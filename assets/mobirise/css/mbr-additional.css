@@ -1,9 +1,5 @@
 @import url(https://fonts.googleapis.com/css?family=Rubik:300,300i,400,400i,500,500i,700,700i,900,900i);
 
-
-
-
-
 body {
   font-style: normal;
   line-height: 1.5;
@@ -99,6 +95,43 @@ body {
     line-height: calc(1.4 * (1.175rem + (1.5 - 1.175) * ((100vw - 20rem) / (48 - 20))));
   }
 }
+
+/* Ini: Style for WhatsApp */
+.whatsapp-menu {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+}
+
+.wa_btn {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.wa_options {
+  display: none;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.wa_options a {
+  background: #25d366;
+  color: white;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 8px;
+  text-align: center;
+  font-family: sans-serif;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#wa_toggle:checked~.wa_options {
+  display: flex;
+}
+
+/* End: Style for WhatsApp */
 
 /* Buttons */
 .btn {
@@ -1754,7 +1787,7 @@ body {
 }
 
 .cid-terceraSeccionIndex .card-img span {
-  font-size: 48px;
+  font-size: 32px;
   color: #707070;
 }
 
@@ -1895,6 +1928,17 @@ body {
 
 .cid-indexSeccionAterrizaje H3 {
   color: #7f1933;
+}
+
+.cid-indexSeccionAterrizaje .btn {
+  padding: 0.9rem 0.8rem;
+  display: -webkit-inline-flex;
+  align-items: center;
+  -webkit-align-items: center;
+}
+
+.cid-indexSeccionAterrizaje .btn .mbr-iconfont {
+  font-size: 1rem;
 }
 
 /* fin:index.html */
@@ -2746,55 +2790,6 @@ body {
 }
 
 .cid-SeccionLineaTiempo .mbr-section-title {
-  color: #7f1933;
-}
-
-.cid-r8DocsuCIX {
-  padding-top: 90px;
-  padding-bottom: 90px;
-  background-color: #f9f9f9;
-}
-
-.cid-r8DocsuCIX h3 {
-  font-weight: 300;
-}
-
-.cid-r8DocsuCIX .card-img {
-  width: initial;
-}
-
-.cid-r8DocsuCIX .card-img .mbr-iconfont {
-  font-size: 48px;
-  padding-right: 1rem;
-}
-
-.cid-r8DocsuCIX .media-container-row {
-  word-wrap: break-word;
-  padding-bottom: 2rem;
-  min-height: 100%;
-}
-
-.cid-r8DocsuCIX .media {
-  margin: initial;
-  align-items: center;
-  -webkit-align-items: center;
-}
-
-.cid-r8DocsuCIX .mbr-section-subtitle {
-  color: #767676;
-}
-
-.cid-r8DocsuCIX .mbr-text {
-  color: #767676;
-}
-
-.cid-r8DocsuCIX .media-container-column {
-  display: -webkit-flex;
-  flex-direction: column;
-  -webkit-flex-direction: column;
-}
-
-.cid-r8DocsuCIX .mbr-section-title {
   color: #7f1933;
 }
 
