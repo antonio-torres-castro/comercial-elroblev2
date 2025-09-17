@@ -1,0 +1,33 @@
+# Front controller (URLs limpias) — permite que index.php maneje rutas
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Si archivo o carpeta existe, servirlo directamente
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Redirigir todo lo demás a index.php
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# Evitar listado de directorios
+Options -Indexes
+
+# Priorizar index.php
+DirectoryIndex index.php index.html
+
+# Bloquear archivos sensibles (compatible con Apache 2.2/2.4)
+<FilesMatch "\.(htaccess|ini|phps|log|sh|bak|config)$">
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# Charset
+AddDefaultCharset UTF-8

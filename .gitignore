@@ -1,0 +1,20 @@
+# Dependencias globales
+/node_modules/
+/vendor/
+
+# Archivos de entorno
+.env
+*.env
+.env.*
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Logs globales
+*.log
+
+# Cache de editores
+.vscode/
+.idea/
+*.swp
