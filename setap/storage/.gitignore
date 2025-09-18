@@ -1,0 +1,5 @@
+# Evitar subir cualquier archivo generado en storage
+*
+
+# Excepto este .gitignore para que la carpeta no desaparezca
+!.gitignore

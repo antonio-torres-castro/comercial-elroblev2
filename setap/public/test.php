@@ -2,7 +2,7 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use App\TestClass;
+use Tests\TestClass;
 
 $test = new TestClass();
 $test->hello();

@@ -5,13 +5,15 @@
 .env
 .env.*
 
-# Logs y caché
-/storage/*.key
-/storage/logs/
-storage/framework/cache/data/
-storage/framework/sessions/
-storage/framework/testing/
-storage/framework/views/
+# Storage (logs, caché, sesiones, subcarpetas)
+ /storage/*
+ !/storage/.gitignore  # Permite que el .gitignore dentro de storage se mantenga
+ /storage/cache/
+ /storage/logs/
+ /storage/sessions/
+
+# Public uploads (archivos subidos)
+ /public/uploads/
 
 # Bootstrap cache
 /bootstrap/cache/
@@ -20,15 +22,17 @@ storage/framework/views/
 *.log
 *.cache
 
-# Compilados de Laravel Mix o Vite
+# Archivos generados por compilación de frontend
+/public/assets/vendor/
+# /public/assets/css/ y /public/assets/js/ quedan versionadas si contienen tus propios estilos y scripts
 /public/hot
 /public/storage
 /public/mix-manifest.json
 /public/build/
 
-# PHPUnit
+# PHPUnit cache
 .phpunit.result.cache
 
 # IDE y debug
-/.vscode
-/.idea
+/.vscode/
+/.idea/
