@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Proyectos - SETAP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .project-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .progress-bar-custom {
+            height: 8px;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-grid-3x3-gap"></i> SETAP
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-light" href="/dashboard">
+                    <i class="bi bi-house"></i> Dashboard
+                </a>
+                <a class="nav-link text-light active" href="/projects">
+                    <i class="bi bi-folder"></i> Proyectos
+                </a>
+                <a class="nav-link text-light" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Salir
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item active">Proyectos</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>
+                    <i class="bi bi-folder"></i> Gestión de Proyectos
+                    <span class="badge bg-secondary ms-2"><?= count($projects) ?> proyectos</span>
+                </h2>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/projects/create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Nuevo Proyecto
+                </a>
+                <a href="/projects/search" class="btn btn-outline-secondary">
+                    <i class="bi bi-search"></i> Búsqueda Avanzada
+                </a>
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" action="/projects" class="row align-items-end">
+                    <div class="col-md-3">
+                        <label for="cliente_id" class="form-label">Cliente</label>
+                        <select class="form-select" name="cliente_id" id="cliente_id">
+                            <option value="">Todos los clientes</option>
+                            <?php foreach ($clients as $client): ?>
+                                <option value="<?= $client['id'] ?>" 
+                                        <?= ($filters['cliente_id'] ?? '') == $client['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($client['nombre']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="estado_tipo_id" class="form-label">Estado</label>
+                        <select class="form-select" name="estado_tipo_id" id="estado_tipo_id">
+                            <option value="">Todos los estados</option>
+                            <?php foreach ($projectStates as $state): ?>
+                                <option value="<?= $state['id'] ?>" 
+                                        <?= ($filters['estado_tipo_id'] ?? '') == $state['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($state['nombre']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="fecha_desde" class="form-label">Desde</label>
+                        <input type="date" class="form-control" name="fecha_desde" id="fecha_desde" 
+                               value="<?= htmlspecialchars($filters['fecha_desde'] ?? '') ?>">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="fecha_hasta" class="form-label">Hasta</label>
+                        <input type="date" class="form-control" name="fecha_hasta" id="fecha_hasta" 
+                               value="<?= htmlspecialchars($filters['fecha_hasta'] ?? '') ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-funnel"></i> Filtrar
+                        </button>
+                        <a href="/projects" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Proyectos -->
+        <?php if (empty($projects)): ?>
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-folder-x display-1 text-muted"></i>
+                    <h4 class="mt-3">No hay proyectos</h4>
+                    <p class="text-muted">No se encontraron proyectos con los filtros seleccionados.</p>
+                    <a href="/projects/create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Crear Primer Proyecto
+                    </a>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="row">
+                <?php foreach ($projects as $project): ?>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card project-card h-100" onclick="window.location.href='/projects/show?id=<?= $project['id'] ?>'">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="card-title mb-0">
+                                    <i class="bi bi-building"></i> <?= htmlspecialchars($project['cliente_nombre']) ?>
+                                </h6>
+                                <?php
+                                $statusClass = match($project['estado_tipo_id']) {
+                                    1 => 'bg-primary',    // Creado
+                                    2 => 'bg-success',    // Activo
+                                    3 => 'bg-warning',    // Inactivo
+                                    5 => 'bg-info',       // Iniciado
+                                    6 => 'bg-warning',    // Terminado
+                                    8 => 'bg-success',    // Aprobado
+                                    default => 'bg-secondary'
+                                };
+                                ?>
+                                <span class="badge <?= $statusClass ?> status-badge">
+                                    <?= htmlspecialchars($project['estado_nombre']) ?>
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <h6 class="text-primary">Ubicación:</h6>
+                                    <p class="mb-1"><?= htmlspecialchars($project['direccion'] ?: 'No especificada') ?></p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h6 class="text-primary">Fechas:</h6>
+                                    <div class="small">
+                                        <div><strong>Inicio:</strong> <?= date('d/m/Y', strtotime($project['fecha_inicio'])) ?></div>
+                                        <?php if ($project['fecha_fin']): ?>
+                                            <div><strong>Fin:</strong> <?= date('d/m/Y', strtotime($project['fecha_fin'])) ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6 class="text-primary">Progreso:</h6>
+                                    <?php 
+                                    $totalTasks = $project['total_tareas'] ?? 0;
+                                    $completedTasks = $project['tareas_completadas'] ?? 0;
+                                    $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+                                    ?>
+                                    <div class="progress progress-bar-custom mb-2">
+                                        <div class="progress-bar" style="width: <?= $progress ?>%"></div>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <?= $completedTasks ?> de <?= $totalTasks ?> tareas completadas (<?= $progress ?>%)
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6 class="text-primary">Contraparte:</h6>
+                                    <div class="small">
+                                        <div><?= htmlspecialchars($project['contraparte_nombre']) ?></div>
+                                        <?php if ($project['contraparte_email']): ?>
+                                            <div class="text-muted"><?= htmlspecialchars($project['contraparte_email']) ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        Tipo: <?= htmlspecialchars($project['tipo_tarea']) ?>
+                                    </small>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/projects/show?id=<?= $project['id'] ?>" 
+                                           class="btn btn-outline-primary"
+                                           onclick="event.stopPropagation()">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/projects/edit?id=<?= $project['id'] ?>" 
+                                           class="btn btn-outline-secondary"
+                                           onclick="event.stopPropagation()">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Configurar fechas por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaDesde = document.getElementById('fecha_desde');
+            const fechaHasta = document.getElementById('fecha_hasta');
+            
+            // Si no hay fecha desde, establecer inicio del año actual
+            if (!fechaDesde.value) {
+                const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+                fechaDesde.max = new Date().toISOString().split('T')[0];
+            }
+            
+            // Si no hay fecha hasta, establecer fecha actual
+            if (!fechaHasta.value) {
+                fechaHasta.max = new Date().toISOString().split('T')[0];
+            }
+            
+            // Validar que fecha hasta sea mayor que fecha desde
+            fechaDesde.addEventListener('change', function() {
+                fechaHasta.min = this.value;
+            });
+            
+            fechaHasta.addEventListener('change', function() {
+                fechaDesde.max = this.value;
+            });
+        });
+    </script>
+</body>
+</html>

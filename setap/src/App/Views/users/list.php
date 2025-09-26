@@ -1,55 +1,407 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuarios - SETAP</title>
+    <title>Gestión de Usuarios - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 0.25em 0.5em;
+        }
+        .table-actions {
+            white-space: nowrap;
+        }
+        .search-box {
+            max-width: 300px;
+        }
+    </style>
 </head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-grid-3x3-gap"></i> SETAP
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-light" href="/dashboard">
+                    <i class="bi bi-house"></i> Dashboard
+                </a>
+                <a class="nav-link text-light active" href="/users">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+                <a class="nav-link text-light" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Salir
+                </a>
+            </div>
+        </div>
+    </nav>
 
-<body>
-    <?php include '../Views/layouts/header.php'; ?>
+    <div class="container-fluid mt-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item active">Usuarios</li>
+            </ol>
+        </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-12">
-                <h2>Gestión de Usuarios</h2>
+        <!-- Header y Filtros -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>
+                    <i class="bi bi-people"></i> Gestión de Usuarios
+                    <span class="badge bg-secondary ms-2"><?= count($users) ?> usuarios</span>
+                </h2>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/users/create" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i> Nuevo Usuario
+                </a>
+            </div>
+        </div>
 
-                <?php if (isset($_GET['success'])): ?>
-                    <div class="alert alert-success"><?= htmlspecialchars($_GET['success']) ?></div>
-                <?php endif; ?>
+        <!-- Alertas -->
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
 
-                <a href="/users/create" class="btn btn-primary mb-3">Nuevo Usuario</a>
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
 
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>RUT</th>
-                            <th>Nombre</th>
-                            <th>Usuario</th>
-                            <th>Rol</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($users as $user): ?>
+        <!-- Filtros y Búsqueda -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group search-box">
+                            <input type="text" class="form-control" id="searchInput" 
+                                   placeholder="Buscar usuarios...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="roleFilter">
+                            <option value="">Todos los roles</option>
+                            <?php 
+                            $uniqueRoles = array_unique(array_column($users, 'tipo_usuario'));
+                            foreach ($uniqueRoles as $role): 
+                            ?>
+                                <option value="<?= htmlspecialchars($role) ?>">
+                                    <?= htmlspecialchars(ucfirst($role)) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </button>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary" id="exportBtn">
+                                <i class="bi bi-download"></i> Exportar
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="refreshBtn">
+                                <i class="bi bi-arrow-clockwise"></i> Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Usuarios -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="usersTable">
+                        <thead class="table-dark">
                             <tr>
-                                <td><?= htmlspecialchars($user['rut']) ?></td>
-                                <td><?= htmlspecialchars($user['persona_nombre']) ?></td>
-                                <td><?= htmlspecialchars($user['nombre_usuario']) ?></td>
-                                <td><?= htmlspecialchars($user['tipo_usuario']) ?></td>
-                                <td>
-                                    <a href="/users/edit/<?= $user['id'] ?>" class="btn btn-sm btn-warning">Editar</a>
-                                    <a href="/users/delete/<?= $user['id'] ?>" class="btn btn-sm btn-danger">Eliminar</a>
-                                </td>
+                                <th>Usuario</th>
+                                <th>Información Personal</th>
+                                <th>Contacto</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Registro</th>
+                                <th class="table-actions">Acciones</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($users)): ?>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox"></i> No hay usuarios registrados
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($users as $user): ?>
+                                    <tr data-user-id="<?= $user['id'] ?>">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-avatar me-3">
+                                                    <?= strtoupper(substr($user['persona_nombre'], 0, 2)) ?>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold"><?= htmlspecialchars($user['nombre_usuario']) ?></div>
+                                                    <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold"><?= htmlspecialchars($user['persona_nombre']) ?></div>
+                                            <div class="text-muted small">RUT: <?= htmlspecialchars($user['rut']) ?></div>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($user['telefono'])): ?>
+                                                <div><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['telefono']) ?></div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($user['direccion'])): ?>
+                                                <div class="text-muted small">
+                                                    <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($user['direccion']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $badgeClass = match($user['tipo_usuario']) {
+                                                'admin' => 'bg-danger',
+                                                'planner' => 'bg-primary',
+                                                'supervisor' => 'bg-warning text-dark',
+                                                'executor' => 'bg-success',
+                                                'client' => 'bg-info',
+                                                default => 'bg-secondary'
+                                            };
+                                            ?>
+                                            <span class="badge <?= $badgeClass ?> role-badge">
+                                                <?= htmlspecialchars(ucfirst($user['tipo_usuario'])) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $statusClass = $user['estado_tipo_id'] == 2 ? 'success' : 'warning';
+                                            $statusText = $user['estado_tipo_id'] == 2 ? 'Activo' : 'Inactivo';
+                                            ?>
+                                            <span class="badge bg-<?= $statusClass ?>">
+                                                <i class="bi bi-circle-fill"></i> <?= $statusText ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="small text-muted">
+                                                <?= date('d/m/Y', strtotime($user['fecha_Creado'])) ?>
+                                            </div>
+                                        </td>
+                                        <td class="table-actions">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-outline-info" 
+                                                        onclick="viewUser(<?= $user['id'] ?>)"
+                                                        title="Ver detalles">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <a href="/users/edit?id=<?= $user['id'] ?>" 
+                                                   class="btn btn-outline-warning"
+                                                   title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a href="/users/permissions?user_id=<?= $user['id'] ?>" 
+                                                   class="btn btn-outline-secondary"
+                                                   title="Permisos">
+                                                    <i class="bi bi-shield-lock"></i>
+                                                </a>
+                                                <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                                    <button type="button" class="btn btn-outline-danger" 
+                                                            onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
+                                                            title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</body>
 
+    <!-- Modal para Ver Usuario -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalles del Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="userModalBody">
+                    <!-- Contenido cargado dinámicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Confirmar Eliminación -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar al usuario <strong id="deleteUserName"></strong>?</p>
+                    <p class="text-muted">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="#" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Búsqueda en tiempo real
+        document.getElementById('searchInput').addEventListener('input', function() {
+            filterTable();
+        });
+
+        // Filtro por rol
+        document.getElementById('roleFilter').addEventListener('change', function() {
+            filterTable();
+        });
+
+        // Limpiar filtros
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = '';
+            filterTable();
+        });
+
+        // Actualizar página
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            window.location.reload();
+        });
+
+        // Exportar datos
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            exportToCSV();
+        });
+
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const rows = document.querySelectorAll('#usersTable tbody tr[data-user-id]');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const role = row.querySelector('.role-badge').textContent.toLowerCase();
+                
+                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+                const matchesRole = roleFilter === '' || role.includes(roleFilter.toLowerCase());
+                
+                row.style.display = matchesSearch && matchesRole ? '' : 'none';
+            });
+        }
+
+        function viewUser(userId) {
+            const modal = new bootstrap.Modal(document.getElementById('userModal'));
+            const modalBody = document.getElementById('userModalBody');
+            
+            modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+            modal.show();
+            
+            // Aquí podrías cargar los detalles del usuario via AJAX
+            // Por ahora, mostraremos un mensaje simple
+            setTimeout(() => {
+                modalBody.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        Funcionalidad de vista detallada en desarrollo.
+                        <br>ID de usuario: ${userId}
+                    </div>
+                `;
+            }, 500);
+        }
+
+        function deleteUser(userId, userName) {
+            document.getElementById('deleteUserName').textContent = userName;
+            document.getElementById('confirmDeleteBtn').href = `/users/delete?id=${userId}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+
+        function exportToCSV() {
+            const table = document.getElementById('usersTable');
+            const rows = Array.from(table.querySelectorAll('tr:not([style*="display: none"])'));
+            
+            let csv = [];
+            
+            // Headers
+            const headers = Array.from(rows[0].querySelectorAll('th'))
+                .slice(0, -1) // Excluir columna de acciones
+                .map(th => th.textContent.trim());
+            csv.push(headers.join(','));
+            
+            // Data rows
+            rows.slice(1).forEach(row => {
+                if (row.dataset.userId) {
+                    const cells = Array.from(row.querySelectorAll('td'))
+                        .slice(0, -1) // Excluir columna de acciones
+                        .map(td => `"${td.textContent.trim().replace(/"/g, '""')}"`);
+                    csv.push(cells.join(','));
+                }
+            });
+            
+            // Download
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `usuarios_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
 </html>

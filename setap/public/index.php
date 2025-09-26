@@ -5,17 +5,19 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/App/bootstrap.php';
 
-use App\Config\AppConfig;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\UserController;
+use App\Controllers\ProjectController;
+use App\Helpers\Security;
+
+// Configurar headers de seguridad básicos
+Security::setSecurityHeaders();
 
 // Manejar CORS para desarrollo
-if (AppConfig::getEnv() === 'development') {
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization');
-}
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization');
 
 // Manejar preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -26,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Obtener la ruta de la solicitud
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Eliminar slash inicial y cualquier segmento no deseado (como 'setap' si está presente)
+// Eliminar slash inicial y cualquier segmento no deseado
 $route = ltrim($requestUri, '/');
 
 // Si la ruta comienza con 'setap/', eliminarlo
@@ -36,56 +38,164 @@ if (strpos($route, 'setap/') === 0) {
 
 // Dividir la ruta para obtener el controlador y la acción
 $parts = explode('/', $route);
-$controllerName = $parts[0] ?: 'login';  // Si está vacío, redirigir a login
+$controllerName = $parts[0] ?: 'login';
 $action = $parts[1] ?? '';
+$id = $parts[2] ?? null;
 
-// Enrutamiento simple
-switch ($controllerName) {
-    case 'login':
-        $controller = new AuthController();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->login();
-        } else {
-            $controller->showLogin();
-        }
-        break;
+// Rate limiting básico para login
+if ($controllerName === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!Security::checkRateLimit('login', 5, 300)) {
+        http_response_code(429);
+        echo json_encode(['error' => 'Demasiados intentos. Intente más tarde.']);
+        exit;
+    }
+}
 
-    case 'dashboard':
-        $controller = new DashboardController();
-        $controller->index();
-        break;
+// Enrutamiento simplificado
+try {
+    switch ($controllerName) {
+        case 'login':
+            $controller = new AuthController();
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->login();
+            } else {
+                $controller->showLoginForm();
+            }
+            break;
 
-    case 'logout':
-        $controller = new AuthController();
-        $controller->logout();
-        break;
+        case 'logout':
+            $controller = new AuthController();
+            $controller->logout();
+            break;
 
-    case 'users':
-        $controller = new UserController();
-        $action = $parts[1] ?? 'index';
-        $id = $parts[2] ?? null;
-
-        if ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-            $controller->create();
-        } elseif ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->store();
-        } else {
+        case 'dashboard':
+            $controller = new DashboardController();
             $controller->index();
-        }
-        break;
+            break;
 
-    case 'test_autoload':
-        $testFile = __DIR__ . '/test_autoload.php';
-        if (file_exists($testFile)) {
-            require $testFile;
-        } else {
+        case 'users':
+            $controller = new UserController();
+            
+            switch ($action) {
+                case 'create':
+                    $controller->create();
+                    break;
+                    
+                case '':
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+
+        case 'projects':
+            $controller = new ProjectController();
+            
+            switch ($action) {
+                case 'show':
+                    if ($id) {
+                        $controller->show((int)$id);
+                    } else {
+                        $controller->index();
+                    }
+                    break;
+                    
+                case '':
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+
+        case 'api':
+            // Rutas API
+            if ($action === 'users' && isset($parts[2]) && $parts[2] === 'validate') {
+                $controller = new UserController();
+                $controller->validateField();
+            } else {
+                http_response_code(404);
+                echo json_encode(['error' => 'API endpoint not found']);
+            }
+            break;
+
+        case '':
+        case 'home':
+            // Redirigir a dashboard si está autenticado, sino a login
+            if (Security::isAuthenticated()) {
+                Security::redirect('/dashboard');
+            } else {
+                Security::redirect('/login');
+            }
+            break;
+
+        default:
+            // Página no encontrada
             http_response_code(404);
-            echo "Archivo de prueba no encontrado";
-        }
-        break;
-
-    default:
-        http_response_code(404);
-        echo "Página no encontrada";
-        break;
+            echo '<!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Página No Encontrada - SETAP</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            </head>
+            <body>
+                <div class="container mt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="mb-0">Página No Encontrada</h4>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p class="mb-3">La página solicitada no existe.</p>
+                                    <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>';
+            break;
+    }
+    
+} catch (Throwable $e) {
+    // Manejo de errores global
+    error_log("Error en router: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
+    
+    http_response_code(500);
+    
+    // Mostrar error detallado solo en desarrollo
+    if (isset($_ENV['APP_DEBUG']) && $_ENV['APP_DEBUG'] === 'true') {
+        echo "<h1>Error Internal del Servidor</h1>";
+        echo "<pre>" . $e->getMessage() . "\n" . $e->getTraceAsString() . "</pre>";
+    } else {
+        echo '<!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Error - SETAP</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h4 class="mb-0">Error Interno del Servidor</h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">Ha ocurrido un error interno. Por favor, intente más tarde.</p>
+                                <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>';
+    }
 }

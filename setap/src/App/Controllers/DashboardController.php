@@ -2,115 +2,101 @@
 
 namespace App\Controllers;
 
+use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
+use App\Helpers\Security;
+use Exception;
 
 class DashboardController
 {
+    private $permissionService;
+
     public function __construct()
     {
-        // Aplicar el middleware de autenticación
+        // Verificar autenticación
         (new AuthMiddleware())->handle();
+        
+        $this->permissionService = new PermissionService();
     }
 
     public function index()
     {
-        // Vista simple del dashboard
-        echo <<<HTML
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Dashboard - SETAP</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-        </head>
-        <body>
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                <div class="container">
-                    <a class="navbar-brand" href="dashboard">SETAP</a>
-                    <div class="navbar-nav ms-auto">
-                        <span class="navbar-text me-3">
-                            <i class="bi bi-person-circle"></i> {$_SESSION['nombre_completo']}
-                        </span>
-                        <a class="btn btn-outline-light btn-sm" href="logout">
-                            <i class="bi bi-box-arrow-right"></i> Salir
-                        </a>
-                    </div>
-                </div>
-            </nav>
+        try {
+            // Obtener usuario actual
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+            
+            // Obtener menús accesibles para el usuario
+            $menus = $this->permissionService->getUserMenus($currentUser['id']);
+            
+            // Datos para el dashboard
+            $dashboardData = [
+                'user' => $currentUser,
+                'menus' => $menus,
+                'stats' => $this->getDashboardStats($currentUser)
+            ];
+            
+            require_once __DIR__ . '/../Views/dashboard.php';
+            
+        } catch (Exception $e) {
+            error_log("Error en DashboardController::index: " . $e->getMessage());
+            http_response_code(500);
+            echo "Error interno del servidor";
+        }
+    }
 
-            <div class="container mt-4">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header">Menú</div>
-                            <div class="list-group list-group-flush">
-                                <a href="#" class="list-group-item list-group-item-action active">
-                                    <i class="bi bi-speedometer2"></i> Dashboard
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="bi bi-folder"></i> Proyectos
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="bi bi-list-task"></i> Tareas
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="bi bi-people"></i> Clientes
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="bi bi-person"></i> Usuarios
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-9">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Dashboard</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="alert alert-info">
-                                    <h6>Bienvenido, {$_SESSION['nombre_completo']}</h6>
-                                    <p class="mb-0">Rol: {$_SESSION['user_role']} | RUT: {$_SESSION['rut']}</p>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="card text-white bg-primary mb-3">
-                                            <div class="card-body">
-                                                <h5 class="card-title">Proyectos</h5>
-                                                <p class="card-text">0 activos</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card text-white bg-success mb-3">
-                                            <div class="card-body">
-                                                <h5 class="card-title">Tareas</h5>
-                                                <p class="card-text">0 pendientes</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="card text-white bg-warning mb-3">
-                                            <div class="card-body">
-                                                <h5 class="card-title">Clientes</h5>
-                                                <p class="card-text">0 activos</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    private function getCurrentUser(): ?array
+    {
+        if (!Security::isAuthenticated()) {
+            return null;
+        }
+        
+        return [
+            'id' => $_SESSION['user_id'],
+            'username' => $_SESSION['username'],
+            'email' => $_SESSION['email'],
+            'nombre_completo' => $_SESSION['nombre_completo'],
+            'rol' => $_SESSION['rol'],
+            'usuario_tipo_id' => $_SESSION['usuario_tipo_id']
+        ];
+    }
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        </body>
-        </html>
-        HTML;
+    private function getDashboardStats(array $user): array
+    {
+        // Estadísticas básicas por defecto
+        $stats = [
+            'total_usuarios' => 0,
+            'total_proyectos' => 0,
+            'proyectos_activos' => 0,
+            'tareas_pendientes' => 0
+        ];
+        
+        try {
+            // Solo mostrar estadísticas si el usuario tiene permisos
+            if (Security::hasPermission('view_statistics')) {
+                $stats = $this->calculateStats();
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error calculando estadísticas: " . $e->getMessage());
+        }
+        
+        return $stats;
+    }
+
+    private function calculateStats(): array
+    {
+        // Implementación básica de estadísticas
+        // Puedes expandir esto según tus necesidades
+        return [
+            'total_usuarios' => 0,
+            'total_proyectos' => 0,
+            'proyectos_activos' => 0,
+            'tareas_pendientes' => 0
+        ];
     }
 }
