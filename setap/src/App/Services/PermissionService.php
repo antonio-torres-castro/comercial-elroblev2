@@ -85,7 +85,7 @@ class PermissionService
                 SELECT m.nombre, m.url, m.icono, m.orden
                 FROM usuario_tipo_menus utm
                 INNER JOIN menus m ON utm.menu_id = m.id
-                WHERE utm.usuario_tipo_id = ? AND (m.estado_tipo_id = 1 or m.estado_tipo_id = 2)
+                WHERE utm.usuario_tipo_id = ? AND m.estado_tipo_id = 2
                 ORDER BY m.orden ASC
             ");
 
