@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Services\AuthService;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
-use App\Middlewares\PermissionMiddleware;
 use App\Helpers\Security;
 use App\Config\Database;
 use PDO;
@@ -24,9 +23,6 @@ class UserController
         // Verificar autenticación
         (new AuthMiddleware())->handle();
 
-        // Verificar permisos
-        PermissionMiddleware::requirePermission('manage_users')->handle();
-
         $this->userModel = new User();
         $this->authService = new AuthService();
         $this->permissionService = new PermissionService();
@@ -36,6 +32,20 @@ class UserController
     public function index()
     {
         try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+
+            // Verificar acceso al menú primero
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
+                http_response_code(403);
+                echo $this->renderError('No tienes acceso a esta sección.');
+                return;
+            }
+
             $users = $this->userModel->getAll();
 
             // Obtener tipos de usuario para filtro
@@ -57,6 +67,20 @@ class UserController
         }
 
         try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+
+            // Verificar acceso al menú de gestión de usuario individual
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                echo $this->renderError('No tienes acceso a esta sección.');
+                return;
+            }
+
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
@@ -72,6 +96,20 @@ class UserController
     public function store()
     {
         try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+
+            // Verificar acceso al menú de gestión de usuario individual
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                echo json_encode(['error' => 'No tienes acceso a esta sección']);
+                return;
+            }
+
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
@@ -115,6 +153,21 @@ class UserController
     public function validateField()
     {
         try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['valid' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            // Verificar acceso al menú de gestión de usuario individual
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                echo json_encode(['valid' => false, 'message' => 'No tienes acceso a esta sección']);
+                return;
+            }
+
             $field = $_GET['field'] ?? '';
             $value = $_GET['value'] ?? '';
 

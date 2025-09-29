@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Models\Project;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
-use App\Middlewares\PermissionMiddleware;
 use App\Helpers\Security;
 use App\Config\Database;
 use PDO;
@@ -22,9 +21,6 @@ class ProjectController
         // Verificar autenticación
         (new AuthMiddleware())->handle();
         
-        // Verificar permisos para gestión de proyectos
-        PermissionMiddleware::requirePermission('manage_projects')->handle();
-        
         $this->projectModel = new Project();
         $this->permissionService = new PermissionService();
         $this->db = Database::getInstance();
@@ -32,6 +28,13 @@ class ProjectController
 
     public function index()
     {
+        // Verificar acceso al menú de gestión de proyectos
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         // Aplicar filtros si están presentes
         $filters = [];
         
@@ -71,6 +74,13 @@ class ProjectController
 
     public function show()
     {
+        // Verificar acceso al menú de gestión de proyecto individual
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         $id = (int)($_GET['id'] ?? 0);
         
         if ($id <= 0) {
@@ -105,6 +115,13 @@ class ProjectController
 
     public function create()
     {
+        // Verificar acceso al menú de gestión de proyecto individual
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         // Obtener datos necesarios para el formulario
         $clients = $this->getClients();
         $taskTypes = $this->getTaskTypes();
@@ -120,6 +137,13 @@ class ProjectController
 
     public function store()
     {
+        // Verificar acceso al menú de gestión de proyecto individual
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             Security::redirect('/projects/create?error=Método no permitido');
             return;
@@ -175,6 +199,13 @@ class ProjectController
 
     public function edit()
     {
+        // Verificar acceso al menú de gestión de proyecto individual
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         $id = (int)($_GET['id'] ?? 0);
         
         if ($id <= 0) {
@@ -208,6 +239,13 @@ class ProjectController
 
     public function update()
     {
+        // Verificar acceso al menú de gestión de proyecto individual
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             Security::redirect('/projects?error=Método no permitido');
             return;
@@ -268,6 +306,13 @@ class ProjectController
 
     public function delete()
     {
+        // Verificar acceso al menú de gestión de proyecto individual
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         $id = (int)($_GET['id'] ?? 0);
         
         if ($id <= 0) {
@@ -300,6 +345,13 @@ class ProjectController
 
     public function changeStatus()
     {
+        // Verificar acceso al menú de gestión de proyecto individual
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             Security::redirect('/projects?error=Método no permitido');
             return;
@@ -333,6 +385,13 @@ class ProjectController
 
     public function search()
     {
+        // Verificar acceso al menú de gestión de proyectos
+        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
+            http_response_code(403);
+            echo "No tienes acceso a esta sección.";
+            return;
+        }
+
         $term = Security::sanitizeInput($_GET['q'] ?? '');
         
         if (empty($term) || strlen($term) < 3) {
