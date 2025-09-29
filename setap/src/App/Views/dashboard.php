@@ -15,9 +15,31 @@
         .sidebar {
             min-height: calc(100vh - 56px);
             background-color: #f8f9fa;
+            position: relative;
+            overflow-y: auto;
         }
 
-        /* Responsividad para el sidebar */
+        /* Asegurar que el contenido principal no se superponga */
+        .main-content {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* Para pantallas grandes asegurar posición correcta */
+        @media (min-width: 768px) {
+            .sidebar {
+                position: sticky;
+                top: 56px;
+                height: calc(100vh - 56px);
+                z-index: 1;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Responsividad para el sidebar en móviles */
         @media (max-width: 767.98px) {
             .sidebar {
                 position: fixed;
@@ -150,7 +172,7 @@
                         <?php else: ?>
                             <!-- Menús por defecto si no hay configuración dinámica -->
                             <?php
-                            if (Security::hasPermission('manage_users')): ?>
+                            if (Security::hasMenuAccess('users')): ?>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/users">
                                         <i class="bi bi-people"></i> Usuarios
@@ -158,7 +180,7 @@
                                 </li>
                             <?php endif; ?>
 
-                            <?php if (Security::hasPermission('manage_projects')): ?>
+                            <?php if (Security::hasMenuAccess('projects')): ?>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/projects">
                                         <i class="bi bi-briefcase"></i> Proyectos
@@ -166,7 +188,7 @@
                                 </li>
                             <?php endif; ?>
 
-                            <?php if (Security::hasPermission('view_reports')): ?>
+                            <?php if (Security::hasMenuAccess('reports')): ?>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/reports">
                                         <i class="bi bi-bar-chart"></i> Reportes
@@ -192,7 +214,7 @@
 
                 <!-- Estadísticas -->
                 <div class="row mb-4">
-                    <?php if (Security::hasPermission('view_statistics')): ?>
+                    <?php if (Security::hasPermission('Read')): ?>
                         <div class="col-md-3 mb-3">
                             <div class="card stats-card h-100 border-0 shadow-sm">
                                 <div class="card-body text-center">
@@ -258,7 +280,7 @@
                                 </p>
 
                                 <div class="row mt-3">
-                                    <?php if (Security::hasPermission('manage_users')): ?>
+                                    <?php if (Security::hasMenuAccess('users')): ?>
                                         <div class="col-md-6 mb-2">
                                             <a href="/users" class="btn btn-outline-primary w-100">
                                                 <i class="bi bi-people"></i> Gestionar Usuarios
@@ -266,7 +288,7 @@
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if (Security::hasPermission('manage_projects')): ?>
+                                    <?php if (Security::hasMenuAccess('projects')): ?>
                                         <div class="col-md-6 mb-2">
                                             <a href="/projects" class="btn btn-outline-success w-100">
                                                 <i class="bi bi-briefcase"></i> Ver Proyectos

@@ -35,9 +35,10 @@ class PermissionService
                 self::$permissionsCache[$cacheKey] = $this->loadUserPermissions($userType['id']);
             }
 
-            $permissions = self::$permissionsCache[$cacheKey];
+            $userPermissions = self::$permissionsCache[$cacheKey];
 
-            return in_array($permissionName, $permissions);
+            // Verificar si tiene el permiso específico (genérico de la BD)
+            return in_array($permissionName, $userPermissions);
         } catch (PDOException $e) {
             error_log("Error verificando permisos: " . $e->getMessage());
             return false;

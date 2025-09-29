@@ -5,7 +5,9 @@ namespace App\Controllers;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Config\Database;
 use Exception;
+use PDO;
 
 class MenuController
 {
@@ -32,18 +34,22 @@ class MenuController
                 return;
             }
 
-            // Verificar permisos para gestión de menús
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menus')) {
+            // Verificar acceso al menú primero
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'menus')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError('No tienes acceso a esta sección.');
                 return;
             }
+
+            // Obtener todos los menús de la base de datos
+            $menus = $this->getAllMenus();
 
             // Datos para la vista
             $data = [
                 'user' => $currentUser,
                 'title' => 'Gestión de Menús',
-                'subtitle' => 'Lista de todos los menús del sistema'
+                'subtitle' => 'Lista de todos los menús del sistema',
+                'menus' => $menus
             ];
 
             require_once __DIR__ . '/../Views/menus/list.php';
@@ -68,10 +74,10 @@ class MenuController
                 return;
             }
 
-            // Verificar permisos para gestión de menú individual
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menu')) {
+            // Verificar acceso al menú primero
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'menu')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError('No tienes acceso a esta sección.');
                 return;
             }
 
@@ -89,6 +95,37 @@ class MenuController
             error_log("Error en MenuController::show: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError('Error interno del servidor');
+        }
+    }
+
+    /**
+     * Obtiene todos los menús de la base de datos
+     */
+    private function getAllMenus(): array
+    {
+        try {
+            $db = Database::getInstance();
+            
+            $sql = "SELECT 
+                        id,
+                        nombre,
+                        url,
+                        icono,
+                        orden,
+                        estado_tipo_id,
+                        created_at,
+                        updated_at
+                    FROM menu 
+                    ORDER BY orden ASC, nombre ASC";
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch (Exception $e) {
+            error_log("Error al obtener menús: " . $e->getMessage());
+            return [];
         }
     }
 

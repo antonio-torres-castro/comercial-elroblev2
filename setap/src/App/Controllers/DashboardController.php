@@ -77,7 +77,7 @@ class DashboardController
         
         try {
             // Solo mostrar estadísticas si el usuario tiene permisos
-            if (Security::hasPermission('view_statistics')) {
+            if (Security::hasPermission('Read') || Security::hasPermission('All')) {
                 $stats = $this->calculateStats();
             }
             

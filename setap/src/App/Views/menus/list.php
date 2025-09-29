@@ -6,8 +6,41 @@
     <title><?php echo $data['title']; ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+        }
+        
+        .nav-link {
+            color: #495057;
+            padding: 0.75rem 1rem;
+        }
+        
+        .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+        
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .badge-status {
+            font-size: 0.7rem;
+        }
+        
+        .icon-preview {
+            font-size: 1.2rem;
+        }
+    </style>
 </head>
 <body>
+    <?php use App\Helpers\Security; ?>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -33,30 +66,125 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/menu" class="btn btn-sm btn-primary">
-                            <i class="bi bi-plus-circle"></i> Nuevo Menú
-                        </a>
+                        <?php if (Security::hasPermission('Create') || Security::hasPermission('All')): ?>
+                            <a href="/menu" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus-circle"></i> Nuevo Menú
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><?php echo $data['subtitle']; ?></h5>
+                                <span class="badge bg-secondary">
+                                    Total: <?php echo count($data['menus']); ?> menús
+                                </span>
                             </div>
                             <div class="card-body">
-                                <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i>
-                                    <strong>Módulo en Construcción</strong><br>
-                                    La gestión de menús está en desarrollo. Próximamente podrás:
-                                    <ul class="mb-0 mt-2">
-                                        <li>Ver todos los menús del sistema</li>
-                                        <li>Crear nuevos menús</li>
-                                        <li>Editar menús existentes</li>
-                                        <li>Gestionar permisos de acceso</li>
-                                    </ul>
-                                </div>
+                                <?php if (!empty($data['menus'])): ?>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-striped">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Icono</th>
+                                                    <th>Nombre</th>
+                                                    <th>URL</th>
+                                                    <th>Orden</th>
+                                                    <th>Estado</th>
+                                                    <th>Creado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($data['menus'] as $menu): ?>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="badge bg-light text-dark"><?php echo htmlspecialchars($menu['id']); ?></span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?> icon-preview text-primary"></i>
+                                                        </td>
+                                                        <td>
+                                                            <strong><?php echo htmlspecialchars($menu['nombre']); ?></strong>
+                                                        </td>
+                                                        <td>
+                                                            <code><?php echo htmlspecialchars($menu['url']); ?></code>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info"><?php echo htmlspecialchars($menu['orden']); ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <?php 
+                                                            $estado_id = $menu['estado_tipo_id'];
+                                                            $estado_info = [
+                                                                1 => ['badge' => 'warning', 'texto' => 'Creado'],
+                                                                2 => ['badge' => 'success', 'texto' => 'Activo'], 
+                                                                3 => ['badge' => 'secondary', 'texto' => 'Inactivo'],
+                                                                4 => ['badge' => 'danger', 'texto' => 'Eliminado'],
+                                                                5 => ['badge' => 'info', 'texto' => 'Iniciado'],
+                                                                6 => ['badge' => 'primary', 'texto' => 'Terminado'],
+                                                                7 => ['badge' => 'danger', 'texto' => 'Rechazado'],
+                                                                8 => ['badge' => 'success', 'texto' => 'Aprobado']
+                                                            ];
+                                                            $estado = $estado_info[$estado_id] ?? ['badge' => 'dark', 'texto' => 'Desconocido'];
+                                                            ?>
+                                                            <span class="badge bg-<?php echo $estado['badge']; ?> badge-status">
+                                                                <?php echo $estado['texto']; ?>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <small class="text-muted">
+                                                                <?php 
+                                                                $fecha = new DateTime($menu['created_at']);
+                                                                echo $fecha->format('d/m/Y H:i');
+                                                                ?>
+                                                            </small>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm" role="group">
+                                                                <?php if (Security::hasPermission('Modify') || Security::hasPermission('All')): ?>
+                                                                    <a href="/menu/<?php echo $menu['id']; ?>" 
+                                                                       class="btn btn-outline-primary btn-sm" 
+                                                                       title="Editar">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                                
+                                                                <?php if (Security::hasPermission('Read') || Security::hasPermission('All')): ?>
+                                                                    <button type="button" 
+                                                                            class="btn btn-outline-info btn-sm" 
+                                                                            title="Ver detalles"
+                                                                            onclick="showMenuDetails(<?php echo htmlspecialchars(json_encode($menu)); ?>)">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </button>
+                                                                <?php endif; ?>
+                                                                
+                                                                <?php if (Security::hasPermission('Modify') || Security::hasPermission('All')): ?>
+                                                                    <button type="button" 
+                                                                            class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm" 
+                                                                            title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>"
+                                                                            onclick="toggleMenuStatus(<?php echo $menu['id']; ?>, <?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>)">
+                                                                        <i class="bi bi-<?php echo ($menu['estado_tipo_id'] == 2) ? 'toggle-on' : 'toggle-off'; ?>"></i>
+                                                                    </button>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="alert alert-warning text-center">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        <strong>No hay menús registrados</strong><br>
+                                        Haz clic en "Nuevo Menú" para crear el primer registro.
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -65,6 +193,84 @@
         </div>
     </div>
 
+    <!-- Modal para detalles del menú -->
+    <div class="modal fade" id="menuDetailsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalles del Menú</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="menuDetailsContent">
+                        <!-- Contenido dinámico -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showMenuDetails(menu) {
+            const estadoInfo = {
+                1: { badge: 'warning', texto: 'Creado' },
+                2: { badge: 'success', texto: 'Activo' },
+                3: { badge: 'secondary', texto: 'Inactivo' },
+                4: { badge: 'danger', texto: 'Eliminado' },
+                5: { badge: 'info', texto: 'Iniciado' },
+                6: { badge: 'primary', texto: 'Terminado' },
+                7: { badge: 'danger', texto: 'Rechazado' },
+                8: { badge: 'success', texto: 'Aprobado' }
+            };
+            
+            const estado = estadoInfo[menu.estado_tipo_id] || { badge: 'dark', texto: 'Desconocido' };
+            
+            const content = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>ID:</strong> ${menu.id}<br>
+                        <strong>Nombre:</strong> ${menu.nombre}<br>
+                        <strong>URL:</strong> <code>${menu.url}</code><br>
+                        <strong>Orden:</strong> ${menu.orden}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Icono:</strong> <i class="bi bi-${menu.icono}"></i> ${menu.icono}<br>
+                        <strong>Estado:</strong> <span class="badge bg-${estado.badge}">${estado.texto}</span><br>
+                        <strong>Creado:</strong> ${new Date(menu.created_at).toLocaleDateString('es-ES')}<br>
+                        <strong>Actualizado:</strong> ${menu.updated_at ? new Date(menu.updated_at).toLocaleDateString('es-ES') : 'N/A'}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('menuDetailsContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('menuDetailsModal')).show();
+        }
+
+        function toggleMenuStatus(menuId, newStatus) {
+            const statusNames = {
+                2: 'activar',
+                3: 'desactivar'
+            };
+            const action = statusNames[newStatus] || 'cambiar estado de';
+            
+            if (confirm(`¿Está seguro que desea ${action} este menú?`)) {
+                // Aquí implementarías la llamada AJAX para cambiar el estado
+                // Por ahora solo mostramos una alerta
+                alert(`Funcionalidad de ${action} menú en desarrollo`);
+            }
+        }
+
+        // Tooltip para botones
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
 </body>
 </html>
