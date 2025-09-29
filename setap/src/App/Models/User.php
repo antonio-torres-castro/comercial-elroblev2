@@ -23,7 +23,7 @@ class User
     {
         try {
             $sql = "
-                SELECT u.id, u.nombre_usuario, u.email, u.created_at,
+                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado,
                        p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado
@@ -31,7 +31,7 @@ class User
                 INNER JOIN personas p ON u.persona_id = p.id 
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 LEFT JOIN estado_tipos et ON u.estado_tipo_id = et.id
-                ORDER BY u.created_at DESC
+                ORDER BY u.fecha_Creado DESC
             ";
 
             $stmt = $this->db->prepare($sql);
@@ -79,7 +79,7 @@ class User
     {
         try {
             $sql = "
-                INSERT INTO personas (nombre, rut, telefono, direccion, estado_tipo_id, created_at) 
+                INSERT INTO personas (nombre, rut, telefono, direccion, estado_tipo_id, fecha_Creado) 
                 VALUES (?, ?, ?, ?, 1, NOW())
             ";
 
@@ -105,7 +105,7 @@ class User
     {
         try {
             $sql = "
-                INSERT INTO usuarios (persona_id, nombre_usuario, email, clave_hash, usuario_tipo_id, estado_tipo_id, created_at) 
+                INSERT INTO usuarios (persona_id, nombre_usuario, email, clave_hash, usuario_tipo_id, estado_tipo_id, fecha_Creado) 
                 VALUES (?, ?, ?, ?, ?, 1, NOW())
             ";
 
@@ -163,7 +163,7 @@ class User
             $personaSql = "
                 UPDATE personas p
                 INNER JOIN usuarios u ON p.id = u.persona_id
-                SET p.nombre = ?, p.telefono = ?, p.direccion = ?, p.updated_at = NOW()
+                SET p.nombre = ?, p.telefono = ?, p.direccion = ?, p.fecha_modificacion = NOW()
                 WHERE u.id = ?
             ";
 
@@ -178,7 +178,7 @@ class User
             // Actualizar usuario
             $usuarioSql = "
                 UPDATE usuarios 
-                SET email = ?, usuario_tipo_id = ?, updated_at = NOW()
+                SET email = ?, usuario_tipo_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
 
@@ -204,7 +204,7 @@ class User
     public function delete(int $id): bool
     {
         try {
-            $sql = "UPDATE usuarios SET estado_tipo_id = 4, updated_at = NOW() WHERE id = ?";
+            $sql = "UPDATE usuarios SET estado_tipo_id = 4, fecha_modificacion = NOW() WHERE id = ?";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$id]);
         } catch (PDOException $e) {

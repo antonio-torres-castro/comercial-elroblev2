@@ -132,8 +132,8 @@
                             <?php echo htmlspecialchars($dashboardData['user']['nombre_completo'] ?? $dashboardData['user']['username']); ?>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Perfil</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Configuración</a></li>
+                            <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="/perfil/edit"><i class="bi bi-gear"></i> Configuración</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>

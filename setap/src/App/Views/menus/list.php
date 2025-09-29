@@ -139,7 +139,7 @@
                                                         <td>
                                                             <small class="text-muted">
                                                                 <?php 
-                                                                $fecha = new DateTime($menu['created_at']);
+                                                                $fecha = new DateTime($menu['fecha_creacion']);
                                                                 echo $fecha->format('d/m/Y H:i');
                                                                 ?>
                                                             </small>
@@ -240,8 +240,8 @@
                     <div class="col-md-6">
                         <strong>Icono:</strong> <i class="bi bi-${menu.icono}"></i> ${menu.icono}<br>
                         <strong>Estado:</strong> <span class="badge bg-${estado.badge}">${estado.texto}</span><br>
-                        <strong>Creado:</strong> ${new Date(menu.created_at).toLocaleDateString('es-ES')}<br>
-                        <strong>Actualizado:</strong> ${menu.updated_at ? new Date(menu.updated_at).toLocaleDateString('es-ES') : 'N/A'}
+                        <strong>Creado:</strong> ${new Date(menu.fecha_creacion).toLocaleDateString('es-ES')}<br>
+                        <strong>Actualizado:</strong> ${menu.fecha_modificacion ? new Date(menu.fecha_modificacion).toLocaleDateString('es-ES') : 'N/A'}
                     </div>
                 </div>
             `;

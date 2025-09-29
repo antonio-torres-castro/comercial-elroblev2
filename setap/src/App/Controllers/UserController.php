@@ -297,7 +297,7 @@ class UserController
     private function getEstadosTipo(): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre FROM estado_tipos WHERE estado_tipo_id = 1 ORDER BY nombre");
+            $stmt = $this->db->prepare("SELECT id, nombre FROM estado_tipos ORDER BY nombre");
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {
@@ -403,5 +403,38 @@ class UserController
             'rol' => $_SESSION['rol'],
             'usuario_tipo_id' => $_SESSION['usuario_tipo_id']
         ];
+    }
+
+    /**
+     * Renderizar página de error
+     */
+    private function renderError(string $message): string
+    {
+        return '<!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Error - SETAP</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h4 class="mb-0">Error</h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">' . htmlspecialchars($message) . '</p>
+                                <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>';
     }
 }

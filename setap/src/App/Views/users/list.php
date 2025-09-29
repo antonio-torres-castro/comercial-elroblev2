@@ -1,3 +1,6 @@
+<?php
+use App\Helpers\Security;
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -69,9 +72,11 @@
                 </h2>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/users/create" class="btn btn-primary">
-                    <i class="bi bi-person-plus"></i> Nuevo Usuario
-                </a>
+                <?php if (Security::hasPermission('Create')): ?>
+                    <a href="/users/create" class="btn btn-primary">
+                        <i class="bi bi-person-plus"></i> Nuevo Usuario
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -107,7 +112,7 @@
                         <select class="form-select" id="roleFilter">
                             <option value="">Todos los roles</option>
                             <?php 
-                            $uniqueRoles = array_unique(array_column($users, 'tipo_usuario'));
+                            $uniqueRoles = array_unique(array_column($users, 'rol'));
                             foreach ($uniqueRoles as $role): 
                             ?>
                                 <option value="<?= htmlspecialchars($role) ?>">
@@ -164,7 +169,7 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="user-avatar me-3">
-                                                    <?= strtoupper(substr($user['persona_nombre'], 0, 2)) ?>
+                                                    <?= strtoupper(substr($user['nombre_completo'], 0, 2)) ?>
                                                 </div>
                                                 <div>
                                                     <div class="fw-bold"><?= htmlspecialchars($user['nombre_usuario']) ?></div>
@@ -173,7 +178,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="fw-bold"><?= htmlspecialchars($user['persona_nombre']) ?></div>
+                                            <div class="fw-bold"><?= htmlspecialchars($user['nombre_completo']) ?></div>
                                             <div class="text-muted small">RUT: <?= htmlspecialchars($user['rut']) ?></div>
                                         </td>
                                         <td>
@@ -188,7 +193,7 @@
                                         </td>
                                         <td>
                                             <?php
-                                            $badgeClass = match($user['tipo_usuario']) {
+                                            $badgeClass = match($user['rol']) {
                                                 'admin' => 'bg-danger',
                                                 'planner' => 'bg-primary',
                                                 'supervisor' => 'bg-warning text-dark',
@@ -198,16 +203,16 @@
                                             };
                                             ?>
                                             <span class="badge <?= $badgeClass ?> role-badge">
-                                                <?= htmlspecialchars(ucfirst($user['tipo_usuario'])) ?>
+                                                <?= htmlspecialchars(ucfirst($user['rol'])) ?>
                                             </span>
                                         </td>
                                         <td>
                                             <?php
-                                            $statusClass = $user['estado_tipo_id'] == 2 ? 'success' : 'warning';
-                                            $statusText = $user['estado_tipo_id'] == 2 ? 'Activo' : 'Inactivo';
+                                            $statusClass = strtolower($user['estado']) === 'activo' ? 'success' : 'warning';
+                                            $statusText = $user['estado'];
                                             ?>
                                             <span class="badge bg-<?= $statusClass ?>">
-                                                <i class="bi bi-circle-fill"></i> <?= $statusText ?>
+                                                <i class="bi bi-circle-fill"></i> <?= htmlspecialchars($statusText) ?>
                                             </span>
                                         </td>
                                         <td>
@@ -217,22 +222,28 @@
                                         </td>
                                         <td class="table-actions">
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <button type="button" class="btn btn-outline-info" 
-                                                        onclick="viewUser(<?= $user['id'] ?>)"
-                                                        title="Ver detalles">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <a href="/users/edit?id=<?= $user['id'] ?>" 
-                                                   class="btn btn-outline-warning"
-                                                   title="Editar">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <a href="/users/permissions?user_id=<?= $user['id'] ?>" 
-                                                   class="btn btn-outline-secondary"
-                                                   title="Permisos">
-                                                    <i class="bi bi-shield-lock"></i>
-                                                </a>
-                                                <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                                <?php if (Security::hasPermission('Read')): ?>
+                                                    <button type="button" class="btn btn-outline-info" 
+                                                            onclick="viewUser(<?= $user['id'] ?>)"
+                                                            title="Ver detalles">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                
+                                                <?php if (Security::hasPermission('Modify')): ?>
+                                                    <a href="/users/edit?id=<?= $user['id'] ?>" 
+                                                       class="btn btn-outline-warning"
+                                                       title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="/users/permissions?user_id=<?= $user['id'] ?>" 
+                                                       class="btn btn-outline-secondary"
+                                                       title="Permisos">
+                                                        <i class="bi bi-shield-lock"></i>
+                                                    </a>
+                                                <?php endif; ?>
+                                                
+                                                <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
                                                     <button type="button" class="btn btn-outline-danger" 
                                                             onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
                                                             title="Eliminar">

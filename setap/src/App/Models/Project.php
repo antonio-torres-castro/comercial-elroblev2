@@ -23,7 +23,7 @@ class Project
         try {
             $sql = "
                 SELECT p.*, 
-                       c.nombre as cliente_nombre,
+                       c.razon_social as cliente_nombre,
                        tt.nombre as tipo_tarea,
                        et.nombre as estado_nombre,
                        cp.nombre as contraparte_nombre,
@@ -88,7 +88,7 @@ class Project
         try {
             $stmt = $this->db->prepare("
                 SELECT p.*, 
-                       c.id as cliente_id, c.nombre as cliente_nombre, c.rut as cliente_rut,
+                       c.id as cliente_id, c.razon_social as cliente_nombre, c.rut as cliente_rut,
                        c.direccion as cliente_direccion, c.telefono as cliente_telefono,
                        tt.id as tarea_tipo_id, tt.nombre as tipo_tarea,
                        et.id as estado_tipo_id, et.nombre as estado_nombre,
@@ -392,7 +392,7 @@ class Project
 
             $stmt = $this->db->prepare("
                 SELECT DISTINCT p.*, 
-                       c.nombre as cliente_nombre,
+                       c.razon_social as cliente_nombre,
                        et.nombre as estado_nombre
                 FROM proyectos p
                 INNER JOIN clientes c ON p.cliente_id = c.id

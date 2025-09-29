@@ -140,7 +140,7 @@ class AuthService
 
             $stmt = $this->db->prepare("
                 UPDATE usuarios 
-                SET clave_hash = ?, updated_at = NOW() 
+                SET clave_hash = ?, fecha_modificacion = NOW() 
                 WHERE id = ?
             ");
 

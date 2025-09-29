@@ -459,10 +459,10 @@ class ProjectController
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, nombre, rut 
+                SELECT id, razon_social as nombre, rut 
                 FROM clientes 
                 WHERE estado_tipo_id != 4 
-                ORDER BY nombre
+                ORDER BY razon_social
             ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -488,11 +488,11 @@ class ProjectController
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT cp.id, cp.nombre, cp.email, cp.cargo, c.nombre as cliente_nombre
+                SELECT cp.id, cp.nombre, cp.email, cp.cargo, c.razon_social as cliente_nombre
                 FROM cliente_contrapartes cp
                 INNER JOIN clientes c ON cp.cliente_id = c.id
                 WHERE cp.estado_tipo_id != 4 
-                ORDER BY c.nombre, cp.nombre
+                ORDER BY c.razon_social, cp.nombre
             ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
