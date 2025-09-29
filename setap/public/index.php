@@ -9,6 +9,11 @@ use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\UserController;
 use App\Controllers\ProjectController;
+use App\Controllers\MenuController;
+use App\Controllers\PersonaController;
+use App\Controllers\PerfilController;
+use App\Controllers\ClientController;
+use App\Controllers\TaskController;
 use App\Helpers\Security;
 
 // Configurar headers de seguridad básicos
@@ -104,6 +109,113 @@ try {
                 default:
                     $controller->index();
                     break;
+            }
+            break;
+
+        case 'project':
+            $controller = new ProjectController();
+            
+            if ($action) {
+                $controller->show((int)$action);
+            } else {
+                // Redirigir a nuevo proyecto
+                $controller->show();
+            }
+            break;
+
+        case 'menus':
+            $controller = new MenuController();
+            $controller->index();
+            break;
+
+        case 'menu':
+            $controller = new MenuController();
+            
+            if ($action) {
+                $controller->show((int)$action);
+            } else {
+                $controller->show();
+            }
+            break;
+
+        case 'personas':
+            $controller = new PersonaController();
+            $controller->index();
+            break;
+
+        case 'persona':
+            $controller = new PersonaController();
+            
+            if ($action) {
+                $controller->show((int)$action);
+            } else {
+                $controller->show();
+            }
+            break;
+
+        case 'perfil':
+            $controller = new PerfilController();
+            
+            if ($action === 'edit') {
+                $controller->edit();
+            } else {
+                $controller->index();
+            }
+            break;
+
+        case 'clients':
+            $controller = new ClientController();
+            $controller->index();
+            break;
+
+        case 'client':
+            $controller = new ClientController();
+            
+            if ($action) {
+                $controller->show((int)$action);
+            } else {
+                $controller->show();
+            }
+            break;
+
+        case 'client-counterparties':
+            $controller = new ClientController();
+            $controller->counterparties();
+            break;
+
+        case 'client-counterpartie':
+            $controller = new ClientController();
+            
+            if ($action) {
+                $controller->counterpartie((int)$action);
+            } else {
+                $controller->counterpartie();
+            }
+            break;
+
+        case 'tasks':
+            $controller = new TaskController();
+            $controller->index();
+            break;
+
+        case 'task':
+            $controller = new TaskController();
+            
+            if ($action) {
+                $controller->show((int)$action);
+            } else {
+                $controller->show();
+            }
+            break;
+
+        case 'user':
+            $controller = new UserController();
+            
+            if ($action) {
+                $controller->show((int)$action);
+            } else {
+                // Nuevo usuario
+                $controller->create();
             }
             break;
 

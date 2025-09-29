@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\User;
 use App\Services\AuthService;
+use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\PermissionMiddleware;
 use App\Helpers\Security;
@@ -15,6 +16,7 @@ class UserController
 {
     private $userModel;
     private $authService;
+    private $permissionService;
     private $db;
 
     public function __construct()
@@ -27,6 +29,7 @@ class UserController
 
         $this->userModel = new User();
         $this->authService = new AuthService();
+        $this->permissionService = new PermissionService();
         $this->db = Database::getInstance();
     }
 
@@ -291,5 +294,61 @@ class UserController
     {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+
+    /**
+     * Mostrar/editar usuario específico
+     */
+    public function show($id = null)
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+
+            // Verificar permisos para gestión de usuario individual
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                require_once __DIR__ . '/../Views/errors/403.php';
+                return;
+            }
+
+            // Datos para la vista
+            $data = [
+                'user' => $currentUser,
+                'title' => 'Gestión de Usuario',
+                'subtitle' => $id ? "Editando usuario #$id" : 'Nuevo usuario',
+                'user_id' => $id
+            ];
+
+            require_once __DIR__ . '/../Views/users/form.php';
+
+        } catch (Exception $e) {
+            error_log("Error en UserController::show: " . $e->getMessage());
+            http_response_code(500);
+            echo "Error interno del servidor";
+        }
+    }
+
+    /**
+     * Obtener información del usuario actual
+     */
+    private function getCurrentUser(): ?array
+    {
+        if (!Security::isAuthenticated()) {
+            return null;
+        }
+        
+        return [
+            'id' => $_SESSION['user_id'],
+            'username' => $_SESSION['username'],
+            'email' => $_SESSION['email'],
+            'nombre_completo' => $_SESSION['nombre_completo'],
+            'rol' => $_SESSION['rol'],
+            'usuario_tipo_id' => $_SESSION['usuario_tipo_id']
+        ];
     }
 }

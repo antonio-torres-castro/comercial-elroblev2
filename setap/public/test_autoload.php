@@ -10,7 +10,7 @@ try {
     $authMiddleware = new App\Middlewares\AuthMiddleware();
     echo "✅ AuthMiddleware cargado<br>";
 
-    $permissionMiddleware = new App\Middlewares\PermissionMiddleware(1);
+    $permissionMiddleware = new App\Middlewares\PermissionMiddleware([1]);
     echo "✅ PermissionMiddleware cargado<br>";
 
     // Test de helpers

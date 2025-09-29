@@ -84,7 +84,7 @@ class PermissionService
             $stmt = $this->db->prepare("
                 SELECT m.nombre, m.url, m.icono, m.orden
                 FROM usuario_tipo_menus utm
-                INNER JOIN menus m ON utm.menu_id = m.id
+                INNER JOIN menu m ON utm.menu_id = m.id
                 WHERE utm.usuario_tipo_id = ? AND m.estado_tipo_id = 2
                 ORDER BY m.orden ASC
             ");
@@ -128,8 +128,8 @@ class PermissionService
             $stmt = $this->db->prepare("
                 SELECT p.nombre
                 FROM usuario_tipo_permisos utp
-                INNER JOIN permisos p ON utp.permiso_id = p.id
-                WHERE utp.usuario_tipo_id = ? AND p.estado_tipo_id = 2
+                INNER JOIN permiso_tipos p ON utp.permiso_id = p.id
+                WHERE utp.usuario_tipo_id = ? AND utp.estado_tipo_id = 2
             ");
 
             $stmt->execute([$userTypeId]);
@@ -149,7 +149,7 @@ class PermissionService
             $stmt = $this->db->prepare("
                 SELECT m.nombre
                 FROM usuario_tipo_menus utm
-                INNER JOIN menus m ON utm.menu_id = m.id
+                INNER JOIN menu m ON utm.menu_id = m.id
                 WHERE utm.usuario_tipo_id = ? AND (m.estado_tipo_id = 1 or m.estado_tipo_id = 2)
             ");
 
