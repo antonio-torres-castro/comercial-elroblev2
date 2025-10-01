@@ -294,7 +294,11 @@ use App\Helpers\Security;
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <a href="#" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</a>
+                    <form method="POST" action="/users/delete" style="display: inline;" id="deleteUserForm">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
+                        <input type="hidden" name="id" id="deleteUserId">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -367,7 +371,7 @@ use App\Helpers\Security;
 
         function deleteUser(userId, userName) {
             document.getElementById('deleteUserName').textContent = userName;
-            document.getElementById('confirmDeleteBtn').href = `/users/delete?id=${userId}`;
+            document.getElementById('deleteUserId').value = userId;
             
             const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();

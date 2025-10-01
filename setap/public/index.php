@@ -83,7 +83,23 @@ try {
             
             switch ($action) {
                 case 'create':
-                    $controller->create();
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+                    
+                case 'edit':
+                    $controller->edit($id);
+                    break;
+                    
+                case 'update':
+                    $controller->update();
+                    break;
+                    
+                case 'delete':
+                    $controller->delete();
                     break;
                     
                 case '':
@@ -103,6 +119,34 @@ try {
                     } else {
                         $controller->index();
                     }
+                    break;
+                    
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+                    
+                case 'edit':
+                    $controller->edit();
+                    break;
+                    
+                case 'update':
+                    $controller->update();
+                    break;
+                    
+                case 'delete':
+                    $controller->delete();
+                    break;
+                    
+                case 'change-status':
+                    $controller->changeStatus();
+                    break;
+                    
+                case 'search':
+                    $controller->search();
                     break;
                     
                 case '':
@@ -140,7 +184,37 @@ try {
 
         case 'personas':
             $controller = new PersonaController();
-            $controller->index();
+            
+            switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+                    
+                case 'edit':
+                    $controller->edit();
+                    break;
+                    
+                case 'update':
+                    $controller->update();
+                    break;
+                    
+                case 'delete':
+                    $controller->delete();
+                    break;
+                    
+                case 'store':
+                    $controller->store();
+                    break;
+                    
+                case '':
+                default:
+                    $controller->index();
+                    break;
+            }
             break;
 
         case 'persona':
@@ -195,7 +269,33 @@ try {
 
         case 'tasks':
             $controller = new TaskController();
-            $controller->index();
+            
+            switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+                    
+                case 'edit':
+                    $controller->edit();
+                    break;
+                    
+                case 'update':
+                    $controller->update();
+                    break;
+                    
+                case 'delete':
+                    $controller->delete();
+                    break;
+                    
+                case '':
+                default:
+                    $controller->index();
+                    break;
+            }
             break;
 
         case 'task':

@@ -17,7 +17,7 @@ class MenuController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-        
+
         $this->permissionService = new PermissionService();
     }
 
@@ -28,14 +28,14 @@ class MenuController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
             }
 
             // Verificar acceso al menú primero
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'menus')) {
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menus')) {
                 http_response_code(403);
                 echo $this->renderError('No tienes acceso a esta sección.');
                 return;
@@ -53,7 +53,6 @@ class MenuController
             ];
 
             require_once __DIR__ . '/../Views/menus/list.php';
-
         } catch (Exception $e) {
             error_log("Error en MenuController::index: " . $e->getMessage());
             http_response_code(500);
@@ -68,14 +67,14 @@ class MenuController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
             }
 
             // Verificar acceso al menú primero
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'menu')) {
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menu')) {
                 http_response_code(403);
                 echo $this->renderError('No tienes acceso a esta sección.');
                 return;
@@ -90,7 +89,6 @@ class MenuController
             ];
 
             require_once __DIR__ . '/../Views/menus/form.php';
-
         } catch (Exception $e) {
             error_log("Error en MenuController::show: " . $e->getMessage());
             http_response_code(500);
@@ -105,7 +103,7 @@ class MenuController
     {
         try {
             $db = Database::getInstance();
-            
+
             $sql = "SELECT 
                         id,
                         nombre,
@@ -117,12 +115,11 @@ class MenuController
                         fecha_modificacion
                     FROM menu 
                     ORDER BY orden ASC, nombre ASC";
-            
+
             $stmt = $db->prepare($sql);
             $stmt->execute();
-            
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
         } catch (Exception $e) {
             error_log("Error al obtener menús: " . $e->getMessage());
             return [];
@@ -134,7 +131,7 @@ class MenuController
         if (!Security::isAuthenticated()) {
             return null;
         }
-        
+
         return [
             'id' => $_SESSION['user_id'],
             'username' => $_SESSION['username'],

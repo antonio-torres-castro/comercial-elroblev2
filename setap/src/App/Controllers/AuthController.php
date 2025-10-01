@@ -180,7 +180,6 @@ HTML;
                 $_SESSION['login_error'] = 'Error al iniciar sesión';
                 Security::redirect('/login');
             }
-
         } catch (Exception $e) {
             error_log("Error en login: " . $e->getMessage());
             $_SESSION['login_error'] = 'Error interno del servidor';
@@ -193,7 +192,6 @@ HTML;
         try {
             $this->authService->logout();
             Security::redirect('/login');
-            
         } catch (Exception $e) {
             error_log("Error en logout: " . $e->getMessage());
             Security::redirect('/login');

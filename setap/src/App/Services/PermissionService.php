@@ -51,13 +51,13 @@ class PermissionService
     public function hasMenuAccess(int $userId, string $menuName): bool
     {
         try {
-            $userType = $this->getUserType($userId);
-            if (!$userType) {
+            $userType = $this->getUserType($userId); /*Obtienes el Id del Usuario, lo entiendo*/
+            if (!$userType) {/*Validas que no sea null?*/
                 return false;
             }
 
-            $cacheKey = "menus_{$userType['id']}";
-            if (!isset(self::$menusCache[$cacheKey])) {
+            $cacheKey = "menus_{$userType['id']}";/*aqui no entiendo para que concatenas "menus_" al id del usuario*/
+            if (!isset(self::$menusCache[$cacheKey])) {/* Aqui entiendo que $menusCache es un array, y que entre corchetes va un indice, por que le pasas un string?*/
                 self::$menusCache[$cacheKey] = $this->loadUserMenus($userType['id']);
             }
 

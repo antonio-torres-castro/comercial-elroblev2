@@ -387,6 +387,227 @@ class UserController
     }
 
     /**
+     * Mostrar formulario de edición de usuario
+     */
+    public function edit($id = null)
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+
+            // Verificar permisos para edición de usuarios
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                require_once __DIR__ . '/../Views/errors/403.php';
+                return;
+            }
+
+            // Obtener ID del parámetro GET si no se pasó como argumento
+            $id = $id ?: (int)($_GET['id'] ?? 0);
+            
+            if ($id <= 0) {
+                Security::redirect('/users?error=ID de usuario inválido');
+                return;
+            }
+
+            // Obtener datos del usuario a editar
+            $userToEdit = $this->userModel->getById($id);
+            if (!$userToEdit) {
+                Security::redirect('/users?error=Usuario no encontrado');
+                return;
+            }
+
+            // Obtener tipos de usuario para el select
+            $userTypes = $this->getUserTypes();
+
+            $data = [
+                'user' => $currentUser,
+                'userToEdit' => $userToEdit,
+                'userTypes' => $userTypes,
+                'title' => 'Editar Usuario',
+                'subtitle' => "Editando usuario: {$userToEdit['nombre_completo']}",
+                'error' => $_GET['error'] ?? '',
+                'success' => $_GET['success'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/users/edit.php';
+
+        } catch (Exception $e) {
+            error_log("Error en UserController::edit: " . $e->getMessage());
+            http_response_code(500);
+            echo "Error interno del servidor";
+        }
+    }
+
+    /**
+     * Actualizar usuario
+     */
+    public function update()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                require_once __DIR__ . '/../Views/errors/403.php';
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                Security::redirect('/users');
+                return;
+            }
+
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                Security::redirect('/users?error=ID de usuario inválido');
+                return;
+            }
+
+            // Validar datos
+            $errors = $this->validateUserDataForUpdate($_POST, true); // true indica que es actualización
+
+            if (!empty($errors)) {
+                $errorMsg = implode(', ', $errors);
+                Security::redirect("/users/edit?id={$id}&error=" . urlencode($errorMsg));
+                return;
+            }
+
+            // Preparar datos para actualización
+            $userData = [
+                'nombre' => trim($_POST['nombre']),
+                'email' => trim($_POST['email']),
+                'telefono' => trim($_POST['telefono'] ?? ''),
+                'direccion' => trim($_POST['direccion'] ?? ''),
+                'usuario_tipo_id' => (int)$_POST['usuario_tipo_id']
+            ];
+
+            // Actualizar usuario
+            if ($this->userModel->update($id, $userData)) {
+                Security::redirect("/users?success=Usuario actualizado correctamente");
+            } else {
+                Security::redirect("/users/edit?id={$id}&error=Error al actualizar el usuario");
+            }
+
+        } catch (Exception $e) {
+            error_log("Error en UserController::update: " . $e->getMessage());
+            $id = (int)($_POST['id'] ?? 0);
+            Security::redirect("/users/edit?id={$id}&error=Error interno del servidor");
+        }
+    }
+
+    /**
+     * Eliminar usuario (soft delete)
+     */
+    public function delete()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                Security::redirect('/login');
+                return;
+            }
+
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                require_once __DIR__ . '/../Views/errors/403.php';
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                Security::redirect('/users');
+                return;
+            }
+
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                Security::redirect('/users?error=ID de usuario inválido');
+                return;
+            }
+
+            // No permitir que el usuario se elimine a sí mismo
+            if ($id == $currentUser['id']) {
+                Security::redirect('/users?error=No puedes eliminar tu propio usuario');
+                return;
+            }
+
+            // Eliminar usuario (soft delete)
+            if ($this->userModel->delete($id)) {
+                Security::redirect('/users?success=Usuario eliminado correctamente');
+            } else {
+                Security::redirect('/users?error=Error al eliminar el usuario');
+            }
+
+        } catch (Exception $e) {
+            error_log("Error en UserController::delete: " . $e->getMessage());
+            Security::redirect('/users?error=Error interno del servidor');
+        }
+    }
+
+    /**
+     * Validar datos del usuario
+     */
+    private function validateUserDataForUpdate(array $data, bool $isUpdate = false): array
+    {
+        $errors = [];
+
+        // Validar nombre
+        if (empty($data['nombre'])) {
+            $errors[] = 'El nombre es obligatorio';
+        } elseif (strlen($data['nombre']) < 2) {
+            $errors[] = 'El nombre debe tener al menos 2 caracteres';
+        }
+
+        // Validar email
+        if (empty($data['email'])) {
+            $errors[] = 'El email es obligatorio';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'El email no tiene un formato válido';
+        }
+
+        // Validar usuario_tipo_id
+        if (empty($data['usuario_tipo_id']) || !is_numeric($data['usuario_tipo_id'])) {
+            $errors[] = 'Debe seleccionar un tipo de usuario válido';
+        }
+
+        // Validaciones específicas para creación (no actualización)
+        if (!$isUpdate) {
+            // Validar nombre_usuario
+            if (empty($data['nombre_usuario'])) {
+                $errors[] = 'El nombre de usuario es obligatorio';
+            } elseif (strlen($data['nombre_usuario']) < 3) {
+                $errors[] = 'El nombre de usuario debe tener al menos 3 caracteres';
+            }
+
+            // Validar password
+            if (empty($data['password'])) {
+                $errors[] = 'La contraseña es obligatoria';
+            } elseif (strlen($data['password']) < 6) {
+                $errors[] = 'La contraseña debe tener al menos 6 caracteres';
+            }
+
+            // Validar confirmación de password
+            if ($data['password'] !== ($data['password_confirm'] ?? '')) {
+                $errors[] = 'Las contraseñas no coinciden';
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
      * Obtener información del usuario actual
      */
     private function getCurrentUser(): ?array
