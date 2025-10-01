@@ -239,16 +239,41 @@ try {
 
         case 'clients':
             $controller = new ClientController();
-            $controller->index();
+            
+            switch ($action) {
+                case 'store':
+                    $controller->store();
+                    break;
+                    
+                case 'update':
+                    $controller->update();
+                    break;
+                    
+                case 'delete':
+                    $controller->delete();
+                    break;
+                    
+                default:
+                    $controller->index();
+                    break;
+            }
             break;
 
         case 'client':
             $controller = new ClientController();
             
-            if ($action) {
-                $controller->show((int)$action);
-            } else {
-                $controller->show();
+            switch ($action) {
+                case 'create':
+                    $controller->create();
+                    break;
+                    
+                default:
+                    if ($action) {
+                        $controller->edit($action);
+                    } else {
+                        $controller->create();
+                    }
+                    break;
             }
             break;
 

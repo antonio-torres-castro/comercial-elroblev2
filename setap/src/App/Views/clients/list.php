@@ -3,35 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $data['title']; ?> - SETAP</title>
+    <title><?php echo htmlspecialchars($data['title']); ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-2 d-md-block bg-light sidebar">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/dashboard">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/clients">
-                                <i class="bi bi-building"></i> Clientes
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
 
             <!-- Main content -->
             <main class="col-md-10 ms-sm-auto px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><?php echo $data['title']; ?></h1>
+                    <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="/client" class="btn btn-sm btn-primary">
                             <i class="bi bi-plus-circle"></i> Nuevo Cliente
@@ -39,33 +25,241 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0"><?php echo $data['subtitle']; ?></h5>
+                <!-- Alertas de mensajes -->
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?php
+                        $messages = [
+                            'created' => 'Cliente creado exitosamente',
+                            'updated' => 'Cliente actualizado exitosamente',
+                            'deleted' => 'Cliente eliminado exitosamente'
+                        ];
+                        echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
+                        ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (isset($_GET['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <?php echo htmlspecialchars($_GET['error']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Filtros de búsqueda -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros de Búsqueda</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="/clients" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="rut" class="form-label">RUT</label>
+                                <input type="text" class="form-control" id="rut" name="rut" 
+                                       value="<?php echo htmlspecialchars($data['filters']['rut']); ?>" 
+                                       placeholder="Buscar por RUT">
                             </div>
-                            <div class="card-body">
-                                <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i>
-                                    <strong>Módulo en Construcción</strong><br>
-                                    La gestión de clientes está en desarrollo. Próximamente podrás:
-                                    <ul class="mb-0 mt-2">
-                                        <li>Ver todos los clientes</li>
-                                        <li>Crear nuevos clientes</li>
-                                        <li>Editar información de clientes</li>
-                                        <li>Gestionar proyectos por cliente</li>
-                                        <li>Ver historial de interacciones</li>
-                                    </ul>
+                            <div class="col-md-4">
+                                <label for="razon_social" class="form-label">Razón Social</label>
+                                <input type="text" class="form-control" id="razon_social" name="razon_social" 
+                                       value="<?php echo htmlspecialchars($data['filters']['razon_social']); ?>" 
+                                       placeholder="Buscar por razón social">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="estado_tipo_id" class="form-label">Estado</label>
+                                <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
+                                    <option value="">Todos los estados</option>
+                                    <?php foreach ($data['statusTypes'] as $status): ?>
+                                        <option value="<?php echo $status['id']; ?>" 
+                                                <?php echo $data['filters']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($status['nombre']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search"></i> Buscar
+                                    </button>
+                                    <a href="/clients" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle"></i> Limpiar
+                                    </a>
                                 </div>
                             </div>
-                        </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Lista de clientes -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><?php echo htmlspecialchars($data['subtitle']); ?></h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($data['clients'])): ?>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                No se encontraron clientes con los filtros aplicados.
+                            </div>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover" id="clientsTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>RUT</th>
+                                            <th>Razón Social</th>
+                                            <th>Email</th>
+                                            <th>Teléfono</th>
+                                            <th>Contrapartes</th>
+                                            <th>Estado</th>
+                                            <th>Creado</th>
+                                            <th width="150">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($data['clients'] as $client): ?>
+                                            <tr>
+                                                <td>
+                                                    <?php if ($client['rut']): ?>
+                                                        <code><?php echo htmlspecialchars($client['rut']); ?></code>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <strong><?php echo htmlspecialchars($client['razon_social']); ?></strong>
+                                                </td>
+                                                <td>
+                                                    <?php if ($client['email']): ?>
+                                                        <a href="mailto:<?php echo htmlspecialchars($client['email']); ?>">
+                                                            <?php echo htmlspecialchars($client['email']); ?>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php if ($client['telefono']): ?>
+                                                        <a href="tel:<?php echo htmlspecialchars($client['telefono']); ?>">
+                                                            <?php echo htmlspecialchars($client['telefono']); ?>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">
+                                                        <?php echo $client['total_contrapartes']; ?> contacto(s)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $statusClasses = [
+                                                        0 => 'bg-warning',   // Creado
+                                                        1 => 'bg-success',   // Activo
+                                                        2 => 'bg-secondary'  // Inactivo
+                                                    ];
+                                                    $statusClass = $statusClasses[$client['estado_tipo_id']] ?? 'bg-dark';
+                                                    ?>
+                                                    <span class="badge <?php echo $statusClass; ?>">
+                                                        <?php echo htmlspecialchars($client['estado_nombre']); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <?php echo date('d/m/Y', strtotime($client['fecha_Creado'])); ?>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a href="/client/<?php echo $client['id']; ?>" 
+                                                           class="btn btn-outline-primary" title="Editar">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-danger" 
+                                                                onclick="confirmDelete(<?php echo $client['id']; ?>, '<?php echo addslashes($client['razon_social']); ?>')"
+                                                                title="Eliminar">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- Modal de confirmación de eliminación -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar al cliente:</p>
+                    <p><strong id="clientName"></strong></p>
+                    <p class="text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form method="POST" action="/clients/delete" style="display: inline;" id="deleteForm">
+                        <input type="hidden" name="csrf_token" value="<?php echo \App\Helpers\Security::generateCsrfToken(); ?>">
+                        <input type="hidden" name="id" id="deleteClientId">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Inicializar DataTable
+            $('#clientsTable').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 25,
+                order: [[1, 'asc']], // Ordenar por razón social
+                columnDefs: [
+                    {
+                        targets: [-1], // Última columna (acciones)
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
+            });
+        });
+
+        function confirmDelete(id, name) {
+            document.getElementById('clientName').textContent = name;
+            document.getElementById('deleteClientId').value = id;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
 </body>
 </html>
