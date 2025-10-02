@@ -165,7 +165,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="<?php echo htmlspecialchars($menu['url']); ?>">
                                         <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?>"></i>
-                                        <?php echo htmlspecialchars($menu['nombre']); ?>
+                                        <?php echo htmlspecialchars($menu['display']); ?>
                                     </a>
                                 </li>
                             <?php endforeach; ?>

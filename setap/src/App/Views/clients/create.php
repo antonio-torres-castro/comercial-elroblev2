@@ -10,11 +10,8 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
-            <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
-
             <!-- Main content -->
-            <main class="col-md-10 ms-sm-auto px-md-4">
+            <main class="col-12 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">

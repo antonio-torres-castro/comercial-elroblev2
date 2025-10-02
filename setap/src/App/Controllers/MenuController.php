@@ -112,7 +112,8 @@ class MenuController
                         orden,
                         estado_tipo_id,
                         fecha_creacion,
-                        fecha_modificacion
+                        fecha_modificacion,
+                        display
                     FROM menu 
                     ORDER BY orden ASC, nombre ASC";
 

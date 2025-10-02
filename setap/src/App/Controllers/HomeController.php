@@ -13,7 +13,7 @@ class HomeController
 
     public function __construct()
     {
-        // Verificar autenticación
+        // Verificar autenticaciÃ³n
         (new AuthMiddleware())->handle();
         
         $this->permissionService = new PermissionService();
@@ -30,7 +30,7 @@ class HomeController
                 return;
             }
             
-            // Obtener menús accesibles para el usuario
+            // Obtener menÃºs accesibles para el usuario
             $menus = $this->permissionService->getUserMenus($currentUser['id']);
             
             // Datos para el home
@@ -67,7 +67,7 @@ class HomeController
 
     private function getHomeStats(array $user): array
     {
-        // Estadísticas básicas por defecto
+        // EstadÃ­sticas bÃ¡sicas por defecto
         $stats = [
             'total_usuarios' => 0,
             'total_proyectos' => 0,
@@ -76,13 +76,13 @@ class HomeController
         ];
         
         try {
-            // Solo mostrar estadísticas si el usuario tiene permisos
+            // Solo mostrar estadÃ­sticas si el usuario tiene permisos
             if (Security::hasPermission('Read') || Security::hasPermission('All')) {
                 $stats = $this->calculateStats();
             }
             
         } catch (Exception $e) {
-            error_log("Error calculando estadísticas: " . $e->getMessage());
+            error_log("Error calculando estadÃ­sticas: " . $e->getMessage());
         }
         
         return $stats;
@@ -90,8 +90,8 @@ class HomeController
 
     private function calculateStats(): array
     {
-        // Implementación básica de estadísticas
-        // Puedes expandir esto según tus necesidades
+        // ImplementaciÃ³n bÃ¡sica de estadÃ­sticas
+        // Puedes expandir esto segÃºn tus necesidades
         return [
             'total_usuarios' => 0,
             'total_proyectos' => 0,

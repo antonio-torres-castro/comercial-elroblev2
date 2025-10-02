@@ -8,28 +8,30 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-2 d-md-block bg-light sidebar">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/home">
-                                <i class="bi bi-speedometer2"></i> Home
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/client-counterparties">
-                                <i class="bi bi-people-fill"></i> Contrapartes
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/home">
+                <i class="bi bi-grid-3x3-gap"></i> SETAP
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-light" href="/home">
+                    <i class="bi bi-house"></i> Home
+                </a>
+                <a class="nav-link text-light active" href="/client-counterparties">
+                    <i class="bi bi-people-fill"></i> Contrapartes
+                </a>
+                <a class="nav-link text-light" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Salir
+                </a>
+            </div>
+        </div>
+    </nav>
 
+    <div class="container-fluid mt-4">
+        <div class="row">
             <!-- Main content -->
-            <main class="col-md-10 ms-sm-auto px-md-4">
+            <main class="col-12 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">

@@ -83,7 +83,7 @@ class PermissionService
             }
 
             $stmt = $this->db->prepare("
-                SELECT m.nombre, m.url, m.icono, m.orden
+                SELECT m.nombre, m.url, m.icono, m.orden, m.display
                 FROM usuario_tipo_menus utm
                 INNER JOIN menu m ON utm.menu_id = m.id
                 WHERE utm.usuario_tipo_id = ? AND m.estado_tipo_id = 2
