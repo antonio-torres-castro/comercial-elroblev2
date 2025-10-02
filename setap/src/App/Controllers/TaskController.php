@@ -148,10 +148,12 @@ class TaskController
                 'taskTypes' => $this->taskModel->getTaskTypes(),
                 'users' => $this->taskModel->getUsers(),
                 'taskStates' => $this->taskModel->getTaskStates(),
+                'task' => null,
+                'task_id' => null,
                 'error' => $_GET['error'] ?? ''
             ];
 
-            require_once __DIR__ . '/../Views/tasks/create.php';
+            require_once __DIR__ . '/../Views/tasks/form.php';
 
         } catch (Exception $e) {
             error_log("Error en TaskController::create: " . $e->getMessage());
@@ -255,6 +257,7 @@ class TaskController
             $data = [
                 'user' => $currentUser,
                 'task' => $task,
+                'task_id' => $id,
                 'title' => 'Editar Tarea',
                 'subtitle' => "Editando: {$task['nombre']}",
                 'projects' => $this->taskModel->getProjects(),
@@ -265,7 +268,7 @@ class TaskController
                 'success' => $_GET['success'] ?? ''
             ];
 
-            require_once __DIR__ . '/../Views/tasks/edit.php';
+            require_once __DIR__ . '/../Views/tasks/form.php';
 
         } catch (Exception $e) {
             error_log("Error en TaskController::edit: " . $e->getMessage());
@@ -463,7 +466,7 @@ class TaskController
                             </div>
                             <div class="card-body">
                                 <p class="mb-3">' . htmlspecialchars($message) . '</p>
-                                <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                                <a href="/home" class="btn btn-primary">Volver al Home</a>
                             </div>
                         </div>
                     </div>

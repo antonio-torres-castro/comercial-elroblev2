@@ -27,12 +27,12 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/dashboard">
+            <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
             </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light" href="/dashboard">
-                    <i class="bi bi-house"></i> Dashboard
+                <a class="nav-link text-light" href="/home">
+                    <i class="bi bi-house"></i> Home
                 </a>
                 <a class="nav-link text-light active" href="/projects">
                     <i class="bi bi-folder"></i> Proyectos
@@ -48,7 +48,7 @@
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="/home">Home</a></li>
                 <li class="breadcrumb-item active">Proyectos</li>
             </ol>
         </nav>

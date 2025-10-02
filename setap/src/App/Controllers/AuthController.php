@@ -17,9 +17,9 @@ class AuthController
 
     public function showLoginForm()
     {
-        // Si ya está autenticado, redirigir al dashboard
+        // Si ya está autenticado, redirigir al home
         if (Security::isAuthenticated()) {
-            Security::redirect('/dashboard');
+            Security::redirect('/home');
             return;
         }
 
@@ -175,7 +175,7 @@ HTML;
 
             // Iniciar sesión
             if ($this->authService->login($userData)) {
-                Security::redirect('/dashboard');
+                Security::redirect('/home');
             } else {
                 $_SESSION['login_error'] = 'Error al iniciar sesión';
                 Security::redirect('/login');

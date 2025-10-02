@@ -52,12 +52,12 @@ $user = $isEdit ? $data['user'] ?? null : null;
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/dashboard">
+            <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
             </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light" href="/dashboard">
-                    <i class="bi bi-house"></i> Dashboard
+                <a class="nav-link text-light" href="/home">
+                    <i class="bi bi-house"></i> Home
                 </a>
                 <a class="nav-link text-light" href="/users">
                     <i class="bi bi-people"></i> Usuarios

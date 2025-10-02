@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SETAP</title>
+    <title>Home - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -25,7 +25,7 @@
             padding-right: 15px;
         }
 
-        /* Para pantallas grandes asegurar posición correcta */
+        /* Para pantallas grandes asegurar posiciÃ³n correcta */
         @media (min-width: 768px) {
             .sidebar {
                 position: sticky;
@@ -39,7 +39,7 @@
             }
         }
 
-        /* Responsividad para el sidebar en móviles */
+        /* Responsividad para el sidebar en mÃ³viles */
         @media (max-width: 767.98px) {
             .sidebar {
                 position: fixed;
@@ -110,16 +110,16 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/dashboard">
+            <a class="navbar-brand" href="/home">
                 <i class="bi bi-building"></i> SETAP
             </a>
 
-            <!-- Botón hamburguesa para sidebar -->
+            <!-- BotÃ³n hamburguesa para sidebar -->
             <button class="navbar-toggler d-md-none" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle sidebar">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!-- Botón hamburguesa para menú de usuario -->
+            <!-- BotÃ³n hamburguesa para menÃº de usuario -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -129,15 +129,15 @@
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i>
-                            <?php echo htmlspecialchars($dashboardData['user']['nombre_completo'] ?? $dashboardData['user']['username']); ?>
+                            <?php echo htmlspecialchars($homeData['user']['nombre_completo'] ?? $homeData['user']['username']); ?>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person"></i> Perfil</a></li>
-                            <li><a class="dropdown-item" href="/perfil/edit"><i class="bi bi-gear"></i> Configuración</a></li>
+                            <li><a class="dropdown-item" href="/perfil/edit"><i class="bi bi-gear"></i> ConfiguraciÃ³n</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar SesiÃ³n</a></li>
                         </ul>
                     </div>
                 </div>
@@ -147,7 +147,7 @@
 
     <div class="container-fluid">
         <div class="row">
-            <!-- Overlay para cerrar sidebar en móviles -->
+            <!-- Overlay para cerrar sidebar en mÃ³viles -->
             <div class="sidebar-overlay" id="sidebarOverlay"></div>
             
             <!-- Sidebar -->
@@ -155,13 +155,13 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="/dashboard">
-                                <i class="bi bi-speedometer2"></i> Dashboard
+                            <a class="nav-link active" href="/home">
+                                <i class="bi bi-speedometer2"></i> Home
                             </a>
                         </li>
 
-                        <?php if (!empty($dashboardData['menus'])): ?>
-                            <?php foreach ($dashboardData['menus'] as $menu): ?>
+                        <?php if (!empty($homeData['menus'])): ?>
+                            <?php foreach ($homeData['menus'] as $menu): ?>
                                 <li class="nav-item">
                                     <a class="nav-link" href="<?php echo htmlspecialchars($menu['url']); ?>">
                                         <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?>"></i>
@@ -170,7 +170,7 @@
                                 </li>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <!-- Menús por defecto si no hay configuración dinámica -->
+                            <!-- MenÃºs por defecto si no hay configuraciÃ³n dinÃ¡mica -->
                             <?php
                             if (Security::hasMenuAccess('users')): ?>
                                 <li class="nav-item">
@@ -203,7 +203,7 @@
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Dashboard</h1>
+                    <h1 class="h2">Home</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-calendar"></i>
@@ -212,7 +212,7 @@
                     </div>
                 </div>
 
-                <!-- Estadísticas -->
+                <!-- EstadÃ­sticas -->
                 <div class="row mb-4">
                     <?php if (Security::hasPermission('Read')): ?>
                         <div class="col-md-3 mb-3">
@@ -221,7 +221,7 @@
                                     <div class="text-primary mb-2">
                                         <i class="bi bi-people" style="font-size: 2rem;"></i>
                                     </div>
-                                    <h3 class="mb-0"><?php echo $dashboardData['stats']['total_usuarios']; ?></h3>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['total_usuarios']; ?></h3>
                                     <p class="text-muted mb-0">Total Usuarios</p>
                                 </div>
                             </div>
@@ -233,7 +233,7 @@
                                     <div class="text-success mb-2">
                                         <i class="bi bi-briefcase" style="font-size: 2rem;"></i>
                                     </div>
-                                    <h3 class="mb-0"><?php echo $dashboardData['stats']['total_proyectos']; ?></h3>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['total_proyectos']; ?></h3>
                                     <p class="text-muted mb-0">Total Proyectos</p>
                                 </div>
                             </div>
@@ -245,7 +245,7 @@
                                     <div class="text-warning mb-2">
                                         <i class="bi bi-play-circle" style="font-size: 2rem;"></i>
                                     </div>
-                                    <h3 class="mb-0"><?php echo $dashboardData['stats']['proyectos_activos']; ?></h3>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['proyectos_activos']; ?></h3>
                                     <p class="text-muted mb-0">Proyectos Activos</p>
                                 </div>
                             </div>
@@ -257,7 +257,7 @@
                                     <div class="text-danger mb-2">
                                         <i class="bi bi-clock" style="font-size: 2rem;"></i>
                                     </div>
-                                    <h3 class="mb-0"><?php echo $dashboardData['stats']['tareas_pendientes']; ?></h3>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['tareas_pendientes']; ?></h3>
                                     <p class="text-muted mb-0">Tareas Pendientes</p>
                                 </div>
                             </div>
@@ -272,11 +272,11 @@
                             <div class="card-body">
                                 <h5 class="card-title">
                                     <i class="bi bi-house-door text-primary"></i>
-                                    Bienvenido, <?php echo htmlspecialchars($dashboardData['user']['nombre_completo'] ?? $dashboardData['user']['username']); ?>
+                                    Bienvenido, <?php echo htmlspecialchars($homeData['user']['nombre_completo'] ?? $homeData['user']['username']); ?>
                                 </h5>
                                 <p class="card-text">
-                                    Has iniciado sesión como <strong><?php echo htmlspecialchars($dashboardData['user']['rol']); ?></strong>.
-                                    Desde aquí puedes acceder a todas las funcionalidades del sistema según tus permisos.
+                                    Has iniciado sesiÃ³n como <strong><?php echo htmlspecialchars($homeData['user']['rol']); ?></strong>.
+                                    Desde aquÃ­ puedes acceder a todas las funcionalidades del sistema segÃºn tus permisos.
                                 </p>
 
                                 <div class="row mt-3">
@@ -305,13 +305,13 @@
                             <div class="card-body">
                                 <h6 class="card-title">
                                     <i class="bi bi-info-circle text-info"></i>
-                                    Información de Sesión
+                                    InformaciÃ³n de SesiÃ³n
                                 </h6>
                                 <ul class="list-unstyled mb-0">
-                                    <li><strong>Usuario:</strong> <?php echo htmlspecialchars($dashboardData['user']['username']); ?></li>
-                                    <li><strong>Email:</strong> <?php echo htmlspecialchars($dashboardData['user']['email']); ?></li>
-                                    <li><strong>Rol:</strong> <?php echo htmlspecialchars($dashboardData['user']['rol']); ?></li>
-                                    <li><strong>Último acceso:</strong> <?php echo date('d/m/Y H:i'); ?></li>
+                                    <li><strong>Usuario:</strong> <?php echo htmlspecialchars($homeData['user']['username']); ?></li>
+                                    <li><strong>Email:</strong> <?php echo htmlspecialchars($homeData['user']['email']); ?></li>
+                                    <li><strong>Rol:</strong> <?php echo htmlspecialchars($homeData['user']['rol']); ?></li>
+                                    <li><strong>Ãšltimo acceso:</strong> <?php echo date('d/m/Y H:i'); ?></li>
                                 </ul>
                             </div>
                         </div>
@@ -323,19 +323,19 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Funcionalidad básica
+        // Funcionalidad bÃ¡sica
         document.addEventListener('DOMContentLoaded', function() {
             // Confirmar logout
             const logoutLink = document.querySelector('a[href="/logout"]');
             if (logoutLink) {
                 logoutLink.addEventListener('click', function(e) {
-                    if (!confirm('¿Está seguro que desea cerrar sesión?')) {
+                    if (!confirm('Â¿EstÃ¡ seguro que desea cerrar sesiÃ³n?')) {
                         e.preventDefault();
                     }
                 });
             }
 
-            // Funcionalidad del sidebar móvil
+            // Funcionalidad del sidebar mÃ³vil
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -364,7 +364,7 @@
                     }
                 });
 
-                // Cerrar sidebar al hacer clic en un enlace del menú (móviles)
+                // Cerrar sidebar al hacer clic en un enlace del menÃº (mÃ³viles)
                 const sidebarLinks = sidebar.querySelectorAll('a.nav-link');
                 sidebarLinks.forEach(function(link) {
                     link.addEventListener('click', function() {

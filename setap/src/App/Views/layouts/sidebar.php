@@ -4,7 +4,7 @@
 <nav class="col-md-2 d-md-block bg-light sidebar">
     <div class="position-sticky pt-3">
         <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
-            <a href="/dashboard" class="text-decoration-none text-dark">
+            <a href="/home" class="text-decoration-none text-dark">
                 <i class="bi bi-grid-3x3-gap"></i>
                 <strong>SETAP</strong>
             </a>
@@ -12,9 +12,9 @@
         
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/dashboard') !== false ? 'active' : ''; ?>" 
-                   href="/dashboard">
-                    <i class="bi bi-speedometer2"></i> Dashboard
+                <a class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/home') !== false ? 'active' : ''; ?>" 
+                   href="/home">
+                    <i class="bi bi-speedometer2"></i> Home
                 </a>
             </li>
             

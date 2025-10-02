@@ -162,7 +162,7 @@ class MenuController
                             </div>
                             <div class="card-body">
                                 <p class="mb-3">' . htmlspecialchars($message) . '</p>
-                                <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                                <a href="/home" class="btn btn-primary">Volver al Home</a>
                             </div>
                         </div>
                     </div>

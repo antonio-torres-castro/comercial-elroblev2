@@ -130,7 +130,7 @@ class PermissionMiddleware
                                     <i class="bi bi-shield-exclamation" style="font-size: 3rem; color: #dc3545;"></i>
                                 </div>
                                 <p class="mb-3">No tienes permisos para acceder a esta sección.</p>
-                                <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                                <a href="/home" class="btn btn-primary">Volver al Home</a>
                             </div>
                         </div>
                     </div>

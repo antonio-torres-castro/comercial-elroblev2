@@ -6,7 +6,7 @@ require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/App/bootstrap.php';
 
 use App\Controllers\AuthController;
-use App\Controllers\DashboardController;
+use App\Controllers\HomeController;
 use App\Controllers\UserController;
 use App\Controllers\ProjectController;
 use App\Controllers\MenuController;
@@ -73,10 +73,15 @@ try {
             $controller->logout();
             break;
 
-        case 'dashboard':
-            $controller = new DashboardController();
+        case 'home':
+            $controller = new HomeController();
             $controller->index();
             break;
+
+        case 'dashboard':
+            // Redirigir a la nueva ruta /home para compatibilidad
+            header('Location: /home', true, 301);
+            exit;
 
         case 'users':
             $controller = new UserController();
@@ -317,14 +322,39 @@ try {
                     break;
                     
                 case 'update':
-                    $controller->update();
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->update();
+                    } else {
+                        Security::redirect('/tasks');
+                    }
+                    break;
+                    
+                case 'store':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        Security::redirect('/tasks');
+                    }
                     break;
                     
                 case 'delete':
-                    $controller->delete();
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->delete();
+                    } else {
+                        Security::redirect('/tasks');
+                    }
+                    break;
+                    
+                case 'show':
+                    if ($id) {
+                        $controller->show((int)$id);
+                    } else {
+                        Security::redirect('/tasks');
+                    }
                     break;
                     
                 case '':
+                case null:
                 default:
                     $controller->index();
                     break;
@@ -384,9 +414,9 @@ try {
 
         case '':
         case 'home':
-            // Redirigir a dashboard si está autenticado, sino a login
+            // Redirigir a home si está autenticado, sino a login
             if (Security::isAuthenticated()) {
-                Security::redirect('/dashboard');
+                Security::redirect('/home');
             } else {
                 Security::redirect('/login');
             }
@@ -413,7 +443,7 @@ try {
                                 </div>
                                 <div class="card-body text-center">
                                     <p class="mb-3">La página solicitada no existe.</p>
-                                    <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                                    <a href="/home" class="btn btn-primary">Volver al Home</a>
                                 </div>
                             </div>
                         </div>
@@ -453,7 +483,7 @@ try {
                             </div>
                             <div class="card-body">
                                 <p class="mb-3">Ha ocurrido un error interno. Por favor, intente más tarde.</p>
-                                <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+                                <a href="/home" class="btn btn-primary">Volver al Home</a>
                             </div>
                         </div>
                     </div>

@@ -48,8 +48,8 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="/dashboard">
-                                <i class="bi bi-speedometer2"></i> Dashboard
+                            <a class="nav-link" href="/home">
+                                <i class="bi bi-speedometer2"></i> Home
                             </a>
                         </li>
                         <li class="nav-item">
