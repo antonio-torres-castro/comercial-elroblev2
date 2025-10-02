@@ -21,6 +21,15 @@ use App\Helpers\Security;
             color: white;
             font-weight: bold;
         }
+        .user-avatar-large {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
         .role-badge {
             font-size: 0.75rem;
             padding: 0.25em 0.5em;
@@ -304,6 +313,37 @@ use App\Helpers\Security;
         </div>
     </div>
 
+    <!-- Modal para Cambio de Contraseña -->
+    <div class="modal fade" id="passwordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cambiar Contraseña</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="passwordForm">
+                        <input type="hidden" id="passwordUserId">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                            <input type="password" class="form-control" id="newPassword" 
+                                   placeholder="Mínimo 6 caracteres" minlength="6" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" class="form-control" id="confirmPassword" 
+                                   placeholder="Repite la nueva contraseña" minlength="6" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="savePassword()">Cambiar Contraseña</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Búsqueda en tiempo real
@@ -356,17 +396,113 @@ use App\Helpers\Security;
             modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
             modal.show();
             
-            // Aquí podrías cargar los detalles del usuario via AJAX
-            // Por ahora, mostraremos un mensaje simple
-            setTimeout(() => {
-                modalBody.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> 
-                        Funcionalidad de vista detallada en desarrollo.
-                        <br>ID de usuario: ${userId}
-                    </div>
-                `;
-            }, 500);
+            // Cargar detalles del usuario via AJAX
+            fetch(`/api/users/details?id=${userId}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    return response.text().then(text => {
+                        console.log('Response text:', text);
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('JSON parse error:', e);
+                            throw new Error('Invalid JSON response: ' + text);
+                        }
+                    });
+                })
+                .then(data => {
+                    console.log('Parsed data:', data);
+                    if (data.success) {
+                        const user = data.user;
+                        modalBody.innerHTML = `
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <div class="user-avatar-large mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                                        ${user.nombre_completo.charAt(0).toUpperCase()}
+                                    </div>
+                                    <h5 class="mb-1">${user.nombre_completo}</h5>
+                                    <p class="text-muted mb-3">@${user.nombre_usuario}</p>
+                                    <span class="badge ${user.estado_tipo_id == 1 ? 'bg-success' : 'bg-secondary'} role-badge">
+                                        ${user.estado || 'Sin estado'}
+                                    </span>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-person-badge"></i> Información Personal</h6>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>RUT:</strong></div>
+                                        <div class="col-sm-8">${user.rut || 'No especificado'}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Email:</strong></div>
+                                        <div class="col-sm-8">${user.email}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Teléfono:</strong></div>
+                                        <div class="col-sm-8">${user.telefono || 'No especificado'}</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4"><strong>Dirección:</strong></div>
+                                        <div class="col-sm-8">${user.direccion || 'No especificada'}</div>
+                                    </div>
+                                    
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-shield-check"></i> Información del Sistema</h6>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Rol:</strong></div>
+                                        <div class="col-sm-8">
+                                            <span class="badge bg-primary role-badge">${user.rol}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Fecha de Registro:</strong></div>
+                                        <div class="col-sm-8">${new Date(user.fecha_Creado).toLocaleDateString('es-ES')}</div>
+                                    </div>
+                                    ${user.fecha_inicio ? `
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Fecha de Inicio:</strong></div>
+                                        <div class="col-sm-8">${new Date(user.fecha_inicio).toLocaleDateString('es-ES')}</div>
+                                    </div>
+                                    ` : ''}
+                                    ${user.fecha_termino ? `
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Fecha de Término:</strong></div>
+                                        <div class="col-sm-8">${new Date(user.fecha_termino).toLocaleDateString('es-ES')}</div>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="editUser(${userId})">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="changePassword(${userId})">
+                                    <i class="bi bi-key"></i> Cambiar Contraseña
+                                </button>
+                                <button type="button" class="btn ${user.estado_tipo_id == 1 ? 'btn-outline-secondary' : 'btn-outline-success'} btn-sm" 
+                                        onclick="toggleUserStatus(${userId}, ${user.estado_tipo_id})">
+                                    <i class="bi bi-power"></i> ${user.estado_tipo_id == 1 ? 'Desactivar' : 'Activar'}
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        modalBody.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Error al cargar los detalles del usuario: ${data.message || 'Error desconocido'}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    modalBody.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Error de conexión: ${error.message}
+                        </div>
+                    `;
+                });
         }
 
         function deleteUser(userId, userName) {
@@ -407,6 +543,84 @@ use App\Helpers\Security;
             a.download = `usuarios_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
+        }
+
+        function editUser(userId) {
+            window.location.href = `/users/edit?id=${userId}`;
+        }
+
+        function changePassword(userId) {
+            const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+            document.getElementById('passwordUserId').value = userId;
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            modal.show();
+        }
+
+        function toggleUserStatus(userId, currentStatus) {
+            const action = currentStatus == 1 ? 'desactivar' : 'activar';
+            
+            if (confirm(`¿Estás seguro de que deseas ${action} este usuario?`)) {
+                const formData = new FormData();
+                formData.append('user_id', userId);
+                formData.append('new_status', currentStatus == 1 ? 2 : 1);
+                
+                fetch('/users/toggle-status', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al cambiar el estado del usuario: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al servidor');
+                });
+            }
+        }
+
+        function savePassword() {
+            const userId = document.getElementById('passwordUserId').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('new_password', newPassword);
+            
+            fetch('/users/change-password', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
+                    modal.hide();
+                    alert('Contraseña cambiada exitosamente');
+                } else {
+                    alert('Error al cambiar la contraseña: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error de conexión al servidor');
+            });
         }
 
         // Auto-hide alerts after 5 seconds

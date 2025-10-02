@@ -102,6 +102,14 @@ try {
                     $controller->delete();
                     break;
                     
+                case 'toggle-status':
+                    $controller->toggleStatus();
+                    break;
+                    
+                case 'change-password':
+                    $controller->changePassword();
+                    break;
+                    
                 case '':
                 default:
                     $controller->index();
@@ -346,9 +354,28 @@ try {
 
         case 'api':
             // Rutas API
-            if ($action === 'users' && isset($parts[2]) && $parts[2] === 'validate') {
+            if ($action === 'users') {
                 $controller = new UserController();
-                $controller->validateField();
+                if (isset($parts[2])) {
+                    switch ($parts[2]) {
+                        case 'validate':
+                            $controller->validateField();
+                            break;
+                        case 'details':
+                            $controller->getUserDetails();
+                            break;
+                        default:
+                            http_response_code(404);
+                            echo json_encode(['error' => 'API endpoint not found']);
+                    }
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'API endpoint not found']);
+                }
+            } elseif ($action === 'user-check') {
+                // Ruta para validaciones de usuario (usada en create.php)
+                $controller = new UserController();
+                $controller->validateUserCheck();
             } else {
                 http_response_code(404);
                 echo json_encode(['error' => 'API endpoint not found']);

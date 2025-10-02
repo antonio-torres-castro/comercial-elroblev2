@@ -212,4 +212,34 @@ class User
             return false;
         }
     }
+
+    /**
+     * Actualizar estado del usuario
+     */
+    public function updateStatus(int $id, int $status): bool
+    {
+        try {
+            $sql = "UPDATE usuarios SET estado_tipo_id = ?, fecha_modificacion = NOW() WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$status, $id]);
+        } catch (PDOException $e) {
+            error_log("Error en User::updateStatus: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualizar contraseña del usuario
+     */
+    public function updatePassword(int $id, string $hashedPassword): bool
+    {
+        try {
+            $sql = "UPDATE usuarios SET clave_hash = ?, fecha_modificacion = NOW() WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$hashedPassword, $id]);
+        } catch (PDOException $e) {
+            error_log("Error en User::updatePassword: " . $e->getMessage());
+            return false;
+        }
+    }
 }

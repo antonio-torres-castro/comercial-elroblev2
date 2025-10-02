@@ -369,12 +369,29 @@ class UserController
                 return;
             }
 
+            $userToEdit = null;
+            if ($id) {
+                $userToEdit = $this->userModel->getById((int)$id);
+                if (!$userToEdit) {
+                    http_response_code(404);
+                    echo $this->renderError('Usuario no encontrado');
+                    return;
+                }
+            }
+
+            // Obtener datos necesarios para el formulario
+            $userTypes = $this->getUserTypes();
+            $estadosTipo = $this->getEstadosTipo();
+
             // Datos para la vista
             $data = [
                 'user' => $currentUser,
-                'title' => 'Gestión de Usuario',
-                'subtitle' => $id ? "Editando usuario #$id" : 'Nuevo usuario',
-                'user_id' => $id
+                'title' => $id ? 'Editar Usuario' : 'Nuevo Usuario',
+                'subtitle' => $id ? "Editando usuario: {$userToEdit['nombre_completo']}" : 'Crear nuevo usuario en el sistema',
+                'user_id' => $id,
+                'user' => $userToEdit,
+                'userTypes' => $userTypes,
+                'estadosTipo' => $estadosTipo
             ];
 
             require_once __DIR__ . '/../Views/users/form.php';
@@ -421,20 +438,23 @@ class UserController
                 return;
             }
 
-            // Obtener tipos de usuario para el select
+            // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
+            $estadosTipo = $this->getEstadosTipo();
 
             $data = [
                 'user' => $currentUser,
-                'userToEdit' => $userToEdit,
-                'userTypes' => $userTypes,
                 'title' => 'Editar Usuario',
                 'subtitle' => "Editando usuario: {$userToEdit['nombre_completo']}",
+                'user_id' => $id,
+                'user' => $userToEdit,
+                'userTypes' => $userTypes,
+                'estadosTipo' => $estadosTipo,
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
             ];
 
-            require_once __DIR__ . '/../Views/users/edit.php';
+            require_once __DIR__ . '/../Views/users/form.php';
 
         } catch (Exception $e) {
             error_log("Error en UserController::edit: " . $e->getMessage());
@@ -627,6 +647,136 @@ class UserController
     }
 
     /**
+     * API: Obtener detalles de un usuario
+     */
+    public function getUserDetails()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                return;
+            }
+
+            $userId = (int)($_GET['id'] ?? 0);
+            if (!$userId) {
+                echo json_encode(['success' => false, 'message' => 'ID de usuario requerido']);
+                return;
+            }
+
+            $user = $this->userModel->getById($userId);
+            if (!$user) {
+                echo json_encode(['success' => false, 'message' => 'Usuario no encontrado']);
+                return;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'user' => $user
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en UserController::getUserDetails: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+        }
+    }
+
+    /**
+     * Cambiar estado de usuario (activar/desactivar)
+     */
+    public function toggleStatus()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                return;
+            }
+
+            $userId = (int)($_POST['user_id'] ?? 0);
+            $newStatus = (int)($_POST['new_status'] ?? 0);
+
+            if (!$userId || !in_array($newStatus, [1, 2])) {
+                echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
+                return;
+            }
+
+            // No permitir desactivar el propio usuario
+            if ($userId == $currentUser['id']) {
+                echo json_encode(['success' => false, 'message' => 'No puedes cambiar tu propio estado']);
+                return;
+            }
+
+            $success = $this->userModel->updateStatus($userId, $newStatus);
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => 'Estado actualizado correctamente']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Error al actualizar el estado']);
+            }
+        } catch (Exception $e) {
+            error_log("Error en UserController::toggleStatus: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+        }
+    }
+
+    /**
+     * Cambiar contraseña de usuario
+     */
+    public function changePassword()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                return;
+            }
+
+            $userId = (int)($_POST['user_id'] ?? 0);
+            $newPassword = $_POST['new_password'] ?? '';
+
+            if (!$userId || strlen($newPassword) < 6) {
+                echo json_encode(['success' => false, 'message' => 'Datos inválidos o contraseña muy corta']);
+                return;
+            }
+
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $success = $this->userModel->updatePassword($userId, $hashedPassword);
+
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => 'Contraseña actualizada correctamente']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Error al actualizar la contraseña']);
+            }
+        } catch (Exception $e) {
+            error_log("Error en UserController::changePassword: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+        }
+    }
+
+    /**
      * Renderizar página de error
      */
     private function renderError(string $message): string
@@ -657,5 +807,65 @@ class UserController
             </div>
         </body>
         </html>';
+    }
+
+    /**
+     * API: Validar campos de usuario (para create.php)
+     */
+    public function validateUserCheck()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['valid' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            $type = $_GET['type'] ?? '';
+            $value = $_GET['value'] ?? '';
+
+            $isValid = true;
+            $message = '';
+
+            switch ($type) {
+                case 'email':
+                    if (Security::validateEmail($value)) {
+                        $isValid = $this->isEmailAvailable($value);
+                        $message = $isValid ? 'Email disponible' : 'Email ya registrado';
+                    } else {
+                        $isValid = false;
+                        $message = 'Email inválido';
+                    }
+                    break;
+
+                case 'username':
+                    $isValid = $this->isUsernameAvailable($value);
+                    $message = $isValid ? 'Nombre de usuario disponible' : 'Nombre de usuario ya existe';
+                    break;
+
+                case 'rut':
+                    $isValid = Security::validateRut($value);
+                    $message = $isValid ? 'RUT válido' : 'RUT inválido';
+                    if ($isValid) {
+                        $isValid = $this->isRutAvailable($value);
+                        $message = $isValid ? 'RUT disponible' : 'RUT ya registrado';
+                    }
+                    break;
+
+                default:
+                    $isValid = false;
+                    $message = 'Tipo de validación no válido';
+            }
+
+            echo json_encode([
+                'valid' => $isValid,
+                'message' => $message
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en UserController::validateUserCheck: " . $e->getMessage());
+            echo json_encode(['valid' => false, 'message' => 'Error de validación']);
+        }
     }
 }
