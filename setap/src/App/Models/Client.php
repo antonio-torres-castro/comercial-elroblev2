@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Database\Database;
+use App\Config\Database;
 use PDO;
 use Exception;
 
@@ -13,7 +13,7 @@ class Client
 
     public function __construct()
     {
-        $this->db = Database::getInstance()->getConnection();
+        $this->db = Database::getInstance();
     }
 
     /**
@@ -56,7 +56,6 @@ class Client
             $stmt->execute($params);
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (Exception $e) {
             error_log("Error en Client::getAll: " . $e->getMessage());
             throw new Exception("Error al obtener la lista de clientes");
@@ -83,7 +82,6 @@ class Client
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
-
         } catch (Exception $e) {
             error_log("Error en Client::find: " . $e->getMessage());
             throw new Exception("Error al obtener el cliente");
@@ -118,7 +116,6 @@ class Client
             ]);
 
             return (int) $this->db->lastInsertId();
-
         } catch (Exception $e) {
             error_log("Error en Client::create: " . $e->getMessage());
             throw new Exception("Error al crear el cliente");
@@ -161,7 +158,6 @@ class Client
             ]);
 
             return $result && $stmt->rowCount() > 0;
-
         } catch (Exception $e) {
             error_log("Error en Client::update: " . $e->getMessage());
             throw new Exception("Error al actualizar el cliente");
@@ -196,7 +192,6 @@ class Client
             }
 
             return $result && $stmt->rowCount() > 0;
-
         } catch (Exception $e) {
             error_log("Error en Client::delete: " . $e->getMessage());
             throw $e;
@@ -221,7 +216,6 @@ class Client
             $stmt->execute($params);
 
             return $stmt->rowCount() > 0;
-
         } catch (Exception $e) {
             error_log("Error en Client::rutExists: " . $e->getMessage());
             return false;
@@ -252,7 +246,6 @@ class Client
             $stmt->execute([$clientId]);
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (Exception $e) {
             error_log("Error en Client::getCounterparties: " . $e->getMessage());
             throw new Exception("Error al obtener las contrapartes del cliente");
@@ -282,7 +275,6 @@ class Client
             ]);
 
             return (int) $this->db->lastInsertId();
-
         } catch (Exception $e) {
             error_log("Error en Client::addCounterpartie: " . $e->getMessage());
             throw new Exception("Error al agregar la contraparte");
@@ -300,7 +292,6 @@ class Client
             $stmt->execute([$clientId]);
 
             return $stmt->fetchColumn() > 0;
-
         } catch (Exception $e) {
             error_log("Error en Client::hasAssociatedProjects: " . $e->getMessage());
             return false;
@@ -322,7 +313,6 @@ class Client
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$clientId]);
-
         } catch (Exception $e) {
             error_log("Error en Client::deactivateCounterparties: " . $e->getMessage());
         }
@@ -339,7 +329,6 @@ class Client
             $stmt->execute();
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (Exception $e) {
             error_log("Error en Client::getStatusTypes: " . $e->getMessage());
             return [];
@@ -353,7 +342,7 @@ class Client
     {
         // Limpiar el RUT
         $rut = preg_replace('/[^0-9kK]/', '', $rut);
-        
+
         if (strlen($rut) < 2) {
             return false;
         }
@@ -371,7 +360,7 @@ class Client
         }
 
         $expectedDv = 11 - ($sum % 11);
-        
+
         if ($expectedDv == 11) $expectedDv = '0';
         elseif ($expectedDv == 10) $expectedDv = 'K';
         else $expectedDv = strval($expectedDv);
@@ -385,7 +374,7 @@ class Client
     public function formatRut(string $rut): string
     {
         $rut = preg_replace('/[^0-9kK]/', '', $rut);
-        
+
         if (strlen($rut) < 2) {
             return $rut;
         }
