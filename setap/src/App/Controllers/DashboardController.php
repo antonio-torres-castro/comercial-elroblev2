@@ -40,7 +40,7 @@ class DashboardController
                 'stats' => $this->getDashboardStats($currentUser)
             ];
             
-            require_once __DIR__ . '/../Views/dashboard.php';
+            require_once __DIR__ . '/../Views/home.php';
             
         } catch (Exception $e) {
             error_log("Error en DashboardController::index: " . $e->getMessage());
