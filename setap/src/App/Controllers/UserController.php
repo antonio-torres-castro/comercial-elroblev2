@@ -33,7 +33,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -68,7 +68,7 @@ class UserController
 
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -97,7 +97,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -154,7 +154,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['valid' => false, 'message' => 'No autorizado']);
@@ -285,7 +285,7 @@ class UserController
     private function getUserTypes(): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre FROM usuario_tipos WHERE estado_tipo_id = 1 ORDER BY nombre");
+            $stmt = $this->db->prepare("SELECT id, nombre FROM usuario_tipos ORDER BY id");
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {
@@ -297,7 +297,7 @@ class UserController
     private function getEstadosTipo(): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre FROM estado_tipos ORDER BY nombre");
+            $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM estado_tipos WHERE id in (1, 2, 3, 4) ORDER BY id");
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {
@@ -356,7 +356,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -395,7 +395,6 @@ class UserController
             ];
 
             require_once __DIR__ . '/../Views/users/form.php';
-
         } catch (Exception $e) {
             error_log("Error en UserController::show: " . $e->getMessage());
             http_response_code(500);
@@ -410,7 +409,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -425,7 +424,7 @@ class UserController
 
             // Obtener ID del parámetro GET si no se pasó como argumento
             $id = $id ?: (int)($_GET['id'] ?? 0);
-            
+
             if ($id <= 0) {
                 Security::redirect('/users?error=ID de usuario inválido');
                 return;
@@ -455,7 +454,6 @@ class UserController
             ];
 
             require_once __DIR__ . '/../Views/users/form.php';
-
         } catch (Exception $e) {
             error_log("Error en UserController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -470,7 +468,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -518,7 +516,6 @@ class UserController
             } else {
                 Security::redirect("/users/edit?id={$id}&error=Error al actualizar el usuario");
             }
-
         } catch (Exception $e) {
             error_log("Error en UserController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
@@ -533,7 +530,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -569,7 +566,6 @@ class UserController
             } else {
                 Security::redirect('/users?error=Error al eliminar el usuario');
             }
-
         } catch (Exception $e) {
             error_log("Error en UserController::delete: " . $e->getMessage());
             Security::redirect('/users?error=Error interno del servidor');
@@ -635,7 +631,7 @@ class UserController
         if (!Security::isAuthenticated()) {
             return null;
         }
-        
+
         return [
             'id' => $_SESSION['user_id'],
             'username' => $_SESSION['username'],
@@ -653,7 +649,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'message' => 'No autorizado']);
@@ -695,7 +691,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'message' => 'No autorizado']);
@@ -741,7 +737,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'message' => 'No autorizado']);
@@ -816,7 +812,7 @@ class UserController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['valid' => false, 'message' => 'No autorizado']);

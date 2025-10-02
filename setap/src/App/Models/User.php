@@ -30,7 +30,7 @@ class User
                 FROM usuarios u 
                 INNER JOIN personas p ON u.persona_id = p.id 
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
-                LEFT JOIN estado_tipos et ON u.estado_tipo_id = et.id
+                INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id /*siempre tiene un estado el registro*/
                 ORDER BY u.fecha_Creado DESC
             ";
 
@@ -135,10 +135,12 @@ class User
         try {
             $sql = "
                 SELECT u.*, p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
-                       ut.nombre as rol
+                ut.nombre as rol,
+                et.nombre as estado /*atributo de estado desplegado al usuario*/
                 FROM usuarios u 
                 INNER JOIN personas p ON u.persona_id = p.id 
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
+                INNER JOIN estado_tipos et ON et.Id = u.estado_tipo_id /* Siempre tiene un estado */
                 WHERE u.id = ?
             ";
 

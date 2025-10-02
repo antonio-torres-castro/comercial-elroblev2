@@ -20,7 +20,7 @@ class PersonaController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-        
+
         $this->personaModel = new Persona();
         $this->permissionService = new PermissionService();
         $this->db = Database::getInstance();
@@ -33,7 +33,7 @@ class PersonaController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -48,11 +48,11 @@ class PersonaController
 
             // Aplicar filtros si están presentes
             $filters = [];
-            
+
             if (!empty($_GET['estado_tipo_id'])) {
                 $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
             }
-            
+
             if (!empty($_GET['search'])) {
                 $filters['search'] = $_GET['search'];
             }
@@ -69,7 +69,6 @@ class PersonaController
                 'success' => $_GET['success'] ?? '',
                 'error' => $_GET['error'] ?? ''
             ]);
-
         } catch (Exception $e) {
             error_log("Error en PersonaController::index: " . $e->getMessage());
             http_response_code(500);
@@ -84,7 +83,7 @@ class PersonaController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -103,7 +102,6 @@ class PersonaController
                 'estadosTipo' => $estadosTipo,
                 'error' => $_GET['error'] ?? ''
             ]);
-
         } catch (Exception $e) {
             error_log("Error en PersonaController::create: " . $e->getMessage());
             http_response_code(500);
@@ -118,7 +116,7 @@ class PersonaController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -143,7 +141,7 @@ class PersonaController
             }
 
             $errors = $this->validatePersonaData($_POST);
-            
+
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/personas/create?error=" . urlencode($errorMsg));
@@ -159,13 +157,13 @@ class PersonaController
             ];
 
             $personaId = $this->personaModel->create($personaData);
-            
+
             if ($personaId) {
                 Security::logSecurityEvent('persona_created', [
                     'persona_id' => $personaId,
                     'created_by' => $_SESSION['username']
                 ]);
-                
+
                 Security::redirect('/personas?success=Persona creada correctamente');
             } else {
                 Security::redirect('/personas/create?error=Error al crear persona');
@@ -183,7 +181,7 @@ class PersonaController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -197,7 +195,7 @@ class PersonaController
             }
 
             $id = (int)($_GET['id'] ?? 0);
-            
+
             if ($id <= 0) {
                 Security::redirect('/personas?error=ID de persona inválido');
                 return;
@@ -216,7 +214,6 @@ class PersonaController
                 'estadosTipo' => $estadosTipo,
                 'error' => $_GET['error'] ?? ''
             ]);
-
         } catch (Exception $e) {
             error_log("Error en PersonaController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -231,7 +228,7 @@ class PersonaController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -250,7 +247,7 @@ class PersonaController
             }
 
             $id = (int)($_POST['id'] ?? 0);
-            
+
             if ($id <= 0) {
                 Security::redirect('/personas?error=ID de persona inválido');
                 return;
@@ -263,7 +260,7 @@ class PersonaController
             }
 
             $errors = $this->validatePersonaData($_POST, $id);
-            
+
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/personas/edit?id={$id}&error=" . urlencode($errorMsg));
@@ -283,7 +280,7 @@ class PersonaController
                     'persona_id' => $id,
                     'updated_by' => $_SESSION['username']
                 ]);
-                
+
                 Security::redirect('/personas?success=Persona actualizada correctamente');
             } else {
                 Security::redirect("/personas/edit?id={$id}&error=Error al actualizar persona");
@@ -302,7 +299,7 @@ class PersonaController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['error' => 'No autenticado']);
@@ -323,7 +320,7 @@ class PersonaController
             }
 
             $id = (int)($_POST['id'] ?? 0);
-            
+
             if ($id <= 0) {
                 http_response_code(400);
                 echo json_encode(['error' => 'ID de persona inválido']);
@@ -342,7 +339,7 @@ class PersonaController
                     'persona_id' => $id,
                     'deleted_by' => $_SESSION['username']
                 ]);
-                
+
                 Security::redirect('/personas?success=Persona eliminada correctamente');
             } else {
                 Security::redirect('/personas?error=No se pudo eliminar la persona. Puede estar siendo utilizada en otros registros');
@@ -360,7 +357,7 @@ class PersonaController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 Security::redirect('/login');
                 return;
@@ -382,7 +379,6 @@ class PersonaController
                 Security::redirect('/personas/create');
                 return;
             }
-
         } catch (Exception $e) {
             error_log("Error en PersonaController::show: " . $e->getMessage());
             http_response_code(500);
@@ -439,11 +435,7 @@ class PersonaController
     private function getEstadosTipo(): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT id, nombre, descripcion 
-                FROM estado_tipos 
-                WHERE id IN (1, 2, 3) 
-                ORDER BY id
+            $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM estado_tipos WHERE id IN (1, 2, 3, 4) ORDER BY id
             ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -467,7 +459,7 @@ class PersonaController
         if (!Security::isAuthenticated()) {
             return null;
         }
-        
+
         return [
             'id' => $_SESSION['user_id'],
             'username' => $_SESSION['username'],

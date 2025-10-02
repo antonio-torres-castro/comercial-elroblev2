@@ -1,8 +1,10 @@
 <?php
+
 use App\Helpers\Security;
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +23,7 @@ use App\Helpers\Security;
             color: white;
             font-weight: bold;
         }
+
         .user-avatar-large {
             background: linear-gradient(45deg, #007bff, #0056b3);
             border-radius: 50%;
@@ -30,18 +33,22 @@ use App\Helpers\Security;
             color: white;
             font-weight: bold;
         }
+
         .role-badge {
             font-size: 0.75rem;
             padding: 0.25em 0.5em;
         }
+
         .table-actions {
             white-space: nowrap;
         }
+
         .search-box {
             max-width: 300px;
         }
     </style>
 </head>
+
 <body class="bg-light">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -110,8 +117,8 @@ use App\Helpers\Security;
                 <div class="row align-items-center">
                     <div class="col-md-4">
                         <div class="input-group search-box">
-                            <input type="text" class="form-control" id="searchInput" 
-                                   placeholder="Buscar usuarios...">
+                            <input type="text" class="form-control" id="searchInput"
+                                placeholder="Buscar usuarios...">
                             <button class="btn btn-outline-secondary" type="button">
                                 <i class="bi bi-search"></i>
                             </button>
@@ -120,9 +127,9 @@ use App\Helpers\Security;
                     <div class="col-md-3">
                         <select class="form-select" id="roleFilter">
                             <option value="">Todos los roles</option>
-                            <?php 
+                            <?php
                             $uniqueRoles = array_unique(array_column($users, 'rol'));
-                            foreach ($uniqueRoles as $role): 
+                            foreach ($uniqueRoles as $role):
                             ?>
                                 <option value="<?= htmlspecialchars($role) ?>">
                                     <?= htmlspecialchars(ucfirst($role)) ?>
@@ -202,7 +209,7 @@ use App\Helpers\Security;
                                         </td>
                                         <td>
                                             <?php
-                                            $badgeClass = match($user['rol']) {
+                                            $badgeClass = match ($user['rol']) {
                                                 'admin' => 'bg-danger',
                                                 'planner' => 'bg-primary',
                                                 'supervisor' => 'bg-warning text-dark',
@@ -232,30 +239,30 @@ use App\Helpers\Security;
                                         <td class="table-actions">
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <?php if (Security::hasPermission('Read')): ?>
-                                                    <button type="button" class="btn btn-outline-info" 
-                                                            onclick="viewUser(<?= $user['id'] ?>)"
-                                                            title="Ver detalles">
+                                                    <button type="button" class="btn btn-outline-info"
+                                                        onclick="viewUser(<?= $user['id'] ?>)"
+                                                        title="Ver detalles">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
                                                 <?php endif; ?>
-                                                
+
                                                 <?php if (Security::hasPermission('Modify')): ?>
-                                                    <a href="/users/edit?id=<?= $user['id'] ?>" 
-                                                       class="btn btn-outline-warning"
-                                                       title="Editar">
+                                                    <a href="/users/edit?id=<?= $user['id'] ?>"
+                                                        class="btn btn-outline-warning"
+                                                        title="Editar">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
-                                                    <a href="/users/permissions?user_id=<?= $user['id'] ?>" 
-                                                       class="btn btn-outline-secondary"
-                                                       title="Permisos">
+                                                    <a href="/users/permissions?user_id=<?= $user['id'] ?>"
+                                                        class="btn btn-outline-secondary"
+                                                        title="Permisos">
                                                         <i class="bi bi-shield-lock"></i>
                                                     </a>
                                                 <?php endif; ?>
-                                                
+
                                                 <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
-                                                    <button type="button" class="btn btn-outline-danger" 
-                                                            onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
-                                                            title="Eliminar">
+                                                    <button type="button" class="btn btn-outline-danger"
+                                                        onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
+                                                        title="Eliminar">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 <?php endif; ?>
@@ -326,13 +333,13 @@ use App\Helpers\Security;
                         <input type="hidden" id="passwordUserId">
                         <div class="mb-3">
                             <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="newPassword" 
-                                   placeholder="Mínimo 6 caracteres" minlength="6" required>
+                            <input type="password" class="form-control" id="newPassword"
+                                placeholder="Mínimo 6 caracteres" minlength="6" required>
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                            <input type="password" class="form-control" id="confirmPassword" 
-                                   placeholder="Repite la nueva contraseña" minlength="6" required>
+                            <input type="password" class="form-control" id="confirmPassword"
+                                placeholder="Repite la nueva contraseña" minlength="6" required>
                         </div>
                     </form>
                 </div>
@@ -381,10 +388,10 @@ use App\Helpers\Security;
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 const role = row.querySelector('.role-badge').textContent.toLowerCase();
-                
+
                 const matchesSearch = searchTerm === '' || text.includes(searchTerm);
                 const matchesRole = roleFilter === '' || role.includes(roleFilter.toLowerCase());
-                
+
                 row.style.display = matchesSearch && matchesRole ? '' : 'none';
             });
         }
@@ -392,10 +399,10 @@ use App\Helpers\Security;
         function viewUser(userId) {
             const modal = new bootstrap.Modal(document.getElementById('userModal'));
             const modalBody = document.getElementById('userModalBody');
-            
+
             modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
             modal.show();
-            
+
             // Cargar detalles del usuario via AJAX
             fetch(`/api/users/details?id=${userId}`)
                 .then(response => {
@@ -423,7 +430,7 @@ use App\Helpers\Security;
                                     </div>
                                     <h5 class="mb-1">${user.nombre_completo}</h5>
                                     <p class="text-muted mb-3">@${user.nombre_usuario}</p>
-                                    <span class="badge ${user.estado_tipo_id == 1 ? 'bg-success' : 'bg-secondary'} role-badge">
+                                    <span class="badge ${user.estado_tipo_id == 2 ? 'bg-success' : 'bg-secondary'} role-badge">
                                         ${user.estado || 'Sin estado'}
                                     </span>
                                 </div>
@@ -508,7 +515,7 @@ use App\Helpers\Security;
         function deleteUser(userId, userName) {
             document.getElementById('deleteUserName').textContent = userName;
             document.getElementById('deleteUserId').value = userId;
-            
+
             const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();
         }
@@ -516,15 +523,15 @@ use App\Helpers\Security;
         function exportToCSV() {
             const table = document.getElementById('usersTable');
             const rows = Array.from(table.querySelectorAll('tr:not([style*="display: none"])'));
-            
+
             let csv = [];
-            
+
             // Headers
             const headers = Array.from(rows[0].querySelectorAll('th'))
                 .slice(0, -1) // Excluir columna de acciones
                 .map(th => th.textContent.trim());
             csv.push(headers.join(','));
-            
+
             // Data rows
             rows.slice(1).forEach(row => {
                 if (row.dataset.userId) {
@@ -534,9 +541,11 @@ use App\Helpers\Security;
                     csv.push(cells.join(','));
                 }
             });
-            
+
             // Download
-            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const blob = new Blob([csv.join('\n')], {
+                type: 'text/csv'
+            });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -559,28 +568,28 @@ use App\Helpers\Security;
 
         function toggleUserStatus(userId, currentStatus) {
             const action = currentStatus == 1 ? 'desactivar' : 'activar';
-            
+
             if (confirm(`¿Estás seguro de que deseas ${action} este usuario?`)) {
                 const formData = new FormData();
                 formData.append('user_id', userId);
                 formData.append('new_status', currentStatus == 1 ? 2 : 1);
-                
+
                 fetch('/users/toggle-status', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error al cambiar el estado del usuario: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error de conexión al servidor');
-                });
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error al cambiar el estado del usuario: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error de conexión al servidor');
+                    });
             }
         }
 
@@ -588,39 +597,39 @@ use App\Helpers\Security;
             const userId = document.getElementById('passwordUserId').value;
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
+
             if (newPassword.length < 6) {
                 alert('La contraseña debe tener al menos 6 caracteres');
                 return;
             }
-            
+
             if (newPassword !== confirmPassword) {
                 alert('Las contraseñas no coinciden');
                 return;
             }
-            
+
             const formData = new FormData();
             formData.append('user_id', userId);
             formData.append('new_password', newPassword);
-            
+
             fetch('/users/change-password', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
-                    modal.hide();
-                    alert('Contraseña cambiada exitosamente');
-                } else {
-                    alert('Error al cambiar la contraseña: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error de conexión al servidor');
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
+                        modal.hide();
+                        alert('Contraseña cambiada exitosamente');
+                    } else {
+                        alert('Error al cambiar la contraseña: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al servidor');
+                });
         }
 
         // Auto-hide alerts after 5 seconds
@@ -633,4 +642,5 @@ use App\Helpers\Security;
         }, 5000);
     </script>
 </body>
+
 </html>
