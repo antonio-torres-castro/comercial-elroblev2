@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -53,18 +55,18 @@
                                         <div class="col-md-8">
                                             <!-- Información básica de la tarea -->
                                             <h6 class="border-bottom pb-2 mb-3">Información de la Tarea</h6>
-                                            
+
                                             <div class="mb-3">
                                                 <label for="nombre" class="form-label">Nombre de la Tarea <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                                <input type="text" class="form-control" id="nombre" name="nombre"
                                                     value="<?= htmlspecialchars($data['task']['nombre'] ?? '') ?>" required>
                                             </div>
-                                            
+
                                             <div class="mb-3">
                                                 <label for="descripcion" class="form-label">Descripción</label>
                                                 <textarea class="form-control" id="descripcion" name="descripcion" rows="4"><?= htmlspecialchars($data['task']['descripcion'] ?? '') ?></textarea>
                                             </div>
-                                            
+
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
@@ -73,7 +75,7 @@
                                                             <option value="">Seleccionar proyecto</option>
                                                             <?php if (!empty($data['projects'])): ?>
                                                                 <?php foreach ($data['projects'] as $project): ?>
-                                                                    <option value="<?= $project['id'] ?>" 
+                                                                    <option value="<?= $project['id'] ?>"
                                                                         <?= (isset($data['task']['proyecto_id']) && $data['task']['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
                                                                         <?= htmlspecialchars($project['cliente_nombre']) ?>
                                                                     </option>
@@ -82,7 +84,7 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="text-danger">*</span></label>
@@ -90,7 +92,7 @@
                                                             <option value="">Seleccionar tipo</option>
                                                             <?php if (!empty($data['taskTypes'])): ?>
                                                                 <?php foreach ($data['taskTypes'] as $type): ?>
-                                                                    <option value="<?= $type['id'] ?>" 
+                                                                    <option value="<?= $type['id'] ?>"
                                                                         <?= (isset($data['task']['tarea_tipo_id']) && $data['task']['tarea_tipo_id'] == $type['id']) ? 'selected' : '' ?>>
                                                                         <?= htmlspecialchars($type['nombre']) ?>
                                                                     </option>
@@ -100,25 +102,25 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
-                                                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
                                                             value="<?= $data['task']['fecha_inicio'] ?? '' ?>">
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="fecha_fin" class="form-label">Fecha de Fin</label>
-                                                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
                                                             value="<?= $data['task']['fecha_fin'] ?? '' ?>">
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
@@ -127,7 +129,7 @@
                                                             <option value="">Sin asignar</option>
                                                             <?php if (!empty($data['users'])): ?>
                                                                 <?php foreach ($data['users'] as $user): ?>
-                                                                    <option value="<?= $user['id'] ?>" 
+                                                                    <option value="<?= $user['id'] ?>"
                                                                         <?= (isset($data['task']['usuario_id']) && $data['task']['usuario_id'] == $user['id']) ? 'selected' : '' ?>>
                                                                         <?= htmlspecialchars($user['nombre_usuario']) ?>
                                                                     </option>
@@ -136,16 +138,16 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="estado_tipo_id" class="form-label">Estado</label>
                                                         <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                                             <?php if (!empty($data['taskStates'])): ?>
                                                                 <?php foreach ($data['taskStates'] as $state): ?>
-                                                                    <option value="<?= $state['id'] ?>" 
-                                                                        <?= (isset($data['task']['estado_tipo_id']) && $data['task']['estado_tipo_id'] == $state['id']) ? 'selected' : 
-                                                                        (!isset($data['task']) && $state['id'] == 2) ? 'selected' : '' ?>>
+                                                                    <option value="<?= $state['id'] ?>"
+                                                                        <?= ((isset($data['task']['estado_tipo_id']) && $data['task']['estado_tipo_id'] == $state['id']) ||
+                                                                            (!isset($data['task']) && $state['id'] == 2)) ? 'selected' : '' ?>>
                                                                         <?= htmlspecialchars($state['nombre']) ?>
                                                                     </option>
                                                                 <?php endforeach; ?>
@@ -155,7 +157,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="col-md-4">
                                             <!-- Instrucciones -->
                                             <div class="card">
@@ -170,16 +172,16 @@
                                                             <li>Proyecto</li>
                                                             <li>Tipo de Tarea</li>
                                                         </ul>
-                                                        
+
                                                         <p><strong>Asignación:</strong></p>
                                                         <p>Puedes asignar la tarea a un usuario específico o dejarla sin asignar para asignarla más tarde.</p>
-                                                        
+
                                                         <p><strong>Fechas:</strong></p>
                                                         <p>Las fechas son opcionales. Si no se especifican, se pueden agregar posteriormente.</p>
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <?php if ($data['task_id']): ?>
                                                 <!-- Información del sistema -->
                                                 <div class="card mt-3">
@@ -190,7 +192,7 @@
                                                         <div class="row g-2">
                                                             <div class="col-sm-4"><strong>Creada:</strong></div>
                                                             <div class="col-sm-8"><?= date('d/m/Y H:i', strtotime($data['task']['fecha_Creado'])) ?></div>
-                                                        
+
                                                             <?php if (!empty($data['task']['fecha_modificacion'])): ?>
                                                                 <div class="col-sm-4"><strong>Modificada:</strong></div>
                                                                 <div class="col-sm-8"><?= date('d/m/Y H:i', strtotime($data['task']['fecha_modificacion'])) ?></div>
@@ -199,13 +201,13 @@
                                                     </div>
                                                 </div>
                                             <?php endif; ?>
-                                            
+
                                             <!-- Acciones -->
                                             <div class="card mt-3">
                                                 <div class="card-body">
                                                     <div class="d-grid gap-2">
                                                         <button type="submit" class="btn btn-success">
-                                                            <i class="bi bi-check-lg"></i> 
+                                                            <i class="bi bi-check-lg"></i>
                                                             <?= $data['task_id'] ? 'Actualizar Tarea' : 'Crear Tarea' ?>
                                                         </button>
                                                         <a href="/tasks" class="btn btn-secondary">
@@ -217,37 +219,37 @@
                                         </div>
                                     </div>
                                 </form>
-                                
+
                                 <script>
                                     // Validación de fechas
                                     document.getElementById('fecha_fin').addEventListener('change', function() {
                                         const fechaInicio = document.getElementById('fecha_inicio').value;
                                         const fechaFin = this.value;
-                                        
+
                                         if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
                                             alert('La fecha de fin no puede ser anterior a la fecha de inicio');
                                             this.value = '';
                                         }
                                     });
-                                    
+
                                     // Validación del formulario
                                     document.getElementById('taskForm').addEventListener('submit', function(e) {
                                         const nombre = document.getElementById('nombre').value.trim();
                                         const proyectoId = document.getElementById('proyecto_id').value;
                                         const tareaTipoId = document.getElementById('tarea_tipo_id').value;
-                                        
+
                                         if (!nombre) {
                                             e.preventDefault();
                                             alert('El nombre de la tarea es obligatorio');
                                             return;
                                         }
-                                        
+
                                         if (!proyectoId) {
                                             e.preventDefault();
                                             alert('Debe seleccionar un proyecto');
                                             return;
                                         }
-                                        
+
                                         if (!tareaTipoId) {
                                             e.preventDefault();
                                             alert('Debe seleccionar un tipo de tarea');
@@ -265,4 +267,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
