@@ -73,26 +73,47 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="nombre" class="form-label">Nombre *</label>
+                                                <label for="nombre" class="form-label">Nombre interno *</label>
                                                 <input type="text" class="form-control" id="nombre" name="nombre" 
                                                        value="<?= htmlspecialchars($data['menu']['nombre'] ?? '') ?>" 
-                                                       required maxlength="255">
-                                                <div class="form-text">Nombre que aparecerá en el menú</div>
+                                                       required maxlength="150">
+                                                <div class="form-text">Nombre interno del sistema (ej: manage_users)</div>
                                             </div>
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="url" class="form-label">URL *</label>
-                                                <input type="text" class="form-control" id="url" name="url" 
-                                                       value="<?= htmlspecialchars($data['menu']['url'] ?? '') ?>" 
-                                                       required maxlength="255">
-                                                <div class="form-text">Ruta del menú (ej: /users, /projects)</div>
+                                                <label for="display" class="form-label">Título de visualización *</label>
+                                                <input type="text" class="form-control" id="display" name="display" 
+                                                       value="<?= htmlspecialchars($data['menu']['display'] ?? '') ?>" 
+                                                       required maxlength="150">
+                                                <div class="form-text">Nombre que verá el usuario (ej: Usuarios)</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="row">
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <label for="descripcion" class="form-label">Descripción</label>
+                                                <textarea class="form-control" id="descripcion" name="descripcion" 
+                                                          maxlength="300" rows="3"><?= htmlspecialchars($data['menu']['descripcion'] ?? '') ?></textarea>
+                                                <div class="form-text">Descripción de las funcionalidades (opcional)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="url" class="form-label">URL *</label>
+                                                <input type="text" class="form-control" id="url" name="url" 
+                                                       value="<?= htmlspecialchars($data['menu']['url'] ?? '') ?>" 
+                                                       required maxlength="100">
+                                                <div class="form-text">Ruta relativa del menú (ej: /users, /projects)</div>
+                                            </div>
+                                        </div>
+                                        
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="icono" class="form-label">Icono</label>
@@ -134,22 +155,7 @@
                                                         <?php endforeach; ?>
                                                     <?php endif; ?>
                                                 </select>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="display" class="form-label">Visibilidad</label>
-                                                <select class="form-select" id="display" name="display">
-                                                    <option value="1" <?= ((isset($data['menu']['display']) && $data['menu']['display'] == 1) || 
-                                                                        (!isset($data['menu']))) ? 'selected' : '' ?>>
-                                                        Visible
-                                                    </option>
-                                                    <option value="0" <?= (isset($data['menu']['display']) && $data['menu']['display'] == 0) ? 'selected' : '' ?>>
-                                                        Oculto
-                                                    </option>
-                                                </select>
-                                                <div class="form-text">¿Debe mostrarse en el menú?</div>
+                                                <div class="form-text">Estado del menú (activo = visible en el sistema)</div>
                                             </div>
                                         </div>
                                     </div>
@@ -193,34 +199,37 @@
         // Validaciones del formulario
         document.getElementById('menuForm').addEventListener('submit', function(e) {
             const nombre = document.getElementById('nombre').value.trim();
+            const display = document.getElementById('display').value.trim();
             const url = document.getElementById('url').value.trim();
             const orden = document.getElementById('orden').value;
 
             if (!nombre) {
                 e.preventDefault();
-                alert('El nombre es requerido');
-                document.getElementById('nombre').focus();
+                alert('El nombre interno es requerido');
+                return;
+            }
+
+            if (!display) {
+                e.preventDefault();
+                alert('El título de visualización es requerido');
                 return;
             }
 
             if (!url) {
                 e.preventDefault();
                 alert('La URL es requerida');
-                document.getElementById('url').focus();
                 return;
             }
 
             if (!url.startsWith('/')) {
                 e.preventDefault();
                 alert('La URL debe comenzar con "/"');
-                document.getElementById('url').focus();
                 return;
             }
 
             if (!orden || orden < 1) {
                 e.preventDefault();
-                alert('El orden debe ser mayor a 0');
-                document.getElementById('orden').focus();
+                alert('El orden debe ser un número mayor a 0');
                 return;
             }
         });

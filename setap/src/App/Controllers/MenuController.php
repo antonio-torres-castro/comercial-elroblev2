@@ -401,17 +401,21 @@ class MenuController
             $db = Database::getInstance();
 
             $sql = "SELECT 
-                        id,
-                        nombre,
-                        url,
-                        icono,
-                        orden,
-                        estado_tipo_id,
-                        fecha_creacion,
-                        fecha_modificacion,
-                        display
-                    FROM menu 
-                    ORDER BY orden ASC, nombre ASC";
+                        m.id,
+                        m.nombre,
+                        m.descripcion,
+                        m.url,
+                        m.icono,
+                        m.orden,
+                        m.estado_tipo_id,
+                        m.fecha_creacion,
+                        m.fecha_modificacion,
+                        m.display,
+                        et.nombre as estado_nombre
+                    FROM menu m
+                    LEFT JOIN estado_tipos et ON m.estado_tipo_id = et.id
+                    WHERE m.estado_tipo_id != 4
+                    ORDER BY m.orden ASC, m.nombre ASC";
 
             $stmt = $db->prepare($sql);
             $stmt->execute();
@@ -434,6 +438,7 @@ class MenuController
             $sql = "SELECT 
                         id,
                         nombre,
+                        descripcion,
                         url,
                         icono,
                         orden,
@@ -507,15 +512,22 @@ class MenuController
         // Nombre requerido
         if (empty(trim($data['nombre'] ?? ''))) {
             $errors[] = 'El nombre es requerido';
-        } elseif (strlen($data['nombre']) > 255) {
-            $errors[] = 'El nombre no puede exceder 255 caracteres';
+        } elseif (strlen($data['nombre']) > 150) {
+            $errors[] = 'El nombre no puede exceder 150 caracteres';
+        }
+
+        // Display requerido
+        if (empty(trim($data['display'] ?? ''))) {
+            $errors[] = 'El título de visualización es requerido';
+        } elseif (strlen($data['display']) > 150) {
+            $errors[] = 'El título de visualización no puede exceder 150 caracteres';
         }
 
         // URL requerida
         if (empty(trim($data['url'] ?? ''))) {
             $errors[] = 'La URL es requerida';
-        } elseif (strlen($data['url']) > 255) {
-            $errors[] = 'La URL no puede exceder 255 caracteres';
+        } elseif (strlen($data['url']) > 100) {
+            $errors[] = 'La URL no puede exceder 100 caracteres';
         } elseif (!str_starts_with($data['url'], '/')) {
             $errors[] = 'La URL debe comenzar con "/"';
         }
@@ -538,6 +550,11 @@ class MenuController
         // Estado válido
         if (!empty($data['estado_tipo_id']) && !is_numeric($data['estado_tipo_id'])) {
             $errors[] = 'Estado inválido';
+        }
+
+        // Descripción opcional pero validar longitud
+        if (!empty($data['descripcion']) && strlen($data['descripcion']) > 300) {
+            $errors[] = 'La descripción no puede exceder 300 caracteres';
         }
 
         return $errors;
@@ -577,17 +594,18 @@ class MenuController
         try {
             $db = Database::getInstance();
 
-            $sql = "INSERT INTO menu (nombre, url, icono, orden, estado_tipo_id, display, fecha_creacion) 
-                    VALUES (:nombre, :url, :icono, :orden, :estado_tipo_id, :display, NOW())";
+            $sql = "INSERT INTO menu (nombre, descripcion, url, icono, orden, estado_tipo_id, display, fecha_creacion) 
+                    VALUES (:nombre, :descripcion, :url, :icono, :orden, :estado_tipo_id, :display, NOW())";
 
             $stmt = $db->prepare($sql);
             $stmt->execute([
                 ':nombre' => trim($data['nombre']),
+                ':descripcion' => trim($data['descripcion'] ?? ''),
                 ':url' => trim($data['url']),
                 ':icono' => trim($data['icono'] ?? ''),
                 ':orden' => (int)$data['orden'],
                 ':estado_tipo_id' => (int)($data['estado_tipo_id'] ?? 2),
-                ':display' => (int)($data['display'] ?? 1)
+                ':display' => trim($data['display'])
             ]);
 
             return $db->lastInsertId();
@@ -607,6 +625,7 @@ class MenuController
 
             $sql = "UPDATE menu 
                     SET nombre = :nombre, 
+                        descripcion = :descripcion,
                         url = :url, 
                         icono = :icono, 
                         orden = :orden, 
@@ -618,11 +637,12 @@ class MenuController
             $stmt = $db->prepare($sql);
             return $stmt->execute([
                 ':nombre' => trim($data['nombre']),
+                ':descripcion' => trim($data['descripcion'] ?? ''),
                 ':url' => trim($data['url']),
                 ':icono' => trim($data['icono'] ?? ''),
                 ':orden' => (int)$data['orden'],
                 ':estado_tipo_id' => (int)($data['estado_tipo_id'] ?? 2),
-                ':display' => (int)($data['display'] ?? 1),
+                ':display' => trim($data['display']),
                 ':id' => $id
             ]);
         } catch (Exception $e) {

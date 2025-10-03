@@ -102,7 +102,8 @@
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>Icono</th>
-                                                    <th>Nombre</th>
+                                                    <th>Nombre interno</th>
+                                                    <th>Título visible</th>
                                                     <th>URL</th>
                                                     <th>Orden</th>
                                                     <th>Estado</th>
@@ -121,6 +122,12 @@
                                                         </td>
                                                         <td>
                                                             <strong><?php echo htmlspecialchars($menu['nombre']); ?></strong>
+                                                            <?php if (!empty($menu['descripcion'])): ?>
+                                                                <br><small class="text-muted"><?php echo htmlspecialchars(substr($menu['descripcion'], 0, 50)); ?><?php echo strlen($menu['descripcion']) > 50 ? '...' : ''; ?></small>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-primary"><?php echo htmlspecialchars($menu['display'] ?? 'Sin título'); ?></span>
                                                         </td>
                                                         <td>
                                                             <code><?php echo htmlspecialchars($menu['url']); ?></code>
@@ -253,7 +260,8 @@
                 <div class="row">
                     <div class="col-md-6">
                         <strong>ID:</strong> ${menu.id}<br>
-                        <strong>Nombre:</strong> ${menu.nombre}<br>
+                        <strong>Nombre interno:</strong> ${menu.nombre}<br>
+                        <strong>Título visible:</strong> <span class="badge bg-primary">${menu.display || 'Sin título'}</span><br>
                         <strong>URL:</strong> <code>${menu.url}</code><br>
                         <strong>Orden:</strong> ${menu.orden}
                     </div>
@@ -264,6 +272,7 @@
                         <strong>Actualizado:</strong> ${menu.fecha_modificacion ? new Date(menu.fecha_modificacion).toLocaleDateString('es-ES') : 'N/A'}
                     </div>
                 </div>
+                ${menu.descripcion ? `<div class="row mt-3"><div class="col-12"><strong>Descripción:</strong><br><p class="mb-0">${menu.descripcion}</p></div></div>` : ''}
             `;
             
             document.getElementById('menuDetailsContent').innerHTML = content;
