@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $data['title']; ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -35,7 +35,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/task" class="btn btn-sm btn-primary">
+                        <a href="/task" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Nueva Tarea
                         </a>
                     </div>
@@ -50,7 +50,7 @@
                         </h2>
                     </div>
                     <div class="col-md-6 text-end">
-                        <a href="/tasks/create" class="btn btn-primary">
+                        <a href="/tasks/create" class="btn btn-setap-primary">
                             <i class="bi bi-plus-lg"></i> Nueva Tarea
                         </a>
                     </div>
@@ -105,7 +105,7 @@
                                         </select>
                                     </div>
                                     <div class="col-md-3 d-flex align-items-end">
-                                        <button type="submit" class="btn btn-outline-primary me-2">
+                                        <button type="submit" class="btn btn-outline-setap-primary me-2">
                                             <i class="bi bi-search"></i> Filtrar
                                         </button>
                                         <a href="/tasks" class="btn btn-outline-secondary">
@@ -188,7 +188,7 @@
                                                                 <a href="/tasks/show/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
-                                                                <a href="/tasks/edit/<?= $task['id'] ?>" class="btn btn-outline-primary" title="Editar">
+                                                                <a href="/tasks/edit/<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
                                                                 <button type="button" class="btn btn-outline-danger" 
@@ -211,7 +211,7 @@
                                     <i class="bi bi-inbox display-1 text-muted"></i>
                                     <h4 class="mt-3">No hay tareas registradas</h4>
                                     <p class="text-muted">Comienza creando tu primera tarea.</p>
-                                    <a href="/tasks/create" class="btn btn-primary">
+                                    <a href="/tasks/create" class="btn btn-setap-primary">
                                         <i class="bi bi-plus-lg"></i> Crear Primera Tarea
                                     </a>
                                 </div>

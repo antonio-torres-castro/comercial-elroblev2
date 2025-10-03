@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto - <?= htmlspecialchars($project['cliente_nombre']) ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .stat-card {
             border-left: 4px solid;
@@ -52,7 +53,7 @@
 </head>
 <body class="bg-light">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -217,7 +218,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><i class="bi bi-list-task"></i> Tareas del Proyecto</h5>
-                        <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-primary">
+                        <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus"></i> Nueva Tarea
                         </a>
                     </div>
@@ -227,7 +228,7 @@
                                 <i class="bi bi-list-task display-3 text-muted"></i>
                                 <h5 class="mt-3">No hay tareas asignadas</h5>
                                 <p class="text-muted">Comienza agregando tareas a este proyecto.</p>
-                                <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-primary">
+                                <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-setap-primary">
                                     <i class="bi bi-plus"></i> Crear Primera Tarea
                                 </a>
                             </div>
@@ -275,7 +276,7 @@
                                                 <?= htmlspecialchars($task['estado_nombre']) ?>
                                             </span>
                                             <div class="mt-2">
-                                                <a href="/tasks/show?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                                <a href="/tasks/show?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline-setap-primary">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                             </div>
@@ -343,7 +344,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-outline-primary">
+                            <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
                                 <i class="bi bi-plus-circle"></i> Agregar Tarea
                             </a>
                             <a href="/projects/report?id=<?= $project['id'] ?>" class="btn btn-outline-info">
@@ -389,7 +390,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Cambiar Estado</button>
+                        <button type="submit" class="btn btn-setap-primary">Cambiar Estado</button>
                     </div>
                 </form>
             </div>

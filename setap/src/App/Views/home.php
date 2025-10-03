@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .navbar-brand {
             font-weight: bold;
@@ -14,7 +15,7 @@
 
         .sidebar {
             min-height: calc(100vh - 56px);
-            background-color: #f8f9fa;
+            background-color: var(--setap-bg-light);
             position: relative;
             overflow-y: auto;
         }
@@ -78,18 +79,18 @@
         }
 
         .nav-link {
-            color: #495057;
+            color: var(--setap-text-primary);
             padding: 0.75rem 1rem;
         }
 
         .nav-link:hover {
-            background-color: #e9ecef;
-            color: #007bff;
+            background-color: rgba(127, 25, 51, 0.1);
+            color: var(--setap-primary);
         }
 
         .nav-link.active {
-            background-color: #007bff;
-            color: white;
+            background-color: var(--setap-primary);
+            color: var(--setap-text-light);
         }
 
         .stats-card {
@@ -108,7 +109,7 @@
     use App\Helpers\Security; ?>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container-fluid">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-building"></i> SETAP
@@ -218,7 +219,7 @@
                         <div class="col-md-3 mb-3">
                             <div class="card stats-card h-100 border-0 shadow-sm">
                                 <div class="card-body text-center">
-                                    <div class="text-primary mb-2">
+                                    <div class="text-setap-primary mb-2">
                                         <i class="bi bi-people" style="font-size: 2rem;"></i>
                                     </div>
                                     <h3 class="mb-0"><?php echo $homeData['stats']['total_usuarios']; ?></h3>
@@ -271,7 +272,7 @@
                         <div class="card border-0 shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title">
-                                    <i class="bi bi-house-door text-primary"></i>
+                                    <i class="bi bi-house-door text-setap-primary"></i>
                                     Bienvenido, <?php echo htmlspecialchars($homeData['user']['nombre_completo'] ?? $homeData['user']['username']); ?>
                                 </h5>
                                 <p class="card-text">
@@ -282,7 +283,7 @@
                                 <div class="row mt-3">
                                     <?php if (Security::hasMenuAccess('users')): ?>
                                         <div class="col-md-6 mb-2">
-                                            <a href="/users" class="btn btn-outline-primary w-100">
+                                            <a href="/users" class="btn btn-outline-setap-primary w-100">
                                                 <i class="bi bi-people"></i> Gestionar Usuarios
                                             </a>
                                         </div>
@@ -290,7 +291,7 @@
 
                                     <?php if (Security::hasMenuAccess('projects')): ?>
                                         <div class="col-md-6 mb-2">
-                                            <a href="/projects" class="btn btn-outline-success w-100">
+                                            <a href="/projects" class="btn btn-outline-setap-primary w-100">
                                                 <i class="bi bi-briefcase"></i> Ver Proyectos
                                             </a>
                                         </div>

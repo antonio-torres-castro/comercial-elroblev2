@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Proyectos - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .project-card {
             transition: transform 0.2s;
@@ -25,7 +26,7 @@
 </head>
 <body class="bg-light">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -62,7 +63,7 @@
                 </h2>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/projects/create" class="btn btn-primary">
+                <a href="/projects/create" class="btn btn-setap-primary">
                     <i class="bi bi-plus-circle"></i> Nuevo Proyecto
                 </a>
                 <a href="/projects/search" class="btn btn-outline-secondary">
@@ -125,7 +126,7 @@
                                value="<?= htmlspecialchars($filters['fecha_hasta'] ?? '') ?>">
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary me-2">
+                        <button type="submit" class="btn btn-setap-primary me-2">
                             <i class="bi bi-funnel"></i> Filtrar
                         </button>
                         <a href="/projects" class="btn btn-outline-secondary">
@@ -143,7 +144,7 @@
                     <i class="bi bi-folder-x display-1 text-muted"></i>
                     <h4 class="mt-3">No hay proyectos</h4>
                     <p class="text-muted">No se encontraron proyectos con los filtros seleccionados.</p>
-                    <a href="/projects/create" class="btn btn-primary">
+                    <a href="/projects/create" class="btn btn-setap-primary">
                         <i class="bi bi-plus-circle"></i> Crear Primer Proyecto
                     </a>
                 </div>
@@ -220,7 +221,7 @@
                                     </small>
                                     <div class="btn-group btn-group-sm">
                                         <a href="/projects/show?id=<?= $project['id'] ?>" 
-                                           class="btn btn-outline-primary"
+                                           class="btn btn-outline-setap-primary"
                                            onclick="event.stopPropagation()">
                                             <i class="bi bi-eye"></i>
                                         </a>

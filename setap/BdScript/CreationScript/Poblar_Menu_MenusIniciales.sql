@@ -31,7 +31,7 @@ Select 6, 'manage_perfil', 'Administrar perfil usuario', '20250926', null, 2, '/
 union
 Select 7, 'manage_users', 'Administrar usuarios', '20250926', null, 2, '/users', 'people', 7, 'Usuarios'
 union
-Select 8, 'manage_user', 'Administrar usuario', '20250926', null, 2, '/user', 'people-plus', 8, 'Usuario'
+Select 8, 'manage_user', 'Administrar usuario', '20250926', null, 2, '/user', 'person-plus', 8, 'Usuario'
 union
 /*Administrar clientes*/
 Select 9, 'manage_clients', 'Administrar clientes', '20250926', null, 2, '/clients', 'building', 9, 'Clientes'

@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Personas - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .stats-card {
             border-left: 4px solid #007bff;
@@ -26,7 +27,7 @@
     <?php use App\Helpers\Security; ?>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -63,7 +64,7 @@
                 </h2>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/personas/create" class="btn btn-primary">
+                <a href="/personas/create" class="btn btn-setap-primary">
                     <i class="bi bi-plus-circle"></i> Nueva Persona
                 </a>
             </div>
@@ -174,7 +175,7 @@
                     </div>
                     <div class="col-md-5">
                         <div class="btn-group">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-setap-primary">
                                 <i class="bi bi-search"></i> Buscar
                             </button>
                             <a href="/personas" class="btn btn-outline-secondary">
@@ -196,14 +197,14 @@
                     <div class="text-center py-4">
                         <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
                         <p class="text-muted mt-2">No se encontraron personas.</p>
-                        <a href="/personas/create" class="btn btn-primary">
+                        <a href="/personas/create" class="btn btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Crear Primera Persona
                         </a>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead class="table-dark">
+                            <thead class="table-setap-primary">
                                 <tr>
                                     <th>ID</th>
                                     <th>RUT</th>
@@ -257,7 +258,7 @@
                                     <td>
                                         <div class="btn-group btn-group-sm">
                                             <a href="/personas/edit?id=<?= (int)$persona['id'] ?>" 
-                                               class="btn btn-outline-primary" title="Editar">
+                                               class="btn btn-outline-setap-primary" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <button type="button" class="btn btn-outline-danger" 

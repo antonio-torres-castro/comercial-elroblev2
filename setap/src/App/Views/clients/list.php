@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($data['title']); ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 </head>
 <body>
@@ -16,7 +16,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/client" class="btn btn-sm btn-primary">
+                        <a href="/client" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Nuevo Cliente
                         </a>
                     </div>
@@ -78,7 +78,7 @@
                             <div class="col-md-2">
                                 <label class="form-label">&nbsp;</label>
                                 <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" class="btn btn-setap-primary">
                                         <i class="bi bi-search"></i> Buscar
                                     </button>
                                     <a href="/clients" class="btn btn-outline-secondary">
@@ -104,7 +104,7 @@
                         <?php else: ?>
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover" id="clientsTable">
-                                    <thead class="table-dark">
+                                    <thead class="table-setap-primary">
                                         <tr>
                                             <th>RUT</th>
                                             <th>Razón Social</th>
@@ -173,7 +173,7 @@
                                                 <td>
                                                     <div class="btn-group btn-group-sm" role="group">
                                                         <a href="/client/<?php echo $client['id']; ?>" 
-                                                           class="btn btn-outline-primary" title="Editar">
+                                                           class="btn btn-outline-setap-primary" title="Editar">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
                                                         <button type="button" class="btn btn-outline-danger" 

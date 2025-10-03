@@ -10,7 +10,8 @@ use App\Helpers\Security;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .user-avatar {
             width: 40px;
@@ -51,7 +52,7 @@ use App\Helpers\Security;
 
 <body class="bg-light">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -89,7 +90,7 @@ use App\Helpers\Security;
             </div>
             <div class="col-md-6 text-end">
                 <?php if (Security::hasPermission('Create')): ?>
-                    <a href="/users/create" class="btn btn-primary">
+                    <a href="/users/create" class="btn btn-setap-primary">
                         <i class="bi bi-person-plus"></i> Nuevo Usuario
                     </a>
                 <?php endif; ?>
@@ -161,7 +162,7 @@ use App\Helpers\Security;
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover" id="usersTable">
-                        <thead class="table-dark">
+                        <thead class="table-setap-primary">
                             <tr>
                                 <th>Usuario</th>
                                 <th>Información Personal</th>
@@ -345,7 +346,7 @@ use App\Helpers\Security;
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="savePassword()">Cambiar Contraseña</button>
+                    <button type="button" class="btn btn-setap-primary" onclick="savePassword()">Cambiar Contraseña</button>
                 </div>
             </div>
         </div>
@@ -480,7 +481,7 @@ use App\Helpers\Security;
                             </div>
                             <hr>
                             <div class="d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="editUser(${userId})">
+                                <button type="button" class="btn btn-outline-setap-primary btn-sm" onclick="editUser(${userId})">
                                     <i class="bi bi-pencil"></i> Editar
                                 </button>
                                 <button type="button" class="btn btn-outline-warning btn-sm" onclick="changePassword(${userId})">

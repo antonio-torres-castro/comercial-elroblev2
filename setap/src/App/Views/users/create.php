@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Usuario - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .form-check-input:checked {
             background-color: #0d6efd;
@@ -51,7 +52,7 @@
     use App\Helpers\Security; ?>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -206,7 +207,7 @@
                                         <a href="/users" class="btn btn-secondary me-md-2">
                                             <i class="bi bi-arrow-left"></i> Cancelar
                                         </a>
-                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <button type="submit" class="btn btn-setap-primary" id="submitBtn">
                                             <i class="bi bi-check-lg"></i> Crear Usuario
                                         </button>
                                     </div>

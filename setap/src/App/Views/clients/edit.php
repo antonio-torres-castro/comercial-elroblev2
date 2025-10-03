@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($data['title']); ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
@@ -142,7 +142,7 @@
                                         <a href="/clients" class="btn btn-secondary">
                                             <i class="bi bi-x-circle"></i> Cancelar
                                         </a>
-                                        <button type="submit" class="btn btn-primary">
+                                        <button type="submit" class="btn btn-setap-primary">
                                             <i class="bi bi-floppy"></i> Actualizar Cliente
                                         </button>
                                     </div>
@@ -154,7 +154,7 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><i class="bi bi-people"></i> Personas de Contacto</h5>
-                                <button type="button" class="btn btn-sm btn-primary" onclick="addCounterpartie()">
+                                <button type="button" class="btn btn-sm btn-setap-primary" onclick="addCounterpartie()">
                                     <i class="bi bi-person-plus"></i> Agregar Contacto
                                 </button>
                             </div>
@@ -217,7 +217,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="btn-group btn-group-sm">
-                                                                <button type="button" class="btn btn-outline-primary" 
+                                                                <button type="button" class="btn btn-outline-setap-primary" 
                                                                         onclick="editCounterpartie(<?php echo $cp['id']; ?>)" 
                                                                         title="Editar">
                                                                     <i class="bi bi-pencil"></i>

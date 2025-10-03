@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Denegado - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-5">
@@ -28,7 +28,7 @@
                             Si crees que esto es un error, contacta al administrador del sistema.
                         </p>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <a href="/home" class="btn btn-primary">
+                            <a href="/home" class="btn btn-setap-primary">
                                 <i class="bi bi-house"></i> Ir al Home
                             </a>
                             <a href="javascript:history.back()" class="btn btn-secondary">

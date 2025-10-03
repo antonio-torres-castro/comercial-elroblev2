@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $data['title']; ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -68,7 +68,7 @@
                                         <input type="email" class="form-control" value="<?php echo htmlspecialchars($data['user']['email']); ?>" disabled>
                                     </div>
                                     <div class="col-12">
-                                        <button type="submit" class="btn btn-primary" disabled>
+                                        <button type="submit" class="btn btn-setap-primary" disabled>
                                             <i class="bi bi-save"></i> Guardar Cambios
                                         </button>
                                     </div>

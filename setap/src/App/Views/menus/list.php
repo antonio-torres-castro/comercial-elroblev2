@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $data['title']; ?> - SETAP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .sidebar {
             min-height: calc(100vh - 56px);
@@ -43,7 +44,7 @@
     <?php use App\Helpers\Security; ?>
     
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-setap">
         <div class="container">
             <a class="navbar-brand" href="/home">
                 <i class="bi bi-grid-3x3-gap"></i> SETAP
@@ -70,7 +71,7 @@
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <?php if (Security::hasPermission('Create') || Security::hasPermission('All')): ?>
-                            <a href="/menu" class="btn btn-sm btn-primary">
+                            <a href="/menu" class="btn btn-sm btn-setap-primary">
                                 <i class="bi bi-plus-circle"></i> Nuevo Menú
                             </a>
                         <?php endif; ?>
@@ -98,7 +99,7 @@
                                 <?php if (!empty($data['menus'])): ?>
                                     <div class="table-responsive">
                                         <table class="table table-hover table-striped">
-                                            <thead class="table-dark">
+                                            <thead class="table-setap-primary">
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>Icono</th>
@@ -166,7 +167,7 @@
                                                             <div class="btn-group btn-group-sm" role="group">
                                                                 <?php if (Security::hasPermission('Modify') || Security::hasPermission('All')): ?>
                                                                     <a href="/menu/<?php echo $menu['id']; ?>" 
-                                                                       class="btn btn-outline-primary btn-sm" 
+                                                                       class="btn btn-outline-setap-primary btn-sm" 
                                                                        title="Editar">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
