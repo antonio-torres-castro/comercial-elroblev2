@@ -48,16 +48,126 @@
                                 <h5 class="mb-0"><?php echo $data['subtitle']; ?></h5>
                             </div>
                             <div class="card-body">
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-tools"></i>
-                                    <strong>Formulario en Construcción</strong><br>
-                                    El formulario de gestión de menús está en desarrollo.
+                                <?php if (isset($data['errors']) && !empty($data['errors'])): ?>
+                                    <div class="alert alert-danger">
+                                        <ul class="mb-0">
+                                            <?php foreach ($data['errors'] as $error): ?>
+                                                <li><?= htmlspecialchars($error) ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (isset($data['success']) && $data['success']): ?>
+                                    <div class="alert alert-success">
+                                        <?= htmlspecialchars($data['success']) ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <form method="POST" action="<?= $data['menu_id'] ? '/menus/update/' . $data['menu_id'] : '/menus/store' ?>" id="menuForm">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                     <?php if ($data['menu_id']): ?>
-                                        <br>ID del menú a editar: <strong><?php echo $data['menu_id']; ?></strong>
-                                    <?php else: ?>
-                                        <br>Aquí podrás crear un nuevo menú.
+                                        <input type="hidden" name="id" value="<?= $data['menu_id'] ?>">
                                     <?php endif; ?>
-                                </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="nombre" class="form-label">Nombre *</label>
+                                                <input type="text" class="form-control" id="nombre" name="nombre" 
+                                                       value="<?= htmlspecialchars($data['menu']['nombre'] ?? '') ?>" 
+                                                       required maxlength="255">
+                                                <div class="form-text">Nombre que aparecerá en el menú</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="url" class="form-label">URL *</label>
+                                                <input type="text" class="form-control" id="url" name="url" 
+                                                       value="<?= htmlspecialchars($data['menu']['url'] ?? '') ?>" 
+                                                       required maxlength="255">
+                                                <div class="form-text">Ruta del menú (ej: /users, /projects)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="icono" class="form-label">Icono</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">
+                                                        <i class="bi bi-<?= htmlspecialchars($data['menu']['icono'] ?? 'circle') ?>" id="icon-preview"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control" id="icono" name="icono" 
+                                                           value="<?= htmlspecialchars($data['menu']['icono'] ?? '') ?>" 
+                                                           maxlength="50" placeholder="circle">
+                                                </div>
+                                                <div class="form-text">Icono de Bootstrap Icons (sin prefijo 'bi bi-')</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="orden" class="form-label">Orden *</label>
+                                                <input type="number" class="form-control" id="orden" name="orden" 
+                                                       value="<?= htmlspecialchars($data['menu']['orden'] ?? '1') ?>" 
+                                                       required min="1" max="999">
+                                                <div class="form-text">Orden de aparición en el menú</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="estado_tipo_id" class="form-label">Estado</label>
+                                                <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
+                                                    <?php if (!empty($data['estados'])): ?>
+                                                        <?php foreach ($data['estados'] as $estado): ?>
+                                                            <option value="<?= $estado['id'] ?>" 
+                                                                <?= ((isset($data['menu']['estado_tipo_id']) && $data['menu']['estado_tipo_id'] == $estado['id']) || 
+                                                                    (!isset($data['menu']) && $estado['id'] == 2)) ? 'selected' : '' ?>>
+                                                                <?= htmlspecialchars($estado['nombre']) ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="display" class="form-label">Visibilidad</label>
+                                                <select class="form-select" id="display" name="display">
+                                                    <option value="1" <?= ((isset($data['menu']['display']) && $data['menu']['display'] == 1) || 
+                                                                        (!isset($data['menu']))) ? 'selected' : '' ?>>
+                                                        Visible
+                                                    </option>
+                                                    <option value="0" <?= (isset($data['menu']['display']) && $data['menu']['display'] == 0) ? 'selected' : '' ?>>
+                                                        Oculto
+                                                    </option>
+                                                </select>
+                                                <div class="form-text">¿Debe mostrarse en el menú?</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-between">
+                                                <a href="/menus" class="btn btn-secondary">
+                                                    <i class="bi bi-arrow-left"></i> Cancelar
+                                                </a>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-save"></i> 
+                                                    <?= $data['menu_id'] ? 'Actualizar Menú' : 'Crear Menú' ?>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -67,5 +177,65 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Actualizar preview del icono
+        document.getElementById('icono').addEventListener('input', function() {
+            const iconInput = this.value.trim();
+            const iconPreview = document.getElementById('icon-preview');
+            
+            if (iconInput) {
+                iconPreview.className = `bi bi-${iconInput}`;
+            } else {
+                iconPreview.className = 'bi bi-circle';
+            }
+        });
+
+        // Validaciones del formulario
+        document.getElementById('menuForm').addEventListener('submit', function(e) {
+            const nombre = document.getElementById('nombre').value.trim();
+            const url = document.getElementById('url').value.trim();
+            const orden = document.getElementById('orden').value;
+
+            if (!nombre) {
+                e.preventDefault();
+                alert('El nombre es requerido');
+                document.getElementById('nombre').focus();
+                return;
+            }
+
+            if (!url) {
+                e.preventDefault();
+                alert('La URL es requerida');
+                document.getElementById('url').focus();
+                return;
+            }
+
+            if (!url.startsWith('/')) {
+                e.preventDefault();
+                alert('La URL debe comenzar con "/"');
+                document.getElementById('url').focus();
+                return;
+            }
+
+            if (!orden || orden < 1) {
+                e.preventDefault();
+                alert('El orden debe ser mayor a 0');
+                document.getElementById('orden').focus();
+                return;
+            }
+        });
+
+        // Auto-generar URL basado en nombre
+        document.getElementById('nombre').addEventListener('input', function() {
+            const urlField = document.getElementById('url');
+            
+            // Solo auto-generar si el campo URL está vacío
+            if (!urlField.value.trim()) {
+                const nombre = this.value.trim().toLowerCase();
+                const url = '/' + nombre.replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+                urlField.value = url;
+            }
+        });
+    </script>
 </body>
 </html>

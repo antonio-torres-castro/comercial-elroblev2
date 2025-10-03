@@ -87,6 +87,14 @@
                                 </span>
                             </div>
                             <div class="card-body">
+                                <?php if (isset($_SESSION['success_message'])): ?>
+                                    <div class="alert alert-success alert-dismissible fade show">
+                                        <?= htmlspecialchars($_SESSION['success_message']) ?>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    <?php unset($_SESSION['success_message']); ?>
+                                <?php endif; ?>
+                                
                                 <?php if (!empty($data['menus'])): ?>
                                     <div class="table-responsive">
                                         <table class="table table-hover table-striped">
@@ -172,6 +180,15 @@
                                                                             title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>"
                                                                             onclick="toggleMenuStatus(<?php echo $menu['id']; ?>, <?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>)">
                                                                         <i class="bi bi-<?php echo ($menu['estado_tipo_id'] == 2) ? 'toggle-on' : 'toggle-off'; ?>"></i>
+                                                                    </button>
+                                                                <?php endif; ?>
+                                                                
+                                                                <?php if (Security::hasPermission('Delete') || Security::hasPermission('All')): ?>
+                                                                    <button type="button" 
+                                                                            class="btn btn-outline-danger btn-sm" 
+                                                                            title="Eliminar"
+                                                                            onclick="deleteMenu(<?php echo $menu['id']; ?>)">
+                                                                        <i class="bi bi-trash"></i>
                                                                     </button>
                                                                 <?php endif; ?>
                                                             </div>
@@ -261,9 +278,62 @@
             const action = statusNames[newStatus] || 'cambiar estado de';
             
             if (confirm(`¿Está seguro que desea ${action} este menú?`)) {
-                // Aquí implementarías la llamada AJAX para cambiar el estado
-                // Por ahora solo mostramos una alerta
-                alert(`Funcionalidad de ${action} menú en desarrollo`);
+                // Obtener el token CSRF
+                const csrfToken = '<?= $_SESSION['csrf_token'] ?? '' ?>';
+                
+                // Crear formulario para envío
+                const formData = new FormData();
+                formData.append('id', menuId);
+                formData.append('status', newStatus);
+                formData.append('csrf_token', csrfToken);
+                
+                fetch('/menus/toggle-status', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recargar la página para mostrar los cambios
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'No se pudo cambiar el estado'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al cambiar el estado');
+                });
+            }
+        }
+
+        function deleteMenu(menuId) {
+            if (confirm('¿Está seguro que desea eliminar este menú? Esta acción no se puede deshacer.')) {
+                // Obtener el token CSRF
+                const csrfToken = '<?= $_SESSION['csrf_token'] ?? '' ?>';
+                
+                // Crear formulario para envío
+                const formData = new FormData();
+                formData.append('id', menuId);
+                formData.append('csrf_token', csrfToken);
+                
+                fetch('/menus/delete', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recargar la página para mostrar los cambios
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'No se pudo eliminar el menú'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al eliminar el menú');
+                });
             }
         }
 

@@ -182,16 +182,75 @@ try {
 
         case 'menus':
             $controller = new MenuController();
-            $controller->index();
+            
+            switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+                    
+                case 'edit':
+                    $controller->edit($id);
+                    break;
+                    
+                case 'update':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->update($id);
+                    } else {
+                        Security::redirect('/menus');
+                    }
+                    break;
+                    
+                case 'store':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        Security::redirect('/menus');
+                    }
+                    break;
+                    
+                case 'delete':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->delete();
+                    } else {
+                        Security::redirect('/menus');
+                    }
+                    break;
+                    
+                case 'toggle-status':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->toggleStatus();
+                    } else {
+                        Security::redirect('/menus');
+                    }
+                    break;
+                    
+                case '':
+                case null:
+                default:
+                    $controller->index();
+                    break;
+            }
             break;
 
         case 'menu':
             $controller = new MenuController();
             
-            if ($action) {
-                $controller->show((int)$action);
-            } else {
-                $controller->show();
+            switch ($action) {
+                case 'create':
+                    $controller->create();
+                    break;
+                    
+                default:
+                    if ($action) {
+                        $controller->edit($action);
+                    } else {
+                        $controller->create();
+                    }
+                    break;
             }
             break;
 
