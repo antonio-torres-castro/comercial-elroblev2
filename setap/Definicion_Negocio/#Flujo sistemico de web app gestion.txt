@@ -1,0 +1,38 @@
+#Flujo sistémico de web app gestión de tareas:
+
+##Definiciones contextuales:
+###Producto de Construcción: Entendemos por producto de construcción por ejemplo, como cualquier cosa que se debe construir, casa, jardín, piso de una casa, muro de una casa, mantención física de un colegio, mantención física de una oficina, Implementación de Software, Construcción de red eléctrica en una casa o edificio.
+###Servicio: Se entiende por ejemplo, como aseo de colegio, aseo de oficinas, soporte computacional, diseño de red eléctrica.Dentro de los servicios, existen servicios con  tareas recurrentes, es decir que la misma tarea se ejecuta mas de una vez durante el periodo del proyecto. Por ejemplo el servicio de aseo de un colegio tiene todas las semanas del periodo escolar (Marzo-Diciembre) limpieza de sala 1, sala 2, ..., sala N. A esta limpieza de la misma sala N en una fecha diferente dentro del periodo de un mismo proyecto, le llamamos tarea recurrente por que es la misma tarea, que tiene una repetición de su ejecución en varias fechas y que cada una de las fechas son una unidad mínima de servicio para un proyecto de aseo.
+
+##Axiomas:
+###Logica y flujo de creación de personas usuarios
+- Primero se crea una persona
+
+- Segundo se crea con esa persona:
+-- un usuario
+--- el usuario puede ser de la empresa propietaria del sistema, la que es una empresa de servicios/construcción. O puede ser un usuario de la empresa cliente. Estos usuarios nunca tienen cliente_id, por que son administrados por la empresa de servicio/construccion (servicio/producto).
+--- el usuario de la empresa propietaria del web app, puede ser:
+---- Adminisrador: admin
+---- Planificador: planner
+---- Supervisor: supervisor
+---- Ejecutor (de tareas): executor
+
+- Tercero
+-- Se crea el cliente.
+
+- Cuarto
+-- Se crean los cliente contrapartes
+
+- Quinto con personas creadas que no sean las mismas asociadas a la propietaria del web app.
+--- el usuario del cliente, puede ser:
+---- Cliente (persona que no este en cliente_contrapartes, pero que tiene el mismo Rut que la empresa): client
+---- Contraparte (asociado a una persona que trabaja para el cliente, estará siempre en la tabla cliente_contrapartes):counterparty
+
+###Logica y flujo de tareas.
+- Primero se puede crear un catalogo de tareas, donde se define un nombre estándar para una tarea común y posiblemente recurrente en un proyecto y entre proyectos. Por ejemplo: nombre: aseo a sala 1, descripcion: aseo a sala de numero uno del establecimiento, estado_tipo_id: 2, fecha_creado:2025-01-01, fecha modificación: null. Esta tarea puede ser usada en el Proyecto 1 del cliente A, Proyecto 2 del cliente A, Proyecto 3 del Cliente B, y así sucesivamente. Las tareas se deben poder crear directamente en el mantenedor de tareas, así como en el mantenedor de proyecto_tareas. La tarea puede crearse y no activarse de inmediato.
+- Segundo se crea un proyecto, el cual debe pertenecer a un cliente. Por lo que el cliente debe haberse creado primero. Y los contraparte se pueden configurar al momento de crear el proyecto o después antes de activar el proyecto.
+- Tercero todo proyecto tiene tareas, por lo que una vez creado el proyecto se pueden crear tareas indicando inmediatamente a que proyecto pertenecerá la tarea. El sistema debe ofrecer un auto completar que busque en el catalogo de taras (tabla tareas), luego si no existe la tarea que esta definiendo el usuario (nombre en tabla tareas), el sistema permitirá se defina el nombre y descripción de la tarea y antes de generar la tarea en el proyecto creara la tarea nueva en el catalogo de tareas, obtendrá su id (en tabla tareas) y recién con el id de la tarea grabara el registro en proyecto_tareas.
+- Cuarto la tarea puede asociarse al proyecto y no activarse de inmediato.
+- Las tareas para ser ejecutadas y/o registrarle eventos debe estar su estado_tipo_id en los siguientes valores o estados: 2: activo, 5: iniciado, 6: terminado, 7: rechazado, 8: aprobado (en este caso solo el usuario admin y planner puede hacerle cambios)
+
+
