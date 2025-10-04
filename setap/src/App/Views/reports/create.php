@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Reporte - SETAP</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/setap-theme.css">
@@ -14,18 +19,22 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
+
         .main-content {
             margin-top: 2rem;
         }
+
         .report-preview {
             background: #f8f9fa;
             border: 1px dashed #dee2e6;
@@ -38,7 +47,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
@@ -77,7 +88,7 @@
                         <!-- Configuración Básica -->
                         <div class="form-section">
                             <h5><i class="bi bi-gear"></i> Configuración Básica</h5>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -92,7 +103,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="report_format" class="form-label">Formato de Salida</label>
@@ -110,7 +121,7 @@
                         <!-- Filtros de Fecha -->
                         <div class="form-section">
                             <h5><i class="bi bi-calendar-range"></i> Período de Tiempo</h5>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -119,7 +130,7 @@
                                         <div class="form-text">Deje en blanco para incluir desde el inicio</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="date_to" class="form-label">Fecha Hasta</label>
@@ -145,7 +156,7 @@
                         <!-- Filtros Específicos -->
                         <div class="form-section">
                             <h5><i class="bi bi-funnel"></i> Filtros Específicos</h5>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -157,7 +168,7 @@
                                         <div class="form-text">Filtrar por un cliente específico</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="project_id" class="form-label">Proyecto Específico</label>
@@ -182,7 +193,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="include_details" class="form-label">Nivel de Detalle</label>
@@ -199,7 +210,7 @@
                         <!-- Vista Previa -->
                         <div class="form-section">
                             <h5><i class="bi bi-eye"></i> Vista Previa</h5>
-                            
+
                             <div class="report-preview" id="reportPreview">
                                 <i class="bi bi-file-text" style="font-size: 3rem;"></i>
                                 <p class="mt-3">Seleccione los parámetros del reporte para ver una vista previa</p>
@@ -226,8 +237,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <!-- Scripts Optimizados de SETAP -->
+    <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createReportForm');
@@ -245,7 +257,7 @@
             function validateDates() {
                 const dateFrom = document.getElementById('date_from').value;
                 const dateTo = document.getElementById('date_to').value;
-                
+
                 if (dateFrom && dateTo && dateFrom > dateTo) {
                     document.getElementById('date_to').setCustomValidity('La fecha hasta debe ser posterior a la fecha desde');
                     return false;
@@ -260,7 +272,7 @@
                 const selectedType = reportType.value;
                 const dateFrom = document.getElementById('date_from').value;
                 const dateTo = document.getElementById('date_to').value;
-                
+
                 if (selectedType) {
                     const typeNames = {
                         'projects_summary': 'Resumen de Proyectos',
@@ -269,11 +281,11 @@
                         'clients_summary': 'Resumen de Clientes',
                         'custom': 'Reporte Personalizado'
                     };
-                    
-                    const period = dateFrom && dateTo ? 
-                        `del ${dateFrom} al ${dateTo}` : 
+
+                    const period = dateFrom && dateTo ?
+                        `del ${dateFrom} al ${dateTo}` :
                         'de todo el período disponible';
-                    
+
                     reportPreview.innerHTML = `
                         <i class="bi bi-file-text text-setap-primary" style="font-size: 3rem;"></i>
                         <h6 class="mt-3">${typeNames[selectedType]}</h6>
@@ -330,7 +342,7 @@
                     alert('Debe seleccionar un tipo de reporte.');
                     return;
                 }
-                
+
                 alert('Funcionalidad de vista previa en desarrollo.');
             });
         });
@@ -340,10 +352,10 @@
             const today = new Date();
             const dateFrom = document.getElementById('date_from');
             const dateTo = document.getElementById('date_to');
-            
+
             dateTo.value = today.toISOString().split('T')[0];
-            
-            switch(period) {
+
+            switch (period) {
                 case 'today':
                     dateFrom.value = today.toISOString().split('T')[0];
                     break;
@@ -368,10 +380,11 @@
                     dateFrom.value = yearAgo.toISOString().split('T')[0];
                     break;
             }
-            
+
             // Disparar eventos para actualizar validación y vista previa
             dateFrom.dispatchEvent(new Event('change'));
         }
     </script>
 </body>
+
 </html>

@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Tarea - SETAP</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/setap-theme.css">
@@ -14,12 +19,14 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
@@ -27,7 +34,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -64,19 +73,19 @@
                     <!-- Información Básica -->
                     <div class="form-section">
                         <h5><i class="bi bi-info-circle"></i> Información de la Tarea</h5>
-                        
+
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Nombre de la Tarea <span class="required">*</span></label>
                             <input type="text" class="form-control" id="nombre" name="nombre" required
-                                   placeholder="Describe brevemente la tarea" maxlength="150"
-                                   value="<?= htmlspecialchars($data['task']['nombre'] ?? '') ?>">
+                                placeholder="Describe brevemente la tarea" maxlength="150"
+                                value="<?= htmlspecialchars($data['task']['nombre'] ?? '') ?>">
                         </div>
 
                         <div class="mb-3">
                             <label for="descripcion" class="form-label">Descripción</label>
                             <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                                      placeholder="Descripción detallada de la tarea (opcional)"
-                                      maxlength="500"><?= htmlspecialchars($data['task']['descripcion'] ?? '') ?></textarea>
+                                placeholder="Descripción detallada de la tarea (opcional)"
+                                maxlength="500"><?= htmlspecialchars($data['task']['descripcion'] ?? '') ?></textarea>
                             <div class="form-text">Campo opcional. Máximo 500 caracteres.</div>
                         </div>
 
@@ -97,7 +106,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
@@ -120,22 +129,22 @@
                     <!-- Planificación -->
                     <div class="form-section">
                         <h5><i class="bi bi-calendar"></i> Planificación</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
                                     <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
-                                           value="<?= $data['task']['fecha_inicio'] ?? '' ?>">
+                                        value="<?= $data['task']['fecha_inicio'] ?? '' ?>">
                                     <div class="form-text">Campo opcional</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="fecha_fin" class="form-label">Fecha de Fin</label>
                                     <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
-                                           value="<?= $data['task']['fecha_fin'] ?? '' ?>">
+                                        value="<?= $data['task']['fecha_fin'] ?? '' ?>">
                                     <div class="form-text">Campo opcional</div>
                                 </div>
                             </div>
@@ -145,7 +154,7 @@
                     <!-- Asignación -->
                     <div class="form-section">
                         <h5><i class="bi bi-person-check"></i> Asignación</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -164,7 +173,7 @@
                                     <div class="form-text">Campo opcional. Se puede asignar posteriormente.</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
@@ -199,8 +208,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <!-- Scripts Optimizados de SETAP -->
+    <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createTaskForm');
@@ -213,7 +223,7 @@
                 if (fechaInicio.value && fechaFin.value) {
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
-                    
+
                     if (fin < inicio) {
                         fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
                         return false;
@@ -273,7 +283,7 @@
                 // Mostrar indicador de carga
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
-                
+
                 // Deshabilitar otros elementos del formulario para evitar double-submit
                 const formElements = form.querySelectorAll('input, select, textarea, button');
                 formElements.forEach(element => {
@@ -285,4 +295,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Persona - SETAP</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/setap-theme.css">
@@ -14,12 +19,14 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
@@ -27,7 +34,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -65,24 +74,24 @@
                     <!-- Información Personal -->
                     <div class="form-section">
                         <h5><i class="bi bi-person"></i> Información Personal</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="rut" class="form-label">RUT <span class="required">*</span></label>
                                     <input type="text" class="form-control" id="rut" name="rut" required
-                                           value="<?= htmlspecialchars($persona['rut']) ?>"
-                                           placeholder="12.345.678-9" maxlength="20">
+                                        value="<?= htmlspecialchars($persona['rut']) ?>"
+                                        placeholder="12.345.678-9" maxlength="20">
                                     <div class="form-text">Formato: 12.345.678-9 o 12345678-9</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="nombre" class="form-label">Nombre Completo <span class="required">*</span></label>
                                     <input type="text" class="form-control" id="nombre" name="nombre" required
-                                           value="<?= htmlspecialchars($persona['nombre']) ?>"
-                                           placeholder="Nombre y apellidos" maxlength="150">
+                                        value="<?= htmlspecialchars($persona['nombre']) ?>"
+                                        placeholder="Nombre y apellidos" maxlength="150">
                                 </div>
                             </div>
                         </div>
@@ -92,18 +101,18 @@
                                 <div class="mb-3">
                                     <label for="telefono" class="form-label">Teléfono</label>
                                     <input type="text" class="form-control" id="telefono" name="telefono"
-                                           value="<?= htmlspecialchars($persona['telefono'] ?? '') ?>"
-                                           placeholder="+56 9 1234 5678" maxlength="20">
+                                        value="<?= htmlspecialchars($persona['telefono'] ?? '') ?>"
+                                        placeholder="+56 9 1234 5678" maxlength="20">
                                     <div class="form-text">Campo opcional</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                         <?php foreach ($estadosTipo as $estado): ?>
-                                            <option value="<?= (int)$estado['id'] ?>" 
+                                            <option value="<?= (int)$estado['id'] ?>"
                                                 <?= $estado['id'] == $persona['estado_tipo_id'] ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($estado['nombre']) ?>
                                             </option>
@@ -116,7 +125,7 @@
                         <div class="mb-3">
                             <label for="direccion" class="form-label">Dirección</label>
                             <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                      placeholder="Dirección completa..." maxlength="255"><?= htmlspecialchars($persona['direccion'] ?? '') ?></textarea>
+                                placeholder="Dirección completa..." maxlength="255"><?= htmlspecialchars($persona['direccion'] ?? '') ?></textarea>
                             <div class="form-text">Campo opcional. Máximo 255 caracteres.</div>
                         </div>
                     </div>
@@ -136,12 +145,12 @@
                                 <p><strong>Modificado:</strong><br><?= date('d/m/Y H:i', strtotime($persona['fecha_modificacion'])) ?></p>
                             <?php endif; ?>
                             <p><strong>Estado Actual:</strong><br>
-                                <span class="badge bg-<?= match($persona['estado_tipo_id']) {
-                                    1 => 'secondary', // Creado
-                                    2 => 'success',   // Activo
-                                    3 => 'warning',   // Inactivo
-                                    default => 'dark'
-                                } ?>">
+                                <span class="badge bg-<?= match ($persona['estado_tipo_id']) {
+                                                            1 => 'secondary', // Creado
+                                                            2 => 'success',   // Activo
+                                                            3 => 'warning',   // Inactivo
+                                                            default => 'dark'
+                                                        } ?>">
                                     <?= htmlspecialchars($persona['estado']) ?>
                                 </span>
                             </p>
@@ -157,10 +166,10 @@
                             <div class="small">
                                 <p><strong>Cambio de RUT:</strong></p>
                                 <p>Ten cuidado al modificar el RUT, ya que puede afectar otras relaciones en el sistema.</p>
-                                
+
                                 <p><strong>Estado:</strong></p>
                                 <p>Si cambias el estado a "Inactivo", la persona no aparecerá en las listas de selección de otros módulos.</p>
-                                
+
                                 <p><strong>Eliminación:</strong></p>
                                 <p>Si esta persona está asociada a usuarios o contrapartes, no podrá ser eliminada hasta que se eliminen esas relaciones.</p>
                             </div>
@@ -186,8 +195,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <!-- Scripts Optimizados de SETAP -->
+    <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('editPersonaForm');
@@ -198,14 +208,14 @@
             // Formatear RUT mientras se escribe
             rutInput.addEventListener('input', function() {
                 let value = this.value.replace(/[^0-9kK]/g, '');
-                
+
                 if (value.length > 1) {
                     let rut = value.slice(0, -1);
                     let dv = value.slice(-1);
-                    
+
                     // Formatear RUT con puntos
                     rut = rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                    
+
                     this.value = rut + '-' + dv.toUpperCase();
                 } else {
                     this.value = value.toUpperCase();
@@ -223,25 +233,25 @@
             function validateRut(rut) {
                 // Remover puntos y guión
                 rut = rut.replace(/[^0-9kK]/g, '');
-                
+
                 if (rut.length < 8) return false;
-                
+
                 let body = rut.slice(0, -1);
                 let dv = rut.slice(-1).toUpperCase();
-                
+
                 // Calcular dígito verificador
                 let sum = 0;
                 let multiplier = 2;
-                
+
                 for (let i = body.length - 1; i >= 0; i--) {
                     sum += parseInt(body[i]) * multiplier;
                     multiplier = multiplier === 7 ? 2 : multiplier + 1;
                 }
-                
+
                 let calculatedDv = 11 - (sum % 11);
                 if (calculatedDv === 11) calculatedDv = '0';
                 if (calculatedDv === 10) calculatedDv = 'K';
-                
+
                 return dv === calculatedDv.toString();
             }
 
@@ -274,7 +284,7 @@
                 // Mostrar indicador de carga
                 saveBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Guardando...';
                 saveBtn.disabled = true;
-                
+
                 // Deshabilitar otros elementos del formulario para evitar double-submit
                 const formElements = form.querySelectorAll('input, select, textarea, button');
                 formElements.forEach(element => {
@@ -286,4 +296,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Usuario - SETAP</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/setap-theme.css">
@@ -17,7 +21,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-setap">
@@ -143,7 +149,7 @@
                                             <option value="">Selecciona un tipo de usuario</option>
                                             <?php if (isset($userTypes) && is_array($userTypes)): ?>
                                                 <?php foreach ($userTypes as $tipo): ?>
-                                                    <option value="<?= (int)$tipo['id'] ?>" 
+                                                    <option value="<?= (int)$tipo['id'] ?>"
                                                         <?= $tipo['id'] == $userToEdit['usuario_tipo_id'] ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($tipo['nombre']) ?>
                                                     </option>
@@ -173,19 +179,19 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Fecha de Creación</label>
-                                        <input type="text" class="form-control" 
+                                        <input type="text" class="form-control"
                                             value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_Creado'])) ?>" readonly>
                                     </div>
                                 </div>
 
                                 <?php if (isset($userToEdit['fecha_modificacion']) && $userToEdit['fecha_modificacion']): ?>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Última Modificación</label>
-                                        <input type="text" class="form-control" 
-                                            value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_modificacion'])) ?>" readonly>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Última Modificación</label>
+                                            <input type="text" class="form-control"
+                                                value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_modificacion'])) ?>" readonly>
+                                        </div>
                                     </div>
-                                </div>
                                 <?php endif; ?>
                             </div>
 
@@ -210,8 +216,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <!-- Scripts Optimizados de SETAP -->
+    <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('userEditForm');
@@ -250,4 +257,5 @@
         });
     </script>
 </body>
+
 </html>

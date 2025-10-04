@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Proyecto - SETAP</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/setap-theme.css">
@@ -14,15 +19,18 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
+
         .main-content {
             margin-top: 2rem;
         }
@@ -30,148 +38,151 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container mt-4">
         <main class="main-content">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <h2>
-                    <i class="bi bi-plus-circle"></i> Crear Nuevo Proyecto
-                </h2>
-                <p class="text-muted">Complete los datos para crear un nuevo proyecto en el sistema.</p>
-            </div>
-            <div class="col-md-4 text-end">
-                <a href="/projects" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver a Proyectos
-                </a>
-            </div>
-        </div>
-
-        <!-- Mensajes de Error -->
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-
-        <!-- Formulario de Creación -->
-        <form method="POST" action="/projects/store" id="createProjectForm">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
-
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <!-- Información Básica -->
-                    <div class="form-section">
-                        <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="cliente_id" class="form-label">Cliente <span class="required">*</span></label>
-                                    <select class="form-select" id="cliente_id" name="cliente_id" required>
-                                        <option value="">Seleccionar Cliente</option>
-                                        <?php foreach ($clients as $client): ?>
-                                            <option value="<?= (int)$client['id'] ?>">
-                                                <?= htmlspecialchars($client['nombre']) ?>
-                                                <?php if (!empty($client['rut'])): ?>
-                                                    - RUT: <?= htmlspecialchars($client['rut']) ?>
-                                                <?php endif; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
-                                    <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
-                                        <option value="">Seleccionar Tipo de Tarea</option>
-                                        <?php foreach ($taskTypes as $taskType): ?>
-                                            <option value="<?= (int)$taskType['id'] ?>">
-                                                <?= htmlspecialchars($taskType['nombre']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
-                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="fecha_fin" class="form-label">Fecha Fin</label>
-                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
-                                    <div class="form-text">Campo opcional. Deja en blanco si no se define aún.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="direccion" class="form-label">Dirección del Proyecto</label>
-                            <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                placeholder="Ingresa la dirección donde se desarrollará el proyecto..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Configuración del Proyecto -->
-                    <div class="form-section">
-                        <h5><i class="bi bi-people"></i> Configuración del Proyecto</h5>
-                        
-                        <div class="mb-3">
-                            <label for="contraparte_id" class="form-label">Contraparte del Cliente <span class="required">*</span></label>
-                            <select class="form-select" id="contraparte_id" name="contraparte_id" required>
-                                <option value="">Seleccionar Contraparte</option>
-                                <?php foreach ($counterparts as $counterpart): ?>
-                                    <option value="<?= (int)$counterpart['id'] ?>">
-                                        <?= htmlspecialchars($counterpart['nombre']) ?> 
-                                        - <?= htmlspecialchars($counterpart['cargo']) ?>
-                                        (<?= htmlspecialchars($counterpart['cliente_nombre']) ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="form-text">Persona de contacto del cliente para este proyecto.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="feriados" class="form-label">Días Festivos Especiales</label>
-                            <input type="text" class="form-control" id="feriados" name="feriados"
-                                placeholder="Ej: 2024-12-25, 2024-01-01, 2024-05-21">
-                            <div class="form-text">Fechas especiales no laborables para este proyecto, separadas por comas (formato: YYYY-MM-DD).</div>
-                        </div>
-                    </div>
-
-                    <!-- Botones de Acción -->
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="/projects" class="btn btn-secondary">
-                            <i class="bi bi-x-lg"></i> Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-success" id="createBtn">
-                            <i class="bi bi-plus-lg"></i> Crear Proyecto
-                        </button>
-                    </div>
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>
+                        <i class="bi bi-plus-circle"></i> Crear Nuevo Proyecto
+                    </h2>
+                    <p class="text-muted">Complete los datos para crear un nuevo proyecto en el sistema.</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="/projects" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver a Proyectos
+                    </a>
                 </div>
             </div>
-        </form>
+
+            <!-- Mensajes de Error -->
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
+            <!-- Formulario de Creación -->
+            <form method="POST" action="/projects/store" id="createProjectForm">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <!-- Información Básica -->
+                        <div class="form-section">
+                            <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="cliente_id" class="form-label">Cliente <span class="required">*</span></label>
+                                        <select class="form-select" id="cliente_id" name="cliente_id" required>
+                                            <option value="">Seleccionar Cliente</option>
+                                            <?php foreach ($clients as $client): ?>
+                                                <option value="<?= (int)$client['id'] ?>">
+                                                    <?= htmlspecialchars($client['nombre']) ?>
+                                                    <?php if (!empty($client['rut'])): ?>
+                                                        - RUT: <?= htmlspecialchars($client['rut']) ?>
+                                                    <?php endif; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
+                                        <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
+                                            <option value="">Seleccionar Tipo de Tarea</option>
+                                            <?php foreach ($taskTypes as $taskType): ?>
+                                                <option value="<?= (int)$taskType['id'] ?>">
+                                                    <?= htmlspecialchars($taskType['nombre']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
+                                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
+                                        <div class="form-text">Campo opcional. Deja en blanco si no se define aún.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="direccion" class="form-label">Dirección del Proyecto</label>
+                                <textarea class="form-control" id="direccion" name="direccion" rows="2"
+                                    placeholder="Ingresa la dirección donde se desarrollará el proyecto..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Configuración del Proyecto -->
+                        <div class="form-section">
+                            <h5><i class="bi bi-people"></i> Configuración del Proyecto</h5>
+
+                            <div class="mb-3">
+                                <label for="contraparte_id" class="form-label">Contraparte del Cliente <span class="required">*</span></label>
+                                <select class="form-select" id="contraparte_id" name="contraparte_id" required>
+                                    <option value="">Seleccionar Contraparte</option>
+                                    <?php foreach ($counterparts as $counterpart): ?>
+                                        <option value="<?= (int)$counterpart['id'] ?>">
+                                            <?= htmlspecialchars($counterpart['nombre']) ?>
+                                            - <?= htmlspecialchars($counterpart['cargo']) ?>
+                                            (<?= htmlspecialchars($counterpart['cliente_nombre']) ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">Persona de contacto del cliente para este proyecto.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="feriados" class="form-label">Días Festivos Especiales</label>
+                                <input type="text" class="form-control" id="feriados" name="feriados"
+                                    placeholder="Ej: 2024-12-25, 2024-01-01, 2024-05-21">
+                                <div class="form-text">Fechas especiales no laborables para este proyecto, separadas por comas (formato: YYYY-MM-DD).</div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/projects" class="btn btn-secondary">
+                                <i class="bi bi-x-lg"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success" id="createBtn">
+                                <i class="bi bi-plus-lg"></i> Crear Proyecto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </main>
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <!-- Scripts Optimizados de SETAP -->
+    <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createProjectForm');
@@ -191,7 +202,7 @@
                 if (fechaInicio.value && fechaFin.value) {
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
-                    
+
                     if (fin < inicio) {
                         fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
                         return false;
@@ -216,7 +227,7 @@
             // Filtrar contrapartes por cliente seleccionado
             clienteSelect.addEventListener('change', function() {
                 const clienteId = this.value;
-                
+
                 // Habilitar todas las opciones primero
                 Array.from(contraparteSelect.options).forEach(option => {
                     if (option.value !== '') {
@@ -230,7 +241,7 @@
                     // Esta implementación es básica. En un entorno real, podrías hacer
                     // una llamada AJAX para obtener las contrapartes del cliente seleccionado
                     // Por ahora, mostramos todas las contrapartes
-                    
+
                     // Resetear selección de contraparte
                     contraparteSelect.value = '';
                 } else {
@@ -247,9 +258,9 @@
                     // Validar formato de fechas separadas por comas
                     const fechas = value.split(',').map(f => f.trim());
                     const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
-                    
+
                     const fechasInvalidas = fechas.filter(fecha => !fechaRegex.test(fecha));
-                    
+
                     if (fechasInvalidas.length > 0) {
                         this.setCustomValidity('Formato de fecha inválido. Use YYYY-MM-DD separado por comas');
                     } else {
@@ -276,7 +287,7 @@
                 // Mostrar indicador de carga
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
-                
+
                 // Deshabilitar otros elementos del formulario para evitar double-submit
                 const formElements = form.querySelectorAll('input, select, textarea, button');
                 formElements.forEach(element => {
@@ -291,4 +302,5 @@
         });
     </script>
 </body>
+
 </html>
