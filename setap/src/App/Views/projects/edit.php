@@ -23,33 +23,20 @@
         .required {
             color: #dc3545;
         }
+        .main-content {
+            margin-top: 2rem;
+        }
     </style>
 </head>
 
 <body class="bg-light">
     <?php use App\Helpers\Security; ?>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-setap">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-grid-3x3-gap"></i> SETAP
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light" href="/home">
-                    <i class="bi bi-house"></i> Home
-                </a>
-                <a class="nav-link text-light" href="/projects">
-                    <i class="bi bi-folder"></i> Proyectos
-                </a>
-                <a class="nav-link text-light" href="/logout">
-                    <i class="bi bi-box-arrow-right"></i> Salir
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- Navegación Unificada -->
+    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container mt-4">
+        <main class="main-content">
         <!-- Header -->
         <div class="row mb-4">
             <div class="col-md-8">
@@ -78,8 +65,8 @@
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
             <input type="hidden" name="id" value="<?= (int)$project['id'] ?>">
 
-            <div class="row">
-                <div class="col-md-8">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
                     <!-- Información Básica -->
                     <div class="form-section">
                         <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
@@ -189,70 +176,20 @@
                             <div class="form-text">Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples contrapartes.</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Panel Lateral -->
-                <div class="col-md-4">
-                    <!-- Información del Proyecto -->
-                    <div class="card">
-                        <div class="card-header bg-setap-primary text-white">
-                            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información del Proyecto</h6>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>ID:</strong> <?= (int)$project['id'] ?></p>
-                            <p><strong>Creado:</strong><br><?= date('d/m/Y H:i', strtotime($project['fecha_Creado'])) ?></p>
-                            <?php if (!empty($project['fecha_modificacion'])): ?>
-                                <p><strong>Modificado:</strong><br><?= date('d/m/Y H:i', strtotime($project['fecha_modificacion'])) ?></p>
-                            <?php endif; ?>
-                            <p><strong>Estado Actual:</strong><br>
-                                <span class="badge bg-<?= match($project['estado_tipo_id']) {
-                                    1 => 'secondary', // Creado
-                                    2 => 'success',   // Activo
-                                    3 => 'warning',   // Inactivo
-                                    5 => 'setap-primary',   // Iniciado
-                                    6 => 'setap-primary-light',      // Terminado
-                                    8 => 'success',   // Aprobado
-                                    default => 'dark'
-                                } ?>">
-                                    <?= htmlspecialchars($project['estado_nombre']) ?>
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Días Festivos -->
-                    <?php if (!empty($holidays)): ?>
-                    <div class="card mt-3">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0"><i class="bi bi-calendar-event"></i> Días Festivos</h6>
-                        </div>
-                        <div class="card-body">
-                            <?php foreach ($holidays as $holiday): ?>
-                                <div class="mb-2">
-                                    <strong><?= htmlspecialchars($holiday['nombre']) ?></strong><br>
-                                    <small class="text-muted"><?= date('d/m/Y', strtotime($holiday['fecha'])) ?></small>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <!-- Acciones -->
-                    <div class="card mt-3">
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-success" id="saveBtn">
-                                    <i class="bi bi-check-lg"></i> Guardar Cambios
-                                </button>
-                                <a href="/projects/show/<?= (int)$project['id'] ?>" class="btn btn-secondary">
-                                    <i class="bi bi-x-lg"></i> Cancelar
-                                </a>
-                            </div>
-                        </div>
+                    <!-- Botones de Acción -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="/projects/show/<?= (int)$project['id'] ?>" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success" id="saveBtn">
+                            <i class="bi bi-check-lg"></i> Guardar Cambios
+                        </button>
                     </div>
                 </div>
             </div>
         </form>
+        </main>
     </div>
 
     <!-- Scripts -->

@@ -23,33 +23,20 @@
         .required {
             color: #dc3545;
         }
+        .main-content {
+            margin-top: 2rem;
+        }
     </style>
 </head>
 
 <body class="bg-light">
     <?php use App\Helpers\Security; ?>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-setap">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-grid-3x3-gap"></i> SETAP
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light" href="/home">
-                    <i class="bi bi-house"></i> Home
-                </a>
-                <a class="nav-link text-light" href="/projects">
-                    <i class="bi bi-folder"></i> Proyectos
-                </a>
-                <a class="nav-link text-light" href="/logout">
-                    <i class="bi bi-box-arrow-right"></i> Salir
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- Navegación Unificada -->
+    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container mt-4">
+        <main class="main-content">
         <!-- Header -->
         <div class="row mb-4">
             <div class="col-md-8">
@@ -77,8 +64,8 @@
         <form method="POST" action="/projects/store" id="createProjectForm">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
 
-            <div class="row">
-                <div class="col-md-8">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
                     <!-- Información Básica -->
                     <div class="form-section">
                         <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
@@ -166,50 +153,20 @@
                             <div class="form-text">Fechas especiales no laborables para este proyecto, separadas por comas (formato: YYYY-MM-DD).</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Panel Lateral -->
-                <div class="col-md-4">
-                    <!-- Instrucciones -->
-                    <div class="card">
-                        <div class="card-header bg-setap-primary text-white">
-                            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="small">
-                                <p><strong>Campos Obligatorios:</strong></p>
-                                <ul>
-                                    <li>Cliente</li>
-                                    <li>Tipo de Tarea</li>
-                                    <li>Fecha de Inicio</li>
-                                    <li>Contraparte del Cliente</li>
-                                </ul>
-                                
-                                <p><strong>Estado Inicial:</strong></p>
-                                <p>El proyecto se creará con estado "Activo" y podrá ser modificado posteriormente.</p>
-                                
-                                <p><strong>Nota:</strong></p>
-                                <p>Una vez creado, podrás agregar tareas específicas y gestionar el seguimiento del proyecto.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Acciones -->
-                    <div class="card mt-3">
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-success" id="createBtn">
-                                    <i class="bi bi-plus-lg"></i> Crear Proyecto
-                                </button>
-                                <a href="/projects" class="btn btn-secondary">
-                                    <i class="bi bi-x-lg"></i> Cancelar
-                                </a>
-                            </div>
-                        </div>
+                    <!-- Botones de Acción -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="/projects" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success" id="createBtn">
+                            <i class="bi bi-plus-lg"></i> Crear Proyecto
+                        </button>
                     </div>
                 </div>
             </div>
         </form>
+        </main>
     </div>
 
     <!-- Scripts -->

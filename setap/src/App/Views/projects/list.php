@@ -22,30 +22,17 @@
         .status-badge {
             font-size: 0.75rem;
         }
+        .main-content {
+            margin-top: 2rem;
+        }
     </style>
 </head>
 <body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-setap">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-grid-3x3-gap"></i> SETAP
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light" href="/home">
-                    <i class="bi bi-house"></i> Home
-                </a>
-                <a class="nav-link text-light active" href="/projects">
-                    <i class="bi bi-folder"></i> Proyectos
-                </a>
-                <a class="nav-link text-light" href="/logout">
-                    <i class="bi bi-box-arrow-right"></i> Salir
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- Navegación Unificada -->
+    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
+        <main class="main-content">
         <!-- Header -->
         <div class="row mb-4">
             <div class="col-md-6">
@@ -230,6 +217,7 @@
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+        </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

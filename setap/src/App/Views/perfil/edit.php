@@ -9,8 +9,6 @@
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
 <body>
-    <?php
-    use App\Helpers\Security; ?>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <main class="container mt-4">
@@ -36,7 +34,7 @@
                 <?php endif; ?>
 
                 <form method="POST" class="row g-3" id="profileForm">
-                    <?php Security::renderCsrfField(); ?>
+                    <?php use App\Helpers\Security; Security::renderCsrfField(); ?>
                     
                     <div class="col-md-6">
                         <label for="nombre" class="form-label">Nombre Completo *</label>

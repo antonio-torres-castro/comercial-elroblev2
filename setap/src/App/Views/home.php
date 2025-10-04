@@ -13,86 +13,6 @@
             font-weight: bold;
         }
 
-        .sidebar {
-            min-height: calc(100vh - 56px);
-            background-color: var(--setap-bg-light);
-            position: relative;
-            overflow-y: auto;
-        }
-
-        /* Asegurar que el contenido principal no se superponga */
-        .main-content {
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-
-        /* Para pantallas grandes asegurar posición correcta */
-        @media (min-width: 768px) {
-            .sidebar {
-                position: sticky;
-                top: 56px;
-                height: calc(100vh - 56px);
-                z-index: 1;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-        }
-
-        /* Responsividad para el sidebar en móviles */
-        @media (max-width: 767.98px) {
-            .sidebar {
-                position: fixed;
-                top: 56px;
-                left: -100%;
-                width: 280px;
-                height: calc(100vh - 56px);
-                z-index: 1000;
-                transition: left 0.3s ease;
-                overflow-y: auto;
-            }
-            
-            .sidebar.show {
-                left: 0;
-                box-shadow: 0 0 0 100vmax rgba(0,0,0,.5);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0,0,0,0.5);
-                z-index: 999;
-                display: none;
-            }
-            
-            .sidebar-overlay.show {
-                display: block;
-            }
-        }
-
-        .nav-link {
-            color: var(--setap-text-primary);
-            padding: 0.75rem 1rem;
-        }
-
-        .nav-link:hover {
-            background-color: rgba(127, 25, 51, 0.1);
-            color: var(--setap-primary);
-        }
-
-        .nav-link.active {
-            background-color: var(--setap-primary);
-            color: var(--setap-text-light);
-        }
-
         .stats-card {
             transition: transform 0.2s;
         }
@@ -100,111 +20,26 @@
         .stats-card:hover {
             transform: translateY(-2px);
         }
+
+        .main-content {
+            margin-top: 2rem;
+        }
     </style>
 </head>
 
-<body>
-    <?php
+<body class="bg-light">
+    <?php use App\Helpers\Security; ?>
 
-    use App\Helpers\Security; ?>
+    <!-- Navegación Unificada -->
+    <?php include __DIR__ . '/layouts/navigation.php'; ?>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-setap">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-building"></i> SETAP
-            </a>
-
-            <!-- Botón hamburguesa para sidebar -->
-            <button class="navbar-toggler d-md-none" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle sidebar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <!-- Botón hamburguesa para menú de usuario -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="navbar-nav ms-auto">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i>
-                            <?php echo htmlspecialchars($homeData['user']['nombre_completo'] ?? $homeData['user']['username']); ?>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person"></i> Perfil</a></li>
-                            <li><a class="dropdown-item" href="/perfil/edit"><i class="bi bi-gear"></i> Configuración</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
+    <!-- Contenido Principal -->
     <div class="container-fluid">
-        <div class="row">
-            <!-- Overlay para cerrar sidebar en móviles -->
-            <div class="sidebar-overlay" id="sidebarOverlay"></div>
-            
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 sidebar" id="sidebar">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/home">
-                                <i class="bi bi-speedometer2"></i> Home
-                            </a>
-                        </li>
-
-                        <?php if (!empty($homeData['menus'])): ?>
-                            <?php foreach ($homeData['menus'] as $menu): ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="<?php echo htmlspecialchars($menu['url']); ?>">
-                                        <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?>"></i>
-                                        <?php echo htmlspecialchars($menu['display']); ?>
-                                    </a>
-                                </li>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <!-- Menús por defecto si no hay configuración dinámica -->
-                            <?php
-                            if (Security::hasMenuAccess('users')): ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/users">
-                                        <i class="bi bi-people"></i> Usuarios
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-
-                            <?php if (Security::hasMenuAccess('projects')): ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/projects">
-                                        <i class="bi bi-briefcase"></i> Proyectos
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-
-                            <?php if (Security::hasMenuAccess('reports')): ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/reports">
-                                        <i class="bi bi-bar-chart"></i> Reportes
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-            </nav>
-
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+        <main class="main-content">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Home</h1>
+                    <h1 class="h2">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <button type="button" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-calendar"></i>
@@ -318,8 +153,7 @@
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+        </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -333,48 +167,6 @@
                     if (!confirm('¿Está seguro que desea cerrar sesión?')) {
                         e.preventDefault();
                     }
-                });
-            }
-
-            // Funcionalidad del sidebar móvil
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-            if (sidebarToggle && sidebar && sidebarOverlay) {
-                // Abrir sidebar
-                sidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.add('show');
-                    sidebarOverlay.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                });
-
-                // Cerrar sidebar al hacer clic en el overlay
-                sidebarOverlay.addEventListener('click', function() {
-                    sidebar.classList.remove('show');
-                    sidebarOverlay.classList.remove('show');
-                    document.body.style.overflow = '';
-                });
-
-                // Cerrar sidebar con la tecla Escape
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && sidebar.classList.contains('show')) {
-                        sidebar.classList.remove('show');
-                        sidebarOverlay.classList.remove('show');
-                        document.body.style.overflow = '';
-                    }
-                });
-
-                // Cerrar sidebar al hacer clic en un enlace del menú (móviles)
-                const sidebarLinks = sidebar.querySelectorAll('a.nav-link');
-                sidebarLinks.forEach(function(link) {
-                    link.addEventListener('click', function() {
-                        if (window.innerWidth < 768) {
-                            sidebar.classList.remove('show');
-                            sidebarOverlay.classList.remove('show');
-                            document.body.style.overflow = '';
-                        }
-                    });
                 });
             }
         });
