@@ -359,4 +359,32 @@ class Menu
             return [];
         }
     }
+
+    /**
+     * Obtener menús específicos para un usuario basado en sus permisos
+     */
+    public function getMenusForUser(int $userId): array
+    {
+        try {
+            // Usar App\Services\PermissionService para verificar permisos
+            $permissionService = new \App\Services\PermissionService();
+            
+            // Obtener todos los menús activos
+            $allMenus = $this->getNavigationMenus();
+            
+            // Filtrar menús según permisos del usuario
+            $userMenus = [];
+            foreach ($allMenus as $menu) {
+                // Verificar si el usuario tiene acceso a este menú
+                if ($permissionService->hasMenuAccess($userId, $menu['nombre'])) {
+                    $userMenus[] = $menu;
+                }
+            }
+            
+            return $userMenus;
+        } catch (Exception $e) {
+            error_log("Error al obtener menús de usuario: " . $e->getMessage());
+            return [];
+        }
+    }
 }
