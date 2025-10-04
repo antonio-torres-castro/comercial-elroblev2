@@ -130,16 +130,11 @@
                                         
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="display" class="form-label">Mostrar en Navegación <span class="text-danger">*</span></label>
-                                                <select class="form-select" id="display" name="display" required>
-                                                    <option value="1" <?php echo (($data['menu']['display'] ?? 1) == 1) ? 'selected' : ''; ?>>
-                                                        Sí - Mostrar en navegación
-                                                    </option>
-                                                    <option value="0" <?php echo (($data['menu']['display'] ?? 1) == 0) ? 'selected' : ''; ?>>
-                                                        No - Solo funcional
-                                                    </option>
-                                                </select>
-                                                <div class="form-text">Define si aparece en el menú de navegación.</div>
+                                                <label for="display" class="form-label">Título de visualización <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="display" name="display" 
+                                                       value="<?php echo htmlspecialchars($data['menu']['display'] ?? ''); ?>" 
+                                                       required maxlength="150" placeholder="Ej: Usuarios, Clientes, Proyectos">
+                                                <div class="form-text">Texto que verá el usuario en el menú (ej: "Usuarios" para nombre interno "manage_users")</div>
                                             </div>
                                         </div>
                                     </div>
@@ -213,6 +208,24 @@
                 document.getElementById('formEliminar').submit();
             }
         }
+
+        // Validación del formulario
+        document.querySelector('form:not(#formEliminar)').addEventListener('submit', function(e) {
+            const nombre = document.getElementById('nombre').value.trim();
+            const display = document.getElementById('display').value.trim();
+
+            if (!nombre) {
+                e.preventDefault();
+                alert('El nombre interno es requerido');
+                return;
+            }
+
+            if (!display) {
+                e.preventDefault();
+                alert('El título de visualización es requerido');
+                return;
+            }
+        });
     </script>
 </body>
 </html>

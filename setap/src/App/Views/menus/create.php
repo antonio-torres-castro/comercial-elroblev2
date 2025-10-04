@@ -129,16 +129,11 @@
                                         
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="display" class="form-label">Mostrar en Navegación <span class="text-danger">*</span></label>
-                                                <select class="form-select" id="display" name="display" required>
-                                                    <option value="1" <?php echo (($data['menu']['display'] ?? 1) == 1) ? 'selected' : ''; ?>>
-                                                        Sí - Mostrar en navegación
-                                                    </option>
-                                                    <option value="0" <?php echo (($data['menu']['display'] ?? 1) == 0) ? 'selected' : ''; ?>>
-                                                        No - Solo funcional
-                                                    </option>
-                                                </select>
-                                                <div class="form-text">Define si aparece en el menú de navegación.</div>
+                                                <label for="display" class="form-label">Título de visualización <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="display" name="display" 
+                                                       value="<?php echo htmlspecialchars($data['menu']['display'] ?? ''); ?>" 
+                                                       required maxlength="150" placeholder="Ej: Usuarios, Clientes, Proyectos">
+                                                <div class="form-text">Texto que verá el usuario en el menú (ej: "Usuarios" para nombre interno "manage_users")</div>
                                             </div>
                                         </div>
                                     </div>
@@ -168,5 +163,56 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-sugerir display basado en nombre
+        document.getElementById('nombre').addEventListener('input', function() {
+            const displayField = document.getElementById('display');
+            
+            // Solo auto-sugerir si el campo display está vacío
+            if (!displayField.value.trim()) {
+                const nombre = this.value.trim();
+                
+                // Generar sugerencia de display basada en el nombre
+                let sugerencia = '';
+                if (nombre) {
+                    // Convertir nombres comunes a display amigable
+                    const conversiones = {
+                        'manage_users': 'Usuarios',
+                        'manage_clients': 'Clientes',
+                        'manage_projects': 'Proyectos',
+                        'manage_tasks': 'Tareas',
+                        'manage_menus': 'Menús',
+                        'view_perfil': 'Mi Perfil',
+                        'manage_perfil': 'Editar Perfil'
+                    };
+                    
+                    sugerencia = conversiones[nombre] || 
+                                nombre.replace(/_/g, ' ')
+                                      .replace(/manage\s+/i, '')
+                                      .replace(/\b\w/g, l => l.toUpperCase());
+                }
+                
+                displayField.value = sugerencia;
+            }
+        });
+
+        // Validación del formulario
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const nombre = document.getElementById('nombre').value.trim();
+            const display = document.getElementById('display').value.trim();
+
+            if (!nombre) {
+                e.preventDefault();
+                alert('El nombre interno es requerido');
+                return;
+            }
+
+            if (!display) {
+                e.preventDefault();
+                alert('El título de visualización es requerido');
+                return;
+            }
+        });
+    </script>
 </body>
 </html>
