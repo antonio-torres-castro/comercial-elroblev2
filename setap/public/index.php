@@ -313,6 +313,22 @@ try {
             $controller = new ClientController();
             
             switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+                    
+                case 'edit':
+                    if ($id) {
+                        $controller->edit($id);
+                    } else {
+                        $controller->index();
+                    }
+                    break;
+                    
                 case 'store':
                     $controller->store();
                     break;
@@ -357,10 +373,38 @@ try {
         case 'client-counterpartie':
             $controller = new ClientController();
             
-            if ($action) {
-                $controller->counterpartie((int)$action);
-            } else {
-                $controller->counterpartie();
+            switch ($action) {
+                case 'create':
+                    $controller->counterpartie();
+                    break;
+                    
+                case 'edit':
+                    if ($id) {
+                        $controller->counterpartie((int)$id);
+                    } else {
+                        $controller->counterpartie();
+                    }
+                    break;
+                    
+                case 'store':
+                    $controller->storeCounterpartie();
+                    break;
+                    
+                case 'update':
+                    $controller->updateCounterpartie();
+                    break;
+                    
+                case 'delete':
+                    $controller->deleteCounterpartie();
+                    break;
+                    
+                default:
+                    if ($action) {
+                        $controller->counterpartie((int)$action);
+                    } else {
+                        $controller->counterpartie();
+                    }
+                    break;
             }
             break;
 
