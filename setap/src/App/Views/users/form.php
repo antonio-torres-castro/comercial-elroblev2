@@ -17,21 +17,21 @@ $user = $isEdit ? $data['user'] ?? null : null;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .form-section {
-            background: #f8f9fa;
-            border-left: 4px solid #007bff;
+            background: var(--setap-bg-light);
+            border-left: 4px solid var(--setap-primary);
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
 
         .form-section h6 {
-            color: #007bff;
+            color: var(--setap-primary);
             margin-bottom: 0.5rem;
         }
 
         .user-avatar-preview {
             width: 80px;
             height: 80px;
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: linear-gradient(45deg, var(--setap-primary), var(--setap-primary-dark));
             border-radius: 50%;
             display: flex;
             align-items: center;

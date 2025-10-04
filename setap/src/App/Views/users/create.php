@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .form-check-input:checked {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
+            background-color: var(--setap-primary);
+            border-color: var(--setap-primary);
         }
 
         .password-strength {

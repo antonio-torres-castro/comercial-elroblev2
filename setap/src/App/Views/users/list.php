@@ -16,7 +16,7 @@ use App\Helpers\Security;
         .user-avatar {
             width: 40px;
             height: 40px;
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: linear-gradient(45deg, var(--setap-primary), var(--setap-primary-dark));
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -26,7 +26,7 @@ use App\Helpers\Security;
         }
 
         .user-avatar-large {
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: linear-gradient(45deg, var(--setap-primary), var(--setap-primary-dark));
             border-radius: 50%;
             display: flex;
             align-items: center;
