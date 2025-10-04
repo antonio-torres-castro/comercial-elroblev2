@@ -50,11 +50,11 @@ try {
                         <?php $menus = $groupData['menus']; ?>
                         
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown<?php echo $group['id']; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown_<?php echo $group['id']; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-<?php echo htmlspecialchars($group['icono'] ?? 'folder'); ?>"></i>
                                 <?php echo htmlspecialchars($group['display']); ?>
                             </a>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown_<?php echo $group['id']; ?>">
                                 <?php foreach ($menus as $menu): ?>
                                     <li>
                                         <a class="dropdown-item" href="<?php echo htmlspecialchars($menu['url']); ?>">
@@ -148,5 +148,20 @@ try {
     </div>
 </nav>
 
-<!-- Script para Bootstrap dropdowns -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Script para inicializar dropdowns -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Asegurar que Bootstrap esté disponible antes de inicializar
+    if (typeof bootstrap !== 'undefined') {
+        // Inicializar todos los dropdowns manualmente
+        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+            return new bootstrap.Dropdown(dropdownToggleEl);
+        });
+        
+        console.log('Dropdowns de navegación inicializados:', dropdownList.length);
+    } else {
+        console.error('Bootstrap no está disponible para inicializar dropdowns');
+    }
+});
+</script>
