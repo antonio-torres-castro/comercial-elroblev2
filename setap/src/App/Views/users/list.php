@@ -152,6 +152,7 @@ use App\Helpers\Security;
                                 <th>Información Personal</th>
                                 <th>Contacto</th>
                                 <th>Rol</th>
+                                <th>Cliente</th> <!-- GAP 1 y GAP 2: Nueva columna -->
                                 <th>Estado</th>
                                 <th>Registro</th>
                                 <th class="table-actions">Acciones</th>
@@ -160,7 +161,7 @@ use App\Helpers\Security;
                         <tbody>
                             <?php if (empty($users)): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="8" class="text-center text-muted py-4">
                                         <i class="bi bi-inbox"></i> No hay usuarios registrados
                                     </td>
                                 </tr>
@@ -206,6 +207,22 @@ use App\Helpers\Security;
                                             <span class="badge <?= $badgeClass ?> role-badge">
                                                 <?= htmlspecialchars(ucfirst($user['rol'])) ?>
                                             </span>
+                                        </td>
+                                        <td>
+                                            <!-- GAP 1 y GAP 2: Mostrar cliente asignado -->
+                                            <?php if (!empty($user['cliente_id']) && !empty($user['cliente_nombre'])): ?>
+                                                <div class="small">
+                                                    <i class="bi bi-building"></i> 
+                                                    <span class="fw-semibold"><?= htmlspecialchars($user['cliente_nombre']) ?></span>
+                                                </div>
+                                                <div class="text-muted smaller">
+                                                    ID: <?= $user['cliente_id'] ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-dash"></i> No asignado
+                                                </span>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php

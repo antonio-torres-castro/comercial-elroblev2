@@ -84,6 +84,7 @@ class UserController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
+            $clients = $this->userModel->getAvailableClients(); // GAP 1 y GAP 2: Obtener clientes
 
             require_once __DIR__ . '/../Views/users/create.php';
         } catch (Exception $e) {
@@ -271,9 +272,18 @@ class UserController
             $validated['usuario_tipo_id'] = (int)$data['usuario_tipo_id'];
         }
 
+        // GAP 1 y GAP 2: Validaciones especiales para usuarios cliente
+        $clientValidationErrors = $this->validateClientLogic($data, $validated);
+        $errors = array_merge($errors, $clientValidationErrors);
+
         // Campos opcionales
         $validated['telefono'] = Security::sanitizeInput($data['telefono'] ?? '');
         $validated['direccion'] = Security::sanitizeInput($data['direccion'] ?? '');
+        
+        // Cliente_id se valida en validateClientLogic
+        if (!empty($data['cliente_id'])) {
+            $validated['cliente_id'] = (int)$data['cliente_id'];
+        }
 
         if (!empty($errors)) {
             return ['errors' => $errors];
@@ -382,6 +392,7 @@ class UserController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
+            $clients = $this->userModel->getAvailableClients(); // GAP 1 y GAP 2: Obtener clientes
 
             // Datos para la vista
             $data = [
@@ -391,7 +402,8 @@ class UserController
                 'user_id' => $id,
                 'user' => $userToEdit,
                 'userTypes' => $userTypes,
-                'estadosTipo' => $estadosTipo
+                'estadosTipo' => $estadosTipo,
+                'clients' => $clients
             ];
 
             require_once __DIR__ . '/../Views/users/form.php';
@@ -573,54 +585,89 @@ class UserController
     }
 
     /**
-     * Validar datos del usuario
+     * Validar datos del usuario para actualización
      */
     private function validateUserDataForUpdate(array $data, bool $isUpdate = false): array
     {
         $errors = [];
+        $validated = [];
 
         // Validar nombre
         if (empty($data['nombre'])) {
-            $errors[] = 'El nombre es obligatorio';
+            $errors['nombre'] = 'El nombre es obligatorio';
         } elseif (strlen($data['nombre']) < 2) {
-            $errors[] = 'El nombre debe tener al menos 2 caracteres';
+            $errors['nombre'] = 'El nombre debe tener al menos 2 caracteres';
+        } else {
+            $validated['nombre'] = Security::sanitizeInput($data['nombre']);
         }
 
         // Validar email
         if (empty($data['email'])) {
-            $errors[] = 'El email es obligatorio';
+            $errors['email'] = 'El email es obligatorio';
         } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'El email no tiene un formato válido';
+            $errors['email'] = 'El email no tiene un formato válido';
+        } else {
+            $validated['email'] = strtolower(trim($data['email']));
         }
 
         // Validar usuario_tipo_id
         if (empty($data['usuario_tipo_id']) || !is_numeric($data['usuario_tipo_id'])) {
-            $errors[] = 'Debe seleccionar un tipo de usuario válido';
+            $errors['usuario_tipo_id'] = 'Debe seleccionar un tipo de usuario válido';
+        } else {
+            $validated['usuario_tipo_id'] = (int)$data['usuario_tipo_id'];
         }
 
         // Validaciones específicas para creación (no actualización)
         if (!$isUpdate) {
             // Validar nombre_usuario
             if (empty($data['nombre_usuario'])) {
-                $errors[] = 'El nombre de usuario es obligatorio';
+                $errors['nombre_usuario'] = 'El nombre de usuario es obligatorio';
             } elseif (strlen($data['nombre_usuario']) < 3) {
-                $errors[] = 'El nombre de usuario debe tener al menos 3 caracteres';
+                $errors['nombre_usuario'] = 'El nombre de usuario debe tener al menos 3 caracteres';
+            } else {
+                $validated['nombre_usuario'] = Security::sanitizeInput($data['nombre_usuario']);
             }
 
             // Validar password
             if (empty($data['password'])) {
-                $errors[] = 'La contraseña es obligatoria';
+                $errors['password'] = 'La contraseña es obligatoria';
             } elseif (strlen($data['password']) < 6) {
-                $errors[] = 'La contraseña debe tener al menos 6 caracteres';
+                $errors['password'] = 'La contraseña debe tener al menos 6 caracteres';
+            } else {
+                $validated['password'] = $data['password'];
             }
 
             // Validar confirmación de password
             if ($data['password'] !== ($data['password_confirm'] ?? '')) {
-                $errors[] = 'Las contraseñas no coinciden';
+                $errors['password_confirm'] = 'Las contraseñas no coinciden';
+            }
+            
+            // Validar RUT para creación
+            if (!empty($data['rut'])) {
+                if (!Security::validateRut($data['rut'])) {
+                    $errors['rut'] = 'El RUT no es válido';
+                } else {
+                    $validated['rut'] = preg_replace('/[^0-9kK]/', '', $data['rut']);
+                }
             }
         }
+        
+        // GAP 1 y GAP 2: Validaciones especiales para usuarios cliente
+        if (!empty($validated['usuario_tipo_id'])) {
+            $clientValidationErrors = $this->validateClientLogic($data, $validated);
+            $errors = array_merge($errors, $clientValidationErrors);
+        }
+        
+        // Campos opcionales
+        $validated['telefono'] = Security::sanitizeInput($data['telefono'] ?? '');
+        $validated['direccion'] = Security::sanitizeInput($data['direccion'] ?? '');
+        
+        // Cliente_id se valida en validateClientLogic
+        if (!empty($data['cliente_id'])) {
+            $validated['cliente_id'] = (int)$data['cliente_id'];
+        }
 
-        return $errors;
+        return !empty($errors) ? $errors : $validated;
     }
 
     /**
@@ -862,6 +909,86 @@ class UserController
         } catch (Exception $e) {
             error_log("Error en UserController::validateUserCheck: " . $e->getMessage());
             echo json_encode(['valid' => false, 'message' => 'Error de validación']);
+        }
+    }
+
+    /**
+     * GAP 1 y GAP 2: Validar lógica de usuarios cliente
+     */
+    private function validateClientLogic(array $data, array $validated): array
+    {
+        $errors = [];
+        
+        if (empty($validated['usuario_tipo_id'])) {
+            return $errors; // No se puede validar sin tipo de usuario
+        }
+        
+        $tipoUsuario = $this->getUserTypeName($validated['usuario_tipo_id']);
+        
+        // GAP 2: Usuarios de empresa propietaria NO deben tener cliente_id
+        if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
+            if (!empty($data['cliente_id'])) {
+                $errors['cliente_id'] = "Usuarios tipo '$tipoUsuario' no deben tener cliente asignado";
+            }
+        }
+        
+        // GAP 1: Usuarios de cliente deben tener cliente_id y validaciones especiales
+        if (in_array($tipoUsuario, ['client', 'counterparty'])) {
+            if (empty($data['cliente_id'])) {
+                $errors['cliente_id'] = "Usuario tipo '$tipoUsuario' debe tener un cliente asignado";
+            } else {
+                $clientId = (int)$data['cliente_id'];
+                
+                // Validar que el cliente existe
+                if (!$this->clientExists($clientId)) {
+                    $errors['cliente_id'] = 'El cliente seleccionado no existe';
+                } else {
+                    // Validaciones especiales según tipo de usuario
+                    if ($tipoUsuario === 'client') {
+                        // GAP 1: Usuario 'client' debe tener mismo RUT que empresa
+                        if (!empty($validated['rut']) && !$this->userModel->validateClientUserRut($validated['rut'], $clientId)) {
+                            $errors['rut'] = 'El RUT de la persona debe coincidir con el RUT del cliente seleccionado';
+                        }
+                    } elseif ($tipoUsuario === 'counterparty') {
+                        // GAP 1: Usuario 'counterparty' debe estar en cliente_contrapartes
+                        // Para creación, necesitamos validar esto después de crear la persona
+                        // Marcar para validación posterior
+                        $validated['_validate_counterparty'] = true;
+                    }
+                }
+            }
+        }
+        
+        return $errors;
+    }
+
+    /**
+     * Obtener nombre del tipo de usuario por ID
+     */
+    private function getUserTypeName(int $userTypeId): string
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT nombre FROM usuario_tipos WHERE id = ?");
+            $stmt->execute([$userTypeId]);
+            return $stmt->fetchColumn() ?: '';
+        } catch (Exception $e) {
+            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
+     * Verificar si un cliente existe
+     */
+    private function clientExists(int $clientId): bool
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clientes WHERE id = ? AND estado_tipo_id IN (1, 2)");
+            $stmt->execute([$clientId]);
+            return $stmt->fetchColumn() > 0;
+        } catch (Exception $e) {
+            error_log("Error verificando cliente: " . $e->getMessage());
+            return false;
         }
     }
 }

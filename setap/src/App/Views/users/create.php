@@ -189,6 +189,45 @@
                                 </div>
                             </div>
 
+                            <!-- GAP 1 y GAP 2: Selección de Cliente -->
+                            <div class="row" id="client-selection" style="display: none;">
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-building"></i> Asignación de Cliente
+                                    </h5>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="cliente_id" class="form-label">Cliente <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="cliente_id" name="cliente_id">
+                                            <option value="">Seleccionar cliente...</option>
+                                            <?php if (isset($clients) && is_array($clients)): ?>
+                                                <?php foreach ($clients as $client): ?>
+                                                    <option value="<?= $client['id'] ?>" data-rut="<?= htmlspecialchars($client['rut'] ?? '') ?>">
+                                                        <?= htmlspecialchars($client['razon_social']) ?>
+                                                        <?= !empty($client['rut']) ? ' - RUT: ' . htmlspecialchars($client['rut']) : '' ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                        <div class="form-text">
+                                            Seleccione el cliente al que pertenece este usuario.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12" id="client-validation-info" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <strong>Nota importante:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li><strong>Usuario tipo "client":</strong> El RUT de la persona debe coincidir con el RUT del cliente.</li>
+                                            <li><strong>Usuario tipo "counterparty":</strong> La persona debe estar registrada como contraparte del cliente.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Botones -->
                             <div class="row">
                                 <div class="col-12">
@@ -325,6 +364,71 @@
                 }, 500);
             } else {
                 div.innerHTML = '';
+            }
+        });
+
+        // GAP 1 y GAP 2: Manejar selección de tipo de usuario
+        document.getElementById('usuario_tipo_id').addEventListener('change', function(e) {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const userType = selectedOption.text.split(' - ')[0].trim();
+            const clientSection = document.getElementById('client-selection');
+            const clientSelect = document.getElementById('cliente_id');
+            const validationInfo = document.getElementById('client-validation-info');
+            
+            // Tipos de usuario que requieren cliente
+            const clientUserTypes = ['client', 'counterparty'];
+            const companyUserTypes = ['admin', 'planner', 'supervisor', 'executor'];
+            
+            if (clientUserTypes.includes(userType.toLowerCase())) {
+                // Mostrar selección de cliente
+                clientSection.style.display = 'block';
+                clientSelect.required = true;
+                validationInfo.style.display = 'block';
+            } else {
+                // Ocultar selección de cliente
+                clientSection.style.display = 'none';
+                clientSelect.required = false;
+                clientSelect.value = '';
+                validationInfo.style.display = 'none';
+            }
+        });
+        
+        // Validar RUT vs Cliente para usuarios tipo 'client'
+        document.getElementById('cliente_id').addEventListener('change', function(e) {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const clientRut = selectedOption.getAttribute('data-rut');
+            const userTypeSelect = document.getElementById('usuario_tipo_id');
+            const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim();
+            const rutInput = document.getElementById('rut');
+            
+            if (userType.toLowerCase() === 'client' && clientRut && rutInput.value) {
+                const cleanClientRut = clientRut.replace(/[^0-9kK]/g, '').toLowerCase();
+                const cleanPersonRut = rutInput.value.replace(/[^0-9kK]/g, '').toLowerCase();
+                
+                if (cleanClientRut !== cleanPersonRut) {
+                    alert('Atención: El RUT de la persona debe coincidir con el RUT del cliente seleccionado para usuarios tipo "client".');
+                }
+            }
+        });
+        
+        // Validar RUT vs Cliente cuando se modifica el RUT
+        document.getElementById('rut').addEventListener('blur', function(e) {
+            const clientSelect = document.getElementById('cliente_id');
+            const userTypeSelect = document.getElementById('usuario_tipo_id');
+            
+            if (clientSelect.value && userTypeSelect.value) {
+                const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+                const clientRut = selectedOption.getAttribute('data-rut');
+                const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim();
+                
+                if (userType.toLowerCase() === 'client' && clientRut && e.target.value) {
+                    const cleanClientRut = clientRut.replace(/[^0-9kK]/g, '').toLowerCase();
+                    const cleanPersonRut = e.target.value.replace(/[^0-9kK]/g, '').toLowerCase();
+                    
+                    if (cleanClientRut !== cleanPersonRut) {
+                        alert('Atención: El RUT de la persona debe coincidir con el RUT del cliente seleccionado para usuarios tipo "client".');
+                    }
+                }
             }
         });
 

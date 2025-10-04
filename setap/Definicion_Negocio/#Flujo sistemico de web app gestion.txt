@@ -35,4 +35,29 @@
 - Cuarto la tarea puede asociarse al proyecto y no activarse de inmediato.
 - Las tareas para ser ejecutadas y/o registrarle eventos debe estar su estado_tipo_id en los siguientes valores o estados: 2: activo, 5: iniciado, 6: terminado, 7: rechazado, 8: aprobado (en este caso solo el usuario admin y planner puede hacerle cambios)
 
+Estados en estado_tipos
+# id, nombre, descripcion
+'1', 'creado', 'Registro en proceso de definición, aún no operativo'
+'2', 'activo', 'Registro completo y en operación'
+'3', 'inactivo', 'Registro completo pero suspendido temporalmente'
+'4', 'eliminado', 'Registro dado de baja lógicamente'
+'5', 'iniciado', 'Proyecto o tarea ha comenzado ejecución'
+'6', 'terminado', 'Proyecto o tarea finalizada, en espera de aprobación'
+'7', 'rechazado', 'Tarea rechazada por supervisor'
+'8', 'aprobado', 'Proyecto o tarea validada y aceptada'
+
+Estados posibles en tabla tareas
+1, 2, 3, 4
+Estados posibles en tabla proyecto_tareas:
+1, 2, 3, 4, 5, 6, 7, 8
+
+Tipos de tareas en tabla tarea_tipos
+# id, nombre
+'1', 'intelectual'
+'2', 'physical'
+
+Al proyecto no se le lleva traza de producto o servicio o construccion: Por que no facturaremos con este sistema web.
+Las tareas recurrentes se determinan solo por que ocurren mas de una vez en el mismo periodo de un proyecto, con una frecuencia determinada. diariamente, semanalmente, quincenalmente, etc. Requiero que el sistema permita al usuario indicar cuando una tarea se repetira diariamente, indicando el dia de la semana que ocurrira (semanal, quincenal, mensual, trimestral, semestral, anual), Cada X meses, Cada X dias: Con esto el sistema debera generar N fechas donde se realizara dicha tarea en proyecto_tareas.
+
+
 
