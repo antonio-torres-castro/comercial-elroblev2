@@ -2,17 +2,24 @@
 use App\Helpers\Security; 
 use App\Models\Menu;
 
-// Obtener menús dinámicos del usuario actual
-$navigationMenus = [];
+// Obtener menús agrupados del usuario actual
+$groupedMenus = [];
+$ungroupedMenus = [];
 try {
     if (Security::isAuthenticated()) {
         $menuModel = new Menu();
         $userId = $_SESSION['user_id'] ?? 0;
-        $navigationMenus = $menuModel->getMenusForUser($userId);
+        
+        // Obtener menús agrupados (con desplegables)
+        $groupedMenus = $menuModel->getGroupedMenusForUser($userId);
+        
+        // Obtener menús sin grupo (individuales)
+        $ungroupedMenus = $menuModel->getUngroupedMenusForUser($userId);
     }
 } catch (Exception $e) {
     error_log("Error obteniendo menús de navegación: " . $e->getMessage());
-    $navigationMenus = [];
+    $groupedMenus = [];
+    $ungroupedMenus = [];
 }
 ?>
 
@@ -36,20 +43,45 @@ try {
                     </a>
                 </li>
                 
-                <!-- Menús dinámicos desde base de datos -->
-                <?php if (!empty($navigationMenus)): ?>
-                    <?php foreach ($navigationMenus as $menu): ?>
-                        <?php if (!empty($menu['url']) && $menu['url'] !== '/home'): ?>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" href="<?php echo htmlspecialchars($menu['url']); ?>">
-                                    <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?>"></i>
-                                    <?php echo htmlspecialchars($menu['display']); ?>
-                                </a>
-                            </li>
-                        <?php endif; ?>
+                <!-- Menús agrupados con desplegables -->
+                <?php if (!empty($groupedMenus)): ?>
+                    <?php foreach ($groupedMenus as $groupData): ?>
+                        <?php $group = $groupData['group']; ?>
+                        <?php $menus = $groupData['menus']; ?>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown<?php echo $group['id']; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-<?php echo htmlspecialchars($group['icono'] ?? 'folder'); ?>"></i>
+                                <?php echo htmlspecialchars($group['display']); ?>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <?php foreach ($menus as $menu): ?>
+                                    <li>
+                                        <a class="dropdown-item" href="<?php echo htmlspecialchars($menu['url']); ?>">
+                                            <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?>"></i>
+                                            <?php echo htmlspecialchars($menu['display']); ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </li>
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <!-- Menús por defecto si no hay configuración dinámica -->
+                <?php endif; ?>
+                
+                <!-- Menús individuales (sin grupo) -->
+                <?php if (!empty($ungroupedMenus)): ?>
+                    <?php foreach ($ungroupedMenus as $menu): ?>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="<?php echo htmlspecialchars($menu['url']); ?>">
+                                <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?>"></i>
+                                <?php echo htmlspecialchars($menu['display']); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                
+                <!-- Menús por defecto si no hay configuración dinámica -->
+                <?php if (empty($groupedMenus) && empty($ungroupedMenus)): ?>
                     <?php if (Security::hasMenuAccess('manage_users')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="/users">
@@ -93,7 +125,7 @@ try {
                 
                 <!-- Dropdown de usuario -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle"></i> 
                         <?php echo htmlspecialchars($_SESSION['nombre_completo'] ?? $_SESSION['username'] ?? 'Usuario'); ?>
                     </a>
@@ -115,3 +147,6 @@ try {
         </div>
     </div>
 </nav>
+
+<!-- Script para Bootstrap dropdowns -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -34,6 +34,7 @@ class Menu
                     m.fecha_creacion,
                     m.fecha_modificacion,
                     m.display,
+                    m.menu_grupo_id,
                     et.nombre as estado_nombre
                 FROM {$this->table} m
                 LEFT JOIN estado_tipos et ON m.estado_tipo_id = et.id
@@ -56,6 +57,11 @@ class Menu
             if (!empty($filters['display'])) {
                 $query .= " AND m.display LIKE ?";
                 $params[] = '%' . $filters['display'] . '%';
+            }
+
+            if (!empty($filters['menu_grupo_id'])) {
+                $query .= " AND m.menu_grupo_id = ?";
+                $params[] = $filters['menu_grupo_id'];
             }
 
             $query .= " ORDER BY m.orden ASC, m.nombre ASC";
@@ -87,7 +93,8 @@ class Menu
                     estado_tipo_id,
                     fecha_creacion,
                     fecha_modificacion,
-                    display
+                    display,
+                    menu_grupo_id
                 FROM {$this->table} 
                 WHERE id = ?
             ";
@@ -118,8 +125,9 @@ class Menu
                     orden, 
                     estado_tipo_id, 
                     display, 
+                    menu_grupo_id,
                     fecha_creacion
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ";
 
             $stmt = $this->db->prepare($query);
@@ -130,7 +138,8 @@ class Menu
                 $data['icono'] ?? null,
                 $data['orden'] ?? 0,
                 $data['estado_tipo_id'] ?? 1,
-                $data['display'] ?? $data['nombre'] ?? ''
+                $data['display'] ?? $data['nombre'] ?? '',
+                $data['menu_grupo_id'] ?? null
             ]);
 
             return (int)$this->db->lastInsertId();
@@ -156,6 +165,7 @@ class Menu
                     orden = ?, 
                     estado_tipo_id = ?, 
                     display = ?, 
+                    menu_grupo_id = ?,
                     fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -169,6 +179,7 @@ class Menu
                 $data['orden'] ?? 0,
                 $data['estado_tipo_id'] ?? 1,
                 $data['display'] ?? $data['nombre'] ?? '',
+                $data['menu_grupo_id'] ?? null,
                 $id
             ]);
         } catch (Exception $e) {
@@ -384,6 +395,137 @@ class Menu
             return $userMenus;
         } catch (Exception $e) {
             error_log("Error al obtener menús de usuario: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener grupos de menús activos
+     */
+    public function getMenuGroups(): array
+    {
+        try {
+            $query = "
+                SELECT 
+                    id,
+                    nombre,
+                    descripcion,
+                    icono,
+                    orden,
+                    display
+                FROM menu_grupo 
+                WHERE estado_tipo_id = 2 
+                ORDER BY orden ASC, nombre ASC
+            ";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error al obtener grupos de menús: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener menús agrupados para navegación basado en permisos de usuario
+     */
+    public function getGroupedMenusForUser(int $userId): array
+    {
+        try {
+            $permissionService = new \App\Services\PermissionService();
+            
+            // Obtener grupos activos
+            $groups = $this->getMenuGroups();
+            
+            $groupedMenus = [];
+            
+            foreach ($groups as $group) {
+                // Obtener menús del grupo que el usuario tiene permisos para ver
+                $query = "
+                    SELECT 
+                        m.id,
+                        m.nombre,
+                        m.display,
+                        m.url,
+                        m.icono,
+                        m.orden
+                    FROM {$this->table} m
+                    WHERE m.menu_grupo_id = ?
+                    AND m.estado_tipo_id = 2 
+                    AND m.display IS NOT NULL 
+                    AND m.display != ''
+                    ORDER BY m.orden ASC, m.nombre ASC
+                ";
+
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([$group['id']]);
+                $groupMenus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // Filtrar menús según permisos del usuario
+                $userGroupMenus = [];
+                foreach ($groupMenus as $menu) {
+                    if ($permissionService->hasMenuAccess($userId, $menu['nombre'])) {
+                        $userGroupMenus[] = $menu;
+                    }
+                }
+
+                // Solo agregar el grupo si tiene menús visibles para el usuario
+                if (!empty($userGroupMenus)) {
+                    $groupedMenus[] = [
+                        'group' => $group,
+                        'menus' => $userGroupMenus
+                    ];
+                }
+            }
+            
+            return $groupedMenus;
+        } catch (Exception $e) {
+            error_log("Error al obtener menús agrupados de usuario: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener menús sin grupo (individuales) para navegación
+     */
+    public function getUngroupedMenusForUser(int $userId): array
+    {
+        try {
+            $permissionService = new \App\Services\PermissionService();
+            
+            $query = "
+                SELECT 
+                    m.id,
+                    m.nombre,
+                    m.display,
+                    m.url,
+                    m.icono,
+                    m.orden
+                FROM {$this->table} m
+                WHERE (m.menu_grupo_id IS NULL OR m.menu_grupo_id = 0)
+                AND m.estado_tipo_id = 2 
+                AND m.display IS NOT NULL 
+                AND m.display != ''
+                ORDER BY m.orden ASC, m.nombre ASC
+            ";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $ungroupedMenus = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Filtrar menús según permisos del usuario
+            $userUngroupedMenus = [];
+            foreach ($ungroupedMenus as $menu) {
+                if ($permissionService->hasMenuAccess($userId, $menu['nombre'])) {
+                    $userUngroupedMenus[] = $menu;
+                }
+            }
+            
+            return $userUngroupedMenus;
+        } catch (Exception $e) {
+            error_log("Error al obtener menús sin grupo de usuario: " . $e->getMessage());
             return [];
         }
     }

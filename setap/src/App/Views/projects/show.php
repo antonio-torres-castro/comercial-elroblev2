@@ -52,25 +52,7 @@
     </style>
 </head>
 <body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-setap">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-grid-3x3-gap"></i> SETAP
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light" href="/home">
-                    <i class="bi bi-house"></i> Home
-                </a>
-                <a class="nav-link text-light" href="/projects">
-                    <i class="bi bi-folder"></i> Proyectos
-                </a>
-                <a class="nav-link text-light" href="/logout">
-                    <i class="bi bi-box-arrow-right"></i> Salir
-                </a>
-            </div>
-        </div>
-    </nav>
+    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
         <!-- Header del Proyecto -->

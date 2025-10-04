@@ -10,25 +10,7 @@
 </head>
 <body>
     <?php use App\Helpers\Security; ?>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-setap">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-grid-3x3-gap"></i> SETAP
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link text-light" href="/home">
-                    <i class="bi bi-house"></i> Home
-                </a>
-                <a class="nav-link text-light" href="/menus">
-                    <i class="bi bi-list-ul"></i> Menús
-                </a>
-                <a class="nav-link text-light" href="/logout">
-                    <i class="bi bi-box-arrow-right"></i> Salir
-                </a>
-            </div>
-        </div>
-    </nav>
+    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
         <div class="row">
