@@ -51,7 +51,7 @@ use App\Helpers\Security;
         .search-box {
             max-width: 300px;
         }
-
+        
         .main-content {
             margin-top: 2rem;
         }
@@ -64,203 +64,203 @@ use App\Helpers\Security;
 
     <div class="container-fluid mt-4">
         <main class="main-content">
-            <!-- Header y Filtros -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h2>
-                        <i class="bi bi-people"></i> Gestión de Usuarios
-                        <span class="badge bg-secondary ms-2"><?= count($users) ?> usuarios</span>
-                    </h2>
-                </div>
-                <div class="col-md-6 text-end">
-                    <?php if (Security::hasPermission('Create')): ?>
-                        <a href="/users/create" class="btn btn-setap-primary">
-                            <i class="bi bi-person-plus"></i> Nuevo Usuario
-                        </a>
-                    <?php endif; ?>
-                </div>
+        <!-- Header y Filtros -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>
+                    <i class="bi bi-people"></i> Gestión de Usuarios
+                    <span class="badge bg-secondary ms-2"><?= count($users) ?> usuarios</span>
+                </h2>
             </div>
+            <div class="col-md-6 text-end">
+                <?php if (Security::hasPermission('Create')): ?>
+                    <a href="/users/create" class="btn btn-setap-primary">
+                        <i class="bi bi-person-plus"></i> Nuevo Usuario
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
 
-            <!-- Alertas -->
-            <?php if (!empty($success)): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+        <!-- Alertas -->
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
 
-            <?php if (!empty($error)): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
 
-            <!-- Filtros y Búsqueda -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <div class="input-group search-box">
-                                <input type="text" class="form-control" id="searchInput"
-                                    placeholder="Buscar usuarios...">
-                                <button class="btn btn-outline-secondary" type="button">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select" id="roleFilter">
-                                <option value="">Todos los roles</option>
-                                <?php
-                                $uniqueRoles = array_unique(array_column($users, 'rol'));
-                                foreach ($uniqueRoles as $role):
-                                ?>
-                                    <option value="<?= htmlspecialchars($role) ?>">
-                                        <?= htmlspecialchars(ucfirst($role)) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-outline-secondary" id="clearFilters">
-                                <i class="bi bi-x-circle"></i> Limpiar
+        <!-- Filtros y Búsqueda -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group search-box">
+                            <input type="text" class="form-control" id="searchInput"
+                                placeholder="Buscar usuarios...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i>
                             </button>
                         </div>
-                        <div class="col-md-3 text-end">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-secondary" id="exportBtn">
-                                    <i class="bi bi-download"></i> Exportar
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" id="refreshBtn">
-                                    <i class="bi bi-arrow-clockwise"></i> Actualizar
-                                </button>
-                            </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="roleFilter">
+                            <option value="">Todos los roles</option>
+                            <?php
+                            $uniqueRoles = array_unique(array_column($users, 'rol'));
+                            foreach ($uniqueRoles as $role):
+                            ?>
+                                <option value="<?= htmlspecialchars($role) ?>">
+                                    <?= htmlspecialchars(ucfirst($role)) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </button>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary" id="exportBtn">
+                                <i class="bi bi-download"></i> Exportar
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="refreshBtn">
+                                <i class="bi bi-arrow-clockwise"></i> Actualizar
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Tabla de Usuarios -->
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="usersTable">
-                            <thead class="table-setap-primary">
+        <!-- Tabla de Usuarios -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="usersTable">
+                        <thead class="table-setap-primary">
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Información Personal</th>
+                                <th>Contacto</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Registro</th>
+                                <th class="table-actions">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($users)): ?>
                                 <tr>
-                                    <th>Usuario</th>
-                                    <th>Información Personal</th>
-                                    <th>Contacto</th>
-                                    <th>Rol</th>
-                                    <th>Estado</th>
-                                    <th>Registro</th>
-                                    <th class="table-actions">Acciones</th>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox"></i> No hay usuarios registrados
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($users)): ?>
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">
-                                            <i class="bi bi-inbox"></i> No hay usuarios registrados
+                            <?php else: ?>
+                                <?php foreach ($users as $user): ?>
+                                    <tr data-user-id="<?= $user['id'] ?>">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-avatar me-3">
+                                                    <?= strtoupper(substr($user['nombre_completo'], 0, 2)) ?>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold"><?= htmlspecialchars($user['nombre_usuario']) ?></div>
+                                                    <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold"><?= htmlspecialchars($user['nombre_completo']) ?></div>
+                                            <div class="text-muted small">RUT: <?= htmlspecialchars($user['rut']) ?></div>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($user['telefono'])): ?>
+                                                <div><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['telefono']) ?></div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($user['direccion'])): ?>
+                                                <div class="text-muted small">
+                                                    <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($user['direccion']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $badgeClass = match ($user['rol']) {
+                                                'admin' => 'bg-danger',
+                                                'planner' => 'bg-primary',
+                                                'supervisor' => 'bg-warning text-dark',
+                                                'executor' => 'bg-success',
+                                                'client' => 'bg-info',
+                                                default => 'bg-secondary'
+                                            };
+                                            ?>
+                                            <span class="badge <?= $badgeClass ?> role-badge">
+                                                <?= htmlspecialchars(ucfirst($user['rol'])) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $statusClass = strtolower($user['estado']) === 'activo' ? 'success' : 'warning';
+                                            $statusText = $user['estado'];
+                                            ?>
+                                            <span class="badge bg-<?= $statusClass ?>">
+                                                <i class="bi bi-circle-fill"></i> <?= htmlspecialchars($statusText) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="small text-muted">
+                                                <?= date('d/m/Y', strtotime($user['fecha_Creado'])) ?>
+                                            </div>
+                                        </td>
+                                        <td class="table-actions">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <?php if (Security::hasPermission('Read')): ?>
+                                                    <button type="button" class="btn btn-outline-info"
+                                                        onclick="viewUser(<?= $user['id'] ?>)"
+                                                        title="Ver detalles">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                <?php endif; ?>
+
+                                                <?php if (Security::hasPermission('Modify')): ?>
+                                                    <a href="/users/edit?id=<?= $user['id'] ?>"
+                                                        class="btn btn-outline-warning"
+                                                        title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="/users/permissions?user_id=<?= $user['id'] ?>"
+                                                        class="btn btn-outline-secondary"
+                                                        title="Permisos">
+                                                        <i class="bi bi-shield-lock"></i>
+                                                    </a>
+                                                <?php endif; ?>
+
+                                                <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
+                                                    <button type="button" class="btn btn-outline-danger"
+                                                        onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
+                                                        title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
-                                <?php else: ?>
-                                    <?php foreach ($users as $user): ?>
-                                        <tr data-user-id="<?= $user['id'] ?>">
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="user-avatar me-3">
-                                                        <?= strtoupper(substr($user['nombre_completo'], 0, 2)) ?>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-bold"><?= htmlspecialchars($user['nombre_usuario']) ?></div>
-                                                        <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="fw-bold"><?= htmlspecialchars($user['nombre_completo']) ?></div>
-                                                <div class="text-muted small">RUT: <?= htmlspecialchars($user['rut']) ?></div>
-                                            </td>
-                                            <td>
-                                                <?php if (!empty($user['telefono'])): ?>
-                                                    <div><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['telefono']) ?></div>
-                                                <?php endif; ?>
-                                                <?php if (!empty($user['direccion'])): ?>
-                                                    <div class="text-muted small">
-                                                        <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($user['direccion']) ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                $badgeClass = match ($user['rol']) {
-                                                    'admin' => 'bg-danger',
-                                                    'planner' => 'bg-primary',
-                                                    'supervisor' => 'bg-warning text-dark',
-                                                    'executor' => 'bg-success',
-                                                    'client' => 'bg-info',
-                                                    default => 'bg-secondary'
-                                                };
-                                                ?>
-                                                <span class="badge <?= $badgeClass ?> role-badge">
-                                                    <?= htmlspecialchars(ucfirst($user['rol'])) ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                $statusClass = strtolower($user['estado']) === 'activo' ? 'success' : 'warning';
-                                                $statusText = $user['estado'];
-                                                ?>
-                                                <span class="badge bg-<?= $statusClass ?>">
-                                                    <i class="bi bi-circle-fill"></i> <?= htmlspecialchars($statusText) ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="small text-muted">
-                                                    <?= date('d/m/Y', strtotime($user['fecha_Creado'])) ?>
-                                                </div>
-                                            </td>
-                                            <td class="table-actions">
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    <?php if (Security::hasPermission('Read')): ?>
-                                                        <button type="button" class="btn btn-outline-info"
-                                                            onclick="viewUser(<?= $user['id'] ?>)"
-                                                            title="Ver detalles">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                    <?php endif; ?>
-
-                                                    <?php if (Security::hasPermission('Modify')): ?>
-                                                        <a href="/users/edit?id=<?= $user['id'] ?>"
-                                                            class="btn btn-outline-warning"
-                                                            title="Editar">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </a>
-                                                        <a href="/users/permissions?user_id=<?= $user['id'] ?>"
-                                                            class="btn btn-outline-secondary"
-                                                            title="Permisos">
-                                                            <i class="bi bi-shield-lock"></i>
-                                                        </a>
-                                                    <?php endif; ?>
-
-                                                    <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
-                                                        <button type="button" class="btn btn-outline-danger"
-                                                            onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
-                                                            title="Eliminar">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
     </div>
 
     <!-- Modal para Ver Usuario -->

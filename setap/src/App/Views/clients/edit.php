@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
-
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -56,23 +54,23 @@
 
                                     <!-- Información Básica -->
                                     <h6 class="border-bottom pb-2 mb-3">Información Básica</h6>
-
+                                    
                                     <div class="row g-3 mb-4">
                                         <div class="col-md-6">
                                             <label for="razon_social" class="form-label">
                                                 Razón Social <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control" id="razon_social" name="razon_social"
-                                                value="<?php echo htmlspecialchars($data['client']['razon_social'] ?? ''); ?>"
-                                                required maxlength="150">
+                                            <input type="text" class="form-control" id="razon_social" name="razon_social" 
+                                                   value="<?php echo htmlspecialchars($data['client']['razon_social'] ?? ''); ?>" 
+                                                   required maxlength="150">
                                             <div class="form-text">Nombre oficial de la empresa</div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="rut" class="form-label">RUT</label>
-                                            <input type="text" class="form-control" id="rut" name="rut"
-                                                value="<?php echo htmlspecialchars($data['client']['rut'] ?? ''); ?>"
-                                                maxlength="20" placeholder="12.345.678-9">
+                                            <input type="text" class="form-control" id="rut" name="rut" 
+                                                   value="<?php echo htmlspecialchars($data['client']['rut'] ?? ''); ?>" 
+                                                   maxlength="20" placeholder="12.345.678-9">
                                             <div class="form-text">RUT de la empresa (opcional)</div>
                                             <div id="rutError" class="text-danger" style="display: none;"></div>
                                         </div>
@@ -80,54 +78,54 @@
 
                                     <!-- Contacto -->
                                     <h6 class="border-bottom pb-2 mb-3">Información de Contacto</h6>
-
+                                    
                                     <div class="row g-3 mb-4">
                                         <div class="col-md-6">
                                             <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control" id="email" name="email"
-                                                value="<?php echo htmlspecialchars($data['client']['email'] ?? ''); ?>"
-                                                maxlength="150">
+                                            <input type="email" class="form-control" id="email" name="email" 
+                                                   value="<?php echo htmlspecialchars($data['client']['email'] ?? ''); ?>" 
+                                                   maxlength="150">
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="telefono" class="form-label">Teléfono</label>
-                                            <input type="text" class="form-control" id="telefono" name="telefono"
-                                                value="<?php echo htmlspecialchars($data['client']['telefono'] ?? ''); ?>"
-                                                maxlength="20">
+                                            <input type="text" class="form-control" id="telefono" name="telefono" 
+                                                   value="<?php echo htmlspecialchars($data['client']['telefono'] ?? ''); ?>" 
+                                                   maxlength="20">
                                         </div>
                                     </div>
 
                                     <div class="row g-3 mb-4">
                                         <div class="col-12">
                                             <label for="direccion" class="form-label">Dirección</label>
-                                            <textarea class="form-control" id="direccion" name="direccion"
-                                                rows="2" maxlength="255"><?php echo htmlspecialchars($data['client']['direccion'] ?? ''); ?></textarea>
+                                            <textarea class="form-control" id="direccion" name="direccion" 
+                                                      rows="2" maxlength="255"><?php echo htmlspecialchars($data['client']['direccion'] ?? ''); ?></textarea>
                                         </div>
                                     </div>
 
                                     <!-- Fechas de Contrato -->
                                     <h6 class="border-bottom pb-2 mb-3">Información de Contrato</h6>
-
+                                    
                                     <div class="row g-3 mb-4">
                                         <div class="col-md-4">
                                             <label for="fecha_inicio_contrato" class="form-label">Fecha Inicio Contrato</label>
-                                            <input type="date" class="form-control" id="fecha_inicio_contrato"
-                                                name="fecha_inicio_contrato"
-                                                value="<?php echo htmlspecialchars($data['client']['fecha_inicio_contrato'] ?? ''); ?>">
+                                            <input type="date" class="form-control" id="fecha_inicio_contrato" 
+                                                   name="fecha_inicio_contrato" 
+                                                   value="<?php echo htmlspecialchars($data['client']['fecha_inicio_contrato'] ?? ''); ?>">
                                         </div>
 
                                         <div class="col-md-4">
                                             <label for="fecha_facturacion" class="form-label">Fecha Facturación</label>
-                                            <input type="date" class="form-control" id="fecha_facturacion"
-                                                name="fecha_facturacion"
-                                                value="<?php echo htmlspecialchars($data['client']['fecha_facturacion'] ?? ''); ?>">
+                                            <input type="date" class="form-control" id="fecha_facturacion" 
+                                                   name="fecha_facturacion" 
+                                                   value="<?php echo htmlspecialchars($data['client']['fecha_facturacion'] ?? ''); ?>">
                                         </div>
 
                                         <div class="col-md-4">
                                             <label for="fecha_termino_contrato" class="form-label">Fecha Término Contrato</label>
-                                            <input type="date" class="form-control" id="fecha_termino_contrato"
-                                                name="fecha_termino_contrato"
-                                                value="<?php echo htmlspecialchars($data['client']['fecha_termino_contrato'] ?? ''); ?>">
+                                            <input type="date" class="form-control" id="fecha_termino_contrato" 
+                                                   name="fecha_termino_contrato" 
+                                                   value="<?php echo htmlspecialchars($data['client']['fecha_termino_contrato'] ?? ''); ?>">
                                         </div>
                                     </div>
 
@@ -137,8 +135,8 @@
                                             <label for="estado_tipo_id" class="form-label">Estado</label>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                                 <?php foreach ($data['statusTypes'] as $status): ?>
-                                                    <option value="<?php echo $status['id']; ?>"
-                                                        <?php echo $data['client']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
+                                                    <option value="<?php echo $status['id']; ?>" 
+                                                            <?php echo $data['client']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($status['nombre']); ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -226,14 +224,14 @@
                                                         </td>
                                                         <td>
                                                             <div class="btn-group btn-group-sm">
-                                                                <button type="button" class="btn btn-outline-setap-primary"
-                                                                    onclick="editCounterpartie(<?php echo $cp['id']; ?>)"
-                                                                    title="Editar">
+                                                                <button type="button" class="btn btn-outline-setap-primary" 
+                                                                        onclick="editCounterpartie(<?php echo $cp['id']; ?>)" 
+                                                                        title="Editar">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </button>
-                                                                <button type="button" class="btn btn-outline-danger"
-                                                                    onclick="removeCounterpartie(<?php echo $cp['id']; ?>, '<?php echo addslashes($cp['persona_nombre']); ?>')"
-                                                                    title="Eliminar">
+                                                                <button type="button" class="btn btn-outline-danger" 
+                                                                        onclick="removeCounterpartie(<?php echo $cp['id']; ?>, '<?php echo addslashes($cp['persona_nombre']); ?>')"
+                                                                        title="Eliminar">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </div>
@@ -293,8 +291,8 @@
                                 <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Acciones Avanzadas</h6>
                             </div>
                             <div class="card-body">
-                                <button type="button" class="btn btn-outline-danger btn-sm w-100"
-                                    onclick="confirmDeleteClient(<?php echo $data['client']['id']; ?>, '<?php echo addslashes($data['client']['razon_social']); ?>')">
+                                <button type="button" class="btn btn-outline-danger btn-sm w-100" 
+                                        onclick="confirmDeleteClient(<?php echo $data['client']['id']; ?>, '<?php echo addslashes($data['client']['razon_social']); ?>')">
                                     <i class="bi bi-trash"></i> Eliminar Cliente
                                 </button>
                                 <div class="form-text">
@@ -350,15 +348,15 @@
             // Formatear RUT mientras se escribe
             rutInput.addEventListener('input', function() {
                 let value = this.value.replace(/[^0-9kK]/g, '');
-
+                
                 if (value.length > 1) {
                     // Separar cuerpo y dígito verificador
                     let body = value.slice(0, -1);
                     let dv = value.slice(-1).toUpperCase();
-
+                    
                     // Formatear cuerpo con puntos
                     body = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
+                    
                     // Unir con guión
                     this.value = body + '-' + dv;
                 }
@@ -398,7 +396,7 @@
         function validateRut(rut) {
             // Limpiar RUT
             rut = rut.replace(/[^0-9kK]/g, '');
-
+            
             if (rut.length < 2) return false;
 
             let body = rut.slice(0, -1);
@@ -414,7 +412,7 @@
             }
 
             let expectedDv = 11 - (sum % 11);
-
+            
             if (expectedDv === 11) expectedDv = '0';
             else if (expectedDv === 10) expectedDv = 'K';
             else expectedDv = expectedDv.toString();
@@ -425,7 +423,7 @@
         function confirmDeleteClient(id, name) {
             document.getElementById('clientNameDelete').textContent = name;
             document.getElementById('deleteClientId').value = id;
-
+            
             const modal = new bootstrap.Modal(document.getElementById('deleteClientModal'));
             modal.show();
         }
@@ -449,5 +447,4 @@
         }
     </script>
 </body>
-
 </html>

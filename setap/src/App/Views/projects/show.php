@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,26 +16,21 @@
             border-left: 4px solid;
             transition: transform 0.2s;
         }
-
         .stat-card:hover {
             transform: translateY(-2px);
         }
-
         .task-item {
             border-left: 3px solid;
             transition: all 0.2s;
         }
-
         .task-item:hover {
             background-color: var(--setap-bg-light);
         }
-
         .timeline-item {
             position: relative;
             padding-left: 30px;
             margin-bottom: 20px;
         }
-
         .timeline-item::before {
             content: '';
             position: absolute;
@@ -46,7 +40,6 @@
             width: 2px;
             background: var(--setap-border-light);
         }
-
         .timeline-item::after {
             content: '';
             position: absolute;
@@ -57,13 +50,11 @@
             border-radius: 50%;
             background: var(--setap-primary);
         }
-
         .timeline-item:last-child::before {
             display: none;
         }
     </style>
 </head>
-
 <body class="bg-light">
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -74,7 +65,7 @@
                 <h2>
                     <i class="bi bi-building"></i> <?= htmlspecialchars($project['cliente_nombre']) ?>
                     <?php
-                    $statusClass = match ($project['estado_tipo_id']) {
+                    $statusClass = match($project['estado_tipo_id']) {
                         1 => 'bg-setap-primary',    // Creado
                         2 => 'bg-success',    // Activo
                         3 => 'bg-warning',    // Inactivo
@@ -159,9 +150,9 @@
                         <h5><i class="bi bi-graph-up"></i> Progreso General</h5>
                     </div>
                     <div class="card-body">
-                        <?php
+                        <?php 
                         $progress = $stats['progreso_porcentaje'] ?? 0;
-                        $progressClass = match (true) {
+                        $progressClass = match(true) {
                             $progress >= 80 => 'bg-success',
                             $progress >= 50 => 'bg-setap-primary',
                             $progress >= 25 => 'bg-warning',
@@ -221,7 +212,7 @@
                         <?php else: ?>
                             <?php foreach ($tasks as $task): ?>
                                 <?php
-                                $taskBorderClass = match ($task['estado_tipo_id']) {
+                                $taskBorderClass = match($task['estado_tipo_id']) {
                                     5 => 'border-setap-primary-light',     // Iniciado
                                     6 => 'border-warning',  // Terminado
                                     7 => 'border-danger',   // Rechazado
@@ -252,13 +243,13 @@
                                             </div>
                                         </div>
                                         <div class="text-end">
-                                            <span class="badge bg-<?= match ($task['estado_tipo_id']) {
-                                                                        5 => 'setap-primary-light',
-                                                                        6 => 'warning',
-                                                                        7 => 'danger',
-                                                                        8 => 'success',
-                                                                        default => 'secondary'
-                                                                    } ?>">
+                                            <span class="badge bg-<?= match($task['estado_tipo_id']) {
+                                                5 => 'setap-primary-light',
+                                                6 => 'warning',
+                                                7 => 'danger',
+                                                8 => 'success',
+                                                default => 'secondary'
+                                            } ?>">
                                                 <?= htmlspecialchars($task['estado_nombre']) ?>
                                             </span>
                                             <div class="mt-2">
@@ -289,7 +280,7 @@
                         <?php endif; ?>
                         <?php if ($project['contraparte_email']): ?>
                             <p class="mb-1">
-                                <i class="bi bi-envelope"></i>
+                                <i class="bi bi-envelope"></i> 
                                 <a href="mailto:<?= htmlspecialchars($project['contraparte_email']) ?>">
                                     <?= htmlspecialchars($project['contraparte_email']) ?>
                                 </a>
@@ -297,7 +288,7 @@
                         <?php endif; ?>
                         <?php if ($project['contraparte_telefono']): ?>
                             <p class="mb-1">
-                                <i class="bi bi-telephone"></i>
+                                <i class="bi bi-telephone"></i> 
                                 <a href="tel:<?= htmlspecialchars($project['contraparte_telefono']) ?>">
                                     <?= htmlspecialchars($project['contraparte_telefono']) ?>
                                 </a>
@@ -308,19 +299,19 @@
 
                 <!-- Feriados del Proyecto -->
                 <?php if (!empty($holidays)): ?>
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5><i class="bi bi-calendar-x"></i> Feriados del Proyecto</h5>
-                        </div>
-                        <div class="card-body">
-                            <?php foreach ($holidays as $holiday): ?>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-calendar-x text-danger me-2"></i>
-                                    <?= date('d/m/Y', strtotime($holiday)) ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-calendar-x"></i> Feriados del Proyecto</h5>
                     </div>
+                    <div class="card-body">
+                        <?php foreach ($holidays as $holiday): ?>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-calendar-x text-danger me-2"></i>
+                                <?= date('d/m/Y', strtotime($holiday)) ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
                 <?php endif; ?>
 
                 <!-- Acciones Rápidas -->
@@ -370,7 +361,7 @@
                             </select>
                         </div>
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i>
+                            <i class="bi bi-info-circle"></i> 
                             El cambio de estado afectará el flujo del proyecto y sus tareas.
                         </div>
                     </div>
@@ -402,5 +393,4 @@
         }, 30000);
     </script>
 </body>
-
 </html>

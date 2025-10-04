@@ -21,9 +21,7 @@
 </head>
 
 <body class="bg-light">
-    <?php
-
-    use App\Helpers\Security; ?>
+    <?php use App\Helpers\Security; ?>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-setap">
@@ -149,7 +147,7 @@
                                             <option value="">Selecciona un tipo de usuario</option>
                                             <?php if (isset($userTypes) && is_array($userTypes)): ?>
                                                 <?php foreach ($userTypes as $tipo): ?>
-                                                    <option value="<?= (int)$tipo['id'] ?>"
+                                                    <option value="<?= (int)$tipo['id'] ?>" 
                                                         <?= $tipo['id'] == $userToEdit['usuario_tipo_id'] ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($tipo['nombre']) ?>
                                                     </option>
@@ -179,19 +177,19 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Fecha de Creación</label>
-                                        <input type="text" class="form-control"
+                                        <input type="text" class="form-control" 
                                             value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_Creado'])) ?>" readonly>
                                     </div>
                                 </div>
 
                                 <?php if (isset($userToEdit['fecha_modificacion']) && $userToEdit['fecha_modificacion']): ?>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Última Modificación</label>
-                                            <input type="text" class="form-control"
-                                                value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_modificacion'])) ?>" readonly>
-                                        </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Última Modificación</label>
+                                        <input type="text" class="form-control" 
+                                            value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_modificacion'])) ?>" readonly>
                                     </div>
+                                </div>
                                 <?php endif; ?>
                             </div>
 
@@ -218,7 +216,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('userEditForm');
@@ -257,5 +255,4 @@
         });
     </script>
 </body>
-
 </html>

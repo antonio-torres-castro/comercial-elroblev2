@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,14 +18,12 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
-
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-color);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
-
         .required {
             color: #dc3545;
         }
@@ -34,9 +31,7 @@
 </head>
 
 <body class="bg-light">
-    <?php
-
-    use App\Helpers\Security; ?>
+    <?php use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -73,7 +68,7 @@
                                     <!-- Información Básica -->
                                     <div class="form-section">
                                         <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
-
+                                        
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
@@ -81,7 +76,7 @@
                                                     <select class="form-select" id="proyecto_id" name="proyecto_id" required>
                                                         <option value="">Seleccionar Proyecto</option>
                                                         <?php foreach ($projects as $project): ?>
-                                                            <option value="<?= (int)$project['id'] ?>"
+                                                            <option value="<?= (int)$project['id'] ?>" 
                                                                 <?= $project['id'] == $task['proyecto_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($project['cliente_nombre']) ?>
                                                             </option>
@@ -89,14 +84,14 @@
                                                     </select>
                                                 </div>
                                             </div>
-
+                                            
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
                                                     <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
                                                         <option value="">Seleccionar Tipo</option>
                                                         <?php foreach ($taskTypes as $type): ?>
-                                                            <option value="<?= (int)$type['id'] ?>"
+                                                            <option value="<?= (int)$type['id'] ?>" 
                                                                 <?= $type['id'] == $task['tarea_tipo_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($type['nombre']) ?>
                                                             </option>
@@ -108,7 +103,7 @@
 
                                         <div class="mb-3">
                                             <label for="nombre" class="form-label">Nombre de la Tarea <span class="required">*</span></label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                            <input type="text" class="form-control" id="nombre" name="nombre" 
                                                 value="<?= htmlspecialchars($task['nombre']) ?>"
                                                 placeholder="Describe brevemente la tarea" minlength="3" required>
                                         </div>
@@ -123,20 +118,20 @@
                                     <!-- Planificación -->
                                     <div class="form-section">
                                         <h5><i class="bi bi-calendar"></i> Planificación</h5>
-
+                                        
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
-                                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
+                                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
                                                         value="<?= date('Y-m-d', strtotime($task['fecha_inicio'])) ?>" required>
                                                 </div>
                                             </div>
-
+                                            
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="fecha_fin" class="form-label">Fecha Fin <span class="required">*</span></label>
-                                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
+                                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
                                                         value="<?= date('Y-m-d', strtotime($task['fecha_fin'])) ?>" required>
                                                 </div>
                                             </div>
@@ -146,7 +141,7 @@
                                     <!-- Asignación -->
                                     <div class="form-section">
                                         <h5><i class="bi bi-person-check"></i> Asignación</h5>
-
+                                        
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
@@ -154,7 +149,7 @@
                                                     <select class="form-select" id="usuario_id" name="usuario_id">
                                                         <option value="">Sin asignar</option>
                                                         <?php foreach ($users as $user): ?>
-                                                            <option value="<?= (int)$user['id'] ?>"
+                                                            <option value="<?= (int)$user['id'] ?>" 
                                                                 <?= $user['id'] == $task['usuario_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($user['nombre_completo']) ?> (<?= htmlspecialchars($user['nombre_usuario']) ?>)
                                                             </option>
@@ -162,13 +157,13 @@
                                                     </select>
                                                 </div>
                                             </div>
-
+                                            
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
                                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                                         <?php foreach ($taskStates as $state): ?>
-                                                            <option value="<?= (int)$state['id'] ?>"
+                                                            <option value="<?= (int)$state['id'] ?>" 
                                                                 <?= $state['id'] == $task['estado_tipo_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($state['nombre']) ?>
                                                             </option>
@@ -200,7 +195,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('taskEditForm');
@@ -213,7 +208,7 @@
                 if (fechaInicio.value && fechaFin.value) {
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
-
+                    
                     if (fin < inicio) {
                         fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
                         return false;
@@ -262,5 +257,4 @@
         });
     </script>
 </body>
-
 </html>

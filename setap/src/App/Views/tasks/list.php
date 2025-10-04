@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
-
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -57,7 +55,7 @@
                                             <option value="">Todos los proyectos</option>
                                             <?php if (!empty($data['projects'])): ?>
                                                 <?php foreach ($data['projects'] as $project): ?>
-                                                    <option value="<?= $project['id'] ?>"
+                                                    <option value="<?= $project['id'] ?>" 
                                                         <?= (isset($_GET['proyecto_id']) && $_GET['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($project['cliente_nombre']) ?>
                                                     </option>
@@ -71,7 +69,7 @@
                                             <option value="">Todos los estados</option>
                                             <?php if (!empty($data['taskStates'])): ?>
                                                 <?php foreach ($data['taskStates'] as $state): ?>
-                                                    <option value="<?= $state['id'] ?>"
+                                                    <option value="<?= $state['id'] ?>" 
                                                         <?= (isset($_GET['estado_tipo_id']) && $_GET['estado_tipo_id'] == $state['id']) ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($state['nombre']) ?>
                                                     </option>
@@ -85,7 +83,7 @@
                                             <option value="">Todos los usuarios</option>
                                             <?php if (!empty($data['users'])): ?>
                                                 <?php foreach ($data['users'] as $user): ?>
-                                                    <option value="<?= $user['id'] ?>"
+                                                    <option value="<?= $user['id'] ?>" 
                                                         <?= (isset($_GET['usuario_id']) && $_GET['usuario_id'] == $user['id']) ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($user['nombre_usuario']) ?>
                                                     </option>
@@ -143,18 +141,10 @@
                                                             <?php
                                                             $badgeClass = 'bg-secondary';
                                                             switch ($task['estado_tipo_id']) {
-                                                                case 1:
-                                                                    $badgeClass = 'bg-success';
-                                                                    break; // Activo
-                                                                case 2:
-                                                                    $badgeClass = 'bg-warning';
-                                                                    break; // Pendiente
-                                                                case 3:
-                                                                    $badgeClass = 'bg-danger';
-                                                                    break;  // Inactivo
-                                                                case 8:
-                                                                    $badgeClass = 'bg-primary';
-                                                                    break; // Completado
+                                                                case 1: $badgeClass = 'bg-success'; break; // Activo
+                                                                case 2: $badgeClass = 'bg-warning'; break; // Pendiente
+                                                                case 3: $badgeClass = 'bg-danger'; break;  // Inactivo
+                                                                case 8: $badgeClass = 'bg-primary'; break; // Completado
                                                             }
                                                             ?>
                                                             <span class="badge <?= $badgeClass ?>">
@@ -188,8 +178,8 @@
                                                                 <a href="/tasks/edit/<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
-                                                                <button type="button" class="btn btn-outline-danger"
-                                                                    onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>')"
+                                                                <button type="button" class="btn btn-outline-danger" 
+                                                                    onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>')" 
                                                                     title="Eliminar">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
@@ -249,24 +239,24 @@
                     document.getElementById('confirmDelete').addEventListener('click', function() {
                         if (taskToDelete) {
                             fetch(`/tasks/delete/${taskToDelete}`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    }
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        location.reload();
-                                    } else {
-                                        alert('Error al eliminar la tarea: ' + (data.message || 'Error desconocido'));
-                                    }
-                                })
-                                .catch(error => {
-                                    alert('Error de conexión al servidor');
-                                    console.error('Error:', error);
-                                });
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Error al eliminar la tarea: ' + (data.message || 'Error desconocido'));
+                                }
+                            })
+                            .catch(error => {
+                                alert('Error de conexión al servidor');
+                                console.error('Error:', error);
+                            });
                         }
                         bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
                     });
@@ -278,5 +268,4 @@
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 </body>
-
 </html>

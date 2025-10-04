@@ -33,9 +33,7 @@
 </head>
 
 <body class="bg-light">
-    <?php
-
-    use App\Helpers\Security; ?>
+    <?php use App\Helpers\Security; ?>
 
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/layouts/navigation.php'; ?>
@@ -43,123 +41,123 @@
     <!-- Contenido Principal -->
     <div class="container-fluid">
         <main class="main-content">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-calendar"></i>
-                        <?php echo date('d/m/Y H:i'); ?>
-                    </button>
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-calendar"></i>
+                            <?php echo date('d/m/Y H:i'); ?>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Estadísticas -->
-            <div class="row mb-4">
-                <?php if (Security::hasPermission('Read')): ?>
-                    <div class="col-md-3 mb-3">
-                        <div class="card stats-card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="text-setap-primary mb-2">
-                                    <i class="bi bi-people" style="font-size: 2rem;"></i>
-                                </div>
-                                <h3 class="mb-0"><?php echo $homeData['stats']['total_usuarios']; ?></h3>
-                                <p class="text-muted mb-0">Total Usuarios</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <div class="card stats-card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="text-success mb-2">
-                                    <i class="bi bi-briefcase" style="font-size: 2rem;"></i>
-                                </div>
-                                <h3 class="mb-0"><?php echo $homeData['stats']['total_proyectos']; ?></h3>
-                                <p class="text-muted mb-0">Total Proyectos</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <div class="card stats-card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="text-warning mb-2">
-                                    <i class="bi bi-play-circle" style="font-size: 2rem;"></i>
-                                </div>
-                                <h3 class="mb-0"><?php echo $homeData['stats']['proyectos_activos']; ?></h3>
-                                <p class="text-muted mb-0">Proyectos Activos</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <div class="card stats-card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="text-danger mb-2">
-                                    <i class="bi bi-clock" style="font-size: 2rem;"></i>
-                                </div>
-                                <h3 class="mb-0"><?php echo $homeData['stats']['tareas_pendientes']; ?></h3>
-                                <p class="text-muted mb-0">Tareas Pendientes</p>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Bienvenida -->
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="bi bi-house-door text-setap-primary"></i>
-                                Bienvenido, <?php echo htmlspecialchars($homeData['user']['nombre_completo'] ?? $homeData['user']['username']); ?>
-                            </h5>
-                            <p class="card-text">
-                                Has iniciado sesión como <strong><?php echo htmlspecialchars($homeData['user']['rol']); ?></strong>.
-                                Desde aquí puedes acceder a todas las funcionalidades del sistema según tus permisos.
-                            </p>
-
-                            <div class="row mt-3">
-                                <?php if (Security::hasMenuAccess('users')): ?>
-                                    <div class="col-md-6 mb-2">
-                                        <a href="/users" class="btn btn-outline-setap-primary w-100">
-                                            <i class="bi bi-people"></i> Gestionar Usuarios
-                                        </a>
+                <!-- Estadísticas -->
+                <div class="row mb-4">
+                    <?php if (Security::hasPermission('Read')): ?>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <div class="text-setap-primary mb-2">
+                                        <i class="bi bi-people" style="font-size: 2rem;"></i>
                                     </div>
-                                <?php endif; ?>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['total_usuarios']; ?></h3>
+                                    <p class="text-muted mb-0">Total Usuarios</p>
+                                </div>
+                            </div>
+                        </div>
 
-                                <?php if (Security::hasMenuAccess('projects')): ?>
-                                    <div class="col-md-6 mb-2">
-                                        <a href="/projects" class="btn btn-outline-setap-primary w-100">
-                                            <i class="bi bi-briefcase"></i> Ver Proyectos
-                                        </a>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <div class="text-success mb-2">
+                                        <i class="bi bi-briefcase" style="font-size: 2rem;"></i>
                                     </div>
-                                <?php endif; ?>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['total_proyectos']; ?></h3>
+                                    <p class="text-muted mb-0">Total Proyectos</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <div class="text-warning mb-2">
+                                        <i class="bi bi-play-circle" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['proyectos_activos']; ?></h3>
+                                    <p class="text-muted mb-0">Proyectos Activos</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <div class="text-danger mb-2">
+                                        <i class="bi bi-clock" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <h3 class="mb-0"><?php echo $homeData['stats']['tareas_pendientes']; ?></h3>
+                                    <p class="text-muted mb-0">Tareas Pendientes</p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Bienvenida -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-house-door text-setap-primary"></i>
+                                    Bienvenido, <?php echo htmlspecialchars($homeData['user']['nombre_completo'] ?? $homeData['user']['username']); ?>
+                                </h5>
+                                <p class="card-text">
+                                    Has iniciado sesión como <strong><?php echo htmlspecialchars($homeData['user']['rol']); ?></strong>.
+                                    Desde aquí puedes acceder a todas las funcionalidades del sistema según tus permisos.
+                                </p>
+
+                                <div class="row mt-3">
+                                    <?php if (Security::hasMenuAccess('users')): ?>
+                                        <div class="col-md-6 mb-2">
+                                            <a href="/users" class="btn btn-outline-setap-primary w-100">
+                                                <i class="bi bi-people"></i> Gestionar Usuarios
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (Security::hasMenuAccess('projects')): ?>
+                                        <div class="col-md-6 mb-2">
+                                            <a href="/projects" class="btn btn-outline-setap-primary w-100">
+                                                <i class="bi bi-briefcase"></i> Ver Proyectos
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi bi-info-circle text-info"></i>
+                                    Información de Sesión
+                                </h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>Usuario:</strong> <?php echo htmlspecialchars($homeData['user']['username']); ?></li>
+                                    <li><strong>Email:</strong> <?php echo htmlspecialchars($homeData['user']['email']); ?></li>
+                                    <li><strong>Rol:</strong> <?php echo htmlspecialchars($homeData['user']['rol']); ?></li>
+                                    <li><strong>Último acceso:</strong> <?php echo date('d/m/Y H:i'); ?></li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h6 class="card-title">
-                                <i class="bi bi-info-circle text-info"></i>
-                                Información de Sesión
-                            </h6>
-                            <ul class="list-unstyled mb-0">
-                                <li><strong>Usuario:</strong> <?php echo htmlspecialchars($homeData['user']['username']); ?></li>
-                                <li><strong>Email:</strong> <?php echo htmlspecialchars($homeData['user']['email']); ?></li>
-                                <li><strong>Rol:</strong> <?php echo htmlspecialchars($homeData['user']['rol']); ?></li>
-                                <li><strong>Último acceso:</strong> <?php echo date('d/m/Y H:i'); ?></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
     </div>
 

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,15 +15,12 @@
         .stats-card {
             border-left: 4px solid var(--setap-primary);
         }
-
         .stats-card.success {
             border-left-color: #28a745;
         }
-
         .stats-card.warning {
             border-left-color: #ffc107;
         }
-
         .stats-card.info {
             border-left-color: var(--setap-primary-light);
         }
@@ -32,9 +28,7 @@
 </head>
 
 <body class="bg-light">
-    <?php
-
-    use App\Helpers\Security; ?>
+    <?php use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -71,68 +65,68 @@
 
         <!-- Estadísticas -->
         <?php if (!empty($stats)): ?>
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card stats-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h6 class="card-title text-muted">Total Personas</h6>
-                                    <h3 class="mb-0"><?= (int)($stats['total'] ?? 0) ?></h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="bi bi-people-fill text-setap-primary fs-2"></i>
-                                </div>
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title text-muted">Total Personas</h6>
+                                <h3 class="mb-0"><?= (int)($stats['total'] ?? 0) ?></h3>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stats-card success">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h6 class="card-title text-muted">Activos</h6>
-                                    <h3 class="mb-0 text-success"><?= (int)($stats['activos'] ?? 0) ?></h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="bi bi-person-check-fill text-success fs-2"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stats-card warning">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h6 class="card-title text-muted">Inactivos</h6>
-                                    <h3 class="mb-0 text-warning"><?= (int)($stats['inactivos'] ?? 0) ?></h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="bi bi-person-x-fill text-warning fs-2"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stats-card info">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h6 class="card-title text-muted">Creados Hoy</h6>
-                                    <h3 class="mb-0 text-info"><?= (int)($stats['creados_hoy'] ?? 0) ?></h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="bi bi-person-plus-fill text-info fs-2"></i>
-                                </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-people-fill text-setap-primary fs-2"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="col-md-3">
+                <div class="card stats-card success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title text-muted">Activos</h6>
+                                <h3 class="mb-0 text-success"><?= (int)($stats['activos'] ?? 0) ?></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-person-check-fill text-success fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title text-muted">Inactivos</h6>
+                                <h3 class="mb-0 text-warning"><?= (int)($stats['inactivos'] ?? 0) ?></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-person-x-fill text-warning fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title text-muted">Creados Hoy</h6>
+                                <h3 class="mb-0 text-info"><?= (int)($stats['creados_hoy'] ?? 0) ?></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-person-plus-fill text-info fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <?php endif; ?>
 
         <!-- Filtros -->
@@ -141,17 +135,17 @@
                 <form method="GET" action="/personas" class="row align-items-end">
                     <div class="col-md-4">
                         <label for="search" class="form-label">Buscar</label>
-                        <input type="text" class="form-control" name="search" id="search"
-                            value="<?= htmlspecialchars($filters['search'] ?? '') ?>"
-                            placeholder="Nombre, RUT o teléfono...">
+                        <input type="text" class="form-control" name="search" id="search" 
+                               value="<?= htmlspecialchars($filters['search'] ?? '') ?>"
+                               placeholder="Nombre, RUT o teléfono...">
                     </div>
                     <div class="col-md-3">
                         <label for="estado_tipo_id" class="form-label">Estado</label>
                         <select class="form-select" name="estado_tipo_id" id="estado_tipo_id">
                             <option value="">Todos los estados</option>
                             <?php foreach ($estadosTipo as $estado): ?>
-                                <option value="<?= $estado['id'] ?>"
-                                    <?= ($filters['estado_tipo_id'] ?? '') == $estado['id'] ? 'selected' : '' ?>>
+                                <option value="<?= $estado['id'] ?>" 
+                                        <?= ($filters['estado_tipo_id'] ?? '') == $estado['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($estado['nombre']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -201,58 +195,58 @@
                             </thead>
                             <tbody>
                                 <?php foreach ($personas as $persona): ?>
-                                    <tr>
-                                        <td><?= (int)$persona['id'] ?></td>
-                                        <td>
-                                            <span class="badge bg-light text-dark">
-                                                <?= htmlspecialchars($persona['rut']) ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <strong><?= htmlspecialchars($persona['nombre']) ?></strong>
-                                            <?php if (!empty($persona['direccion'])): ?>
-                                                <br><small class="text-muted">
-                                                    <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($persona['direccion']) ?>
-                                                </small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if (!empty($persona['telefono'])): ?>
-                                                <i class="bi bi-telephone"></i> <?= htmlspecialchars($persona['telefono']) ?>
-                                            <?php else: ?>
-                                                <span class="text-muted">-</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php
-                                            $statusClass = match ($persona['estado_tipo_id']) {
-                                                1 => 'secondary', // Creado
-                                                2 => 'success',   // Activo
-                                                3 => 'warning',   // Inactivo
-                                                default => 'dark'
-                                            };
-                                            ?>
-                                            <span class="badge bg-<?= $statusClass ?>">
-                                                <?= htmlspecialchars($persona['estado']) ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small><?= date('d/m/Y H:i', strtotime($persona['fecha_Creado'])) ?></small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="/personas/edit?id=<?= (int)$persona['id'] ?>"
-                                                    class="btn btn-outline-setap-primary" title="Editar">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-outline-danger"
+                                <tr>
+                                    <td><?= (int)$persona['id'] ?></td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            <?= htmlspecialchars($persona['rut']) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($persona['nombre']) ?></strong>
+                                        <?php if (!empty($persona['direccion'])): ?>
+                                            <br><small class="text-muted">
+                                                <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($persona['direccion']) ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($persona['telefono'])): ?>
+                                            <i class="bi bi-telephone"></i> <?= htmlspecialchars($persona['telefono']) ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $statusClass = match($persona['estado_tipo_id']) {
+                                            1 => 'secondary', // Creado
+                                            2 => 'success',   // Activo
+                                            3 => 'warning',   // Inactivo
+                                            default => 'dark'
+                                        };
+                                        ?>
+                                        <span class="badge bg-<?= $statusClass ?>">
+                                            <?= htmlspecialchars($persona['estado']) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small><?= date('d/m/Y H:i', strtotime($persona['fecha_Creado'])) ?></small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="/personas/edit?id=<?= (int)$persona['id'] ?>" 
+                                               class="btn btn-outline-setap-primary" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger" 
                                                     onclick="confirmDelete(<?= (int)$persona['id'] ?>, '<?= htmlspecialchars($persona['nombre']) ?>')"
                                                     title="Eliminar">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
@@ -294,7 +288,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-
+    
     <script>
         function confirmDelete(id, name) {
             document.getElementById('deletePersonaId').value = id;
@@ -308,5 +302,4 @@
         });
     </script>
 </body>
-
 </html>
