@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .stats-card {
-            border-left: 4px solid #007bff;
+            border-left: 4px solid var(--setap-primary);
         }
         .stats-card.success {
             border-left-color: #28a745;
@@ -18,7 +18,7 @@
             border-left-color: #ffc107;
         }
         .stats-card.info {
-            border-left-color: #17a2b8;
+            border-left-color: var(--setap-primary-light);
         }
     </style>
 </head>
@@ -97,7 +97,7 @@
                                 <h3 class="mb-0"><?= (int)($stats['total'] ?? 0) ?></h3>
                             </div>
                             <div class="align-self-center">
-                                <i class="bi bi-people-fill text-primary fs-2"></i>
+                                <i class="bi bi-people-fill text-setap-primary fs-2"></i>
                             </div>
                         </div>
                     </div>

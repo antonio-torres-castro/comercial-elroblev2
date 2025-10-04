@@ -160,10 +160,10 @@
                                 </h6>
                                 <?php
                                 $statusClass = match($project['estado_tipo_id']) {
-                                    1 => 'bg-primary',    // Creado
+                                    1 => 'bg-setap-primary',    // Creado
                                     2 => 'bg-success',    // Activo
                                     3 => 'bg-warning',    // Inactivo
-                                    5 => 'bg-info',       // Iniciado
+                                    5 => 'bg-setap-primary-light',       // Iniciado
                                     6 => 'bg-warning',    // Terminado
                                     8 => 'bg-success',    // Aprobado
                                     default => 'bg-secondary'
@@ -175,12 +175,12 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <h6 class="text-primary">Ubicación:</h6>
+                                    <h6 class="text-setap-primary">Ubicación:</h6>
                                     <p class="mb-1"><?= htmlspecialchars($project['direccion'] ?: 'No especificada') ?></p>
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <h6 class="text-primary">Fechas:</h6>
+                                    <h6 class="text-setap-primary">Fechas:</h6>
                                     <div class="small">
                                         <div><strong>Inicio:</strong> <?= date('d/m/Y', strtotime($project['fecha_inicio'])) ?></div>
                                         <?php if ($project['fecha_fin']): ?>
@@ -190,7 +190,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <h6 class="text-primary">Progreso:</h6>
+                                    <h6 class="text-setap-primary">Progreso:</h6>
                                     <?php 
                                     $totalTasks = $project['total_tareas'] ?? 0;
                                     $completedTasks = $project['tareas_completadas'] ?? 0;
@@ -205,7 +205,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <h6 class="text-primary">Contraparte:</h6>
+                                    <h6 class="text-setap-primary">Contraparte:</h6>
                                     <div class="small">
                                         <div><?= htmlspecialchars($project['contraparte_nombre']) ?></div>
                                         <?php if ($project['contraparte_email']): ?>

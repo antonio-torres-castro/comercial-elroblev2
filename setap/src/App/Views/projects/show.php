@@ -20,7 +20,7 @@
             transition: all 0.2s;
         }
         .task-item:hover {
-            background-color: #f8f9fa;
+            background-color: var(--setap-bg-light);
         }
         .timeline-item {
             position: relative;
@@ -34,7 +34,7 @@
             top: 0;
             bottom: -20px;
             width: 2px;
-            background: #dee2e6;
+            background: var(--setap-border-light);
         }
         .timeline-item::after {
             content: '';
@@ -44,7 +44,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #007bff;
+            background: var(--setap-primary);
         }
         .timeline-item:last-child::before {
             display: none;
@@ -89,10 +89,10 @@
                     <i class="bi bi-building"></i> <?= htmlspecialchars($project['cliente_nombre']) ?>
                     <?php
                     $statusClass = match($project['estado_tipo_id']) {
-                        1 => 'bg-primary',    // Creado
+                        1 => 'bg-setap-primary',    // Creado
                         2 => 'bg-success',    // Activo
                         3 => 'bg-warning',    // Inactivo
-                        5 => 'bg-info',       // Iniciado
+                        5 => 'bg-setap-primary-light',       // Iniciado
                         6 => 'bg-warning',    // Terminado
                         8 => 'bg-success',    // Aprobado
                         default => 'bg-secondary'
@@ -108,7 +108,7 @@
                 <a href="/projects/edit?id=<?= $project['id'] ?>" class="btn btn-warning">
                     <i class="bi bi-pencil"></i> Editar Proyecto
                 </a>
-                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
+                <button type="button" class="btn btn-setap-primary" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
                     <i class="bi bi-arrow-repeat"></i> Cambiar Estado
                 </button>
             </div>
@@ -132,9 +132,9 @@
         <!-- Estadísticas del Proyecto -->
         <div class="row mb-4">
             <div class="col-md-3">
-                <div class="card stat-card border-primary">
+                <div class="card stat-card border-setap-primary">
                     <div class="card-body text-center">
-                        <h3 class="text-primary"><?= $stats['total_tareas'] ?? 0 ?></h3>
+                        <h3 class="text-setap-primary"><?= $stats['total_tareas'] ?? 0 ?></h3>
                         <p class="mb-0">Total Tareas</p>
                     </div>
                 </div>
@@ -156,9 +156,9 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card stat-card border-info">
+                <div class="card stat-card border-setap-primary-light">
                     <div class="card-body text-center">
-                        <h3 class="text-info"><?= round($stats['horas_planificadas'] ?? 0, 1) ?></h3>
+                        <h3 class="text-setap-primary-light"><?= round($stats['horas_planificadas'] ?? 0, 1) ?></h3>
                         <p class="mb-0">Horas Planificadas</p>
                     </div>
                 </div>
@@ -177,7 +177,7 @@
                         $progress = $stats['progreso_porcentaje'] ?? 0;
                         $progressClass = match(true) {
                             $progress >= 80 => 'bg-success',
-                            $progress >= 50 => 'bg-info',
+                            $progress >= 50 => 'bg-setap-primary',
                             $progress >= 25 => 'bg-warning',
                             default => 'bg-danger'
                         };
@@ -236,7 +236,7 @@
                             <?php foreach ($tasks as $task): ?>
                                 <?php
                                 $taskBorderClass = match($task['estado_tipo_id']) {
-                                    5 => 'border-info',     // Iniciado
+                                    5 => 'border-setap-primary-light',     // Iniciado
                                     6 => 'border-warning',  // Terminado
                                     7 => 'border-danger',   // Rechazado
                                     8 => 'border-success',  // Aprobado
@@ -267,7 +267,7 @@
                                         </div>
                                         <div class="text-end">
                                             <span class="badge bg-<?= match($task['estado_tipo_id']) {
-                                                5 => 'info',
+                                                5 => 'setap-primary-light',
                                                 6 => 'warning',
                                                 7 => 'danger',
                                                 8 => 'success',
@@ -347,7 +347,7 @@
                             <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
                                 <i class="bi bi-plus-circle"></i> Agregar Tarea
                             </a>
-                            <a href="/projects/report?id=<?= $project['id'] ?>" class="btn btn-outline-info">
+                            <a href="/projects/report?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
                                 <i class="bi bi-file-earmark-text"></i> Generar Reporte
                             </a>
                             <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changeStatusModal">

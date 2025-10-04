@@ -9,14 +9,14 @@
     <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .form-section {
-            background: #f8f9fa;
+            background: var(--setap-bg-light);
             border-radius: 8px;
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
         .form-section h5 {
-            color: #495057;
-            border-bottom: 2px solid #dee2e6;
+            color: var(--setap-text-muted);
+            border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
@@ -181,7 +181,7 @@
                 <div class="col-md-4">
                     <!-- Instrucciones -->
                     <div class="card">
-                        <div class="card-header bg-primary text-white">
+                        <div class="card-header bg-setap-primary text-white">
                             <h6 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones</h6>
                         </div>
                         <div class="card-body">
