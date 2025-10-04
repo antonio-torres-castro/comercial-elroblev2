@@ -2,15 +2,15 @@
 
 namespace App\Controllers;
 
+use App\Models\Menu;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
-use App\Config\Database;
 use Exception;
-use PDO;
 
 class MenuController
 {
+    private $menuModel;
     private $permissionService;
 
     public function __construct()
@@ -18,6 +18,7 @@ class MenuController
         // Verificar autenticación
         (new AuthMiddleware())->handle();
 
+        $this->menuModel = new Menu();
         $this->permissionService = new PermissionService();
     }
 
@@ -41,20 +42,25 @@ class MenuController
                 return;
             }
 
-            // Generar token CSRF si no existe
-            if (!isset($_SESSION['csrf_token'])) {
-                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-            }
+            // Obtener filtros de búsqueda
+            $filters = [
+                'nombre' => $_GET['nombre'] ?? '',
+                'estado_tipo_id' => $_GET['estado_tipo_id'] ?? '',
+                'display' => $_GET['display'] ?? ''
+            ];
 
-            // Obtener todos los menús de la base de datos
-            $menus = $this->getAllMenus();
+            // Obtener menús y estados usando el modelo
+            $menus = $this->menuModel->getAll($filters);
+            $statusTypes = $this->menuModel->getStatusTypes();
 
             // Datos para la vista
             $data = [
                 'user' => $currentUser,
                 'title' => 'Gestión de Menús',
                 'subtitle' => 'Lista de todos los menús del sistema',
-                'menus' => $menus
+                'menus' => $menus,
+                'statusTypes' => $statusTypes,
+                'filters' => $filters
             ];
 
             require_once __DIR__ . '/../Views/menus/list.php';
@@ -85,14 +91,9 @@ class MenuController
                 return;
             }
 
-            // Generar token CSRF si no existe
-            if (!isset($_SESSION['csrf_token'])) {
-                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-            }
-
             $menu = null;
             if ($id) {
-                $menu = $this->getMenuById($id);
+                $menu = $this->menuModel->find((int)$id);
                 if (!$menu) {
                     http_response_code(404);
                     echo $this->renderError('Menú no encontrado.');
@@ -100,8 +101,8 @@ class MenuController
                 }
             }
 
-            // Obtener estados disponibles
-            $estados = $this->getEstados();
+            // Obtener estados disponibles usando el modelo
+            $statusTypes = $this->menuModel->getStatusTypes();
 
             // Datos para la vista
             $data = [
@@ -110,10 +111,17 @@ class MenuController
                 'subtitle' => $id ? "Editando menú #$id" : 'Nuevo menú',
                 'menu_id' => $id,
                 'menu' => $menu,
-                'estados' => $estados
+                'statusTypes' => $statusTypes,
+                'action' => $id ? 'edit' : 'create',
+                'next_order' => $id ? null : $this->menuModel->getNextOrder()
             ];
 
-            require_once __DIR__ . '/../Views/menus/form.php';
+            // Usar vista específica según la acción
+            if ($id) {
+                require_once __DIR__ . '/../Views/menus/edit.php';
+            } else {
+                require_once __DIR__ . '/../Views/menus/create.php';
+            }
         } catch (Exception $e) {
             error_log("Error en MenuController::show: " . $e->getMessage());
             http_response_code(500);
@@ -142,17 +150,17 @@ class MenuController
                 return;
             }
 
-            // Verificar acceso
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menu')) {
-                http_response_code(403);
-                echo $this->renderError('No tienes acceso a esta sección.');
+            // Verificar método POST
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo $this->renderError('Método no permitido');
                 return;
             }
 
-            // Validar CSRF
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+            // Verificar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido.');
+                echo $this->renderError('Token de seguridad inválido');
                 return;
             }
 
@@ -160,34 +168,32 @@ class MenuController
             $errors = $this->validateMenuData($_POST);
             
             if (!empty($errors)) {
-                $estados = $this->getEstados();
+                $statusTypes = $this->menuModel->getStatusTypes();
                 $data = [
                     'user' => $currentUser,
                     'title' => 'Gestión de Menú',
                     'subtitle' => 'Nuevo menú',
                     'menu_id' => null,
                     'menu' => $_POST,
-                    'estados' => $estados,
+                    'statusTypes' => $statusTypes,
+                    'action' => 'create',
+                    'next_order' => $this->menuModel->getNextOrder(),
                     'errors' => $errors
                 ];
-                require_once __DIR__ . '/../Views/menus/form.php';
+                require_once __DIR__ . '/../Views/menus/create.php';
                 return;
             }
 
-            // Crear menú
-            $menuId = $this->createMenu($_POST);
+            // Crear menú usando el modelo
+            $menuId = $this->menuModel->create($_POST);
 
-            if ($menuId) {
-                $_SESSION['success_message'] = 'Menú creado exitosamente.';
-                Security::redirect('/menus');
-            } else {
-                throw new Exception('Error al crear el menú');
-            }
+            // Redireccionar con mensaje de éxito
+            Security::redirect('/menus?success=created');
 
         } catch (Exception $e) {
             error_log("Error en MenuController::store: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError('Error al guardar el menú: ' . $e->getMessage());
         }
     }
 
@@ -212,34 +218,34 @@ class MenuController
                 return;
             }
 
-            // Verificar acceso
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menu')) {
+            // Verificar método POST
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo $this->renderError('Método no permitido');
+                return;
+            }
+
+            // Verificar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes acceso a esta sección.');
+                echo $this->renderError('Token de seguridad inválido');
                 return;
             }
 
             // Obtener ID del menú
-            $menuId = $id ?? $_POST['id'] ?? null;
+            $menuId = $id ?? (int)($_POST['id'] ?? 0);
             
             if (!$menuId) {
                 http_response_code(400);
-                echo $this->renderError('ID de menú requerido.');
+                echo $this->renderError('ID de menú requerido');
                 return;
             }
 
-            // Verificar que el menú existe
-            $menu = $this->getMenuById($menuId);
+            // Verificar que el menú existe usando el modelo
+            $menu = $this->menuModel->find($menuId);
             if (!$menu) {
                 http_response_code(404);
-                echo $this->renderError('Menú no encontrado.');
-                return;
-            }
-
-            // Validar CSRF
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-                http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido.');
+                echo $this->renderError('Menú no encontrado');
                 return;
             }
 
@@ -247,34 +253,34 @@ class MenuController
             $errors = $this->validateMenuData($_POST, $menuId);
             
             if (!empty($errors)) {
-                $estados = $this->getEstados();
+                $statusTypes = $this->menuModel->getStatusTypes();
                 $data = [
                     'user' => $currentUser,
                     'title' => 'Gestión de Menú',
                     'subtitle' => "Editando menú #$menuId",
                     'menu_id' => $menuId,
                     'menu' => array_merge($menu, $_POST),
-                    'estados' => $estados,
+                    'statusTypes' => $statusTypes,
+                    'action' => 'edit',
                     'errors' => $errors
                 ];
-                require_once __DIR__ . '/../Views/menus/form.php';
+                require_once __DIR__ . '/../Views/menus/edit.php';
                 return;
             }
 
-            // Actualizar menú
-            $result = $this->updateMenu($menuId, $_POST);
+            // Actualizar menú usando el modelo
+            $success = $this->menuModel->update($menuId, $_POST);
 
-            if ($result) {
-                $_SESSION['success_message'] = 'Menú actualizado exitosamente.';
-                Security::redirect('/menus');
+            if ($success) {
+                Security::redirect('/menus?success=updated');
             } else {
-                throw new Exception('Error al actualizar el menú');
+                throw new Exception('No se pudo actualizar el menú');
             }
 
         } catch (Exception $e) {
             error_log("Error en MenuController::update: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError('Error al actualizar el menú: ' . $e->getMessage());
         }
     }
 
@@ -287,54 +293,44 @@ class MenuController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'No autenticado']);
+                Security::redirect('/login');
                 return;
             }
 
-            // Verificar acceso
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menu')) {
+            // Verificar método POST
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo $this->renderError('Método no permitido');
+                return;
+            }
+
+            // Verificar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                echo $this->renderError('Token de seguridad inválido');
                 return;
             }
 
-            $menuId = $_POST['id'] ?? null;
+            $menuId = (int)($_POST['id'] ?? 0);
             
             if (!$menuId) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'message' => 'ID requerido']);
+                echo $this->renderError('ID de menú requerido');
                 return;
             }
 
-            // Verificar CSRF
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-                http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Token inválido']);
-                return;
+            // Eliminar menú usando el modelo
+            $success = $this->menuModel->delete($menuId);
+
+            if ($success) {
+                Security::redirect('/menus?success=deleted');
+            } else {
+                throw new Exception('No se pudo eliminar el menú');
             }
-
-            // Verificar que el menú existe
-            $menu = $this->getMenuById($menuId);
-            if (!$menu) {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'message' => 'Menú no encontrado']);
-                return;
-            }
-
-            // Eliminar (cambiar estado a eliminado)
-            $result = $this->deleteMenu($menuId);
-
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => $result,
-                'message' => $result ? 'Menú eliminado exitosamente' : 'Error al eliminar el menú'
-            ]);
 
         } catch (Exception $e) {
             error_log("Error en MenuController::delete: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+            Security::redirect('/menus?error=' . urlencode($e->getMessage()));
         }
     }
 
@@ -347,158 +343,44 @@ class MenuController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'No autenticado']);
+                Security::redirect('/login');
                 return;
             }
 
-            // Verificar acceso
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menu')) {
+            // Verificar método POST
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo $this->renderError('Método no permitido');
+                return;
+            }
+
+            // Verificar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                echo $this->renderError('Token de seguridad inválido');
                 return;
             }
 
-            $menuId = $_POST['id'] ?? null;
-            $newStatus = $_POST['status'] ?? null;
+            $menuId = (int)($_POST['id'] ?? 0);
             
-            if (!$menuId || !$newStatus) {
+            if (!$menuId) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'message' => 'Datos requeridos']);
+                echo $this->renderError('ID de menú requerido');
                 return;
             }
 
-            // Verificar que el menú existe
-            $menu = $this->getMenuById($menuId);
-            if (!$menu) {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'message' => 'Menú no encontrado']);
-                return;
+            // Cambiar estado usando el modelo
+            $success = $this->menuModel->toggleStatus($menuId);
+
+            if ($success) {
+                Security::redirect('/menus?success=status_changed');
+            } else {
+                throw new Exception('No se pudo cambiar el estado del menú');
             }
-
-            // Cambiar estado
-            $result = $this->changeMenuStatus($menuId, $newStatus);
-
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => $result,
-                'message' => $result ? 'Estado actualizado exitosamente' : 'Error al actualizar el estado'
-            ]);
 
         } catch (Exception $e) {
             error_log("Error en MenuController::toggleStatus: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
-        }
-    }
-
-    /**
-     * Obtiene todos los menús de la base de datos
-     */
-    private function getAllMenus(): array
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "SELECT 
-                        m.id,
-                        m.nombre,
-                        m.descripcion,
-                        m.url,
-                        m.icono,
-                        m.orden,
-                        m.estado_tipo_id,
-                        m.fecha_creacion,
-                        m.fecha_modificacion,
-                        m.display,
-                        et.nombre as estado_nombre
-                    FROM menu m
-                    LEFT JOIN estado_tipos et ON m.estado_tipo_id = et.id
-                    WHERE m.estado_tipo_id != 4
-                    ORDER BY m.orden ASC, m.nombre ASC";
-
-            $stmt = $db->prepare($sql);
-            $stmt->execute();
-
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            error_log("Error al obtener menús: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Obtiene un menú por ID
-     */
-    private function getMenuById($id): ?array
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "SELECT 
-                        id,
-                        nombre,
-                        descripcion,
-                        url,
-                        icono,
-                        orden,
-                        estado_tipo_id,
-                        fecha_creacion,
-                        fecha_modificacion,
-                        display
-                    FROM menu 
-                    WHERE id = :id";
-
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result ?: null;
-        } catch (Exception $e) {
-            error_log("Error al obtener menú por ID: " . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Obtiene los estados disponibles
-     */
-    private function getEstados(): array
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "SELECT id, nombre 
-                    FROM tipo 
-                    WHERE tabla_nombre = 'menu' 
-                    AND campo_nombre = 'estado' 
-                    ORDER BY id ASC";
-
-            $stmt = $db->prepare($sql);
-            $stmt->execute();
-
-            $estados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Si no hay estados específicos, usar estados generales
-            if (empty($estados)) {
-                $estados = [
-                    ['id' => 1, 'nombre' => 'Creado'],
-                    ['id' => 2, 'nombre' => 'Activo'], 
-                    ['id' => 3, 'nombre' => 'Inactivo'],
-                    ['id' => 4, 'nombre' => 'Eliminado']
-                ];
-            }
-
-            return $estados;
-        } catch (Exception $e) {
-            error_log("Error al obtener estados: " . $e->getMessage());
-            return [
-                ['id' => 1, 'nombre' => 'Creado'],
-                ['id' => 2, 'nombre' => 'Activo'], 
-                ['id' => 3, 'nombre' => 'Inactivo'],
-                ['id' => 4, 'nombre' => 'Eliminado']
-            ];
+            Security::redirect('/menus?error=' . urlencode($e->getMessage()));
         }
     }
 
@@ -514,13 +396,8 @@ class MenuController
             $errors[] = 'El nombre es requerido';
         } elseif (strlen($data['nombre']) > 150) {
             $errors[] = 'El nombre no puede exceder 150 caracteres';
-        }
-
-        // Display requerido
-        if (empty(trim($data['display'] ?? ''))) {
-            $errors[] = 'El título de visualización es requerido';
-        } elseif (strlen($data['display']) > 150) {
-            $errors[] = 'El título de visualización no puede exceder 150 caracteres';
+        } elseif ($this->menuModel->nameExists($data['nombre'], $excludeId)) {
+            $errors[] = 'Ya existe un menú con este nombre';
         }
 
         // URL requerida
@@ -530,10 +407,7 @@ class MenuController
             $errors[] = 'La URL no puede exceder 100 caracteres';
         } elseif (!str_starts_with($data['url'], '/')) {
             $errors[] = 'La URL debe comenzar con "/"';
-        }
-
-        // Verificar URL única
-        if (!empty($data['url']) && $this->isUrlDuplicate($data['url'], $excludeId)) {
+        } elseif ($this->menuModel->urlExists($data['url'], $excludeId)) {
             $errors[] = 'Ya existe un menú con esta URL';
         }
 
@@ -557,143 +431,14 @@ class MenuController
             $errors[] = 'La descripción no puede exceder 300 caracteres';
         }
 
+        // Display requerido (texto para mostrar en la interfaz)
+        if (empty(trim($data['display'] ?? ''))) {
+            $errors[] = 'El texto a mostrar (display) es requerido';
+        } elseif (strlen($data['display']) > 150) {
+            $errors[] = 'El texto a mostrar no puede exceder 150 caracteres';
+        }
+
         return $errors;
-    }
-
-    /**
-     * Verifica si la URL está duplicada
-     */
-    private function isUrlDuplicate(string $url, $excludeId = null): bool
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "SELECT id FROM menu WHERE url = :url";
-            $params = [':url' => $url];
-
-            if ($excludeId) {
-                $sql .= " AND id != :exclude_id";
-                $params[':exclude_id'] = $excludeId;
-            }
-
-            $stmt = $db->prepare($sql);
-            $stmt->execute($params);
-
-            return $stmt->fetch() !== false;
-        } catch (Exception $e) {
-            error_log("Error al verificar URL duplicada: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Crea un nuevo menú
-     */
-    private function createMenu(array $data): ?int
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "INSERT INTO menu (nombre, descripcion, url, icono, orden, estado_tipo_id, display, fecha_creacion) 
-                    VALUES (:nombre, :descripcion, :url, :icono, :orden, :estado_tipo_id, :display, NOW())";
-
-            $stmt = $db->prepare($sql);
-            $stmt->execute([
-                ':nombre' => trim($data['nombre']),
-                ':descripcion' => trim($data['descripcion'] ?? ''),
-                ':url' => trim($data['url']),
-                ':icono' => trim($data['icono'] ?? ''),
-                ':orden' => (int)$data['orden'],
-                ':estado_tipo_id' => (int)($data['estado_tipo_id'] ?? 2),
-                ':display' => trim($data['display'])
-            ]);
-
-            return $db->lastInsertId();
-        } catch (Exception $e) {
-            error_log("Error al crear menú: " . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Actualiza un menú existente
-     */
-    private function updateMenu(int $id, array $data): bool
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "UPDATE menu 
-                    SET nombre = :nombre, 
-                        descripcion = :descripcion,
-                        url = :url, 
-                        icono = :icono, 
-                        orden = :orden, 
-                        estado_tipo_id = :estado_tipo_id, 
-                        display = :display, 
-                        fecha_modificacion = NOW() 
-                    WHERE id = :id";
-
-            $stmt = $db->prepare($sql);
-            return $stmt->execute([
-                ':nombre' => trim($data['nombre']),
-                ':descripcion' => trim($data['descripcion'] ?? ''),
-                ':url' => trim($data['url']),
-                ':icono' => trim($data['icono'] ?? ''),
-                ':orden' => (int)$data['orden'],
-                ':estado_tipo_id' => (int)($data['estado_tipo_id'] ?? 2),
-                ':display' => trim($data['display']),
-                ':id' => $id
-            ]);
-        } catch (Exception $e) {
-            error_log("Error al actualizar menú: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Elimina un menú (cambia estado a eliminado)
-     */
-    private function deleteMenu(int $id): bool
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "UPDATE menu 
-                    SET estado_tipo_id = 4, 
-                        fecha_modificacion = NOW() 
-                    WHERE id = :id";
-
-            $stmt = $db->prepare($sql);
-            return $stmt->execute([':id' => $id]);
-        } catch (Exception $e) {
-            error_log("Error al eliminar menú: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Cambia el estado de un menú
-     */
-    private function changeMenuStatus(int $id, int $newStatus): bool
-    {
-        try {
-            $db = Database::getInstance();
-
-            $sql = "UPDATE menu 
-                    SET estado_tipo_id = :status, 
-                        fecha_modificacion = NOW() 
-                    WHERE id = :id";
-
-            $stmt = $db->prepare($sql);
-            return $stmt->execute([
-                ':status' => $newStatus,
-                ':id' => $id
-            ]);
-        } catch (Exception $e) {
-            error_log("Error al cambiar estado del menú: " . $e->getMessage());
-            return false;
-        }
     }
 
     private function getCurrentUser(): ?array

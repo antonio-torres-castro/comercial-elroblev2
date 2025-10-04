@@ -30,6 +30,12 @@ class Security
         return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
     }
 
+    public static function renderCsrfField(): void
+    {
+        $token = self::generateCsrfToken();
+        echo '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+    }
+
     public static function redirect(string $url): void
     {
         header("Location: $url");

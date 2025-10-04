@@ -78,6 +78,29 @@
                     </div>
                 </div>
 
+                <!-- Alertas de mensajes -->
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?php
+                        $messages = [
+                            'created' => 'Menú creado exitosamente',
+                            'updated' => 'Menú actualizado exitosamente',
+                            'deleted' => 'Menú eliminado exitosamente',
+                            'status_changed' => 'Estado del menú actualizado exitosamente'
+                        ];
+                        echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
+                        ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (isset($_GET['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <?php echo htmlspecialchars($_GET['error']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
                 <div class="row">
                     <div class="col-12">
                         <div class="card">

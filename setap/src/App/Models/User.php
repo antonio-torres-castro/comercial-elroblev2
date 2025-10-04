@@ -244,4 +244,79 @@ class User
             return false;
         }
     }
+
+    /**
+     * Actualizar perfil del usuario (campos seguros solamente)
+     */
+    public function updateProfile(int $id, array $data): bool
+    {
+        try {
+            $this->db->beginTransaction();
+
+            // Actualizar datos de persona (nombre, teléfono, dirección)
+            $personaSql = "
+                UPDATE personas p
+                INNER JOIN usuarios u ON p.id = u.persona_id
+                SET p.nombre = ?, p.telefono = ?, p.direccion = ?, p.fecha_modificacion = NOW()
+                WHERE u.id = ?
+            ";
+
+            $stmt = $this->db->prepare($personaSql);
+            $stmt->execute([
+                $data['nombre'],
+                $data['telefono'] ?? '',
+                $data['direccion'] ?? '',
+                $id
+            ]);
+
+            // Actualizar email del usuario (sin cambiar el rol)
+            $usuarioSql = "
+                UPDATE usuarios 
+                SET email = ?, fecha_modificacion = NOW()
+                WHERE id = ?
+            ";
+
+            $stmt = $this->db->prepare($usuarioSql);
+            $stmt->execute([
+                $data['email'],
+                $id
+            ]);
+
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Error en User::updateProfile: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtener usuario completo por ID
+     */
+    public function findComplete(int $id): ?array
+    {
+        try {
+            $sql = "
+                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado,
+                       p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
+                       ut.nombre as rol, ut.id as usuario_tipo_id,
+                       et.nombre as estado
+                FROM usuarios u 
+                INNER JOIN personas p ON u.persona_id = p.id 
+                INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
+                INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id
+                WHERE u.id = ?
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (PDOException $e) {
+            error_log("Error en User::findComplete: " . $e->getMessage());
+            return null;
+        }
+    }
 }

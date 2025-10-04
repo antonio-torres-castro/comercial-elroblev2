@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\User;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
@@ -10,6 +11,7 @@ use Exception;
 class PerfilController
 {
     private $permissionService;
+    private $userModel;
 
     public function __construct()
     {
@@ -17,6 +19,7 @@ class PerfilController
         (new AuthMiddleware())->handle();
         
         $this->permissionService = new PermissionService();
+        $this->userModel = new User();
     }
 
     /**
@@ -39,9 +42,17 @@ class PerfilController
                 return;
             }
 
+            // Obtener datos completos del usuario
+            $fullUserData = $this->userModel->findComplete($currentUser['id']);
+            if (!$fullUserData) {
+                http_response_code(404);
+                echo $this->renderError('Usuario no encontrado.');
+                return;
+            }
+
             // Datos para la vista
             $data = [
-                'user' => $currentUser,
+                'user' => $fullUserData,
                 'title' => 'Mi Perfil',
                 'subtitle' => 'Información de tu cuenta'
             ];
@@ -75,14 +86,22 @@ class PerfilController
                 return;
             }
 
+            // Obtener datos completos del usuario
+            $fullUserData = $this->userModel->findComplete($currentUser['id']);
+            if (!$fullUserData) {
+                http_response_code(404);
+                echo $this->renderError('Usuario no encontrado.');
+                return;
+            }
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $this->updateProfile($currentUser);
+                $this->updateProfile($fullUserData);
                 return;
             }
 
             // Datos para la vista
             $data = [
-                'user' => $currentUser,
+                'user' => $fullUserData,
                 'title' => 'Editar Perfil',
                 'subtitle' => 'Actualiza tu información personal'
             ];
@@ -101,11 +120,104 @@ class PerfilController
      */
     private function updateProfile(array $currentUser)
     {
-        // TODO: Implementar lógica de actualización del perfil
-        // Por ahora solo mostramos un mensaje de éxito
-        
-        $_SESSION['success_message'] = 'Perfil actualizado correctamente';
-        Security::redirect('/perfil');
+        try {
+            // Verificar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(403);
+                echo $this->renderError('Token de seguridad inválido');
+                return;
+            }
+
+            // Validar datos
+            $errors = $this->validateProfileData($_POST);
+            
+            if (!empty($errors)) {
+                // Mostrar formulario con errores
+                $data = [
+                    'user' => array_merge($currentUser, $_POST),
+                    'title' => 'Editar Perfil',
+                    'subtitle' => 'Actualiza tu información personal',
+                    'errors' => $errors
+                ];
+                require_once __DIR__ . '/../Views/perfil/edit.php';
+                return;
+            }
+
+            // Preparar datos para actualización
+            $updateData = [
+                'nombre' => trim($_POST['nombre']),
+                'email' => trim($_POST['email']),
+                'telefono' => trim($_POST['telefono'] ?? ''),
+                'direccion' => trim($_POST['direccion'] ?? '')
+            ];
+
+            // Actualizar perfil usando el modelo
+            $success = $this->userModel->updateProfile($currentUser['id'], $updateData);
+
+            if ($success) {
+                // Actualizar datos en sesión
+                $_SESSION['nombre_completo'] = $updateData['nombre'];
+                $_SESSION['email'] = $updateData['email'];
+                
+                $_SESSION['success_message'] = 'Perfil actualizado correctamente';
+                Security::redirect('/perfil');
+            } else {
+                throw new Exception('No se pudo actualizar el perfil');
+            }
+
+        } catch (Exception $e) {
+            error_log("Error en PerfilController::updateProfile: " . $e->getMessage());
+            
+            // Mostrar formulario con error
+            $data = [
+                'user' => array_merge($currentUser, $_POST ?? []),
+                'title' => 'Editar Perfil',
+                'subtitle' => 'Actualiza tu información personal',
+                'errors' => ['Error al actualizar el perfil: ' . $e->getMessage()]
+            ];
+            require_once __DIR__ . '/../Views/perfil/edit.php';
+        }
+    }
+
+    /**
+     * Validar datos del perfil
+     */
+    private function validateProfileData(array $data): array
+    {
+        $errors = [];
+
+        // Nombre requerido
+        if (empty(trim($data['nombre'] ?? ''))) {
+            $errors[] = 'El nombre completo es requerido';
+        } elseif (strlen($data['nombre']) < 2) {
+            $errors[] = 'El nombre debe tener al menos 2 caracteres';
+        } elseif (strlen($data['nombre']) > 100) {
+            $errors[] = 'El nombre no puede exceder 100 caracteres';
+        }
+
+        // Email requerido y válido
+        if (empty(trim($data['email'] ?? ''))) {
+            $errors[] = 'El email es requerido';
+        } elseif (!Security::validateEmail($data['email'])) {
+            $errors[] = 'El email no tiene un formato válido';
+        }
+
+        // Teléfono opcional pero validar formato si se proporciona
+        if (!empty($data['telefono'])) {
+            $telefono = preg_replace('/[^0-9+\-\s]/', '', $data['telefono']);
+            if (strlen($telefono) < 8) {
+                $errors[] = 'El teléfono debe tener al menos 8 dígitos';
+            } elseif (strlen($telefono) > 20) {
+                $errors[] = 'El teléfono no puede exceder 20 caracteres';
+            }
+        }
+
+        // Dirección opcional pero validar longitud
+        if (!empty($data['direccion']) && strlen($data['direccion']) > 200) {
+            $errors[] = 'La dirección no puede exceder 200 caracteres';
+        }
+
+        return $errors;
     }
 
     private function getCurrentUser(): ?array
