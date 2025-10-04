@@ -50,15 +50,6 @@
     </nav>
 
     <div class="container mt-4">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/home">Home</a></li>
-                <li class="breadcrumb-item"><a href="/tasks">Tareas</a></li>
-                <li class="breadcrumb-item active">Editar Tarea</li>
-            </ol>
-        </nav>
-
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <div class="card shadow">

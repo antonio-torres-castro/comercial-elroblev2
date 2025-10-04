@@ -40,15 +40,6 @@
     </nav>
 
     <div class="container mt-4">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/home">Home</a></li>
-                <li class="breadcrumb-item"><a href="/users">Usuarios</a></li>
-                <li class="breadcrumb-item active">Editar Usuario</li>
-            </ol>
-        </nav>
-
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card shadow">

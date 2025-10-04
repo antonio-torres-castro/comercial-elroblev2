@@ -72,14 +72,6 @@ use App\Helpers\Security;
     </nav>
 
     <div class="container-fluid mt-4">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/home">Home</a></li>
-                <li class="breadcrumb-item active">Usuarios</li>
-            </ol>
-        </nav>
-
         <!-- Header y Filtros -->
         <div class="row mb-4">
             <div class="col-md-6">
