@@ -125,7 +125,7 @@
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($data['tasks'] as $task): ?>
-                                                    <tr>
+                                                    <tr id="task-row-<?= $task['id'] ?>">
                                                         <td>
                                                             <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
                                                             <?php if (!empty($task['descripcion'])): ?>
@@ -140,20 +140,43 @@
                                                         <td>
                                                             <?php
                                                             $badgeClass = 'bg-secondary';
+                                                            $statusText = '';
                                                             switch ($task['estado_tipo_id']) {
-                                                                case 1: $badgeClass = 'bg-success'; break; // Activo
-                                                                case 2: $badgeClass = 'bg-warning'; break; // Pendiente
-                                                                case 3: $badgeClass = 'bg-danger'; break;  // Inactivo
-                                                                case 8: $badgeClass = 'bg-primary'; break; // Completado
+                                                                case 1: $badgeClass = 'bg-warning text-dark'; $statusText = 'Creado'; break;
+                                                                case 2: $badgeClass = 'bg-success'; $statusText = 'Activo'; break;
+                                                                case 3: $badgeClass = 'bg-secondary'; $statusText = 'Inactivo'; break;
+                                                                case 5: $badgeClass = 'bg-primary'; $statusText = 'Iniciado'; break;
+                                                                case 6: $badgeClass = 'bg-info text-dark'; $statusText = 'Terminado'; break;
+                                                                case 7: $badgeClass = 'bg-danger'; $statusText = 'Rechazado'; break;
+                                                                case 8: $badgeClass = 'bg-dark'; $statusText = 'Aprobado'; break;
+                                                                default: $statusText = htmlspecialchars($task['estado']);
                                                             }
                                                             ?>
-                                                            <span class="badge <?= $badgeClass ?>">
-                                                                <?= htmlspecialchars($task['estado']) ?>
-                                                            </span>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="badge <?= $badgeClass ?>" id="status-badge-<?= $task['id'] ?>">
+                                                                    <?= $statusText ?>
+                                                                </span>
+                                                                
+                                                                <!-- GAP 5: Botón para cambiar estado -->
+                                                                <div class="dropdown ms-2">
+                                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                                        id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false"
+                                                                        onclick="loadValidTransitions(<?= $task['id'] ?>)">
+                                                                        <i class="bi bi-arrow-repeat"></i>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
+                                                                        <li><span class="dropdown-item-text text-muted">Cargando...</span></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                         <td>
-                                                            <?php if (!empty($task['asignado_a'])): ?>
-                                                                <i class="bi bi-person"></i> <?= htmlspecialchars($task['asignado_a']) ?>
+                                                            <?php if (!empty($task['ejecutor_nombre'])): ?>
+                                                                <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
+                                                            <?php elseif (!empty($task['supervisor_nombre'])): ?>
+                                                                <i class="bi bi-person-check"></i> <?= htmlspecialchars($task['supervisor_nombre']) ?>
+                                                            <?php elseif (!empty($task['planificador_nombre'])): ?>
+                                                                <i class="bi bi-person-gear"></i> <?= htmlspecialchars($task['planificador_nombre']) ?>
                                                             <?php else: ?>
                                                                 <span class="text-muted">Sin asignar</span>
                                                             <?php endif; ?>
@@ -162,8 +185,8 @@
                                                             <?php if (!empty($task['fecha_inicio'])): ?>
                                                                 <small>
                                                                     <strong>Inicio:</strong> <?= date('d/m/Y', strtotime($task['fecha_inicio'])) ?><br>
-                                                                    <?php if (!empty($task['fecha_fin'])): ?>
-                                                                        <strong>Fin:</strong> <?= date('d/m/Y', strtotime($task['fecha_fin'])) ?>
+                                                                    <?php if (!empty($task['duracion_horas'])): ?>
+                                                                        <strong>Duración:</strong> <?= $task['duracion_horas'] ?>h
                                                                     <?php endif; ?>
                                                                 </small>
                                                             <?php else: ?>
@@ -175,12 +198,13 @@
                                                                 <a href="/tasks/show/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
-                                                                <a href="/tasks/edit/<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
+                                                                <a href="/tasks/edit?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
+                                                                <!-- GAP 5: Validar si puede eliminar según estado -->
                                                                 <button type="button" class="btn btn-outline-danger" 
-                                                                    onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>')" 
-                                                                    title="Eliminar">
+                                                                    onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>', <?= $task['estado_tipo_id'] ?>)" 
+                                                                    title="Eliminar" id="delete-btn-<?= $task['id'] ?>">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </div>
@@ -218,6 +242,10 @@
                             <div class="modal-body">
                                 <p>¿Estás seguro de que deseas eliminar la tarea <strong id="deleteTaskName"></strong>?</p>
                                 <p class="text-muted small">Esta acción no se puede deshacer.</p>
+                                <div id="deleteWarning" class="alert alert-warning d-none">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <span id="deleteWarningMessage"></span>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -227,39 +255,203 @@
                     </div>
                 </div>
 
+                <!-- Modal para cambiar estado -->
+                <div class="modal fade" id="changeStateModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Cambiar Estado de Tarea</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="changeStateForm">
+                                    <input type="hidden" id="changeStateTaskId" name="task_id">
+                                    <input type="hidden" id="changeStateNewState" name="new_state">
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Tarea:</label>
+                                        <div id="changeStateTaskName" class="fw-bold text-primary"></div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Nuevo Estado:</label>
+                                        <div id="changeStateNewStateName" class="fw-bold text-success"></div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="changeStateReason" class="form-label">Motivo del cambio (opcional):</label>
+                                        <textarea class="form-control" id="changeStateReason" name="reason" rows="3" 
+                                            placeholder="Describe el motivo del cambio de estado..."></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="confirmChangeState">Cambiar Estado</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <script>
                     let taskToDelete = null;
+                    let taskToChangeState = null;
 
-                    function deleteTask(id, name) {
+                    // GAP 5: Cargar transiciones válidas para una tarea
+                    function loadValidTransitions(taskId) {
+                        fetch(`/tasks/valid-transitions?task_id=${taskId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const menu = document.getElementById(`stateMenu${taskId}`);
+                                if (data.transitions && data.transitions.length > 0) {
+                                    menu.innerHTML = '';
+                                    data.transitions.forEach(transition => {
+                                        const li = document.createElement('li');
+                                        li.innerHTML = `<a class="dropdown-item" href="#" onclick="confirmStateChange(${taskId}, ${transition.id}, '${transition.nombre}')">
+                                            <i class="bi bi-arrow-right"></i> ${transition.nombre}
+                                        </a>`;
+                                        menu.appendChild(li);
+                                    });
+                                } else {
+                                    menu.innerHTML = '<li><span class="dropdown-item-text text-muted">Sin transiciones disponibles</span></li>';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error cargando transiciones:', error);
+                                const menu = document.getElementById(`stateMenu${taskId}`);
+                                menu.innerHTML = '<li><span class="dropdown-item-text text-danger">Error al cargar</span></li>';
+                            });
+                    }
+
+                    // GAP 5: Confirmar cambio de estado
+                    function confirmStateChange(taskId, newStateId, newStateName) {
+                        const taskName = document.querySelector(`#task-row-${taskId} .fw-bold`).textContent;
+                        
+                        document.getElementById('changeStateTaskId').value = taskId;
+                        document.getElementById('changeStateNewState').value = newStateId;
+                        document.getElementById('changeStateTaskName').textContent = taskName;
+                        document.getElementById('changeStateNewStateName').textContent = newStateName;
+                        document.getElementById('changeStateReason').value = '';
+                        
+                        new bootstrap.Modal(document.getElementById('changeStateModal')).show();
+                    }
+
+                    // GAP 5: Ejecutar cambio de estado
+                    document.getElementById('confirmChangeState').addEventListener('click', function() {
+                        const formData = new FormData(document.getElementById('changeStateForm'));
+                        
+                        fetch('/tasks/change-state', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Actualizar badge de estado en la tabla
+                                const taskId = formData.get('task_id');
+                                const newStateId = formData.get('new_state');
+                                updateStatusBadge(taskId, newStateId);
+                                
+                                // Mostrar mensaje de éxito
+                                showAlert('success', data.message);
+                                
+                                // Cerrar modal
+                                bootstrap.Modal.getInstance(document.getElementById('changeStateModal')).hide();
+                            } else {
+                                showAlert('danger', 'Error: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showAlert('danger', 'Error de conexión al servidor');
+                        });
+                    });
+
+                    // GAP 5: Actualizar badge de estado
+                    function updateStatusBadge(taskId, stateId) {
+                        const badge = document.getElementById(`status-badge-${taskId}`);
+                        let badgeClass = 'bg-secondary';
+                        let statusText = '';
+                        
+                        switch (parseInt(stateId)) {
+                            case 1: badgeClass = 'bg-warning text-dark'; statusText = 'Creado'; break;
+                            case 2: badgeClass = 'bg-success'; statusText = 'Activo'; break;
+                            case 3: badgeClass = 'bg-secondary'; statusText = 'Inactivo'; break;
+                            case 5: badgeClass = 'bg-primary'; statusText = 'Iniciado'; break;
+                            case 6: badgeClass = 'bg-info text-dark'; statusText = 'Terminado'; break;
+                            case 7: badgeClass = 'bg-danger'; statusText = 'Rechazado'; break;
+                            case 8: badgeClass = 'bg-dark'; statusText = 'Aprobado'; break;
+                        }
+                        
+                        badge.className = `badge ${badgeClass}`;
+                        badge.textContent = statusText;
+                    }
+
+                    // Función para eliminar tareas con validación GAP 5
+                    function deleteTask(id, name, stateId) {
                         taskToDelete = id;
                         document.getElementById('deleteTaskName').textContent = name;
+                        
+                        // GAP 5: Mostrar warning si es tarea aprobada
+                        const warning = document.getElementById('deleteWarning');
+                        if (stateId === 8) { // Estado aprobado
+                            warning.classList.remove('d-none');
+                            document.getElementById('deleteWarningMessage').textContent = 
+                                'Esta tarea está aprobada. Solo Admin y Planner pueden eliminarla.';
+                        } else {
+                            warning.classList.add('d-none');
+                        }
+                        
                         new bootstrap.Modal(document.getElementById('deleteModal')).show();
                     }
 
                     document.getElementById('confirmDelete').addEventListener('click', function() {
                         if (taskToDelete) {
-                            fetch(`/tasks/delete/${taskToDelete}`, {
+                            const formData = new FormData();
+                            formData.append('id', taskToDelete);
+                            
+                            fetch('/tasks/delete', {
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
+                                body: formData
                             })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    location.reload();
+                                    // Remover fila de la tabla
+                                    document.getElementById(`task-row-${taskToDelete}`).remove();
+                                    showAlert('success', data.message);
                                 } else {
-                                    alert('Error al eliminar la tarea: ' + (data.message || 'Error desconocido'));
+                                    showAlert('danger', 'Error: ' + data.message);
                                 }
                             })
                             .catch(error => {
-                                alert('Error de conexión al servidor');
                                 console.error('Error:', error);
+                                showAlert('danger', 'Error de conexión al servidor');
                             });
                         }
                         bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
                     });
+
+                    // Función para mostrar alertas
+                    function showAlert(type, message) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+                        alertDiv.style.top = '20px';
+                        alertDiv.style.right = '20px';
+                        alertDiv.style.zIndex = '9999';
+                        alertDiv.innerHTML = `
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        document.body.appendChild(alertDiv);
+                        
+                        // Auto-remove after 5 seconds
+                        setTimeout(() => {
+                            if (alertDiv.parentNode) {
+                                alertDiv.parentNode.removeChild(alertDiv);
+                            }
+                        }, 5000);
+                    }
                 </script>
             </main>
         </div>
@@ -267,5 +459,8 @@
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+    
+    <!-- GAP 5: Task State Validation Utilities -->
+    <script src="/js/task-state-utils.js"></script>
 </body>
 </html>

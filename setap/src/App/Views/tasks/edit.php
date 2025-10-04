@@ -162,13 +162,21 @@
                                                 <div class="mb-3">
                                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
                                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
-                                                        <?php foreach ($taskStates as $state): ?>
-                                                            <option value="<?= (int)$state['id'] ?>" 
-                                                                <?= $state['id'] == $task['estado_tipo_id'] ? 'selected' : '' ?>>
-                                                                <?= htmlspecialchars($state['nombre']) ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
+                                                        <option value="<?= $task['estado_tipo_id'] ?>" selected>
+                                                            <?= htmlspecialchars($task['estado']) ?> (Actual)
+                                                        </option>
                                                     </select>
+                                                    <div class="form-text">
+                                                        <i class="bi bi-info-circle"></i> 
+                                                        Solo se muestran transiciones válidas según el estado actual y tu rol.
+                                                    </div>
+                                                    <!-- GAP 5: Warning si es tarea aprobada -->
+                                                    <?php if ($task['estado_tipo_id'] == 8): ?>
+                                                        <div class="alert alert-warning mt-2 mb-0">
+                                                            <i class="bi bi-exclamation-triangle"></i>
+                                                            <strong>Tarea Aprobada:</strong> Solo Admin y Planner pueden modificar tareas aprobadas.
+                                                        </div>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -254,7 +262,90 @@
                 updateBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizando...';
                 updateBtn.disabled = true;
             });
+
+            // GAP 5: Cargar transiciones válidas para el estado actual
+            loadValidTransitions();
+        });
+
+        // GAP 5: Función para cargar transiciones válidas
+        function loadValidTransitions() {
+            const taskId = <?= $task['id'] ?>;
+            const currentStateId = <?= $task['estado_tipo_id'] ?>;
+            const estadoSelect = document.getElementById('estado_tipo_id');
+            
+            fetch(`/tasks/valid-transitions?task_id=${taskId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Limpiar opciones actuales (excepto la primera que es el estado actual)
+                    while (estadoSelect.children.length > 1) {
+                        estadoSelect.removeChild(estadoSelect.lastChild);
+                    }
+                    
+                    // Agregar transiciones válidas
+                    if (data.transitions && data.transitions.length > 0) {
+                        data.transitions.forEach(transition => {
+                            const option = document.createElement('option');
+                            option.value = transition.id;
+                            option.textContent = transition.nombre;
+                            option.title = transition.descripcion;
+                            estadoSelect.appendChild(option);
+                        });
+                        
+                        // Mostrar ayuda sobre transiciones disponibles
+                        const formText = estadoSelect.parentNode.querySelector('.form-text');
+                        if (formText) {
+                            formText.innerHTML = `
+                                <i class="bi bi-info-circle"></i> 
+                                ${data.transitions.length} transición(es) válida(s) disponible(s) según tu rol.
+                            `;
+                        }
+                    } else {
+                        // Sin transiciones disponibles
+                        const formText = estadoSelect.parentNode.querySelector('.form-text');
+                        if (formText) {
+                            formText.innerHTML = `
+                                <i class="bi bi-exclamation-circle text-warning"></i> 
+                                No hay transiciones válidas disponibles desde el estado actual.
+                            `;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cargando transiciones:', error);
+                    const formText = estadoSelect.parentNode.querySelector('.form-text');
+                    if (formText) {
+                        formText.innerHTML = `
+                            <i class="bi bi-exclamation-triangle text-danger"></i> 
+                            Error al cargar las transiciones válidas.
+                        `;
+                    }
+                });
+        }
+
+        // GAP 5: Validar cambio de estado antes de enviar formulario
+        function validateStateChange() {
+            const estadoSelect = document.getElementById('estado_tipo_id');
+            const currentStateId = <?= $task['estado_tipo_id'] ?>;
+            const newStateId = parseInt(estadoSelect.value);
+            
+            if (newStateId !== currentStateId) {
+                const stateName = estadoSelect.options[estadoSelect.selectedIndex].text;
+                return confirm(`¿Confirmas el cambio de estado a "${stateName}"?\n\nEsta acción puede requerir permisos especiales según tu rol.`);
+            }
+            
+            return true;
+        }
+
+        // Agregar validación de estado al envío del formulario
+        document.getElementById('editTaskForm').addEventListener('submit', function(e) {
+            if (!validateStateChange()) {
+                e.preventDefault();
+                return false;
+            }
         });
     </script>
+    
+    <!-- GAP 5: Task State Validation Utilities -->
+    <script src="/js/task-state-utils.js"></script>
 </body>
 </html>

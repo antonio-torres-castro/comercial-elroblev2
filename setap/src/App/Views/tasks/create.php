@@ -331,18 +331,26 @@
                             
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
+                                    <label for="estado_tipo_id" class="form-label">Estado Inicial <span class="required">*</span></label>
                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                         <?php if (!empty($data['taskStates'])): ?>
                                             <?php foreach ($data['taskStates'] as $state): ?>
+                                                <?php 
+                                                // GAP 5: Solo permitir estados válidos para creación (1=Creado, 2=Activo)
+                                                if (!in_array($state['id'], [1, 2])) continue;
+                                                ?>
                                                 <option value="<?= $state['id'] ?>"
                                                     <?= ((isset($data['task']['estado_tipo_id']) && $data['task']['estado_tipo_id'] == $state['id']) ||
-                                                        (!isset($data['task']) && $state['id'] == 2)) ? 'selected' : '' ?>>
+                                                        (!isset($data['task']) && $state['id'] == 1)) ? 'selected' : '' ?>>
                                                     <?= htmlspecialchars($state['nombre']) ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         <?php endif; ?>
                                     </select>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle"></i> 
+                                        Las tareas se crean en estado "Creado" por defecto. Pueden activarse inmediatamente si están listas.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -449,5 +457,8 @@
             });
         });
     </script>
+    
+    <!-- GAP 5: Task State Validation Utilities -->
+    <script src="/js/task-state-utils.js"></script>
 </body>
 </html>

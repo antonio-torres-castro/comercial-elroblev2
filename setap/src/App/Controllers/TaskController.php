@@ -413,14 +413,34 @@ class TaskController
 
             // Eliminar tarea
             if ($this->taskModel->delete($id)) {
-                Security::redirect('/tasks?success=Tarea eliminada correctamente');
+                // Si es petición AJAX, devolver JSON
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                    echo json_encode(['success' => true, 'message' => 'Tarea eliminada correctamente']);
+                } else {
+                    Security::redirect('/tasks?success=Tarea eliminada correctamente');
+                }
             } else {
-                Security::redirect('/tasks?error=Error al eliminar la tarea');
+                // Si es petición AJAX, devolver JSON
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                    echo json_encode(['success' => false, 'message' => 'Error al eliminar la tarea']);
+                } else {
+                    Security::redirect('/tasks?error=Error al eliminar la tarea');
+                }
             }
 
         } catch (Exception $e) {
             error_log("Error en TaskController::delete: " . $e->getMessage());
-            Security::redirect('/tasks?error=Error interno del servidor');
+            
+            // Si es petición AJAX, devolver JSON
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+            } else {
+                Security::redirect('/tasks?error=Error interno del servidor');
+            }
         }
     }
 
