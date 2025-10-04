@@ -75,24 +75,6 @@
                         </table>
                     </div>
                 </div>
-                
-                <hr>
-                
-                <div class="row">
-                    <div class="col-12">
-                        <h5><i class="bi bi-clock"></i> Información del Sistema</h5>
-                        <table class="table table-borderless">
-                            <tr>
-                                <td><strong>Fecha de Registro:</strong></td>
-                                <td><?php echo htmlspecialchars($data['user']['fecha_Creado'] ?? 'No disponible'); ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>ID de Usuario:</strong></td>
-                                <td><span class="badge bg-light text-dark"><?php echo htmlspecialchars($data['user']['id'] ?? 'N/A'); ?></span></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
     </main>

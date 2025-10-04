@@ -153,7 +153,7 @@ class TaskController
                 'error' => $_GET['error'] ?? ''
             ];
 
-            require_once __DIR__ . '/../Views/tasks/form.php';
+            require_once __DIR__ . '/../Views/tasks/create.php';
 
         } catch (Exception $e) {
             error_log("Error en TaskController::create: " . $e->getMessage());
@@ -184,6 +184,12 @@ class TaskController
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 Security::redirect('/tasks');
+                return;
+            }
+
+            // Verificar CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                Security::redirect("/tasks/create?error=" . urlencode('Token de seguridad inválido'));
                 return;
             }
 
@@ -268,7 +274,7 @@ class TaskController
                 'success' => $_GET['success'] ?? ''
             ];
 
-            require_once __DIR__ . '/../Views/tasks/form.php';
+            require_once __DIR__ . '/../Views/tasks/edit.php';
 
         } catch (Exception $e) {
             error_log("Error en TaskController::edit: " . $e->getMessage());
@@ -299,6 +305,12 @@ class TaskController
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 Security::redirect('/tasks');
+                return;
+            }
+
+            // Verificar CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                Security::redirect("/tasks?error=" . urlencode('Token de seguridad inválido'));
                 return;
             }
 
@@ -411,16 +423,7 @@ class TaskController
             $errors[] = 'Debe seleccionar un tipo de tarea válido';
         }
 
-        // Validar fechas
-        if (empty($data['fecha_inicio'])) {
-            $errors[] = 'La fecha de inicio es obligatoria';
-        }
-
-        if (empty($data['fecha_fin'])) {
-            $errors[] = 'La fecha de fin es obligatoria';
-        }
-
-        // Validar que fecha fin sea posterior a fecha inicio
+        // Validar fechas (opcionales pero si están presentes deben ser válidas)
         if (!empty($data['fecha_inicio']) && !empty($data['fecha_fin'])) {
             if (strtotime($data['fecha_fin']) < strtotime($data['fecha_inicio'])) {
                 $errors[] = 'La fecha de fin debe ser posterior a la fecha de inicio';

@@ -133,48 +133,15 @@
                                       placeholder="Dirección completa..." maxlength="255"></textarea>
                             <div class="form-text">Campo opcional. Máximo 255 caracteres.</div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Panel Lateral -->
-                <div class="col-md-4">
-                    <!-- Instrucciones -->
-                    <div class="card">
-                        <div class="card-header bg-setap-primary text-white">
-                            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="small">
-                                <p><strong>Campos Obligatorios:</strong></p>
-                                <ul>
-                                    <li>RUT (debe ser válido y único)</li>
-                                    <li>Nombre completo</li>
-                                    <li>Estado</li>
-                                </ul>
-                                
-                                <p><strong>RUT:</strong></p>
-                                <p>Ingresa el RUT con o sin puntos y guión. El sistema validará automáticamente su formato y dígito verificador.</p>
-                                
-                                <p><strong>Estado por Defecto:</strong></p>
-                                <p>Las personas se crean como "Activo" por defecto. Puedes cambiar el estado si es necesario.</p>
-                                
-                                <p><strong>Uso Posterior:</strong></p>
-                                <p>Una vez creada, la persona podrá ser asociada a usuarios, clientes o contrapartes según corresponda.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Acciones -->
-                    <div class="card mt-3">
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-success" id="createBtn">
-                                    <i class="bi bi-check-lg"></i> Crear Persona
-                                </button>
-                                <a href="/personas" class="btn btn-secondary">
-                                    <i class="bi bi-x-lg"></i> Cancelar
-                                </a>
-                            </div>
+                        <!-- Botones de Acción -->
+                        <div class="mt-4 text-end">
+                            <a href="/personas" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-lg"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success" id="createBtn">
+                                <i class="bi bi-check-lg"></i> Crear Persona
+                            </button>
                         </div>
                     </div>
                 </div>

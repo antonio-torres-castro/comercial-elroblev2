@@ -53,7 +53,7 @@
                             <div class="card-body">
                                 <form method="POST" action="<?= $data['task_id'] ? '/tasks/update/' . $data['task_id'] : '/tasks/store' ?>" id="taskForm">
                                     <div class="row">
-                                        <div class="col-md-8">
+                                        <div class="col-12">
                                             <!-- Información básica de la tarea -->
                                             <h6 class="border-bottom pb-2 mb-3">Información de la Tarea</h6>
 
@@ -157,65 +157,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-4">
-                                            <!-- Instrucciones -->
-                                            <div class="card">
-                                                <div class="card-header bg-info text-white">
-                                                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones</h6>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="small">
-                                                        <p><strong>Campos Obligatorios:</strong></p>
-                                                        <ul>
-                                                            <li>Nombre de la Tarea</li>
-                                                            <li>Proyecto</li>
-                                                            <li>Tipo de Tarea</li>
-                                                        </ul>
-
-                                                        <p><strong>Asignación:</strong></p>
-                                                        <p>Puedes asignar la tarea a un usuario específico o dejarla sin asignar para asignarla más tarde.</p>
-
-                                                        <p><strong>Fechas:</strong></p>
-                                                        <p>Las fechas son opcionales. Si no se especifican, se pueden agregar posteriormente.</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <?php if ($data['task_id']): ?>
-                                                <!-- Información del sistema -->
-                                                <div class="card mt-3">
-                                                    <div class="card-header">
-                                                        <h6 class="mb-0"><i class="bi bi-gear"></i> Información del Sistema</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="row g-2">
-                                                            <div class="col-sm-4"><strong>Creada:</strong></div>
-                                                            <div class="col-sm-8"><?= date('d/m/Y H:i', strtotime($data['task']['fecha_Creado'])) ?></div>
-
-                                                            <?php if (!empty($data['task']['fecha_modificacion'])): ?>
-                                                                <div class="col-sm-4"><strong>Modificada:</strong></div>
-                                                                <div class="col-sm-8"><?= date('d/m/Y H:i', strtotime($data['task']['fecha_modificacion'])) ?></div>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <!-- Acciones -->
-                                            <div class="card mt-3">
-                                                <div class="card-body">
-                                                    <div class="d-grid gap-2">
-                                                        <button type="submit" class="btn btn-success">
-                                                            <i class="bi bi-check-lg"></i>
-                                                            <?= $data['task_id'] ? 'Actualizar Tarea' : 'Crear Tarea' ?>
-                                                        </button>
-                                                        <a href="/tasks" class="btn btn-secondary">
-                                                            <i class="bi bi-x-lg"></i> Cancelar
-                                                        </a>
-                                                    </div>
-                                                </div>
+                                            <!-- Botones de Acción -->
+                                            <div class="mt-4 text-end">
+                                                <a href="/tasks" class="btn btn-secondary me-2">
+                                                    <i class="bi bi-x-lg"></i> Cancelar
+                                                </a>
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="bi bi-check-lg"></i>
+                                                    <?= $data['task_id'] ? 'Actualizar Tarea' : 'Crear Tarea' ?>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>

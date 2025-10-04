@@ -285,7 +285,7 @@ class UserController
     private function getUserTypes(): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre FROM usuario_tipos ORDER BY id");
+            $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM usuario_tipos ORDER BY id");
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {

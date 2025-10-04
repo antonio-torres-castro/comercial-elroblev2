@@ -78,7 +78,7 @@
                             <input type="hidden" name="id" value="<?= (int)$task['id'] ?>">
 
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-12">
                                     <!-- Información Básica -->
                                     <div class="form-section">
                                         <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
@@ -187,51 +187,15 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Panel Lateral -->
-                                <div class="col-md-4">
-                                    <!-- Información de la Tarea -->
-                                    <div class="card">
-                                        <div class="card-header bg-setap-primary-light text-white">
-                                            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información de la Tarea</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p><strong>ID:</strong> <?= (int)$task['id'] ?></p>
-                                            <p><strong>Proyecto:</strong><br><?= htmlspecialchars($task['cliente_nombre']) ?></p>
-                                            <p><strong>Creada:</strong><br><?= date('d/m/Y H:i', strtotime($task['fecha_Creado'])) ?></p>
-                                            <?php if (!empty($task['fecha_modificacion'])): ?>
-                                                <p><strong>Modificada:</strong><br><?= date('d/m/Y H:i', strtotime($task['fecha_modificacion'])) ?></p>
-                                            <?php endif; ?>
-                                            <p><strong>Estado Actual:</strong><br>
-                                                <span class="badge bg-<?= match($task['estado_tipo_id']) {
-                                                    1 => 'secondary', // Creada
-                                                    5 => 'setap-primary',   // En proceso
-                                                    6 => 'warning',   // Pendiente
-                                                    8 => 'success',   // Completada
-                                                    default => 'dark'
-                                                } ?>">
-                                                    <?= htmlspecialchars($task['estado']) ?>
-                                                </span>
-                                            </p>
-                                            <?php if (!empty($task['asignado_a'])): ?>
-                                                <p><strong>Asignada a:</strong><br><?= htmlspecialchars($task['asignado_a']) ?></p>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <!-- Acciones -->
-                                    <div class="card mt-3">
-                                        <div class="card-body">
-                                            <div class="d-grid gap-2">
-                                                <button type="submit" class="btn btn-warning" id="updateBtn">
-                                                    <i class="bi bi-check-lg"></i> Actualizar Tarea
-                                                </button>
-                                                <a href="/tasks" class="btn btn-secondary">
-                                                    <i class="bi bi-arrow-left"></i> Volver a Tareas
-                                                </a>
-                                            </div>
-                                        </div>
+                                    <!-- Botones de Acción -->
+                                    <div class="mt-4 text-end">
+                                        <a href="/tasks" class="btn btn-secondary me-2">
+                                            <i class="bi bi-arrow-left"></i> Volver a Tareas
+                                        </a>
+                                        <button type="submit" class="btn btn-warning" id="updateBtn">
+                                            <i class="bi bi-check-lg"></i> Actualizar Tarea
+                                        </button>
                                     </div>
                                 </div>
                             </div>

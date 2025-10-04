@@ -55,7 +55,7 @@
                 <?php endif; ?>
 
                 <div class="row">
-                    <div class="col-lg-8">
+                    <div class="col-12">
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="mb-0"><?php echo htmlspecialchars($data['subtitle']); ?></h5>
@@ -169,41 +169,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Panel de información -->
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="alert alert-info">
-                                    <h6>Campos requeridos:</h6>
-                                    <ul class="mb-0">
-                                        <li><strong>Razón Social:</strong> Nombre oficial de la empresa</li>
-                                    </ul>
-                                </div>
-
-                                <div class="alert alert-warning">
-                                    <h6>Validaciones RUT:</h6>
-                                    <ul class="mb-0">
-                                        <li>El RUT debe tener formato válido</li>
-                                        <li>No puede repetirse con otro cliente</li>
-                                        <li>Es opcional pero recomendado</li>
-                                    </ul>
-                                </div>
-
-                                <div class="alert alert-secondary">
-                                    <h6>Fechas de contrato:</h6>
-                                    <ul class="mb-0">
-                                        <li>Fecha de término debe ser posterior a la de inicio</li>
-                                        <li>Todas las fechas son opcionales</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </main>
         </div>
     </div>
