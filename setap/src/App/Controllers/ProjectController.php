@@ -488,11 +488,16 @@ class ProjectController
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT cp.id, cp.nombre, cp.email, cp.cargo, c.razon_social as cliente_nombre
-                FROM cliente_contrapartes cp
-                INNER JOIN clientes c ON cp.cliente_id = c.id
-                WHERE cp.estado_tipo_id != 4 
-                ORDER BY c.razon_social, cp.nombre
+                SELECT cc.id, 
+                       CONCAT(p.nombre, ' (', c.razon_social, ')') as nombre,
+                       cc.email, 
+                       cc.cargo, 
+                       c.razon_social as cliente_nombre
+                FROM cliente_contrapartes cc
+                INNER JOIN personas p ON cc.persona_id = p.id
+                INNER JOIN clientes c ON cc.cliente_id = c.id
+                WHERE cc.estado_tipo_id != 4 
+                ORDER BY c.razon_social, p.nombre
             ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -26,16 +26,17 @@ class Project
                        c.razon_social as cliente_nombre,
                        tt.nombre as tipo_tarea,
                        et.nombre as estado_nombre,
-                       cp.nombre as contraparte_nombre,
-                       cp.email as contraparte_email,
-                       cp.telefono as contraparte_telefono,
+                       CONCAT(per.nombre, ' (', per.rut, ')') as contraparte_nombre,
+                       cc.email as contraparte_email,
+                       cc.telefono as contraparte_telefono,
                        COUNT(pt.id) as total_tareas,
                        COUNT(CASE WHEN pt.estado_tipo_id = 8 THEN 1 END) as tareas_completadas
                 FROM proyectos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                INNER JOIN cliente_contrapartes cp ON p.contraparte_id = cp.id
+                INNER JOIN cliente_contrapartes cc ON p.contraparte_id = cc.id
+                INNER JOIN personas per ON cc.persona_id = per.id
                 LEFT JOIN proyecto_tareas pt ON p.id = pt.proyecto_id AND pt.estado_tipo_id != 4
                 WHERE p.estado_tipo_id != 4
             ";
@@ -92,14 +93,16 @@ class Project
                        c.direccion as cliente_direccion, c.telefono as cliente_telefono,
                        tt.id as tarea_tipo_id, tt.nombre as tipo_tarea,
                        et.id as estado_tipo_id, et.nombre as estado_nombre,
-                       cp.id as contraparte_id, cp.nombre as contraparte_nombre,
-                       cp.email as contraparte_email, cp.telefono as contraparte_telefono,
-                       cp.cargo as contraparte_cargo
+                       cc.id as contraparte_id, 
+                       CONCAT(per.nombre, ' (', per.rut, ')') as contraparte_nombre,
+                       cc.email as contraparte_email, cc.telefono as contraparte_telefono,
+                       cc.cargo as contraparte_cargo
                 FROM proyectos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                INNER JOIN cliente_contrapartes cp ON p.contraparte_id = cp.id
+                INNER JOIN cliente_contrapartes cc ON p.contraparte_id = cc.id
+                INNER JOIN personas per ON cc.persona_id = per.id
                 WHERE p.id = ? AND p.estado_tipo_id != 4
             ");
 
@@ -397,13 +400,14 @@ class Project
                 FROM proyectos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                LEFT JOIN cliente_contrapartes cp ON p.contraparte_id = cp.id
+                LEFT JOIN cliente_contrapartes cc ON p.contraparte_id = cc.id
+                LEFT JOIN personas per ON cc.persona_id = per.id
                 WHERE p.estado_tipo_id != 4 
                 AND (
-                    c.nombre LIKE ? OR
+                    c.razon_social LIKE ? OR
                     p.direccion LIKE ? OR
-                    cp.nombre LIKE ? OR
-                    cp.email LIKE ?
+                    per.nombre LIKE ? OR
+                    cc.email LIKE ?
                 )
                 ORDER BY p.fecha_inicio DESC
             ");

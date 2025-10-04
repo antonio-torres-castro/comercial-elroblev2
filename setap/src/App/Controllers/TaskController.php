@@ -143,9 +143,9 @@ class TaskController
             $data = [
                 'user' => $currentUser,
                 'title' => 'Nueva Tarea',
-                'subtitle' => 'Crear nueva tarea',
+                'subtitle' => 'Asignar tarea a proyecto',
                 'projects' => $this->taskModel->getProjects(),
-                'taskTypes' => $this->taskModel->getTaskTypes(),
+                'taskTypes' => $this->taskModel->getTaskTypes(), // Catálogo de tareas existentes
                 'users' => $this->taskModel->getUsers(),
                 'taskStates' => $this->taskModel->getTaskStates(),
                 'task' => null,
@@ -205,21 +205,29 @@ class TaskController
             // Preparar datos para creación
             $taskData = [
                 'proyecto_id' => (int)$_POST['proyecto_id'],
-                'tarea_tipo_id' => (int)$_POST['tarea_tipo_id'],
-                'nombre' => trim($_POST['nombre']),
-                'descripcion' => trim($_POST['descripcion'] ?? ''),
+                'planificador_id' => $currentUser['id'], // El usuario actual es quien planifica
+                'ejecutor_id' => !empty($_POST['ejecutor_id']) ? (int)$_POST['ejecutor_id'] : null,
+                'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
                 'fecha_inicio' => $_POST['fecha_inicio'],
-                'fecha_fin' => $_POST['fecha_fin'],
-                'usuario_id' => !empty($_POST['usuario_id']) ? (int)$_POST['usuario_id'] : null,
+                'duracion_horas' => (float)($_POST['duracion_horas'] ?? 1.0),
+                'prioridad' => (int)($_POST['prioridad'] ?? 0),
                 'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1)
             ];
+
+            // Determinar si usar tarea existente o crear nueva
+            if (!empty($_POST['tarea_id']) && $_POST['tarea_id'] !== 'nueva') {
+                $taskData['tarea_id'] = (int)$_POST['tarea_id'];
+            } else {
+                $taskData['nueva_tarea_nombre'] = trim($_POST['nueva_tarea_nombre']);
+                $taskData['nueva_tarea_descripcion'] = trim($_POST['nueva_tarea_descripcion'] ?? '');
+            }
 
             // Crear tarea
             $taskId = $this->taskModel->create($taskData);
             if ($taskId) {
-                Security::redirect("/tasks?success=Tarea creada correctamente");
+                Security::redirect("/tasks?success=Tarea asignada al proyecto correctamente");
             } else {
-                Security::redirect("/tasks/create?error=Error al crear la tarea");
+                Security::redirect("/tasks/create?error=Error al asignar la tarea al proyecto");
             }
 
         } catch (Exception $e) {
@@ -406,31 +414,59 @@ class TaskController
     {
         $errors = [];
 
-        // Validar nombre
-        if (empty($data['nombre'])) {
-            $errors[] = 'El nombre de la tarea es obligatorio';
-        } elseif (strlen($data['nombre']) < 3) {
-            $errors[] = 'El nombre debe tener al menos 3 caracteres';
-        }
-
         // Validar proyecto
         if (empty($data['proyecto_id']) || !is_numeric($data['proyecto_id'])) {
             $errors[] = 'Debe seleccionar un proyecto válido';
         }
 
-        // Validar tipo de tarea
-        if (empty($data['tarea_tipo_id']) || !is_numeric($data['tarea_tipo_id'])) {
-            $errors[] = 'Debe seleccionar un tipo de tarea válido';
+        // Validar tarea - debe seleccionar existente o crear nueva
+        if (empty($data['tarea_id']) || $data['tarea_id'] === 'nueva') {
+            // Crear nueva tarea - validar nombre
+            if (empty($data['nueva_tarea_nombre'])) {
+                $errors[] = 'El nombre de la nueva tarea es obligatorio';
+            } elseif (strlen($data['nueva_tarea_nombre']) < 3) {
+                $errors[] = 'El nombre de la tarea debe tener al menos 3 caracteres';
+            }
+        } else {
+            // Usar tarea existente - validar que sea numérica
+            if (!is_numeric($data['tarea_id'])) {
+                $errors[] = 'Debe seleccionar una tarea válida del catálogo';
+            }
         }
 
-        // Validar fechas (opcionales pero si están presentes deben ser válidas)
-        if (!empty($data['fecha_inicio']) && !empty($data['fecha_fin'])) {
-            if (strtotime($data['fecha_fin']) < strtotime($data['fecha_inicio'])) {
-                $errors[] = 'La fecha de fin debe ser posterior a la fecha de inicio';
+        // Validar fecha de inicio
+        if (empty($data['fecha_inicio'])) {
+            $errors[] = 'La fecha de inicio es obligatoria';
+        } elseif (!$this->isValidDate($data['fecha_inicio'])) {
+            $errors[] = 'La fecha de inicio debe tener un formato válido (YYYY-MM-DD)';
+        }
+
+        // Validar duración en horas
+        if (!empty($data['duracion_horas'])) {
+            if (!is_numeric($data['duracion_horas']) || (float)$data['duracion_horas'] <= 0) {
+                $errors[] = 'La duración debe ser un número positivo';
+            } elseif ((float)$data['duracion_horas'] > 24) {
+                $errors[] = 'La duración no puede exceder 24 horas por tarea';
+            }
+        }
+
+        // Validar prioridad
+        if (!empty($data['prioridad'])) {
+            if (!is_numeric($data['prioridad']) || (int)$data['prioridad'] < 0 || (int)$data['prioridad'] > 10) {
+                $errors[] = 'La prioridad debe ser un número entre 0 y 10';
             }
         }
 
         return $errors;
+    }
+
+    /**
+     * Validar formato de fecha
+     */
+    private function isValidDate(string $date): bool
+    {
+        $d = \DateTime::createFromFormat('Y-m-d', $date);
+        return $d && $d->format('Y-m-d') === $date;
     }
 
     private function getCurrentUser(): ?array

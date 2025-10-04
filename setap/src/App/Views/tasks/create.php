@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Tarea - SETAP</title>
+    <title><?php echo $data['title']; ?> - SETAP</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -11,93 +11,253 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/setap-theme.css">
-    <style>
-        .form-section {
-            background: var(--setap-bg-light);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .form-section h5 {
-            color: var(--setap-text-muted);
-            border-bottom: 2px solid var(--setap-border-light);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .required {
-            color: #dc3545;
-        }
-    </style>
 </head>
-
-<body class="bg-light">
-    <?php use App\Helpers\Security; ?>
-
+<body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
-    <div class="container mt-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <h2>
-                    <i class="bi bi-plus-circle"></i> Crear Nueva Tarea
-                </h2>
-                <p class="text-muted">Complete la información para crear una nueva tarea del proyecto.</p>
-            </div>
-            <div class="col-md-4 text-end">
-                <a href="/tasks" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver a Tareas
-                </a>
-            </div>
-        </div>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Main content -->
+            <main class="col-12 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><?php echo $data['title']; ?></h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/tasks" class="btn btn-sm btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver a Tareas
+                        </a>
+                    </div>
+                </div>
 
-        <!-- Mensajes de Error -->
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
+                <!-- Mensajes de error -->
+                <?php if (isset($data['error']) && !empty($data['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Se encontraron los siguientes errores:</h6>
+                        <p class="mb-0"><?php echo htmlspecialchars($data['error']); ?></p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
 
-        <!-- Formulario de Creación -->
-        <form method="POST" action="/tasks/store" id="createTaskForm">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-list-task"></i> <?php echo $data['subtitle']; ?>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="/tasks/store">
+                                    <input type="hidden" name="csrf_token" value="<?php echo App\Helpers\Security::generateCsrfToken(); ?>">
 
-            <div class="row">
-                <div class="col-12">
-                    <!-- Información Básica -->
-                    <div class="form-section">
-                        <h5><i class="bi bi-info-circle"></i> Información de la Tarea</h5>
-                        
-                        <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre de la Tarea <span class="required">*</span></label>
-                            <input type="text" class="form-control" id="nombre" name="nombre" required
-                                   placeholder="Describe brevemente la tarea" maxlength="150"
-                                   value="<?= htmlspecialchars($data['task']['nombre'] ?? '') ?>">
-                        </div>
+                                    <div class="row g-3">
+                                        <!-- Proyecto -->
+                                        <div class="col-md-6">
+                                            <label for="proyecto_id" class="form-label">
+                                                Proyecto <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="form-select" id="proyecto_id" name="proyecto_id" required>
+                                                <option value="">Seleccionar proyecto...</option>
+                                                <?php foreach ($data['projects'] as $project): ?>
+                                                    <option value="<?php echo $project['id']; ?>" 
+                                                        <?php echo (isset($_POST['proyecto_id']) && $_POST['proyecto_id'] == $project['id']) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($project['nombre']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="form-text">Proyecto al que se asignará la tarea.</div>
+                                        </div>
 
-                        <div class="mb-3">
-                            <label for="descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                                      placeholder="Descripción detallada de la tarea (opcional)"
-                                      maxlength="500"><?= htmlspecialchars($data['task']['descripcion'] ?? '') ?></textarea>
-                            <div class="form-text">Campo opcional. Máximo 500 caracteres.</div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="proyecto_id" class="form-label">Proyecto <span class="required">*</span></label>
-                                    <select class="form-select" id="proyecto_id" name="proyecto_id" required>
-                                        <option value="">Seleccionar proyecto</option>
-                                        <?php if (!empty($data['projects'])): ?>
-                                            <?php foreach ($data['projects'] as $project): ?>
-                                                <option value="<?= $project['id'] ?>"
-                                                    <?= (isset($data['task']['proyecto_id']) && $data['task']['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
-                                                    <?= htmlspecialchars($project['cliente_nombre']) ?>
+                                        <!-- Tipo de tarea -->
+                                        <div class="col-md-6">
+                                            <label for="tarea_id" class="form-label">
+                                                Tarea <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="form-select" id="tarea_id" name="tarea_id" required>
+                                                <option value="">Seleccionar tarea existente...</option>
+                                                <?php foreach ($data['taskTypes'] as $taskType): ?>
+                                                    <option value="<?php echo $taskType['id']; ?>" 
+                                                        <?php echo (isset($_POST['tarea_id']) && $_POST['tarea_id'] == $taskType['id']) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($taskType['nombre']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                                <option value="nueva" <?php echo (isset($_POST['tarea_id']) && $_POST['tarea_id'] == 'nueva') ? 'selected' : ''; ?>>
+                                                    ➕ Crear nueva tarea
                                                 </option>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
+                                            </select>
+                                            <div class="form-text">Seleccione del catálogo o cree una nueva.</div>
+                                        </div>
+
+                                        <!-- Campos para nueva tarea (ocultos por defecto) -->
+                                        <div class="col-12" id="nueva-tarea-fields" style="display: none;">
+                                            <div class="card border-primary">
+                                                <div class="card-header bg-primary text-white">
+                                                    <h6 class="mb-0"><i class="bi bi-plus-circle"></i> Nueva Tarea</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label for="nueva_tarea_nombre" class="form-label">
+                                                                Nombre de la nueva tarea <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre" 
+                                                                   placeholder="Nombre descriptivo de la tarea"
+                                                                   value="<?php echo htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>" 
+                                                                   maxlength="150">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="nueva_tarea_descripcion" class="form-label">Descripción</label>
+                                                            <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion" 
+                                                                      placeholder="Descripción detallada de la tarea" rows="3"><?php echo htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Asignaciones -->
+                                        <div class="col-12">
+                                            <hr>
+                                            <h6 class="text-muted">
+                                                <i class="bi bi-people"></i> Asignación de Usuarios
+                                            </h6>
+                                        </div>
+
+                                        <!-- Ejecutor -->
+                                        <div class="col-md-4">
+                                            <label for="ejecutor_id" class="form-label">Ejecutor</label>
+                                            <select class="form-select" id="ejecutor_id" name="ejecutor_id">
+                                                <option value="">Sin asignar</option>
+                                                <?php foreach ($data['users'] as $user): ?>
+                                                    <option value="<?php echo $user['id']; ?>" 
+                                                        <?php echo (isset($_POST['ejecutor_id']) && $_POST['ejecutor_id'] == $user['id']) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($user['nombre_completo'] . ' (' . $user['nombre_usuario'] . ')'); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="form-text">Usuario que ejecutará la tarea.</div>
+                                        </div>
+
+                                        <!-- Supervisor -->
+                                        <div class="col-md-4">
+                                            <label for="supervisor_id" class="form-label">Supervisor</label>
+                                            <select class="form-select" id="supervisor_id" name="supervisor_id">
+                                                <option value="">Sin supervisor</option>
+                                                <?php foreach ($data['users'] as $user): ?>
+                                                    <option value="<?php echo $user['id']; ?>" 
+                                                        <?php echo (isset($_POST['supervisor_id']) && $_POST['supervisor_id'] == $user['id']) ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($user['nombre_completo'] . ' (' . $user['nombre_usuario'] . ')'); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="form-text">Usuario que supervisará la tarea.</div>
+                                        </div>
+
+                                        <!-- Estado -->
+                                        <div class="col-md-4">
+                                            <label for="estado_tipo_id" class="form-label">
+                                                Estado Inicial <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
+                                                <?php foreach ($data['taskStates'] as $state): ?>
+                                                    <option value="<?php echo $state['id']; ?>" 
+                                                        <?php 
+                                                        $selected = false;
+                                                        if (isset($_POST['estado_tipo_id'])) {
+                                                            $selected = ($_POST['estado_tipo_id'] == $state['id']);
+                                                        } elseif ($state['id'] == 1) { // Creado por defecto
+                                                            $selected = true;
+                                                        }
+                                                        echo $selected ? 'selected' : '';
+                                                        ?>>
+                                                        <?php echo htmlspecialchars($state['nombre']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <!-- Programación -->
+                                        <div class="col-12">
+                                            <hr>
+                                            <h6 class="text-muted">
+                                                <i class="bi bi-calendar"></i> Programación
+                                            </h6>
+                                        </div>
+
+                                        <!-- Fecha de inicio -->
+                                        <div class="col-md-4">
+                                            <label for="fecha_inicio" class="form-label">
+                                                Fecha de Inicio <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="datetime-local" class="form-control" id="fecha_inicio" name="fecha_inicio" required
+                                                   value="<?php echo htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d\TH:i')); ?>">
+                                        </div>
+
+                                        <!-- Duración -->
+                                        <div class="col-md-4">
+                                            <label for="duracion_horas" class="form-label">Duración (horas)</label>
+                                            <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" 
+                                                   step="0.5" min="0.5" max="24" 
+                                                   value="<?php echo htmlspecialchars($_POST['duracion_horas'] ?? '1.0'); ?>">
+                                            <div class="form-text">Duración estimada en horas (0.5 - 24).</div>
+                                        </div>
+
+                                        <!-- Prioridad -->
+                                        <div class="col-md-4">
+                                            <label for="prioridad" class="form-label">Prioridad</label>
+                                            <select class="form-select" id="prioridad" name="prioridad">
+                                                <option value="0" <?php echo (isset($_POST['prioridad']) && $_POST['prioridad'] == '0') ? 'selected' : ''; ?>>0 - Baja</option>
+                                                <option value="3" <?php echo (isset($_POST['prioridad']) && $_POST['prioridad'] == '3') ? 'selected' : ''; ?>>3 - Normal</option>
+                                                <option value="5" <?php echo ((!isset($_POST['prioridad'])) || $_POST['prioridad'] == '5') ? 'selected' : ''; ?>>5 - Media</option>
+                                                <option value="7" <?php echo (isset($_POST['prioridad']) && $_POST['prioridad'] == '7') ? 'selected' : ''; ?>>7 - Alta</option>
+                                                <option value="10" <?php echo (isset($_POST['prioridad']) && $_POST['prioridad'] == '10') ? 'selected' : ''; ?>>10 - Crítica</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Botones -->
+                                        <div class="col-12">
+                                            <hr>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="/tasks" class="btn btn-secondary">
+                                                    <i class="bi bi-x-lg"></i> Cancelar
+                                                </a>
+                                                <button type="submit" class="btn btn-setap-primary">
+                                                    <i class="bi bi-plus-circle"></i> Asignar Tarea
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts Optimizados de SETAP -->
+    <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+    
+    <script>
+        // Mostrar/ocultar campos de nueva tarea
+        document.getElementById('tarea_id').addEventListener('change', function() {
+            const nuevaTareaFields = document.getElementById('nueva-tarea-fields');
+            const nuevaTareaNombre = document.getElementById('nueva_tarea_nombre');
+            
+            if (this.value === 'nueva') {
+                nuevaTareaFields.style.display = 'block';
+                nuevaTareaNombre.setAttribute('required', 'required');
+            } else {
+                nuevaTareaFields.style.display = 'none';
+                nuevaTareaNombre.removeAttribute('required');
+            }
+        });
+
+        // Trigger inicial
+        document.getElementById('tarea_id').dispatchEvent(new Event('change'));
+    </script>
+</body>
+</html>
                                     </select>
                                 </div>
                             </div>
