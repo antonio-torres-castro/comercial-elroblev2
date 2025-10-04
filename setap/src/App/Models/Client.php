@@ -299,6 +299,201 @@ class Client
     }
 
     /**
+     * Actualizar contraparte
+     */
+    public function updateCounterpartie(int $id, array $data): bool
+    {
+        try {
+            $query = "
+                UPDATE cliente_contrapartes SET
+                    cliente_id = ?,
+                    persona_id = ?,
+                    telefono = ?,
+                    email = ?,
+                    cargo = ?,
+                    estado_tipo_id = ?,
+                    fecha_modificacion = CURRENT_TIMESTAMP
+                WHERE id = ? AND estado_tipo_id != 4
+            ";
+
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([
+                $data['cliente_id'],
+                $data['persona_id'],
+                $data['telefono'] ?? null,
+                $data['email'] ?? null,
+                $data['cargo'] ?? null,
+                $data['estado_tipo_id'] ?? 2, // 2 = Activo
+                $id
+            ]);
+
+            return $result && $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log("Error en Client::updateCounterpartie: " . $e->getMessage());
+            throw new Exception("Error al actualizar la contraparte");
+        }
+    }
+
+    /**
+     * Eliminar contraparte (soft delete)
+     */
+    public function deleteCounterpartie(int $id): bool
+    {
+        try {
+            // Verificar si la contraparte está siendo usada en proyectos activos
+            if ($this->counterpartieHasActiveProjects($id)) {
+                throw new Exception("No se puede eliminar la contraparte porque está asignada a proyectos activos");
+            }
+
+            // Realizar soft delete
+            $query = "
+                UPDATE cliente_contrapartes SET
+                    estado_tipo_id = 4,
+                    fecha_modificacion = CURRENT_TIMESTAMP
+                WHERE id = ? AND estado_tipo_id != 4
+            ";
+
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([$id]);
+
+            return $result && $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log("Error en Client::deleteCounterpartie: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Obtener una contraparte específica por ID
+     */
+    public function findCounterpartie(int $id): ?array
+    {
+        try {
+            $query = "
+                SELECT 
+                    cc.*,
+                    p.rut as persona_rut,
+                    p.nombre as persona_nombre,
+                    p.telefono as persona_telefono,
+                    p.direccion as persona_direccion,
+                    et.nombre as estado_nombre,
+                    c.razon_social as cliente_nombre
+                FROM cliente_contrapartes cc
+                JOIN personas p ON cc.persona_id = p.id
+                JOIN clientes c ON cc.cliente_id = c.id
+                LEFT JOIN estado_tipos et ON cc.estado_tipo_id = et.id
+                WHERE cc.id = ? AND cc.estado_tipo_id != 4
+            ";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([$id]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (Exception $e) {
+            error_log("Error en Client::findCounterpartie: " . $e->getMessage());
+            throw new Exception("Error al obtener la contraparte");
+        }
+    }
+
+    /**
+     * Obtener todas las contrapartes del sistema
+     */
+    public function getAllCounterparties(array $filters = []): array
+    {
+        try {
+            $query = "
+                SELECT 
+                    cc.*,
+                    p.rut as persona_rut,
+                    p.nombre as persona_nombre,
+                    p.telefono as persona_telefono,
+                    et.nombre as estado_nombre,
+                    c.razon_social as cliente_nombre
+                FROM cliente_contrapartes cc
+                JOIN personas p ON cc.persona_id = p.id
+                JOIN clientes c ON cc.cliente_id = c.id
+                LEFT JOIN estado_tipos et ON cc.estado_tipo_id = et.id
+                WHERE cc.estado_tipo_id != 4
+            ";
+
+            $params = [];
+
+            // Filtros opcionales
+            if (!empty($filters['cliente_id'])) {
+                $query .= " AND cc.cliente_id = ?";
+                $params[] = $filters['cliente_id'];
+            }
+
+            if (!empty($filters['persona_nombre'])) {
+                $query .= " AND p.nombre LIKE ?";
+                $params[] = '%' . $filters['persona_nombre'] . '%';
+            }
+
+            if (!empty($filters['cargo'])) {
+                $query .= " AND cc.cargo LIKE ?";
+                $params[] = '%' . $filters['cargo'] . '%';
+            }
+
+            if (!empty($filters['estado_tipo_id'])) {
+                $query .= " AND cc.estado_tipo_id = ?";
+                $params[] = $filters['estado_tipo_id'];
+            }
+
+            $query .= " ORDER BY c.razon_social ASC, p.nombre ASC";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute($params);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error en Client::getAllCounterparties: " . $e->getMessage());
+            throw new Exception("Error al obtener la lista de contrapartes");
+        }
+    }
+
+    /**
+     * Verificar si ya existe una contraparte para el cliente y persona
+     */
+    public function counterpartieExists(int $clientId, int $personaId, int $excludeId = null): bool
+    {
+        try {
+            $query = "SELECT id FROM cliente_contrapartes WHERE cliente_id = ? AND persona_id = ? AND estado_tipo_id != 4";
+            $params = [$clientId, $personaId];
+
+            if ($excludeId) {
+                $query .= " AND id != ?";
+                $params[] = $excludeId;
+            }
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute($params);
+
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log("Error en Client::counterpartieExists: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verificar si una contraparte tiene proyectos activos
+     */
+    private function counterpartieHasActiveProjects(int $counterpartieId): bool
+    {
+        try {
+            $query = "SELECT COUNT(*) FROM proyectos WHERE contraparte_id = ? AND estado_tipo_id IN (1, 2, 5)";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([$counterpartieId]);
+
+            return $stmt->fetchColumn() > 0;
+        } catch (Exception $e) {
+            error_log("Error en Client::counterpartieHasActiveProjects: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Desactivar contrapartes del cliente
      */
     private function deactivateCounterparties(int $clientId): void
@@ -306,9 +501,9 @@ class Client
         try {
             $query = "
                 UPDATE cliente_contrapartes SET
-                    estado_tipo_id = 3,
+                    estado_tipo_id = 4,
                     fecha_modificacion = CURRENT_TIMESTAMP
-                WHERE cliente_id = ? AND estado_tipo_id != 3
+                WHERE cliente_id = ? AND estado_tipo_id != 4
             ";
 
             $stmt = $this->db->prepare($query);
