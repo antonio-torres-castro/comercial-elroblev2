@@ -10,24 +10,24 @@
     <style>
         .sidebar {
             min-height: calc(100vh - 56px);
-            background-color: #f8f9fa;
+            background-color: var(--setap-bg-light);
             position: sticky;
             top: 0;
             overflow-y: auto;
         }
         
         .nav-link {
-            color: #495057;
+            color: var(--setap-text-muted);
             padding: 0.75rem 1rem;
         }
         
         .nav-link:hover {
-            background-color: #e9ecef;
-            color: #007bff;
+            background-color: var(--setap-bg-light);
+            color: var(--setap-primary);
         }
         
         .nav-link.active {
-            background-color: #007bff;
+            background-color: var(--setap-primary);
             color: white;
         }
         
@@ -119,7 +119,7 @@
                                                             <span class="badge bg-light text-dark"><?php echo htmlspecialchars($menu['id']); ?></span>
                                                         </td>
                                                         <td class="text-center">
-                                                            <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?> icon-preview text-primary"></i>
+                                                            <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?> icon-preview text-setap-primary"></i>
                                                         </td>
                                                         <td>
                                                             <strong><?php echo htmlspecialchars($menu['nombre']); ?></strong>
@@ -128,13 +128,13 @@
                                                             <?php endif; ?>
                                                         </td>
                                                         <td>
-                                                            <span class="badge bg-primary"><?php echo htmlspecialchars($menu['display'] ?? 'Sin título'); ?></span>
+                                                            <span class="badge bg-setap-primary"><?php echo htmlspecialchars($menu['display'] ?? 'Sin título'); ?></span>
                                                         </td>
                                                         <td>
                                                             <code><?php echo htmlspecialchars($menu['url']); ?></code>
                                                         </td>
                                                         <td class="text-center">
-                                                            <span class="badge bg-info"><?php echo htmlspecialchars($menu['orden']); ?></span>
+                                                            <span class="badge bg-setap-primary-light"><?php echo htmlspecialchars($menu['orden']); ?></span>
                                                         </td>
                                                         <td>
                                                             <?php 
@@ -144,8 +144,8 @@
                                                                 2 => ['badge' => 'success', 'texto' => 'Activo'], 
                                                                 3 => ['badge' => 'secondary', 'texto' => 'Inactivo'],
                                                                 4 => ['badge' => 'danger', 'texto' => 'Eliminado'],
-                                                                5 => ['badge' => 'info', 'texto' => 'Iniciado'],
-                                                                6 => ['badge' => 'primary', 'texto' => 'Terminado'],
+                                                                5 => ['badge' => 'setap-primary-light', 'texto' => 'Iniciado'],
+                                                                6 => ['badge' => 'setap-primary', 'texto' => 'Terminado'],
                                                                 7 => ['badge' => 'danger', 'texto' => 'Rechazado'],
                                                                 8 => ['badge' => 'success', 'texto' => 'Aprobado']
                                                             ];
@@ -175,7 +175,7 @@
                                                                 
                                                                 <?php if (Security::hasPermission('Read') || Security::hasPermission('All')): ?>
                                                                     <button type="button" 
-                                                                            class="btn btn-outline-info btn-sm" 
+                                                                            class="btn btn-outline-setap-primary-light btn-sm" 
                                                                             title="Ver detalles"
                                                                             onclick="showMenuDetails(<?php echo htmlspecialchars(json_encode($menu)); ?>)">
                                                                         <i class="bi bi-eye"></i>
@@ -249,8 +249,8 @@
                 2: { badge: 'success', texto: 'Activo' },
                 3: { badge: 'secondary', texto: 'Inactivo' },
                 4: { badge: 'danger', texto: 'Eliminado' },
-                5: { badge: 'info', texto: 'Iniciado' },
-                6: { badge: 'primary', texto: 'Terminado' },
+                5: { badge: 'setap-primary-light', texto: 'Iniciado' },
+                6: { badge: 'setap-primary', texto: 'Terminado' },
                 7: { badge: 'danger', texto: 'Rechazado' },
                 8: { badge: 'success', texto: 'Aprobado' }
             };
@@ -262,7 +262,7 @@
                     <div class="col-md-6">
                         <strong>ID:</strong> ${menu.id}<br>
                         <strong>Nombre interno:</strong> ${menu.nombre}<br>
-                        <strong>Título visible:</strong> <span class="badge bg-primary">${menu.display || 'Sin título'}</span><br>
+                        <strong>Título visible:</strong> <span class="badge bg-setap-primary">${menu.display || 'Sin título'}</span><br>
                         <strong>URL:</strong> <code>${menu.url}</code><br>
                         <strong>Orden:</strong> ${menu.orden}
                     </div>

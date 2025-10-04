@@ -9,14 +9,14 @@
     <link rel="stylesheet" href="/css/setap-theme.css">
     <style>
         .form-section {
-            background: #f8f9fa;
+            background: var(--setap-bg-light);
             border-radius: 8px;
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
         .form-section h5 {
-            color: #495057;
-            border-bottom: 2px solid #dee2e6;
+            color: var(--setap-text-muted);
+            border-bottom: 2px solid var(--setap-border-color);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
@@ -202,7 +202,7 @@
                                 <div class="col-md-4">
                                     <!-- Información de la Tarea -->
                                     <div class="card">
-                                        <div class="card-header bg-info text-white">
+                                        <div class="card-header bg-setap-primary-light text-white">
                                             <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información de la Tarea</h6>
                                         </div>
                                         <div class="card-body">
@@ -215,7 +215,7 @@
                                             <p><strong>Estado Actual:</strong><br>
                                                 <span class="badge bg-<?= match($task['estado_tipo_id']) {
                                                     1 => 'secondary', // Creada
-                                                    5 => 'primary',   // En proceso
+                                                    5 => 'setap-primary',   // En proceso
                                                     6 => 'warning',   // Pendiente
                                                     8 => 'success',   // Completada
                                                     default => 'dark'
