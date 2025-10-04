@@ -456,6 +456,33 @@ try {
                     }
                     break;
                     
+                case 'change-state':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->changeState();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'check-executable':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->checkExecutable();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['valid' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'valid-transitions':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->getValidTransitions();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['transitions' => [], 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
                 case '':
                 case null:
                 default:

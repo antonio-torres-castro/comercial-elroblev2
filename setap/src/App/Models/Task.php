@@ -322,4 +322,272 @@ class Task
             return [];
         }
     }
+
+    /**
+     * Validar si una transición de estado es válida
+     */
+    public function isValidStateTransition(int $currentState, int $newState): array
+    {
+        // Definir transiciones válidas según reglas de negocio
+        $validTransitions = [
+            1 => [2, 3, 4], // creado -> activo, inactivo, eliminado
+            2 => [1, 3, 4, 5], // activo -> creado, inactivo, eliminado, iniciado
+            3 => [1, 2, 4], // inactivo -> creado, activo, eliminado
+            4 => [], // eliminado -> no se puede cambiar
+            5 => [2, 6, 7], // iniciado -> activo, terminado, rechazado
+            6 => [5, 7, 8], // terminado -> iniciado, rechazado, aprobado
+            7 => [2, 5], // rechazado -> activo, iniciado
+            8 => [6] // aprobado -> solo a terminado (para re-trabajo)
+        ];
+
+        $isValid = isset($validTransitions[$currentState]) && 
+                   in_array($newState, $validTransitions[$currentState]);
+
+        $message = '';
+        if (!$isValid) {
+            $stateNames = [
+                1 => 'Creado', 2 => 'Activo', 3 => 'Inactivo', 4 => 'Eliminado',
+                5 => 'Iniciado', 6 => 'Terminado', 7 => 'Rechazado', 8 => 'Aprobado'
+            ];
+            
+            $currentName = $stateNames[$currentState] ?? 'Desconocido';
+            $newName = $stateNames[$newState] ?? 'Desconocido';
+            
+            $message = "No es posible cambiar de estado '{$currentName}' a '{$newName}'";
+        }
+
+        return [
+            'valid' => $isValid,
+            'message' => $message
+        ];
+    }
+
+    /**
+     * Validar si el usuario puede cambiar el estado según su rol
+     */
+    public function canUserChangeState(int $currentState, int $newState, string $userRole): array
+    {
+        // Estados que solo admin y planner pueden modificar cuando están aprobados
+        if ($currentState == 8) { // aprobado
+            if (!in_array($userRole, ['admin', 'planner'])) {
+                return [
+                    'valid' => false,
+                    'message' => 'Solo usuarios Admin y Planner pueden modificar tareas aprobadas'
+                ];
+            }
+        }
+
+        // Validaciones específicas por rol
+        $restrictions = [
+            'executor' => [
+                'allowed_from' => [2, 5], // Solo desde activo e iniciado
+                'allowed_to' => [5, 6], // Solo a iniciado y terminado
+                'message' => 'Los ejecutores solo pueden iniciar tareas activas o marcarlas como terminadas'
+            ],
+            'supervisor' => [
+                'allowed_from' => [5, 6], // Solo desde iniciado y terminado
+                'allowed_to' => [7, 8], // Solo a rechazado y aprobado
+                'message' => 'Los supervisores solo pueden aprobar o rechazar tareas iniciadas o terminadas'
+            ]
+        ];
+
+        if (isset($restrictions[$userRole])) {
+            $restriction = $restrictions[$userRole];
+            
+            if (!in_array($currentState, $restriction['allowed_from']) || 
+                !in_array($newState, $restriction['allowed_to'])) {
+                return [
+                    'valid' => false,
+                    'message' => $restriction['message']
+                ];
+            }
+        }
+
+        return ['valid' => true, 'message' => ''];
+    }
+
+    /**
+     * Validar si la tarea puede ser ejecutada según su estado
+     */
+    public function canExecuteTask(int $taskId): array
+    {
+        try {
+            $task = $this->getById($taskId);
+            if (!$task) {
+                return [
+                    'valid' => false,
+                    'message' => 'Tarea no encontrada'
+                ];
+            }
+
+            // Estados válidos para ejecución: 2(activo), 5(iniciado), 6(terminado), 7(rechazado), 8(aprobado)
+            $executableStates = [2, 5, 6, 7, 8];
+            
+            if (!in_array($task['estado_tipo_id'], $executableStates)) {
+                return [
+                    'valid' => false,
+                    'message' => 'La tarea debe estar en estado Activo, Iniciado, Terminado, Rechazado o Aprobado para poder ejecutarse'
+                ];
+            }
+
+            return ['valid' => true, 'message' => ''];
+            
+        } catch (PDOException $e) {
+            error_log("Error en Task::canExecuteTask: " . $e->getMessage());
+            return [
+                'valid' => false,
+                'message' => 'Error al verificar el estado de la tarea'
+            ];
+        }
+    }
+
+    /**
+     * Cambiar estado de una tarea con validaciones
+     */
+    public function changeState(int $taskId, int $newState, int $userId, string $userRole, string $reason = ''): array
+    {
+        try {
+            $this->db->beginTransaction();
+
+            // Obtener tarea actual
+            $task = $this->getById($taskId);
+            if (!$task) {
+                $this->db->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Tarea no encontrada'
+                ];
+            }
+
+            $currentState = (int)$task['estado_tipo_id'];
+
+            // Validar transición de estado
+            $transitionValidation = $this->isValidStateTransition($currentState, $newState);
+            if (!$transitionValidation['valid']) {
+                $this->db->rollBack();
+                return [
+                    'success' => false,
+                    'message' => $transitionValidation['message']
+                ];
+            }
+
+            // Validar permisos del usuario
+            $userValidation = $this->canUserChangeState($currentState, $newState, $userRole);
+            if (!$userValidation['valid']) {
+                $this->db->rollBack();
+                return [
+                    'success' => false,
+                    'message' => $userValidation['message']
+                ];
+            }
+
+            // Actualizar estado
+            $sql = "UPDATE proyecto_tareas SET estado_tipo_id = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $success = $stmt->execute([$newState, $taskId]);
+
+            if (!$success) {
+                $this->db->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Error al actualizar el estado de la tarea'
+                ];
+            }
+
+            // Registrar en historial si la tabla existe
+            $this->registerStateHistory($taskId, $currentState, $newState, $userId, $reason);
+
+            $this->db->commit();
+            
+            return [
+                'success' => true,
+                'message' => 'Estado de la tarea actualizado correctamente'
+            ];
+
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Error en Task::changeState: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error interno al cambiar el estado de la tarea'
+            ];
+        }
+    }
+
+    /**
+     * Registrar cambio de estado en historial
+     */
+    private function registerStateHistory(int $taskId, int $oldState, int $newState, int $userId, string $reason): void
+    {
+        try {
+            // Verificar si la tabla historial_tareas existe
+            $checkTable = $this->db->prepare("SHOW TABLES LIKE 'historial_tareas'");
+            $checkTable->execute();
+            
+            if ($checkTable->rowCount() > 0) {
+                $sql = "
+                    INSERT INTO historial_tareas (
+                        proyecto_tarea_id, 
+                        estado_anterior_id, 
+                        estado_nuevo_id, 
+                        usuario_id, 
+                        motivo, 
+                        fecha_cambio
+                    ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ";
+                
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([$taskId, $oldState, $newState, $userId, $reason]);
+            }
+        } catch (PDOException $e) {
+            // Solo logear el error, no interrumpir el proceso principal
+            error_log("Error al registrar historial de tarea: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Validar datos de actualización con validaciones de estado
+     */
+    public function validateUpdateData(int $taskId, array $data, string $userRole): array
+    {
+        $errors = [];
+
+        try {
+            $task = $this->getById($taskId);
+            if (!$task) {
+                $errors[] = 'Tarea no encontrada';
+                return $errors;
+            }
+
+            $currentState = (int)$task['estado_tipo_id'];
+
+            // Si se intenta cambiar el estado
+            if (isset($data['estado_tipo_id']) && $data['estado_tipo_id'] != $currentState) {
+                $newState = (int)$data['estado_tipo_id'];
+                
+                // Validar transición
+                $transitionValidation = $this->isValidStateTransition($currentState, $newState);
+                if (!$transitionValidation['valid']) {
+                    $errors[] = $transitionValidation['message'];
+                }
+
+                // Validar permisos del usuario
+                $userValidation = $this->canUserChangeState($currentState, $newState, $userRole);
+                if (!$userValidation['valid']) {
+                    $errors[] = $userValidation['message'];
+                }
+            }
+
+            // Validar si se pueden hacer cambios según el estado actual
+            if ($currentState == 8 && !in_array($userRole, ['admin', 'planner'])) {
+                $errors[] = 'Solo usuarios Admin y Planner pueden modificar tareas aprobadas';
+            }
+
+        } catch (Exception $e) {
+            error_log("Error en Task::validateUpdateData: " . $e->getMessage());
+            $errors[] = 'Error al validar los datos de actualización';
+        }
+
+        return $errors;
+    }
 }

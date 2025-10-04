@@ -215,7 +215,6 @@ class User
             return false;
         }
     }
-    }
 
     /**
      * Eliminar usuario (cambiar estado), el estado id = 4 es eliminado
