@@ -452,20 +452,20 @@ class UserController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
+            
+            // Obtener clientes para la asignación
+            $clients = $this->userModel->getAvailableClients();
 
             $data = [
-                'user' => $currentUser,
-                'title' => 'Editar Usuario',
-                'subtitle' => "Editando usuario: {$userToEdit['nombre_completo']}",
-                'user_id' => $id,
-                'user' => $userToEdit,
+                'userToEdit' => $userToEdit,  // Cambiar key para consistencia con edit.php
                 'userTypes' => $userTypes,
                 'estadosTipo' => $estadosTipo,
+                'clients' => $clients,
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
             ];
 
-            require_once __DIR__ . '/../Views/users/form.php';
+            require_once __DIR__ . '/../Views/users/edit.php';
         } catch (Exception $e) {
             error_log("Error en UserController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -519,7 +519,8 @@ class UserController
                 'email' => trim($_POST['email']),
                 'telefono' => trim($_POST['telefono'] ?? ''),
                 'direccion' => trim($_POST['direccion'] ?? ''),
-                'usuario_tipo_id' => (int)$_POST['usuario_tipo_id']
+                'usuario_tipo_id' => (int)$_POST['usuario_tipo_id'],
+                'cliente_id' => !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null
             ];
 
             // Actualizar usuario

@@ -81,7 +81,7 @@ $user = $isEdit ? $data['user'] ?? null : null;
                 <?php if (isset($_GET['error'])): ?>
                     <div class="alert alert-danger alert-dismissible fade show">
                         <i class="bi bi-exclamation-triangle"></i>
-                        <?php echo $_GET['error']; ?>. Intente nuevamente.
+                        Error al procesar la solicitud. Intente nuevamente.
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>

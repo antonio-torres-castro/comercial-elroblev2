@@ -42,9 +42,23 @@
                             </div>
                         <?php endif; ?>
 
+                        <?php if (!empty($_GET['error'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($_GET['error']) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
                         <?php if (!empty($success)): ?>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($_GET['success'])): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($_GET['success']) ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
@@ -148,6 +162,47 @@
                                 </div>
                             </div>
 
+                            <!-- Asignación de Cliente -->
+                            <div class="row mb-4" id="client-selection" style="display: none;">
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-building"></i> Asignación de Cliente
+                                    </h5>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="cliente_id" class="form-label">Cliente <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="cliente_id" name="cliente_id">
+                                            <option value="">Seleccionar cliente...</option>
+                                            <?php if (isset($clients) && is_array($clients)): ?>
+                                                <?php foreach ($clients as $client): ?>
+                                                    <option value="<?= $client['id'] ?>" 
+                                                        data-rut="<?= htmlspecialchars($client['rut'] ?? '') ?>"
+                                                        <?= (isset($userToEdit['cliente_id']) && $client['id'] == $userToEdit['cliente_id']) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($client['razon_social']) ?>
+                                                        <?= !empty($client['rut']) ? ' - RUT: ' . htmlspecialchars($client['rut']) : '' ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                        <div class="form-text">
+                                            Seleccione el cliente al que pertenece este usuario.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12" id="client-validation-info" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <strong>Nota importante:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li><strong>Usuario tipo "client":</strong> El RUT de la persona debe coincidir con el RUT del cliente.</li>
+                                            <li><strong>Usuario tipo "counterparty":</strong> La persona debe estar registrada como contraparte del cliente.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Información Adicional -->
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -204,15 +259,74 @@
             const form = document.getElementById('userEditForm');
             const updateBtn = document.getElementById('updateBtn');
 
+            // Mostrar/ocultar sección de cliente basado en el tipo de usuario actual
+            function toggleClientSection() {
+                const userTypeSelect = document.getElementById('usuario_tipo_id');
+                const selectedOption = userTypeSelect.options[userTypeSelect.selectedIndex];
+                const userType = selectedOption.text.split(' - ')[0].trim();
+                const clientSection = document.getElementById('client-selection');
+                const clientSelect = document.getElementById('cliente_id');
+                const validationInfo = document.getElementById('client-validation-info');
+                
+                // Tipos de usuario que requieren cliente
+                const clientUserTypes = ['client', 'counterparty'];
+                
+                if (clientUserTypes.includes(userType.toLowerCase())) {
+                    // Mostrar selección de cliente
+                    clientSection.style.display = 'block';
+                    clientSelect.required = true;
+                    validationInfo.style.display = 'block';
+                } else {
+                    // Ocultar selección de cliente
+                    clientSection.style.display = 'none';
+                    clientSelect.required = false;
+                    clientSelect.value = '';
+                    validationInfo.style.display = 'none';
+                }
+            }
+
+            // Inicializar la visibilidad de la sección de cliente
+            toggleClientSection();
+
+            // Manejar cambios en el tipo de usuario
+            document.getElementById('usuario_tipo_id').addEventListener('change', toggleClientSection);
+            
+            // Validar RUT vs Cliente para usuarios tipo 'client'
+            document.getElementById('cliente_id').addEventListener('change', function(e) {
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                const clientRut = selectedOption.getAttribute('data-rut');
+                const userTypeSelect = document.getElementById('usuario_tipo_id');
+                const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim();
+                const rutInput = document.getElementById('rut');
+                
+                if (userType.toLowerCase() === 'client' && clientRut && rutInput.value) {
+                    const cleanClientRut = clientRut.replace(/[^0-9kK]/g, '').toLowerCase();
+                    const cleanPersonRut = rutInput.value.replace(/[^0-9kK]/g, '').toLowerCase();
+                    
+                    if (cleanClientRut !== cleanPersonRut) {
+                        alert('Atención: El RUT de la persona debe coincidir con el RUT del cliente seleccionado para usuarios tipo "client".');
+                    }
+                }
+            });
+
             // Validación del formulario
             form.addEventListener('submit', function(e) {
                 const nombre = document.getElementById('nombre').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const usuario_tipo_id = document.getElementById('usuario_tipo_id').value;
+                const clientSection = document.getElementById('client-selection');
+                const clientSelect = document.getElementById('cliente_id');
 
                 if (!nombre || !email || !usuario_tipo_id) {
                     e.preventDefault();
                     alert('Por favor, completa todos los campos obligatorios.');
+                    return;
+                }
+
+                // Validar selección de cliente si es requerida
+                if (clientSection.style.display !== 'none' && clientSelect.required && !clientSelect.value) {
+                    e.preventDefault();
+                    alert('Por favor, selecciona un cliente para este tipo de usuario.');
                     return;
                 }
 
