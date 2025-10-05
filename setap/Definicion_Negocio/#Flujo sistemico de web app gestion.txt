@@ -59,5 +59,26 @@ Tipos de tareas en tabla tarea_tipos
 Al proyecto no se le lleva traza de producto o servicio o construccion: Por que no facturaremos con este sistema web.
 Las tareas recurrentes se determinan solo por que ocurren mas de una vez en el mismo periodo de un proyecto, con una frecuencia determinada. diariamente, semanalmente, quincenalmente, etc. Requiero que el sistema permita al usuario indicar cuando una tarea se repetira diariamente, indicando el dia de la semana que ocurrira (semanal, quincenal, mensual, trimestral, semestral, anual), Cada X meses, Cada X dias: Con esto el sistema debera generar N fechas donde se realizara dicha tarea en proyecto_tareas.
 
+#Feriados en web app
+1. Los feriados son días que no se podrá trabajar, comúnmente se consideran feriados los domingos y en muchos proyectos los sábados también. Pero en este caso no siembre es así.
+2. La entidad que almacena los feriados para un proyecto, debe considerar todas las fechas que no se trabaja en el proyecto (los motivos no son relevantes).
+3. Dado el punto anterior, se necesita un mantener para proyecto_feriados que:
+- Permita al usuario crear masivamente como feriados, en el periodo del proyecto seleccionado para crearle feriados, seleccionando cualquiera de los 7 días de la semana, ya que hay empresas que por ejemplo, no trabajan los lunes, o por ejemplo por facilidad de administración e puede querer marcar hasta 6 días de la semana como feriados, para que las otras funcionalidades de creación de tareas sepan que solo 1 día a la semana se puede trabajar en el proyecto.
+- Teniendo seleccionados los días de la semana que se quieren registrar como feriados durante el periodo del proyecto, el sistema web debe generar en todas las fechas de esos días un registro con la fecha correspondiente como feriado.
+- Además el usuario debe poder indicar una fecha especifica como feriado, y/o un intervalo de fechas especifico como feriado
+- Todos los feriados de un proyecto deben presentarse en una tabla navegable en el mantenedor de proyecto_feriados a medida que se agregan, y al momento de consultar los feriados de un proyecto. Por ejemplo si voy a agregar un feriado a un proyecto, al darle agrear se validara que para ese proyecto no este ya creado el feriado, y a terminar de agregar el feriado (si es no existía para ese proyecto) se consultaran todos los feriados del proyecto involucrado y se presentaran en la tabla navegable con todos sus datos.
+- El mantenedor de feriados debe ser alcanzable desde el mantenedor de proyecto, para que al invocarlo el usuario ya tenga el id del proyecto en el mantenedor de feriados.
 
+tabla proyecto_feriados
+# id=correlativo auto incrementable, proyecto_id=id en tabla proyectos, fecha=fecha que se indica es feriado, estado_tipo_id = estados posibles: de estado_tipos (1:creado, 2:activo, 3:inactivo, 4:eliminado)
 
+C. Casos Edge a Considerar (casos de borde a considerar)
+Proyectos con períodos muy largos: ¿Cómo manejar proyectos de varios años? La simplicidad ante todo, los proyectos de este tipo no son a mas de 3 años y tres años de feriados son en promedio 112 por año, en tres años son 336 registros en promedio por proyecto, lo cual es poco.
+Cambios en calendarios: ¿Qué pasa si cambia el calendario laboral a mitad de proyecto? El sistema si agrega un feriado y en esa fecha hay tareas, automáticamente debe alertar que moverá todas las fechas de las tareas hacia adelante (agregar la funcionalidad de mover masivamente las fechas de las tareas N días hacia adelante) a menos que el usuario no quiera mover de fecha las tareas y solo para efectos legales quiera marcar el día como feriado (para algún reporte por ejemplo).
+Feriados superpuestos: ¿Y si un feriado específico cae en un día ya marcado como feriado recurrente? Si es así y o si es al revés, el feriado se sobre escribe, se registra una modificación al feriado, de todos sus datos excepto el Id y la fecha (por que no permitimos duplicar fecha de feriados en un proyecto).
+
+Preguntas para Validar:
+1.¿Los feriados deben tener diferentes prioridades o todos son iguales? Existen renunciables y e irrenunciables, pero en ambos casos solo se le indicara al querer poner tareas en un feriado que esta agendando tareas en un dia feriado o feriado irrenunciable, para que sepa que tiene un costo adicional la HH y posible multa
+2.¿Se requiere un calendario visual además de la tabla? No pero la tabla debe calcular y desplegar que dia de la semana es la fecha.
+3.¿Los feriados inactivos siguen afectando la planificación? No, ningun feriado afecta la planificacion a menos que el usuario confirme que quiere mover tareas que estaban ese dia feriado programadas (se mueven al siguien dia hábil).
+4.¿Se necesita importar feriados desde fuentes externas (calendarios oficiales)? No por que los recurrentes los debiera calcular el sistema, pidiendo una referencia de que dia es hoy para poder calcular cuando es sabado, domingo, etc. Y el resto son solo 8 fechas (en promedio) feriados no sabados ni domingos mas las vacaciones de las personas.
