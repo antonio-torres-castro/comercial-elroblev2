@@ -119,13 +119,16 @@ class UserController
             }
 
             // Sanitizar y validar datos
-            $data = $this->validateUserData($_POST);
+            $errors = $this->validateUserData($_POST);
 
-            if (isset($data['errors'])) {
+            if (!empty($errors)) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Datos inválidos', 'details' => $data['errors']]);
+                echo json_encode(['error' => 'Datos inválidos', 'details' => $errors]);
                 return;
             }
+
+            // Si no hay errores, procesar los datos del POST directamente
+            $data = $_POST;
 
             // Crear usuario
             $userId = $this->userModel->create($data);
@@ -214,13 +217,10 @@ class UserController
     private function validateUserData(array $data): array
     {
         $errors = [];
-        $validated = [];
 
         // Validar nombre
         if (empty($data['nombre'])) {
             $errors['nombre'] = 'El nombre es requerido';
-        } else {
-            $validated['nombre'] = Security::sanitizeInput($data['nombre']);
         }
 
         // Validar RUT
@@ -230,8 +230,6 @@ class UserController
             $errors['rut'] = 'El RUT no es válido';
         } elseif (!$this->isRutAvailable($data['rut'])) {
             $errors['rut'] = 'El RUT ya está registrado';
-        } else {
-            $validated['rut'] = preg_replace('/[^0-9kK]/', '', $data['rut']);
         }
 
         // Validar email
@@ -241,8 +239,6 @@ class UserController
             $errors['email'] = 'El email no es válido';
         } elseif (!$this->isEmailAvailable($data['email'])) {
             $errors['email'] = 'El email ya está registrado';
-        } else {
-            $validated['email'] = strtolower(trim($data['email']));
         }
 
         // Validar username
@@ -250,8 +246,6 @@ class UserController
             $errors['nombre_usuario'] = 'El nombre de usuario es requerido';
         } elseif (!$this->isUsernameAvailable($data['nombre_usuario'])) {
             $errors['nombre_usuario'] = 'El nombre de usuario ya existe';
-        } else {
-            $validated['nombre_usuario'] = Security::sanitizeInput($data['nombre_usuario']);
         }
 
         // Validar contraseña
@@ -261,36 +255,21 @@ class UserController
             $passwordErrors = Security::validatePasswordStrength($data['password']);
             if (!empty($passwordErrors)) {
                 $errors['password'] = implode(', ', $passwordErrors);
-            } else {
-                $validated['password'] = $data['password'];
             }
         }
 
         // Validar tipo de usuario
         if (empty($data['usuario_tipo_id'])) {
             $errors['usuario_tipo_id'] = 'El tipo de usuario es requerido';
-        } else {
-            $validated['usuario_tipo_id'] = (int)$data['usuario_tipo_id'];
         }
 
         // GAP 1 y GAP 2: Validaciones especiales para usuarios cliente
-        $clientValidationErrors = $this->validateClientLogic($data, $validated);
-        $errors = array_merge($errors, $clientValidationErrors);
-
-        // Campos opcionales
-        $validated['telefono'] = Security::sanitizeInput($data['telefono'] ?? '');
-        $validated['direccion'] = Security::sanitizeInput($data['direccion'] ?? '');
-        
-        // Cliente_id se valida en validateClientLogic
-        if (!empty($data['cliente_id'])) {
-            $validated['cliente_id'] = (int)$data['cliente_id'];
+        if (!empty($data['usuario_tipo_id'])) {
+            $clientValidationErrors = $this->validateClientLogic($data);
+            $errors = array_merge($errors, $clientValidationErrors);
         }
 
-        if (!empty($errors)) {
-            return ['errors' => $errors];
-        }
-
-        return $validated;
+        return $errors;
     }
 
     private function getUserTypes(): array
@@ -530,36 +509,16 @@ class UserController
             }
 
             // Validar datos
-            $result = $this->validateUserDataForUpdate($_POST, $id); // Pasar el ID del usuario para excluir de validaciones de unicidad
+            $errors = $this->validateUserDataForUpdate($_POST, $id);
 
-            // Verificar si el resultado contiene errores o datos validados
-            // Una forma robusta es verificar si algún valor parece ser un mensaje de error
-            $hasErrors = false;
-            $errorMessages = [];
-            
-            // Si cualquier valor es un string que parece un mensaje de error, entonces hay errores
-            foreach ($result as $key => $value) {
-                if (is_string($value) && strlen($value) > 20 && 
-                   (strpos($value, 'obligatorio') !== false || 
-                    strpos($value, 'válido') !== false || 
-                    strpos($value, 'caracteres') !== false ||
-                    strpos($value, 'formato') !== false ||
-                    strpos($value, 'coinciden') !== false ||
-                    strpos($value, 'uso') !== false ||
-                    strpos($value, 'seleccionar') !== false)) {
-                    $hasErrors = true;
-                    $errorMessages[] = $value;
-                }
-            }
-            
-            if ($hasErrors) {
-                $errorMsg = implode(', ', $errorMessages);
+            if (!empty($errors)) {
+                $errorMsg = implode(', ', array_values($errors));
                 Security::redirect("/users/edit?id={$id}&error=" . urlencode($errorMsg));
                 return;
             }
-            
-            // Si llegamos aquí, $result contiene los datos validados
-            $userData = $result;
+
+            // Si no hay errores, usar los datos del POST directamente
+            $userData = $_POST;
             
             // Agregar campos adicionales que no están en la validación estándar
             $userData['estado_tipo_id'] = (int)($_POST['estado_tipo_id'] ?? 1);
@@ -634,15 +593,12 @@ class UserController
     private function validateUserDataForUpdate(array $data, int $userId = 0): array
     {
         $errors = [];
-        $validated = [];
 
         // Validar nombre
         if (empty($data['nombre'])) {
             $errors['nombre'] = 'El nombre es obligatorio';
         } elseif (strlen($data['nombre']) < 2) {
             $errors['nombre'] = 'El nombre debe tener al menos 2 caracteres';
-        } else {
-            $validated['nombre'] = Security::sanitizeInput($data['nombre']);
         }
 
         // Validar email
@@ -652,15 +608,11 @@ class UserController
             $errors['email'] = 'El email no tiene un formato válido';
         } elseif (!$this->isEmailAvailable($data['email'], $userId)) {
             $errors['email'] = 'El correo electrónico ya está en uso por otro usuario';
-        } else {
-            $validated['email'] = strtolower(trim($data['email']));
         }
 
         // Validar usuario_tipo_id
         if (empty($data['usuario_tipo_id']) || !is_numeric($data['usuario_tipo_id'])) {
             $errors['usuario_tipo_id'] = 'Debe seleccionar un tipo de usuario válido';
-        } else {
-            $validated['usuario_tipo_id'] = (int)$data['usuario_tipo_id'];
         }
 
         // Validaciones específicas para creación (no actualización)
@@ -672,8 +624,6 @@ class UserController
                 $errors['nombre_usuario'] = 'El nombre de usuario debe tener al menos 3 caracteres';
             } elseif (!$this->isUsernameAvailable($data['nombre_usuario'], $userId)) {
                 $errors['nombre_usuario'] = 'El nombre de usuario ya está en uso';
-            } else {
-                $validated['nombre_usuario'] = Security::sanitizeInput($data['nombre_usuario']);
             }
 
             // Validar password
@@ -681,8 +631,6 @@ class UserController
                 $errors['password'] = 'La contraseña es obligatoria';
             } elseif (strlen($data['password']) < 6) {
                 $errors['password'] = 'La contraseña debe tener al menos 6 caracteres';
-            } else {
-                $validated['password'] = $data['password'];
             }
 
             // Validar confirmación de password
@@ -696,28 +644,17 @@ class UserController
                     $errors['rut'] = 'El RUT no es válido';
                 } elseif (!$this->isRutAvailable($data['rut'], $userId)) {
                     $errors['rut'] = 'El RUT ya está registrado';
-                } else {
-                    $validated['rut'] = preg_replace('/[^0-9kK]/', '', $data['rut']);
                 }
             }
         }
         
         // GAP 1 y GAP 2: Validaciones especiales para usuarios cliente
-        if (!empty($validated['usuario_tipo_id'])) {
-            $clientValidationErrors = $this->validateClientLogic($data, $validated);
+        if (!empty($data['usuario_tipo_id'])) {
+            $clientValidationErrors = $this->validateClientLogic($data);
             $errors = array_merge($errors, $clientValidationErrors);
         }
-        
-        // Campos opcionales
-        $validated['telefono'] = Security::sanitizeInput($data['telefono'] ?? '');
-        $validated['direccion'] = Security::sanitizeInput($data['direccion'] ?? '');
-        
-        // Cliente_id se valida en validateClientLogic
-        if (!empty($data['cliente_id'])) {
-            $validated['cliente_id'] = (int)$data['cliente_id'];
-        }
 
-        return !empty($errors) ? $errors : $validated;
+        return $errors;
     }
 
     /**
@@ -971,15 +908,15 @@ class UserController
     /**
      * GAP 1 y GAP 2: Validar lógica de usuarios cliente
      */
-    private function validateClientLogic(array $data, array $validated): array
+    private function validateClientLogic(array $data): array
     {
         $errors = [];
         
-        if (empty($validated['usuario_tipo_id'])) {
+        if (empty($data['usuario_tipo_id'])) {
             return $errors; // No se puede validar sin tipo de usuario
         }
         
-        $tipoUsuario = $this->getUserTypeName($validated['usuario_tipo_id']);
+        $tipoUsuario = $this->getUserTypeName((int)$data['usuario_tipo_id']);
         
         // GAP 2: Usuarios de empresa propietaria NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
@@ -1002,15 +939,11 @@ class UserController
                     // Validaciones especiales según tipo de usuario
                     if ($tipoUsuario === 'client') {
                         // GAP 1: Usuario 'client' debe tener mismo RUT que empresa
-                        if (!empty($validated['rut']) && !$this->userModel->validateClientUserRut($validated['rut'], $clientId)) {
+                        if (!empty($data['rut']) && !$this->userModel->validateClientUserRut($data['rut'], $clientId)) {
                             $errors['rut'] = 'El RUT de la persona debe coincidir con el RUT del cliente seleccionado';
                         }
-                    } elseif ($tipoUsuario === 'counterparty') {
-                        // GAP 1: Usuario 'counterparty' debe estar en cliente_contrapartes
-                        // Para creación, necesitamos validar esto después de crear la persona
-                        // Marcar para validación posterior
-                        $validated['_validate_counterparty'] = true;
                     }
+                    // Nota: La validación de counterparty se hará después de crear la persona
                 }
             }
         }
