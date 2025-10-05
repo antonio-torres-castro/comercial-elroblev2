@@ -17,6 +17,51 @@
             background-color: var(--setap-primary);
             border-color: var(--setap-primary);
         }
+        
+        .form-section {
+            background: var(--setap-bg-light);
+            border-left: 4px solid var(--setap-primary);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.375rem;
+        }
+
+        .form-section h6 {
+            color: var(--setap-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .user-avatar-preview {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, var(--setap-primary), var(--setap-primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+        }
+        
+        .availability-check {
+            font-size: 0.875em;
+            margin-top: 5px;
+        }
+
+        .available {
+            color: #198754;
+        }
+
+        .unavailable {
+            color: #dc3545;
+        }
     </style>
 </head>
 
@@ -67,97 +112,123 @@
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
                             <input type="hidden" name="id" value="<?= (int)$userToEdit['id'] ?>">
 
-                            <!-- Información Personal -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h5 class="border-bottom pb-2 mb-3">
-                                        <i class="bi bi-person-vcard"></i> Información Personal
-                                    </h5>
+                            <!-- Vista previa del avatar -->
+                            <div class="text-center mb-4">
+                                <div class="user-avatar-preview" id="avatarPreview">
+                                    <?= strtoupper(substr($userToEdit['nombre_completo'] ?? 'U', 0, 1)) ?>
                                 </div>
+                                <h5><?= htmlspecialchars($userToEdit['nombre_completo']) ?></h5>
+                                <p class="text-muted">@<?= htmlspecialchars($userToEdit['nombre_usuario']) ?></p>
+                            </div>
+                            <hr>
 
+                            <div class="row">
+                                <!-- Información Personal -->
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="rut" class="form-label">RUT <span class="text-muted">(Solo lectura)</span></label>
-                                        <input type="text" class="form-control" id="rut" name="rut"
-                                            value="<?= htmlspecialchars($userToEdit['rut']) ?>" readonly>
+                                    <div class="form-section">
+                                        <h6><i class="bi bi-person"></i> Información Personal</h6>
+                                        <div class="mb-3">
+                                            <label for="rut" class="form-label">RUT <span class="text-muted">(Solo lectura)</span></label>
+                                            <input type="text" class="form-control" id="rut" name="rut"
+                                                value="<?= htmlspecialchars($userToEdit['rut']) ?>" readonly>
+                                            <div class="invalid-feedback" id="rutFeedback"></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                                value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?>"
+                                                placeholder="Ej: Juan Pérez González" minlength="3" required>
+                                            <div class="invalid-feedback" id="nombreFeedback"></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="telefono" class="form-label">Teléfono</label>
+                                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                                value="<?= htmlspecialchars($userToEdit['telefono'] ?? '') ?>"
+                                                placeholder="+56 9 1234 5678">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="direccion" class="form-label">Dirección</label>
+                                            <textarea class="form-control" id="direccion" name="direccion" rows="2"
+                                                placeholder="Dirección completa"><?= htmlspecialchars($userToEdit['direccion'] ?? '') ?></textarea>
+                                        </div>
                                     </div>
                                 </div>
 
+                                <!-- Información del Sistema -->
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="nombre" name="nombre"
-                                            value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?>"
-                                            placeholder="Ej: Juan Pérez González" minlength="3" required>
-                                    </div>
-                                </div>
+                                    <div class="form-section">
+                                        <h6><i class="bi bi-shield-check"></i> Información del Sistema</h6>
 
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="telefono" class="form-label">Teléfono</label>
-                                        <input type="tel" class="form-control" id="telefono" name="telefono"
-                                            value="<?= htmlspecialchars($userToEdit['telefono'] ?? '') ?>"
-                                            placeholder="+56 9 1234 5678">
-                                    </div>
-                                </div>
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                value="<?= htmlspecialchars($userToEdit['email']) ?>"
+                                                placeholder="usuario@dominio.com" required>
+                                            <div class="invalid-feedback" id="emailFeedback"></div>
+                                            <div id="email-availability" class="availability-check"></div>
+                                        </div>
 
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="direccion" class="form-label">Dirección</label>
-                                        <input type="text" class="form-control" id="direccion" name="direccion"
-                                            value="<?= htmlspecialchars($userToEdit['direccion'] ?? '') ?>"
-                                            placeholder="Dirección completa">
+                                        <div class="mb-3">
+                                            <label for="nombre_usuario" class="form-label">Nombre de Usuario <span class="text-muted">(Solo lectura)</span></label>
+                                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
+                                                value="<?= htmlspecialchars($userToEdit['nombre_usuario']) ?>" readonly>
+                                            <div class="invalid-feedback" id="usernameFeedback"></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="usuario_tipo_id" class="form-label">Tipo de Usuario <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="usuario_tipo_id" name="usuario_tipo_id" required>
+                                                <option value="">Selecciona un tipo de usuario</option>
+                                                <?php if (isset($userTypes) && is_array($userTypes)): ?>
+                                                    <?php foreach ($userTypes as $tipo): ?>
+                                                        <option value="<?= (int)$tipo['id'] ?>" 
+                                                            <?= $tipo['id'] == $userToEdit['usuario_tipo_id'] ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($tipo['nombre']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="estado_tipo_id" class="form-label">Estado</label>
+                                            <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
+                                                <?php if (isset($estadosTipo) && is_array($estadosTipo)): ?>
+                                                    <?php foreach ($estadosTipo as $estado): ?>
+                                                        <?php if ($estado['id'] < 5): // No mostrar "Eliminado" ?>
+                                                            <option value="<?= (int)$estado['id'] ?>"
+                                                                <?= ($userToEdit['estado_tipo_id'] ?? 1) == $estado['id'] ? 'selected' : '' ?>>
+                                                                <?= htmlspecialchars($estado['nombre']) ?>
+                                                            </option>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Información de Usuario -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h5 class="border-bottom pb-2 mb-3">
-                                        <i class="bi bi-key"></i> Información de Usuario
-                                    </h5>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="nombre_usuario" class="form-label">Nombre de Usuario <span class="text-muted">(Solo lectura)</span></label>
-                                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
-                                            value="<?= htmlspecialchars($userToEdit['nombre_usuario']) ?>" readonly>
+                            <!-- Fechas de vigencia -->
+                            <div class="form-section">
+                                <h6><i class="bi bi-calendar"></i> Fechas de Vigencia</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
+                                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
+                                                value="<?= $userToEdit['fecha_inicio'] ?? '' ?>">
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" id="email" name="email"
-                                            value="<?= htmlspecialchars($userToEdit['email']) ?>"
-                                            placeholder="usuario@dominio.com" required>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="usuario_tipo_id" class="form-label">Tipo de Usuario <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="usuario_tipo_id" name="usuario_tipo_id" required>
-                                            <option value="">Selecciona un tipo de usuario</option>
-                                            <?php if (isset($userTypes) && is_array($userTypes)): ?>
-                                                <?php foreach ($userTypes as $tipo): ?>
-                                                    <option value="<?= (int)$tipo['id'] ?>" 
-                                                        <?= $tipo['id'] == $userToEdit['usuario_tipo_id'] ? 'selected' : '' ?>>
-                                                        <?= htmlspecialchars($tipo['nombre']) ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="estado" class="form-label">Estado Actual</label>
-                                        <input type="text" class="form-control" id="estado" name="estado"
-                                            value="<?= htmlspecialchars($userToEdit['estado'] ?? 'Activo') ?>" readonly>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_termino" class="form-label">Fecha de Término</label>
+                                            <input type="date" class="form-control" id="fecha_termino" name="fecha_termino"
+                                                value="<?= $userToEdit['fecha_termino'] ?? '' ?>">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -309,6 +380,43 @@
                 }
             });
 
+            // Validación de email en tiempo real
+            let emailTimeout;
+            document.getElementById('email').addEventListener('input', function(e) {
+                clearTimeout(emailTimeout);
+                const email = e.target.value;
+                const div = document.getElementById('email-availability');
+                
+                if (email.length > 0 && email.includes('@')) {
+                    emailTimeout = setTimeout(() => {
+                        fetch(`/api/user-check?type=email&value=${encodeURIComponent(email)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.available) {
+                                    div.className = 'availability-check available';
+                                    div.innerHTML = '<i class="bi bi-check-circle"></i> Email disponible';
+                                } else {
+                                    div.className = 'availability-check unavailable';
+                                    div.innerHTML = '<i class="bi bi-x-circle"></i> Email ya está en uso';
+                                }
+                            })
+                            .catch(() => {
+                                div.innerHTML = '';
+                            });
+                    }, 500);
+                } else {
+                    div.innerHTML = '';
+                }
+            });
+
+            // Actualizar avatar preview
+            document.getElementById('nombre').addEventListener('input', function() {
+                const avatarPreview = document.getElementById('avatarPreview');
+                if (avatarPreview) {
+                    avatarPreview.textContent = this.value.charAt(0).toUpperCase() || 'U';
+                }
+            });
+
             // Validación del formulario
             form.addEventListener('submit', function(e) {
                 const nombre = document.getElementById('nombre').value.trim();
@@ -348,6 +456,17 @@
                 updateBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizando...';
                 updateBtn.disabled = true;
             });
+
+            // Auto-hide alerts después de 5 segundos
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    if (bootstrap.Alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                });
+            }, 5000);
         });
     </script>
 </body>

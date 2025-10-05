@@ -520,6 +520,9 @@ class UserController
                 'telefono' => trim($_POST['telefono'] ?? ''),
                 'direccion' => trim($_POST['direccion'] ?? ''),
                 'usuario_tipo_id' => (int)$_POST['usuario_tipo_id'],
+                'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1),
+                'fecha_inicio' => !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null,
+                'fecha_termino' => !empty($_POST['fecha_termino']) ? $_POST['fecha_termino'] : null,
                 'cliente_id' => !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null
             ];
 

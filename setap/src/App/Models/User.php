@@ -191,7 +191,7 @@ class User
             // Actualizar usuario
             $usuarioSql = "
                 UPDATE usuarios 
-                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, fecha_modificacion = NOW()
+                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
 
@@ -199,6 +199,7 @@ class User
             $stmt->execute([
                 $data['email'],
                 $data['usuario_tipo_id'],
+                $data['estado_tipo_id'],
                 $clienteId,
                 $id
             ]);

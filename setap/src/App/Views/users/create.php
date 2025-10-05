@@ -18,6 +18,20 @@
             border-color: var(--setap-primary);
         }
 
+        .form-section {
+            background: var(--setap-bg-light);
+            border-left: 4px solid var(--setap-primary);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.375rem;
+        }
+
+        .form-section h6 {
+            color: var(--setap-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
         .password-strength {
             font-size: 0.875em;
             margin-top: 5px;
@@ -46,6 +60,10 @@
 
         .unavailable {
             color: #dc3545;
+        }
+
+        .password-toggle {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -89,102 +107,98 @@
                         <form method="POST" action="/users/create" id="userForm">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
 
-                            <!-- Información Personal -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h5 class="border-bottom pb-2 mb-3">
-                                        <i class="bi bi-person-vcard"></i> Información Personal
-                                    </h5>
-                                </div>
-
+                            <div class="row">
+                                <!-- Información Personal -->
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="rut" class="form-label">RUT <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="rut" name="rut"
-                                            placeholder="12345678-9" pattern="[0-9]{7,8}-[0-9Kk]" required>
-                                        <div class="form-text">Formato: 12345678-9</div>
-                                    </div>
-                                </div>
+                                    <div class="form-section">
+                                        <h6><i class="bi bi-person"></i> Información Personal</h6>
 
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="nombre" name="nombre"
-                                            placeholder="Ej: Juan Pérez González" minlength="3" required>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="telefono" class="form-label">Teléfono</label>
-                                        <input type="tel" class="form-control" id="telefono" name="telefono"
-                                            placeholder="+56 9 1234 5678">
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="direccion" class="form-label">Dirección</label>
-                                        <input type="text" class="form-control" id="direccion" name="direccion"
-                                            placeholder="Dirección completa">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Información de Usuario -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h5 class="border-bottom pb-2 mb-3">
-                                        <i class="bi bi-key"></i> Información de Usuario
-                                    </h5>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" id="email" name="email"
-                                            placeholder="usuario@ejemplo.com" required>
-                                        <div id="email-availability" class="availability-check"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="nombre_usuario" class="form-label">Nombre de Usuario <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
-                                            placeholder="usuario123" minlength="4" required>
-                                        <div id="username-availability" class="availability-check"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <input type="password" class="form-control" id="password" name="password"
-                                                minlength="8" required>
-                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
+                                        <div class="mb-3">
+                                            <label for="rut" class="form-label">RUT <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="rut" name="rut"
+                                                placeholder="12345678-9" pattern="[0-9]{7,8}-[0-9Kk]" required>
+                                            <div class="form-text">Formato: 12345678-9</div>
+                                            <div class="invalid-feedback" id="rutFeedback"></div>
                                         </div>
-                                        <div id="password-strength" class="password-strength"></div>
-                                        <div class="form-text">
-                                            Mínimo 8 caracteres, incluye mayúsculas, minúsculas, números y símbolos
+
+                                        <div class="mb-3">
+                                            <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                                placeholder="Ej: Juan Pérez González" minlength="3" required>
+                                            <div class="invalid-feedback" id="nombreFeedback"></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="telefono" class="form-label">Teléfono</label>
+                                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                                placeholder="+56 9 1234 5678">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="direccion" class="form-label">Dirección</label>
+                                            <textarea class="form-control" id="direccion" name="direccion" rows="2"
+                                                placeholder="Dirección completa"></textarea>
                                         </div>
                                     </div>
                                 </div>
 
+                                <!-- Información del Sistema -->
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="usuario_tipo_id" class="form-label">Tipo de Usuario <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="usuario_tipo_id" name="usuario_tipo_id" required>
-                                            <option value="">Seleccionar tipo...</option>
-                                            <?php foreach ($userTypes as $type): ?>
-                                                <option value="<?= $type['id'] ?>">
-                                                    <?= htmlspecialchars($type['nombre']) ?> - <?= htmlspecialchars($type['descripcion']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                    <div class="form-section">
+                                        <h6><i class="bi bi-shield-check"></i> Información del Sistema</h6>
+
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                placeholder="usuario@ejemplo.com" required>
+                                            <div class="invalid-feedback" id="emailFeedback"></div>
+                                            <div id="email-availability" class="availability-check"></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="nombre_usuario" class="form-label">Nombre de Usuario <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
+                                                placeholder="usuario123" minlength="4" required>
+                                            <div class="invalid-feedback" id="usernameFeedback"></div>
+                                            <div id="username-availability" class="availability-check"></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="usuario_tipo_id" class="form-label">Tipo de Usuario <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="usuario_tipo_id" name="usuario_tipo_id" required>
+                                                <option value="">Seleccionar tipo...</option>
+                                                <?php foreach ($userTypes as $type): ?>
+                                                    <option value="<?= $type['id'] ?>">
+                                                        <?= htmlspecialchars($type['nombre']) ?> - <?= htmlspecialchars($type['descripcion']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="password" name="password"
+                                                    minlength="6" required>
+                                                <span class="input-group-text password-toggle" onclick="togglePassword('password')">
+                                                    <i class="bi bi-eye"></i>
+                                                </span>
+                                            </div>
+                                            <div class="invalid-feedback" id="passwordFeedback"></div>
+                                            <div id="password-strength" class="password-strength"></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="confirm_password" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                                                    minlength="6" required>
+                                                <span class="input-group-text password-toggle" onclick="togglePassword('confirm_password')">
+                                                    <i class="bi bi-eye"></i>
+                                                </span>
+                                            </div>
+                                            <div class="invalid-feedback" id="confirmPasswordFeedback"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -295,17 +309,32 @@
             }
         });
 
-        // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const icon = this.querySelector('i');
+        // Toggle de contraseña
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling.querySelector('i');
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
+            if (field.type === 'password') {
+                field.type = 'text';
                 icon.className = 'bi bi-eye-slash';
             } else {
-                passwordInput.type = 'password';
+                field.type = 'password';
                 icon.className = 'bi bi-eye';
+            }
+        }
+
+        // Validación de confirmación de contraseña
+        document.getElementById('confirm_password').addEventListener('blur', function() {
+            const password = document.getElementById('password').value;
+            const confirm = this.value;
+
+            if (password !== confirm) {
+                this.classList.add('is-invalid');
+                document.getElementById('confirmPasswordFeedback').textContent = 'Las contraseñas no coinciden';
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+                document.getElementById('confirmPasswordFeedback').textContent = '';
             }
         });
 
@@ -447,6 +476,17 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creando...';
         });
+
+        // Auto-hide alerts después de 5 segundos
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if (bootstrap.Alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            });
+        }, 5000);
     </script>
 </body>
 
