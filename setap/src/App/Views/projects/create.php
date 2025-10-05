@@ -150,12 +150,7 @@
                             <div class="form-text">Persona de contacto del cliente para este proyecto.</div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="feriados" class="form-label">Días Festivos Especiales</label>
-                            <input type="text" class="form-control" id="feriados" name="feriados"
-                                placeholder="Ej: 2024-12-25, 2024-01-01, 2024-05-21">
-                            <div class="form-text">Fechas especiales no laborables para este proyecto, separadas por comas (formato: YYYY-MM-DD).</div>
-                        </div>
+
                     </div>
 
                     <!-- Botones de Acción -->
@@ -282,12 +277,11 @@
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
                 
-                // Deshabilitar otros elementos del formulario para evitar double-submit
-                const formElements = form.querySelectorAll('input, select, textarea, button');
-                formElements.forEach(element => {
-                    if (element !== createBtn) {
-                        element.disabled = true;
-                    }
+                // No deshabilitar los inputs del formulario - esto impide que se envíen los datos
+                // Solo deshabilitar botones adicionales si existen
+                const additionalButtons = form.querySelectorAll('button:not([type="submit"])');
+                additionalButtons.forEach(button => {
+                    button.disabled = true;
                 });
             });
 

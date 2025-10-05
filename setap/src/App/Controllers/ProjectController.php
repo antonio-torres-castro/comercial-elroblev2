@@ -174,11 +174,6 @@ class ProjectController
                 'contraparte_id' => (int)$_POST['contraparte_id']
             ];
 
-            // Agregar feriados si están presentes
-            if (!empty($_POST['feriados'])) {
-                $projectData['feriados'] = explode(',', $_POST['feriados']);
-            }
-
             $projectId = $this->projectModel->create($projectData);
             
             if ($projectId) {
@@ -282,11 +277,6 @@ class ProjectController
                 'estado_tipo_id' => (int)$_POST['estado_tipo_id'],
                 'contraparte_id' => (int)$_POST['contraparte_id']
             ];
-
-            // Agregar feriados si están presentes
-            if (isset($_POST['feriados'])) {
-                $projectData['feriados'] = !empty($_POST['feriados']) ? explode(',', $_POST['feriados']) : [];
-            }
 
             if ($this->projectModel->update($id, $projectData)) {
                 Security::logSecurityEvent('project_updated', [

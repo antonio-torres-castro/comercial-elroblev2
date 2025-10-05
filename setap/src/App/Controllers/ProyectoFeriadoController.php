@@ -39,8 +39,7 @@ class ProyectoFeriadoController
         // Obtener información del proyecto
         $project = $this->projectModel->find((int)$projectId);
         if (!$project) {
-            Security::setFlashMessage('error', 'Proyecto no encontrado');
-            Security::redirect('/projects');
+            Security::redirect('/projects?error=Proyecto no encontrado');
             return;
         }
 

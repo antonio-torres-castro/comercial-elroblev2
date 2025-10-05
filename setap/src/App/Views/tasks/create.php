@@ -447,12 +447,11 @@
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
                 
-                // Deshabilitar otros elementos del formulario para evitar double-submit
-                const formElements = form.querySelectorAll('input, select, textarea, button');
-                formElements.forEach(element => {
-                    if (element !== createBtn) {
-                        element.disabled = true;
-                    }
+                // No deshabilitar los inputs del formulario - esto impide que se envíen los datos
+                // Solo deshabilitar botones adicionales si existen
+                const additionalButtons = form.querySelectorAll('button:not([type="submit"])');
+                additionalButtons.forEach(button => {
+                    button.disabled = true;
                 });
             });
         });

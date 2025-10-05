@@ -858,11 +858,15 @@ class UserController
     public function validateUserCheck()
     {
         try {
+            // Configurar headers para respuesta JSON
+            header('Content-Type: application/json');
+            header('Cache-Control: no-cache, must-revalidate');
+            
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['valid' => false, 'message' => 'No autorizado']);
+                echo json_encode(['valid' => false, 'available' => false, 'message' => 'No autorizado']);
                 return;
             }
 
@@ -904,11 +908,12 @@ class UserController
 
             echo json_encode([
                 'valid' => $isValid,
+                'available' => $isValid,  // Para compatibilidad con el JavaScript
                 'message' => $message
             ]);
         } catch (Exception $e) {
             error_log("Error en UserController::validateUserCheck: " . $e->getMessage());
-            echo json_encode(['valid' => false, 'message' => 'Error de validación']);
+            echo json_encode(['valid' => false, 'available' => false, 'message' => 'Error de validación']);
         }
     }
 
