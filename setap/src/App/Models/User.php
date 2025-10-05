@@ -199,8 +199,8 @@ class User
             $stmt->execute([
                 $data['email'],
                 $data['usuario_tipo_id'],
-                $data['estado_tipo_id'],
                 $clienteId,
+                $data['estado_tipo_id'] ?? 1,
                 $id
             ]);
 

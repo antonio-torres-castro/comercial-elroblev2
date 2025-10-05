@@ -171,18 +171,19 @@ class UserController
 
             $field = $_GET['field'] ?? '';
             $value = $_GET['value'] ?? '';
+            $excludeUserId = isset($_GET['exclude_user_id']) ? (int)$_GET['exclude_user_id'] : 0;
 
             $isValid = true;
             $message = '';
 
             switch ($field) {
                 case 'username':
-                    $isValid = $this->isUsernameAvailable($value);
+                    $isValid = $this->isUsernameAvailable($value, $excludeUserId);
                     $message = $isValid ? 'Nombre de usuario disponible' : 'Nombre de usuario ya existe';
                     break;
 
                 case 'email':
-                    $isValid = $this->isEmailAvailable($value);
+                    $isValid = $this->isEmailAvailable($value, $excludeUserId);
                     $message = $isValid ? 'Email disponible' : 'Email ya registrado';
                     break;
 
@@ -190,7 +191,7 @@ class UserController
                     $isValid = Security::validateRut($value);
                     $message = $isValid ? 'RUT válido' : 'RUT inválido';
                     if ($isValid) {
-                        $isValid = $this->isRutAvailable($value);
+                        $isValid = $this->isRutAvailable($value, $excludeUserId);
                         $message = $isValid ? 'RUT disponible' : 'RUT ya registrado';
                     }
                     break;
@@ -316,11 +317,19 @@ class UserController
         }
     }
 
-    private function isUsernameAvailable(string $username): bool
+    private function isUsernameAvailable(string $username, int $excludeUserId = 0): bool
     {
         try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = ?");
-            $stmt->execute([$username]);
+            $sql = "SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = ?";
+            $params = [$username];
+            
+            if ($excludeUserId > 0) {
+                $sql .= " AND id != ?";
+                $params[] = $excludeUserId;
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
             error_log("Error verificando username: " . $e->getMessage());
@@ -328,11 +337,19 @@ class UserController
         }
     }
 
-    private function isEmailAvailable(string $email): bool
+    private function isEmailAvailable(string $email, int $excludeUserId = 0): bool
     {
         try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM usuarios WHERE email = ?");
-            $stmt->execute([$email]);
+            $sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
+            $params = [$email];
+            
+            if ($excludeUserId > 0) {
+                $sql .= " AND id != ?";
+                $params[] = $excludeUserId;
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
             error_log("Error verificando email: " . $e->getMessage());
@@ -340,12 +357,20 @@ class UserController
         }
     }
 
-    private function isRutAvailable(string $rut): bool
+    private function isRutAvailable(string $rut, int $excludeUserId = 0): bool
     {
         try {
             $cleanRut = preg_replace('/[^0-9kK]/', '', $rut);
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM personas WHERE rut = ?");
-            $stmt->execute([$cleanRut]);
+            $sql = "SELECT COUNT(*) FROM personas WHERE rut = ?";
+            $params = [$cleanRut];
+            
+            if ($excludeUserId > 0) {
+                $sql .= " AND usuario_id != ?";
+                $params[] = $excludeUserId;
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
             error_log("Error verificando RUT: " . $e->getMessage());
@@ -505,26 +530,41 @@ class UserController
             }
 
             // Validar datos
-            $errors = $this->validateUserDataForUpdate($_POST, true); // true indica que es actualización
+            $result = $this->validateUserDataForUpdate($_POST, $id); // Pasar el ID del usuario para excluir de validaciones de unicidad
 
-            if (!empty($errors)) {
-                $errorMsg = implode(', ', $errors);
+            // Verificar si el resultado contiene errores o datos validados
+            // Una forma robusta es verificar si algún valor parece ser un mensaje de error
+            $hasErrors = false;
+            $errorMessages = [];
+            
+            // Si cualquier valor es un string que parece un mensaje de error, entonces hay errores
+            foreach ($result as $key => $value) {
+                if (is_string($value) && strlen($value) > 20 && 
+                   (strpos($value, 'obligatorio') !== false || 
+                    strpos($value, 'válido') !== false || 
+                    strpos($value, 'caracteres') !== false ||
+                    strpos($value, 'formato') !== false ||
+                    strpos($value, 'coinciden') !== false ||
+                    strpos($value, 'uso') !== false ||
+                    strpos($value, 'seleccionar') !== false)) {
+                    $hasErrors = true;
+                    $errorMessages[] = $value;
+                }
+            }
+            
+            if ($hasErrors) {
+                $errorMsg = implode(', ', $errorMessages);
                 Security::redirect("/users/edit?id={$id}&error=" . urlencode($errorMsg));
                 return;
             }
-
-            // Preparar datos para actualización
-            $userData = [
-                'nombre' => trim($_POST['nombre']),
-                'email' => trim($_POST['email']),
-                'telefono' => trim($_POST['telefono'] ?? ''),
-                'direccion' => trim($_POST['direccion'] ?? ''),
-                'usuario_tipo_id' => (int)$_POST['usuario_tipo_id'],
-                'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1),
-                'fecha_inicio' => !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null,
-                'fecha_termino' => !empty($_POST['fecha_termino']) ? $_POST['fecha_termino'] : null,
-                'cliente_id' => !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null
-            ];
+            
+            // Si llegamos aquí, $result contiene los datos validados
+            $userData = $result;
+            
+            // Agregar campos adicionales que no están en la validación estándar
+            $userData['estado_tipo_id'] = (int)($_POST['estado_tipo_id'] ?? 1);
+            $userData['fecha_inicio'] = !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null;
+            $userData['fecha_termino'] = !empty($_POST['fecha_termino']) ? $_POST['fecha_termino'] : null;
 
             // Actualizar usuario
             if ($this->userModel->update($id, $userData)) {
@@ -591,7 +631,7 @@ class UserController
     /**
      * Validar datos del usuario para actualización
      */
-    private function validateUserDataForUpdate(array $data, bool $isUpdate = false): array
+    private function validateUserDataForUpdate(array $data, int $userId = 0): array
     {
         $errors = [];
         $validated = [];
@@ -610,6 +650,8 @@ class UserController
             $errors['email'] = 'El email es obligatorio';
         } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $errors['email'] = 'El email no tiene un formato válido';
+        } elseif (!$this->isEmailAvailable($data['email'], $userId)) {
+            $errors['email'] = 'El correo electrónico ya está en uso por otro usuario';
         } else {
             $validated['email'] = strtolower(trim($data['email']));
         }
@@ -622,12 +664,14 @@ class UserController
         }
 
         // Validaciones específicas para creación (no actualización)
-        if (!$isUpdate) {
+        if ($userId === 0) {
             // Validar nombre_usuario
             if (empty($data['nombre_usuario'])) {
                 $errors['nombre_usuario'] = 'El nombre de usuario es obligatorio';
             } elseif (strlen($data['nombre_usuario']) < 3) {
                 $errors['nombre_usuario'] = 'El nombre de usuario debe tener al menos 3 caracteres';
+            } elseif (!$this->isUsernameAvailable($data['nombre_usuario'], $userId)) {
+                $errors['nombre_usuario'] = 'El nombre de usuario ya está en uso';
             } else {
                 $validated['nombre_usuario'] = Security::sanitizeInput($data['nombre_usuario']);
             }
@@ -650,6 +694,8 @@ class UserController
             if (!empty($data['rut'])) {
                 if (!Security::validateRut($data['rut'])) {
                     $errors['rut'] = 'El RUT no es válido';
+                } elseif (!$this->isRutAvailable($data['rut'], $userId)) {
+                    $errors['rut'] = 'El RUT ya está registrado';
                 } else {
                     $validated['rut'] = preg_replace('/[^0-9kK]/', '', $data['rut']);
                 }
@@ -876,6 +922,7 @@ class UserController
 
             $type = $_GET['type'] ?? '';
             $value = $_GET['value'] ?? '';
+            $excludeUserId = isset($_GET['exclude_user_id']) ? (int)$_GET['exclude_user_id'] : 0;
 
             $isValid = true;
             $message = '';
@@ -883,7 +930,7 @@ class UserController
             switch ($type) {
                 case 'email':
                     if (Security::validateEmail($value)) {
-                        $isValid = $this->isEmailAvailable($value);
+                        $isValid = $this->isEmailAvailable($value, $excludeUserId);
                         $message = $isValid ? 'Email disponible' : 'Email ya registrado';
                     } else {
                         $isValid = false;
@@ -892,7 +939,7 @@ class UserController
                     break;
 
                 case 'username':
-                    $isValid = $this->isUsernameAvailable($value);
+                    $isValid = $this->isUsernameAvailable($value, $excludeUserId);
                     $message = $isValid ? 'Nombre de usuario disponible' : 'Nombre de usuario ya existe';
                     break;
 
@@ -900,7 +947,7 @@ class UserController
                     $isValid = Security::validateRut($value);
                     $message = $isValid ? 'RUT válido' : 'RUT inválido';
                     if ($isValid) {
-                        $isValid = $this->isRutAvailable($value);
+                        $isValid = $this->isRutAvailable($value, $excludeUserId);
                         $message = $isValid ? 'RUT disponible' : 'RUT ya registrado';
                     }
                     break;
