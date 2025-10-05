@@ -6,7 +6,7 @@ use App\Services\AuthService;
 use App\Helpers\Security;
 use Exception;
 
-class AuthController
+class AuthController extends BaseController
 {
     private $authService;
 

@@ -7,7 +7,7 @@ use App\Helpers\Security;
 use PDO;
 use Exception;
 
-class ReportController
+class ReportController extends BaseController
 {
     private $db;
     private $reportService;

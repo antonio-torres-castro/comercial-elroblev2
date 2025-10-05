@@ -9,7 +9,7 @@ use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use Exception;
 
-class ClientController
+class ClientController extends BaseController
 {
     private $clientModel;
     private $personaModel;
@@ -812,58 +812,5 @@ class ClientController
         return $errors;
     }
 
-    /**
-     * Validar formato de fecha
-     */
-    private function isValidDate(string $date): bool
-    {
-        $d = \DateTime::createFromFormat('Y-m-d', $date);
-        return $d && $d->format('Y-m-d') === $date;
-    }
 
-    private function getCurrentUser(): ?array
-    {
-        if (!Security::isAuthenticated()) {
-            return null;
-        }
-        
-        return [
-            'id' => $_SESSION['user_id'],
-            'username' => $_SESSION['username'],
-            'email' => $_SESSION['email'],
-            'nombre_completo' => $_SESSION['nombre_completo'],
-            'rol' => $_SESSION['rol'],
-            'usuario_tipo_id' => $_SESSION['usuario_tipo_id']
-        ];
-    }
-
-    private function renderError(string $message): string
-    {
-        return '<!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Error - SETAP</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        </head>
-        <body>
-            <div class="container mt-5">
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <div class="card border-danger">
-                            <div class="card-header bg-danger text-white">
-                                <h4 class="mb-0">Error</h4>
-                            </div>
-                            <div class="card-body">
-                                <p class="mb-3">' . htmlspecialchars($message) . '</p>
-                                <a href="/home" class="btn btn-primary">Volver al Home</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </body>
-        </html>';
-    }
 }

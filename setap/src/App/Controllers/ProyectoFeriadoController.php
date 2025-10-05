@@ -7,7 +7,7 @@ use App\Models\Project;
 use App\Helpers\Security;
 use PDO;
 
-class ProyectoFeriadoController
+class ProyectoFeriadoController extends BaseController
 {
     private $proyectoFeriadoModel;
     private $projectModel;

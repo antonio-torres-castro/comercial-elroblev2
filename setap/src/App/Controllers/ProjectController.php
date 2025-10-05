@@ -10,7 +10,7 @@ use App\Config\Database;
 use PDO;
 use Exception;
 
-class ProjectController
+class ProjectController extends BaseController
 {
     private $projectModel;
     private $permissionService;
@@ -439,11 +439,7 @@ class ProjectController
         return $errors;
     }
 
-    private function isValidDate(string $date): bool
-    {
-        $dateTime = \DateTime::createFromFormat('Y-m-d', $date);
-        return $dateTime && $dateTime->format('Y-m-d') === $date;
-    }
+
 
     private function getClients(): array
     {

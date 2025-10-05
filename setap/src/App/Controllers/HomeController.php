@@ -7,7 +7,7 @@ use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use Exception;
 
-class HomeController
+class HomeController extends BaseController
 {
     private $permissionService;
 
@@ -49,21 +49,7 @@ class HomeController
         }
     }
 
-    private function getCurrentUser(): ?array
-    {
-        if (!Security::isAuthenticated()) {
-            return null;
-        }
-        
-        return [
-            'id' => $_SESSION['user_id'],
-            'username' => $_SESSION['username'],
-            'email' => $_SESSION['email'],
-            'nombre_completo' => $_SESSION['nombre_completo'],
-            'rol' => $_SESSION['rol'],
-            'usuario_tipo_id' => $_SESSION['usuario_tipo_id']
-        ];
-    }
+
 
     private function getHomeStats(array $user): array
     {
