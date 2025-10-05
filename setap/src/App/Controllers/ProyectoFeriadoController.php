@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ProyectoFeriado;
 use App\Models\Project;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use PDO;
 
 class ProyectoFeriadoController extends BaseController
@@ -16,7 +17,7 @@ class ProyectoFeriadoController extends BaseController
     {
         // Verificar autenticación
         if (!Security::isAuthenticated()) {
-            Security::redirect('/login');
+            $this->redirectToLogin();
             return;
         }
 
@@ -32,14 +33,14 @@ class ProyectoFeriadoController extends BaseController
         $projectId = $_GET['proyecto_id'] ?? null;
         
         if (!$projectId) {
-            Security::redirect('/projects');
+            $this->redirectToRoute(AppConstants::ROUTE_PROJECTS);
             return;
         }
 
         // Obtener información del proyecto
         $project = $this->projectModel->find((int)$projectId);
         if (!$project) {
-            Security::redirect('/projects?error=Proyecto no encontrado');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_PROJECT_NOT_FOUND);
             return;
         }
 

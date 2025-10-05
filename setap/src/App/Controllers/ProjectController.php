@@ -7,6 +7,7 @@ use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Config\Database;
+use App\Constants\AppConstants;
 use PDO;
 use Exception;
 
@@ -84,13 +85,13 @@ class ProjectController extends BaseController
         $id = (int)($_GET['id'] ?? 0);
         
         if ($id <= 0) {
-            Security::redirect('/projects?error=ID de proyecto inválido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
         }
 
         $project = $this->projectModel->find($id);
         if (!$project) {
-            Security::redirect('/projects?error=Proyecto no encontrado');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_PROJECT_NOT_FOUND);
             return;
         }
 
@@ -145,13 +146,13 @@ class ProjectController extends BaseController
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            Security::redirect('/projects/create?error=Método no permitido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_METHOD_NOT_ALLOWED);
             return;
         }
 
         // Validar token CSRF
         if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-            Security::redirect('/projects/create?error=Token de seguridad inválido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_INVALID_SECURITY_TOKEN);
             return;
         }
 
@@ -182,13 +183,13 @@ class ProjectController extends BaseController
                     'created_by' => $_SESSION['username']
                 ]);
                 
-                Security::redirect('/projects?success=Proyecto creado correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto creado correctamente');
             } else {
-                Security::redirect('/projects/create?error=Error al crear proyecto');
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_CREATE_PROJECT);
             }
         } catch (\Exception $e) {
             error_log('ProjectController::store error: ' . $e->getMessage());
-            Security::redirect('/projects/create?error=Error interno del sistema');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_INTERNAL_SYSTEM);
         }
     }
 
@@ -204,13 +205,13 @@ class ProjectController extends BaseController
         $id = (int)($_GET['id'] ?? 0);
         
         if ($id <= 0) {
-            Security::redirect('/projects?error=ID de proyecto inválido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
         }
 
         $project = $this->projectModel->find($id);
         if (!$project) {
-            Security::redirect('/projects?error=Proyecto no encontrado');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_PROJECT_NOT_FOUND);
             return;
         }
 
@@ -242,14 +243,14 @@ class ProjectController extends BaseController
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            Security::redirect('/projects?error=Método no permitido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
             return;
         }
 
         $id = (int)($_POST['id'] ?? 0);
         
         if ($id <= 0) {
-            Security::redirect('/projects?error=ID de proyecto inválido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
         }
 
@@ -284,7 +285,7 @@ class ProjectController extends BaseController
                     'updated_by' => $_SESSION['username']
                 ]);
                 
-                Security::redirect('/projects?success=Proyecto actualizado correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto actualizado correctamente');
             } else {
                 Security::redirect("/projects/edit?id={$id}&error=Error al actualizar proyecto");
             }
@@ -306,14 +307,14 @@ class ProjectController extends BaseController
         $id = (int)($_GET['id'] ?? 0);
         
         if ($id <= 0) {
-            Security::redirect('/projects?error=ID de proyecto inválido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
         }
 
         try {
             $project = $this->projectModel->find($id);
             if (!$project) {
-                Security::redirect('/projects?error=Proyecto no encontrado');
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_PROJECT_NOT_FOUND);
                 return;
             }
 
@@ -323,13 +324,13 @@ class ProjectController extends BaseController
                     'deleted_by' => $_SESSION['username']
                 ]);
                 
-                Security::redirect('/projects?success=Proyecto eliminado correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto eliminado correctamente');
             } else {
-                Security::redirect('/projects?error=Error al eliminar proyecto');
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_DELETE_PROJECT);
             }
         } catch (\Exception $e) {
             error_log('ProjectController::delete error: ' . $e->getMessage());
-            Security::redirect('/projects?error=Error interno del sistema');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INTERNAL_SYSTEM);
         }
     }
 
@@ -343,7 +344,7 @@ class ProjectController extends BaseController
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            Security::redirect('/projects?error=Método no permitido');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
             return;
         }
 
@@ -351,7 +352,7 @@ class ProjectController extends BaseController
         $newStatusId = (int)($_POST['new_status_id'] ?? 0);
 
         if ($projectId <= 0 || $newStatusId <= 0) {
-            Security::redirect('/projects?error=Datos inválidos');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_DATA);
             return;
         }
 
@@ -385,7 +386,7 @@ class ProjectController extends BaseController
         $term = Security::sanitizeInput($_GET['q'] ?? '');
         
         if (empty($term) || strlen($term) < 3) {
-            Security::redirect('/projects?error=El término de búsqueda debe tener al menos 3 caracteres');
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_SEARCH_TERM_TOO_SHORT);
             return;
         }
 

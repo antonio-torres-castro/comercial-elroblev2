@@ -7,6 +7,7 @@ use App\Models\Persona;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use Exception;
 
 class ClientController extends BaseController
@@ -34,7 +35,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -84,7 +85,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -125,7 +126,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -167,7 +168,7 @@ class ClientController extends BaseController
             $clientId = $this->clientModel->create($_POST);
 
             // Redireccionar con mensaje de éxito
-            Security::redirect('/clients?success=created');
+            $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_CREATED);
 
         } catch (Exception $e) {
             error_log("Error en ClientController::store: " . $e->getMessage());
@@ -185,7 +186,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -237,7 +238,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -290,7 +291,7 @@ class ClientController extends BaseController
             $success = $this->clientModel->update($id, $_POST);
 
             if ($success) {
-                Security::redirect('/clients?success=updated');
+                $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_UPDATED);
             } else {
                 throw new Exception('No se pudo actualizar el cliente');
             }
@@ -311,7 +312,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -341,14 +342,14 @@ class ClientController extends BaseController
             $success = $this->clientModel->delete($id);
 
             if ($success) {
-                Security::redirect('/clients?success=deleted');
+                $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_DELETED);
             } else {
                 throw new Exception('No se pudo eliminar el cliente');
             }
 
         } catch (Exception $e) {
             error_log("Error en ClientController::delete: " . $e->getMessage());
-            Security::redirect('/clients?error=' . urlencode($e->getMessage()));
+            $this->redirectWithError(AppConstants::ROUTE_CLIENTS, $e->getMessage());
         }
     }
 
@@ -373,7 +374,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -426,7 +427,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -490,7 +491,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -538,7 +539,7 @@ class ClientController extends BaseController
             $counterpartieId = $this->clientModel->addCounterpartie($_POST);
 
             // Redireccionar con mensaje de éxito
-            Security::redirect('/client-counterparties?success=created');
+            $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_CREATED);
 
         } catch (Exception $e) {
             error_log("Error en ClientController::storeCounterpartie: " . $e->getMessage());
@@ -556,7 +557,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -613,7 +614,7 @@ class ClientController extends BaseController
             $success = $this->clientModel->updateCounterpartie($id, $_POST);
 
             if ($success) {
-                Security::redirect('/client-counterparties?success=updated');
+                $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_UPDATED);
             } else {
                 throw new Exception('No se pudo actualizar la contraparte');
             }
@@ -634,7 +635,7 @@ class ClientController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -664,14 +665,14 @@ class ClientController extends BaseController
             $success = $this->clientModel->deleteCounterpartie($id);
 
             if ($success) {
-                Security::redirect('/client-counterparties?success=deleted');
+                $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_DELETED);
             } else {
                 throw new Exception('No se pudo eliminar la contraparte');
             }
 
         } catch (Exception $e) {
             error_log("Error en ClientController::deleteCounterpartie: " . $e->getMessage());
-            Security::redirect('/client-counterparties?error=' . urlencode($e->getMessage()));
+            $this->redirectWithError(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, $e->getMessage());
         }
     }
 

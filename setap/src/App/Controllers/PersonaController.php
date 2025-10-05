@@ -7,6 +7,7 @@ use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Config\Database;
+use App\Constants\AppConstants;
 use PDO;
 use Exception;
 
@@ -35,7 +36,7 @@ class PersonaController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -85,7 +86,7 @@ class PersonaController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -118,7 +119,7 @@ class PersonaController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -130,13 +131,13 @@ class PersonaController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                Security::redirect('/personas/create?error=Método no permitido');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                Security::redirect('/personas/create?error=Token de seguridad inválido');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
@@ -164,13 +165,13 @@ class PersonaController extends BaseController
                     'created_by' => $_SESSION['username']
                 ]);
 
-                Security::redirect('/personas?success=Persona creada correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_PERSONAS, 'Persona creada correctamente');
             } else {
-                Security::redirect('/personas/create?error=Error al crear persona');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_CREATE_PERSONA);
             }
         } catch (Exception $e) {
             error_log('PersonaController::store error: ' . $e->getMessage());
-            Security::redirect('/personas/create?error=Error interno del sistema');
+            $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_INTERNAL_SYSTEM);
         }
     }
 
@@ -183,7 +184,7 @@ class PersonaController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -197,13 +198,13 @@ class PersonaController extends BaseController
             $id = (int)($_GET['id'] ?? 0);
 
             if ($id <= 0) {
-                Security::redirect('/personas?error=ID de persona inválido');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
                 return;
             }
 
             $persona = $this->personaModel->find($id);
             if (!$persona) {
-                Security::redirect('/personas?error=Persona no encontrada');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_PERSONA_NOT_FOUND);
                 return;
             }
 
@@ -230,7 +231,7 @@ class PersonaController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -242,14 +243,14 @@ class PersonaController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                Security::redirect('/personas?error=Método no permitido');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
 
             if ($id <= 0) {
-                Security::redirect('/personas?error=ID de persona inválido');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
                 return;
             }
 
@@ -281,7 +282,7 @@ class PersonaController extends BaseController
                     'updated_by' => $_SESSION['username']
                 ]);
 
-                Security::redirect('/personas?success=Persona actualizada correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_PERSONAS, 'Persona actualizada correctamente');
             } else {
                 Security::redirect("/personas/edit?id={$id}&error=Error al actualizar persona");
             }
@@ -340,13 +341,13 @@ class PersonaController extends BaseController
                     'deleted_by' => $_SESSION['username']
                 ]);
 
-                Security::redirect('/personas?success=Persona eliminada correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_PERSONAS, 'Persona eliminada correctamente');
             } else {
-                Security::redirect('/personas?error=No se pudo eliminar la persona. Puede estar siendo utilizada en otros registros');
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_PERSONA_IN_USE);
             }
         } catch (Exception $e) {
             error_log('PersonaController::delete error: ' . $e->getMessage());
-            Security::redirect('/personas?error=Error interno del sistema');
+            $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INTERNAL_SYSTEM);
         }
     }
 
@@ -359,7 +360,7 @@ class PersonaController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -376,7 +377,7 @@ class PersonaController extends BaseController
                 return;
             } else {
                 // Redirigir al método create
-                Security::redirect('/personas/create');
+                $this->redirectToRoute(AppConstants::ROUTE_PERSONAS_CREATE);
                 return;
             }
         } catch (Exception $e) {

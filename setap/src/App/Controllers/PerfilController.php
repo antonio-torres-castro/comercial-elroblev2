@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use Exception;
 
 class PerfilController extends BaseController
@@ -31,7 +32,7 @@ class PerfilController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -75,7 +76,7 @@ class PerfilController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -160,7 +161,7 @@ class PerfilController extends BaseController
                 $_SESSION['email'] = $updateData['email'];
                 
                 $_SESSION['success_message'] = 'Perfil actualizado correctamente';
-                Security::redirect('/perfil');
+                $this->redirectToRoute(AppConstants::ROUTE_PERFIL);
             } else {
                 throw new Exception('No se pudo actualizar el perfil');
             }

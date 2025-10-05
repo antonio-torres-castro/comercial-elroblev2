@@ -8,6 +8,7 @@ use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Config\Database;
+use App\Constants\AppConstants;
 use PDO;
 use Exception;
 
@@ -35,7 +36,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -70,7 +71,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -100,7 +101,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -137,7 +138,7 @@ class UserController extends BaseController
                 if ($this->isAjaxRequest()) {
                     echo json_encode(['success' => true, 'message' => 'Usuario creado exitosamente', 'id' => $userId]);
                 } else {
-                    Security::redirect('/users?success=created');
+                    $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_CREATED);
                 }
             } else {
                 throw new Exception('Error al crear el usuario');
@@ -149,7 +150,7 @@ class UserController extends BaseController
             if ($this->isAjaxRequest()) {
                 echo json_encode(['error' => 'Error interno del servidor']);
             } else {
-                Security::redirect('/users/create?error=server');
+                $this->redirectWithError(AppConstants::ROUTE_USERS_CREATE, AppConstants::ERROR_SERVER);
             }
         }
     }
@@ -372,7 +373,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -427,7 +428,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -442,14 +443,14 @@ class UserController extends BaseController
             $id = $id ?: (int)($_GET['id'] ?? 0);
 
             if ($id <= 0) {
-                Security::redirect('/users?error=ID de usuario inválido');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_INVALID_USER_ID);
                 return;
             }
 
             // Obtener datos del usuario a editar
             $userToEdit = $this->userModel->getById($id);
             if (!$userToEdit) {
-                Security::redirect('/users?error=Usuario no encontrado');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_USER_NOT_FOUND);
                 return;
             }
 
@@ -486,7 +487,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -498,13 +499,13 @@ class UserController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                Security::redirect('/users');
+                $this->redirectToRoute(AppConstants::ROUTE_USERS);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                Security::redirect('/users?error=ID de usuario inválido');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_INVALID_USER_ID);
                 return;
             }
 
@@ -547,7 +548,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -559,31 +560,31 @@ class UserController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                Security::redirect('/users');
+                $this->redirectToRoute(AppConstants::ROUTE_USERS);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                Security::redirect('/users?error=ID de usuario inválido');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_INVALID_USER_ID);
                 return;
             }
 
             // No permitir que el usuario se elimine a sí mismo
             if ($id == $currentUser['id']) {
-                Security::redirect('/users?error=No puedes eliminar tu propio usuario');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_CANNOT_DELETE_OWN_USER);
                 return;
             }
 
             // Eliminar usuario (soft delete)
             if ($this->userModel->delete($id)) {
-                Security::redirect('/users?success=Usuario eliminado correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_USER_DELETED);
             } else {
-                Security::redirect('/users?error=Error al eliminar el usuario');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_DELETE_USER);
             }
         } catch (Exception $e) {
             error_log("Error en UserController::delete: " . $e->getMessage());
-            Security::redirect('/users?error=Error interno del servidor');
+            $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 

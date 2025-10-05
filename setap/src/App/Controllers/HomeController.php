@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use Exception;
 
 class HomeController extends BaseController
@@ -26,7 +27,7 @@ class HomeController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
             

@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use Exception;
 
 class TaskController extends BaseController
@@ -31,7 +32,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -92,7 +93,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -129,7 +130,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -171,7 +172,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -183,7 +184,7 @@ class TaskController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                Security::redirect('/tasks');
+                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
                 return;
             }
 
@@ -245,7 +246,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -258,13 +259,13 @@ class TaskController extends BaseController
 
             $id = (int)($_GET['id'] ?? 0);
             if ($id <= 0) {
-                Security::redirect('/tasks?error=ID de tarea inválido');
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INVALID_TASK_ID);
                 return;
             }
 
             $task = $this->taskModel->getById($id);
             if (!$task) {
-                Security::redirect('/tasks?error=Tarea no encontrada');
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_TASK_NOT_FOUND);
                 return;
             }
 
@@ -300,7 +301,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -312,19 +313,19 @@ class TaskController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                Security::redirect('/tasks');
+                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
                 return;
             }
 
             // Verificar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                Security::redirect("/tasks?error=" . urlencode('Token de seguridad inválido'));
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                Security::redirect('/tasks?error=ID de tarea inválido');
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INVALID_TASK_ID);
                 return;
             }
 
@@ -376,7 +377,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -388,26 +389,26 @@ class TaskController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                Security::redirect('/tasks');
+                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                Security::redirect('/tasks?error=ID de tarea inválido');
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INVALID_TASK_ID);
                 return;
             }
 
             // Validar si la tarea puede ser eliminada (GAP 5)
             $task = $this->taskModel->getById($id);
             if (!$task) {
-                Security::redirect('/tasks?error=Tarea no encontrada');
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_TASK_NOT_FOUND);
                 return;
             }
 
             // Solo admin y planner pueden eliminar tareas aprobadas
             if ($task['estado_tipo_id'] == 8 && !in_array($currentUser['rol'], ['admin', 'planner'])) {
-                Security::redirect('/tasks?error=Solo usuarios Admin y Planner pueden eliminar tareas aprobadas');
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_CANNOT_DELETE_APPROVED_TASK);
                 return;
             }
 
@@ -418,7 +419,7 @@ class TaskController extends BaseController
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                     echo json_encode(['success' => true, 'message' => 'Tarea eliminada correctamente']);
                 } else {
-                    Security::redirect('/tasks?success=Tarea eliminada correctamente');
+                    $this->redirectWithSuccess(AppConstants::ROUTE_TASKS, AppConstants::SUCCESS_TASK_DELETED);
                 }
             } else {
                 // Si es petición AJAX, devolver JSON
@@ -426,7 +427,7 @@ class TaskController extends BaseController
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                     echo json_encode(['success' => false, 'message' => 'Error al eliminar la tarea']);
                 } else {
-                    Security::redirect('/tasks?error=Error al eliminar la tarea');
+                    $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_DELETE_TASK);
                 }
             }
 
@@ -439,7 +440,7 @@ class TaskController extends BaseController
                 http_response_code(500);
                 echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
             } else {
-                Security::redirect('/tasks?error=Error interno del servidor');
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INTERNAL_SERVER);
             }
         }
     }

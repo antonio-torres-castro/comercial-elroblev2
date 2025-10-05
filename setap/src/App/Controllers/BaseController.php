@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 
 /**
  * BaseController - Clase base para todos los controladores
@@ -74,5 +75,47 @@ abstract class BaseController
     {
         $d = \DateTime::createFromFormat($format, $date);
         return $d && $d->format($format) === $date;
+    }
+
+    // ===== MÉTODOS DE REDIRECCIÓN CON CONSTANTES =====
+
+    /**
+     * Redirige a la página de login
+     */
+    protected function redirectToLogin(): void
+    {
+        Security::redirect(AppConstants::ROUTE_LOGIN);
+    }
+
+    /**
+     * Redirige a la página de home
+     */
+    protected function redirectToHome(): void
+    {
+        Security::redirect(AppConstants::ROUTE_HOME);
+    }
+
+    /**
+     * Redirige con mensaje de éxito
+     */
+    protected function redirectWithSuccess(string $route, string $message): void
+    {
+        Security::redirect(AppConstants::buildSuccessUrl($route, $message));
+    }
+
+    /**
+     * Redirige con mensaje de error
+     */
+    protected function redirectWithError(string $route, string $message): void
+    {
+        Security::redirect(AppConstants::buildErrorUrl($route, $message));
+    }
+
+    /**
+     * Redirige a una ruta específica usando constantes
+     */
+    protected function redirectToRoute(string $route): void
+    {
+        Security::redirect($route);
     }
 }

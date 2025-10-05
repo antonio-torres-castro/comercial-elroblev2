@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Services\AuthService;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use Exception;
 
 class AuthController extends BaseController
@@ -19,7 +20,7 @@ class AuthController extends BaseController
     {
         // Si ya está autenticado, redirigir al home
         if (Security::isAuthenticated()) {
-            Security::redirect('/home');
+            $this->redirectToHome();
             return;
         }
 
@@ -149,8 +150,8 @@ HTML;
         try {
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $_SESSION['login_error'] = 'Token de seguridad inválido';
-                Security::redirect('/login');
+                $_SESSION['login_error'] = AppConstants::ERROR_INVALID_SECURITY_TOKEN;
+                $this->redirectToLogin();
                 return;
             }
 
@@ -160,7 +161,7 @@ HTML;
 
             if (empty($identifier) || empty($password)) {
                 $_SESSION['login_error'] = 'Usuario y contraseña son requeridos';
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -169,21 +170,21 @@ HTML;
 
             if (!$userData) {
                 $_SESSION['login_error'] = 'Credenciales incorrectas';
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
             // Iniciar sesión
             if ($this->authService->login($userData)) {
-                Security::redirect('/home');
+                $this->redirectToHome();
             } else {
                 $_SESSION['login_error'] = 'Error al iniciar sesión';
-                Security::redirect('/login');
+                $this->redirectToLogin();
             }
         } catch (Exception $e) {
             error_log("Error en login: " . $e->getMessage());
-            $_SESSION['login_error'] = 'Error interno del servidor';
-            Security::redirect('/login');
+            $_SESSION['login_error'] = AppConstants::ERROR_INTERNAL_SERVER;
+            $this->redirectToLogin();
         }
     }
 
@@ -191,10 +192,10 @@ HTML;
     {
         try {
             $this->authService->logout();
-            Security::redirect('/login');
+            $this->redirectToLogin();
         } catch (Exception $e) {
             error_log("Error en logout: " . $e->getMessage());
-            Security::redirect('/login');
+            $this->redirectToLogin();
         }
     }
 

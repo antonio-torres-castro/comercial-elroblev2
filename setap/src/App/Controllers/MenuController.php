@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use Exception;
 
 class MenuController extends BaseController
@@ -31,7 +32,7 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -80,7 +81,7 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -146,7 +147,7 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -188,7 +189,7 @@ class MenuController extends BaseController
             $menuId = $this->menuModel->create($_POST);
 
             // Redireccionar con mensaje de éxito
-            Security::redirect('/menus?success=created');
+            $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, AppConstants::SUCCESS_CREATED);
 
         } catch (Exception $e) {
             error_log("Error en MenuController::store: " . $e->getMessage());
@@ -214,7 +215,7 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -272,7 +273,7 @@ class MenuController extends BaseController
             $success = $this->menuModel->update($menuId, $_POST);
 
             if ($success) {
-                Security::redirect('/menus?success=updated');
+                $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, AppConstants::SUCCESS_UPDATED);
             } else {
                 throw new Exception('No se pudo actualizar el menú');
             }
@@ -293,7 +294,7 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -323,14 +324,14 @@ class MenuController extends BaseController
             $success = $this->menuModel->delete($menuId);
 
             if ($success) {
-                Security::redirect('/menus?success=deleted');
+                $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, AppConstants::SUCCESS_DELETED);
             } else {
                 throw new Exception('No se pudo eliminar el menú');
             }
 
         } catch (Exception $e) {
             error_log("Error en MenuController::delete: " . $e->getMessage());
-            Security::redirect('/menus?error=' . urlencode($e->getMessage()));
+            $this->redirectWithError(AppConstants::ROUTE_MENUS, $e->getMessage());
         }
     }
 
@@ -343,7 +344,7 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                Security::redirect('/login');
+                $this->redirectToLogin();
                 return;
             }
 
@@ -373,14 +374,14 @@ class MenuController extends BaseController
             $success = $this->menuModel->toggleStatus($menuId);
 
             if ($success) {
-                Security::redirect('/menus?success=status_changed');
+                $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, AppConstants::SUCCESS_STATUS_CHANGED);
             } else {
                 throw new Exception('No se pudo cambiar el estado del menú');
             }
 
         } catch (Exception $e) {
             error_log("Error en MenuController::toggleStatus: " . $e->getMessage());
-            Security::redirect('/menus?error=' . urlencode($e->getMessage()));
+            $this->redirectWithError(AppConstants::ROUTE_MENUS, $e->getMessage());
         }
     }
 
