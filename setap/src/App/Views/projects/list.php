@@ -205,13 +205,18 @@
                                     <div class="btn-group btn-group-sm">
                                         <a href="/projects/show?id=<?= $project['id'] ?>" 
                                            class="btn btn-outline-setap-primary"
-                                           onclick="event.stopPropagation()">
+                                           onclick="event.stopPropagation()" title="Ver Proyecto">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <a href="/projects/edit?id=<?= $project['id'] ?>" 
                                            class="btn btn-outline-secondary"
-                                           onclick="event.stopPropagation()">
+                                           onclick="event.stopPropagation()" title="Editar Proyecto">
                                             <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>" 
+                                           class="btn btn-outline-info"
+                                           onclick="event.stopPropagation()" title="Gestionar Feriados">
+                                            <i class="bi bi-calendar-x"></i>
                                         </a>
                                     </div>
                                 </div>

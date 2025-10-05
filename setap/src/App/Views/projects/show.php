@@ -85,6 +85,9 @@
                 <a href="/projects/edit?id=<?= $project['id'] ?>" class="btn btn-warning">
                     <i class="bi bi-pencil"></i> Editar Proyecto
                 </a>
+                <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>" class="btn btn-info">
+                    <i class="bi bi-calendar-x"></i> Gestionar Feriados
+                </a>
                 <button type="button" class="btn btn-setap-primary" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
                     <i class="bi bi-arrow-repeat"></i> Cambiar Estado
                 </button>

@@ -590,4 +590,213 @@ class Task
 
         return $errors;
     }
+
+    /**
+     * Verificar si una tarea está programada en un día feriado
+     */
+    public function isTaskOnHoliday(int $taskId): bool
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT pt.fecha_inicio, pt.fecha_fin, pt.proyecto_id
+                FROM proyecto_tareas pt
+                WHERE pt.id = ?
+            ");
+            $stmt->execute([$taskId]);
+            $task = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$task) {
+                return false;
+            }
+
+            // Verificar si la fecha de inicio o fin está en feriados
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as holiday_count
+                FROM proyecto_feriados pf
+                WHERE pf.proyecto_id = ? 
+                AND pf.estado_tipo_id = 2
+                AND (pf.fecha = ? OR (? IS NOT NULL AND pf.fecha = ?))
+            ");
+            
+            $stmt->execute([
+                $task['proyecto_id'],
+                $task['fecha_inicio'],
+                $task['fecha_fin'],
+                $task['fecha_fin']
+            ]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ($result['holiday_count'] > 0);
+
+        } catch (PDOException $e) {
+            error_log('Task::isTaskOnHoliday error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtener tareas que están programadas en feriados de un proyecto
+     */
+    public function getTasksOnHolidays(int $projectId): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT DISTINCT pt.id, pt.fecha_inicio, pt.fecha_fin,
+                       t.nombre as tarea_nombre,
+                       et.nombre as estado_nombre,
+                       pf.fecha as fecha_feriado,
+                       pf.ind_irrenunciable,
+                       pf.observaciones as feriado_observaciones
+                FROM proyecto_tareas pt
+                INNER JOIN tareas t ON pt.tarea_id = t.id
+                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
+                INNER JOIN proyecto_feriados pf ON pt.proyecto_id = pf.proyecto_id
+                WHERE pt.proyecto_id = ?
+                AND pt.estado_tipo_id NOT IN (4, 6, 7, 8)
+                AND pf.estado_tipo_id = 2
+                AND (pf.fecha = pt.fecha_inicio 
+                     OR pf.fecha = pt.fecha_fin
+                     OR (pt.fecha_inicio <= pf.fecha AND pt.fecha_fin >= pf.fecha))
+                ORDER BY pf.fecha, pt.fecha_inicio
+            ");
+
+            $stmt->execute([$projectId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log('Task::getTasksOnHolidays error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Validar fechas de tarea considerando feriados
+     */
+    public function validateTaskDatesWithHolidays(int $projectId, string $fechaInicio, ?string $fechaFin = null): array
+    {
+        $warnings = [];
+        
+        try {
+            // Verificar si fecha de inicio es feriado
+            $stmt = $this->db->prepare("
+                SELECT fecha, ind_irrenunciable, observaciones
+                FROM proyecto_feriados
+                WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
+            ");
+            
+            $stmt->execute([$projectId, $fechaInicio]);
+            $holidayStart = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($holidayStart) {
+                $type = $holidayStart['ind_irrenunciable'] ? 'irrenunciable' : 'renunciable';
+                $warnings[] = [
+                    'type' => 'holiday_start',
+                    'message' => "La fecha de inicio ({$fechaInicio}) es un feriado {$type}",
+                    'date' => $fechaInicio,
+                    'holiday_type' => $type,
+                    'observations' => $holidayStart['observaciones']
+                ];
+            }
+
+            // Verificar si fecha de fin es feriado
+            if ($fechaFin) {
+                $stmt->execute([$projectId, $fechaFin]);
+                $holidayEnd = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($holidayEnd) {
+                    $type = $holidayEnd['ind_irrenunciable'] ? 'irrenunciable' : 'renunciable';
+                    $warnings[] = [
+                        'type' => 'holiday_end',
+                        'message' => "La fecha de fin ({$fechaFin}) es un feriado {$type}",
+                        'date' => $fechaFin,
+                        'holiday_type' => $type,
+                        'observations' => $holidayEnd['observaciones']
+                    ];
+                }
+            }
+
+        } catch (PDOException $e) {
+            error_log('Task::validateTaskDatesWithHolidays error: ' . $e->getMessage());
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Sugerir próxima fecha hábil para una tarea
+     */
+    public function getNextWorkingDay(int $projectId, string $date): string
+    {
+        try {
+            $currentDate = new \DateTime($date);
+            $maxIterations = 30; // Evitar bucle infinito
+            $iterations = 0;
+
+            while ($iterations < $maxIterations) {
+                $dateStr = $currentDate->format('Y-m-d');
+                
+                // Verificar si es feriado
+                $stmt = $this->db->prepare("
+                    SELECT id FROM proyecto_feriados
+                    WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
+                ");
+                $stmt->execute([$projectId, $dateStr]);
+                
+                if ($stmt->rowCount() === 0) {
+                    // No es feriado, retornar esta fecha
+                    return $dateStr;
+                }
+                
+                // Avanzar un día
+                $currentDate->add(new \DateInterval('P1D'));
+                $iterations++;
+            }
+
+            // Si no encontramos día hábil en 30 días, retornar fecha original
+            return $date;
+
+        } catch (\Exception $e) {
+            error_log('Task::getNextWorkingDay error: ' . $e->getMessage());
+            return $date;
+        }
+    }
+
+    /**
+     * Calcular días laborables entre dos fechas excluyendo feriados
+     */
+    public function getWorkingDaysBetween(int $projectId, string $startDate, string $endDate): int
+    {
+        try {
+            $start = new \DateTime($startDate);
+            $end = new \DateTime($endDate);
+            $workingDays = 0;
+
+            if ($start > $end) {
+                return 0;
+            }
+
+            while ($start <= $end) {
+                $dateStr = $start->format('Y-m-d');
+                
+                // Verificar si no es feriado
+                $stmt = $this->db->prepare("
+                    SELECT id FROM proyecto_feriados
+                    WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
+                ");
+                $stmt->execute([$projectId, $dateStr]);
+                
+                if ($stmt->rowCount() === 0) {
+                    $workingDays++;
+                }
+                
+                $start->add(new \DateInterval('P1D'));
+            }
+
+            return $workingDays;
+
+        } catch (\Exception $e) {
+            error_log('Task::getWorkingDaysBetween error: ' . $e->getMessage());
+            return 0;
+        }
+    }
 }

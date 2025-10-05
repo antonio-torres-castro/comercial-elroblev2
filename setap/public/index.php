@@ -14,6 +14,7 @@ use App\Controllers\PersonaController;
 use App\Controllers\PerfilController;
 use App\Controllers\ClientController;
 use App\Controllers\TaskController;
+use App\Controllers\ProyectoFeriadoController;
 use App\Helpers\Security;
 
 // Configurar headers de seguridad básicos
@@ -498,6 +499,99 @@ try {
                 $controller->show((int)$action);
             } else {
                 $controller->show();
+            }
+            break;
+
+        case 'proyecto-feriados':
+            $controller = new ProyectoFeriadoController();
+            
+            switch ($action) {
+                case 'create-masivo':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->createMasivo();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'create-especifico':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->createEspecifico();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'create-rango':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->createRango();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'list':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->list();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'update':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->update();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'delete':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->delete();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'check-conflicts':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->checkConflicts();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'move-tasks':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->moveTasks();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case 'working-days':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->getWorkingDays();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                    }
+                    break;
+                    
+                case '':
+                case null:
+                default:
+                    $controller->index();
+                    break;
             }
             break;
 
