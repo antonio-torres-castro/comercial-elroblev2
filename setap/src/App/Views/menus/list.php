@@ -69,10 +69,10 @@
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php
                         $messages = [
-                            'created' => 'Menú creado exitosamente',
-                            'updated' => 'Menú actualizado exitosamente',
-                            'deleted' => 'Menú eliminado exitosamente',
-                            'status_changed' => 'Estado del menú actualizado exitosamente'
+                            'created' => AppConstants::SUCCESS_MENU_CREATED,
+                            'updated' => AppConstants::SUCCESS_MENU_UPDATED,
+                            'deleted' => AppConstants::SUCCESS_MENU_DELETED,
+                            'status_changed' => AppConstants::SUCCESS_MENU_STATUS_UPDATED
                         ];
                         echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
                         ?>

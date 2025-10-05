@@ -39,7 +39,7 @@ class PerfilController extends BaseController
             // Verificar permisos para ver perfil
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'view_perfil')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -47,7 +47,7 @@ class PerfilController extends BaseController
             $fullUserData = $this->userModel->findComplete($currentUser['id']);
             if (!$fullUserData) {
                 http_response_code(404);
-                echo $this->renderError('Usuario no encontrado.');
+                echo $this->renderError(AppConstants::ERROR_USER_NOT_FOUND);
                 return;
             }
 
@@ -63,7 +63,7 @@ class PerfilController extends BaseController
         } catch (Exception $e) {
             error_log("Error en PerfilController::index: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -83,7 +83,7 @@ class PerfilController extends BaseController
             // Verificar permisos para editar perfil
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_perfil')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para editar tu perfil.');
+                echo $this->renderError(AppConstants::ERROR_NO_EDIT_PERMISSIONS);
                 return;
             }
 
@@ -91,7 +91,7 @@ class PerfilController extends BaseController
             $fullUserData = $this->userModel->findComplete($currentUser['id']);
             if (!$fullUserData) {
                 http_response_code(404);
-                echo $this->renderError('Usuario no encontrado.');
+                echo $this->renderError(AppConstants::ERROR_USER_NOT_FOUND);
                 return;
             }
 
@@ -112,7 +112,7 @@ class PerfilController extends BaseController
         } catch (Exception $e) {
             error_log("Error en PerfilController::edit: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 

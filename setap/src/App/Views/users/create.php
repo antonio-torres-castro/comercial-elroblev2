@@ -468,7 +468,7 @@
 
             if (unavailable.length > 0) {
                 e.preventDefault();
-                alert('Por favor, corrija los campos marcados como no disponibles antes de continuar.');
+                alert(AppConstants::ERROR_UNAVAILABLE_FIELDS);
                 return false;
             }
 

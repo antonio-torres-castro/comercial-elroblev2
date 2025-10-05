@@ -42,7 +42,7 @@ class ClientController extends BaseController
             // Verificar permisos para gestión de clientes
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_clients')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -72,7 +72,7 @@ class ClientController extends BaseController
         } catch (Exception $e) {
             error_log("Error en ClientController::index: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -92,7 +92,7 @@ class ClientController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -113,7 +113,7 @@ class ClientController extends BaseController
         } catch (Exception $e) {
             error_log("Error en ClientController::create: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -193,7 +193,7 @@ class ClientController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -202,7 +202,7 @@ class ClientController extends BaseController
             
             if (!$client) {
                 http_response_code(404);
-                echo $this->renderError('Cliente no encontrado');
+                echo $this->renderError(AppConstants::ERROR_CLIENT_NOT_FOUND);
                 return;
             }
 
@@ -225,7 +225,7 @@ class ClientController extends BaseController
         } catch (Exception $e) {
             error_log("Error en ClientController::edit: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -381,7 +381,7 @@ class ClientController extends BaseController
             // Verificar permisos para gestión de contrapartes
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client_counterparties')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -414,7 +414,7 @@ class ClientController extends BaseController
         } catch (Exception $e) {
             error_log("Error en ClientController::counterparties: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -434,7 +434,7 @@ class ClientController extends BaseController
             // Verificar permisos para gestión de contraparte individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client_counterpartie')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -478,7 +478,7 @@ class ClientController extends BaseController
         } catch (Exception $e) {
             error_log("Error en ClientController::counterpartie: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 

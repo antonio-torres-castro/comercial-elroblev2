@@ -427,14 +427,14 @@
 
                 if (!nombre || !email || !usuario_tipo_id) {
                     e.preventDefault();
-                    alert('Por favor, completa todos los campos obligatorios.');
+                    alert(AppConstants::ERROR_REQUIRED_FIELDS);
                     return;
                 }
 
                 // Validar selección de cliente si es requerida
                 if (clientSection.style.display !== 'none' && clientSelect.required && !clientSelect.value) {
                     e.preventDefault();
-                    alert('Por favor, selecciona un cliente para este tipo de usuario.');
+                    alert(AppConstants::ERROR_CLIENT_REQUIRED);
                     return;
                 }
 
@@ -442,7 +442,7 @@
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
                     e.preventDefault();
-                    alert('Por favor, ingresa un email válido.');
+                    alert(AppConstants::ERROR_INVALID_EMAIL);
                     return;
                 }
 

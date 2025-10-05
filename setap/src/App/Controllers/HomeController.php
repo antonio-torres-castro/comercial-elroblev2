@@ -46,7 +46,7 @@ class HomeController extends BaseController
         } catch (Exception $e) {
             error_log("Error en HomeController::index: " . $e->getMessage());
             http_response_code(500);
-            echo "Error interno del servidor";
+            echo AppConstants::ERROR_INTERNAL_SERVER;
         }
     }
 

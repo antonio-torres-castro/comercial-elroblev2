@@ -32,7 +32,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyectos
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -78,7 +78,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -119,7 +119,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -141,7 +141,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -198,7 +198,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -238,7 +238,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -300,7 +300,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -339,7 +339,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 
@@ -379,7 +379,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyectos
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
             http_response_code(403);
-            echo "No tienes acceso a esta sección.";
+            echo AppConstants::ERROR_ACCESS_DENIED;
             return;
         }
 

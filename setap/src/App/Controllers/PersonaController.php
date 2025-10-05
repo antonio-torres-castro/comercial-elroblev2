@@ -43,7 +43,7 @@ class PersonaController extends BaseController
             // Verificar permisos para gestión de personas
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_personas')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -73,7 +73,7 @@ class PersonaController extends BaseController
         } catch (Exception $e) {
             error_log("Error en PersonaController::index: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -93,7 +93,7 @@ class PersonaController extends BaseController
             // Verificar permisos para gestión de persona individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -106,7 +106,7 @@ class PersonaController extends BaseController
         } catch (Exception $e) {
             error_log("Error en PersonaController::create: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -126,7 +126,7 @@ class PersonaController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para realizar esta acción.');
+                echo $this->renderError(AppConstants::ERROR_NO_ACTION_PERMISSIONS);
                 return;
             }
 
@@ -191,7 +191,7 @@ class PersonaController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -218,7 +218,7 @@ class PersonaController extends BaseController
         } catch (Exception $e) {
             error_log("Error en PersonaController::edit: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -238,7 +238,7 @@ class PersonaController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para realizar esta acción.');
+                echo $this->renderError(AppConstants::ERROR_NO_ACTION_PERMISSIONS);
                 return;
             }
 
@@ -367,7 +367,7 @@ class PersonaController extends BaseController
             // Verificar permisos para gestión de persona individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -383,7 +383,7 @@ class PersonaController extends BaseController
         } catch (Exception $e) {
             error_log("Error en PersonaController::show: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 

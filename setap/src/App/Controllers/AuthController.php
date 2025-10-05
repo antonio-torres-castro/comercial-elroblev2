@@ -160,7 +160,7 @@ HTML;
             $password = $_POST['password'] ?? '';
 
             if (empty($identifier) || empty($password)) {
-                $_SESSION['login_error'] = 'Usuario y contraseña son requeridos';
+                $_SESSION['login_error'] = AppConstants::ERROR_LOGIN_REQUIRED;
                 $this->redirectToLogin();
                 return;
             }

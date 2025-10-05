@@ -169,7 +169,7 @@ class ProyectoFeriadoController extends BaseController
 
             // Validaciones
             if (!$projectId || !$fecha) {
-                echo json_encode(['success' => false, 'message' => 'Proyecto y fecha son requeridos']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_PROJECT_DATE_REQUIRED]);
                 return;
             }
 
@@ -186,7 +186,7 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
-            $message = $result['action'] === 'created' ? 'Feriado creado exitosamente' : 'Feriado actualizado exitosamente';
+            $message = $result['action'] === 'created' ? AppConstants::SUCCESS_HOLIDAY_CREATED : AppConstants::SUCCESS_HOLIDAY_UPDATED;
             
             $response = [
                 'success' => true,
@@ -345,7 +345,7 @@ class ProyectoFeriadoController extends BaseController
             $success = $this->proyectoFeriadoModel->update($id, $data);
 
             if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Feriado actualizado exitosamente']);
+                echo json_encode(['success' => true, 'message' => AppConstants::SUCCESS_HOLIDAY_UPDATED]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al actualizar feriado']);
             }
@@ -385,7 +385,7 @@ class ProyectoFeriadoController extends BaseController
             $success = $this->proyectoFeriadoModel->delete($id);
 
             if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Feriado eliminado exitosamente']);
+                echo json_encode(['success' => true, 'message' => AppConstants::SUCCESS_HOLIDAY_DELETED]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al eliminar feriado']);
             }

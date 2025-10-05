@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Config\Database;
+use App\Constants\AppConstants;
 use PDO;
 use Exception;
 
@@ -217,7 +218,7 @@ class Menu
             // Obtener estado actual
             $currentMenu = $this->find($id);
             if (!$currentMenu) {
-                throw new Exception("Menú no encontrado");
+                throw new Exception(AppConstants::ERROR_MENU_NOT_FOUND);
             }
 
             // Cambiar estado (2=Activo, 3=Inactivo)

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Config\Database;
+use App\Constants\AppConstants;
 use PDO;
 use Exception;
 
@@ -308,7 +309,7 @@ class MenuGrupo
             // Obtener estado actual
             $currentGroup = $this->find($id);
             if (!$currentGroup) {
-                throw new Exception("Grupo no encontrado");
+                throw new Exception(AppConstants::ERROR_GROUP_NOT_FOUND);
             }
 
             // Cambiar estado (2=Activo, 3=Inactivo)

@@ -43,7 +43,7 @@ class UserController extends BaseController
             // Verificar acceso al menú primero
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes acceso a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
                 return;
             }
 
@@ -56,7 +56,7 @@ class UserController extends BaseController
         } catch (Exception $e) {
             error_log("Error en UserController::index: " . $e->getMessage());
             http_response_code(500);
-            echo "Error interno del servidor";
+            echo AppConstants::ERROR_INTERNAL_SERVER;
         }
     }
 
@@ -78,7 +78,7 @@ class UserController extends BaseController
             // Verificar acceso al menú de gestión de usuario individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes acceso a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
                 return;
             }
 
@@ -91,7 +91,7 @@ class UserController extends BaseController
         } catch (Exception $e) {
             error_log("Error en UserController::create: " . $e->getMessage());
             http_response_code(500);
-            echo "Error interno del servidor";
+            echo AppConstants::ERROR_INTERNAL_SERVER;
         }
     }
 
@@ -108,7 +108,7 @@ class UserController extends BaseController
             // Verificar acceso al menú de gestión de usuario individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo json_encode(['error' => 'No tienes acceso a esta sección']);
+                echo json_encode(['error' => AppConstants::ERROR_ACCESS_DENIED]);
                 return;
             }
 
@@ -136,7 +136,7 @@ class UserController extends BaseController
 
             if ($userId) {
                 if ($this->isAjaxRequest()) {
-                    echo json_encode(['success' => true, 'message' => 'Usuario creado exitosamente', 'id' => $userId]);
+                    echo json_encode(['success' => true, 'message' => AppConstants::SUCCESS_USER_CREATED, 'id' => $userId]);
                 } else {
                     $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_CREATED);
                 }
@@ -148,7 +148,7 @@ class UserController extends BaseController
             http_response_code(500);
 
             if ($this->isAjaxRequest()) {
-                echo json_encode(['error' => 'Error interno del servidor']);
+                echo json_encode(['error' => AppConstants::ERROR_INTERNAL_SERVER]);
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_USERS_CREATE, AppConstants::ERROR_SERVER);
             }
@@ -169,7 +169,7 @@ class UserController extends BaseController
             // Verificar acceso al menú de gestión de usuario individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo json_encode(['valid' => false, 'message' => 'No tienes acceso a esta sección']);
+                echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED]);
                 return;
             }
 
@@ -389,7 +389,7 @@ class UserController extends BaseController
                 $userToEdit = $this->userModel->getById((int)$id);
                 if (!$userToEdit) {
                     http_response_code(404);
-                    echo $this->renderError('Usuario no encontrado');
+                    echo $this->renderError(AppConstants::ERROR_USER_NOT_FOUND);
                     return;
                 }
             }
@@ -415,7 +415,7 @@ class UserController extends BaseController
         } catch (Exception $e) {
             error_log("Error en UserController::show: " . $e->getMessage());
             http_response_code(500);
-            echo "Error interno del servidor";
+            echo AppConstants::ERROR_INTERNAL_SERVER;
         }
     }
 
@@ -474,7 +474,7 @@ class UserController extends BaseController
         } catch (Exception $e) {
             error_log("Error en UserController::edit: " . $e->getMessage());
             http_response_code(500);
-            echo "Error interno del servidor";
+            echo AppConstants::ERROR_INTERNAL_SERVER;
         }
     }
 
@@ -688,7 +688,7 @@ class UserController extends BaseController
 
             $user = $this->userModel->getById($userId);
             if (!$user) {
-                echo json_encode(['success' => false, 'message' => 'Usuario no encontrado']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_FOUND]);
                 return;
             }
 
@@ -698,7 +698,7 @@ class UserController extends BaseController
             ]);
         } catch (Exception $e) {
             error_log("Error en UserController::getUserDetails: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
         }
     }
 
@@ -744,7 +744,7 @@ class UserController extends BaseController
             }
         } catch (Exception $e) {
             error_log("Error en UserController::toggleStatus: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
         }
     }
 
@@ -786,7 +786,7 @@ class UserController extends BaseController
             }
         } catch (Exception $e) {
             error_log("Error en UserController::changePassword: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
         }
     }
 

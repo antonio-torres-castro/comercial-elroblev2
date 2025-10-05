@@ -39,7 +39,7 @@ class TaskController extends BaseController
             // Verificar permisos para gestión de tareas
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -80,7 +80,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::index: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -100,7 +100,7 @@ class TaskController extends BaseController
             // Verificar permisos para gestión de tarea individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -117,7 +117,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::show: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -137,7 +137,7 @@ class TaskController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -159,7 +159,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::create: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -179,7 +179,7 @@ class TaskController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -253,7 +253,7 @@ class TaskController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -288,7 +288,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::edit: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -308,7 +308,7 @@ class TaskController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -384,7 +384,7 @@ class TaskController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes permisos para acceder a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
 
@@ -438,7 +438,7 @@ class TaskController extends BaseController
             if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                 http_response_code(500);
-                echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INTERNAL_SERVER);
             }
@@ -498,7 +498,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::changeState: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
         }
     }
 
@@ -531,7 +531,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::checkExecutable: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['valid' => false, 'message' => 'Error interno del servidor']);
+            echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
         }
     }
 
@@ -605,7 +605,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::getValidTransitions: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['transitions' => [], 'message' => 'Error interno del servidor']);
+            echo json_encode(['transitions' => [], 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
         }
     }
 

@@ -39,7 +39,7 @@ class MenuController extends BaseController
             // Verificar acceso al menú primero
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menus')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes acceso a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
                 return;
             }
 
@@ -68,7 +68,7 @@ class MenuController extends BaseController
         } catch (Exception $e) {
             error_log("Error en MenuController::index: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -88,7 +88,7 @@ class MenuController extends BaseController
             // Verificar acceso al menú primero
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menu')) {
                 http_response_code(403);
-                echo $this->renderError('No tienes acceso a esta sección.');
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
                 return;
             }
 
@@ -97,7 +97,7 @@ class MenuController extends BaseController
                 $menu = $this->menuModel->find((int)$id);
                 if (!$menu) {
                     http_response_code(404);
-                    echo $this->renderError('Menú no encontrado.');
+                    echo $this->renderError(AppConstants::ERROR_MENU_NOT_FOUND);
                     return;
                 }
             }
@@ -126,7 +126,7 @@ class MenuController extends BaseController
         } catch (Exception $e) {
             error_log("Error en MenuController::show: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error interno del servidor');
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -246,7 +246,7 @@ class MenuController extends BaseController
             $menu = $this->menuModel->find($menuId);
             if (!$menu) {
                 http_response_code(404);
-                echo $this->renderError('Menú no encontrado');
+                echo $this->renderError(AppConstants::ERROR_MENU_NOT_FOUND);
                 return;
             }
 

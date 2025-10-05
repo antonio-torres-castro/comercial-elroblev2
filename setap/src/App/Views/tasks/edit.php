@@ -239,7 +239,7 @@
             form.addEventListener('submit', function(e) {
                 if (!validateDates()) {
                     e.preventDefault();
-                    alert('Por favor, corrige los errores en las fechas.');
+                    alert(AppConstants::ERROR_INVALID_DATES);
                     return;
                 }
 
@@ -249,7 +249,7 @@
 
                 if (!nombre || !proyecto_id || !tarea_tipo_id) {
                     e.preventDefault();
-                    alert('Por favor, completa todos los campos obligatorios.');
+                    alert(AppConstants::ERROR_REQUIRED_FIELDS);
                     return;
                 }
 
