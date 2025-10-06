@@ -17,7 +17,7 @@
             background-color: var(--setap-primary);
             border-color: var(--setap-primary);
         }
-        
+
         .form-section {
             background: var(--setap-bg-light);
             border-left: 4px solid var(--setap-primary);
@@ -49,7 +49,7 @@
         .password-toggle {
             cursor: pointer;
         }
-        
+
         .availability-check {
             font-size: 0.875em;
             margin-top: 5px;
@@ -184,7 +184,7 @@
                                                 <option value="">Selecciona un tipo de usuario</option>
                                                 <?php if (isset($userTypes) && is_array($userTypes)): ?>
                                                     <?php foreach ($userTypes as $tipo): ?>
-                                                        <option value="<?= (int)$tipo['id'] ?>" 
+                                                        <option value="<?= (int)$tipo['id'] ?>"
                                                             <?= $tipo['id'] == $userToEdit['usuario_tipo_id'] ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($tipo['nombre']) ?>
                                                         </option>
@@ -240,7 +240,7 @@
                                         <i class="bi bi-building"></i> Asignación de Cliente
                                     </h5>
                                 </div>
-                                
+
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="cliente_id" class="form-label">Cliente <span class="text-danger">*</span></label>
@@ -248,7 +248,7 @@
                                             <option value="">Seleccionar cliente...</option>
                                             <?php if (isset($clients) && is_array($clients)): ?>
                                                 <?php foreach ($clients as $client): ?>
-                                                    <option value="<?= $client['id'] ?>" 
+                                                    <option value="<?= $client['id'] ?>"
                                                         data-rut="<?= htmlspecialchars($client['rut'] ?? '') ?>"
                                                         <?= (isset($userToEdit['cliente_id']) && $client['id'] == $userToEdit['cliente_id']) ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($client['razon_social']) ?>
@@ -262,7 +262,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-12" id="client-validation-info" style="display: none;">
                                     <div class="alert alert-info">
                                         <strong>Nota importante:</strong>
@@ -285,7 +285,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Fecha de Creación</label>
-                                        <input type="text" class="form-control" 
+                                        <input type="text" class="form-control"
                                             value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_Creado'])) ?>" readonly>
                                     </div>
                                 </div>
@@ -294,7 +294,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Última Modificación</label>
-                                        <input type="text" class="form-control" 
+                                        <input type="text" class="form-control"
                                             value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_modificacion'])) ?>" readonly>
                                     </div>
                                 </div>
@@ -324,7 +324,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('userEditForm');
@@ -338,10 +338,10 @@
                 const clientSection = document.getElementById('client-selection');
                 const clientSelect = document.getElementById('cliente_id');
                 const validationInfo = document.getElementById('client-validation-info');
-                
+
                 // Tipos de usuario que requieren cliente
                 const clientUserTypes = ['client', 'counterparty'];
-                
+
                 if (clientUserTypes.includes(userType.toLowerCase())) {
                     // Mostrar selección de cliente
                     clientSection.style.display = 'block';
@@ -361,7 +361,7 @@
 
             // Manejar cambios en el tipo de usuario
             document.getElementById('usuario_tipo_id').addEventListener('change', toggleClientSection);
-            
+
             // Validar RUT vs Cliente para usuarios tipo 'client'
             document.getElementById('cliente_id').addEventListener('change', function(e) {
                 const selectedOption = e.target.options[e.target.selectedIndex];
@@ -369,11 +369,11 @@
                 const userTypeSelect = document.getElementById('usuario_tipo_id');
                 const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim();
                 const rutInput = document.getElementById('rut');
-                
+
                 if (userType.toLowerCase() === 'client' && clientRut && rutInput.value) {
                     const cleanClientRut = clientRut.replace(/[^0-9kK]/g, '').toLowerCase();
                     const cleanPersonRut = rutInput.value.replace(/[^0-9kK]/g, '').toLowerCase();
-                    
+
                     if (cleanClientRut !== cleanPersonRut) {
                         alert('Atención: El RUT de la persona debe coincidir con el RUT del cliente seleccionado para usuarios tipo "client".');
                     }
@@ -386,7 +386,7 @@
                 clearTimeout(emailTimeout);
                 const email = e.target.value;
                 const div = document.getElementById('email-availability');
-                
+
                 if (email.length > 0 && email.includes('@')) {
                     emailTimeout = setTimeout(() => {
                         fetch(`/api/user-check?type=email&value=${encodeURIComponent(email)}`)

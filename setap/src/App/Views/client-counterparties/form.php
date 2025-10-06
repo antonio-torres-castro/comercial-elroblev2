@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
-
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -66,7 +64,7 @@
                                                 Cliente <span class="text-danger">*</span>
                                             </label>
                                             <select class="form-select <?php echo isset($data['errors']) && in_array('cliente_id', array_column($data['errors'], 'field')) ? 'is-invalid' : ''; ?>"
-                                                id="cliente_id" name="cliente_id" required>
+                                                    id="cliente_id" name="cliente_id" required>
                                                 <option value="">Seleccionar cliente...</option>
                                                 <?php foreach ($data['clients'] as $client): ?>
                                                     <option value="<?php echo $client['id']; ?>"
@@ -92,7 +90,7 @@
                                                 Persona <span class="text-danger">*</span>
                                             </label>
                                             <select class="form-select <?php echo isset($data['errors']) && in_array('persona_id', array_column($data['errors'], 'field')) ? 'is-invalid' : ''; ?>"
-                                                id="persona_id" name="persona_id" required>
+                                                    id="persona_id" name="persona_id" required>
                                                 <option value="">Seleccionar persona...</option>
                                                 <?php foreach ($data['personas'] as $persona): ?>
                                                     <option value="<?php echo $persona['id']; ?>"
@@ -116,14 +114,14 @@
                                         <div class="col-md-6">
                                             <label for="cargo" class="form-label">Cargo</label>
                                             <input type="text" class="form-control" id="cargo" name="cargo"
-                                                placeholder="Ej: Gerente de Proyecto, Coordinador, etc."
-                                                value="<?php
-                                                        if ($data['action'] === 'edit' && $data['counterpartie']) {
-                                                            echo htmlspecialchars($data['counterpartie']['cargo'] ?? '');
-                                                        } elseif (isset($_POST['cargo'])) {
-                                                            echo htmlspecialchars($_POST['cargo']);
-                                                        }
-                                                        ?>" maxlength="100">
+                                                   placeholder="Ej: Gerente de Proyecto, Coordinador, etc."
+                                                   value="<?php
+                                                   if ($data['action'] === 'edit' && $data['counterpartie']) {
+                                                       echo htmlspecialchars($data['counterpartie']['cargo'] ?? '');
+                                                   } elseif (isset($_POST['cargo'])) {
+                                                       echo htmlspecialchars($_POST['cargo']);
+                                                   }
+                                                   ?>" maxlength="100">
                                             <div class="form-text">Cargo o posición de la persona en el cliente (opcional).</div>
                                         </div>
 
@@ -169,14 +167,14 @@
                                         <div class="col-md-6">
                                             <label for="telefono" class="form-label">Teléfono</label>
                                             <input type="tel" class="form-control" id="telefono" name="telefono"
-                                                placeholder="Ej: +56 9 1234 5678"
-                                                value="<?php
-                                                        if ($data['action'] === 'edit' && $data['counterpartie']) {
-                                                            echo htmlspecialchars($data['counterpartie']['telefono'] ?? '');
-                                                        } elseif (isset($_POST['telefono'])) {
-                                                            echo htmlspecialchars($_POST['telefono']);
-                                                        }
-                                                        ?>" maxlength="20">
+                                                   placeholder="Ej: +56 9 1234 5678"
+                                                   value="<?php
+                                                   if ($data['action'] === 'edit' && $data['counterpartie']) {
+                                                       echo htmlspecialchars($data['counterpartie']['telefono'] ?? '');
+                                                   } elseif (isset($_POST['telefono'])) {
+                                                       echo htmlspecialchars($_POST['telefono']);
+                                                   }
+                                                   ?>" maxlength="20">
                                             <div class="form-text">Teléfono específico para contacto relacionado a este cliente.</div>
                                         </div>
 
@@ -184,14 +182,14 @@
                                         <div class="col-md-6">
                                             <label for="email" class="form-label">Email</label>
                                             <input type="email" class="form-control" id="email" name="email"
-                                                placeholder="Ej: contraparte@cliente.com"
-                                                value="<?php
-                                                        if ($data['action'] === 'edit' && $data['counterpartie']) {
-                                                            echo htmlspecialchars($data['counterpartie']['email'] ?? '');
-                                                        } elseif (isset($_POST['email'])) {
-                                                            echo htmlspecialchars($_POST['email']);
-                                                        }
-                                                        ?>" maxlength="150">
+                                                   placeholder="Ej: contraparte@cliente.com"
+                                                   value="<?php
+                                                   if ($data['action'] === 'edit' && $data['counterpartie']) {
+                                                       echo htmlspecialchars($data['counterpartie']['email'] ?? '');
+                                                   } elseif (isset($_POST['email'])) {
+                                                       echo htmlspecialchars($_POST['email']);
+                                                   }
+                                                   ?>" maxlength="150">
                                             <div class="form-text">Email específico para contacto relacionado a este cliente.</div>
                                         </div>
 
@@ -260,5 +258,4 @@
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 </body>
-
 </html>

@@ -556,13 +556,9 @@ class Client
 
         $expectedDv = 11 - ($sum % 11);
 
-        if ($expectedDv == 11) {
-            $expectedDv = '0';
-        } elseif ($expectedDv == 10) {
-            $expectedDv = 'K';
-        } else {
-            $expectedDv = strval($expectedDv);
-        }
+        if ($expectedDv == 11) $expectedDv = '0';
+        elseif ($expectedDv == 10) $expectedDv = 'K';
+        else $expectedDv = strval($expectedDv);
 
         return $dv == $expectedDv;
     }

@@ -137,10 +137,8 @@ class ReportService
             if (strpos(strtolower($project['estado']), 'activo') !== false) {
                 $summary['active_projects']++;
             }
-            if (
-                strpos(strtolower($project['estado']), 'terminado') !== false ||
-                strpos(strtolower($project['estado']), 'completado') !== false
-            ) {
+            if (strpos(strtolower($project['estado']), 'terminado') !== false ||
+                strpos(strtolower($project['estado']), 'completado') !== false) {
                 $summary['completed_projects']++;
             }
         }

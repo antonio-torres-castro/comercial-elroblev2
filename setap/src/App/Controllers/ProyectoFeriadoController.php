@@ -135,6 +135,7 @@ class ProyectoFeriadoController extends BaseController
             }
 
             echo json_encode($response);
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createMasivo error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -200,6 +201,7 @@ class ProyectoFeriadoController extends BaseController
             }
 
             echo json_encode($response);
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createEspecifico error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -272,6 +274,7 @@ class ProyectoFeriadoController extends BaseController
             }
 
             echo json_encode($response);
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createRango error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -299,6 +302,7 @@ class ProyectoFeriadoController extends BaseController
                 'feriados' => $feriados,
                 'stats' => $stats
             ]);
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::list error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -345,6 +349,7 @@ class ProyectoFeriadoController extends BaseController
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al actualizar feriado']);
             }
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::update error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -384,6 +389,7 @@ class ProyectoFeriadoController extends BaseController
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al eliminar feriado']);
             }
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::delete error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -411,6 +417,7 @@ class ProyectoFeriadoController extends BaseController
                 'success' => true,
                 'conflicts' => $conflicts
             ]);
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::checkConflicts error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -462,6 +469,7 @@ class ProyectoFeriadoController extends BaseController
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al mover tareas']);
             }
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::moveTasks error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -490,6 +498,7 @@ class ProyectoFeriadoController extends BaseController
                 'working_days' => $workingDays,
                 'total_working_days' => count($workingDays)
             ]);
+
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::getWorkingDays error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);

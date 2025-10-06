@@ -285,11 +285,9 @@ class ProyectoFeriado
             foreach ($fechas as $fecha) {
                 $result[$fecha] = [];
                 foreach ($conflicts as $conflict) {
-                    if (
-                        $conflict['fecha_inicio'] === $fecha ||
+                    if ($conflict['fecha_inicio'] === $fecha ||
                         $conflict['fecha_fin'] === $fecha ||
-                        ($conflict['fecha_inicio'] <= $fecha && $conflict['fecha_fin'] >= $fecha)
-                    ) {
+                        ($conflict['fecha_inicio'] <= $fecha && $conflict['fecha_fin'] >= $fecha)) {
                         $result[$fecha][] = $conflict;
                     }
                 }

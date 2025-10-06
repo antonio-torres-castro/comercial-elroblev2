@@ -101,17 +101,67 @@ class ViewRenderer
     }
 
     /**
-     * Renderizar mensaje de error
+     * Renderizar mensaje de error de forma segura
      */
     public function renderError(string $message, int $code = 500): string
     {
-        $errorData = [
-            'error_message' => $message,
-            'error_code' => $code,
-            'timestamp' => date('Y-m-d H:i:s')
-        ];
+        try {
+            $errorData = [
+                'error_message' => $message,
+                'error_code' => $code,
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
 
-        return $this->renderWith('errors/generic.php', $errorData, 'error');
+            // Intentar usar el sistema de templates
+            $viewPath = __DIR__ . '/../Views/errors/generic.php';
+            $layoutPath = __DIR__ . '/../Views/layouts/error.php';
+            
+            if (file_exists($viewPath) && file_exists($layoutPath)) {
+                // Extraer variables para las vistas
+                extract($errorData);
+                
+                // Capturar contenido de la vista de error
+                ob_start();
+                include $viewPath;
+                $content = ob_get_clean();
+                
+                // Renderizar con layout de error
+                ob_start();
+                include $layoutPath;
+                return ob_get_clean();
+            }
+        } catch (Exception $e) {
+            // Si todo falla, HTML básico para evitar recursión infinita
+            error_log("Error en renderError: " . $e->getMessage());
+        }
+        
+        // Fallback HTML simple sin dependencias externas
+        $timestamp = date('Y-m-d H:i:s');
+        return "<!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Error {$code}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                .error-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+                .error-title { color: #d32f2f; font-size: 24px; margin-bottom: 15px; }
+                .error-message { color: #666; margin-bottom: 20px; }
+                .error-details { background: #f8f8f8; padding: 15px; border-radius: 4px; font-size: 14px; color: #888; }
+            </style>
+        </head>
+        <body>
+            <div class='error-container'>
+                <h1 class='error-title'>Error {$code}</h1>
+                <p class='error-message'>" . htmlspecialchars($message) . "</p>
+                <div class='error-details'>
+                    <strong>Timestamp:</strong> {$timestamp}<br>
+                    <strong>Error Code:</strong> {$code}
+                </div>
+            </div>
+        </body>
+        </html>";
     }
 
     /**
