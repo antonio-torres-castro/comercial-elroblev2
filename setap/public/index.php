@@ -612,13 +612,13 @@ try {
             break;
 
         case 'user':
-            $controller = new UserController();
-            
+            // Redireccionar las rutas /user/{id} a las rutas estándar
             if ($action) {
-                $controller->show((int)$action);
+                // Editar usuario existente
+                Security::redirect("/users/edit?id={$action}");
             } else {
                 // Nuevo usuario
-                $controller->create();
+                Security::redirect("/users/create");
             }
             break;
 
