@@ -28,8 +28,8 @@ class User
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
                        c.razon_social as cliente_nombre
-                FROM usuarios u
-                INNER JOIN personas p ON u.persona_id = p.id
+                FROM usuarios u 
+                INNER JOIN personas p ON u.persona_id = p.id 
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id /*siempre tiene un estado el registro*/
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -46,21 +46,23 @@ class User
     }
 
     /**
-     * Crear un nuevo usuario
+     * Crear un nuevo usuario (solo tabla usuarios, persona debe existir)
      */
     public function create(array $data): ?int
     {
         try {
             $this->db->beginTransaction();
 
-            // 1. Crear persona
-            $personaId = $this->createPersona($data);
-            if (!$personaId) {
-                throw new Exception('Error creando persona');
+            // Validar que la persona existe y no tiene usuario asociado
+            if (!$this->isPersonaAvailableForUser($data['persona_id'])) {
+                throw new Exception('La persona seleccionada ya tiene un usuario asociado o no existe');
             }
 
-            // 2. Crear usuario
-            $userId = $this->createUsuario($data, $personaId);
+            // Validar reglas de negocio según tipo de usuario
+            $this->validateBusinessRules($data);
+
+            // Crear usuario
+            $userId = $this->createUsuario($data, $data['persona_id']);
             if (!$userId) {
                 throw new Exception('Error creando usuario');
             }
@@ -70,33 +72,7 @@ class User
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log("Error en User::create: " . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Crear registro en tabla personas
-     */
-    private function createPersona(array $data): ?int
-    {
-        try {
-            $sql = "
-                INSERT INTO personas (nombre, rut, telefono, direccion, estado_tipo_id, fecha_Creado)
-                VALUES (?, ?, ?, ?, 1, NOW())
-            ";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([
-                $data['nombre'],
-                $data['rut'],
-                $data['telefono'] ?? '',
-                $data['direccion'] ?? ''
-            ]);
-
-            return $this->db->lastInsertId();
-        } catch (PDOException $e) {
-            error_log("Error creando persona: " . $e->getMessage());
-            return null;
+            throw $e; // Re-lanzar para manejo específico en controlador
         }
     }
 
@@ -106,12 +82,22 @@ class User
     private function createUsuario(array $data, int $personaId): ?int
     {
         try {
-            // Determinar cliente_id según tipo de usuario
+            // Determinar cliente_id según tipo de usuario y validaciones de negocio
             $clienteId = $this->determineClienteId($data);
-
+            
             $sql = "
-                INSERT INTO usuarios (persona_id, nombre_usuario, email, clave_hash, usuario_tipo_id, cliente_id, estado_tipo_id, fecha_Creado)
-                VALUES (?, ?, ?, ?, ?, ?, 1, NOW())
+                INSERT INTO usuarios (
+                    persona_id, 
+                    nombre_usuario, 
+                    email, 
+                    clave_hash, 
+                    usuario_tipo_id, 
+                    cliente_id, 
+                    estado_tipo_id, 
+                    fecha_inicio,
+                    fecha_termino,
+                    fecha_Creado
+                ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, NOW())
             ";
 
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
@@ -123,7 +109,9 @@ class User
                 $data['email'],
                 $hashedPassword,
                 $data['usuario_tipo_id'],
-                $clienteId
+                $clienteId,
+                $data['fecha_inicio'] ?? null,
+                $data['fecha_termino'] ?? null
             ]);
 
             return $this->db->lastInsertId();
@@ -144,8 +132,8 @@ class User
                 ut.nombre as rol,
                 et.nombre as estado, /*atributo de estado desplegado al usuario*/
                 c.razon_social as cliente_nombre
-                FROM usuarios u
-                INNER JOIN personas p ON u.persona_id = p.id
+                FROM usuarios u 
+                INNER JOIN personas p ON u.persona_id = p.id 
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON et.Id = u.estado_tipo_id /* Siempre tiene un estado */
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -190,7 +178,7 @@ class User
 
             // Actualizar usuario
             $usuarioSql = "
-                UPDATE usuarios
+                UPDATE usuarios 
                 SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -288,7 +276,7 @@ class User
 
             // Actualizar email del usuario (sin cambiar el rol)
             $usuarioSql = "
-                UPDATE usuarios
+                UPDATE usuarios 
                 SET email = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -320,8 +308,8 @@ class User
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
                        c.razon_social as cliente_nombre
-                FROM usuarios u
-                INNER JOIN personas p ON u.persona_id = p.id
+                FROM usuarios u 
+                INNER JOIN personas p ON u.persona_id = p.id 
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -330,7 +318,7 @@ class User
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
-
+            
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (PDOException $e) {
@@ -346,12 +334,12 @@ class User
     private function determineClienteId(array $data): ?int
     {
         $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
-
+        
         // Usuarios de la empresa propietaria NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
             return null;
         }
-
+        
         // Usuarios de cliente deben tener cliente_id
         if (in_array($tipoUsuario, ['client', 'counterparty'])) {
             if (empty($data['cliente_id'])) {
@@ -359,7 +347,7 @@ class User
             }
             return (int)$data['cliente_id'];
         }
-
+        
         return null;
     }
 
@@ -388,15 +376,15 @@ class User
             $stmt = $this->db->prepare("SELECT rut FROM clientes WHERE id = ?");
             $stmt->execute([$clientId]);
             $clientRut = $stmt->fetchColumn();
-
+            
             if (!$clientRut) {
                 return false;
             }
-
+            
             // Limpiar y comparar RUTs
             $cleanPersonRut = preg_replace('/[^0-9kK]/', '', strtolower($personRut));
             $cleanClientRut = preg_replace('/[^0-9kK]/', '', strtolower($clientRut));
-
+            
             return $cleanPersonRut === $cleanClientRut;
         } catch (PDOException $e) {
             error_log("Error validando RUT de cliente: " . $e->getMessage());
@@ -412,8 +400,8 @@ class User
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT COUNT(*)
-                FROM cliente_contrapartes
+                SELECT COUNT(*) 
+                FROM cliente_contrapartes 
                 WHERE persona_id = ? AND cliente_id = ? AND estado_tipo_id != 4
             ");
             $stmt->execute([$personaId, $clientId]);
@@ -431,9 +419,9 @@ class User
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, razon_social, rut
-                FROM clientes
-                WHERE estado_tipo_id IN (1, 2)
+                SELECT id, razon_social, rut 
+                FROM clientes 
+                WHERE estado_tipo_id IN (1, 2) 
                 ORDER BY razon_social
             ");
             $stmt->execute();
@@ -461,6 +449,139 @@ class User
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error obteniendo contrapartes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener personas disponibles (que no tienen usuario asociado)
+     */
+    public function getAvailablePersonas(?string $search = null): array
+    {
+        try {
+            $sql = "
+                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion
+                FROM personas p
+                LEFT JOIN usuarios u ON p.id = u.persona_id
+                WHERE u.persona_id IS NULL 
+                AND p.estado_tipo_id IN (1, 2)
+            ";
+            
+            $params = [];
+            
+            if (!empty($search)) {
+                $sql .= " AND (p.nombre LIKE ? OR p.rut LIKE ?)";
+                $searchParam = "%{$search}%";
+                $params = [$searchParam, $searchParam];
+            }
+            
+            $sql .= " ORDER BY p.nombre";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error obteniendo personas disponibles: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Verificar si una persona está disponible para crear usuario
+     */
+    public function isPersonaAvailableForUser(int $personaId): bool
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) 
+                FROM usuarios u 
+                INNER JOIN personas p ON u.persona_id = p.id
+                WHERE u.persona_id = ? AND p.estado_tipo_id IN (1, 2)
+            ");
+            $stmt->execute([$personaId]);
+            return $stmt->fetchColumn() == 0;
+        } catch (PDOException $e) {
+            error_log("Error verificando disponibilidad de persona: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtener información completa de una persona por ID
+     */
+    public function getPersonaById(int $personaId): ?array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id, rut, nombre, telefono, direccion
+                FROM personas 
+                WHERE id = ? AND estado_tipo_id IN (1, 2)
+            ");
+            $stmt->execute([$personaId]);
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (PDOException $e) {
+            error_log("Error obteniendo persona: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Validar reglas de negocio según tipo de usuario
+     */
+    private function validateBusinessRules(array $data): void
+    {
+        $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
+        
+        // Regla: Solo usuarios tipo 'counterparty' (id=6) pueden tener cliente_id
+        if ($tipoUsuario === 'counterparty') {
+            if (empty($data['cliente_id'])) {
+                throw new Exception("Usuario tipo 'counterparty' debe tener un cliente asociado");
+            }
+            
+            // Verificar que la persona existe como contraparte del cliente
+            if (!$this->validateCounterpartyExists($data['persona_id'], $data['cliente_id'])) {
+                throw new Exception("La persona debe estar registrada como contraparte del cliente seleccionado");
+            }
+        }
+        
+        // Regla: Usuarios internos (admin, planner, supervisor, executor) NO deben tener cliente_id
+        if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor']) && !empty($data['cliente_id'])) {
+            throw new Exception("Usuario tipo '$tipoUsuario' no debe tener cliente asociado");
+        }
+        
+        // Regla: Usuarios tipo 'client' deben tener cliente_id y el RUT debe coincidir
+        if ($tipoUsuario === 'client') {
+            if (empty($data['cliente_id'])) {
+                throw new Exception("Usuario tipo 'client' debe tener un cliente asociado");
+            }
+            
+            $persona = $this->getPersonaById($data['persona_id']);
+            if (!$persona || !$this->validateClientUserRut($persona['rut'], $data['cliente_id'])) {
+                throw new Exception("El RUT de la persona debe coincidir con el RUT del cliente");
+            }
+        }
+    }
+
+    /**
+     * Buscar contrapartes disponibles para un cliente (personas sin usuario)
+     */
+    public function getAvailableCounterparties(int $clientId): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT p.id, p.rut, p.nombre, p.telefono, cc.cargo, cc.email
+                FROM cliente_contrapartes cc
+                INNER JOIN personas p ON cc.persona_id = p.id
+                LEFT JOIN usuarios u ON p.id = u.persona_id
+                WHERE cc.cliente_id = ? 
+                AND cc.estado_tipo_id IN (1, 2)
+                AND u.persona_id IS NULL
+                ORDER BY p.nombre
+            ");
+            $stmt->execute([$clientId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error obteniendo contrapartes disponibles: " . $e->getMessage());
             return [];
         }
     }

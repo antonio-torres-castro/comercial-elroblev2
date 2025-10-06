@@ -15,7 +15,7 @@ class ReportService
     }
 
     /**
-     * Obtener estadï¿½sticas bï¿½sicas para la pï¿½gina principal de reportes
+     * Obtener estadísticas básicas para la página principal de reportes
      */
     public function getBasicStats()
     {
@@ -51,7 +51,7 @@ class ReportService
     }
 
     /**
-     * Generar reporte segï¿½n el tipo y parï¿½metros especificados
+     * Generar reporte según el tipo y parámetros especificados
      */
     public function generateReport($reportType, $parameters = [])
     {
@@ -59,21 +59,21 @@ class ReportService
             switch ($reportType) {
                 case 'projects_summary':
                     return $this->generateProjectsSummary($parameters);
-
+                
                 case 'tasks_summary':
                     return $this->generateTasksSummary($parameters);
-
+                
                 case 'users_activity':
                     return $this->generateUsersActivity($parameters);
-
+                
                 case 'clients_summary':
                     return $this->generateClientsSummary($parameters);
-
+                
                 case 'custom':
                     return $this->generateCustomReport($parameters);
-
+                
                 default:
-                    throw new Exception("Tipo de reporte no vï¿½lido: $reportType");
+                    throw new Exception("Tipo de reporte no válido: $reportType");
             }
         } catch (Exception $e) {
             error_log("Error en ReportService::generateReport: " . $e->getMessage());
@@ -86,7 +86,7 @@ class ReportService
      */
     private function generateProjectsSummary($parameters)
     {
-        $sql = "SELECT
+        $sql = "SELECT 
                     p.id,
                     c.nombre as cliente_nombre,
                     p.fecha_inicio,
@@ -137,7 +137,7 @@ class ReportService
             if (strpos(strtolower($project['estado']), 'activo') !== false) {
                 $summary['active_projects']++;
             }
-            if (strpos(strtolower($project['estado']), 'terminado') !== false ||
+            if (strpos(strtolower($project['estado']), 'terminado') !== false || 
                 strpos(strtolower($project['estado']), 'completado') !== false) {
                 $summary['completed_projects']++;
             }
@@ -155,7 +155,7 @@ class ReportService
      */
     private function generateTasksSummary($parameters)
     {
-        $sql = "SELECT
+        $sql = "SELECT 
                     t.id,
                     t.nombre as tarea_nombre,
                     p.id as proyecto_id,
@@ -226,7 +226,7 @@ class ReportService
      */
     private function generateUsersActivity($parameters)
     {
-        $sql = "SELECT
+        $sql = "SELECT 
                     u.id,
                     u.username,
                     u.nombre_completo,
@@ -273,11 +273,11 @@ class ReportService
             if ($user['activo']) {
                 $summary['active_users']++;
             }
-
+            
             if ($user['fecha_ultimo_acceso'] && $user['fecha_ultimo_acceso'] >= $weekAgo) {
                 $summary['recent_logins']++;
             }
-
+            
             if ($user['fecha_creacion'] && $user['fecha_creacion'] >= $monthAgo) {
                 $summary['new_users']++;
             }
@@ -295,7 +295,7 @@ class ReportService
      */
     private function generateClientsSummary($parameters)
     {
-        $sql = "SELECT
+        $sql = "SELECT 
                     c.id,
                     c.nombre,
                     c.rut,
@@ -341,11 +341,11 @@ class ReportService
             if ($client['activo']) {
                 $summary['active_clients']++;
             }
-
+            
             if ($client['total_proyectos'] > 0) {
                 $summary['clients_with_projects']++;
             }
-
+            
             if ($client['fecha_creacion'] && $client['fecha_creacion'] >= $monthAgo) {
                 $summary['new_clients']++;
             }
@@ -363,9 +363,9 @@ class ReportService
      */
     private function generateCustomReport($parameters)
     {
-        // Implementaciï¿½n bï¿½sica para reporte personalizado
-        // En una implementaciï¿½n real, esto podrï¿½a ser mucho mï¿½s complejo
-
+        // Implementación básica para reporte personalizado
+        // En una implementación real, esto podría ser mucho más complejo
+        
         return [
             'summary' => [
                 'message' => 'Reporte personalizado',
@@ -380,7 +380,7 @@ class ReportService
                     'status' => 'Configurado'
                 ],
                 [
-                    'parameter' => 'Fecha de generaciï¿½n',
+                    'parameter' => 'Fecha de generación',
                     'value' => date('d/m/Y H:i:s'),
                     'status' => 'Actual'
                 ]

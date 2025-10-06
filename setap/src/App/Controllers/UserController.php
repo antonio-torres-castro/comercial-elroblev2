@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\AuthService;
 use App\Services\PermissionService;
 use App\Services\ValidationService;
+use App\Services\UserValidationService;
 use App\Services\ClientBusinessLogic;
 use App\Core\ViewRenderer;
 use App\Middlewares\AuthMiddleware;
@@ -22,6 +23,7 @@ class UserController extends BaseController
     private $authService;
     private $permissionService;
     private $validationService;
+    private $userValidationService;
     private $clientBusinessLogic;
     private $viewRenderer;
     private $db;
@@ -35,6 +37,7 @@ class UserController extends BaseController
         $this->authService = new AuthService();
         $this->permissionService = new PermissionService();
         $this->validationService = new ValidationService();
+        $this->userValidationService = new UserValidationService();
         $this->clientBusinessLogic = new ClientBusinessLogic();
         $this->viewRenderer = new ViewRenderer();
         $this->db = Database::getInstance();
@@ -100,13 +103,17 @@ class UserController extends BaseController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
-            $clients = $this->userModel->getAvailableClients(); // GAP 1 y GAP 2: Obtener clientes
+            $clients = $this->userModel->getAvailableClients();
+            
+            // Obtener personas disponibles (sin usuario asociado)
+            $availablePersonas = $this->userModel->getAvailablePersonas();
 
             // Usar ViewRenderer para renderizar la vista
             $this->viewRenderer->render('users/create', [
                 'userTypes' => $userTypes,
                 'estadosTipo' => $estadosTipo,
                 'clients' => $clients,
+                'availablePersonas' => $availablePersonas,
                 'currentUser' => $currentUser
             ]);
         } catch (Exception $e) {
@@ -140,17 +147,26 @@ class UserController extends BaseController
                 return;
             }
 
-            // Sanitizar y validar datos usando ValidationService
-            $validationResult = $this->validationService->validateUserDataComplete($_POST);
+            // Validar datos usando UserValidationService (específico para usuarios)
+            $errors = $this->userValidationService->validateUserCreationData($_POST);
 
-            if (!$validationResult['isValid']) {
+            if (!empty($errors)) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Datos inválidos', 'details' => $validationResult['errors']]);
+                echo json_encode(['error' => 'Datos inválidos', 'details' => $errors]);
                 return;
             }
 
-            // Si no hay errores, usar datos sanitizados
-            $data = $validationResult['data'];
+            // Si no hay errores, sanitizar datos
+            $data = [
+                'persona_id' => (int)$_POST['persona_id'],
+                'email' => Security::sanitizeInput($_POST['email']),
+                'nombre_usuario' => Security::sanitizeInput($_POST['nombre_usuario']),
+                'password' => $_POST['password'], // No sanitizar contraseñas
+                'usuario_tipo_id' => (int)$_POST['usuario_tipo_id'],
+                'cliente_id' => !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null,
+                'fecha_inicio' => !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null,
+                'fecha_termino' => !empty($_POST['fecha_termino']) ? $_POST['fecha_termino'] : null
+            ];
 
             // Crear usuario
             $userId = $this->userModel->create($data);
@@ -236,7 +252,118 @@ class UserController extends BaseController
         }
     }
 
+    /**
+     * API: Buscar personas disponibles
+     */
+    public function searchPersonas()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
 
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                return;
+            }
+
+            $search = $_GET['search'] ?? '';
+            $personas = $this->userModel->getAvailablePersonas($search);
+
+            echo json_encode([
+                'success' => true,
+                'personas' => $personas
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en UserController::searchPersonas: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error en búsqueda']);
+        }
+    }
+
+    /**
+     * API: Obtener contrapartes disponibles para un cliente
+     */
+    public function getClientCounterparties()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                return;
+            }
+
+            $clientId = (int)($_GET['client_id'] ?? 0);
+            if (!$clientId) {
+                echo json_encode(['success' => false, 'message' => 'ID de cliente requerido']);
+                return;
+            }
+
+            $counterparties = $this->userModel->getAvailableCounterparties($clientId);
+
+            echo json_encode([
+                'success' => true,
+                'counterparties' => $counterparties
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en UserController::getClientCounterparties: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error obteniendo contrapartes']);
+        }
+    }
+
+    /**
+     * API: Obtener información de una persona
+     */
+    public function getPersonaInfo()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                return;
+            }
+
+            $personaId = (int)($_GET['persona_id'] ?? 0);
+            if (!$personaId) {
+                echo json_encode(['success' => false, 'message' => 'ID de persona requerido']);
+                return;
+            }
+
+            $persona = $this->userModel->getPersonaById($personaId);
+            if (!$persona) {
+                echo json_encode(['success' => false, 'message' => 'Persona no encontrada']);
+                return;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'persona' => $persona
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en UserController::getPersonaInfo: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error obteniendo información']);
+        }
+    }
 
     private function getUserTypes(): array
     {
