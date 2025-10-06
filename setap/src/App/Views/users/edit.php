@@ -50,18 +50,7 @@
             cursor: pointer;
         }
 
-        .availability-check {
-            font-size: 0.875em;
-            margin-top: 5px;
-        }
 
-        .available {
-            color: #198754;
-        }
-
-        .unavailable {
-            color: #dc3545;
-        }
 
         .persona-result-card {
             border: 1px solid #dee2e6;
@@ -282,7 +271,6 @@
                                                 value="<?= htmlspecialchars($userToEdit['email']) ?>"
                                                 placeholder="usuario@dominio.com" required>
                                             <div class="invalid-feedback" id="emailFeedback"></div>
-                                            <div id="email-availability" class="availability-check"></div>
                                         </div>
 
                                         <div class="mb-3">
@@ -476,139 +464,25 @@
             // Manejar cambios en el tipo de usuario
             document.getElementById('usuario_tipo_id').addEventListener('change', toggleClientSection);
 
-            // Cargar personas disponibles para cambio de asociación
-            const personaSelect = document.getElementById('persona_id');
-            let personasLoaded = false;
+            // Nota: Se eliminó la carga AJAX de personas ya que no se usa en esta vista
 
-            // Cargar personas disponibles inmediatamente al cargar la página
-            loadAvailablePersonas();
-            personasLoaded = true;
+            // Nota: Se eliminó la función showErrorMessage ya que no se usa después de quitar AJAX
 
-            personaSelect.addEventListener('focus', function() {
-                if (!personasLoaded) {
-                    loadAvailablePersonas();
-                    personasLoaded = true;
-                }
-            });
-
-            function loadAvailablePersonas() {
-                fetch('/api/personas/available-for-user?current_user_id=<?= (int)$userToEdit['id'] ?>')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success && data.personas) {
-                            // Mantener la opción actual como primera opción
-                            const currentOption = personaSelect.querySelector('option');
-                            personaSelect.innerHTML = '';
-                            personaSelect.appendChild(currentOption);
-                            
-                            // Agregar personas disponibles
-                            data.personas.forEach(persona => {
-                                const option = document.createElement('option');
-                                option.value = persona.id;
-                                option.textContent = `${persona.nombre} - RUT: ${persona.rut}`;
-                                personaSelect.appendChild(option);
-                            });
-                        } else {
-                            console.error('Error en respuesta:', data.message);
-                            showErrorMessage('Error cargando personas disponibles: ' + (data.message || 'Error desconocido'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error cargando personas:', error);
-                        showErrorMessage('Error de conexión al cargar personas disponibles. Verifique su conexión de red.');
-                    });
-            }
-
-            // Función para mostrar mensajes de error al usuario
-            function showErrorMessage(message) {
-                // Crear o actualizar div de error
-                let errorDiv = document.getElementById('dynamic-error-message');
-                if (!errorDiv) {
-                    errorDiv = document.createElement('div');
-                    errorDiv.id = 'dynamic-error-message';
-                    errorDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
-                    errorDiv.innerHTML = `
-                        <i class="bi bi-exclamation-triangle"></i> <span class="error-text"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    
-                    // Insertar después de los mensajes existentes
-                    const form = document.getElementById('userEditForm');
-                    const firstChild = form.firstElementChild;
-                    form.insertBefore(errorDiv, firstChild);
-                }
-                
-                errorDiv.querySelector('.error-text').textContent = message;
-                errorDiv.style.display = 'block';
-                
-                // Auto-hide después de 8 segundos
-                setTimeout(() => {
-                    if (errorDiv && errorDiv.parentNode) {
-                        errorDiv.style.display = 'none';
-                    }
-                }, 8000);
-            }
-
-            // Validar lógica de negocio según tipo de usuario
+            // Validar lógica de negocio según tipo de usuario (simplificada - sin AJAX)
             function validateBusinessLogic() {
                 const clientSelect = document.getElementById('cliente_id');
-                const personaSelect = document.getElementById('persona_id');
                 const userTypeSelect = document.getElementById('usuario_tipo_id');
                 
-                const selectedClientOption = clientSelect.options[clientSelect.selectedIndex];
-                const selectedPersonaOption = personaSelect.options[personaSelect.selectedIndex];
                 const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim().toLowerCase();
                 
                 // Limpiar mensajes de validación previos
                 clearValidationMessages();
                 
-                // Validar usuarios tipo 'client'
-                if (userType === 'client') {
+                // Validar usuarios tipo 'client' y 'counterparty'
+                if (userType === 'client' || userType === 'counterparty') {
                     if (!clientSelect.value) {
-                        showValidationError('Usuario tipo "client" debe tener un cliente asociado.');
+                        showValidationError(`Usuario tipo "${userType}" debe tener un cliente asociado.`);
                         return false;
-                    }
-                    
-                    if (selectedClientOption && selectedPersonaOption) {
-                        const clientRut = selectedClientOption.getAttribute('data-rut');
-                        const personaText = selectedPersonaOption.textContent;
-                        const personaRutMatch = personaText.match(/RUT:\s*([^\s]+)/);
-                        
-                        if (clientRut && personaRutMatch) {
-                            const cleanClientRut = clientRut.replace(/[^0-9kK]/g, '').toLowerCase();
-                            const cleanPersonRut = personaRutMatch[1].replace(/[^0-9kK]/g, '').toLowerCase();
-
-                            if (cleanClientRut !== cleanPersonRut) {
-                                showValidationError('El RUT de la persona debe coincidir con el RUT del cliente seleccionado para usuarios tipo "client".');
-                                return false;
-                            }
-                        }
-                    }
-                }
-                
-                // Validar usuarios tipo 'counterparty'
-                else if (userType === 'counterparty') {
-                    if (!clientSelect.value) {
-                        showValidationError('Usuario tipo "counterparty" debe tener un cliente asociado.');
-                        return false;
-                    }
-                    
-                    // Validar que la persona esté registrada como contraparte del cliente
-                    if (selectedPersonaOption && selectedClientOption) {
-                        // Esta validación se complementa en el servidor
-                        // Aquí podríamos agregar una validación AJAX si fuera necesario
-                        const personaId = selectedPersonaOption.value;
-                        const clienteId = selectedClientOption.value;
-                        
-                        // Mostrar mensaje informativo
-                        if (personaId && clienteId) {
-                            showInfoMessage('Verificando que la persona esté registrada como contraparte del cliente...');
-                        }
                     }
                 }
                 
@@ -620,6 +494,7 @@
                     }
                 }
                 
+                // Nota: Validaciones adicionales de RUT y contraparte se manejan en el backend
                 return true;
             }
 
@@ -691,50 +566,13 @@
 
             // Agregar listeners para validación de negocio
             document.getElementById('cliente_id').addEventListener('change', validateBusinessLogic);
-            document.getElementById('persona_id').addEventListener('change', validateBusinessLogic);
             document.getElementById('usuario_tipo_id').addEventListener('change', function() {
                 toggleClientSection();
                 validateBusinessLogic();
             });
 
-            // Validación de email en tiempo real
-            let emailTimeout;
-            document.getElementById('email').addEventListener('input', function(e) {
-                clearTimeout(emailTimeout);
-                const email = e.target.value;
-                const div = document.getElementById('email-availability');
-
-                if (email.length > 0 && email.includes('@')) {
-                    emailTimeout = setTimeout(() => {
-                        fetch(`/api/user-check?type=email&value=${encodeURIComponent(email)}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.available) {
-                                    div.className = 'availability-check available';
-                                    div.innerHTML = '<i class="bi bi-check-circle"></i> Email disponible';
-                                } else {
-                                    div.className = 'availability-check unavailable';
-                                    div.innerHTML = '<i class="bi bi-x-circle"></i> Email ya está en uso';
-                                }
-                            })
-                            .catch(() => {
-                                div.innerHTML = '';
-                            });
-                    }, 500);
-                } else {
-                    div.innerHTML = '';
-                }
-            });
-
-            // Actualizar avatar preview cuando cambie la persona
-            document.getElementById('persona_id').addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                const personaName = selectedOption.textContent.split(' - ')[0];
-                const avatarPreview = document.getElementById('avatarPreview');
-                if (avatarPreview && personaName) {
-                    avatarPreview.textContent = personaName.charAt(0).toUpperCase() || 'U';
-                }
-            });
+            // Nota: Se eliminó la validación AJAX de email en tiempo real - ahora se valida en el backend
+            // Nota: Se eliminaron los listeners de persona_id ya que es un campo hidden, no un select
 
             // Validación del formulario
             form.addEventListener('submit', function(e) {
