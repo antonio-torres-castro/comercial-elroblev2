@@ -45,9 +45,7 @@
     </style>
 </head>
 <body>
-    <?php
-
-    use App\Helpers\Security; ?>
+    <?php use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -178,35 +176,35 @@
                                                             <div class="btn-group btn-group-sm" role="group">
                                                                 <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <a href="/menu/<?php echo $menu['id']; ?>"
-                                                                        class="btn btn-outline-setap-primary btn-sm"
-                                                                        title="Editar">
+                                                                       class="btn btn-outline-setap-primary btn-sm"
+                                                                       title="Editar">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Read') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <button type="button"
-                                                                        class="btn btn-outline-setap-primary-light btn-sm"
-                                                                        title="Ver detalles"
-                                                                        onclick="showMenuDetails(<?php echo htmlspecialchars(json_encode($menu)); ?>)">
+                                                                            class="btn btn-outline-setap-primary-light btn-sm"
+                                                                            title="Ver detalles"
+                                                                            onclick="showMenuDetails(<?php echo htmlspecialchars(json_encode($menu)); ?>)">
                                                                         <i class="bi bi-eye"></i>
                                                                     </button>
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <button type="button"
-                                                                        class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm"
-                                                                        title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>"
-                                                                        onclick="toggleMenuStatus(<?php echo $menu['id']; ?>, <?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>)">
+                                                                            class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm"
+                                                                            title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>"
+                                                                            onclick="toggleMenuStatus(<?php echo $menu['id']; ?>, <?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>)">
                                                                         <i class="bi bi-<?php echo ($menu['estado_tipo_id'] == 2) ? 'toggle-on' : 'toggle-off'; ?>"></i>
                                                                     </button>
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Delete') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <button type="button"
-                                                                        class="btn btn-outline-danger btn-sm"
-                                                                        title="Eliminar"
-                                                                        onclick="deleteMenu(<?php echo $menu['id']; ?>)">
+                                                                            class="btn btn-outline-danger btn-sm"
+                                                                            title="Eliminar"
+                                                                            onclick="deleteMenu(<?php echo $menu['id']; ?>)">
                                                                         <i class="bi bi-trash"></i>
                                                                     </button>
                                                                 <?php endif; ?>
@@ -257,44 +255,17 @@
     <script>
         function showMenuDetails(menu) {
             const estadoInfo = {
-                1: {
-                    badge: 'warning',
-                    texto: 'Creado'
-                },
-                2: {
-                    badge: 'success',
-                    texto: 'Activo'
-                },
-                3: {
-                    badge: 'secondary',
-                    texto: 'Inactivo'
-                },
-                4: {
-                    badge: 'danger',
-                    texto: 'Eliminado'
-                },
-                5: {
-                    badge: 'setap-primary-light',
-                    texto: 'Iniciado'
-                },
-                6: {
-                    badge: 'setap-primary',
-                    texto: 'Terminado'
-                },
-                7: {
-                    badge: 'danger',
-                    texto: 'Rechazado'
-                },
-                8: {
-                    badge: 'success',
-                    texto: 'Aprobado'
-                }
+                1: { badge: 'warning', texto: 'Creado' },
+                2: { badge: 'success', texto: 'Activo' },
+                3: { badge: 'secondary', texto: 'Inactivo' },
+                4: { badge: 'danger', texto: 'Eliminado' },
+                5: { badge: 'setap-primary-light', texto: 'Iniciado' },
+                6: { badge: 'setap-primary', texto: 'Terminado' },
+                7: { badge: 'danger', texto: 'Rechazado' },
+                8: { badge: 'success', texto: 'Aprobado' }
             };
 
-            const estado = estadoInfo[menu.estado_tipo_id] || {
-                badge: 'dark',
-                texto: 'Desconocido'
-            };
+            const estado = estadoInfo[menu.estado_tipo_id] || { badge: 'dark', texto: 'Desconocido' };
 
             const content = `
                 <div class="row">
@@ -337,22 +308,22 @@
                 formData.append('csrf_token', csrfToken);
 
                 fetch('/menus/toggle-status', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Recargar la página para mostrar los cambios
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'No se pudo cambiar el estado'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error de conexión al cambiar el estado');
-                    });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recargar la página para mostrar los cambios
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'No se pudo cambiar el estado'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al cambiar el estado');
+                });
             }
         }
 
@@ -367,33 +338,32 @@
                 formData.append('csrf_token', csrfToken);
 
                 fetch('/menus/delete', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Recargar la página para mostrar los cambios
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'No se pudo eliminar el menú'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error de conexión al eliminar el menú');
-                    });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recargar la página para mostrar los cambios
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'No se pudo eliminar el menú'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al eliminar el menú');
+                });
             }
         }
 
         // Tooltip para botones
         document.addEventListener('DOMContentLoaded', function() {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
     </script>
 </body>
-
 </html>

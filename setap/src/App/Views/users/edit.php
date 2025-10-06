@@ -62,6 +62,24 @@
         .unavailable {
             color: #dc3545;
         }
+
+        .persona-result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .persona-result-card:hover {
+            border-color: var(--setap-primary);
+            background: #f8f9fa;
+        }
+
+        .persona-result-card.selected {
+            border: 2px solid var(--setap-primary);
+            background: #e7f3ff;
+        }
     </style>
 </head>
 
@@ -157,15 +175,98 @@
                                             <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
 
-                                        <!-- Nuevo campo para cambiar persona asociada -->
+                                        <!-- Búsqueda de personas para cambio -->
                                         <div class="mb-3">
-                                            <label for="persona_id" class="form-label">Cambiar Persona Asociada</label>
-                                            <select class="form-select" id="persona_id" name="persona_id">
-                                                <option value="<?= (int)$userToEdit['persona_id'] ?>" selected>
-                                                    <?= htmlspecialchars($userToEdit['nombre_completo']) ?> - RUT: <?= htmlspecialchars($userToEdit['rut']) ?>
-                                                </option>
-                                            </select>
-                                            <div class="form-text">Seleccione una persona diferente si necesita cambiar la asociación. Deje la opción actual para mantener la persona actual.</div>
+                                            <label class="form-label">Buscar Nueva Persona (Opcional)</label>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <input type="text" 
+                                                           class="form-control" 
+                                                           id="persona_search" 
+                                                           name="persona_search"
+                                                           placeholder="RUT o nombre para buscar"
+                                                           value="<?= htmlspecialchars($_SESSION['old_input']['persona_search'] ?? '') ?>">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <select class="form-select" id="search_type" name="search_type">
+                                                        <option value="all" <?= ($_SESSION['old_input']['search_type'] ?? 'all') === 'all' ? 'selected' : '' ?>>Todo</option>
+                                                        <option value="rut" <?= ($_SESSION['old_input']['search_type'] ?? '') === 'rut' ? 'selected' : '' ?>>RUT</option>
+                                                        <option value="name" <?= ($_SESSION['old_input']['search_type'] ?? '') === 'name' ? 'selected' : '' ?>>Nombre</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <button type="submit" name="search_persona" class="btn btn-outline-primary btn-sm">
+                                                        <i class="bi bi-search"></i> Buscar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Estadísticas de búsqueda -->
+                                        <?php if (isset($_SESSION['search_stats'])): ?>
+                                            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                                                <div>
+                                                    <i class="bi bi-info-circle"></i>
+                                                    <strong>Resultados:</strong> <?= $_SESSION['search_stats']['total'] ?> persona(s) encontrada(s)
+                                                </div>
+                                                <div class="small">
+                                                    <span class="badge bg-success"><?= $_SESSION['search_stats']['available'] ?> disponibles</span>
+                                                    <span class="badge bg-warning"><?= $_SESSION['search_stats']['assigned'] ?> asignadas</span>
+                                                </div>
+                                            </div>
+                                            <?php unset($_SESSION['search_stats']); ?>
+                                        <?php endif; ?>
+
+                                        <!-- Resultados de búsqueda -->
+                                        <?php if (isset($_SESSION['persona_results'])): ?>
+                                            <div class="mb-3">
+                                                <label class="form-label">Seleccionar Nueva Persona</label>
+                                                <?php if (empty($_SESSION['persona_results'])): ?>
+                                                    <div class="alert alert-warning">
+                                                        <i class="bi bi-exclamation-triangle"></i> No se encontraron personas con ese criterio.
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="row" style="max-height: 300px; overflow-y: auto;">
+                                                        <?php foreach ($_SESSION['persona_results'] as $persona): ?>
+                                                            <div class="col-12 mb-2">
+                                                                <div class="persona-result-card small <?= $persona['has_user'] ? 'border-warning' : '' ?> <?= $persona['id'] == $userToEdit['persona_id'] ? 'border-info bg-info bg-opacity-10' : '' ?>">
+                                                                    <div class="form-check">
+                                                                        <input class="form-check-input" 
+                                                                               type="radio" 
+                                                                               name="new_persona_id" 
+                                                                               id="new_persona_<?= $persona['id'] ?>"
+                                                                               value="<?= $persona['id'] ?>"
+                                                                               <?= ($_SESSION['old_input']['new_persona_id'] ?? '') == $persona['id'] ? 'checked' : '' ?>>
+                                                                        <label class="form-check-label w-100" for="new_persona_<?= $persona['id'] ?>">
+                                                                            <strong><?= htmlspecialchars($persona['nombre']) ?></strong>
+                                                                            - RUT: <?= htmlspecialchars($persona['rut']) ?>
+                                                                            <?php if ($persona['id'] == $userToEdit['persona_id']): ?>
+                                                                                <span class="badge bg-info ms-2">ACTUAL</span>
+                                                                            <?php elseif ($persona['has_user']): ?>
+                                                                                <span class="badge bg-warning ms-2">Asignada a: <?= htmlspecialchars($persona['usuario_asociado']) ?></span>
+                                                                            <?php endif; ?>
+                                                                            <?php if (!empty($persona['telefono'])): ?>
+                                                                                <br><small class="text-muted">Tel: <?= htmlspecialchars($persona['telefono']) ?></small>
+                                                                            <?php endif; ?>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php unset($_SESSION['persona_results']); ?>
+                                        <?php endif; ?>
+
+                                        <!-- Campo persona actual (solo lectura para información) -->
+                                        <div class="mb-3">
+                                            <label for="persona_id" class="form-label">Persona Actualmente Asociada</label>
+                                            <input type="text" class="form-control" 
+                                                   value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?> - RUT: <?= htmlspecialchars($userToEdit['rut']) ?>" 
+                                                   readonly>
+                                            <input type="hidden" name="persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
+                                            <div class="form-text">Para cambiar la persona, use la búsqueda de arriba y seleccione una nueva persona.</div>
                                         </div>
                                     </div>
                                 </div>

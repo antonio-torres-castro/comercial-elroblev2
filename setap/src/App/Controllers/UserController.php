@@ -80,11 +80,6 @@ class UserController extends BaseController
 
     public function create()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->store();
-            return;
-        }
-
         try {
             $currentUser = $this->getCurrentUser();
 
@@ -100,13 +95,15 @@ class UserController extends BaseController
                 return;
             }
 
+
+
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
             $clients = $this->userModel->getAvailableClients();
-            
-            // Obtener personas disponibles (sin usuario asociado)
-            $availablePersonas = $this->userModel->getAvailablePersonas();
+
+            // Obtener todas las personas disponibles
+            $availablePersonas = $this->userModel->getAllPersonas();
 
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('users/create', [
@@ -123,7 +120,7 @@ class UserController extends BaseController
         }
     }
 
-    public function store()
+    public function seekPersonas()
     {
         try {
             $currentUser = $this->getCurrentUser();
@@ -136,29 +133,62 @@ class UserController extends BaseController
             // Verificar acceso al menú de gestión de usuario individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo json_encode(['error' => AppConstants::ERROR_ACCESS_DENIED]);
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
                 return;
             }
 
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                http_response_code(403);
-                echo json_encode(['error' => 'Token CSRF inválido']);
+                $this->redirectWithError(AppConstants::ROUTE_USERS_CREATE, 'Token CSRF inválido');
                 return;
             }
 
-            // Validar datos usando UserValidationService (específico para usuarios)
-            $errors = $this->userValidationService->validateUserCreationData($_POST);
+            // Manejar búsqueda de persona
+            $this->handlePersonaSearch();
+            
+        } catch (Exception $e) {
+            error_log("Error en UserController::seekPersonas: " . $e->getMessage());
+            $_SESSION['errors'] = ['Error al buscar personas'];
+            $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+        }
+    }
+
+    public function store()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            // Verificar acceso al menú de gestión de usuario individual
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                $this->redirectWithError(AppConstants::ROUTE_USERS_CREATE, AppConstants::ERROR_ACCESS_DENIED);
+                return;
+            }
+
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError(AppConstants::ROUTE_USERS_CREATE, 'Token CSRF inválido');
+                return;
+            }
+
+            // Validar datos simplificado
+            $errors = $this->validateUserDataSimplified($_POST);
 
             if (!empty($errors)) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Datos inválidos', 'details' => $errors]);
+                // Guardar errores y datos antiguos en sesión
+                $_SESSION['errors'] = $errors;
+                $_SESSION['old_input'] = $_POST;
+                $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
                 return;
             }
 
             // Si no hay errores, sanitizar datos
             $data = [
-                'persona_id' => (int)$_POST['persona_id'],
+                'persona_id' => (int)($_POST['persona_id'] ?? $_POST['persona_id_hidden']),
                 'email' => Security::sanitizeInput($_POST['email']),
                 'nombre_usuario' => Security::sanitizeInput($_POST['nombre_usuario']),
                 'password' => $_POST['password'], // No sanitizar contraseñas
@@ -172,23 +202,15 @@ class UserController extends BaseController
             $userId = $this->userModel->create($data);
 
             if ($userId) {
-                if (AuthHelper::isAjaxRequest()) {
-                    echo json_encode(['success' => true, 'message' => AppConstants::SUCCESS_USER_CREATED, 'id' => $userId]);
-                } else {
-                    $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_CREATED);
-                }
+                $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_USER_CREATED);
             } else {
                 throw new Exception('Error al crear el usuario');
             }
         } catch (Exception $e) {
             error_log("Error en UserController::store: " . $e->getMessage());
-            http_response_code(500);
-
-            if (AuthHelper::isAjaxRequest()) {
-                echo json_encode(['error' => AppConstants::ERROR_INTERNAL_SERVER]);
-            } else {
-                $this->redirectWithError(AppConstants::ROUTE_USERS_CREATE, AppConstants::ERROR_SERVER);
-            }
+            $_SESSION['errors'] = [AppConstants::ERROR_INTERNAL_SERVER];
+            $_SESSION['old_input'] = $_POST;
+            $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
         }
     }
 
@@ -259,7 +281,7 @@ class UserController extends BaseController
     {
         // Establecer header JSON
         header('Content-Type: application/json');
-        
+
         try {
             $currentUser = $this->getCurrentUser();
 
@@ -393,10 +415,6 @@ class UserController extends BaseController
         }
     }
 
-
-
-
-
     /**
      * Mostrar/editar usuario específico
      */
@@ -480,6 +498,13 @@ class UserController extends BaseController
                 return;
             }
 
+            // Manejar búsqueda de persona para edición
+            if (isset($_POST['search_persona'])) {
+                $_POST['current_user_id'] = $id; // Agregar ID del usuario en edición
+                $this->handlePersonaSearch();
+                return;
+            }
+
             // Obtener datos del usuario a editar
             $userToEdit = $this->userModel->getById($id);
             if (!$userToEdit) {
@@ -490,15 +515,20 @@ class UserController extends BaseController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
-            
+
             // Obtener clientes para la asignación
             $clients = $this->userModel->getAvailableClients();
 
+            // Obtener personas disponibles (incluyendo la actual del usuario)
+            $availablePersonas = $this->userModel->getAllPersonas($id);
+
             $data = [
-                'userToEdit' => $userToEdit,  // Cambiar key para consistencia con edit.php
+                'userToEdit' => $userToEdit,
                 'userTypes' => $userTypes,
                 'estadosTipo' => $estadosTipo,
                 'clients' => $clients,
+                'availablePersonas' => $availablePersonas,
+                'currentUser' => $currentUser,
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
             ];
@@ -567,7 +597,12 @@ class UserController extends BaseController
 
             // Si no hay errores, usar los datos del POST directamente
             $userData = $_POST;
-            
+
+            // Manejar cambio de persona si se seleccionó una nueva
+            if (!empty($_POST['new_persona_id'])) {
+                $userData['persona_id'] = (int)$_POST['new_persona_id'];
+            }
+
             // Agregar campos adicionales que no están en la validación estándar
             $userData['estado_tipo_id'] = (int)($_POST['estado_tipo_id'] ?? 1);
             $userData['fecha_inicio'] = !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null;
@@ -621,6 +656,12 @@ class UserController extends BaseController
                 return;
             }
 
+            // Validar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError(AppConstants::ROUTE_USERS, 'Token de seguridad inválido');
+                return;
+            }
+
             // No permitir que el usuario se elimine a sí mismo
             if ($id == $currentUser['id']) {
                 $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_CANNOT_DELETE_OWN_USER);
@@ -638,13 +679,6 @@ class UserController extends BaseController
             $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
-
-    /**
-     * Validar datos del usuario para actualización
-     */
-
-
-
 
     /**
      * API: Obtener detalles de un usuario
@@ -776,8 +810,6 @@ class UserController extends BaseController
         }
     }
 
-
-
     /**
      * API: Validar campos de usuario (para create.php)
      */
@@ -787,7 +819,7 @@ class UserController extends BaseController
             // Configurar headers para respuesta JSON
             header('Content-Type: application/json');
             header('Cache-Control: no-cache, must-revalidate');
-            
+
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
@@ -845,11 +877,6 @@ class UserController extends BaseController
     }
 
     /**
-     * GAP 1 y GAP 2: Validar lógica de usuarios cliente
-     */
-
-
-    /**
      * Obtener nombre del tipo de usuario por ID
      */
     private function getUserTypeName(int $userTypeId): string
@@ -895,7 +922,7 @@ class UserController extends BaseController
             // Validar reglas de negocio según tipo de usuario
             if (isset($data['usuario_tipo_id'])) {
                 $userType = $this->getUserTypeNameById((int)$data['usuario_tipo_id']);
-                
+
                 // Validar usuarios tipo 'client'
                 if ($userType === 'client') {
                     if (empty($data['cliente_id'])) {
@@ -980,7 +1007,7 @@ class UserController extends BaseController
 
             // Obtener personas disponibles (sin usuario asociado) o la persona actual del usuario
             $personas = $this->userModel->getAvailablePersonas($search);
-            
+
             // Si estamos editando un usuario, incluir su persona actual aunque tenga usuario asociado
             if ($currentUserId > 0) {
                 $currentUserData = $this->userModel->getById($currentUserId);
@@ -993,7 +1020,7 @@ class UserController extends BaseController
                             break;
                         }
                     }
-                    
+
                     // Si no está en la lista, agregarla al principio
                     if (!$personaExists) {
                         $currentPersona = [
@@ -1018,4 +1045,151 @@ class UserController extends BaseController
         }
     }
 
+    /**
+     * Buscar personas disponibles en la base de datos (sin usuario asociado)
+     */
+    private function searchAvailablePersonas(string $search): array
+    {
+        $sql = "SELECT id, nombre_completo, rut, telefono
+                FROM personas 
+                WHERE (nombre_completo LIKE :search 
+                   OR rut LIKE :search) 
+                AND id NOT IN (SELECT persona_id FROM usuarios WHERE persona_id IS NOT NULL)
+                ORDER BY nombre_completo
+                LIMIT 10";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['search' => "%{$search}%"]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Manejar búsqueda mejorada de personas
+     */
+    private function handlePersonaSearch()
+    {
+        $search = trim($_POST['persona_search'] ?? '');
+        $searchType = $_POST['search_type'] ?? 'all'; // 'all', 'rut', 'name'
+        $currentUserId = (int)($_POST['current_user_id'] ?? 0); // Para edición
+        
+        try {
+            $personas = [];
+            
+            // Si no hay término de búsqueda, traer todas las personas
+            if (empty($search)) {
+                $personas = $this->userModel->getAllPersonas($currentUserId > 0 ? $currentUserId : null);
+            } else {
+                // Buscar según el tipo especificado
+                switch ($searchType) {
+                    case 'rut':
+                        $personas = $this->userModel->searchPersonasByRut($search, $currentUserId > 0 ? $currentUserId : null);
+                        break;
+                    case 'name':
+                        $personas = $this->userModel->searchPersonasByName($search, $currentUserId > 0 ? $currentUserId : null);
+                        break;
+                    case 'all':
+                    default:
+                        $personas = $this->userModel->searchPersonasAdvanced($search, 'all', true, $currentUserId > 0 ? $currentUserId : null);
+                        break;
+                }
+            }
+
+            if (empty($personas)) {
+                $_SESSION['errors'] = empty($search) 
+                    ? ['No se encontraron personas en el sistema'] 
+                    : ['No se encontraron personas con ese criterio de búsqueda'];
+            } else {
+                $_SESSION['persona_results'] = $personas;
+                $_SESSION['search_stats'] = [
+                    'total' => count($personas),
+                    'available' => count(array_filter($personas, function($p) { return $p['has_user'] == 0; })),
+                    'assigned' => count(array_filter($personas, function($p) { return $p['has_user'] == 1; }))
+                ];
+            }
+
+            $_SESSION['old_input'] = $_POST;
+            
+            // Redireccionar según el contexto
+            if ($currentUserId > 0) {
+                $this->redirectTo("/users/edit?id={$currentUserId}");
+            } else {
+                $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+            }
+        } catch (Exception $e) {
+            error_log("Error en búsqueda de personas: " . $e->getMessage());
+            $_SESSION['errors'] = ['Error al buscar personas'];
+            $_SESSION['old_input'] = $_POST;
+            
+            if ($currentUserId > 0) {
+                $this->redirectTo("/users/edit?id={$currentUserId}");
+            } else {
+                $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+            }
+        }
+    }
+
+    /**
+     * Validar datos del usuario (método simplificado)
+     */
+    private function validateUserDataSimplified(array $data): array
+    {
+        $errors = [];
+
+        // Validar campos requeridos
+        $personaId = $data['persona_id'] ?? $data['persona_id_hidden'] ?? '';
+        if (empty($personaId)) {
+            $errors[] = 'Debe seleccionar una persona';
+        }
+
+        if (empty($data['email'])) {
+            $errors[] = 'El email es requerido';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'El email no es válido';
+        } elseif (!$this->validationService->isEmailAvailable($data['email'])) {
+            $errors[] = 'El email ya está registrado';
+        }
+
+        if (empty($data['nombre_usuario'])) {
+            $errors[] = 'El nombre de usuario es requerido';
+        } elseif (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $data['nombre_usuario'])) {
+            $errors[] = 'El nombre de usuario debe tener entre 3 y 20 caracteres alfanuméricos o guiones bajos';
+        } elseif (!$this->validationService->isUsernameAvailable($data['nombre_usuario'])) {
+            $errors[] = 'El nombre de usuario ya existe';
+        }
+
+        if (empty($data['password'])) {
+            $errors[] = 'La contraseña es requerida';
+        } elseif (strlen($data['password']) < 8) {
+            $errors[] = 'La contraseña debe tener al menos 8 caracteres';
+        }
+
+        if (empty($data['password_confirm'])) {
+            $errors[] = 'Debe confirmar la contraseña';
+        } elseif ($data['password'] !== $data['password_confirm']) {
+            $errors[] = 'Las contraseñas no coinciden';
+        }
+
+        if (empty($data['usuario_tipo_id'])) {
+            $errors[] = 'Debe seleccionar un tipo de usuario';
+        }
+
+        // Validar fechas si se proporcionan
+        if (!empty($data['fecha_inicio']) && !empty($data['fecha_termino'])) {
+            if ($data['fecha_inicio'] > $data['fecha_termino']) {
+                $errors[] = 'La fecha de inicio no puede ser posterior a la fecha de término';
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Redireccionar simple
+     */
+    private function redirectTo(string $url): void
+    {
+        header("Location: $url");
+        exit;
+    }
 }

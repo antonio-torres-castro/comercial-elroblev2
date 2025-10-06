@@ -27,56 +27,27 @@
             font-weight: 600;
         }
 
-        .persona-search-card {
-            border: 2px dashed #dee2e6;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            text-align: center;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-
-        .persona-search-card:hover {
-            border-color: var(--setap-primary);
-            background: #fff;
-        }
-
-        .persona-selected {
-            border: 2px solid var(--setap-primary);
-            background: #e7f3ff;
-        }
-
-        .persona-info {
-            background: white;
+        .persona-result-card {
             border: 1px solid #dee2e6;
             border-radius: 0.5rem;
             padding: 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .persona-result-card:hover {
+            border-color: var(--setap-primary);
+            background: #f8f9fa;
+        }
+
+        .persona-result-card.selected {
+            border: 2px solid var(--setap-primary);
+            background: #e7f3ff;
         }
 
         .client-conditional {
             display: none;
         }
-
-        .counterparty-search {
-            display: none;
-        }
-
-        .password-strength {
-            font-size: 0.875em;
-            margin-top: 5px;
-        }
-
-        .strength-weak { color: #dc3545; }
-        .strength-medium { color: #ffc107; }
-        .strength-strong { color: #198754; }
-
-        .availability-check {
-            font-size: 0.875em;
-            margin-top: 5px;
-        }
-
-        .available { color: #198754; }
-        .unavailable { color: #dc3545; }
     </style>
 </head>
 
@@ -98,131 +69,287 @@
 
                 <div class="row justify-content-center">
                     <div class="col-md-10">
-                        <form id="userForm" method="POST" action="/users/store">
-                            <?= Security::renderCsrfField() ?>
-                            
-                            <!-- Paso 1: Seleccionar Persona -->
-                            <div class="form-section">
-                                <h6><i class="bi bi-person-check"></i> Paso 1: Seleccionar Persona</h6>
-                                
-                                <div id="personaSearchCard" class="persona-search-card" onclick="openPersonaModal()">
-                                    <i class="bi bi-search display-4 text-muted"></i>
-                                    <h5 class="mt-3">Buscar Persona</h5>
-                                    <p class="text-muted">Haga clic para buscar y seleccionar una persona que no tenga usuario asociado</p>
-                                    <button type="button" class="btn btn-primary">
-                                        <i class="bi bi-search"></i> Buscar Personas
-                                    </button>
-                                </div>
-
-                                <div id="personaSelected" class="persona-info mt-3" style="display: none;">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <strong>Nombre:</strong> <span id="selectedPersonaNombre"></span>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <strong>RUT:</strong> <span id="selectedPersonaRut"></span>
-                                        </div>
-                                        <div class="col-md-6 mt-2">
-                                            <strong>Teléfono:</strong> <span id="selectedPersonaTelefono"></span>
-                                        </div>
-                                        <div class="col-md-6 mt-2">
-                                            <strong>Dirección:</strong> <span id="selectedPersonaDireccion"></span>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="clearPersonaSelection()">
-                                        <i class="bi bi-x"></i> Cambiar Persona
-                                    </button>
-                                </div>
-
-                                <input type="hidden" id="persona_id" name="persona_id" required>
+                        
+                        <!-- Mostrar errores si existen -->
+                        <?php if (isset($_SESSION['errors'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Se encontraron errores:</h6>
+                                <ul class="mb-0">
+                                    <?php foreach ($_SESSION['errors'] as $error): ?>
+                                        <li><?= htmlspecialchars($error) ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
+                            <?php unset($_SESSION['errors']); ?>
+                        <?php endif; ?>
 
-                            <!-- Paso 2: Datos del Usuario -->
-                            <div class="form-section" id="userDataSection" style="display: none;">
-                                <h6><i class="bi bi-person-gear"></i> Paso 2: Datos del Usuario</h6>
+                        <!-- Mostrar mensaje de éxito si existe -->
+                        <?php if (isset($_SESSION['success_message'])): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($_SESSION['success_message']) ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <?php unset($_SESSION['success_message']); ?>
+                        <?php endif; ?>
+
+                        <!-- Recuperar datos anteriores si existen -->
+                        <?php 
+                        $oldInput = $_SESSION['old_input'] ?? [];
+                        if (isset($_SESSION['old_input'])) {
+                            unset($_SESSION['old_input']);
+                        }
+                        ?>
+
+                        <!-- Paso 1: Buscar y Seleccionar Persona -->
+                        <div class="form-section">
+                            <h6><i class="bi bi-person-check"></i> Paso 1: Buscar y Seleccionar Persona</h6>
+                            
+                            <!-- Formulario de búsqueda -->
+                            <form method="POST" action="/users/seek_personas" class="needs-validation" novalidate id="search-form">
+                                <?= Security::renderCsrfField() ?>
                                 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" id="email" name="email" required>
-                                        <div id="emailCheck" class="availability-check"></div>
+                                <!-- Formulario de búsqueda mejorado -->
+                                <div class="row mb-3">
+                                    <div class="col-md-5">
+                                        <label for="persona_search" class="form-label">Buscar Persona</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="persona_search" 
+                                               name="persona_search"
+                                               placeholder="RUT completo o parte del nombre"
+                                               value="<?= htmlspecialchars($oldInput['persona_search'] ?? '') ?>">
+                                        <div class="form-text">Deje vacío para ver todas las personas</div>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="nombre_usuario" class="form-label">Nombre de Usuario <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required>
-                                        <div id="usernameCheck" class="availability-check"></div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <input type="password" class="form-control" id="password" name="password" required>
-                                            <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password')">
-                                                <i class="bi bi-eye" id="passwordToggleIcon"></i>
-                                            </button>
-                                        </div>
-                                        <div id="passwordStrength" class="password-strength"></div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="usuario_tipo_id" class="form-label">Tipo de Usuario <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="usuario_tipo_id" name="usuario_tipo_id" required onchange="handleUserTypeChange()">
-                                            <option value="">Seleccionar tipo</option>
-                                            <?php foreach ($userTypes as $type): ?>
-                                                <option value="<?= $type['id'] ?>" data-name="<?= htmlspecialchars($type['nombre']) ?>">
-                                                    <?= htmlspecialchars($type['nombre']) ?> - <?= htmlspecialchars($type['descripcion']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
+                                    <div class="col-md-3">
+                                        <label for="search_type" class="form-label">Tipo de Búsqueda</label>
+                                        <select class="form-select" id="search_type" name="search_type">
+                                            <option value="all" <?= ($oldInput['search_type'] ?? 'all') === 'all' ? 'selected' : '' ?>>Buscar en todo</option>
+                                            <option value="rut" <?= ($oldInput['search_type'] ?? '') === 'rut' ? 'selected' : '' ?>>Solo por RUT</option>
+                                            <option value="name" <?= ($oldInput['search_type'] ?? '') === 'name' ? 'selected' : '' ?>>Solo por nombre</option>
                                         </select>
                                     </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button type="submit" name="search_persona" class="btn btn-outline-primary me-2">
+                                            <i class="bi bi-search"></i> Buscar
+                                        </button>
+                                        <button type="submit" name="search_persona" onclick="document.getElementById('persona_search').value='';" class="btn btn-outline-secondary">
+                                            <i class="bi bi-list"></i> Ver Todas
+                                        </button>
+                                    </div>
                                 </div>
+                            </form>
 
-                                <!-- Sección de Cliente (solo para client y counterparty) -->
-                                <div id="clientSection" class="client-conditional">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="cliente_id" class="form-label">Cliente <span class="text-danger">*</span></label>
-                                            <select class="form-select" id="cliente_id" name="cliente_id" onchange="handleClientChange()">
-                                                <option value="">Seleccionar cliente</option>
-                                                <?php foreach ($clients as $client): ?>
-                                                    <option value="<?= $client['id'] ?>">
-                                                        <?= htmlspecialchars($client['razon_social']) ?> (<?= htmlspecialchars($client['rut']) ?>)
+                            <!-- Estadísticas de búsqueda -->
+                            <?php if (isset($_SESSION['search_stats'])): ?>
+                                <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <i class="bi bi-info-circle"></i>
+                                        <strong>Resultados:</strong> <?= $_SESSION['search_stats']['total'] ?> persona(s) encontrada(s)
+                                    </div>
+                                    <div class="small">
+                                        <span class="badge bg-success"><?= $_SESSION['search_stats']['available'] ?> disponibles</span>
+                                        <span class="badge bg-warning"><?= $_SESSION['search_stats']['assigned'] ?> asignadas</span>
+                                    </div>
+                                </div>
+                                <?php unset($_SESSION['search_stats']); ?>
+                            <?php endif; ?>
+
+                            <!-- Resultados de búsqueda mejorados -->
+                            <?php if (isset($_SESSION['persona_results'])): ?>
+                                <div class="mb-3">
+                                    <label class="form-label">Seleccionar Persona *</label>
+                                    <?php if (empty($_SESSION['persona_results'])): ?>
+                                        <div class="alert alert-warning">
+                                            <i class="bi bi-exclamation-triangle"></i> No se encontraron personas con ese criterio de búsqueda.
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="row" style="max-height: 400px; overflow-y: auto;">
+                                            <?php foreach ($_SESSION['persona_results'] as $persona): ?>
+                                                <div class="col-md-6 mb-2">
+                                                    <div class="persona-result-card <?= $persona['has_user'] ? 'border-warning' : '' ?>">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" 
+                                                                   type="radio" 
+                                                                   name="persona_id" 
+                                                                   id="persona_<?= $persona['id'] ?>"
+                                                                   value="<?= $persona['id'] ?>"
+                                                                   <?= ($oldInput['persona_id'] ?? '') == $persona['id'] ? 'checked' : '' ?>
+                                                                   onchange="updatePersonaSelection(this)">
+                                                            <label class="form-check-label w-100" for="persona_<?= $persona['id'] ?>">
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <strong><?= htmlspecialchars($persona['nombre']) ?></strong>
+                                                                        <?php if ($persona['has_user']): ?>
+                                                                            <span class="badge bg-warning ms-2">Asignada a: <?= htmlspecialchars($persona['usuario_asociado']) ?></span>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                    <div class="col-12">
+                                                                        <small class="text-muted">RUT: <?= htmlspecialchars($persona['rut']) ?></small>
+                                                                    </div>
+                                                                    <?php if (!empty($persona['telefono'])): ?>
+                                                                        <div class="col-12">
+                                                                            <small class="text-muted">Tel: <?= htmlspecialchars($persona['telefono']) ?></small>
+                                                                        </div>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php unset($_SESSION['persona_results']); ?>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Paso 2: Crear Usuario -->
+                        <form method="POST" action="/users/store" class="needs-validation" novalidate id="create-form">
+                            <?= Security::renderCsrfField() ?>
+                            
+                            <!-- Campo oculto para persona seleccionada -->
+                            <input type="hidden" id="persona_id_hidden" name="persona_id_hidden" value="<?= htmlspecialchars($oldInput['persona_id'] ?? '') ?>">
+
+                            <!-- Paso 2: Datos del Usuario -->
+                            <div class="form-section">
+                                <h6><i class="bi bi-person-gear"></i> Paso 2: Información del Usuario</h6>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email *</label>
+                                            <input type="email" 
+                                                   class="form-control" 
+                                                   id="email" 
+                                                   name="email"
+                                                   placeholder="usuario@dominio.com"
+                                                   value="<?= htmlspecialchars($oldInput['email'] ?? '') ?>"
+                                                   required>
+                                            <div class="invalid-feedback">Ingrese un email válido</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="nombre_usuario" class="form-label">Nombre de Usuario *</label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="nombre_usuario" 
+                                                   name="nombre_usuario"
+                                                   placeholder="nombre_usuario"
+                                                   value="<?= htmlspecialchars($oldInput['nombre_usuario'] ?? '') ?>"
+                                                   pattern="[a-zA-Z0-9_]{3,20}"
+                                                   required>
+                                            <div class="form-text">3-20 caracteres, solo letras, números y guión bajo</div>
+                                            <div class="invalid-feedback">El nombre de usuario debe tener entre 3 y 20 caracteres alfanuméricos</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">Contraseña *</label>
+                                            <input type="password" 
+                                                   class="form-control" 
+                                                   id="password" 
+                                                   name="password"
+                                                   minlength="8"
+                                                   required>
+                                            <div class="form-text">Mínimo 8 caracteres</div>
+                                            <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="password_confirm" class="form-label">Confirmar Contraseña *</label>
+                                            <input type="password" 
+                                                   class="form-control" 
+                                                   id="password_confirm" 
+                                                   name="password_confirm"
+                                                   required>
+                                            <div class="invalid-feedback">Las contraseñas no coinciden</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Paso 3: Configuración del Sistema -->
+                            <div class="form-section">
+                                <h6><i class="bi bi-gear"></i> Paso 3: Configuración del Sistema</h6>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="usuario_tipo_id" class="form-label">Tipo de Usuario *</label>
+                                            <select class="form-select" id="usuario_tipo_id" name="usuario_tipo_id" required onchange="toggleClientFields()">
+                                                <option value="">Seleccione un tipo</option>
+                                                <?php foreach ($userTypes as $type): ?>
+                                                    <option value="<?= $type['id'] ?>" 
+                                                            data-name="<?= htmlspecialchars(strtolower($type['nombre'])) ?>"
+                                                            <?= ($oldInput['usuario_tipo_id'] ?? '') == $type['id'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($type['nombre']) ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
+                                            <div class="invalid-feedback">Debe seleccionar un tipo de usuario</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3 client-conditional" id="client-field">
+                                            <label for="cliente_id" class="form-label">Cliente Asociado *</label>
+                                            <select class="form-select" id="cliente_id" name="cliente_id">
+                                                <option value="">Seleccione un cliente</option>
+                                                <?php foreach ($clients as $client): ?>
+                                                    <option value="<?= $client['id'] ?>"
+                                                            <?= ($oldInput['cliente_id'] ?? '') == $client['id'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($client['nombre']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="invalid-feedback">Debe seleccionar un cliente para este tipo de usuario</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Información adicional para counterparty -->
-                                <div id="counterpartyInfo" class="counterparty-search">
-                                    <div class="alert alert-info">
-                                        <i class="bi bi-info-circle"></i>
-                                        <strong>Usuario Counterparty:</strong> La persona seleccionada debe estar registrada como contraparte del cliente.
-                                    </div>
-                                </div>
-
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
-                                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_inicio" class="form-label">Fecha de Inicio (Opcional)</label>
+                                            <input type="date" 
+                                                   class="form-control" 
+                                                   id="fecha_inicio" 
+                                                   name="fecha_inicio"
+                                                   value="<?= htmlspecialchars($oldInput['fecha_inicio'] ?? '') ?>">
+                                        </div>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="fecha_termino" class="form-label">Fecha de Término</label>
-                                        <input type="date" class="form-control" id="fecha_termino" name="fecha_termino">
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_termino" class="form-label">Fecha de Término (Opcional)</label>
+                                            <input type="date" 
+                                                   class="form-control" 
+                                                   id="fecha_termino" 
+                                                   name="fecha_termino"
+                                                   value="<?= htmlspecialchars($oldInput['fecha_termino'] ?? '') ?>">
+                                            <div class="invalid-feedback">La fecha de término debe ser posterior a la fecha de inicio</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="text-end">
-                                <button type="button" class="btn btn-secondary me-2" onclick="window.location.href='/users'">
-                                    <i class="bi bi-x-circle"></i> Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
-                                    <i class="bi bi-check-circle"></i> Crear Usuario
-                                </button>
+                            <!-- Botones de acción -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between">
+                                        <a href="/users" class="btn btn-secondary">
+                                            <i class="bi bi-arrow-left"></i> Cancelar
+                                        </a>
+                                        <button type="submit" name="create_user" class="btn btn-primary">
+                                            <i class="bi bi-person-plus"></i> Crear Usuario
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+
                         </form>
                     </div>
                 </div>
@@ -230,357 +357,196 @@
         </div>
     </div>
 
-    <!-- Modal para Buscar Personas -->
-    <div class="modal fade" id="personaModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-search"></i> Buscar Persona</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <input type="text" class="form-control" id="personaSearch" placeholder="Buscar por nombre o RUT..." onkeyup="searchPersonas()">
-                    </div>
-                    <div id="personaResults">
-                        <!-- Resultados de búsqueda aquí -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let selectedPersona = null;
-        const personaModal = new bootstrap.Modal(document.getElementById('personaModal'));
-
-        // Cargar personas disponibles al abrir modal
-        function openPersonaModal() {
-            personaModal.show();
-            loadAvailablePersonas();
-        }
-
-        // Cargar personas disponibles
-        function loadAvailablePersonas(search = '') {
-            const url = `/users/search-personas?search=${encodeURIComponent(search)}`;
-            
-            fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => {
-                    // Verificar si la respuesta es exitosa
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    // Verificar si la respuesta es JSON
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        // Si no es JSON, obtener el texto para debugging
-                        return response.text().then(text => {
-                            console.error('Respuesta no es JSON:', text.substring(0, 200));
-                            throw new Error('Respuesta del servidor no es JSON válido');
-                        });
-                    }
-                    
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        displayPersonas(data.personas);
-                    } else {
-                        document.getElementById('personaResults').innerHTML = '<p class="text-danger">Error: ' + (data.message || 'Error cargando personas') + '</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('personaResults').innerHTML = '<p class="text-danger">Error de conexión: ' + error.message + '</p>';
-                });
-        }
-
-        // Mostrar personas en el modal
-        function displayPersonas(personas) {
-            const container = document.getElementById('personaResults');
-            
-            if (personas.length === 0) {
-                container.innerHTML = '<p class="text-muted text-center">No se encontraron personas disponibles</p>';
-                return;
-            }
-
-            let html = '<div class="row">';
-            personas.forEach(persona => {
-                html += `
-                    <div class="col-md-6 mb-3">
-                        <div class="card persona-card" onclick="selectPersona(${persona.id}, '${persona.nombre}', '${persona.rut}', '${persona.telefono || ''}', '${persona.direccion || ''}')" style="cursor: pointer;">
-                            <div class="card-body">
-                                <h6 class="card-title">${persona.nombre}</h6>
-                                <p class="card-text">
-                                    <small class="text-muted">RUT: ${persona.rut}</small><br>
-                                    ${persona.telefono ? `<small>Tel: ${persona.telefono}</small><br>` : ''}
-                                    ${persona.direccion ? `<small>${persona.direccion}</small>` : ''}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
+        // Función para actualizar selección de persona
+        function updatePersonaSelection(radio) {
+            // Limpiar clases de selección previa
+            document.querySelectorAll('.persona-result-card').forEach(card => {
+                card.classList.remove('selected');
             });
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        // Seleccionar persona
-        function selectPersona(id, nombre, rut, telefono, direccion) {
-            selectedPersona = { id, nombre, rut, telefono, direccion };
             
-            // Actualizar UI
-            document.getElementById('persona_id').value = id;
-            document.getElementById('selectedPersonaNombre').textContent = nombre;
-            document.getElementById('selectedPersonaRut').textContent = rut;
-            document.getElementById('selectedPersonaTelefono').textContent = telefono || 'No especificado';
-            document.getElementById('selectedPersonaDireccion').textContent = direccion || 'No especificada';
-            
-            document.getElementById('personaSearchCard').style.display = 'none';
-            document.getElementById('personaSelected').style.display = 'block';
-            document.getElementById('userDataSection').style.display = 'block';
-            
-            checkFormCompletion();
-            personaModal.hide();
-        }
-
-        // Limpiar selección de persona
-        function clearPersonaSelection() {
-            selectedPersona = null;
-            document.getElementById('persona_id').value = '';
-            document.getElementById('personaSearchCard').style.display = 'block';
-            document.getElementById('personaSelected').style.display = 'none';
-            document.getElementById('userDataSection').style.display = 'none';
-            checkFormCompletion();
-        }
-
-        // Buscar personas (con debounce)
-        let searchTimeout;
-        function searchPersonas() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const search = document.getElementById('personaSearch').value;
-                loadAvailablePersonas(search);
-            }, 300);
-        }
-
-        // Manejar cambio de tipo de usuario
-        function handleUserTypeChange() {
-            const select = document.getElementById('usuario_tipo_id');
-            const selectedOption = select.options[select.selectedIndex];
-            const userTypeName = selectedOption.getAttribute('data-name');
-            
-            const clientSection = document.getElementById('clientSection');
-            const counterpartyInfo = document.getElementById('counterpartyInfo');
-            const clienteSelect = document.getElementById('cliente_id');
-            
-            if (userTypeName === 'client' || userTypeName === 'counterparty') {
-                clientSection.style.display = 'block';
-                clienteSelect.required = true;
+            // Agregar clase a la seleccionada
+            if (radio.checked) {
+                radio.closest('.persona-result-card').classList.add('selected');
+                document.getElementById('persona_id_hidden').value = radio.value;
                 
-                if (userTypeName === 'counterparty') {
-                    counterpartyInfo.style.display = 'block';
-                } else {
-                    counterpartyInfo.style.display = 'none';
-                }
-            } else {
-                clientSection.style.display = 'none';
-                counterpartyInfo.style.display = 'none';
-                clienteSelect.required = false;
-                clienteSelect.value = '';
+                // Mostrar indicador visual de que hay una persona seleccionada
+                showPersonaSelectedFeedback(radio);
+            }
+        }
+
+        // Función para mostrar feedback visual cuando se selecciona una persona
+        function showPersonaSelectedFeedback(radio) {
+            const formSection = document.querySelector('.form-section');
+            
+            // Remover feedback previo
+            const existingFeedback = formSection.querySelector('.persona-selected-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
             }
             
-            checkFormCompletion();
-        }
-
-        // Manejar cambio de cliente
-        function handleClientChange() {
-            checkFormCompletion();
-        }
-
-        // Verificar disponibilidad de email
-        let emailTimeout;
-        document.getElementById('email').addEventListener('input', function() {
-            clearTimeout(emailTimeout);
-            emailTimeout = setTimeout(() => {
-                const email = this.value;
-                if (email.length > 0) {
-                    checkEmailAvailability(email);
-                }
-            }, 500);
-        });
-
-        // Verificar disponibilidad de username
-        let usernameTimeout;
-        document.getElementById('nombre_usuario').addEventListener('input', function() {
-            clearTimeout(usernameTimeout);
-            usernameTimeout = setTimeout(() => {
-                const username = this.value;
-                if (username.length > 0) {
-                    checkUsernameAvailability(username);
-                }
-            }, 500);
-        });
-
-        // Verificar fortaleza de contraseña
-        document.getElementById('password').addEventListener('input', function() {
-            checkPasswordStrength(this.value);
-        });
-
-        function checkEmailAvailability(email) {
-            fetch(`/users/validate-field?field=email&value=${encodeURIComponent(email)}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const checkDiv = document.getElementById('emailCheck');
-                    if (data.valid) {
-                        checkDiv.innerHTML = '<i class="bi bi-check-circle"></i> Email disponible';
-                        checkDiv.className = 'availability-check available';
-                    } else {
-                        checkDiv.innerHTML = '<i class="bi bi-x-circle"></i> ' + data.message;
-                        checkDiv.className = 'availability-check unavailable';
-                    }
-                    checkFormCompletion();
-                });
-        }
-
-        function checkUsernameAvailability(username) {
-            fetch(`/users/validate-field?field=username&value=${encodeURIComponent(username)}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const checkDiv = document.getElementById('usernameCheck');
-                    if (data.valid) {
-                        checkDiv.innerHTML = '<i class="bi bi-check-circle"></i> Usuario disponible';
-                        checkDiv.className = 'availability-check available';
-                    } else {
-                        checkDiv.innerHTML = '<i class="bi bi-x-circle"></i> ' + data.message;
-                        checkDiv.className = 'availability-check unavailable';
-                    }
-                    checkFormCompletion();
-                });
-        }
-
-        function checkPasswordStrength(password) {
-            const strengthDiv = document.getElementById('passwordStrength');
-            let strength = 0;
-            let messages = [];
-
-            if (password.length >= 8) strength++;
-            else messages.push('mínimo 8 caracteres');
-
-            if (/[A-Z]/.test(password)) strength++;
-            else messages.push('una mayúscula');
-
-            if (/[a-z]/.test(password)) strength++;
-            else messages.push('una minúscula');
-
-            if (/[0-9]/.test(password)) strength++;
-            else messages.push('un número');
-
-            if (/[^a-zA-Z0-9]/.test(password)) strength++;
-            else messages.push('un carácter especial');
-
-            if (strength < 3) {
-                strengthDiv.innerHTML = '<i class="bi bi-shield-x"></i> Débil - Falta: ' + messages.join(', ');
-                strengthDiv.className = 'password-strength strength-weak';
-            } else if (strength < 5) {
-                strengthDiv.innerHTML = '<i class="bi bi-shield-check"></i> Media - Falta: ' + messages.join(', ');
-                strengthDiv.className = 'password-strength strength-medium';
-            } else {
-                strengthDiv.innerHTML = '<i class="bi bi-shield-fill-check"></i> Fuerte';
-                strengthDiv.className = 'password-strength strength-strong';
-            }
-
-            checkFormCompletion();
-        }
-
-        function checkFormCompletion() {
-            const submitBtn = document.getElementById('submitBtn');
-            const requiredFields = ['persona_id', 'email', 'nombre_usuario', 'password', 'usuario_tipo_id'];
+            // Obtener datos de la persona seleccionada
+            const label = radio.closest('.persona-result-card').querySelector('label');
+            const personaName = label.querySelector('strong').textContent;
+            const personaRut = label.querySelector('small').textContent;
             
-            let allValid = true;
+            // Crear feedback
+            const feedback = document.createElement('div');
+            feedback.className = 'alert alert-success persona-selected-feedback mt-3';
+            feedback.innerHTML = `
+                <i class="bi bi-check-circle"></i> 
+                <strong>Persona seleccionada:</strong> ${personaName} - ${personaRut}
+                <br><small>Ahora puede continuar con los datos del usuario en el Paso 2.</small>
+            `;
             
-            // Verificar campos requeridos
-            for (let field of requiredFields) {
-                const element = document.getElementById(field);
-                if (!element.value) {
-                    allValid = false;
-                    break;
-                }
-            }
-            
-            // Verificar si tipo requiere cliente
+            formSection.appendChild(feedback);
+        }
+
+        // Función para mostrar/ocultar campos condicionales de cliente
+        function toggleClientFields() {
             const userTypeSelect = document.getElementById('usuario_tipo_id');
             const selectedOption = userTypeSelect.options[userTypeSelect.selectedIndex];
             const userTypeName = selectedOption ? selectedOption.getAttribute('data-name') : '';
+            const clientField = document.getElementById('client-field');
+            const clientSelect = document.getElementById('cliente_id');
             
-            if ((userTypeName === 'client' || userTypeName === 'counterparty') && !document.getElementById('cliente_id').value) {
-                allValid = false;
-            }
-            
-            // Verificar availability checks
-            const emailCheck = document.getElementById('emailCheck');
-            const usernameCheck = document.getElementById('usernameCheck');
-            
-            if (emailCheck.classList.contains('unavailable') || usernameCheck.classList.contains('unavailable')) {
-                allValid = false;
-            }
-            
-            submitBtn.disabled = !allValid;
-        }
-
-        function togglePassword(fieldId) {
-            const field = document.getElementById(fieldId);
-            const icon = document.getElementById(fieldId + 'ToggleIcon');
-            
-            if (field.type === 'password') {
-                field.type = 'text';
-                icon.className = 'bi bi-eye-slash';
+            // Mostrar campo cliente solo para tipos 'client' y 'counterparty'
+            if (userTypeName === 'client' || userTypeName === 'counterparty') {
+                clientField.style.display = 'block';
+                clientField.classList.add('client-conditional');
+                clientSelect.setAttribute('required', 'required');
             } else {
-                field.type = 'password';
-                icon.className = 'bi bi-eye';
+                clientField.style.display = 'none';
+                clientField.classList.remove('client-conditional');
+                clientSelect.removeAttribute('required');
+                clientSelect.value = '';
             }
         }
 
-        // Manejar envío del formulario
-        document.getElementById('userForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            fetch('/users/store', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/users?success=' + encodeURIComponent(data.message);
-                } else {
-                    alert('Error: ' + (data.error || 'Error desconocido'));
+        // Inicialización al cargar la página
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                // Inicializar campos condicionales
+                toggleClientFields();
+                
+                // Marcar persona seleccionada si existe
+                const selectedPersonaId = document.getElementById('persona_id_hidden').value;
+                if (selectedPersonaId) {
+                    const radio = document.querySelector(`input[name="persona_id"][value="${selectedPersonaId}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        updatePersonaSelection(radio);
+                    }
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error de conexión');
-            });
+                
+                // Configurar validación solo para el formulario de crear usuario
+                const createForm = document.getElementById('create-form');
+                if (createForm) {
+                    createForm.addEventListener('submit', function(event) {
+                        // Validar persona seleccionada
+                        const personaId = document.getElementById('persona_id_hidden').value;
+                        const personaRadios = document.querySelectorAll('input[name="persona_id"]');
+                        let personaSelected = false;
+                        
+                        personaRadios.forEach(radio => {
+                            if (radio.checked) {
+                                personaSelected = true;
+                                document.getElementById('persona_id_hidden').value = radio.value;
+                            }
+                        });
+
+                        if (!personaSelected && !personaId) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            
+                            // Mostrar alerta más clara
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                            alertDiv.innerHTML = `
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Error:</strong> Debe seleccionar una persona antes de crear el usuario.
+                                <br><small>Use el formulario de búsqueda en el Paso 1 para buscar y seleccionar una persona.</small>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            `;
+                            
+                            // Insertar alerta antes del formulario
+                            createForm.parentNode.insertBefore(alertDiv, createForm);
+                            
+                            // Scroll hacia arriba para mostrar la alerta
+                            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return;
+                        }
+                        
+                        // Validar confirmación de contraseña
+                        const password = document.getElementById('password').value;
+                        const passwordConfirm = document.getElementById('password_confirm').value;
+                        const passwordConfirmInput = document.getElementById('password_confirm');
+                        
+                        if (password !== passwordConfirm) {
+                            passwordConfirmInput.setCustomValidity('Las contraseñas no coinciden');
+                        } else {
+                            passwordConfirmInput.setCustomValidity('');
+                        }
+                        
+                        // Validar cliente si es requerido
+                        const userTypeSelect = document.getElementById('usuario_tipo_id');
+                        const selectedOption = userTypeSelect.options[userTypeSelect.selectedIndex];
+                        const userTypeName = selectedOption ? selectedOption.getAttribute('data-name') : '';
+                        const clientSelect = document.getElementById('cliente_id');
+                        
+                        if ((userTypeName === 'client' || userTypeName === 'counterparty') && !clientSelect.value) {
+                            clientSelect.setCustomValidity('Debe seleccionar un cliente');
+                        } else {
+                            clientSelect.setCustomValidity('');
+                        }
+                        
+                        if (createForm.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        createForm.classList.add('was-validated');
+                    }, false);
+                }
+                
+                // Configurar validación básica para el formulario de búsqueda (sin validaciones complejas)
+                const searchForm = document.getElementById('search-form');
+                if (searchForm) {
+                    searchForm.addEventListener('submit', function(event) {
+                        // No necesita validaciones complejas, solo envío directo
+                    }, false);
+                }
+            }, false);
+        })();
+        
+        // Validación en tiempo real de confirmación de contraseña
+        document.getElementById('password_confirm').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const passwordConfirm = this.value;
+            
+            if (password !== passwordConfirm) {
+                this.setCustomValidity('Las contraseñas no coinciden');
+            } else {
+                this.setCustomValidity('');
+            }
         });
+
+        // Validación de fechas
+        document.getElementById('fecha_inicio').addEventListener('change', validateDates);
+        document.getElementById('fecha_termino').addEventListener('change', validateDates);
+        
+        function validateDates() {
+            const fechaInicio = document.getElementById('fecha_inicio').value;
+            const fechaTermino = document.getElementById('fecha_termino').value;
+            const fechaTerminoInput = document.getElementById('fecha_termino');
+            
+            if (fechaInicio && fechaTermino && fechaInicio > fechaTermino) {
+                fechaTerminoInput.setCustomValidity('La fecha de término debe ser posterior a la fecha de inicio');
+            } else {
+                fechaTerminoInput.setCustomValidity('');
+            }
+        }
     </script>
 </body>
 </html>

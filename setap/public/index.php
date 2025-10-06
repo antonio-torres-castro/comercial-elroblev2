@@ -120,6 +120,10 @@ try {
                     $controller->searchPersonas();
                     break;
                     
+                case 'seek_personas':
+                    $controller->seekPersonas();
+                    break;
+                    
                 case 'validate-field':
                     $controller->validateField();
                     break;

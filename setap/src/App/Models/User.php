@@ -23,7 +23,7 @@ class User
     {
         try {
             $sql = "
-                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id,
+                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id, u.estado_tipo_id,
                        p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
@@ -33,6 +33,7 @@ class User
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id /*siempre tiene un estado el registro*/
                 LEFT JOIN clientes c ON u.cliente_id = c.id
+                WHERE u.estado_tipo_id != 4 /* Excluir usuarios eliminados */
                 ORDER BY u.fecha_Creado DESC
             ";
 
@@ -97,7 +98,7 @@ class User
                     fecha_inicio,
                     fecha_termino,
                     fecha_Creado
-                ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, datetime('now'))
             ";
 
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
@@ -164,7 +165,7 @@ class User
             $usuarioSql = "
                 UPDATE usuarios 
                 SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, 
-                    fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = NOW()
+                    fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = datetime('now')
                 WHERE id = ?
             ";
 
@@ -225,7 +226,7 @@ class User
     public function delete(int $id): bool
     {
         try {
-            $sql = "UPDATE usuarios SET estado_tipo_id = 4, fecha_modificacion = NOW() WHERE id = ?";
+            $sql = "UPDATE usuarios SET estado_tipo_id = 4, fecha_modificacion = datetime('now') WHERE id = ?";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$id]);
         } catch (PDOException $e) {
@@ -240,7 +241,7 @@ class User
     public function updateStatus(int $id, int $status): bool
     {
         try {
-            $sql = "UPDATE usuarios SET estado_tipo_id = ?, fecha_modificacion = NOW() WHERE id = ?";
+            $sql = "UPDATE usuarios SET estado_tipo_id = ?, fecha_modificacion = datetime('now') WHERE id = ?";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$status, $id]);
         } catch (PDOException $e) {
@@ -255,7 +256,7 @@ class User
     public function updatePassword(int $id, string $hashedPassword): bool
     {
         try {
-            $sql = "UPDATE usuarios SET clave_hash = ?, fecha_modificacion = NOW() WHERE id = ?";
+            $sql = "UPDATE usuarios SET clave_hash = ?, fecha_modificacion = datetime('now') WHERE id = ?";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$hashedPassword, $id]);
         } catch (PDOException $e) {
@@ -274,10 +275,9 @@ class User
 
             // Actualizar datos de persona (nombre, teléfono, dirección)
             $personaSql = "
-                UPDATE personas p
-                INNER JOIN usuarios u ON p.id = u.persona_id
-                SET p.nombre = ?, p.telefono = ?, p.direccion = ?, p.fecha_modificacion = NOW()
-                WHERE u.id = ?
+                UPDATE personas 
+                SET nombre = ?, telefono = ?, direccion = ?, fecha_modificacion = datetime('now')
+                WHERE id = (SELECT persona_id FROM usuarios WHERE id = ?)
             ";
 
             $stmt = $this->db->prepare($personaSql);
@@ -291,7 +291,7 @@ class User
             // Actualizar email del usuario (sin cambiar el rol)
             $usuarioSql = "
                 UPDATE usuarios 
-                SET email = ?, fecha_modificacion = NOW()
+                SET email = ?, fecha_modificacion = datetime('now')
                 WHERE id = ?
             ";
 
@@ -498,6 +498,116 @@ class User
             error_log("Error obteniendo personas disponibles: " . $e->getMessage());
             return [];
         }
+    }
+
+    /**
+     * Búsqueda mejorada de personas con opciones flexibles
+     * 
+     * @param string|null $search Término de búsqueda
+     * @param string $searchType Tipo de búsqueda: 'all', 'rut', 'name'
+     * @param bool $includeAssigned Si incluir personas ya asignadas a usuarios
+     * @param int|null $excludeUserId ID de usuario a excluir (para edición)
+     * @return array Lista de personas encontradas
+     */
+    public function searchPersonasAdvanced(?string $search = null, string $searchType = 'all', bool $includeAssigned = true, ?int $excludeUserId = null): array
+    {
+        try {
+            $sql = "
+                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion,
+                       CASE WHEN u.id IS NOT NULL THEN 1 ELSE 0 END as has_user,
+                       CASE WHEN u.id IS NOT NULL THEN u.nombre_usuario ELSE NULL END as usuario_asociado,
+                       CASE WHEN u.id IS NOT NULL THEN u.id ELSE NULL END as usuario_id
+                FROM personas p
+                LEFT JOIN usuarios u ON p.id = u.persona_id
+                WHERE p.estado_tipo_id IN (1, 2)
+            ";
+            
+            $params = [];
+            
+            // Si no se quieren incluir personas asignadas
+            if (!$includeAssigned) {
+                $sql .= " AND u.persona_id IS NULL";
+            }
+            
+            // Si se está editando un usuario, excluir de la verificación de asignación
+            if ($excludeUserId !== null) {
+                $sql .= " AND (u.id IS NULL OR u.id = ?)";
+                $params[] = $excludeUserId;
+            }
+            
+            // Aplicar filtro de búsqueda según tipo
+            if (!empty($search)) {
+                switch ($searchType) {
+                    case 'rut':
+                        // Buscar por RUT exacto (limpiando formato)
+                        $cleanRut = preg_replace('/[^0-9kK]/', '', $search);
+                        $sql .= " AND REPLACE(REPLACE(p.rut, '-', ''), '.', '') LIKE ?";
+                        $params[] = "%{$cleanRut}%";
+                        break;
+                        
+                    case 'name':
+                        // Buscar por coincidencia parcial en nombre
+                        $sql .= " AND p.nombre LIKE ?";
+                        $params[] = "%{$search}%";
+                        break;
+                        
+                    case 'all':
+                    default:
+                        // Buscar en ambos campos
+                        $sql .= " AND (p.nombre LIKE ? OR p.rut LIKE ?)";
+                        $searchParam = "%{$search}%";
+                        $params[] = $searchParam;
+                        $params[] = $searchParam;
+                        break;
+                }
+            }
+            
+            $sql .= " ORDER BY 
+                CASE WHEN u.id IS NULL THEN 0 ELSE 1 END, -- Personas sin usuario primero
+                p.nombre ASC";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error en búsqueda avanzada de personas: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener todas las personas del sistema (para búsqueda sin parámetros)
+     * 
+     * @param int|null $excludeUserId ID de usuario a excluir (para edición)
+     * @return array Lista de todas las personas
+     */
+    public function getAllPersonas(?int $excludeUserId = null): array
+    {
+        return $this->searchPersonasAdvanced(null, 'all', true, $excludeUserId);
+    }
+
+    /**
+     * Buscar personas por RUT completo y válido
+     * 
+     * @param string $rut RUT a buscar
+     * @param int|null $excludeUserId ID de usuario a excluir (para edición)
+     * @return array Lista de personas encontradas
+     */
+    public function searchPersonasByRut(string $rut, ?int $excludeUserId = null): array
+    {
+        return $this->searchPersonasAdvanced($rut, 'rut', true, $excludeUserId);
+    }
+
+    /**
+     * Buscar personas por coincidencia parcial en nombre
+     * 
+     * @param string $name Parte del nombre a buscar
+     * @param int|null $excludeUserId ID de usuario a excluir (para edición)
+     * @return array Lista de personas encontradas
+     */
+    public function searchPersonasByName(string $name, ?int $excludeUserId = null): array
+    {
+        return $this->searchPersonasAdvanced($name, 'name', true, $excludeUserId);
     }
 
     /**
