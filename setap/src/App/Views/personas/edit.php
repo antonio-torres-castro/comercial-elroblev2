@@ -61,7 +61,7 @@
 
         <!-- Formulario de Edición -->
         <form method="POST" action="/personas/update" id="editPersonaForm">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
             <input type="hidden" name="id" value="<?= (int)$persona['id'] ?>">
 
             <div class="row">

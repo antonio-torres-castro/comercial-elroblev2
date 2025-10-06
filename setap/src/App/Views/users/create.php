@@ -468,7 +468,7 @@
 
             if (unavailable.length > 0) {
                 e.preventDefault();
-                alert(AppConstants::ERROR_UNAVAILABLE_FIELDS);
+                alert('<?= \App\Constants\AppConstants::ERROR_UNAVAILABLE_FIELDS ?>');
                 return false;
             }
 

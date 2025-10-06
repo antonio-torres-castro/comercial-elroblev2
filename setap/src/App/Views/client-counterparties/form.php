@@ -51,7 +51,7 @@
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="<?php echo $data['action'] === 'edit' ? '/client-counterpartie/update' : '/client-counterpartie/store'; ?>">
-                                    <input type="hidden" name="csrf_token" value="<?php echo App\Helpers\Security::generateCsrfToken(); ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo \App\Helpers\Security::generateCsrfToken(); ?>">
                                     
                                     <?php if ($data['action'] === 'edit' && $data['counterpartie']): ?>
                                         <input type="hidden" name="id" value="<?php echo $data['counterpartie']['id']; ?>">

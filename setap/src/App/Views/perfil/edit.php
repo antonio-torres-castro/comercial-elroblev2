@@ -38,7 +38,7 @@
                 <?php endif; ?>
 
                 <form method="POST" class="row g-3" id="profileForm">
-                    <?php use App\Helpers\Security; Security::renderCsrfField(); ?>
+                    <?php use App\Helpers\Security; \App\Helpers\Security::renderCsrfField(); ?>
                     
                     <div class="col-md-6">
                         <label for="nombre" class="form-label">Nombre Completo *</label>

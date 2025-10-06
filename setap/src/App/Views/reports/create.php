@@ -74,7 +74,7 @@
 
             <!-- Formulario de Configuración -->
             <form method="POST" action="/reports/generate" id="createReportForm">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
 
                 <div class="row justify-content-center">
                     <div class="col-lg-8">

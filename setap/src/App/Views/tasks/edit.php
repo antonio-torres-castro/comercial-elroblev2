@@ -60,7 +60,7 @@
                         <?php endif; ?>
 
                         <form method="POST" action="/tasks/update" id="taskEditForm">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCsrfToken()) ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
                             <input type="hidden" name="id" value="<?= (int)$task['id'] ?>">
 
                             <div class="row">
@@ -239,7 +239,7 @@
             form.addEventListener('submit', function(e) {
                 if (!validateDates()) {
                     e.preventDefault();
-                    alert(AppConstants::ERROR_INVALID_DATES);
+                    alert('<?= \App\Constants\AppConstants::ERROR_INVALID_DATES ?>');
                     return;
                 }
 
@@ -249,7 +249,7 @@
 
                 if (!nombre || !proyecto_id || !tarea_tipo_id) {
                     e.preventDefault();
-                    alert(AppConstants::ERROR_REQUIRED_FIELDS);
+                    alert('<?= \App\Constants\AppConstants::ERROR_REQUIRED_FIELDS ?>');
                     return;
                 }
 

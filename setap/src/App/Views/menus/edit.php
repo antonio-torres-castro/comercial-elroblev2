@@ -49,7 +49,7 @@
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="/menus/update">
-                                    <?php Security::renderCsrfField(); ?>
+                                    <?php \App\Helpers\Security::renderCsrfField(); ?>
                                     <input type="hidden" name="id" value="<?php echo $data['menu_id']; ?>">
                                     
                                     <div class="row">
@@ -176,7 +176,7 @@
 
                                 <!-- Formulario oculto para eliminar -->
                                 <form id="formEliminar" method="POST" action="/menus/delete" style="display: none;">
-                                    <?php Security::renderCsrfField(); ?>
+                                    <?php \App\Helpers\Security::renderCsrfField(); ?>
                                     <input type="hidden" name="id" value="<?php echo $data['menu_id']; ?>">
                                 </form>
                             </div>

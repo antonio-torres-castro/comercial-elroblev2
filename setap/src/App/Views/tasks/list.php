@@ -165,7 +165,7 @@
                                                                         <i class="bi bi-arrow-repeat"></i>
                                                                     </button>
                                                                     <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
-                                                                        <li><span class="dropdown-item-text text-muted"><?php echo AppConstants::UI_LOADING; ?></span></li>
+                                                                        <li><span class="dropdown-item-text text-muted"><?php echo \App\Constants\AppConstants::UI_LOADING; ?></span></li>
                                                                     </ul>
                                                                 </div>
                                                             </div>

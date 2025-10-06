@@ -56,7 +56,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <?php if (Security::hasPermission('Create') || Security::hasPermission('All')): ?>
+                        <?php if (\App\Helpers\Security::hasPermission('Create') || \App\Helpers\Security::hasPermission('All')): ?>
                             <a href="/menu" class="btn btn-sm btn-setap-primary">
                                 <i class="bi bi-plus-circle"></i> Nuevo Menú
                             </a>
@@ -69,10 +69,10 @@
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php
                         $messages = [
-                            'created' => AppConstants::SUCCESS_MENU_CREATED,
-                            'updated' => AppConstants::SUCCESS_MENU_UPDATED,
-                            'deleted' => AppConstants::SUCCESS_MENU_DELETED,
-                            'status_changed' => AppConstants::SUCCESS_MENU_STATUS_UPDATED
+                            'created' => \App\Constants\AppConstants::SUCCESS_MENU_CREATED,
+                            'updated' => \App\Constants\AppConstants::SUCCESS_MENU_UPDATED,
+                            'deleted' => \App\Constants\AppConstants::SUCCESS_MENU_DELETED,
+                            'status_changed' => \App\Constants\AppConstants::SUCCESS_MENU_STATUS_UPDATED
                         ];
                         echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
                         ?>
@@ -174,7 +174,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="btn-group btn-group-sm" role="group">
-                                                                <?php if (Security::hasPermission('Modify') || Security::hasPermission('All')): ?>
+                                                                <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <a href="/menu/<?php echo $menu['id']; ?>" 
                                                                        class="btn btn-outline-setap-primary btn-sm" 
                                                                        title="Editar">
@@ -182,7 +182,7 @@
                                                                     </a>
                                                                 <?php endif; ?>
                                                                 
-                                                                <?php if (Security::hasPermission('Read') || Security::hasPermission('All')): ?>
+                                                                <?php if (\App\Helpers\Security::hasPermission('Read') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <button type="button" 
                                                                             class="btn btn-outline-setap-primary-light btn-sm" 
                                                                             title="Ver detalles"
@@ -191,7 +191,7 @@
                                                                     </button>
                                                                 <?php endif; ?>
                                                                 
-                                                                <?php if (Security::hasPermission('Modify') || Security::hasPermission('All')): ?>
+                                                                <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <button type="button" 
                                                                             class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm" 
                                                                             title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>"
@@ -200,7 +200,7 @@
                                                                     </button>
                                                                 <?php endif; ?>
                                                                 
-                                                                <?php if (Security::hasPermission('Delete') || Security::hasPermission('All')): ?>
+                                                                <?php if (\App\Helpers\Security::hasPermission('Delete') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <button type="button" 
                                                                             class="btn btn-outline-danger btn-sm" 
                                                                             title="Eliminar"

@@ -55,7 +55,7 @@
 
                 <!-- Estadísticas -->
                 <div class="row mb-4">
-                    <?php if (Security::hasPermission('Read')): ?>
+                    <?php if (\App\Helpers\Security::hasPermission('Read')): ?>
                         <div class="col-md-3 mb-3">
                             <div class="card stats-card h-100 border-0 shadow-sm">
                                 <div class="card-body text-center">
@@ -121,7 +121,7 @@
                                 </p>
 
                                 <div class="row mt-3">
-                                    <?php if (Security::hasMenuAccess('users')): ?>
+                                    <?php if (\App\Helpers\Security::hasMenuAccess('users')): ?>
                                         <div class="col-md-6 mb-2">
                                             <a href="/users" class="btn btn-outline-setap-primary w-100">
                                                 <i class="bi bi-people"></i> Gestionar Usuarios
@@ -129,7 +129,7 @@
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if (Security::hasMenuAccess('projects')): ?>
+                                    <?php if (\App\Helpers\Security::hasMenuAccess('projects')): ?>
                                         <div class="col-md-6 mb-2">
                                             <a href="/projects" class="btn btn-outline-setap-primary w-100">
                                                 <i class="bi bi-briefcase"></i> Ver Proyectos

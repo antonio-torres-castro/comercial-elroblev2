@@ -34,9 +34,9 @@
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php
                         $messages = [
-                            'created' => AppConstants::SUCCESS_CLIENT_CREATED,
-                            'updated' => AppConstants::SUCCESS_CLIENT_UPDATED,
-                            'deleted' => AppConstants::SUCCESS_CLIENT_DELETED
+                            'created' => \App\Constants\AppConstants::SUCCESS_CLIENT_CREATED,
+                            'updated' => \App\Constants\AppConstants::SUCCESS_CLIENT_UPDATED,
+                            'deleted' => \App\Constants\AppConstants::SUCCESS_CLIENT_DELETED
                         ];
                         echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
                         ?>

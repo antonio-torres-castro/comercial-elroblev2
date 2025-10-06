@@ -73,7 +73,7 @@ use App\Helpers\Security;
                 </h2>
             </div>
             <div class="col-md-6 text-end">
-                <?php if (Security::hasPermission('Create')): ?>
+                <?php if (\App\Helpers\Security::hasPermission('Create')): ?>
                     <a href="/users/create" class="btn btn-setap-primary">
                         <i class="bi bi-person-plus"></i> Nuevo Usuario
                     </a>
@@ -240,7 +240,7 @@ use App\Helpers\Security;
                                         </td>
                                         <td class="table-actions">
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <?php if (Security::hasPermission('Read')): ?>
+                                                <?php if (\App\Helpers\Security::hasPermission('Read')): ?>
                                                     <button type="button" class="btn btn-outline-info"
                                                         onclick="viewUser(<?= $user['id'] ?>)"
                                                         title="Ver detalles">
@@ -248,7 +248,7 @@ use App\Helpers\Security;
                                                     </button>
                                                 <?php endif; ?>
 
-                                                <?php if (Security::hasPermission('Modify')): ?>
+                                                <?php if (\App\Helpers\Security::hasPermission('Modify')): ?>
                                                     <a href="/users/edit?id=<?= $user['id'] ?>"
                                                         class="btn btn-outline-warning"
                                                         title="Editar">
@@ -261,7 +261,7 @@ use App\Helpers\Security;
                                                     </a>
                                                 <?php endif; ?>
 
-                                                <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
+                                                <?php if (\App\Helpers\Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
                                                     <button type="button" class="btn btn-outline-danger"
                                                         onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
                                                         title="Eliminar">

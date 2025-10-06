@@ -5,6 +5,9 @@ namespace App\Controllers;
 use App\Models\Client;
 use App\Models\Persona;
 use App\Services\PermissionService;
+use App\Services\ClientValidationService;
+use App\Services\CounterpartieService;
+use App\Core\ViewRenderer;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Constants\AppConstants;
@@ -15,6 +18,9 @@ class ClientController extends BaseController
     private $clientModel;
     private $personaModel;
     private $permissionService;
+    private $clientValidationService;
+    private $counterpartieService;
+    private $viewRenderer;
 
     public function __construct()
     {
@@ -24,6 +30,9 @@ class ClientController extends BaseController
         $this->clientModel = new Client();
         $this->personaModel = new Persona();
         $this->permissionService = new PermissionService();
+        $this->clientValidationService = new ClientValidationService();
+        $this->counterpartieService = new CounterpartieService();
+        $this->viewRenderer = new ViewRenderer();
     }
 
     /**
@@ -57,17 +66,15 @@ class ClientController extends BaseController
             $clients = $this->clientModel->getAll($filters);
             $statusTypes = $this->clientModel->getStatusTypes();
 
-            // Datos para la vista
-            $data = [
+            // Usar ViewRenderer para renderizar la vista
+            $this->viewRenderer->render('clients/list', [
                 'user' => $currentUser,
                 'title' => 'Gestión de Clientes',
                 'subtitle' => 'Lista de todos los clientes',
                 'clients' => $clients,
                 'statusTypes' => $statusTypes,
                 'filters' => $filters
-            ];
-
-            require_once __DIR__ . '/../Views/clients/list.php';
+            ]);
 
         } catch (Exception $e) {
             error_log("Error en ClientController::index: " . $e->getMessage());
@@ -98,17 +105,15 @@ class ClientController extends BaseController
 
             $statusTypes = $this->clientModel->getStatusTypes();
 
-            // Datos para la vista
-            $data = [
+            // Usar ViewRenderer para renderizar la vista
+            $this->viewRenderer->render('clients/create', [
                 'user' => $currentUser,
                 'title' => 'Nuevo Cliente',
                 'subtitle' => 'Crear nuevo cliente',
                 'client' => null,
                 'statusTypes' => $statusTypes,
                 'action' => 'create'
-            ];
-
-            require_once __DIR__ . '/../Views/clients/create.php';
+            ]);
 
         } catch (Exception $e) {
             error_log("Error en ClientController::create: " . $e->getMessage());
@@ -144,13 +149,14 @@ class ClientController extends BaseController
                 return;
             }
 
-            // Validar datos
-            $errors = $this->validateClientData($_POST);
+            // Validar datos usando el servicio de validación
+            $errors = $this->clientValidationService->validateClientData($_POST);
             
             if (!empty($errors)) {
                 $statusTypes = $this->clientModel->getStatusTypes();
                 
-                $data = [
+                // Usar ViewRenderer para renderizar la vista con errores
+                $this->viewRenderer->render('clients/create', [
                     'user' => $currentUser,
                     'title' => 'Nuevo Cliente',
                     'subtitle' => 'Crear nuevo cliente',
@@ -158,9 +164,7 @@ class ClientController extends BaseController
                     'statusTypes' => $statusTypes,
                     'action' => 'create',
                     'errors' => $errors
-                ];
-
-                require_once __DIR__ . '/../Views/clients/create.php';
+                ]);
                 return;
             }
 
@@ -209,8 +213,8 @@ class ClientController extends BaseController
             $statusTypes = $this->clientModel->getStatusTypes();
             $counterparties = $this->clientModel->getCounterparties((int)$id);
 
-            // Datos para la vista
-            $data = [
+            // Usar ViewRenderer para renderizar la vista
+            $this->viewRenderer->render('clients/edit', [
                 'user' => $currentUser,
                 'title' => 'Editar Cliente',
                 'subtitle' => 'Editando: ' . $client['razon_social'],
@@ -218,9 +222,7 @@ class ClientController extends BaseController
                 'statusTypes' => $statusTypes,
                 'counterparties' => $counterparties,
                 'action' => 'edit'
-            ];
-
-            require_once __DIR__ . '/../Views/clients/edit.php';
+            ]);
 
         } catch (Exception $e) {
             error_log("Error en ClientController::edit: " . $e->getMessage());
@@ -264,15 +266,16 @@ class ClientController extends BaseController
                 return;
             }
 
-            // Validar datos
-            $errors = $this->validateClientData($_POST, $id);
+            // Validar datos usando el servicio de validación
+            $errors = $this->clientValidationService->validateClientData($_POST, $id);
             
             if (!empty($errors)) {
                 $client = $this->clientModel->find($id);
                 $statusTypes = $this->clientModel->getStatusTypes();
                 $counterparties = $this->clientModel->getCounterparties($id);
                 
-                $data = [
+                // Usar ViewRenderer para renderizar la vista con errores
+                $this->viewRenderer->render('clients/edit', [
                     'user' => $currentUser,
                     'title' => 'Editar Cliente',
                     'subtitle' => 'Editando: ' . $client['razon_social'],
@@ -281,9 +284,7 @@ class ClientController extends BaseController
                     'counterparties' => $counterparties,
                     'action' => 'edit',
                     'errors' => $errors
-                ];
-
-                require_once __DIR__ . '/../Views/clients/edit.php';
+                ]);
                 return;
             }
 
@@ -393,13 +394,13 @@ class ClientController extends BaseController
                 'estado_tipo_id' => $_GET['estado_tipo_id'] ?? ''
             ];
 
-            // Obtener contrapartes y datos necesarios para filtros
-            $counterparties = $this->clientModel->getAllCounterparties($filters);
+            // Obtener contrapartes usando el servicio y datos necesarios para filtros
+            $counterparties = $this->counterpartieService->getAllCounterparties($filters);
             $statusTypes = $this->clientModel->getStatusTypes();
             $clients = $this->clientModel->getAll(); // Para el filtro de clientes
 
-            // Datos para la vista
-            $data = [
+            // Usar ViewRenderer para renderizar la vista
+            $this->viewRenderer->render('client-counterparties/list', [
                 'user' => $currentUser,
                 'title' => 'Contrapartes de Clientes',
                 'subtitle' => 'Lista de todas las contrapartes',
@@ -407,9 +408,7 @@ class ClientController extends BaseController
                 'statusTypes' => $statusTypes,
                 'clients' => $clients,
                 'filters' => $filters
-            ];
-
-            require_once __DIR__ . '/../Views/client-counterparties/list.php';
+            ]);
 
         } catch (Exception $e) {
             error_log("Error en ClientController::counterparties: " . $e->getMessage());
@@ -443,7 +442,7 @@ class ClientController extends BaseController
 
             // Si hay ID, estamos editando
             if ($id) {
-                $counterpartie = $this->clientModel->findCounterpartie((int)$id);
+                $counterpartie = $this->counterpartieService->findCounterpartie((int)$id);
                 
                 if (!$counterpartie) {
                     http_response_code(404);
@@ -454,26 +453,21 @@ class ClientController extends BaseController
                 $action = 'edit';
             }
 
-            // Obtener datos necesarios para el formulario
-            $clients = $this->clientModel->getAll();
-            $statusTypes = $this->clientModel->getStatusTypes();
-            $personaModel = $this->personaModel;
-            $personas = $personaModel->getAll(); // Necesitamos este método en Persona
+            // Obtener datos necesarios para el formulario usando el servicio
+            $formData = $this->counterpartieService->getFormData();
 
-            // Datos para la vista
-            $data = [
+            // Usar ViewRenderer para renderizar la vista
+            $this->viewRenderer->render('client-counterparties/form', [
                 'user' => $currentUser,
                 'title' => $id ? 'Editar Contraparte' : 'Nueva Contraparte',
                 'subtitle' => $id ? "Editando contraparte #$id" : 'Crear nueva contraparte',
                 'counterpartie' => $counterpartie,
                 'counterpartie_id' => $id,
-                'clients' => $clients,
-                'personas' => $personas,
-                'statusTypes' => $statusTypes,
+                'clients' => $formData['clients'],
+                'personas' => $formData['personas'],
+                'statusTypes' => $formData['statusTypes'],
                 'action' => $action
-            ];
-
-            require_once __DIR__ . '/../Views/client-counterparties/form.php';
+            ]);
 
         } catch (Exception $e) {
             error_log("Error en ClientController::counterpartie: " . $e->getMessage());
@@ -509,34 +503,31 @@ class ClientController extends BaseController
                 return;
             }
 
-            // Validar datos de contraparte
-            $errors = $this->validateCounterpartieData($_POST);
+            // Validar datos de contraparte usando el servicio de validación
+            $errors = $this->clientValidationService->validateCounterpartieData($_POST);
             
             if (!empty($errors)) {
-                // Obtener datos necesarios para el formulario
-                $clients = $this->clientModel->getAll();
-                $statusTypes = $this->clientModel->getStatusTypes();
-                $personas = $this->personaModel->getAll();
+                // Obtener datos necesarios para el formulario usando el servicio
+                $formData = $this->counterpartieService->getFormData();
 
-                $data = [
+                // Usar ViewRenderer para renderizar la vista con errores
+                $this->viewRenderer->render('client-counterparties/form', [
                     'user' => $currentUser,
                     'title' => 'Nueva Contraparte',
                     'subtitle' => 'Crear nueva contraparte',
                     'counterpartie' => null,
                     'counterpartie_id' => null,
-                    'clients' => $clients,
-                    'personas' => $personas,
-                    'statusTypes' => $statusTypes,
+                    'clients' => $formData['clients'],
+                    'personas' => $formData['personas'],
+                    'statusTypes' => $formData['statusTypes'],
                     'action' => 'create',
                     'errors' => $errors
-                ];
-
-                require_once __DIR__ . '/../Views/client-counterparties/form.php';
+                ]);
                 return;
             }
 
-            // Crear contraparte
-            $counterpartieId = $this->clientModel->addCounterpartie($_POST);
+            // Crear contraparte usando el servicio
+            $counterpartieId = $this->counterpartieService->createCounterpartie($_POST);
 
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_CREATED);
@@ -583,40 +574,35 @@ class ClientController extends BaseController
                 return;
             }
 
-            // Validar datos de contraparte
-            $errors = $this->validateCounterpartieData($_POST, $id);
+            // Validar datos de contraparte usando el servicio de validación
+            $errors = $this->clientValidationService->validateCounterpartieData($_POST, $id);
             
             if (!empty($errors)) {
-                // Obtener datos necesarios para el formulario
-                $counterpartie = $this->clientModel->findCounterpartie($id);
-                $clients = $this->clientModel->getAll();
-                $statusTypes = $this->clientModel->getStatusTypes();
-                $personas = $this->personaModel->getAll();
+                // Obtener datos necesarios para el formulario usando los servicios
+                $counterpartie = $this->counterpartieService->findCounterpartie($id);
+                $formData = $this->counterpartieService->getFormData();
 
-                $data = [
+                // Usar ViewRenderer para renderizar la vista con errores
+                $this->viewRenderer->render('client-counterparties/form', [
                     'user' => $currentUser,
                     'title' => 'Editar Contraparte',
                     'subtitle' => 'Editando contraparte #' . $id,
                     'counterpartie' => array_merge($counterpartie, $_POST),
                     'counterpartie_id' => $id,
-                    'clients' => $clients,
-                    'personas' => $personas,
-                    'statusTypes' => $statusTypes,
+                    'clients' => $formData['clients'],
+                    'personas' => $formData['personas'],
+                    'statusTypes' => $formData['statusTypes'],
                     'action' => 'edit',
                     'errors' => $errors
-                ];
-
-                require_once __DIR__ . '/../Views/client-counterparties/form.php';
+                ]);
                 return;
             }
 
-            // Actualizar contraparte
-            $success = $this->clientModel->updateCounterpartie($id, $_POST);
+            // Actualizar contraparte usando el servicio
+            $success = $this->counterpartieService->updateCounterpartie($id, $_POST);
 
             if ($success) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_UPDATED);
-            } else {
-                throw new Exception('No se pudo actualizar la contraparte');
             }
 
         } catch (Exception $e) {
@@ -661,13 +647,11 @@ class ClientController extends BaseController
                 return;
             }
 
-            // Eliminar contraparte
-            $success = $this->clientModel->deleteCounterpartie($id);
+            // Eliminar contraparte usando el servicio
+            $success = $this->counterpartieService->deleteCounterpartie($id);
 
             if ($success) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_DELETED);
-            } else {
-                throw new Exception('No se pudo eliminar la contraparte');
             }
 
         } catch (Exception $e) {
@@ -676,142 +660,7 @@ class ClientController extends BaseController
         }
     }
 
-    /**
-     * Validar datos de cliente
-     */
-    private function validateClientData(array $data, int $excludeId = null): array
-    {
-        $errors = [];
 
-        // Razón social requerida
-        if (empty($data['razon_social'])) {
-            $errors[] = 'La razón social es requerida';
-        } elseif (strlen($data['razon_social']) > 150) {
-            $errors[] = 'La razón social no puede exceder 150 caracteres';
-        }
-
-        // Validar RUT si se proporciona
-        if (!empty($data['rut'])) {
-            if (!$this->clientModel->validateRut($data['rut'])) {
-                $errors[] = 'El formato del RUT es inválido';
-            } elseif ($this->clientModel->rutExists($data['rut'], $excludeId)) {
-                $errors[] = 'El RUT ya está registrado para otro cliente';
-            }
-            
-            if (strlen($data['rut']) > 20) {
-                $errors[] = 'El RUT no puede exceder 20 caracteres';
-            }
-        }
-
-        // Validar email si se proporciona
-        if (!empty($data['email'])) {
-            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'El formato del email es inválido';
-            } elseif (strlen($data['email']) > 150) {
-                $errors[] = 'El email no puede exceder 150 caracteres';
-            }
-        }
-
-        // Validar longitudes
-        if (!empty($data['direccion']) && strlen($data['direccion']) > 255) {
-            $errors[] = 'La dirección no puede exceder 255 caracteres';
-        }
-
-        if (!empty($data['telefono']) && strlen($data['telefono']) > 20) {
-            $errors[] = 'El teléfono no puede exceder 20 caracteres';
-        }
-
-        // Validar fechas
-        if (!empty($data['fecha_inicio_contrato']) && !$this->isValidDate($data['fecha_inicio_contrato'])) {
-            $errors[] = 'La fecha de inicio de contrato no es válida';
-        }
-
-        if (!empty($data['fecha_facturacion']) && !$this->isValidDate($data['fecha_facturacion'])) {
-            $errors[] = 'La fecha de facturación no es válida';
-        }
-
-        if (!empty($data['fecha_termino_contrato']) && !$this->isValidDate($data['fecha_termino_contrato'])) {
-            $errors[] = 'La fecha de término de contrato no es válida';
-        }
-
-        // Validar que fecha de término sea posterior a fecha de inicio
-        if (!empty($data['fecha_inicio_contrato']) && !empty($data['fecha_termino_contrato'])) {
-            if (strtotime($data['fecha_termino_contrato']) <= strtotime($data['fecha_inicio_contrato'])) {
-                $errors[] = 'La fecha de término debe ser posterior a la fecha de inicio';
-            }
-        }
-
-        return $errors;
-    }
-
-    /**
-     * Validar datos de contraparte
-     */
-    private function validateCounterpartieData(array $data, int $excludeId = null): array
-    {
-        $errors = [];
-
-        // Cliente requerido
-        if (empty($data['cliente_id'])) {
-            $errors[] = 'El cliente es requerido';
-        } elseif (!is_numeric($data['cliente_id'])) {
-            $errors[] = 'El cliente seleccionado no es válido';
-        } else {
-            // Verificar que el cliente existe
-            $client = $this->clientModel->find((int)$data['cliente_id']);
-            if (!$client) {
-                $errors[] = 'El cliente seleccionado no existe';
-            }
-        }
-
-        // Persona requerida
-        if (empty($data['persona_id'])) {
-            $errors[] = 'La persona es requerida';
-        } elseif (!is_numeric($data['persona_id'])) {
-            $errors[] = 'La persona seleccionada no es válida';
-        } else {
-            // Verificar que la persona existe
-            $persona = $this->personaModel->find((int)$data['persona_id']);
-            if (!$persona) {
-                $errors[] = 'La persona seleccionada no existe';
-            }
-        }
-
-        // Verificar que la combinación cliente-persona no exista ya
-        if (!empty($data['cliente_id']) && !empty($data['persona_id'])) {
-            if ($this->clientModel->counterpartieExists((int)$data['cliente_id'], (int)$data['persona_id'], $excludeId)) {
-                $errors[] = 'Esta persona ya es contraparte de este cliente';
-            }
-        }
-
-        // Validar cargo si se proporciona
-        if (!empty($data['cargo']) && strlen($data['cargo']) > 100) {
-            $errors[] = 'El cargo no puede exceder 100 caracteres';
-        }
-
-        // Validar teléfono si se proporciona
-        if (!empty($data['telefono']) && strlen($data['telefono']) > 20) {
-            $errors[] = 'El teléfono no puede exceder 20 caracteres';
-        }
-
-        // Validar email si se proporciona
-        if (!empty($data['email'])) {
-            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'El formato del email es inválido';
-            } elseif (strlen($data['email']) > 150) {
-                $errors[] = 'El email no puede exceder 150 caracteres';
-            }
-        }
-
-        // Estado requerido
-        if (empty($data['estado_tipo_id'])) {
-            $errors[] = 'El estado es requerido';
-        } elseif (!is_numeric($data['estado_tipo_id'])) {
-            $errors[] = 'El estado seleccionado no es válido';
-        }
-
-        return $errors;
-    }
 
 
 }

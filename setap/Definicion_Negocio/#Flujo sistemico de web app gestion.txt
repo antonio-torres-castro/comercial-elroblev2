@@ -82,3 +82,10 @@ Preguntas para Validar:
 2.¿Se requiere un calendario visual además de la tabla? No pero la tabla debe calcular y desplegar que dia de la semana es la fecha.
 3.¿Los feriados inactivos siguen afectando la planificación? No, ningun feriado afecta la planificacion a menos que el usuario confirme que quiere mover tareas que estaban ese dia feriado programadas (se mueven al siguien dia hábil).
 4.¿Se necesita importar feriados desde fuentes externas (calendarios oficiales)? No por que los recurrentes los debiera calcular el sistema, pidiendo una referencia de que dia es hoy para poder calcular cuando es sabado, domingo, etc. Y el resto son solo 8 fechas (en promedio) feriados no sabados ni domingos mas las vacaciones de las personas.
+
+#Como debiera funcionar a nivel de negocio el mantenedor de usuarios:
+1. Se debe poder buscar una persona, entre personas que no tienen un usuario asociado.
+2. No se ingresa en el mantenedor de usuarios datos de la persona
+3. El mantenedor de usuario no crea personas nuevas
+4. Se debe poder seleccionar un cliente asociado al usuario, o desasociarlo del cliente.
+5. Cuando el usuario es asociado a un cliente, este solo puede ser en usuario_tipo_id = 6 = counterparty.

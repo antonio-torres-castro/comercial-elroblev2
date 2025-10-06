@@ -6,7 +6,7 @@ use App\Models\Menu;
 $groupedMenus = [];
 $ungroupedMenus = [];
 try {
-    if (Security::isAuthenticated()) {
+    if (\App\Helpers\Security::isAuthenticated()) {
         $menuModel = new Menu();
         $userId = $_SESSION['user_id'] ?? 0;
         
@@ -82,7 +82,7 @@ try {
                 
                 <!-- Menús por defecto si no hay configuración dinámica -->
                 <?php if (empty($groupedMenus) && empty($ungroupedMenus)): ?>
-                    <?php if (Security::hasMenuAccess('manage_users')): ?>
+                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_users')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="/users">
                                 <i class="bi bi-people"></i> Usuarios
@@ -90,7 +90,7 @@ try {
                         </li>
                     <?php endif; ?>
 
-                    <?php if (Security::hasMenuAccess('manage_clients')): ?>
+                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_clients')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="/clients">
                                 <i class="bi bi-building"></i> Clientes
@@ -98,7 +98,7 @@ try {
                         </li>
                     <?php endif; ?>
 
-                    <?php if (Security::hasMenuAccess('manage_projects')): ?>
+                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_projects')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="/projects">
                                 <i class="bi bi-folder"></i> Proyectos
@@ -106,7 +106,7 @@ try {
                         </li>
                     <?php endif; ?>
 
-                    <?php if (Security::hasMenuAccess('manage_tasks')): ?>
+                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_tasks')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="/tasks">
                                 <i class="bi bi-list-task"></i> Tareas
@@ -114,7 +114,7 @@ try {
                         </li>
                     <?php endif; ?>
 
-                    <?php if (Security::hasMenuAccess('manage_menus')): ?>
+                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_menus')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="/menus">
                                 <i class="bi bi-list-ul"></i> Menús

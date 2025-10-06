@@ -5,8 +5,12 @@ namespace App\Controllers;
 use App\Models\User;
 use App\Services\AuthService;
 use App\Services\PermissionService;
+use App\Services\ValidationService;
+use App\Services\ClientBusinessLogic;
+use App\Core\ViewRenderer;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Security\AuthHelper;
 use App\Config\Database;
 use App\Constants\AppConstants;
 use PDO;
@@ -17,6 +21,9 @@ class UserController extends BaseController
     private $userModel;
     private $authService;
     private $permissionService;
+    private $validationService;
+    private $clientBusinessLogic;
+    private $viewRenderer;
     private $db;
 
     public function __construct()
@@ -27,6 +34,9 @@ class UserController extends BaseController
         $this->userModel = new User();
         $this->authService = new AuthService();
         $this->permissionService = new PermissionService();
+        $this->validationService = new ValidationService();
+        $this->clientBusinessLogic = new ClientBusinessLogic();
+        $this->viewRenderer = new ViewRenderer();
         $this->db = Database::getInstance();
     }
 
@@ -52,7 +62,12 @@ class UserController extends BaseController
             // Obtener tipos de usuario para filtro
             $userTypes = $this->getUserTypes();
 
-            require_once __DIR__ . '/../Views/users/list.php';
+            // Usar ViewRenderer para renderizar la vista
+            $this->viewRenderer->render('users/list', [
+                'users' => $users,
+                'userTypes' => $userTypes,
+                'currentUser' => $currentUser
+            ]);
         } catch (Exception $e) {
             error_log("Error en UserController::index: " . $e->getMessage());
             http_response_code(500);
@@ -87,7 +102,13 @@ class UserController extends BaseController
             $estadosTipo = $this->getEstadosTipo();
             $clients = $this->userModel->getAvailableClients(); // GAP 1 y GAP 2: Obtener clientes
 
-            require_once __DIR__ . '/../Views/users/create.php';
+            // Usar ViewRenderer para renderizar la vista
+            $this->viewRenderer->render('users/create', [
+                'userTypes' => $userTypes,
+                'estadosTipo' => $estadosTipo,
+                'clients' => $clients,
+                'currentUser' => $currentUser
+            ]);
         } catch (Exception $e) {
             error_log("Error en UserController::create: " . $e->getMessage());
             http_response_code(500);
@@ -119,23 +140,23 @@ class UserController extends BaseController
                 return;
             }
 
-            // Sanitizar y validar datos
-            $errors = $this->validateUserData($_POST);
+            // Sanitizar y validar datos usando ValidationService
+            $validationResult = $this->validationService->validateUserData($_POST);
 
-            if (!empty($errors)) {
+            if (!$validationResult['isValid']) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Datos inválidos', 'details' => $errors]);
+                echo json_encode(['error' => 'Datos inválidos', 'details' => $validationResult['errors']]);
                 return;
             }
 
-            // Si no hay errores, procesar los datos del POST directamente
-            $data = $_POST;
+            // Si no hay errores, usar datos sanitizados
+            $data = $validationResult['data'];
 
             // Crear usuario
             $userId = $this->userModel->create($data);
 
             if ($userId) {
-                if ($this->isAjaxRequest()) {
+                if (AuthHelper::isAjaxRequest()) {
                     echo json_encode(['success' => true, 'message' => AppConstants::SUCCESS_USER_CREATED, 'id' => $userId]);
                 } else {
                     $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_CREATED);
@@ -147,7 +168,7 @@ class UserController extends BaseController
             error_log("Error en UserController::store: " . $e->getMessage());
             http_response_code(500);
 
-            if ($this->isAjaxRequest()) {
+            if (AuthHelper::isAjaxRequest()) {
                 echo json_encode(['error' => AppConstants::ERROR_INTERNAL_SERVER]);
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_USERS_CREATE, AppConstants::ERROR_SERVER);
@@ -182,12 +203,12 @@ class UserController extends BaseController
 
             switch ($field) {
                 case 'username':
-                    $isValid = $this->isUsernameAvailable($value, $excludeUserId);
+                    $isValid = $this->validationService->isUsernameAvailable($value, $excludeUserId);
                     $message = $isValid ? 'Nombre de usuario disponible' : 'Nombre de usuario ya existe';
                     break;
 
                 case 'email':
-                    $isValid = $this->isEmailAvailable($value, $excludeUserId);
+                    $isValid = $this->validationService->isEmailAvailable($value, $excludeUserId);
                     $message = $isValid ? 'Email disponible' : 'Email ya registrado';
                     break;
 
@@ -195,7 +216,7 @@ class UserController extends BaseController
                     $isValid = Security::validateRut($value);
                     $message = $isValid ? 'RUT válido' : 'RUT inválido';
                     if ($isValid) {
-                        $isValid = $this->isRutAvailable($value, $excludeUserId);
+                        $isValid = $this->validationService->isRutAvailable($value, $excludeUserId);
                         $message = $isValid ? 'RUT disponible' : 'RUT ya registrado';
                     }
                     break;
@@ -215,63 +236,7 @@ class UserController extends BaseController
         }
     }
 
-    private function validateUserData(array $data): array
-    {
-        $errors = [];
 
-        // Validar nombre
-        if (empty($data['nombre'])) {
-            $errors['nombre'] = 'El nombre es requerido';
-        }
-
-        // Validar RUT
-        if (empty($data['rut'])) {
-            $errors['rut'] = 'El RUT es requerido';
-        } elseif (!Security::validateRut($data['rut'])) {
-            $errors['rut'] = 'El RUT no es válido';
-        } elseif (!$this->isRutAvailable($data['rut'])) {
-            $errors['rut'] = 'El RUT ya está registrado';
-        }
-
-        // Validar email
-        if (empty($data['email'])) {
-            $errors['email'] = 'El email es requerido';
-        } elseif (!Security::validateEmail($data['email'])) {
-            $errors['email'] = 'El email no es válido';
-        } elseif (!$this->isEmailAvailable($data['email'])) {
-            $errors['email'] = 'El email ya está registrado';
-        }
-
-        // Validar username
-        if (empty($data['nombre_usuario'])) {
-            $errors['nombre_usuario'] = 'El nombre de usuario es requerido';
-        } elseif (!$this->isUsernameAvailable($data['nombre_usuario'])) {
-            $errors['nombre_usuario'] = 'El nombre de usuario ya existe';
-        }
-
-        // Validar contraseña
-        if (empty($data['password'])) {
-            $errors['password'] = 'La contraseña es requerida';
-        } else {
-            $passwordErrors = Security::validatePasswordStrength($data['password']);
-            if (!empty($passwordErrors)) {
-                $errors['password'] = implode(', ', $passwordErrors);
-            }
-        }
-
-        // Validar tipo de usuario
-        if (empty($data['usuario_tipo_id'])) {
-            $errors['usuario_tipo_id'] = 'El tipo de usuario es requerido';
-        }
-
-        // GAP 1 y GAP 2: Validaciones especiales para usuarios cliente
-        if (!empty($data['usuario_tipo_id'])) {
-            $clientValidationErrors = $this->validateClientLogic($data);
-            $errors = array_merge($errors, $clientValidationErrors);
-        }
-
-        return $errors;
-    }
 
     private function getUserTypes(): array
     {
@@ -297,72 +262,9 @@ class UserController extends BaseController
         }
     }
 
-    private function isUsernameAvailable(string $username, int $excludeUserId = 0): bool
-    {
-        try {
-            $sql = "SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = ?";
-            $params = [$username];
-            
-            if ($excludeUserId > 0) {
-                $sql .= " AND id != ?";
-                $params[] = $excludeUserId;
-            }
-            
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->fetchColumn() == 0;
-        } catch (Exception $e) {
-            error_log("Error verificando username: " . $e->getMessage());
-            return false;
-        }
-    }
 
-    private function isEmailAvailable(string $email, int $excludeUserId = 0): bool
-    {
-        try {
-            $sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
-            $params = [$email];
-            
-            if ($excludeUserId > 0) {
-                $sql .= " AND id != ?";
-                $params[] = $excludeUserId;
-            }
-            
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->fetchColumn() == 0;
-        } catch (Exception $e) {
-            error_log("Error verificando email: " . $e->getMessage());
-            return false;
-        }
-    }
 
-    private function isRutAvailable(string $rut, int $excludeUserId = 0): bool
-    {
-        try {
-            $cleanRut = preg_replace('/[^0-9kK]/', '', $rut);
-            $sql = "SELECT COUNT(*) FROM personas WHERE rut = ?";
-            $params = [$cleanRut];
-            
-            if ($excludeUserId > 0) {
-                $sql .= " AND usuario_id != ?";
-                $params[] = $excludeUserId;
-            }
-            
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->fetchColumn() == 0;
-        } catch (Exception $e) {
-            error_log("Error verificando RUT: " . $e->getMessage());
-            return false;
-        }
-    }
 
-    private function isAjaxRequest(): bool
-    {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-    }
 
     /**
      * Mostrar/editar usuario específico
@@ -380,7 +282,7 @@ class UserController extends BaseController
             // Verificar permisos para gestión de usuario individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                require_once __DIR__ . '/../Views/errors/403.php';
+                $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -411,7 +313,7 @@ class UserController extends BaseController
                 'clients' => $clients
             ];
 
-            require_once __DIR__ . '/../Views/users/form.php';
+            $this->viewRenderer->render('users/form', $data);
         } catch (Exception $e) {
             error_log("Error en UserController::show: " . $e->getMessage());
             http_response_code(500);
@@ -435,7 +337,7 @@ class UserController extends BaseController
             // Verificar permisos para edición de usuarios
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                require_once __DIR__ . '/../Views/errors/403.php';
+                $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -470,7 +372,7 @@ class UserController extends BaseController
                 'success' => $_GET['success'] ?? ''
             ];
 
-            require_once __DIR__ . '/../Views/users/edit.php';
+            $this->viewRenderer->render('users/edit', $data);
         } catch (Exception $e) {
             error_log("Error en UserController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -494,7 +396,7 @@ class UserController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                require_once __DIR__ . '/../Views/errors/403.php';
+                $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -509,8 +411,8 @@ class UserController extends BaseController
                 return;
             }
 
-            // Validar datos
-            $errors = $this->validateUserDataForUpdate($_POST, $id);
+            // Validar datos usando ValidationService
+            $errors = $this->validationService->validateUserDataForUpdate($_POST, $id);
 
             if (!empty($errors)) {
                 $errorMsg = implode(', ', array_values($errors));
@@ -555,7 +457,7 @@ class UserController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                require_once __DIR__ . '/../Views/errors/403.php';
+                $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -591,72 +493,7 @@ class UserController extends BaseController
     /**
      * Validar datos del usuario para actualización
      */
-    private function validateUserDataForUpdate(array $data, int $userId = 0): array
-    {
-        $errors = [];
 
-        // Validar nombre
-        if (empty($data['nombre'])) {
-            $errors['nombre'] = 'El nombre es obligatorio';
-        } elseif (strlen($data['nombre']) < 2) {
-            $errors['nombre'] = 'El nombre debe tener al menos 2 caracteres';
-        }
-
-        // Validar email
-        if (empty($data['email'])) {
-            $errors['email'] = 'El email es obligatorio';
-        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'El email no tiene un formato válido';
-        } elseif (!$this->isEmailAvailable($data['email'], $userId)) {
-            $errors['email'] = 'El correo electrónico ya está en uso por otro usuario';
-        }
-
-        // Validar usuario_tipo_id
-        if (empty($data['usuario_tipo_id']) || !is_numeric($data['usuario_tipo_id'])) {
-            $errors['usuario_tipo_id'] = 'Debe seleccionar un tipo de usuario válido';
-        }
-
-        // Validaciones específicas para creación (no actualización)
-        if ($userId === 0) {
-            // Validar nombre_usuario
-            if (empty($data['nombre_usuario'])) {
-                $errors['nombre_usuario'] = 'El nombre de usuario es obligatorio';
-            } elseif (strlen($data['nombre_usuario']) < 3) {
-                $errors['nombre_usuario'] = 'El nombre de usuario debe tener al menos 3 caracteres';
-            } elseif (!$this->isUsernameAvailable($data['nombre_usuario'], $userId)) {
-                $errors['nombre_usuario'] = 'El nombre de usuario ya está en uso';
-            }
-
-            // Validar password
-            if (empty($data['password'])) {
-                $errors['password'] = 'La contraseña es obligatoria';
-            } elseif (strlen($data['password']) < 6) {
-                $errors['password'] = 'La contraseña debe tener al menos 6 caracteres';
-            }
-
-            // Validar confirmación de password
-            if ($data['password'] !== ($data['password_confirm'] ?? '')) {
-                $errors['password_confirm'] = 'Las contraseñas no coinciden';
-            }
-            
-            // Validar RUT para creación
-            if (!empty($data['rut'])) {
-                if (!Security::validateRut($data['rut'])) {
-                    $errors['rut'] = 'El RUT no es válido';
-                } elseif (!$this->isRutAvailable($data['rut'], $userId)) {
-                    $errors['rut'] = 'El RUT ya está registrado';
-                }
-            }
-        }
-        
-        // GAP 1 y GAP 2: Validaciones especiales para usuarios cliente
-        if (!empty($data['usuario_tipo_id'])) {
-            $clientValidationErrors = $this->validateClientLogic($data);
-            $errors = array_merge($errors, $clientValidationErrors);
-        }
-
-        return $errors;
-    }
 
 
 
@@ -820,7 +657,7 @@ class UserController extends BaseController
             switch ($type) {
                 case 'email':
                     if (Security::validateEmail($value)) {
-                        $isValid = $this->isEmailAvailable($value, $excludeUserId);
+                        $isValid = $this->validationService->isEmailAvailable($value, $excludeUserId);
                         $message = $isValid ? 'Email disponible' : 'Email ya registrado';
                     } else {
                         $isValid = false;
@@ -829,7 +666,7 @@ class UserController extends BaseController
                     break;
 
                 case 'username':
-                    $isValid = $this->isUsernameAvailable($value, $excludeUserId);
+                    $isValid = $this->validationService->isUsernameAvailable($value, $excludeUserId);
                     $message = $isValid ? 'Nombre de usuario disponible' : 'Nombre de usuario ya existe';
                     break;
 
@@ -837,7 +674,7 @@ class UserController extends BaseController
                     $isValid = Security::validateRut($value);
                     $message = $isValid ? 'RUT válido' : 'RUT inválido';
                     if ($isValid) {
-                        $isValid = $this->isRutAvailable($value, $excludeUserId);
+                        $isValid = $this->validationService->isRutAvailable($value, $excludeUserId);
                         $message = $isValid ? 'RUT disponible' : 'RUT ya registrado';
                     }
                     break;
@@ -861,76 +698,10 @@ class UserController extends BaseController
     /**
      * GAP 1 y GAP 2: Validar lógica de usuarios cliente
      */
-    private function validateClientLogic(array $data): array
-    {
-        $errors = [];
-        
-        if (empty($data['usuario_tipo_id'])) {
-            return $errors; // No se puede validar sin tipo de usuario
-        }
-        
-        $tipoUsuario = $this->getUserTypeName((int)$data['usuario_tipo_id']);
-        
-        // GAP 2: Usuarios de empresa propietaria NO deben tener cliente_id
-        if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
-            if (!empty($data['cliente_id'])) {
-                $errors['cliente_id'] = "Usuarios tipo '$tipoUsuario' no deben tener cliente asignado";
-            }
-        }
-        
-        // GAP 1: Usuarios de cliente deben tener cliente_id y validaciones especiales
-        if (in_array($tipoUsuario, ['client', 'counterparty'])) {
-            if (empty($data['cliente_id'])) {
-                $errors['cliente_id'] = "Usuario tipo '$tipoUsuario' debe tener un cliente asignado";
-            } else {
-                $clientId = (int)$data['cliente_id'];
-                
-                // Validar que el cliente existe
-                if (!$this->clientExists($clientId)) {
-                    $errors['cliente_id'] = 'El cliente seleccionado no existe';
-                } else {
-                    // Validaciones especiales según tipo de usuario
-                    if ($tipoUsuario === 'client') {
-                        // GAP 1: Usuario 'client' debe tener mismo RUT que empresa
-                        if (!empty($data['rut']) && !$this->userModel->validateClientUserRut($data['rut'], $clientId)) {
-                            $errors['rut'] = 'El RUT de la persona debe coincidir con el RUT del cliente seleccionado';
-                        }
-                    }
-                    // Nota: La validación de counterparty se hará después de crear la persona
-                }
-            }
-        }
-        
-        return $errors;
-    }
+
 
     /**
      * Obtener nombre del tipo de usuario por ID
      */
-    private function getUserTypeName(int $userTypeId): string
-    {
-        try {
-            $stmt = $this->db->prepare("SELECT nombre FROM usuario_tipos WHERE id = ?");
-            $stmt->execute([$userTypeId]);
-            return $stmt->fetchColumn() ?: '';
-        } catch (Exception $e) {
-            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
-            return '';
-        }
-    }
 
-    /**
-     * Verificar si un cliente existe
-     */
-    private function clientExists(int $clientId): bool
-    {
-        try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clientes WHERE id = ? AND estado_tipo_id IN (1, 2)");
-            $stmt->execute([$clientId]);
-            return $stmt->fetchColumn() > 0;
-        } catch (Exception $e) {
-            error_log("Error verificando cliente: " . $e->getMessage());
-            return false;
-        }
-    }
 }

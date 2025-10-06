@@ -49,7 +49,7 @@
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="/menus/store">
-                                    <?php Security::renderCsrfField(); ?>
+                                    <?php \App\Helpers\Security::renderCsrfField(); ?>
                                     
                                     <div class="row">
                                         <div class="col-md-6">

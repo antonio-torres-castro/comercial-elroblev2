@@ -220,7 +220,7 @@
                                                                 Cancelar
                                                             </button>
                                                             <form method="POST" action="/client-counterpartie/delete" style="display: inline;">
-                                                                <input type="hidden" name="csrf_token" value="<?php echo App\Helpers\Security::generateCsrfToken(); ?>">
+                                                                <input type="hidden" name="csrf_token" value="<?php echo \App\Helpers\Security::generateCsrfToken(); ?>">
                                                                 <input type="hidden" name="id" value="<?php echo $counterpartie['id']; ?>">
                                                                 <button type="submit" class="btn btn-danger">
                                                                     <i class="bi bi-trash"></i> Eliminar
