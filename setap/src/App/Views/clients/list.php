@@ -60,14 +60,14 @@
                         <form method="GET" action="/clients" class="row g-3">
                             <div class="col-md-3">
                                 <label for="rut" class="form-label">RUT</label>
-                                <input type="text" class="form-control" id="rut" name="rut" 
-                                       value="<?php echo htmlspecialchars($data['filters']['rut']); ?>" 
+                                <input type="text" class="form-control" id="rut" name="rut"
+                                       value="<?php echo htmlspecialchars($data['filters']['rut']); ?>"
                                        placeholder="Buscar por RUT">
                             </div>
                             <div class="col-md-4">
                                 <label for="razon_social" class="form-label">Razón Social</label>
-                                <input type="text" class="form-control" id="razon_social" name="razon_social" 
-                                       value="<?php echo htmlspecialchars($data['filters']['razon_social']); ?>" 
+                                <input type="text" class="form-control" id="razon_social" name="razon_social"
+                                       value="<?php echo htmlspecialchars($data['filters']['razon_social']); ?>"
                                        placeholder="Buscar por razón social">
                             </div>
                             <div class="col-md-3">
@@ -75,7 +75,7 @@
                                 <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                     <option value="">Todos los estados</option>
                                     <?php foreach ($data['statusTypes'] as $status): ?>
-                                        <option value="<?php echo $status['id']; ?>" 
+                                        <option value="<?php echo $status['id']; ?>"
                                                 <?php echo $data['filters']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($status['nombre']); ?>
                                         </option>
@@ -179,11 +179,11 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm" role="group">
-                                                        <a href="/client/<?php echo $client['id']; ?>" 
+                                                        <a href="/client/<?php echo $client['id']; ?>"
                                                            class="btn btn-outline-setap-primary" title="Editar">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <button type="button" class="btn btn-outline-danger" 
+                                                        <button type="button" class="btn btn-outline-danger"
                                                                 onclick="confirmDelete(<?php echo $client['id']; ?>, '<?php echo addslashes($client['razon_social']); ?>')"
                                                                 title="Eliminar">
                                                             <i class="bi bi-trash"></i>
@@ -258,7 +258,7 @@
         function confirmDelete(id, name) {
             document.getElementById('clientName').textContent = name;
             document.getElementById('deleteClientId').value = id;
-            
+
             const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();
         }

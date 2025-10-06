@@ -94,7 +94,7 @@
 
             <!-- Contenido del Reporte -->
             <?php if (isset($reportData) && !empty($reportData)): ?>
-                
+
                 <!-- Resumen Ejecutivo -->
                 <?php if (isset($reportData['summary'])): ?>
                 <div class="row mb-4">
@@ -155,7 +155,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 <!-- Paginación o información adicional -->
                                 <div class="mt-3 text-muted">
                                     <small>
@@ -203,7 +203,7 @@
                                 <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
                                 <h4 class="mt-3">No hay datos para mostrar</h4>
                                 <p class="text-muted">
-                                    No se encontraron datos para los parámetros especificados. 
+                                    No se encontraron datos para los parámetros especificados.
                                     Intente ajustar los filtros o el período de tiempo.
                                 </p>
                                 <a href="/reports/create" class="btn btn-setap-primary">
@@ -248,7 +248,7 @@
             // Obtener parámetros del reporte actual
             const urlParams = new URLSearchParams(window.location.search);
             const exportUrl = `/reports/export?format=${format}&type=${urlParams.get('type') || 'custom'}`;
-            
+
             // Crear enlace temporal para descarga
             const link = document.createElement('a');
             link.href = exportUrl;

@@ -27,27 +27,27 @@ class ClientBusinessLogic
     public function validateClientUserLogic(array $data): array
     {
         $errors = [];
-        
+
         if (empty($data['usuario_tipo_id'])) {
             return $errors; // No se puede validar sin tipo de usuario
         }
-        
+
         $tipoUsuario = $this->getUserTypeName((int)$data['usuario_tipo_id']);
-        
+
         // GAP 2: Usuarios de empresa propietaria NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
             if (!empty($data['cliente_id'])) {
                 $errors['cliente_id'] = "Usuarios tipo '$tipoUsuario' no deben tener cliente asignado";
             }
         }
-        
+
         // GAP 1: Usuarios de cliente deben tener cliente_id y validaciones especiales
         if (in_array($tipoUsuario, ['client', 'counterparty'])) {
             if (empty($data['cliente_id'])) {
                 $errors['cliente_id'] = "Usuario tipo '$tipoUsuario' debe tener un cliente asignado";
             } else {
                 $clientId = (int)$data['cliente_id'];
-                
+
                 // Validar que el cliente existe
                 if (!$this->clientExists($clientId)) {
                     $errors['cliente_id'] = 'El cliente seleccionado no existe';
@@ -63,7 +63,7 @@ class ClientBusinessLogic
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -73,12 +73,12 @@ class ClientBusinessLogic
     public function determineClienteId(array $data): ?int
     {
         $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
-        
+
         // Usuarios de la empresa propietaria NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
             return null;
         }
-        
+
         // Usuarios de cliente deben tener cliente_id
         if (in_array($tipoUsuario, ['client', 'counterparty'])) {
             if (empty($data['cliente_id'])) {
@@ -86,7 +86,7 @@ class ClientBusinessLogic
             }
             return (int)$data['cliente_id'];
         }
-        
+
         return null;
     }
 
@@ -105,9 +105,9 @@ class ClientBusinessLogic
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, razon_social, rut 
-                FROM clientes 
-                WHERE estado_tipo_id IN (1, 2) 
+                SELECT id, razon_social, rut
+                FROM clientes
+                WHERE estado_tipo_id IN (1, 2)
                 ORDER BY razon_social
             ");
             $stmt->execute();
@@ -145,13 +145,13 @@ class ClientBusinessLogic
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT estado_tipo_id 
-                FROM clientes 
+                SELECT estado_tipo_id
+                FROM clientes
                 WHERE id = ?
             ");
             $stmt->execute([$clientId]);
             $status = $stmt->fetchColumn();
-            
+
             // Solo clientes activos (1) o en proceso (2) pueden tener usuarios
             return in_array($status, [1, 2]);
         } catch (Exception $e) {
@@ -308,27 +308,27 @@ class ClientBusinessLogic
     public function validateClientLogic(array $data): array
     {
         $errors = [];
-        
+
         if (empty($data['usuario_tipo_id'])) {
             return $errors; // No se puede validar sin tipo de usuario
         }
-        
+
         $tipoUsuario = $this->getUserTypeName((int)$data['usuario_tipo_id']);
-        
+
         // GAP 2: Usuarios de empresa propietaria NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
             if (!empty($data['cliente_id'])) {
                 $errors['cliente_id'] = "Usuarios tipo '$tipoUsuario' no deben tener cliente asignado";
             }
         }
-        
+
         // GAP 1: Usuarios de cliente deben tener cliente_id y validaciones especiales
         if (in_array($tipoUsuario, ['client', 'counterparty'])) {
             if (empty($data['cliente_id'])) {
                 $errors['cliente_id'] = "Usuario tipo '$tipoUsuario' debe tener un cliente asignado";
             } else {
                 $clientId = (int)$data['cliente_id'];
-                
+
                 // Validar que el cliente existe
                 if (!$this->clientExists($clientId)) {
                     $errors['cliente_id'] = 'El cliente seleccionado no existe';
@@ -345,7 +345,7 @@ class ClientBusinessLogic
                 }
             }
         }
-        
+
         return $errors;
     }
 }

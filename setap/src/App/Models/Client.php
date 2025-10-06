@@ -23,7 +23,7 @@ class Client
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     c.*,
                     et.nombre as estado_nombre,
                     (SELECT COUNT(*) FROM cliente_contrapartes cc WHERE cc.cliente_id = c.id AND cc.estado_tipo_id != 3) as total_contrapartes
@@ -69,7 +69,7 @@ class Client
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     c.*,
                     et.nombre as estado_nombre
                 FROM {$this->table} c
@@ -229,7 +229,7 @@ class Client
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     cc.*,
                     p.rut as persona_rut,
                     p.nombre as persona_nombre,
@@ -370,7 +370,7 @@ class Client
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     cc.*,
                     p.rut as persona_rut,
                     p.nombre as persona_nombre,
@@ -403,7 +403,7 @@ class Client
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     cc.*,
                     p.rut as persona_rut,
                     p.nombre as persona_nombre,
@@ -556,9 +556,13 @@ class Client
 
         $expectedDv = 11 - ($sum % 11);
 
-        if ($expectedDv == 11) $expectedDv = '0';
-        elseif ($expectedDv == 10) $expectedDv = 'K';
-        else $expectedDv = strval($expectedDv);
+        if ($expectedDv == 11) {
+            $expectedDv = '0';
+        } elseif ($expectedDv == 10) {
+            $expectedDv = 'K';
+        } else {
+            $expectedDv = strval($expectedDv);
+        }
 
         return $dv == $expectedDv;
     }

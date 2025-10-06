@@ -8,7 +8,7 @@ use App\Controllers\BaseController;
 
 /**
  * ClientValidationService
- * 
+ *
  * Servicio especializado en la validación de datos de clientes y contrapartes.
  * Centraliza toda la lógica de validación que anteriormente estaba en ClientController.
  */
@@ -25,7 +25,7 @@ class ClientValidationService extends BaseController
 
     /**
      * Validar datos de cliente
-     * 
+     *
      * @param array $data Datos del cliente a validar
      * @param int|null $excludeId ID del cliente a excluir (para ediciones)
      * @return array Lista de errores encontrados
@@ -48,7 +48,7 @@ class ClientValidationService extends BaseController
             } elseif ($this->clientModel->rutExists($data['rut'], $excludeId)) {
                 $errors[] = 'El RUT ya está registrado para otro cliente';
             }
-            
+
             if (strlen($data['rut']) > 20) {
                 $errors[] = 'El RUT no puede exceder 20 caracteres';
             }
@@ -97,7 +97,7 @@ class ClientValidationService extends BaseController
 
     /**
      * Validar datos de contraparte
-     * 
+     *
      * @param array $data Datos de la contraparte a validar
      * @param int|null $excludeId ID de la contraparte a excluir (para ediciones)
      * @return array Lista de errores encontrados

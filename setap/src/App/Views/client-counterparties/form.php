@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -52,7 +54,7 @@
                             <div class="card-body">
                                 <form method="POST" action="<?php echo $data['action'] === 'edit' ? '/client-counterpartie/update' : '/client-counterpartie/store'; ?>">
                                     <input type="hidden" name="csrf_token" value="<?php echo \App\Helpers\Security::generateCsrfToken(); ?>">
-                                    
+
                                     <?php if ($data['action'] === 'edit' && $data['counterpartie']): ?>
                                         <input type="hidden" name="id" value="<?php echo $data['counterpartie']['id']; ?>">
                                     <?php endif; ?>
@@ -63,12 +65,12 @@
                                             <label for="cliente_id" class="form-label">
                                                 Cliente <span class="text-danger">*</span>
                                             </label>
-                                            <select class="form-select <?php echo isset($data['errors']) && in_array('cliente_id', array_column($data['errors'], 'field')) ? 'is-invalid' : ''; ?>" 
-                                                    id="cliente_id" name="cliente_id" required>
+                                            <select class="form-select <?php echo isset($data['errors']) && in_array('cliente_id', array_column($data['errors'], 'field')) ? 'is-invalid' : ''; ?>"
+                                                id="cliente_id" name="cliente_id" required>
                                                 <option value="">Seleccionar cliente...</option>
                                                 <?php foreach ($data['clients'] as $client): ?>
-                                                    <option value="<?php echo $client['id']; ?>" 
-                                                        <?php 
+                                                    <option value="<?php echo $client['id']; ?>"
+                                                        <?php
                                                         $selected = false;
                                                         if ($data['action'] === 'edit' && $data['counterpartie']) {
                                                             $selected = ($data['counterpartie']['cliente_id'] == $client['id']);
@@ -89,12 +91,12 @@
                                             <label for="persona_id" class="form-label">
                                                 Persona <span class="text-danger">*</span>
                                             </label>
-                                            <select class="form-select <?php echo isset($data['errors']) && in_array('persona_id', array_column($data['errors'], 'field')) ? 'is-invalid' : ''; ?>" 
-                                                    id="persona_id" name="persona_id" required>
+                                            <select class="form-select <?php echo isset($data['errors']) && in_array('persona_id', array_column($data['errors'], 'field')) ? 'is-invalid' : ''; ?>"
+                                                id="persona_id" name="persona_id" required>
                                                 <option value="">Seleccionar persona...</option>
                                                 <?php foreach ($data['personas'] as $persona): ?>
-                                                    <option value="<?php echo $persona['id']; ?>" 
-                                                        <?php 
+                                                    <option value="<?php echo $persona['id']; ?>"
+                                                        <?php
                                                         $selected = false;
                                                         if ($data['action'] === 'edit' && $data['counterpartie']) {
                                                             $selected = ($data['counterpartie']['persona_id'] == $persona['id']);
@@ -113,15 +115,15 @@
                                         <!-- Cargo -->
                                         <div class="col-md-6">
                                             <label for="cargo" class="form-label">Cargo</label>
-                                            <input type="text" class="form-control" id="cargo" name="cargo" 
-                                                   placeholder="Ej: Gerente de Proyecto, Coordinador, etc."
-                                                   value="<?php 
-                                                   if ($data['action'] === 'edit' && $data['counterpartie']) {
-                                                       echo htmlspecialchars($data['counterpartie']['cargo'] ?? '');
-                                                   } elseif (isset($_POST['cargo'])) {
-                                                       echo htmlspecialchars($_POST['cargo']);
-                                                   }
-                                                   ?>" maxlength="100">
+                                            <input type="text" class="form-control" id="cargo" name="cargo"
+                                                placeholder="Ej: Gerente de Proyecto, Coordinador, etc."
+                                                value="<?php
+                                                        if ($data['action'] === 'edit' && $data['counterpartie']) {
+                                                            echo htmlspecialchars($data['counterpartie']['cargo'] ?? '');
+                                                        } elseif (isset($_POST['cargo'])) {
+                                                            echo htmlspecialchars($_POST['cargo']);
+                                                        }
+                                                        ?>" maxlength="100">
                                             <div class="form-text">Cargo o posición de la persona en el cliente (opcional).</div>
                                         </div>
 
@@ -132,8 +134,8 @@
                                             </label>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                                 <?php foreach ($data['statusTypes'] as $status): ?>
-                                                    <option value="<?php echo $status['id']; ?>" 
-                                                        <?php 
+                                                    <option value="<?php echo $status['id']; ?>"
+                                                        <?php
                                                         $selected = false;
                                                         if ($data['action'] === 'edit' && $data['counterpartie']) {
                                                             $selected = ($data['counterpartie']['estado_tipo_id'] == $status['id']);
@@ -154,11 +156,11 @@
                                         <div class="col-12">
                                             <hr>
                                             <h6 class="text-muted">
-                                                <i class="bi bi-telephone"></i> Información de Contacto Específica 
+                                                <i class="bi bi-telephone"></i> Información de Contacto Específica
                                                 <small class="text-muted">(para este cliente)</small>
                                             </h6>
                                             <p class="small text-muted">
-                                                Puedes especificar información de contacto específica para esta relación cliente-contraparte. 
+                                                Puedes especificar información de contacto específica para esta relación cliente-contraparte.
                                                 Si no se especifica, se usará la información de contacto general de la persona.
                                             </p>
                                         </div>
@@ -166,30 +168,30 @@
                                         <!-- Teléfono -->
                                         <div class="col-md-6">
                                             <label for="telefono" class="form-label">Teléfono</label>
-                                            <input type="tel" class="form-control" id="telefono" name="telefono" 
-                                                   placeholder="Ej: +56 9 1234 5678"
-                                                   value="<?php 
-                                                   if ($data['action'] === 'edit' && $data['counterpartie']) {
-                                                       echo htmlspecialchars($data['counterpartie']['telefono'] ?? '');
-                                                   } elseif (isset($_POST['telefono'])) {
-                                                       echo htmlspecialchars($_POST['telefono']);
-                                                   }
-                                                   ?>" maxlength="20">
+                                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                                placeholder="Ej: +56 9 1234 5678"
+                                                value="<?php
+                                                        if ($data['action'] === 'edit' && $data['counterpartie']) {
+                                                            echo htmlspecialchars($data['counterpartie']['telefono'] ?? '');
+                                                        } elseif (isset($_POST['telefono'])) {
+                                                            echo htmlspecialchars($_POST['telefono']);
+                                                        }
+                                                        ?>" maxlength="20">
                                             <div class="form-text">Teléfono específico para contacto relacionado a este cliente.</div>
                                         </div>
 
                                         <!-- Email -->
                                         <div class="col-md-6">
                                             <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control" id="email" name="email" 
-                                                   placeholder="Ej: contraparte@cliente.com"
-                                                   value="<?php 
-                                                   if ($data['action'] === 'edit' && $data['counterpartie']) {
-                                                       echo htmlspecialchars($data['counterpartie']['email'] ?? '');
-                                                   } elseif (isset($_POST['email'])) {
-                                                       echo htmlspecialchars($_POST['email']);
-                                                   }
-                                                   ?>" maxlength="150">
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                placeholder="Ej: contraparte@cliente.com"
+                                                value="<?php
+                                                        if ($data['action'] === 'edit' && $data['counterpartie']) {
+                                                            echo htmlspecialchars($data['counterpartie']['email'] ?? '');
+                                                        } elseif (isset($_POST['email'])) {
+                                                            echo htmlspecialchars($_POST['email']);
+                                                        }
+                                                        ?>" maxlength="150">
                                             <div class="form-text">Email específico para contacto relacionado a este cliente.</div>
                                         </div>
 
@@ -225,10 +227,10 @@
                                             <dl class="row">
                                                 <dt class="col-sm-4">ID:</dt>
                                                 <dd class="col-sm-8"><?php echo $data['counterpartie']['id']; ?></dd>
-                                                
+
                                                 <dt class="col-sm-4">Fecha Creación:</dt>
                                                 <dd class="col-sm-8"><?php echo date('d/m/Y H:i', strtotime($data['counterpartie']['fecha_Creado'])); ?></dd>
-                                                
+
                                                 <dt class="col-sm-4">Última Modificación:</dt>
                                                 <dd class="col-sm-8"><?php echo date('d/m/Y H:i', strtotime($data['counterpartie']['fecha_modificacion'])); ?></dd>
                                             </dl>
@@ -240,7 +242,7 @@
                                                     <?php echo htmlspecialchars($data['counterpartie']['persona_nombre']); ?>
                                                     <br><small class="text-muted">RUT: <?php echo htmlspecialchars($data['counterpartie']['persona_rut']); ?></small>
                                                 </dd>
-                                                
+
                                                 <dt class="col-sm-4">Cliente:</dt>
                                                 <dd class="col-sm-8"><?php echo htmlspecialchars($data['counterpartie']['cliente_nombre']); ?></dd>
                                             </dl>
@@ -258,4 +260,5 @@
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 </body>
+
 </html>

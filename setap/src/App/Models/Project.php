@@ -22,7 +22,7 @@ class Project
     {
         try {
             $sql = "
-                SELECT p.*, 
+                SELECT p.*,
                        c.razon_social as cliente_nombre,
                        tt.nombre as tipo_tarea,
                        et.nombre as estado_nombre,
@@ -88,12 +88,12 @@ class Project
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT p.*, 
+                SELECT p.*,
                        c.id as cliente_id, c.razon_social as cliente_nombre, c.rut as cliente_rut,
                        c.direccion as cliente_direccion, c.telefono as cliente_telefono,
                        tt.id as tarea_tipo_id, tt.nombre as tipo_tarea,
                        et.id as estado_tipo_id, et.nombre as estado_nombre,
-                       cc.id as contraparte_id, 
+                       cc.id as contraparte_id,
                        CONCAT(per.nombre, ' (', per.rut, ')') as contraparte_nombre,
                        cc.email as contraparte_email, cc.telefono as contraparte_telefono,
                        cc.cargo as contraparte_cargo
@@ -124,7 +124,7 @@ class Project
 
             $stmt = $this->db->prepare("
                 INSERT INTO proyectos (
-                    cliente_id, direccion, fecha_inicio, fecha_fin, 
+                    cliente_id, direccion, fecha_inicio, fecha_fin,
                     tarea_tipo_id, estado_tipo_id, contraparte_id
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
@@ -214,25 +214,25 @@ class Project
 
             // Eliminar proyecto (lógicamente)
             $stmt = $this->db->prepare("
-                UPDATE proyectos SET 
-                    estado_tipo_id = 4, 
-                    fecha_modificacion = CURRENT_TIMESTAMP 
+                UPDATE proyectos SET
+                    estado_tipo_id = 4,
+                    fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE id = ?
             ");
             $stmt->execute([$id]);
 
             // Eliminar tareas asociadas (lógicamente)
             $stmt = $this->db->prepare("
-                UPDATE proyecto_tareas SET 
-                    estado_tipo_id = 4, 
-                    fecha_modificacion = CURRENT_TIMESTAMP 
+                UPDATE proyecto_tareas SET
+                    estado_tipo_id = 4,
+                    fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE proyecto_id = ?
             ");
             $stmt->execute([$id]);
 
             // Eliminar feriados asociados (lógicamente)
             $stmt = $this->db->prepare("
-                UPDATE proyecto_feriados SET 
+                UPDATE proyecto_feriados SET
                     estado_tipo_id = 4
                 WHERE proyecto_id = ?
             ");
@@ -254,7 +254,7 @@ class Project
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT pt.*, 
+                SELECT pt.*,
                        t.nombre as tarea_nombre, t.descripcion as tarea_descripcion,
                        p.nombre_usuario as planificador_nombre,
                        e.nombre_usuario as ejecutor_nombre,
@@ -267,7 +267,7 @@ class Project
                 LEFT JOIN usuarios e ON pt.ejecutor_id = e.id
                 LEFT JOIN usuarios s ON pt.supervisor_id = s.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
-                LEFT JOIN historial_tareas ht ON pt.id = ht.proyecto_tarea_id 
+                LEFT JOIN historial_tareas ht ON pt.id = ht.proyecto_tarea_id
                     AND ht.id = (SELECT MAX(id) FROM historial_tareas WHERE proyecto_tarea_id = pt.id)
                 WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4
                 ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC
@@ -288,7 +288,7 @@ class Project
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT 
+                SELECT
                     COUNT(*) as total_tareas,
                     COUNT(CASE WHEN pt.estado_tipo_id = 5 THEN 1 END) as tareas_iniciadas,
                     COUNT(CASE WHEN pt.estado_tipo_id = 6 THEN 1 END) as tareas_terminadas,
@@ -324,8 +324,8 @@ class Project
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT fecha 
-                FROM proyecto_feriados 
+                SELECT fecha
+                FROM proyecto_feriados
                 WHERE proyecto_id = ? AND estado_tipo_id != 4
                 ORDER BY fecha
             ");
@@ -345,9 +345,9 @@ class Project
     {
         try {
             $stmt = $this->db->prepare("
-                UPDATE proyectos SET 
-                    estado_tipo_id = ?, 
-                    fecha_modificacion = CURRENT_TIMESTAMP 
+                UPDATE proyectos SET
+                    estado_tipo_id = ?,
+                    fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE id = ? AND estado_tipo_id != 4
             ");
 
@@ -394,7 +394,7 @@ class Project
             $searchTerm = "%{$term}%";
 
             $stmt = $this->db->prepare("
-                SELECT DISTINCT p.*, 
+                SELECT DISTINCT p.*,
                        c.razon_social as cliente_nombre,
                        et.nombre as estado_nombre
                 FROM proyectos p
@@ -402,7 +402,7 @@ class Project
                 INNER JOIN estado_tipos et ON p.estado_tipo_id = et.id
                 LEFT JOIN cliente_contrapartes cc ON p.contraparte_id = cc.id
                 LEFT JOIN personas per ON cc.persona_id = per.id
-                WHERE p.estado_tipo_id != 4 
+                WHERE p.estado_tipo_id != 4
                 AND (
                     c.razon_social LIKE ? OR
                     p.direccion LIKE ? OR
@@ -429,7 +429,7 @@ class Project
     {
         try {
             $stmt = $this->db->prepare("
-                INSERT INTO proyecto_feriados (proyecto_id, fecha, estado_tipo_id) 
+                INSERT INTO proyecto_feriados (proyecto_id, fecha, estado_tipo_id)
                 VALUES (?, ?, 1)
             ");
 
@@ -451,7 +451,7 @@ class Project
     {
         try {
             $stmt = $this->db->prepare("
-                UPDATE proyecto_feriados SET estado_tipo_id = 4 
+                UPDATE proyecto_feriados SET estado_tipo_id = 4
                 WHERE proyecto_id = ?
             ");
 

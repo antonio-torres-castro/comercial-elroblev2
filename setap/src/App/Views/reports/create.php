@@ -81,7 +81,7 @@
                         <!-- Configuración Básica -->
                         <div class="form-section">
                             <h5><i class="bi bi-gear"></i> Configuración Básica</h5>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -96,7 +96,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="report_format" class="form-label">Formato de Salida</label>
@@ -114,7 +114,7 @@
                         <!-- Filtros de Fecha -->
                         <div class="form-section">
                             <h5><i class="bi bi-calendar-range"></i> Período de Tiempo</h5>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -123,7 +123,7 @@
                                         <div class="form-text">Deje en blanco para incluir desde el inicio</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="date_to" class="form-label">Fecha Hasta</label>
@@ -149,7 +149,7 @@
                         <!-- Filtros Específicos -->
                         <div class="form-section">
                             <h5><i class="bi bi-funnel"></i> Filtros Específicos</h5>
-                            
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -161,7 +161,7 @@
                                         <div class="form-text">Filtrar por un cliente específico</div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="project_id" class="form-label">Proyecto Específico</label>
@@ -186,7 +186,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="include_details" class="form-label">Nivel de Detalle</label>
@@ -203,7 +203,7 @@
                         <!-- Vista Previa -->
                         <div class="form-section">
                             <h5><i class="bi bi-eye"></i> Vista Previa</h5>
-                            
+
                             <div class="report-preview" id="reportPreview">
                                 <i class="bi bi-file-text" style="font-size: 3rem;"></i>
                                 <p class="mt-3">Seleccione los parámetros del reporte para ver una vista previa</p>
@@ -232,7 +232,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createReportForm');
@@ -250,7 +250,7 @@
             function validateDates() {
                 const dateFrom = document.getElementById('date_from').value;
                 const dateTo = document.getElementById('date_to').value;
-                
+
                 if (dateFrom && dateTo && dateFrom > dateTo) {
                     document.getElementById('date_to').setCustomValidity('La fecha hasta debe ser posterior a la fecha desde');
                     return false;
@@ -265,7 +265,7 @@
                 const selectedType = reportType.value;
                 const dateFrom = document.getElementById('date_from').value;
                 const dateTo = document.getElementById('date_to').value;
-                
+
                 if (selectedType) {
                     const typeNames = {
                         'projects_summary': 'Resumen de Proyectos',
@@ -274,11 +274,11 @@
                         'clients_summary': 'Resumen de Clientes',
                         'custom': 'Reporte Personalizado'
                     };
-                    
-                    const period = dateFrom && dateTo ? 
-                        `del ${dateFrom} al ${dateTo}` : 
+
+                    const period = dateFrom && dateTo ?
+                        `del ${dateFrom} al ${dateTo}` :
                         'de todo el período disponible';
-                    
+
                     reportPreview.innerHTML = `
                         <i class="bi bi-file-text text-setap-primary" style="font-size: 3rem;"></i>
                         <h6 class="mt-3">${typeNames[selectedType]}</h6>
@@ -335,7 +335,7 @@
                     alert('Debe seleccionar un tipo de reporte.');
                     return;
                 }
-                
+
                 alert('Funcionalidad de vista previa en desarrollo.');
             });
         });
@@ -345,9 +345,9 @@
             const today = new Date();
             const dateFrom = document.getElementById('date_from');
             const dateTo = document.getElementById('date_to');
-            
+
             dateTo.value = today.toISOString().split('T')[0];
-            
+
             switch(period) {
                 case 'today':
                     dateFrom.value = today.toISOString().split('T')[0];
@@ -373,7 +373,7 @@
                     dateFrom.value = yearAgo.toISOString().split('T')[0];
                     break;
             }
-            
+
             // Disparar eventos para actualizar validación y vista previa
             dateFrom.dispatchEvent(new Event('change'));
         }

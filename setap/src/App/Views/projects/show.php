@@ -153,7 +153,7 @@
                         <h5><i class="bi bi-graph-up"></i> Progreso General</h5>
                     </div>
                     <div class="card-body">
-                        <?php 
+                        <?php
                         $progress = $stats['progreso_porcentaje'] ?? 0;
                         $progressClass = match(true) {
                             $progress >= 80 => 'bg-success',
@@ -283,7 +283,7 @@
                         <?php endif; ?>
                         <?php if ($project['contraparte_email']): ?>
                             <p class="mb-1">
-                                <i class="bi bi-envelope"></i> 
+                                <i class="bi bi-envelope"></i>
                                 <a href="mailto:<?= htmlspecialchars($project['contraparte_email']) ?>">
                                     <?= htmlspecialchars($project['contraparte_email']) ?>
                                 </a>
@@ -291,7 +291,7 @@
                         <?php endif; ?>
                         <?php if ($project['contraparte_telefono']): ?>
                             <p class="mb-1">
-                                <i class="bi bi-telephone"></i> 
+                                <i class="bi bi-telephone"></i>
                                 <a href="tel:<?= htmlspecialchars($project['contraparte_telefono']) ?>">
                                     <?= htmlspecialchars($project['contraparte_telefono']) ?>
                                 </a>
@@ -364,7 +364,7 @@
                             </select>
                         </div>
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> 
+                            <i class="bi bi-info-circle"></i>
                             El cambio de estado afectará el flujo del proyecto y sus tareas.
                         </div>
                     </div>

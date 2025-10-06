@@ -19,26 +19,26 @@
             top: 0;
             overflow-y: auto;
         }
-        
+
         .nav-link {
             color: var(--setap-text-muted);
             padding: 0.75rem 1rem;
         }
-        
+
         .nav-link:hover {
             background-color: var(--setap-bg-light);
             color: var(--setap-primary);
         }
-        
+
         .nav-link.active {
             background-color: var(--setap-primary);
             color: white;
         }
-        
+
         .badge-status {
             font-size: 0.7rem;
         }
-        
+
         .icon-preview {
             font-size: 1.2rem;
         }
@@ -46,7 +46,7 @@
 </head>
 <body>
     <?php use App\Helpers\Security; ?>
-    
+
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
@@ -104,7 +104,7 @@
                                     </div>
                                     <?php unset($_SESSION['success_message']); ?>
                                 <?php endif; ?>
-                                
+
                                 <?php if (!empty($data['menus'])): ?>
                                     <div class="table-responsive">
                                         <table class="table table-hover table-striped">
@@ -146,11 +146,11 @@
                                                             <span class="badge bg-setap-primary-light"><?php echo htmlspecialchars($menu['orden']); ?></span>
                                                         </td>
                                                         <td>
-                                                            <?php 
+                                                            <?php
                                                             $estado_id = $menu['estado_tipo_id'];
                                                             $estado_info = [
                                                                 1 => ['badge' => 'warning', 'texto' => 'Creado'],
-                                                                2 => ['badge' => 'success', 'texto' => 'Activo'], 
+                                                                2 => ['badge' => 'success', 'texto' => 'Activo'],
                                                                 3 => ['badge' => 'secondary', 'texto' => 'Inactivo'],
                                                                 4 => ['badge' => 'danger', 'texto' => 'Eliminado'],
                                                                 5 => ['badge' => 'setap-primary-light', 'texto' => 'Iniciado'],
@@ -166,7 +166,7 @@
                                                         </td>
                                                         <td>
                                                             <small class="text-muted">
-                                                                <?php 
+                                                                <?php
                                                                 $fecha = new DateTime($menu['fecha_creacion']);
                                                                 echo $fecha->format('d/m/Y H:i');
                                                                 ?>
@@ -175,34 +175,34 @@
                                                         <td>
                                                             <div class="btn-group btn-group-sm" role="group">
                                                                 <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <a href="/menu/<?php echo $menu['id']; ?>" 
-                                                                       class="btn btn-outline-setap-primary btn-sm" 
+                                                                    <a href="/menu/<?php echo $menu['id']; ?>"
+                                                                       class="btn btn-outline-setap-primary btn-sm"
                                                                        title="Editar">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
                                                                 <?php endif; ?>
-                                                                
+
                                                                 <?php if (\App\Helpers\Security::hasPermission('Read') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <button type="button" 
-                                                                            class="btn btn-outline-setap-primary-light btn-sm" 
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-setap-primary-light btn-sm"
                                                                             title="Ver detalles"
                                                                             onclick="showMenuDetails(<?php echo htmlspecialchars(json_encode($menu)); ?>)">
                                                                         <i class="bi bi-eye"></i>
                                                                     </button>
                                                                 <?php endif; ?>
-                                                                
+
                                                                 <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <button type="button" 
-                                                                            class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm" 
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm"
                                                                             title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>"
                                                                             onclick="toggleMenuStatus(<?php echo $menu['id']; ?>, <?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>)">
                                                                         <i class="bi bi-<?php echo ($menu['estado_tipo_id'] == 2) ? 'toggle-on' : 'toggle-off'; ?>"></i>
                                                                     </button>
                                                                 <?php endif; ?>
-                                                                
+
                                                                 <?php if (\App\Helpers\Security::hasPermission('Delete') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <button type="button" 
-                                                                            class="btn btn-outline-danger btn-sm" 
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-danger btn-sm"
                                                                             title="Eliminar"
                                                                             onclick="deleteMenu(<?php echo $menu['id']; ?>)">
                                                                         <i class="bi bi-trash"></i>
@@ -264,9 +264,9 @@
                 7: { badge: 'danger', texto: 'Rechazado' },
                 8: { badge: 'success', texto: 'Aprobado' }
             };
-            
+
             const estado = estadoInfo[menu.estado_tipo_id] || { badge: 'dark', texto: 'Desconocido' };
-            
+
             const content = `
                 <div class="row">
                     <div class="col-md-6">
@@ -285,7 +285,7 @@
                 </div>
                 ${menu.descripcion ? `<div class="row mt-3"><div class="col-12"><strong>Descripción:</strong><br><p class="mb-0">${menu.descripcion}</p></div></div>` : ''}
             `;
-            
+
             document.getElementById('menuDetailsContent').innerHTML = content;
             new bootstrap.Modal(document.getElementById('menuDetailsModal')).show();
         }
@@ -296,17 +296,17 @@
                 3: 'desactivar'
             };
             const action = statusNames[newStatus] || 'cambiar estado de';
-            
+
             if (confirm(`¿Está seguro que desea ${action} este menú?`)) {
                 // Obtener el token CSRF
                 const csrfToken = '<?= $_SESSION['csrf_token'] ?? '' ?>';
-                
+
                 // Crear formulario para envío
                 const formData = new FormData();
                 formData.append('id', menuId);
                 formData.append('status', newStatus);
                 formData.append('csrf_token', csrfToken);
-                
+
                 fetch('/menus/toggle-status', {
                     method: 'POST',
                     body: formData
@@ -331,12 +331,12 @@
             if (confirm('¿Está seguro que desea eliminar este menú? Esta acción no se puede deshacer.')) {
                 // Obtener el token CSRF
                 const csrfToken = '<?= $_SESSION['csrf_token'] ?? '' ?>';
-                
+
                 // Crear formulario para envío
                 const formData = new FormData();
                 formData.append('id', menuId);
                 formData.append('csrf_token', csrfToken);
-                
+
                 fetch('/menus/delete', {
                     method: 'POST',
                     body: formData

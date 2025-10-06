@@ -74,7 +74,7 @@
                     <!-- Información Básica -->
                     <div class="form-section">
                         <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -82,7 +82,7 @@
                                     <select class="form-select" id="cliente_id" name="cliente_id" required>
                                         <option value="">Seleccionar Cliente</option>
                                         <?php foreach ($clients as $client): ?>
-                                            <option value="<?= (int)$client['id'] ?>" 
+                                            <option value="<?= (int)$client['id'] ?>"
                                                 <?= $client['id'] == $project['cliente_id'] ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($client['nombre']) ?>
                                             </option>
@@ -90,13 +90,13 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                         <?php foreach ($projectStates as $state): ?>
-                                            <option value="<?= (int)$state['id'] ?>" 
+                                            <option value="<?= (int)$state['id'] ?>"
                                                 <?= $state['id'] == $project['estado_tipo_id'] ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($state['nombre']) ?>
                                             </option>
@@ -110,15 +110,15 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
-                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
                                         value="<?= date('Y-m-d', strtotime($project['fecha_inicio'])) ?>" required>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="fecha_fin" class="form-label">Fecha Fin <span class="required">*</span></label>
-                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
                                         value="<?= date('Y-m-d', strtotime($project['fecha_fin'])) ?>" required>
                                 </div>
                             </div>
@@ -134,18 +134,18 @@
                     <!-- Configuración de Tareas -->
                     <div class="form-section">
                         <h5><i class="bi bi-list-task"></i> Configuración de Tareas</h5>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Tipos de Tareas Incluidas</label>
                             <div class="row">
                                 <?php foreach ($taskTypes as $taskType): ?>
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
-                                                id="task_type_<?= $taskType['id'] ?>" 
-                                                name="task_types[]" 
+                                            <input class="form-check-input" type="checkbox"
+                                                id="task_type_<?= $taskType['id'] ?>"
+                                                name="task_types[]"
                                                 value="<?= $taskType['id'] ?>"
-                                                <?php 
+                                                <?php
                                                 // Aquí deberías verificar si el tipo de tarea está asociado al proyecto
                                                 // Por simplicidad, asumo que todos están marcados por defecto
                                                 ?>>
@@ -163,13 +163,13 @@
                     <!-- Contrapartes -->
                     <div class="form-section">
                         <h5><i class="bi bi-people"></i> Contrapartes del Cliente</h5>
-                        
+
                         <div class="mb-3">
                             <label for="counterparts" class="form-label">Contrapartes Asignadas</label>
                             <select class="form-select" id="counterparts" name="counterparts[]" multiple size="4">
                                 <?php foreach ($counterparts as $counterpart): ?>
                                     <option value="<?= (int)$counterpart['id'] ?>"
-                                        <?php 
+                                        <?php
                                         // Aquí deberías verificar si la contraparte está asignada al proyecto
                                         // Por simplicidad, no marco ninguna por defecto
                                         ?>>
@@ -199,7 +199,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('editProjectForm');
@@ -212,7 +212,7 @@
                 if (fechaInicio.value && fechaFin.value) {
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
-                    
+
                     if (fin < inicio) {
                         fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
                         return false;

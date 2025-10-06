@@ -208,7 +208,7 @@ $user = $isEdit ? $data['user'] ?? null : null;
                                             <label for="estado_tipo_id" class="form-label">Estado</label>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                                 <?php foreach ($data['estadosTipo'] ?? [] as $estado): ?>
-                                                    <?php if ($estado['id'] < 5): // No mostrar "Eliminado" 
+                                                    <?php if ($estado['id'] < 5): // No mostrar "Eliminado"
                                                     ?>
                                                         <option value="<?php echo $estado['id']; ?>"
                                                             <?php echo ($user['estado_tipo_id'] ?? 1) == $estado['id'] ? 'selected' : ''; ?>>

@@ -73,7 +73,7 @@
                     <!-- Información Básica -->
                     <div class="form-section">
                         <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -91,7 +91,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
@@ -114,7 +114,7 @@
                                     <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="fecha_fin" class="form-label">Fecha Fin</label>
@@ -134,14 +134,14 @@
                     <!-- Configuración del Proyecto -->
                     <div class="form-section">
                         <h5><i class="bi bi-people"></i> Configuración del Proyecto</h5>
-                        
+
                         <div class="mb-3">
                             <label for="contraparte_id" class="form-label">Contraparte del Cliente <span class="required">*</span></label>
                             <select class="form-select" id="contraparte_id" name="contraparte_id" required>
                                 <option value="">Seleccionar Contraparte</option>
                                 <?php foreach ($counterparts as $counterpart): ?>
                                     <option value="<?= (int)$counterpart['id'] ?>">
-                                        <?= htmlspecialchars($counterpart['nombre']) ?> 
+                                        <?= htmlspecialchars($counterpart['nombre']) ?>
                                         - <?= htmlspecialchars($counterpart['cargo']) ?>
                                         (<?= htmlspecialchars($counterpart['cliente_nombre']) ?>)
                                     </option>
@@ -171,7 +171,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createProjectForm');
@@ -191,7 +191,7 @@
                 if (fechaInicio.value && fechaFin.value) {
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
-                    
+
                     if (fin < inicio) {
                         fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
                         return false;
@@ -216,7 +216,7 @@
             // Filtrar contrapartes por cliente seleccionado
             clienteSelect.addEventListener('change', function() {
                 const clienteId = this.value;
-                
+
                 // Habilitar todas las opciones primero
                 Array.from(contraparteSelect.options).forEach(option => {
                     if (option.value !== '') {
@@ -230,7 +230,7 @@
                     // Esta implementación es básica. En un entorno real, podrías hacer
                     // una llamada AJAX para obtener las contrapartes del cliente seleccionado
                     // Por ahora, mostramos todas las contrapartes
-                    
+
                     // Resetear selección de contraparte
                     contraparteSelect.value = '';
                 } else {
@@ -247,9 +247,9 @@
                     // Validar formato de fechas separadas por comas
                     const fechas = value.split(',').map(f => f.trim());
                     const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
-                    
+
                     const fechasInvalidas = fechas.filter(fecha => !fechaRegex.test(fecha));
-                    
+
                     if (fechasInvalidas.length > 0) {
                         this.setCustomValidity('Formato de fecha inválido. Use YYYY-MM-DD separado por comas');
                     } else {
@@ -276,7 +276,7 @@
                 // Mostrar indicador de carga
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
-                
+
                 // No deshabilitar los inputs del formulario - esto impide que se envíen los datos
                 // Solo deshabilitar botones adicionales si existen
                 const additionalButtons = form.querySelectorAll('button:not([type="submit"])');

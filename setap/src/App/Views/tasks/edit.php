@@ -68,7 +68,7 @@
                                     <!-- Información Básica -->
                                     <div class="form-section">
                                         <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
-                                        
+
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
@@ -76,7 +76,7 @@
                                                     <select class="form-select" id="proyecto_id" name="proyecto_id" required>
                                                         <option value="">Seleccionar Proyecto</option>
                                                         <?php foreach ($projects as $project): ?>
-                                                            <option value="<?= (int)$project['id'] ?>" 
+                                                            <option value="<?= (int)$project['id'] ?>"
                                                                 <?= $project['id'] == $task['proyecto_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($project['cliente_nombre']) ?>
                                                             </option>
@@ -84,14 +84,14 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
                                                     <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
                                                         <option value="">Seleccionar Tipo</option>
                                                         <?php foreach ($taskTypes as $type): ?>
-                                                            <option value="<?= (int)$type['id'] ?>" 
+                                                            <option value="<?= (int)$type['id'] ?>"
                                                                 <?= $type['id'] == $task['tarea_tipo_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($type['nombre']) ?>
                                                             </option>
@@ -103,7 +103,7 @@
 
                                         <div class="mb-3">
                                             <label for="nombre" class="form-label">Nombre de la Tarea <span class="required">*</span></label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                            <input type="text" class="form-control" id="nombre" name="nombre"
                                                 value="<?= htmlspecialchars($task['nombre']) ?>"
                                                 placeholder="Describe brevemente la tarea" minlength="3" required>
                                         </div>
@@ -118,20 +118,20 @@
                                     <!-- Planificación -->
                                     <div class="form-section">
                                         <h5><i class="bi bi-calendar"></i> Planificación</h5>
-                                        
+
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
-                                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
                                                         value="<?= date('Y-m-d', strtotime($task['fecha_inicio'])) ?>" required>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="fecha_fin" class="form-label">Fecha Fin <span class="required">*</span></label>
-                                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
                                                         value="<?= date('Y-m-d', strtotime($task['fecha_fin'])) ?>" required>
                                                 </div>
                                             </div>
@@ -141,7 +141,7 @@
                                     <!-- Asignación -->
                                     <div class="form-section">
                                         <h5><i class="bi bi-person-check"></i> Asignación</h5>
-                                        
+
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
@@ -149,7 +149,7 @@
                                                     <select class="form-select" id="usuario_id" name="usuario_id">
                                                         <option value="">Sin asignar</option>
                                                         <?php foreach ($users as $user): ?>
-                                                            <option value="<?= (int)$user['id'] ?>" 
+                                                            <option value="<?= (int)$user['id'] ?>"
                                                                 <?= $user['id'] == $task['usuario_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($user['nombre_completo']) ?> (<?= htmlspecialchars($user['nombre_usuario']) ?>)
                                                             </option>
@@ -157,7 +157,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
@@ -167,7 +167,7 @@
                                                         </option>
                                                     </select>
                                                     <div class="form-text">
-                                                        <i class="bi bi-info-circle"></i> 
+                                                        <i class="bi bi-info-circle"></i>
                                                         Solo se muestran transiciones válidas según el estado actual y tu rol.
                                                     </div>
                                                     <!-- GAP 5: Warning si es tarea aprobada -->
@@ -203,7 +203,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('taskEditForm');
@@ -216,7 +216,7 @@
                 if (fechaInicio.value && fechaFin.value) {
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
-                    
+
                     if (fin < inicio) {
                         fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
                         return false;
@@ -272,7 +272,7 @@
             const taskId = <?= $task['id'] ?>;
             const currentStateId = <?= $task['estado_tipo_id'] ?>;
             const estadoSelect = document.getElementById('estado_tipo_id');
-            
+
             fetch(`/tasks/valid-transitions?task_id=${taskId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -280,7 +280,7 @@
                     while (estadoSelect.children.length > 1) {
                         estadoSelect.removeChild(estadoSelect.lastChild);
                     }
-                    
+
                     // Agregar transiciones válidas
                     if (data.transitions && data.transitions.length > 0) {
                         data.transitions.forEach(transition => {
@@ -290,12 +290,12 @@
                             option.title = transition.descripcion;
                             estadoSelect.appendChild(option);
                         });
-                        
+
                         // Mostrar ayuda sobre transiciones disponibles
                         const formText = estadoSelect.parentNode.querySelector('.form-text');
                         if (formText) {
                             formText.innerHTML = `
-                                <i class="bi bi-info-circle"></i> 
+                                <i class="bi bi-info-circle"></i>
                                 ${data.transitions.length} transición(es) válida(s) disponible(s) según tu rol.
                             `;
                         }
@@ -304,7 +304,7 @@
                         const formText = estadoSelect.parentNode.querySelector('.form-text');
                         if (formText) {
                             formText.innerHTML = `
-                                <i class="bi bi-exclamation-circle text-warning"></i> 
+                                <i class="bi bi-exclamation-circle text-warning"></i>
                                 No hay transiciones válidas disponibles desde el estado actual.
                             `;
                         }
@@ -315,7 +315,7 @@
                     const formText = estadoSelect.parentNode.querySelector('.form-text');
                     if (formText) {
                         formText.innerHTML = `
-                            <i class="bi bi-exclamation-triangle text-danger"></i> 
+                            <i class="bi bi-exclamation-triangle text-danger"></i>
                             Error al cargar las transiciones válidas.
                         `;
                     }
@@ -327,12 +327,12 @@
             const estadoSelect = document.getElementById('estado_tipo_id');
             const currentStateId = <?= $task['estado_tipo_id'] ?>;
             const newStateId = parseInt(estadoSelect.value);
-            
+
             if (newStateId !== currentStateId) {
                 const stateName = estadoSelect.options[estadoSelect.selectedIndex].text;
                 return confirm(`¿Confirmas el cambio de estado a "${stateName}"?\n\nEsta acción puede requerir permisos especiales según tu rol.`);
             }
-            
+
             return true;
         }
 
@@ -344,7 +344,7 @@
             }
         });
     </script>
-    
+
     <!-- GAP 5: Task State Validation Utilities -->
     <script src="/js/task-state-utils.js"></script>
 </body>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -31,12 +33,19 @@
                 <!-- Mensajes de éxito/error -->
                 <?php if (isset($_GET['success'])): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <?php 
-                        switch($_GET['success']) {
-                            case 'created': echo 'Contraparte creada exitosamente.'; break;
-                            case 'updated': echo 'Contraparte actualizada exitosamente.'; break;
-                            case 'deleted': echo 'Contraparte eliminada exitosamente.'; break;
-                            default: echo 'Operación realizada exitosamente.';
+                        <?php
+                        switch ($_GET['success']) {
+                            case 'created':
+                                echo 'Contraparte creada exitosamente.';
+                                break;
+                            case 'updated':
+                                echo 'Contraparte actualizada exitosamente.';
+                                break;
+                            case 'deleted':
+                                echo 'Contraparte eliminada exitosamente.';
+                                break;
+                            default:
+                                echo 'Operación realizada exitosamente.';
                         }
                         ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -65,7 +74,7 @@
                                     <select class="form-select" id="cliente_id" name="cliente_id">
                                         <option value="">Todos los clientes</option>
                                         <?php foreach ($data['clients'] as $client): ?>
-                                            <option value="<?php echo $client['id']; ?>" 
+                                            <option value="<?php echo $client['id']; ?>"
                                                 <?php echo ($data['filters']['cliente_id'] == $client['id']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($client['razon_social']); ?>
                                             </option>
@@ -74,22 +83,22 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label for="persona_nombre" class="form-label">Nombre de Persona</label>
-                                    <input type="text" class="form-control" id="persona_nombre" name="persona_nombre" 
-                                           placeholder="Buscar por nombre..." 
-                                           value="<?php echo htmlspecialchars($data['filters']['persona_nombre']); ?>">
+                                    <input type="text" class="form-control" id="persona_nombre" name="persona_nombre"
+                                        placeholder="Buscar por nombre..."
+                                        value="<?php echo htmlspecialchars($data['filters']['persona_nombre']); ?>">
                                 </div>
                                 <div class="col-md-2">
                                     <label for="cargo" class="form-label">Cargo</label>
-                                    <input type="text" class="form-control" id="cargo" name="cargo" 
-                                           placeholder="Buscar cargo..." 
-                                           value="<?php echo htmlspecialchars($data['filters']['cargo']); ?>">
+                                    <input type="text" class="form-control" id="cargo" name="cargo"
+                                        placeholder="Buscar cargo..."
+                                        value="<?php echo htmlspecialchars($data['filters']['cargo']); ?>">
                                 </div>
                                 <div class="col-md-2">
                                     <label for="estado_tipo_id" class="form-label">Estado</label>
                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                         <option value="">Todos</option>
                                         <?php foreach ($data['statusTypes'] as $status): ?>
-                                            <option value="<?php echo $status['id']; ?>" 
+                                            <option value="<?php echo $status['id']; ?>"
                                                 <?php echo ($data['filters']['estado_tipo_id'] == $status['id']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($status['nombre']); ?>
                                             </option>
@@ -157,9 +166,9 @@
                                                     <?php echo $counterpartie['cargo'] ? htmlspecialchars($counterpartie['cargo']) : '<span class="text-muted">-</span>'; ?>
                                                 </td>
                                                 <td>
-                                                    <?php 
+                                                    <?php
                                                     $telefono = $counterpartie['telefono'] ?: $counterpartie['persona_telefono'];
-                                                    echo $telefono ? htmlspecialchars($telefono) : '<span class="text-muted">-</span>'; 
+                                                    echo $telefono ? htmlspecialchars($telefono) : '<span class="text-muted">-</span>';
                                                     ?>
                                                 </td>
                                                 <td>
@@ -168,10 +177,16 @@
                                                 <td>
                                                     <?php
                                                     $badgeClass = 'secondary';
-                                                    switch($counterpartie['estado_tipo_id']) {
-                                                        case 1: $badgeClass = 'warning'; break; // creado
-                                                        case 2: $badgeClass = 'success'; break; // activo
-                                                        case 3: $badgeClass = 'secondary'; break; // inactivo
+                                                    switch ($counterpartie['estado_tipo_id']) {
+                                                        case 1:
+                                                            $badgeClass = 'warning';
+                                                            break; // creado
+                                                        case 2:
+                                                            $badgeClass = 'success';
+                                                            break; // activo
+                                                        case 3:
+                                                            $badgeClass = 'secondary';
+                                                            break; // inactivo
                                                     }
                                                     ?>
                                                     <span class="badge bg-<?php echo $badgeClass; ?>">
@@ -185,13 +200,13 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="/client-counterpartie/<?php echo $counterpartie['id']; ?>" 
-                                                           class="btn btn-outline-primary" title="Editar">
+                                                        <a href="/client-counterpartie/<?php echo $counterpartie['id']; ?>"
+                                                            class="btn btn-outline-primary" title="Editar">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <button type="button" class="btn btn-outline-danger" 
-                                                                title="Eliminar" data-bs-toggle="modal" 
-                                                                data-bs-target="#deleteModal<?php echo $counterpartie['id']; ?>">
+                                                        <button type="button" class="btn btn-outline-danger"
+                                                            title="Eliminar" data-bs-toggle="modal"
+                                                            data-bs-target="#deleteModal<?php echo $counterpartie['id']; ?>">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
@@ -244,4 +259,5 @@
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 </body>
+
 </html>

@@ -22,7 +22,7 @@ class ProyectoFeriado
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT pf.*, 
+                SELECT pf.*,
                        et.nombre as estado_nombre,
                        CASE DAYOFWEEK(pf.fecha)
                            WHEN 1 THEN 'Domingo'
@@ -68,11 +68,11 @@ class ProyectoFeriado
 
             while ($start <= $end) {
                 $dayOfWeek = (int)$start->format('w'); // 0=domingo, 1=lunes, etc.
-                
+
                 if (in_array($dayOfWeek, $diasSemana)) {
                     $fechasGeneradas[] = $start->format('Y-m-d');
                 }
-                
+
                 $start->add(new \DateInterval('P1D'));
             }
 
@@ -143,7 +143,7 @@ class ProyectoFeriado
 
             while ($start <= $end) {
                 $fecha = $start->format('Y-m-d');
-                
+
                 $conflictInfo = $this->upsertHoliday($projectId, $fecha, [
                     'tipo_feriado' => 'especifico',
                     'ind_irrenunciable' => $indIrrenunciable,
@@ -183,7 +183,7 @@ class ProyectoFeriado
         try {
             // Verificar si existe
             $stmt = $this->db->prepare("
-                SELECT id FROM proyecto_feriados 
+                SELECT id FROM proyecto_feriados
                 WHERE proyecto_id = ? AND fecha = ?
             ");
             $stmt->execute([$projectId, $fecha]);
@@ -203,7 +203,7 @@ class ProyectoFeriado
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                 ");
-                
+
                 $stmt->execute([
                     $data['tipo_feriado'],
                     $data['ind_irrenunciable'],
@@ -220,12 +220,12 @@ class ProyectoFeriado
                 // Crear nuevo registro
                 $stmt = $this->db->prepare("
                     INSERT INTO proyecto_feriados (
-                        proyecto_id, fecha, tipo_feriado, 
-                        ind_irrenunciable, observaciones, 
+                        proyecto_id, fecha, tipo_feriado,
+                        ind_irrenunciable, observaciones,
                         estado_tipo_id, created_at
                     ) VALUES (?, ?, ?, ?, ?, 2, CURRENT_TIMESTAMP)
                 ");
-                
+
                 $stmt->execute([
                     $projectId,
                     $fecha,
@@ -265,9 +265,9 @@ class ProyectoFeriado
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
-                WHERE pt.proyecto_id = ? 
+                WHERE pt.proyecto_id = ?
                 AND pt.estado_tipo_id NOT IN (4, 6, 7, 8)
-                AND (pt.fecha_inicio IN ($placeholders) 
+                AND (pt.fecha_inicio IN ($placeholders)
                      OR pt.fecha_fin IN ($placeholders)
                      OR (pt.fecha_inicio <= ? AND pt.fecha_fin >= ?))
             ");
@@ -276,7 +276,7 @@ class ProyectoFeriado
             $minFecha = min($fechas);
             $maxFecha = max($fechas);
             $allParams = array_merge($params, $fechas, [$maxFecha, $minFecha]);
-            
+
             $stmt->execute($allParams);
             $conflicts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -285,9 +285,11 @@ class ProyectoFeriado
             foreach ($fechas as $fecha) {
                 $result[$fecha] = [];
                 foreach ($conflicts as $conflict) {
-                    if ($conflict['fecha_inicio'] === $fecha || 
+                    if (
+                        $conflict['fecha_inicio'] === $fecha ||
                         $conflict['fecha_fin'] === $fecha ||
-                        ($conflict['fecha_inicio'] <= $fecha && $conflict['fecha_fin'] >= $fecha)) {
+                        ($conflict['fecha_inicio'] <= $fecha && $conflict['fecha_fin'] >= $fecha)
+                    ) {
                         $result[$fecha][] = $conflict;
                     }
                 }
@@ -311,8 +313,8 @@ class ProyectoFeriado
             foreach ($taskIds as $taskId) {
                 // Obtener fechas actuales de la tarea
                 $stmt = $this->db->prepare("
-                    SELECT fecha_inicio, fecha_fin 
-                    FROM proyecto_tareas 
+                    SELECT fecha_inicio, fecha_fin
+                    FROM proyecto_tareas
                     WHERE id = ? AND proyecto_id = ?
                 ");
                 $stmt->execute([$taskId, $projectId]);
@@ -320,7 +322,7 @@ class ProyectoFeriado
 
                 if ($task) {
                     $newStartDate = $this->addWorkingDays($projectId, $task['fecha_inicio'], $diasAMover);
-                    $newEndDate = $task['fecha_fin'] ? 
+                    $newEndDate = $task['fecha_fin'] ?
                         $this->addWorkingDays($projectId, $task['fecha_fin'], $diasAMover) : null;
 
                     // Actualizar fechas de la tarea
@@ -355,7 +357,7 @@ class ProyectoFeriado
 
             while ($addedDays < $workingDays) {
                 $date->add(new \DateInterval('P1D'));
-                
+
                 // Verificar si el día no es feriado
                 if (!$this->isHoliday($projectId, $date->format('Y-m-d'))) {
                     $addedDays++;
@@ -376,7 +378,7 @@ class ProyectoFeriado
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id FROM proyecto_feriados 
+                SELECT id FROM proyecto_feriados
                 WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
             ");
             $stmt->execute([$projectId, $fecha]);
@@ -448,7 +450,7 @@ class ProyectoFeriado
     {
         try {
             $stmt = $this->db->prepare("
-                UPDATE proyecto_feriados SET 
+                UPDATE proyecto_feriados SET
                     estado_tipo_id = 4,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
@@ -489,14 +491,14 @@ class ProyectoFeriado
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT 
+                SELECT
                     COUNT(*) as total_feriados,
                     COUNT(CASE WHEN tipo_feriado = 'recurrente' THEN 1 END) as feriados_recurrentes,
                     COUNT(CASE WHEN tipo_feriado = 'especifico' THEN 1 END) as feriados_especificos,
                     COUNT(CASE WHEN ind_irrenunciable = 1 THEN 1 END) as feriados_irrenunciables,
                     MIN(fecha) as primer_feriado,
                     MAX(fecha) as ultimo_feriado
-                FROM proyecto_feriados 
+                FROM proyecto_feriados
                 WHERE proyecto_id = ? AND estado_tipo_id = 2
             ");
 

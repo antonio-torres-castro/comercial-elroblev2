@@ -2,8 +2,8 @@
 /**
  * Scripts avanzados opcionales
  * Incluye: jQuery, DataTables, y otras librerías según necesidad
- * 
- * Uso: 
+ *
+ * Uso:
  * $scripts = ['jquery', 'datatables'];
  * include __DIR__ . '/scripts-advanced.php';
  */
@@ -32,7 +32,7 @@ if (!empty($scripts)) {
     // Prevenir carga múltiple
     if (!defined('SETAP_ADVANCED_SCRIPTS_LOADED')) {
         define('SETAP_ADVANCED_SCRIPTS_LOADED', true);
-        
+
         // Resolver dependencias
         $scripts_to_load = [];
         foreach ($scripts as $script) {
@@ -50,7 +50,7 @@ if (!empty($scripts)) {
                 }
             }
         }
-        
+
         // Cargar CSS
         echo "    <!-- Scripts Avanzados de SETAP -->\n";
         foreach ($scripts_to_load as $script) {
@@ -58,11 +58,11 @@ if (!empty($scripts)) {
                 echo "    <link href=\"{$available_scripts[$script]['css']}\" rel=\"stylesheet\">\n";
             }
         }
-        
+
         // Cargar JavaScript
         foreach ($scripts_to_load as $script) {
             $script_config = $available_scripts[$script];
-            
+
             if (isset($script_config['url'])) {
                 echo "    <script src=\"{$script_config['url']}\"></script>\n";
             } elseif (isset($script_config['js'])) {
@@ -75,17 +75,17 @@ if (!empty($scripts)) {
                 }
             }
         }
-        
+
         // Script de verificación
         echo "    <script>\n";
         echo "        // Verificar carga de scripts avanzados\n";
         echo "        window.SETAP = window.SETAP || {};\n";
         echo "        window.SETAP.scriptsLoaded = window.SETAP.scriptsLoaded || {};\n";
-        
+
         foreach ($scripts_to_load as $script) {
             echo "        window.SETAP.scriptsLoaded.{$script} = true;\n";
         }
-        
+
         echo "        console.log('SETAP Advanced Scripts cargados:', " . json_encode($scripts_to_load) . ");\n";
         echo "    </script>\n";
     }

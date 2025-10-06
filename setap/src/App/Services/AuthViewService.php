@@ -10,7 +10,7 @@ class AuthViewService
     public function generateLoginPage(string $error = '', string $csrfToken = ''): string
     {
         $errorAlert = $this->generateErrorAlert($error);
-        
+
         return <<<HTML
         <!DOCTYPE html>
         <html lang="es">
@@ -21,7 +21,7 @@ class AuthViewService
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
             <style>
-                body { 
+                body {
                     background: linear-gradient(135deg, #7f1933 0%, #5a1124 100%);
                     min-height: 100vh;
                     display: flex;
@@ -74,36 +74,36 @@ class AuthViewService
                             </div>
                             <div class="card-body p-4">
                                 {$errorAlert}
-                                
+
                                 <form method="POST" action="/login">
                                     <input type="hidden" name="csrf_token" value="{$csrfToken}">
-                                    
+
                                     <div class="mb-3">
                                         <label for="identifier" class="form-label">
                                             <i class="bi bi-person"></i> Usuario o Email
                                         </label>
-                                        <input type="text" 
-                                               class="form-control" 
-                                               id="identifier" 
-                                               name="identifier" 
+                                        <input type="text"
+                                               class="form-control"
+                                               id="identifier"
+                                               name="identifier"
                                                placeholder="Ingrese su usuario o email"
-                                               required 
+                                               required
                                                autocomplete="username">
                                     </div>
-                                    
+
                                     <div class="mb-4">
                                         <label for="password" class="form-label">
                                             <i class="bi bi-lock"></i> Contraseña
                                         </label>
-                                        <input type="password" 
-                                               class="form-control" 
-                                               id="password" 
-                                               name="password" 
+                                        <input type="password"
+                                               class="form-control"
+                                               id="password"
+                                               name="password"
                                                placeholder="Ingrese su contraseña"
-                                               required 
+                                               required
                                                autocomplete="current-password">
                                     </div>
-                                    
+
                                     <div class="d-grid">
                                         <button type="submit" class="btn btn-primary btn-login">
                                             <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
@@ -118,7 +118,7 @@ class AuthViewService
                     </div>
                 </div>
             </div>
-            
+
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         </body>
         </html>

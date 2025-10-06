@@ -21,7 +21,7 @@ class CsrfManager
         }
 
         $token = bin2hex(random_bytes(32));
-        
+
         $_SESSION[self::$tokenKey] = [
             'token' => $token,
             'expires' => time() + self::$tokenExpiry
@@ -127,9 +127,9 @@ class CsrfManager
     public static function validateFromRequest(): bool
     {
         // Buscar token en POST, GET o headers
-        $token = $_POST['csrf_token'] ?? 
-                 $_GET['csrf_token'] ?? 
-                 $_SERVER['HTTP_X_CSRF_TOKEN'] ?? 
+        $token = $_POST['csrf_token'] ??
+                 $_GET['csrf_token'] ??
+                 $_SERVER['HTTP_X_CSRF_TOKEN'] ??
                  '';
 
         return self::validateToken($token);
@@ -148,16 +148,16 @@ class CsrfManager
 
         if (!self::validateFromRequest()) {
             http_response_code(403);
-            
+
             // Si es AJAX, devolver JSON
-            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                 header('Content-Type: application/json');
                 echo json_encode(['error' => 'Token CSRF inválido']);
             } else {
                 echo 'Token CSRF inválido';
             }
-            
+
             exit;
         }
     }

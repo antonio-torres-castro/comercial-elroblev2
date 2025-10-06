@@ -34,7 +34,7 @@ use App\Helpers\Security;
                             <h5 class="card-title"><?= htmlspecialchars($project['cliente_nombre']) ?></h5>
                             <p class="card-text">
                                 <strong>Dirección:</strong> <?= htmlspecialchars($project['direccion'] ?? 'No especificada') ?><br>
-                                <strong>Período:</strong> <?= date('d/m/Y', strtotime($project['fecha_inicio'])) ?> 
+                                <strong>Período:</strong> <?= date('d/m/Y', strtotime($project['fecha_inicio'])) ?>
                                 <?= $project['fecha_fin'] ? ' - ' . date('d/m/Y', strtotime($project['fecha_fin'])) : '' ?>
                             </p>
                         </div>
@@ -93,16 +93,16 @@ use App\Helpers\Security;
                             <form id="form-masivo" class="mt-3">
                                 <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
                                 <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
-                                
+
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="fecha_inicio_masivo" class="form-label">Fecha Inicio *</label>
-                                        <input type="date" class="form-control" id="fecha_inicio_masivo" name="fecha_inicio" 
+                                        <input type="date" class="form-control" id="fecha_inicio_masivo" name="fecha_inicio"
                                                value="<?= $project['fecha_inicio'] ?>" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="fecha_fin_masivo" class="form-label">Fecha Fin *</label>
-                                        <input type="date" class="form-control" id="fecha_fin_masivo" name="fecha_fin" 
+                                        <input type="date" class="form-control" id="fecha_fin_masivo" name="fecha_fin"
                                                value="<?= $project['fecha_fin'] ?? '' ?>" required>
                                     </div>
                                 </div>
@@ -173,7 +173,7 @@ use App\Helpers\Security;
                                     </div>
                                     <div class="col-md-6">
                                         <label for="observaciones_masivo" class="form-label">Observaciones</label>
-                                        <input type="text" class="form-control" id="observaciones_masivo" name="observaciones" 
+                                        <input type="text" class="form-control" id="observaciones_masivo" name="observaciones"
                                                placeholder="Ej: Fines de semana regulares" maxlength="100">
                                     </div>
                                 </div>
@@ -189,7 +189,7 @@ use App\Helpers\Security;
                             <form id="form-especifico" class="mt-3">
                                 <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
                                 <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
-                                
+
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="fecha_especifica" class="form-label">Fecha *</label>
@@ -213,7 +213,7 @@ use App\Helpers\Security;
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <label for="observaciones_especifico" class="form-label">Observaciones</label>
-                                        <input type="text" class="form-control" id="observaciones_especifico" name="observaciones" 
+                                        <input type="text" class="form-control" id="observaciones_especifico" name="observaciones"
                                                placeholder="Ej: Feriado Nacional" maxlength="100">
                                     </div>
                                 </div>
@@ -229,7 +229,7 @@ use App\Helpers\Security;
                             <form id="form-rango" class="mt-3">
                                 <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
                                 <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
-                                
+
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="fecha_inicio_rango" class="form-label">Fecha Inicio *</label>
@@ -257,7 +257,7 @@ use App\Helpers\Security;
                                     </div>
                                     <div class="col-md-6">
                                         <label for="observaciones_rango" class="form-label">Observaciones</label>
-                                        <input type="text" class="form-control" id="observaciones_rango" name="observaciones" 
+                                        <input type="text" class="form-control" id="observaciones_rango" name="observaciones"
                                                placeholder="Ej: Vacaciones de verano" maxlength="100">
                                     </div>
                                 </div>
@@ -373,7 +373,7 @@ use App\Helpers\Security;
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
                     <input type="hidden" name="id" id="edit-holiday-id">
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Tipo de Feriado</label>
                         <div>
@@ -387,7 +387,7 @@ use App\Helpers\Security;
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="edit-observaciones" class="form-label">Observaciones</label>
                         <input type="text" class="form-control" id="edit-observaciones" name="observaciones" maxlength="100">

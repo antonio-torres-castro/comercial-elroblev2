@@ -29,10 +29,10 @@ class AuthService
                        p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        p.estado_tipo_id as persona_estado
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
-                WHERE (u.nombre_usuario = ? OR u.email = ?) 
+                WHERE (u.nombre_usuario = ? OR u.email = ?)
                 AND p.estado_tipo_id = 2 AND u.estado_tipo_id = 2
             ");
 
@@ -139,8 +139,8 @@ class AuthService
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
             $stmt = $this->db->prepare("
-                UPDATE usuarios 
-                SET clave_hash = ?, fecha_modificacion = NOW() 
+                UPDATE usuarios
+                SET clave_hash = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ");
 

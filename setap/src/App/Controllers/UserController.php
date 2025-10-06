@@ -141,7 +141,7 @@ class UserController extends BaseController
             }
 
             // Sanitizar y validar datos usando ValidationService
-            $validationResult = $this->validationService->validateUserData($_POST);
+            $validationResult = $this->validationService->validateUserDataComplete($_POST);
 
             if (!$validationResult['isValid']) {
                 http_response_code(400);

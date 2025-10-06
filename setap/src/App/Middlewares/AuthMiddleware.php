@@ -13,7 +13,7 @@ class AuthMiddleware
             $this->redirectToLogin();
             return;
         }
-        
+
         // Verificar si la sesión ha expirado (opcional)
         if ($this->isSessionExpired()) {
             session_destroy();
@@ -21,7 +21,7 @@ class AuthMiddleware
             return;
         }
     }
-    
+
     private function redirectToLogin(): void
     {
         if ($this->isAjaxRequest()) {
@@ -33,20 +33,20 @@ class AuthMiddleware
         }
         exit;
     }
-    
+
     private function isSessionExpired(): bool
     {
         if (!isset($_SESSION['login_time'])) {
             return true;
         }
-        
+
         $sessionLifetime = 3600; // 1 hora por defecto
         return (time() - $_SESSION['login_time']) > $sessionLifetime;
     }
-    
+
     private function isAjaxRequest(): bool
     {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) 
-               && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }

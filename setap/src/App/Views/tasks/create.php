@@ -58,7 +58,7 @@
                                             <select class="form-select" id="proyecto_id" name="proyecto_id" required>
                                                 <option value="">Seleccionar proyecto...</option>
                                                 <?php foreach ($data['projects'] as $project): ?>
-                                                    <option value="<?php echo $project['id']; ?>" 
+                                                    <option value="<?php echo $project['id']; ?>"
                                                         <?php echo (isset($_POST['proyecto_id']) && $_POST['proyecto_id'] == $project['id']) ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($project['nombre']); ?>
                                                     </option>
@@ -75,7 +75,7 @@
                                             <select class="form-select" id="tarea_id" name="tarea_id" required>
                                                 <option value="">Seleccionar tarea existente...</option>
                                                 <?php foreach ($data['taskTypes'] as $taskType): ?>
-                                                    <option value="<?php echo $taskType['id']; ?>" 
+                                                    <option value="<?php echo $taskType['id']; ?>"
                                                         <?php echo (isset($_POST['tarea_id']) && $_POST['tarea_id'] == $taskType['id']) ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($taskType['nombre']); ?>
                                                     </option>
@@ -99,14 +99,14 @@
                                                             <label for="nueva_tarea_nombre" class="form-label">
                                                                 Nombre de la nueva tarea <span class="text-danger">*</span>
                                                             </label>
-                                                            <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre" 
+                                                            <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre"
                                                                    placeholder="Nombre descriptivo de la tarea"
-                                                                   value="<?php echo htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>" 
+                                                                   value="<?php echo htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>"
                                                                    maxlength="150">
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label for="nueva_tarea_descripcion" class="form-label">Descripción</label>
-                                                            <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion" 
+                                                            <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
                                                                       placeholder="Descripción detallada de la tarea" rows="3"><?php echo htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
                                                         </div>
                                                     </div>
@@ -128,7 +128,7 @@
                                             <select class="form-select" id="ejecutor_id" name="ejecutor_id">
                                                 <option value="">Sin asignar</option>
                                                 <?php foreach ($data['users'] as $user): ?>
-                                                    <option value="<?php echo $user['id']; ?>" 
+                                                    <option value="<?php echo $user['id']; ?>"
                                                         <?php echo (isset($_POST['ejecutor_id']) && $_POST['ejecutor_id'] == $user['id']) ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($user['nombre_completo'] . ' (' . $user['nombre_usuario'] . ')'); ?>
                                                     </option>
@@ -143,7 +143,7 @@
                                             <select class="form-select" id="supervisor_id" name="supervisor_id">
                                                 <option value="">Sin supervisor</option>
                                                 <?php foreach ($data['users'] as $user): ?>
-                                                    <option value="<?php echo $user['id']; ?>" 
+                                                    <option value="<?php echo $user['id']; ?>"
                                                         <?php echo (isset($_POST['supervisor_id']) && $_POST['supervisor_id'] == $user['id']) ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($user['nombre_completo'] . ' (' . $user['nombre_usuario'] . ')'); ?>
                                                     </option>
@@ -159,8 +159,8 @@
                                             </label>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                                 <?php foreach ($data['taskStates'] as $state): ?>
-                                                    <option value="<?php echo $state['id']; ?>" 
-                                                        <?php 
+                                                    <option value="<?php echo $state['id']; ?>"
+                                                        <?php
                                                         $selected = false;
                                                         if (isset($_POST['estado_tipo_id'])) {
                                                             $selected = ($_POST['estado_tipo_id'] == $state['id']);
@@ -195,8 +195,8 @@
                                         <!-- Duración -->
                                         <div class="col-md-4">
                                             <label for="duracion_horas" class="form-label">Duración (horas)</label>
-                                            <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" 
-                                                   step="0.5" min="0.5" max="24" 
+                                            <input type="number" class="form-control" id="duracion_horas" name="duracion_horas"
+                                                   step="0.5" min="0.5" max="24"
                                                    value="<?php echo htmlspecialchars($_POST['duracion_horas'] ?? '1.0'); ?>">
                                             <div class="form-text">Duración estimada en horas (0.5 - 24).</div>
                                         </div>
@@ -237,13 +237,13 @@
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         // Mostrar/ocultar campos de nueva tarea
         document.getElementById('tarea_id').addEventListener('change', function() {
             const nuevaTareaFields = document.getElementById('nueva-tarea-fields');
             const nuevaTareaNombre = document.getElementById('nueva_tarea_nombre');
-            
+
             if (this.value === 'nueva') {
                 nuevaTareaFields.style.display = 'block';
                 nuevaTareaNombre.setAttribute('required', 'required');
@@ -261,7 +261,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
@@ -284,7 +284,7 @@
                     <!-- Planificación -->
                     <div class="form-section">
                         <h5><i class="bi bi-calendar"></i> Planificación</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -294,7 +294,7 @@
                                     <div class="form-text">Campo opcional</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="fecha_fin" class="form-label">Fecha de Fin</label>
@@ -309,7 +309,7 @@
                     <!-- Asignación -->
                     <div class="form-section">
                         <h5><i class="bi bi-person-check"></i> Asignación</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -328,14 +328,14 @@
                                     <div class="form-text">Campo opcional. Se puede asignar posteriormente.</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="estado_tipo_id" class="form-label">Estado Inicial <span class="required">*</span></label>
                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                         <?php if (!empty($data['taskStates'])): ?>
                                             <?php foreach ($data['taskStates'] as $state): ?>
-                                                <?php 
+                                                <?php
                                                 // GAP 5: Solo permitir estados válidos para creación (1=Creado, 2=Activo)
                                                 if (!in_array($state['id'], [1, 2])) continue;
                                                 ?>
@@ -348,7 +348,7 @@
                                         <?php endif; ?>
                                     </select>
                                     <div class="form-text">
-                                        <i class="bi bi-info-circle"></i> 
+                                        <i class="bi bi-info-circle"></i>
                                         Las tareas se crean en estado "Creado" por defecto. Pueden activarse inmediatamente si están listas.
                                     </div>
                                 </div>
@@ -373,7 +373,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createTaskForm');
@@ -386,7 +386,7 @@
                 if (fechaInicio.value && fechaFin.value) {
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
-                    
+
                     if (fin < inicio) {
                         fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
                         return false;
@@ -446,7 +446,7 @@
                 // Mostrar indicador de carga
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
-                
+
                 // No deshabilitar los inputs del formulario - esto impide que se envíen los datos
                 // Solo deshabilitar botones adicionales si existen
                 const additionalButtons = form.querySelectorAll('button:not([type="submit"])');
@@ -456,7 +456,7 @@
             });
         });
     </script>
-    
+
     <!-- GAP 5: Task State Validation Utilities -->
     <script src="/js/task-state-utils.js"></script>
 </body>

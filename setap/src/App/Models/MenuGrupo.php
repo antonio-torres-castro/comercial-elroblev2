@@ -24,7 +24,7 @@ class MenuGrupo
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     mg.id,
                     mg.nombre,
                     mg.descripcion,
@@ -77,7 +77,7 @@ class MenuGrupo
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     id,
                     nombre,
                     descripcion,
@@ -87,7 +87,7 @@ class MenuGrupo
                     fecha_creacion,
                     fecha_modificacion,
                     estado_tipo_id
-                FROM {$this->table} 
+                FROM {$this->table}
                 WHERE id = ?
             ";
 
@@ -110,11 +110,11 @@ class MenuGrupo
         try {
             $query = "
                 INSERT INTO {$this->table} (
-                    nombre, 
-                    descripcion, 
-                    icono, 
-                    orden, 
-                    display, 
+                    nombre,
+                    descripcion,
+                    icono,
+                    orden,
+                    display,
                     estado_tipo_id,
                     fecha_creacion
                 ) VALUES (?, ?, ?, ?, ?, ?, NOW())
@@ -144,13 +144,13 @@ class MenuGrupo
     {
         try {
             $query = "
-                UPDATE {$this->table} 
-                SET 
-                    nombre = ?, 
-                    descripcion = ?, 
-                    icono = ?, 
-                    orden = ?, 
-                    display = ?, 
+                UPDATE {$this->table}
+                SET
+                    nombre = ?,
+                    descripcion = ?,
+                    icono = ?,
+                    orden = ?,
+                    display = ?,
                     estado_tipo_id = ?,
                     fecha_modificacion = NOW()
                 WHERE id = ?
@@ -179,8 +179,8 @@ class MenuGrupo
     {
         try {
             $query = "
-                UPDATE {$this->table} 
-                SET estado_tipo_id = 4, fecha_modificacion = NOW() 
+                UPDATE {$this->table}
+                SET estado_tipo_id = 4, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
 
@@ -199,15 +199,15 @@ class MenuGrupo
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     id,
                     nombre,
                     descripcion,
                     icono,
                     orden,
                     display
-                FROM {$this->table} 
-                WHERE estado_tipo_id = 2 
+                FROM {$this->table}
+                WHERE estado_tipo_id = 2
                 ORDER BY orden ASC, nombre ASC
             ";
 
@@ -269,8 +269,8 @@ class MenuGrupo
     {
         try {
             $query = "
-                SELECT id, nombre 
-                FROM estado_tipos 
+                SELECT id, nombre
+                FROM estado_tipos
                 WHERE id IN (1, 2, 3)
                 ORDER BY id ASC
             ";
@@ -279,12 +279,12 @@ class MenuGrupo
             $stmt->execute();
 
             $estados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             // Si no hay estados específicos, usar estados predeterminados
             if (empty($estados)) {
                 $estados = [
                     ['id' => 1, 'nombre' => 'Creado'],
-                    ['id' => 2, 'nombre' => 'Activo'], 
+                    ['id' => 2, 'nombre' => 'Activo'],
                     ['id' => 3, 'nombre' => 'Inactivo']
                 ];
             }
@@ -294,7 +294,7 @@ class MenuGrupo
             error_log("Error al obtener estados: " . $e->getMessage());
             return [
                 ['id' => 1, 'nombre' => 'Creado'],
-                ['id' => 2, 'nombre' => 'Activo'], 
+                ['id' => 2, 'nombre' => 'Activo'],
                 ['id' => 3, 'nombre' => 'Inactivo']
             ];
         }
@@ -316,8 +316,8 @@ class MenuGrupo
             $newStatus = ($currentGroup['estado_tipo_id'] == 2) ? 3 : 2;
 
             $query = "
-                UPDATE {$this->table} 
-                SET estado_tipo_id = ?, fecha_modificacion = NOW() 
+                UPDATE {$this->table}
+                SET estado_tipo_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
 

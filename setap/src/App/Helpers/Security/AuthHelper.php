@@ -68,7 +68,7 @@ class AuthHelper
         $_SESSION['user_id'] = $userData['id'];
         $_SESSION['user_data'] = $userData;
         $_SESSION['login_time'] = time();
-        
+
         // Regenerar ID de sesión por seguridad
         session_regenerate_id(true);
     }
@@ -197,7 +197,7 @@ class AuthHelper
         // Verificar timeout
         if (self::checkSessionTimeout()) {
             self::logout();
-            
+
             if (self::isAjaxRequest()) {
                 http_response_code(401);
                 header('Content-Type: application/json');
@@ -221,14 +221,14 @@ class AuthHelper
 
         if (!self::hasPermission($permission)) {
             http_response_code(403);
-            
+
             if (self::isAjaxRequest()) {
                 header('Content-Type: application/json');
                 echo json_encode(['error' => 'Acceso denegado']);
             } else {
                 echo 'Acceso denegado';
             }
-            
+
             exit;
         }
     }
@@ -242,14 +242,14 @@ class AuthHelper
 
         if (!self::hasMenuAccess($menuName)) {
             http_response_code(403);
-            
+
             if (self::isAjaxRequest()) {
                 header('Content-Type: application/json');
                 echo json_encode(['error' => 'Acceso denegado al menú']);
             } else {
                 echo 'Acceso denegado';
             }
-            
+
             exit;
         }
     }
@@ -269,7 +269,7 @@ class AuthHelper
     public static function redirectToLogin(string $message = ''): void
     {
         $loginUrl = '/login';
-        
+
         if (!empty($message)) {
             $loginUrl .= '?message=' . urlencode($message);
         }
@@ -282,7 +282,7 @@ class AuthHelper
      */
     public static function isAjaxRequest(): bool
     {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 

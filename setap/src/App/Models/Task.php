@@ -23,7 +23,7 @@ class Task
     {
         try {
             $sql = "
-                SELECT 
+                SELECT
                     pt.id,
                     pt.tarea_id,
                     t.nombre as tarea_nombre,
@@ -91,7 +91,7 @@ class Task
     {
         try {
             $sql = "
-                SELECT 
+                SELECT
                     pt.*,
                     t.nombre as tarea_nombre,
                     t.descripcion as tarea_descripcion,
@@ -131,11 +131,11 @@ class Task
     {
         try {
             $this->db->beginTransaction();
-            
+
             // Primero crear la tarea en el catálogo general si no existe
             if (!empty($data['nueva_tarea_nombre'])) {
                 $stmt = $this->db->prepare("
-                    INSERT INTO tareas (nombre, descripcion, estado_tipo_id) 
+                    INSERT INTO tareas (nombre, descripcion, estado_tipo_id)
                     VALUES (?, ?, 1)
                 ");
                 $stmt->execute([
@@ -150,13 +150,13 @@ class Task
             // Luego crear la asignación proyecto-tarea
             $stmt = $this->db->prepare("
                 INSERT INTO proyecto_tareas (
-                    proyecto_id, 
-                    tarea_id, 
+                    proyecto_id,
+                    tarea_id,
                     planificador_id,
                     ejecutor_id,
                     supervisor_id,
-                    fecha_inicio, 
-                    duracion_horas, 
+                    fecha_inicio,
+                    duracion_horas,
                     prioridad,
                     estado_tipo_id
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -195,14 +195,14 @@ class Task
     {
         try {
             $sql = "
-                UPDATE proyecto_tareas 
-                SET 
-                    proyecto_id = ?, 
+                UPDATE proyecto_tareas
+                SET
+                    proyecto_id = ?,
                     planificador_id = ?,
-                    ejecutor_id = ?, 
+                    ejecutor_id = ?,
                     supervisor_id = ?,
-                    fecha_inicio = ?, 
-                    duracion_horas = ?, 
+                    fecha_inicio = ?,
+                    duracion_horas = ?,
                     prioridad = ?,
                     estado_tipo_id = ?,
                     fecha_modificacion = CURRENT_TIMESTAMP
@@ -268,7 +268,7 @@ class Task
                 SELECT p.id, CONCAT('Proyecto para ', c.razon_social) as nombre, c.razon_social as cliente_nombre
                 FROM proyectos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
-                WHERE p.estado_tipo_id IN (1, 2, 5) 
+                WHERE p.estado_tipo_id IN (1, 2, 5)
                 ORDER BY c.razon_social
             ";
             $stmt = $this->db->prepare($sql);
@@ -309,9 +309,9 @@ class Task
     {
         try {
             $sql = "
-                SELECT id, nombre, descripcion 
-                FROM estado_tipos 
-                WHERE id IN (1, 2, 5, 6, 7, 8) 
+                SELECT id, nombre, descripcion
+                FROM estado_tipos
+                WHERE id IN (1, 2, 5, 6, 7, 8)
                 ORDER BY id
             ";
             $stmt = $this->db->prepare($sql);
@@ -340,19 +340,25 @@ class Task
             8 => [6] // aprobado -> solo a terminado (para re-trabajo)
         ];
 
-        $isValid = isset($validTransitions[$currentState]) && 
-                   in_array($newState, $validTransitions[$currentState]);
+        $isValid = isset($validTransitions[$currentState]) &&
+            in_array($newState, $validTransitions[$currentState]);
 
         $message = '';
         if (!$isValid) {
             $stateNames = [
-                1 => 'Creado', 2 => 'Activo', 3 => 'Inactivo', 4 => 'Eliminado',
-                5 => 'Iniciado', 6 => 'Terminado', 7 => 'Rechazado', 8 => 'Aprobado'
+                1 => 'Creado',
+                2 => 'Activo',
+                3 => 'Inactivo',
+                4 => 'Eliminado',
+                5 => 'Iniciado',
+                6 => 'Terminado',
+                7 => 'Rechazado',
+                8 => 'Aprobado'
             ];
-            
+
             $currentName = $stateNames[$currentState] ?? 'Desconocido';
             $newName = $stateNames[$newState] ?? 'Desconocido';
-            
+
             $message = "No es posible cambiar de estado '{$currentName}' a '{$newName}'";
         }
 
@@ -393,9 +399,11 @@ class Task
 
         if (isset($restrictions[$userRole])) {
             $restriction = $restrictions[$userRole];
-            
-            if (!in_array($currentState, $restriction['allowed_from']) || 
-                !in_array($newState, $restriction['allowed_to'])) {
+
+            if (
+                !in_array($currentState, $restriction['allowed_from']) ||
+                !in_array($newState, $restriction['allowed_to'])
+            ) {
                 return [
                     'valid' => false,
                     'message' => $restriction['message']
@@ -422,7 +430,7 @@ class Task
 
             // Estados válidos para ejecución: 2(activo), 5(iniciado), 6(terminado), 7(rechazado), 8(aprobado)
             $executableStates = [2, 5, 6, 7, 8];
-            
+
             if (!in_array($task['estado_tipo_id'], $executableStates)) {
                 return [
                     'valid' => false,
@@ -431,7 +439,6 @@ class Task
             }
 
             return ['valid' => true, 'message' => ''];
-            
         } catch (PDOException $e) {
             error_log("Error en Task::canExecuteTask: " . $e->getMessage());
             return [
@@ -498,12 +505,11 @@ class Task
             $this->registerStateHistory($taskId, $currentState, $newState, $userId, $reason);
 
             $this->db->commit();
-            
+
             return [
                 'success' => true,
                 'message' => 'Estado de la tarea actualizado correctamente'
             ];
-
         } catch (PDOException $e) {
             $this->db->rollBack();
             error_log("Error en Task::changeState: " . $e->getMessage());
@@ -523,19 +529,19 @@ class Task
             // Verificar si la tabla historial_tareas existe
             $checkTable = $this->db->prepare("SHOW TABLES LIKE 'historial_tareas'");
             $checkTable->execute();
-            
+
             if ($checkTable->rowCount() > 0) {
                 $sql = "
                     INSERT INTO historial_tareas (
-                        proyecto_tarea_id, 
-                        estado_anterior_id, 
-                        estado_nuevo_id, 
-                        usuario_id, 
-                        motivo, 
+                        proyecto_tarea_id,
+                        estado_anterior_id,
+                        estado_nuevo_id,
+                        usuario_id,
+                        motivo,
                         fecha_cambio
                     ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                 ";
-                
+
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([$taskId, $oldState, $newState, $userId, $reason]);
             }
@@ -564,7 +570,7 @@ class Task
             // Si se intenta cambiar el estado
             if (isset($data['estado_tipo_id']) && $data['estado_tipo_id'] != $currentState) {
                 $newState = (int)$data['estado_tipo_id'];
-                
+
                 // Validar transición
                 $transitionValidation = $this->isValidStateTransition($currentState, $newState);
                 if (!$transitionValidation['valid']) {
@@ -582,7 +588,6 @@ class Task
             if ($currentState == 8 && !in_array($userRole, ['admin', 'planner'])) {
                 $errors[] = 'Solo usuarios Admin y Planner pueden modificar tareas aprobadas';
             }
-
         } catch (Exception $e) {
             error_log("Error en Task::validateUpdateData: " . $e->getMessage());
             $errors[] = 'Error al validar los datos de actualización';
@@ -613,11 +618,11 @@ class Task
             $stmt = $this->db->prepare("
                 SELECT COUNT(*) as holiday_count
                 FROM proyecto_feriados pf
-                WHERE pf.proyecto_id = ? 
+                WHERE pf.proyecto_id = ?
                 AND pf.estado_tipo_id = 2
                 AND (pf.fecha = ? OR (? IS NOT NULL AND pf.fecha = ?))
             ");
-            
+
             $stmt->execute([
                 $task['proyecto_id'],
                 $task['fecha_inicio'],
@@ -627,7 +632,6 @@ class Task
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return ($result['holiday_count'] > 0);
-
         } catch (PDOException $e) {
             error_log('Task::isTaskOnHoliday error: ' . $e->getMessage());
             return false;
@@ -654,7 +658,7 @@ class Task
                 WHERE pt.proyecto_id = ?
                 AND pt.estado_tipo_id NOT IN (4, 6, 7, 8)
                 AND pf.estado_tipo_id = 2
-                AND (pf.fecha = pt.fecha_inicio 
+                AND (pf.fecha = pt.fecha_inicio
                      OR pf.fecha = pt.fecha_fin
                      OR (pt.fecha_inicio <= pf.fecha AND pt.fecha_fin >= pf.fecha))
                 ORDER BY pf.fecha, pt.fecha_inicio
@@ -662,7 +666,6 @@ class Task
 
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             error_log('Task::getTasksOnHolidays error: ' . $e->getMessage());
             return [];
@@ -675,7 +678,7 @@ class Task
     public function validateTaskDatesWithHolidays(int $projectId, string $fechaInicio, ?string $fechaFin = null): array
     {
         $warnings = [];
-        
+
         try {
             // Verificar si fecha de inicio es feriado
             $stmt = $this->db->prepare("
@@ -683,7 +686,7 @@ class Task
                 FROM proyecto_feriados
                 WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
             ");
-            
+
             $stmt->execute([$projectId, $fechaInicio]);
             $holidayStart = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -714,7 +717,6 @@ class Task
                     ];
                 }
             }
-
         } catch (PDOException $e) {
             error_log('Task::validateTaskDatesWithHolidays error: ' . $e->getMessage());
         }
@@ -734,19 +736,19 @@ class Task
 
             while ($iterations < $maxIterations) {
                 $dateStr = $currentDate->format('Y-m-d');
-                
+
                 // Verificar si es feriado
                 $stmt = $this->db->prepare("
                     SELECT id FROM proyecto_feriados
                     WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
                 ");
                 $stmt->execute([$projectId, $dateStr]);
-                
+
                 if ($stmt->rowCount() === 0) {
                     // No es feriado, retornar esta fecha
                     return $dateStr;
                 }
-                
+
                 // Avanzar un día
                 $currentDate->add(new \DateInterval('P1D'));
                 $iterations++;
@@ -754,7 +756,6 @@ class Task
 
             // Si no encontramos día hábil en 30 días, retornar fecha original
             return $date;
-
         } catch (\Exception $e) {
             error_log('Task::getNextWorkingDay error: ' . $e->getMessage());
             return $date;
@@ -777,23 +778,22 @@ class Task
 
             while ($start <= $end) {
                 $dateStr = $start->format('Y-m-d');
-                
+
                 // Verificar si no es feriado
                 $stmt = $this->db->prepare("
                     SELECT id FROM proyecto_feriados
                     WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
                 ");
                 $stmt->execute([$projectId, $dateStr]);
-                
+
                 if ($stmt->rowCount() === 0) {
                     $workingDays++;
                 }
-                
+
                 $start->add(new \DateInterval('P1D'));
             }
 
             return $workingDays;
-
         } catch (\Exception $e) {
             error_log('Task::getWorkingDaysBetween error: ' . $e->getMessage());
             return 0;

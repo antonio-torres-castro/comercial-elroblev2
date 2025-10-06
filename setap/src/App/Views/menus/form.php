@@ -44,7 +44,7 @@
                                         </ul>
                                     </div>
                                 <?php endif; ?>
-                                
+
                                 <?php if (isset($data['success']) && $data['success']): ?>
                                     <div class="alert alert-success">
                                         <?= htmlspecialchars($data['success']) ?>
@@ -61,18 +61,18 @@
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="nombre" class="form-label">Nombre interno *</label>
-                                                <input type="text" class="form-control" id="nombre" name="nombre" 
-                                                       value="<?= htmlspecialchars($data['menu']['nombre'] ?? '') ?>" 
+                                                <input type="text" class="form-control" id="nombre" name="nombre"
+                                                       value="<?= htmlspecialchars($data['menu']['nombre'] ?? '') ?>"
                                                        required maxlength="150">
                                                 <div class="form-text">Nombre interno del sistema (ej: manage_users)</div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="display" class="form-label">Título de visualización *</label>
-                                                <input type="text" class="form-control" id="display" name="display" 
-                                                       value="<?= htmlspecialchars($data['menu']['display'] ?? '') ?>" 
+                                                <input type="text" class="form-control" id="display" name="display"
+                                                       value="<?= htmlspecialchars($data['menu']['display'] ?? '') ?>"
                                                        required maxlength="150">
                                                 <div class="form-text">Nombre que verá el usuario (ej: Usuarios)</div>
                                             </div>
@@ -83,24 +83,24 @@
                                         <div class="col-12">
                                             <div class="mb-3">
                                                 <label for="descripcion" class="form-label">Descripción</label>
-                                                <textarea class="form-control" id="descripcion" name="descripcion" 
+                                                <textarea class="form-control" id="descripcion" name="descripcion"
                                                           maxlength="300" rows="3"><?= htmlspecialchars($data['menu']['descripcion'] ?? '') ?></textarea>
                                                 <div class="form-text">Descripción de las funcionalidades (opcional)</div>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="url" class="form-label">URL *</label>
-                                                <input type="text" class="form-control" id="url" name="url" 
-                                                       value="<?= htmlspecialchars($data['menu']['url'] ?? '') ?>" 
+                                                <input type="text" class="form-control" id="url" name="url"
+                                                       value="<?= htmlspecialchars($data['menu']['url'] ?? '') ?>"
                                                        required maxlength="100">
                                                 <div class="form-text">Ruta relativa del menú (ej: /users, /projects)</div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="icono" class="form-label">Icono</label>
@@ -108,19 +108,19 @@
                                                     <span class="input-group-text">
                                                         <i class="bi bi-<?= htmlspecialchars($data['menu']['icono'] ?? 'circle') ?>" id="icon-preview"></i>
                                                     </span>
-                                                    <input type="text" class="form-control" id="icono" name="icono" 
-                                                           value="<?= htmlspecialchars($data['menu']['icono'] ?? '') ?>" 
+                                                    <input type="text" class="form-control" id="icono" name="icono"
+                                                           value="<?= htmlspecialchars($data['menu']['icono'] ?? '') ?>"
                                                            maxlength="50" placeholder="circle">
                                                 </div>
                                                 <div class="form-text">Icono de Bootstrap Icons (sin prefijo 'bi bi-')</div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="orden" class="form-label">Orden *</label>
-                                                <input type="number" class="form-control" id="orden" name="orden" 
-                                                       value="<?= htmlspecialchars($data['menu']['orden'] ?? '1') ?>" 
+                                                <input type="number" class="form-control" id="orden" name="orden"
+                                                       value="<?= htmlspecialchars($data['menu']['orden'] ?? '1') ?>"
                                                        required min="1" max="999">
                                                 <div class="form-text">Orden de aparición en el menú</div>
                                             </div>
@@ -134,8 +134,8 @@
                                                 <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                                     <?php if (!empty($data['estados'])): ?>
                                                         <?php foreach ($data['estados'] as $estado): ?>
-                                                            <option value="<?= $estado['id'] ?>" 
-                                                                <?= ((isset($data['menu']['estado_tipo_id']) && $data['menu']['estado_tipo_id'] == $estado['id']) || 
+                                                            <option value="<?= $estado['id'] ?>"
+                                                                <?= ((isset($data['menu']['estado_tipo_id']) && $data['menu']['estado_tipo_id'] == $estado['id']) ||
                                                                     (!isset($data['menu']) && $estado['id'] == 2)) ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($estado['nombre']) ?>
                                                             </option>
@@ -154,7 +154,7 @@
                                                     <i class="bi bi-arrow-left"></i> Cancelar
                                                 </a>
                                                 <button type="submit" class="btn btn-setap-primary">
-                                                    <i class="bi bi-save"></i> 
+                                                    <i class="bi bi-save"></i>
                                                     <?= $data['menu_id'] ? 'Actualizar Menú' : 'Crear Menú' ?>
                                                 </button>
                                             </div>
@@ -176,7 +176,7 @@
         document.getElementById('icono').addEventListener('input', function() {
             const iconInput = this.value.trim();
             const iconPreview = document.getElementById('icon-preview');
-            
+
             if (iconInput) {
                 iconPreview.className = `bi bi-${iconInput}`;
             } else {
@@ -225,7 +225,7 @@
         // Auto-generar URL basado en nombre
         document.getElementById('nombre').addEventListener('input', function() {
             const urlField = document.getElementById('url');
-            
+
             // Solo auto-generar si el campo URL está vacío
             if (!urlField.value.trim()) {
                 const nombre = this.value.trim().toLowerCase();

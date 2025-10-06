@@ -11,7 +11,7 @@ use App\Helpers\Security\SecurityValidator;
 
 /**
  * Security Facade
- * 
+ *
  * Esta clase actúa como una Fachada para los diferentes componentes de seguridad,
  * siguiendo el principio de responsabilidad única (SRP).
  * Delega las operaciones específicas a clases especializadas.

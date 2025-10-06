@@ -18,7 +18,7 @@ class TaskController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-        
+
         $this->taskModel = new Task();
         $this->permissionService = new PermissionService();
     }
@@ -30,7 +30,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -91,7 +91,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -128,7 +128,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -170,7 +170,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -244,7 +244,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -299,7 +299,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -375,7 +375,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -415,7 +415,7 @@ class TaskController extends BaseController
             // Eliminar tarea
             if ($this->taskModel->delete($id)) {
                 // Si es petición AJAX, devolver JSON
-                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                     echo json_encode(['success' => true, 'message' => 'Tarea eliminada correctamente']);
                 } else {
@@ -423,7 +423,7 @@ class TaskController extends BaseController
                 }
             } else {
                 // Si es petición AJAX, devolver JSON
-                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                     echo json_encode(['success' => false, 'message' => 'Error al eliminar la tarea']);
                 } else {
@@ -433,9 +433,9 @@ class TaskController extends BaseController
 
         } catch (Exception $e) {
             error_log("Error en TaskController::delete: " . $e->getMessage());
-            
+
             // Si es petición AJAX, devolver JSON
-            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                 http_response_code(500);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
@@ -452,7 +452,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'message' => 'No autenticado']);
@@ -485,10 +485,10 @@ class TaskController extends BaseController
 
             // Cambiar estado usando el modelo con validaciones
             $result = $this->taskModel->changeState(
-                $taskId, 
-                $newState, 
-                $currentUser['id'], 
-                $currentUser['rol'], 
+                $taskId,
+                $newState,
+                $currentUser['id'],
+                $currentUser['rol'],
                 $reason
             );
 
@@ -509,7 +509,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['valid' => false, 'message' => 'No autenticado']);
@@ -525,7 +525,7 @@ class TaskController extends BaseController
 
             // Verificar si la tarea puede ejecutarse
             $result = $this->taskModel->canExecuteTask($taskId);
-            
+
             echo json_encode($result);
 
         } catch (Exception $e) {
@@ -542,7 +542,7 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['transitions' => [], 'message' => 'No autenticado']);
@@ -565,14 +565,14 @@ class TaskController extends BaseController
 
             $currentState = (int)$task['estado_tipo_id'];
             $userRole = $currentUser['rol'];
-            
+
             // Obtener todos los estados posibles
             $allStates = $this->taskModel->getTaskStates();
             $validTransitions = [];
 
             foreach ($allStates as $state) {
                 $stateId = (int)$state['id'];
-                
+
                 if ($stateId === $currentState) {
                     continue; // No incluir el estado actual
                 }

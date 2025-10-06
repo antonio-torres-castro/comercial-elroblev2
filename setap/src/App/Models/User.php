@@ -28,8 +28,8 @@ class User
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
                        c.razon_social as cliente_nombre
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id /*siempre tiene un estado el registro*/
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -81,7 +81,7 @@ class User
     {
         try {
             $sql = "
-                INSERT INTO personas (nombre, rut, telefono, direccion, estado_tipo_id, fecha_Creado) 
+                INSERT INTO personas (nombre, rut, telefono, direccion, estado_tipo_id, fecha_Creado)
                 VALUES (?, ?, ?, ?, 1, NOW())
             ";
 
@@ -108,9 +108,9 @@ class User
         try {
             // Determinar cliente_id según tipo de usuario
             $clienteId = $this->determineClienteId($data);
-            
+
             $sql = "
-                INSERT INTO usuarios (persona_id, nombre_usuario, email, clave_hash, usuario_tipo_id, cliente_id, estado_tipo_id, fecha_Creado) 
+                INSERT INTO usuarios (persona_id, nombre_usuario, email, clave_hash, usuario_tipo_id, cliente_id, estado_tipo_id, fecha_Creado)
                 VALUES (?, ?, ?, ?, ?, ?, 1, NOW())
             ";
 
@@ -144,8 +144,8 @@ class User
                 ut.nombre as rol,
                 et.nombre as estado, /*atributo de estado desplegado al usuario*/
                 c.razon_social as cliente_nombre
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON et.Id = u.estado_tipo_id /* Siempre tiene un estado */
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -190,7 +190,7 @@ class User
 
             // Actualizar usuario
             $usuarioSql = "
-                UPDATE usuarios 
+                UPDATE usuarios
                 SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -288,7 +288,7 @@ class User
 
             // Actualizar email del usuario (sin cambiar el rol)
             $usuarioSql = "
-                UPDATE usuarios 
+                UPDATE usuarios
                 SET email = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -320,8 +320,8 @@ class User
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
                        c.razon_social as cliente_nombre
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -330,7 +330,7 @@ class User
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
-            
+
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (PDOException $e) {
@@ -346,12 +346,12 @@ class User
     private function determineClienteId(array $data): ?int
     {
         $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
-        
+
         // Usuarios de la empresa propietaria NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
             return null;
         }
-        
+
         // Usuarios de cliente deben tener cliente_id
         if (in_array($tipoUsuario, ['client', 'counterparty'])) {
             if (empty($data['cliente_id'])) {
@@ -359,7 +359,7 @@ class User
             }
             return (int)$data['cliente_id'];
         }
-        
+
         return null;
     }
 
@@ -388,15 +388,15 @@ class User
             $stmt = $this->db->prepare("SELECT rut FROM clientes WHERE id = ?");
             $stmt->execute([$clientId]);
             $clientRut = $stmt->fetchColumn();
-            
+
             if (!$clientRut) {
                 return false;
             }
-            
+
             // Limpiar y comparar RUTs
             $cleanPersonRut = preg_replace('/[^0-9kK]/', '', strtolower($personRut));
             $cleanClientRut = preg_replace('/[^0-9kK]/', '', strtolower($clientRut));
-            
+
             return $cleanPersonRut === $cleanClientRut;
         } catch (PDOException $e) {
             error_log("Error validando RUT de cliente: " . $e->getMessage());
@@ -412,8 +412,8 @@ class User
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT COUNT(*) 
-                FROM cliente_contrapartes 
+                SELECT COUNT(*)
+                FROM cliente_contrapartes
                 WHERE persona_id = ? AND cliente_id = ? AND estado_tipo_id != 4
             ");
             $stmt->execute([$personaId, $clientId]);
@@ -431,9 +431,9 @@ class User
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, razon_social, rut 
-                FROM clientes 
-                WHERE estado_tipo_id IN (1, 2) 
+                SELECT id, razon_social, rut
+                FROM clientes
+                WHERE estado_tipo_id IN (1, 2)
                 ORDER BY razon_social
             ");
             $stmt->execute();

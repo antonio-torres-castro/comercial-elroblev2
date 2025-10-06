@@ -24,7 +24,7 @@ class Menu
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     m.id,
                     m.nombre,
                     m.descripcion,
@@ -84,7 +84,7 @@ class Menu
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     id,
                     nombre,
                     descripcion,
@@ -96,7 +96,7 @@ class Menu
                     fecha_modificacion,
                     display,
                     menu_grupo_id
-                FROM {$this->table} 
+                FROM {$this->table}
                 WHERE id = ?
             ";
 
@@ -119,13 +119,13 @@ class Menu
         try {
             $query = "
                 INSERT INTO {$this->table} (
-                    nombre, 
-                    descripcion, 
-                    url, 
-                    icono, 
-                    orden, 
-                    estado_tipo_id, 
-                    display, 
+                    nombre,
+                    descripcion,
+                    url,
+                    icono,
+                    orden,
+                    estado_tipo_id,
+                    display,
                     menu_grupo_id,
                     fecha_creacion
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
@@ -157,15 +157,15 @@ class Menu
     {
         try {
             $query = "
-                UPDATE {$this->table} 
-                SET 
-                    nombre = ?, 
-                    descripcion = ?, 
-                    url = ?, 
-                    icono = ?, 
-                    orden = ?, 
-                    estado_tipo_id = ?, 
-                    display = ?, 
+                UPDATE {$this->table}
+                SET
+                    nombre = ?,
+                    descripcion = ?,
+                    url = ?,
+                    icono = ?,
+                    orden = ?,
+                    estado_tipo_id = ?,
+                    display = ?,
                     menu_grupo_id = ?,
                     fecha_modificacion = NOW()
                 WHERE id = ?
@@ -196,8 +196,8 @@ class Menu
     {
         try {
             $query = "
-                UPDATE {$this->table} 
-                SET estado_tipo_id = 4, fecha_modificacion = NOW() 
+                UPDATE {$this->table}
+                SET estado_tipo_id = 4, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
 
@@ -225,8 +225,8 @@ class Menu
             $newStatus = ($currentMenu['estado_tipo_id'] == 2) ? 3 : 2;
 
             $query = "
-                UPDATE {$this->table} 
-                SET estado_tipo_id = ?, fecha_modificacion = NOW() 
+                UPDATE {$this->table}
+                SET estado_tipo_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
 
@@ -245,8 +245,8 @@ class Menu
     {
         try {
             $query = "
-                SELECT id, nombre 
-                FROM estado_tipos 
+                SELECT id, nombre
+                FROM estado_tipos
                 WHERE id IN (1, 2, 3)
                 ORDER BY id ASC
             ";
@@ -255,12 +255,12 @@ class Menu
             $stmt->execute();
 
             $estados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             // Si no hay estados específicos, usar estados predeterminados
             if (empty($estados)) {
                 $estados = [
                     ['id' => 1, 'nombre' => 'Creado'],
-                    ['id' => 2, 'nombre' => 'Activo'], 
+                    ['id' => 2, 'nombre' => 'Activo'],
                     ['id' => 3, 'nombre' => 'Inactivo']
                 ];
             }
@@ -270,7 +270,7 @@ class Menu
             error_log("Error al obtener estados: " . $e->getMessage());
             return [
                 ['id' => 1, 'nombre' => 'Creado'],
-                ['id' => 2, 'nombre' => 'Activo'], 
+                ['id' => 2, 'nombre' => 'Activo'],
                 ['id' => 3, 'nombre' => 'Inactivo']
             ];
         }
@@ -348,16 +348,16 @@ class Menu
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     id,
                     nombre,
                     display,
                     url,
                     icono,
                     orden
-                FROM {$this->table} 
-                WHERE estado_tipo_id = 2 
-                AND display IS NOT NULL 
+                FROM {$this->table}
+                WHERE estado_tipo_id = 2
+                AND display IS NOT NULL
                 AND display != ''
                 ORDER BY orden ASC, nombre ASC
             ";
@@ -380,10 +380,10 @@ class Menu
         try {
             // Usar App\Services\PermissionService para verificar permisos
             $permissionService = new \App\Services\PermissionService();
-            
+
             // Obtener todos los menús activos
             $allMenus = $this->getNavigationMenus();
-            
+
             // Filtrar menús según permisos del usuario
             $userMenus = [];
             foreach ($allMenus as $menu) {
@@ -392,7 +392,7 @@ class Menu
                     $userMenus[] = $menu;
                 }
             }
-            
+
             return $userMenus;
         } catch (Exception $e) {
             error_log("Error al obtener menús de usuario: " . $e->getMessage());
@@ -407,15 +407,15 @@ class Menu
     {
         try {
             $query = "
-                SELECT 
+                SELECT
                     id,
                     nombre,
                     descripcion,
                     icono,
                     orden,
                     display
-                FROM menu_grupo 
-                WHERE estado_tipo_id = 2 
+                FROM menu_grupo
+                WHERE estado_tipo_id = 2
                 ORDER BY orden ASC, nombre ASC
             ";
 
@@ -436,16 +436,16 @@ class Menu
     {
         try {
             $permissionService = new \App\Services\PermissionService();
-            
+
             // Obtener grupos activos
             $groups = $this->getMenuGroups();
-            
+
             $groupedMenus = [];
-            
+
             foreach ($groups as $group) {
                 // Obtener menús del grupo que el usuario tiene permisos para ver
                 $query = "
-                    SELECT 
+                    SELECT
                         m.id,
                         m.nombre,
                         m.display,
@@ -454,8 +454,8 @@ class Menu
                         m.orden
                     FROM {$this->table} m
                     WHERE m.menu_grupo_id = ?
-                    AND m.estado_tipo_id = 2 
-                    AND m.display IS NOT NULL 
+                    AND m.estado_tipo_id = 2
+                    AND m.display IS NOT NULL
                     AND m.display != ''
                     ORDER BY m.orden ASC, m.nombre ASC
                 ";
@@ -480,7 +480,7 @@ class Menu
                     ];
                 }
             }
-            
+
             return $groupedMenus;
         } catch (Exception $e) {
             error_log("Error al obtener menús agrupados de usuario: " . $e->getMessage());
@@ -495,9 +495,9 @@ class Menu
     {
         try {
             $permissionService = new \App\Services\PermissionService();
-            
+
             $query = "
-                SELECT 
+                SELECT
                     m.id,
                     m.nombre,
                     m.display,
@@ -506,8 +506,8 @@ class Menu
                     m.orden
                 FROM {$this->table} m
                 WHERE (m.menu_grupo_id IS NULL OR m.menu_grupo_id = 0)
-                AND m.estado_tipo_id = 2 
-                AND m.display IS NOT NULL 
+                AND m.estado_tipo_id = 2
+                AND m.display IS NOT NULL
                 AND m.display != ''
                 ORDER BY m.orden ASC, m.nombre ASC
             ";
@@ -523,7 +523,7 @@ class Menu
                     $userUngroupedMenus[] = $menu;
                 }
             }
-            
+
             return $userUngroupedMenus;
         } catch (Exception $e) {
             error_log("Error al obtener menús sin grupo de usuario: " . $e->getMessage());

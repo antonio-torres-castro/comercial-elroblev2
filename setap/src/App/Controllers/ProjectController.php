@@ -21,7 +21,7 @@ class ProjectController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-        
+
         $this->projectModel = new Project();
         $this->permissionService = new PermissionService();
         $this->db = Database::getInstance();
@@ -38,30 +38,30 @@ class ProjectController extends BaseController
 
         // Aplicar filtros si están presentes
         $filters = [];
-        
+
         if (!empty($_GET['cliente_id'])) {
             $filters['cliente_id'] = (int)$_GET['cliente_id'];
         }
-        
+
         if (!empty($_GET['estado_tipo_id'])) {
             $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
         }
-        
+
         if (!empty($_GET['fecha_desde'])) {
             $filters['fecha_desde'] = $_GET['fecha_desde'];
         }
-        
+
         if (!empty($_GET['fecha_hasta'])) {
             $filters['fecha_hasta'] = $_GET['fecha_hasta'];
         }
 
         $projects = $this->projectModel->getAll($filters);
-        
+
         // Obtener datos para filtros
         $clients = $this->getClients();
         $projectStates = $this->getProjectStates();
         $taskTypes = $this->getTaskTypes();
-        
+
         $this->view('projects/list', [
             'projects' => $projects,
             'clients' => $clients,
@@ -83,7 +83,7 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_GET['id'] ?? 0);
-        
+
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -97,10 +97,10 @@ class ProjectController extends BaseController
 
         // Obtener tareas del proyecto
         $tasks = $this->projectModel->getProjectTasks($id);
-        
+
         // Obtener estadísticas del proyecto
         $stats = $this->projectModel->getProjectStats($id);
-        
+
         // Obtener feriados del proyecto
         $holidays = $this->projectModel->getProjectHolidays($id);
 
@@ -127,7 +127,7 @@ class ProjectController extends BaseController
         $clients = $this->getClients();
         $taskTypes = $this->getTaskTypes();
         $counterparts = $this->getCounterparts();
-        
+
         $this->view('projects/create', [
             'clients' => $clients,
             'taskTypes' => $taskTypes,
@@ -158,7 +158,7 @@ class ProjectController extends BaseController
 
         try {
             $errors = $this->validateProjectData($_POST);
-            
+
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/projects/create?error=" . urlencode($errorMsg));
@@ -176,13 +176,13 @@ class ProjectController extends BaseController
             ];
 
             $projectId = $this->projectModel->create($projectData);
-            
+
             if ($projectId) {
                 Security::logSecurityEvent('project_created', [
                     'project_id' => $projectId,
                     'created_by' => $_SESSION['username']
                 ]);
-                
+
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto creado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_CREATE_PROJECT);
@@ -203,7 +203,7 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_GET['id'] ?? 0);
-        
+
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -221,7 +221,7 @@ class ProjectController extends BaseController
         $counterparts = $this->getCounterparts();
         $projectStates = $this->getProjectStates();
         $holidays = $this->projectModel->getProjectHolidays($id);
-        
+
         $this->view('projects/edit', [
             'project' => $project,
             'clients' => $clients,
@@ -248,7 +248,7 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_POST['id'] ?? 0);
-        
+
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -262,7 +262,7 @@ class ProjectController extends BaseController
 
         try {
             $errors = $this->validateProjectData($_POST);
-            
+
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/projects/edit?id={$id}&error=" . urlencode($errorMsg));
@@ -284,7 +284,7 @@ class ProjectController extends BaseController
                     'project_id' => $id,
                     'updated_by' => $_SESSION['username']
                 ]);
-                
+
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto actualizado correctamente');
             } else {
                 Security::redirect("/projects/edit?id={$id}&error=Error al actualizar proyecto");
@@ -305,7 +305,7 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_GET['id'] ?? 0);
-        
+
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -323,7 +323,7 @@ class ProjectController extends BaseController
                     'project_id' => $id,
                     'deleted_by' => $_SESSION['username']
                 ]);
-                
+
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto eliminado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_DELETE_PROJECT);
@@ -363,7 +363,7 @@ class ProjectController extends BaseController
                     'new_status_id' => $newStatusId,
                     'changed_by' => $_SESSION['username']
                 ]);
-                
+
                 Security::redirect("/projects/show?id={$projectId}&success=Estado actualizado correctamente");
             } else {
                 Security::redirect("/projects/show?id={$projectId}&error=Error al cambiar estado");
@@ -384,14 +384,14 @@ class ProjectController extends BaseController
         }
 
         $term = Security::sanitizeInput($_GET['q'] ?? '');
-        
+
         if (empty($term) || strlen($term) < 3) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_SEARCH_TERM_TOO_SHORT);
             return;
         }
 
         $projects = $this->projectModel->search($term);
-        
+
         $this->view('projects/search', [
             'projects' => $projects,
             'searchTerm' => $term,
@@ -446,9 +446,9 @@ class ProjectController extends BaseController
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, razon_social as nombre, rut 
-                FROM clientes 
-                WHERE estado_tipo_id != 4 
+                SELECT id, razon_social as nombre, rut
+                FROM clientes
+                WHERE estado_tipo_id != 4
                 ORDER BY razon_social
             ");
             $stmt->execute();
@@ -475,15 +475,15 @@ class ProjectController extends BaseController
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT cc.id, 
+                SELECT cc.id,
                        CONCAT(p.nombre, ' (', c.razon_social, ')') as nombre,
-                       cc.email, 
-                       cc.cargo, 
+                       cc.email,
+                       cc.cargo,
                        c.razon_social as cliente_nombre
                 FROM cliente_contrapartes cc
                 INNER JOIN personas p ON cc.persona_id = p.id
                 INNER JOIN clientes c ON cc.cliente_id = c.id
-                WHERE cc.estado_tipo_id != 4 
+                WHERE cc.estado_tipo_id != 4
                 ORDER BY c.razon_social, p.nombre
             ");
             $stmt->execute();
@@ -498,9 +498,9 @@ class ProjectController extends BaseController
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, nombre, descripcion 
-                FROM estado_tipos 
-                WHERE id IN (1, 2, 3, 5, 6, 8) 
+                SELECT id, nombre, descripcion
+                FROM estado_tipos
+                WHERE id IN (1, 2, 3, 5, 6, 8)
                 ORDER BY id
             ");
             $stmt->execute();

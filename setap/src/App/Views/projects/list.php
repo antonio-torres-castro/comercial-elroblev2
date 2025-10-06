@@ -79,7 +79,7 @@
                         <select class="form-select" name="cliente_id" id="cliente_id">
                             <option value="">Todos los clientes</option>
                             <?php foreach ($clients as $client): ?>
-                                <option value="<?= $client['id'] ?>" 
+                                <option value="<?= $client['id'] ?>"
                                         <?= ($filters['cliente_id'] ?? '') == $client['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($client['nombre']) ?>
                                 </option>
@@ -91,7 +91,7 @@
                         <select class="form-select" name="estado_tipo_id" id="estado_tipo_id">
                             <option value="">Todos los estados</option>
                             <?php foreach ($projectStates as $state): ?>
-                                <option value="<?= $state['id'] ?>" 
+                                <option value="<?= $state['id'] ?>"
                                         <?= ($filters['estado_tipo_id'] ?? '') == $state['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($state['nombre']) ?>
                                 </option>
@@ -100,12 +100,12 @@
                     </div>
                     <div class="col-md-2">
                         <label for="fecha_desde" class="form-label">Desde</label>
-                        <input type="date" class="form-control" name="fecha_desde" id="fecha_desde" 
+                        <input type="date" class="form-control" name="fecha_desde" id="fecha_desde"
                                value="<?= htmlspecialchars($filters['fecha_desde'] ?? '') ?>">
                     </div>
                     <div class="col-md-2">
                         <label for="fecha_hasta" class="form-label">Hasta</label>
-                        <input type="date" class="form-control" name="fecha_hasta" id="fecha_hasta" 
+                        <input type="date" class="form-control" name="fecha_hasta" id="fecha_hasta"
                                value="<?= htmlspecialchars($filters['fecha_hasta'] ?? '') ?>">
                     </div>
                     <div class="col-md-3">
@@ -161,7 +161,7 @@
                                     <h6 class="text-setap-primary">Ubicación:</h6>
                                     <p class="mb-1"><?= htmlspecialchars($project['direccion'] ?: 'No especificada') ?></p>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <h6 class="text-setap-primary">Fechas:</h6>
                                     <div class="small">
@@ -174,7 +174,7 @@
 
                                 <div class="mb-3">
                                     <h6 class="text-setap-primary">Progreso:</h6>
-                                    <?php 
+                                    <?php
                                     $totalTasks = $project['total_tareas'] ?? 0;
                                     $completedTasks = $project['tareas_completadas'] ?? 0;
                                     $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
@@ -203,17 +203,17 @@
                                         Tipo: <?= htmlspecialchars($project['tipo_tarea']) ?>
                                     </small>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="/projects/show?id=<?= $project['id'] ?>" 
+                                        <a href="/projects/show?id=<?= $project['id'] ?>"
                                            class="btn btn-outline-setap-primary"
                                            onclick="event.stopPropagation()" title="Ver Proyecto">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="/projects/edit?id=<?= $project['id'] ?>" 
+                                        <a href="/projects/edit?id=<?= $project['id'] ?>"
                                            class="btn btn-outline-secondary"
                                            onclick="event.stopPropagation()" title="Editar Proyecto">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>" 
+                                        <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>"
                                            class="btn btn-outline-info"
                                            onclick="event.stopPropagation()" title="Gestionar Feriados">
                                             <i class="bi bi-calendar-x"></i>
@@ -245,23 +245,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             const fechaDesde = document.getElementById('fecha_desde');
             const fechaHasta = document.getElementById('fecha_hasta');
-            
+
             // Si no hay fecha desde, establecer inicio del año actual
             if (!fechaDesde.value) {
                 const startOfYear = new Date(new Date().getFullYear(), 0, 1);
                 fechaDesde.max = new Date().toISOString().split('T')[0];
             }
-            
+
             // Si no hay fecha hasta, establecer fecha actual
             if (!fechaHasta.value) {
                 fechaHasta.max = new Date().toISOString().split('T')[0];
             }
-            
+
             // Validar que fecha hasta sea mayor que fecha desde
             fechaDesde.addEventListener('change', function() {
                 fechaHasta.min = this.value;
             });
-            
+
             fechaHasta.addEventListener('change', function() {
                 fechaDesde.max = this.value;
             });

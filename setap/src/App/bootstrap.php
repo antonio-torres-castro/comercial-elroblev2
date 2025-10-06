@@ -56,6 +56,3 @@ register_shutdown_function(function () {
         }
     }
 });
-
-// NOTA: Hemos eliminado completamente el autoloader personalizado
-// Composer's autoloader se encarga de todo ahora

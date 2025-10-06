@@ -1,5 +1,5 @@
-<?php 
-use App\Helpers\Security; 
+<?php
+use App\Helpers\Security;
 use App\Models\Menu;
 
 // Obtener menús agrupados del usuario actual
@@ -9,10 +9,10 @@ try {
     if (\App\Helpers\Security::isAuthenticated()) {
         $menuModel = new Menu();
         $userId = $_SESSION['user_id'] ?? 0;
-        
+
         // Obtener menús agrupados (con desplegables)
         $groupedMenus = $menuModel->getGroupedMenusForUser($userId);
-        
+
         // Obtener menús sin grupo (individuales)
         $ungroupedMenus = $menuModel->getUngroupedMenusForUser($userId);
     }
@@ -29,11 +29,11 @@ try {
         <a class="navbar-brand" href="/home">
             <i class="bi bi-grid-3x3-gap"></i> SETAP
         </a>
-        
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <!-- Home siempre visible -->
@@ -42,13 +42,13 @@ try {
                         <i class="bi bi-house"></i> Home
                     </a>
                 </li>
-                
+
                 <!-- Menús agrupados con desplegables -->
                 <?php if (!empty($groupedMenus)): ?>
                     <?php foreach ($groupedMenus as $groupData): ?>
                         <?php $group = $groupData['group']; ?>
                         <?php $menus = $groupData['menus']; ?>
-                        
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown_<?php echo $group['id']; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-<?php echo htmlspecialchars($group['icono'] ?? 'folder'); ?>"></i>
@@ -67,7 +67,7 @@ try {
                         </li>
                     <?php endforeach; ?>
                 <?php endif; ?>
-                
+
                 <!-- Menús individuales (sin grupo) -->
                 <?php if (!empty($ungroupedMenus)): ?>
                     <?php foreach ($ungroupedMenus as $menu): ?>
@@ -79,7 +79,7 @@ try {
                         </li>
                     <?php endforeach; ?>
                 <?php endif; ?>
-                
+
                 <!-- Menús por defecto si no hay configuración dinámica -->
                 <?php if (empty($groupedMenus) && empty($ungroupedMenus)): ?>
                     <?php if (\App\Helpers\Security::hasMenuAccess('manage_users')): ?>
@@ -122,11 +122,11 @@ try {
                         </li>
                     <?php endif; ?>
                 <?php endif; ?>
-                
+
                 <!-- Dropdown de usuario -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle"></i> 
+                        <i class="bi bi-person-circle"></i>
                         <?php echo htmlspecialchars($_SESSION['nombre_completo'] ?? $_SESSION['username'] ?? 'Usuario'); ?>
                     </a>
                     <ul class="dropdown-menu">
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
             return new bootstrap.Dropdown(dropdownToggleEl);
         });
-        
+
         console.log('Dropdowns de navegación inicializados:', dropdownList.length);
     } else {
         console.error('Bootstrap no está disponible para inicializar dropdowns');

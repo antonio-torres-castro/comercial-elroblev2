@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Scripts básicos requeridos por toda la aplicación
  * Incluye: Bootstrap Bundle
@@ -10,20 +11,20 @@ if (!defined('SETAP_BASE_SCRIPTS_LOADED')) {
 ?>
     <!-- Scripts Base de SETAP -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         // Variables globales para evitar conflictos
         window.SETAP = window.SETAP || {};
         window.SETAP.scriptsLoaded = window.SETAP.scriptsLoaded || {};
         window.SETAP.scriptsLoaded.bootstrap = true;
-        
+
         // Función helper para confirmar logout
         window.SETAP.confirmLogout = function(e) {
             if (!confirm('¿Está seguro que desea cerrar sesión?')) {
                 e.preventDefault();
             }
         };
-        
+
         // Inicialización básica
         document.addEventListener('DOMContentLoaded', function() {
             // Configurar confirmación de logout
@@ -31,7 +32,7 @@ if (!defined('SETAP_BASE_SCRIPTS_LOADED')) {
             if (logoutLink) {
                 logoutLink.addEventListener('click', window.SETAP.confirmLogout);
             }
-            
+
             console.log('SETAP Base Scripts cargados correctamente');
         });
     </script>

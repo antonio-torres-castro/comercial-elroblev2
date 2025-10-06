@@ -185,12 +185,12 @@ class ValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = ?";
             $params = [$username];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -208,12 +208,12 @@ class ValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
             $params = [$email];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -232,12 +232,12 @@ class ValidationService
             $cleanRut = preg_replace('/[^0-9kK]/', '', $rut);
             $sql = "SELECT COUNT(*) FROM personas WHERE rut = ?";
             $params = [$cleanRut];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND usuario_id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -245,6 +245,94 @@ class ValidationService
             error_log("Error verificando RUT: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Validar datos de usuario con sanitización y respuesta completa
+     * (Versión completa para casos que requieren datos sanitizados)
+     */
+    public function validateUserDataComplete(array $data): array
+    {
+        $errors = [];
+        $sanitizedData = [];
+
+        // Validar y sanitizar nombre
+        if (empty($data['nombre'])) {
+            $errors['nombre'] = 'El nombre es requerido';
+        } else {
+            $sanitizedData['nombre'] = Security::sanitizeInput($data['nombre']);
+        }
+
+        // Validar y sanitizar RUT
+        if (empty($data['rut'])) {
+            $errors['rut'] = 'El RUT es requerido';
+        } else {
+            $sanitizedData['rut'] = Security::sanitizeInput($data['rut']);
+            if (!Security::validateRut($sanitizedData['rut'])) {
+                $errors['rut'] = 'El RUT no es válido';
+            } elseif (!$this->isRutAvailable($sanitizedData['rut'])) {
+                $errors['rut'] = 'El RUT ya está registrado';
+            }
+        }
+
+        // Validar y sanitizar email
+        if (empty($data['email'])) {
+            $errors['email'] = 'El email es requerido';
+        } else {
+            $sanitizedData['email'] = Security::sanitizeInput($data['email']);
+            if (!Security::validateEmail($sanitizedData['email'])) {
+                $errors['email'] = 'El email no es válido';
+            } elseif (!$this->isEmailAvailable($sanitizedData['email'])) {
+                $errors['email'] = 'El email ya está registrado';
+            }
+        }
+
+        // Validar y sanitizar nombre de usuario
+        if (empty($data['nombre_usuario'])) {
+            $errors['nombre_usuario'] = 'El nombre de usuario es requerido';
+        } else {
+            $sanitizedData['nombre_usuario'] = Security::sanitizeInput($data['nombre_usuario']);
+            if (!$this->isUsernameAvailable($sanitizedData['nombre_usuario'])) {
+                $errors['nombre_usuario'] = 'El nombre de usuario ya existe';
+            }
+        }
+
+        // Validar contraseña
+        if (empty($data['password'])) {
+            $errors['password'] = 'La contraseña es requerida';
+        } else {
+            $sanitizedData['password'] = $data['password']; // No sanitizar contraseñas
+            $passwordErrors = Security::validatePasswordStrength($data['password']);
+            if (!empty($passwordErrors)) {
+                $errors['password'] = implode(', ', $passwordErrors);
+            }
+        }
+
+        // Validar tipo de usuario
+        if (empty($data['usuario_tipo_id'])) {
+            $errors['usuario_tipo_id'] = 'El tipo de usuario es requerido';
+        } else {
+            $sanitizedData['usuario_tipo_id'] = (int)$data['usuario_tipo_id'];
+        }
+
+        // Sanitizar otros campos si están presentes
+        foreach (['telefono', 'direccion', 'estado_id', 'cliente_id'] as $field) {
+            if (isset($data[$field])) {
+                $sanitizedData[$field] = Security::sanitizeInput($data[$field]);
+            }
+        }
+
+        // Validaciones de lógica de negocio para clientes
+        if (!empty($data['usuario_tipo_id'])) {
+            $clientValidationErrors = $this->clientBusinessLogic->validateClientLogic($sanitizedData);
+            $errors = array_merge($errors, $clientValidationErrors);
+        }
+
+        return [
+            'isValid' => empty($errors),
+            'errors' => $errors,
+            'data' => $sanitizedData
+        ];
     }
 
     /**

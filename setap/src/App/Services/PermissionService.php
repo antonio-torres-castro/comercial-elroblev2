@@ -106,7 +106,7 @@ class PermissionService
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT ut.id, ut.nombre 
+                SELECT ut.id, ut.nombre
                 FROM usuarios u
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 WHERE u.id = ?

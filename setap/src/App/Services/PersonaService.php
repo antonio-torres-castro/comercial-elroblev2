@@ -26,7 +26,7 @@ class PersonaService
     {
         try {
             $sql = "
-                INSERT INTO personas (nombre, rut, telefono, direccion, estado_tipo_id, fecha_Creado) 
+                INSERT INTO personas (nombre, rut, telefono, direccion, estado_tipo_id, fecha_Creado)
                 VALUES (?, ?, ?, ?, 1, NOW())
             ";
 
@@ -52,7 +52,7 @@ class PersonaService
     {
         try {
             $sql = "
-                UPDATE personas 
+                UPDATE personas
                 SET nombre = ?, telefono = ?, direccion = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -112,15 +112,15 @@ class PersonaService
             $stmt = $this->db->prepare("SELECT rut FROM clientes WHERE id = ?");
             $stmt->execute([$clientId]);
             $clientRut = $stmt->fetchColumn();
-            
+
             if (!$clientRut) {
                 return false;
             }
-            
+
             // Comparar RUTs limpios
             $cleanPersonRut = $this->cleanRut($personRut);
             $cleanClientRut = $this->cleanRut($clientRut);
-            
+
             return $cleanPersonRut === $cleanClientRut;
         } catch (Exception $e) {
             error_log("Error validando RUT de cliente: " . $e->getMessage());
@@ -135,8 +135,8 @@ class PersonaService
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT COUNT(*) 
-                FROM cliente_contrapartes 
+                SELECT COUNT(*)
+                FROM cliente_contrapartes
                 WHERE persona_id = ? AND cliente_id = ? AND estado_tipo_id != 4
             ");
             $stmt->execute([$personaId, $clientId]);
@@ -203,11 +203,11 @@ class PersonaService
 
         $dv = strtoupper(substr($cleanRut, -1));
         $numero = substr($cleanRut, 0, -1);
-        
+
         // Agregar puntos cada 3 dígitos desde la derecha
         $numero = strrev(chunk_split(strrev($numero), 3, '.'));
         $numero = rtrim($numero, '.');
-        
+
         return $numero . '-' . $dv;
     }
 

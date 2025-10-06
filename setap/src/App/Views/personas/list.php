@@ -135,7 +135,7 @@
                 <form method="GET" action="/personas" class="row align-items-end">
                     <div class="col-md-4">
                         <label for="search" class="form-label">Buscar</label>
-                        <input type="text" class="form-control" name="search" id="search" 
+                        <input type="text" class="form-control" name="search" id="search"
                                value="<?= htmlspecialchars($filters['search'] ?? '') ?>"
                                placeholder="Nombre, RUT o teléfono...">
                     </div>
@@ -144,7 +144,7 @@
                         <select class="form-select" name="estado_tipo_id" id="estado_tipo_id">
                             <option value="">Todos los estados</option>
                             <?php foreach ($estadosTipo as $estado): ?>
-                                <option value="<?= $estado['id'] ?>" 
+                                <option value="<?= $estado['id'] ?>"
                                         <?= ($filters['estado_tipo_id'] ?? '') == $estado['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($estado['nombre']) ?>
                                 </option>
@@ -235,11 +235,11 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="/personas/edit?id=<?= (int)$persona['id'] ?>" 
+                                            <a href="/personas/edit?id=<?= (int)$persona['id'] ?>"
                                                class="btn btn-outline-setap-primary" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <button type="button" class="btn btn-outline-danger" 
+                                            <button type="button" class="btn btn-outline-danger"
                                                     onclick="confirmDelete(<?= (int)$persona['id'] ?>, '<?= htmlspecialchars($persona['nombre']) ?>')"
                                                     title="Eliminar">
                                                 <i class="bi bi-trash"></i>
@@ -288,7 +288,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         function confirmDelete(id, name) {
             document.getElementById('deletePersonaId').value = id;

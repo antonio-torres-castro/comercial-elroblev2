@@ -31,8 +31,8 @@ class FilterService
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
                        c.razon_social as cliente_nombre
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -115,8 +115,8 @@ class FilterService
         try {
             $sql = "
                 SELECT COUNT(*)
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -178,7 +178,7 @@ class FilterService
         try {
             $sql = "
                 SELECT id, razon_social, rut, email, telefono
-                FROM clientes 
+                FROM clientes
                 WHERE estado_tipo_id IN (1, 2)
             ";
 
@@ -209,8 +209,8 @@ class FilterService
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, nombre, descripcion 
-                FROM usuario_tipos 
+                SELECT id, nombre, descripcion
+                FROM usuario_tipos
                 ORDER BY id
             ");
             $stmt->execute();
@@ -228,9 +228,9 @@ class FilterService
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, nombre, descripcion 
-                FROM estado_tipos 
-                WHERE id IN (1, 2, 3, 4) 
+                SELECT id, nombre, descripcion
+                FROM estado_tipos
+                WHERE id IN (1, 2, 3, 4)
                 ORDER BY id
             ");
             $stmt->execute();
@@ -247,13 +247,13 @@ class FilterService
     public function buildFilterParams(array $filters): string
     {
         $params = [];
-        
+
         foreach ($filters as $key => $value) {
             if (!empty($value)) {
                 $params[] = urlencode($key) . '=' . urlencode($value);
             }
         }
-        
+
         return !empty($params) ? '?' . implode('&', $params) : '';
     }
 
@@ -305,8 +305,8 @@ class FilterService
 
             // Usuarios creados en el último mes
             $stmt = $this->db->prepare("
-                SELECT COUNT(*) 
-                FROM usuarios 
+                SELECT COUNT(*)
+                FROM usuarios
                 WHERE fecha_Creado >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
                 AND estado_tipo_id != 4
             ");

@@ -51,7 +51,7 @@ class RateLimiter
 
         $attempts = self::loadAttempts($key);
         $attempts[] = $now;
-        
+
         self::saveAttempts($key, $attempts);
     }
 
@@ -65,7 +65,7 @@ class RateLimiter
         $now = time();
 
         $attempts = self::loadAttempts($key);
-        
+
         // Contar intentos dentro del timeWindow
         $validAttempts = array_filter($attempts, function($timestamp) use ($now, $timeWindow) {
             return ($now - $timestamp) <= $timeWindow;
@@ -84,7 +84,7 @@ class RateLimiter
         $now = time();
 
         $attempts = self::loadAttempts($key);
-        
+
         if (empty($attempts)) {
             return 0;
         }
@@ -92,7 +92,7 @@ class RateLimiter
         // Encontrar el intento más antiguo que aún está en el timeWindow
         $oldestAttempt = min($attempts);
         $timeSinceOldest = $now - $oldestAttempt;
-        
+
         return max(0, $timeWindow - $timeSinceOldest);
     }
 
@@ -103,7 +103,7 @@ class RateLimiter
     {
         $identifier = $identifier ?: self::getIdentifier();
         $key = $action . '_' . $identifier;
-        
+
         self::saveAttempts($key, []);
     }
 
@@ -114,10 +114,10 @@ class RateLimiter
     {
         if (!self::checkLimit($action, $maxAttempts, $timeWindow)) {
             $timeUntilReset = self::getTimeUntilReset($action, $timeWindow);
-            
+
             http_response_code(429); // Too Many Requests
             header('Retry-After: ' . $timeUntilReset);
-            
+
             if (self::isAjaxRequest()) {
                 header('Content-Type: application/json');
                 echo json_encode([
@@ -128,7 +128,7 @@ class RateLimiter
             } else {
                 echo "Demasiados intentos. Intenta nuevamente en {$timeUntilReset} segundos.";
             }
-            
+
             exit;
         }
     }
@@ -165,7 +165,7 @@ class RateLimiter
         // Combinar IP y User Agent para identificar al cliente
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-        
+
         return md5($ip . $userAgent);
     }
 
@@ -180,7 +180,7 @@ class RateLimiter
                     session_start();
                 }
                 return $_SESSION['rate_limit'][$key] ?? [];
-                
+
             case 'file':
                 $file = sys_get_temp_dir() . '/rate_limit_' . md5($key) . '.json';
                 if (file_exists($file)) {
@@ -188,7 +188,7 @@ class RateLimiter
                     return $data['attempts'] ?? [];
                 }
                 return [];
-                
+
             default:
                 return self::$attempts[$key] ?? [];
         }
@@ -206,13 +206,13 @@ class RateLimiter
                 }
                 $_SESSION['rate_limit'][$key] = $attempts;
                 break;
-                
+
             case 'file':
                 $file = sys_get_temp_dir() . '/rate_limit_' . md5($key) . '.json';
                 $data = ['attempts' => $attempts, 'updated' => time()];
                 file_put_contents($file, json_encode($data));
                 break;
-                
+
             default:
                 self::$attempts[$key] = $attempts;
                 break;
@@ -234,7 +234,7 @@ class RateLimiter
      */
     private static function isAjaxRequest(): bool
     {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 
@@ -253,7 +253,7 @@ class RateLimiter
 
         foreach ($files as $file) {
             $data = json_decode(file_get_contents($file), true);
-            
+
             // Eliminar archivos no actualizados en más de 24 horas
             if (isset($data['updated']) && ($now - $data['updated']) > 86400) {
                 unlink($file);

@@ -68,7 +68,7 @@
                     <!-- Información Personal -->
                     <div class="form-section">
                         <h5><i class="bi bi-person"></i> Información Personal</h5>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -78,7 +78,7 @@
                                     <div class="form-text">Formato: 12.345.678-9 o 12345678-9</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="nombre" class="form-label">Nombre Completo <span class="required">*</span></label>
@@ -97,13 +97,13 @@
                                     <div class="form-text">Campo opcional</div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                         <?php foreach ($estadosTipo as $estado): ?>
-                                            <option value="<?= (int)$estado['id'] ?>" 
+                                            <option value="<?= (int)$estado['id'] ?>"
                                                 <?= $estado['id'] == 2 ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($estado['nombre']) ?>
                                             </option>
@@ -138,7 +138,7 @@
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createPersonaForm');
@@ -149,14 +149,14 @@
             // Formatear RUT mientras se escribe
             rutInput.addEventListener('input', function() {
                 let value = this.value.replace(/[^0-9kK]/g, '');
-                
+
                 if (value.length > 1) {
                     let rut = value.slice(0, -1);
                     let dv = value.slice(-1);
-                    
+
                     // Formatear RUT con puntos
                     rut = rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                    
+
                     this.value = rut + '-' + dv.toUpperCase();
                 } else {
                     this.value = value.toUpperCase();
@@ -174,25 +174,25 @@
             function validateRut(rut) {
                 // Remover puntos y guión
                 rut = rut.replace(/[^0-9kK]/g, '');
-                
+
                 if (rut.length < 8) return false;
-                
+
                 let body = rut.slice(0, -1);
                 let dv = rut.slice(-1).toUpperCase();
-                
+
                 // Calcular dígito verificador
                 let sum = 0;
                 let multiplier = 2;
-                
+
                 for (let i = body.length - 1; i >= 0; i--) {
                     sum += parseInt(body[i]) * multiplier;
                     multiplier = multiplier === 7 ? 2 : multiplier + 1;
                 }
-                
+
                 let calculatedDv = 11 - (sum % 11);
                 if (calculatedDv === 11) calculatedDv = '0';
                 if (calculatedDv === 10) calculatedDv = 'K';
-                
+
                 return dv === calculatedDv.toString();
             }
 
@@ -225,7 +225,7 @@
                 // Mostrar indicador de carga
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
-                
+
                 // No deshabilitar los inputs del formulario - esto impide que se envíen los datos
                 // Solo deshabilitar botones adicionales si existen
                 const additionalButtons = form.querySelectorAll('button:not([type="submit"])');
