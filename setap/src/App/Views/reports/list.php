@@ -279,7 +279,7 @@
             const csrfToken = document.createElement('input');
             csrfToken.type = 'hidden';
             csrfToken.name = 'csrf_token';
-            csrfToken.value = '<?= \App\Helpers\Security::generateCsrfToken() ?>';
+            csrfToken.value = '<?= \App\Helpers\Security::getCsrfToken() ?>';
             form.appendChild(csrfToken);
             
             // Agregar tipo de reporte

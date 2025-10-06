@@ -60,7 +60,7 @@
                         <?php endif; ?>
 
                         <form method="POST" action="/tasks/update" id="taskEditForm">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
+                            <?= \App\Helpers\Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$task['id'] ?>">
 
                             <div class="row">

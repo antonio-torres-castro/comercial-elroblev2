@@ -91,7 +91,7 @@ use App\Helpers\Security;
                         <!-- Creación Masiva Tab -->
                         <div class="tab-pane fade show active" id="masivo" role="tabpanel">
                             <form id="form-masivo" class="mt-3">
-                                <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
+                                <?= \App\Helpers\Security::renderCsrfField() ?>
                                 <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
 
                                 <div class="row mb-3">
@@ -187,7 +187,7 @@ use App\Helpers\Security;
                         <!-- Fecha Específica Tab -->
                         <div class="tab-pane fade" id="especifico" role="tabpanel">
                             <form id="form-especifico" class="mt-3">
-                                <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
+                                <?= \App\Helpers\Security::renderCsrfField() ?>
                                 <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
 
                                 <div class="row mb-3">
@@ -227,7 +227,7 @@ use App\Helpers\Security;
                         <!-- Rango de Fechas Tab -->
                         <div class="tab-pane fade" id="rango" role="tabpanel">
                             <form id="form-rango" class="mt-3">
-                                <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
+                                <?= \App\Helpers\Security::renderCsrfField() ?>
                                 <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
 
                                 <div class="row mb-3">
@@ -371,7 +371,7 @@ use App\Helpers\Security;
             </div>
             <form id="edit-holiday-form">
                 <div class="modal-body">
-                    <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::generateCsrfToken() ?>">
+                    <?= \App\Helpers\Security::renderCsrfField() ?>
                     <input type="hidden" name="id" id="edit-holiday-id">
 
                     <div class="mb-3">

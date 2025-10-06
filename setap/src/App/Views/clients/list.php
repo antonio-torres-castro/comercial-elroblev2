@@ -221,7 +221,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <form method="POST" action="/clients/delete" style="display: inline;" id="deleteForm">
-                        <input type="hidden" name="csrf_token" value="<?php echo \App\Helpers\Security::generateCsrfToken(); ?>">
+                        <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deleteClientId">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Eliminar

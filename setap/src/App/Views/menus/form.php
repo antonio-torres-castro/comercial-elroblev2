@@ -52,7 +52,7 @@
                                 <?php endif; ?>
 
                                 <form method="POST" action="<?= $data['menu_id'] ? '/menus/update/' . $data['menu_id'] : '/menus/store' ?>" id="menuForm">
-                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                    <?= \App\Helpers\Security::renderCsrfField() ?>
                                     <?php if ($data['menu_id']): ?>
                                         <input type="hidden" name="id" value="<?= $data['menu_id'] ?>">
                                     <?php endif; ?>

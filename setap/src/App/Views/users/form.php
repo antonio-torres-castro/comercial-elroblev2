@@ -91,7 +91,7 @@ $user = $isEdit ? $data['user'] ?? null : null;
                     <div class="card-body">
                         <form method="POST" action="<?php echo $isEdit ? '/users/update' : '/users/store'; ?>" id="userForm">
                             <!-- CSRF Token -->
-                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(\App\Helpers\Security::generateCsrfToken()); ?>">
+                            <?= \App\Helpers\Security::renderCsrfField() ?>
                             <?php if ($isEdit): ?>
                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($data['user_id']); ?>">
                             <?php endif; ?>

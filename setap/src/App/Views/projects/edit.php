@@ -66,7 +66,7 @@
 
         <!-- Formulario de Edición -->
         <form method="POST" action="/projects/update" id="editProjectForm">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
+            <?= \App\Helpers\Security::renderCsrfField() ?>
             <input type="hidden" name="id" value="<?= (int)$project['id'] ?>">
 
             <div class="row justify-content-center">

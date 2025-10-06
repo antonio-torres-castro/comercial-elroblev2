@@ -61,7 +61,7 @@
 
         <!-- Formulario de Creación -->
         <form method="POST" action="/personas/store" id="createPersonaForm">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
+            <?= \App\Helpers\Security::renderCsrfField() ?>
 
             <div class="row">
                 <div class="col-md-8">

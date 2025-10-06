@@ -48,7 +48,7 @@
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="/clients/store" id="clientForm">
-                                    <input type="hidden" name="csrf_token" value="<?php echo \App\Helpers\Security::generateCsrfToken(); ?>">
+                                    <?= \App\Helpers\Security::renderCsrfField() ?>
 
                                     <!-- Información Básica -->
                                     <h6 class="border-bottom pb-2 mb-3">Información Básica</h6>

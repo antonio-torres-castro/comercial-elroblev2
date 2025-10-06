@@ -313,7 +313,7 @@ use App\Helpers\Security;
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <form method="POST" action="/users/delete" style="display: inline;" id="deleteUserForm">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
+                        <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deleteUserId">
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </form>

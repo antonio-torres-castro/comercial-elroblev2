@@ -109,7 +109,7 @@
                         <?php endif; ?>
 
                         <form method="POST" action="/users/update" id="userEditForm">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
+                            <?= \App\Helpers\Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$userToEdit['id'] ?>">
 
                             <!-- Vista previa del avatar -->

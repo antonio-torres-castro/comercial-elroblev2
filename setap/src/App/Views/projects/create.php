@@ -66,7 +66,7 @@
 
         <!-- Formulario de Creación -->
         <form method="POST" action="/projects/store" id="createProjectForm">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Helpers\Security::generateCsrfToken()) ?>">
+            <?= \App\Helpers\Security::renderCsrfField() ?>
 
             <div class="row justify-content-center">
                 <div class="col-lg-8">
