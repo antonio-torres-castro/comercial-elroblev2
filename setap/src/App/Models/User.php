@@ -150,38 +150,34 @@ class User
     }
 
     /**
-     * Actualizar usuario
+     * Actualizar usuario - solo permite cambiar persona_id y cliente_id según tipo de usuario
      */
     public function update(int $id, array $data): bool
     {
         try {
             $this->db->beginTransaction();
 
-            // Actualizar persona
-            $personaSql = "
-                UPDATE personas p
-                INNER JOIN usuarios u ON p.id = u.persona_id
-                SET p.nombre = ?, p.telefono = ?, p.direccion = ?, p.fecha_modificacion = NOW()
-                WHERE u.id = ?
-            ";
-
-            $stmt = $this->db->prepare($personaSql);
-            $stmt->execute([
-                $data['nombre'],
-                $data['telefono'] ?? '',
-                $data['direccion'] ?? '',
-                $id
-            ]);
-
             // Determinar cliente_id para la actualización
             $clienteId = $this->determineClienteId($data);
 
-            // Actualizar usuario
+            // Solo actualizar campos específicos del usuario - NO datos de persona
             $usuarioSql = "
                 UPDATE usuarios 
-                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, fecha_modificacion = NOW()
+                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, 
+                    fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
+
+            // Validar que la nueva persona esté disponible si se está cambiando
+            if (isset($data['persona_id'])) {
+                $currentPersonaId = $this->getCurrentPersonaId($id);
+                if ($currentPersonaId != $data['persona_id']) {
+                    // Verificar que la nueva persona esté disponible
+                    if (!$this->isPersonaAvailableForUser($data['persona_id'])) {
+                        throw new Exception('La persona seleccionada ya tiene un usuario asociado');
+                    }
+                }
+            }
 
             $stmt = $this->db->prepare($usuarioSql);
             $stmt->execute([
@@ -189,6 +185,9 @@ class User
                 $data['usuario_tipo_id'],
                 $clienteId,
                 $data['estado_tipo_id'] ?? 1,
+                $data['fecha_inicio'] ?? null,
+                $data['fecha_termino'] ?? null,
+                $data['persona_id'] ?? $this->getCurrentPersonaId($id),
                 $id
             ]);
 
@@ -202,6 +201,21 @@ class User
             $this->db->rollBack();
             error_log("Error en User::update: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Obtener persona_id actual de un usuario
+     */
+    private function getCurrentPersonaId(int $userId): ?int
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT persona_id FROM usuarios WHERE id = ?");
+            $stmt->execute([$userId]);
+            return $stmt->fetchColumn() ?: null;
+        } catch (PDOException $e) {
+            error_log("Error obteniendo persona_id actual: " . $e->getMessage());
+            return null;
         }
     }
 
@@ -489,16 +503,26 @@ class User
     /**
      * Verificar si una persona está disponible para crear usuario
      */
-    public function isPersonaAvailableForUser(int $personaId): bool
+    public function isPersonaAvailableForUser(int $personaId, ?int $excludeUserId = null): bool
     {
         try {
-            $stmt = $this->db->prepare("
+            $sql = "
                 SELECT COUNT(*) 
                 FROM usuarios u 
                 INNER JOIN personas p ON u.persona_id = p.id
                 WHERE u.persona_id = ? AND p.estado_tipo_id IN (1, 2)
-            ");
-            $stmt->execute([$personaId]);
+            ";
+            
+            $params = [$personaId];
+            
+            // Si se está editando un usuario, excluirlo de la verificación
+            if ($excludeUserId !== null) {
+                $sql .= " AND u.id != ?";
+                $params[] = $excludeUserId;
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (PDOException $e) {
             error_log("Error verificando disponibilidad de persona: " . $e->getMessage());

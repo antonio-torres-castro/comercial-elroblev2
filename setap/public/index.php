@@ -120,6 +120,14 @@ try {
                     $controller->searchPersonas();
                     break;
                     
+                case 'validate-field':
+                    $controller->validateField();
+                    break;
+                    
+                case 'store':
+                    $controller->store();
+                    break;
+                    
                 case '':
                 default:
                     $controller->index();
@@ -634,6 +642,22 @@ try {
                 // Ruta para validaciones de usuario (usada en create.php)
                 $controller = new UserController();
                 $controller->validateUserCheck();
+            } elseif ($action === 'personas') {
+                // Rutas API para personas
+                $controller = new UserController();
+                if (isset($parts[2])) {
+                    switch ($parts[2]) {
+                        case 'available-for-user':
+                            $controller->getAvailablePersonas();
+                            break;
+                        default:
+                            http_response_code(404);
+                            echo json_encode(['error' => 'API endpoint not found']);
+                    }
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'API endpoint not found']);
+                }
             } else {
                 http_response_code(404);
                 echo json_encode(['error' => 'API endpoint not found']);

@@ -75,6 +75,7 @@
                                     <label for="rut" class="form-label">RUT <span class="required">*</span></label>
                                     <input type="text" class="form-control" id="rut" name="rut" required
                                            placeholder="12.345.678-9" maxlength="20">
+                                    <input type="hidden" id="rut_clean" name="rut_clean">
                                     <div class="form-text">Formato: 12.345.678-9 o 12345678-9</div>
                                 </div>
                             </div>
@@ -145,16 +146,25 @@
             const createBtn = document.getElementById('createBtn');
             const rutInput = document.getElementById('rut');
             const nombreInput = document.getElementById('nombre');
+            
+            // Inicializar campo oculto si hay valor inicial en el RUT
+            if (rutInput.value) {
+                let value = rutInput.value.replace(/[^0-9kK]/g, '');
+                document.getElementById('rut_clean').value = value.toLowerCase();
+            }
 
             // Formatear RUT mientras se escribe
             rutInput.addEventListener('input', function() {
                 let value = this.value.replace(/[^0-9kK]/g, '');
+                
+                // Actualizar campo oculto con RUT limpio (solo números y K/k, sin puntos ni guión)
+                document.getElementById('rut_clean').value = value.toLowerCase();
 
                 if (value.length > 1) {
                     let rut = value.slice(0, -1);
                     let dv = value.slice(-1);
 
-                    // Formatear RUT con puntos
+                    // Formatear RUT con puntos para mostrar en el input
                     rut = rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
                     this.value = rut + '-' + dv.toUpperCase();

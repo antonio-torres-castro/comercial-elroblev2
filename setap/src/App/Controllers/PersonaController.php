@@ -150,7 +150,7 @@ class PersonaController extends BaseController
             }
 
             $personaData = [
-                'rut' => Security::sanitizeInput($_POST['rut']),
+                'rut' => Security::sanitizeInput($_POST['rut_clean'] ?? $_POST['rut']),
                 'nombre' => Security::sanitizeInput($_POST['nombre']),
                 'telefono' => Security::sanitizeInput($_POST['telefono'] ?? ''),
                 'direccion' => Security::sanitizeInput($_POST['direccion'] ?? ''),
@@ -269,7 +269,7 @@ class PersonaController extends BaseController
             }
 
             $personaData = [
-                'rut' => Security::sanitizeInput($_POST['rut']),
+                'rut' => Security::sanitizeInput($_POST['rut_clean'] ?? $_POST['rut']),
                 'nombre' => Security::sanitizeInput($_POST['nombre']),
                 'telefono' => Security::sanitizeInput($_POST['telefono'] ?? ''),
                 'direccion' => Security::sanitizeInput($_POST['direccion'] ?? ''),

@@ -111,6 +111,7 @@
                         <form method="POST" action="/users/update" id="userEditForm">
                             <?= \App\Helpers\Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$userToEdit['id'] ?>">
+                            <input type="hidden" name="current_persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
 
                             <!-- Vista previa del avatar -->
                             <div class="text-center mb-4">
@@ -127,32 +128,44 @@
                                 <div class="col-md-6">
                                     <div class="form-section">
                                         <h6><i class="bi bi-person"></i> Información Personal</h6>
+                                        
+                                        <!-- Solo mostrar la información de la persona, sin permitir edición -->
                                         <div class="mb-3">
-                                            <label for="rut" class="form-label">RUT <span class="text-muted">(Solo lectura)</span></label>
-                                            <input type="text" class="form-control" id="rut" name="rut"
+                                            <label class="form-label">RUT de la Persona</label>
+                                            <input type="text" class="form-control" 
                                                 value="<?= htmlspecialchars($userToEdit['rut']) ?>" readonly>
-                                            <div class="invalid-feedback" id="rutFeedback"></div>
+                                            <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre"
-                                                value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?>"
-                                                placeholder="Ej: Juan Pérez González" minlength="3" required>
-                                            <div class="invalid-feedback" id="nombreFeedback"></div>
+                                            <label class="form-label">Nombre Completo</label>
+                                            <input type="text" class="form-control" 
+                                                value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?>" readonly>
+                                            <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="telefono" class="form-label">Teléfono</label>
-                                            <input type="tel" class="form-control" id="telefono" name="telefono"
-                                                value="<?= htmlspecialchars($userToEdit['telefono'] ?? '') ?>"
-                                                placeholder="+56 9 1234 5678">
+                                            <label class="form-label">Teléfono</label>
+                                            <input type="text" class="form-control" 
+                                                value="<?= htmlspecialchars($userToEdit['telefono'] ?? '') ?>" readonly>
+                                            <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="direccion" class="form-label">Dirección</label>
-                                            <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                                placeholder="Dirección completa"><?= htmlspecialchars($userToEdit['direccion'] ?? '') ?></textarea>
+                                            <label class="form-label">Dirección</label>
+                                            <textarea class="form-control" rows="2" readonly><?= htmlspecialchars($userToEdit['direccion'] ?? '') ?></textarea>
+                                            <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
+                                        </div>
+
+                                        <!-- Nuevo campo para cambiar persona asociada -->
+                                        <div class="mb-3">
+                                            <label for="persona_id" class="form-label">Cambiar Persona Asociada</label>
+                                            <select class="form-select" id="persona_id" name="persona_id">
+                                                <option value="<?= (int)$userToEdit['persona_id'] ?>" selected>
+                                                    <?= htmlspecialchars($userToEdit['nombre_completo']) ?> - RUT: <?= htmlspecialchars($userToEdit['rut']) ?>
+                                                </option>
+                                            </select>
+                                            <div class="form-text">Seleccione una persona diferente si necesita cambiar la asociación. Deje la opción actual para mantener la persona actual.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -362,22 +375,225 @@
             // Manejar cambios en el tipo de usuario
             document.getElementById('usuario_tipo_id').addEventListener('change', toggleClientSection);
 
-            // Validar RUT vs Cliente para usuarios tipo 'client'
-            document.getElementById('cliente_id').addEventListener('change', function(e) {
-                const selectedOption = e.target.options[e.target.selectedIndex];
-                const clientRut = selectedOption.getAttribute('data-rut');
+            // Cargar personas disponibles para cambio de asociación
+            const personaSelect = document.getElementById('persona_id');
+            let personasLoaded = false;
+
+            // Cargar personas disponibles inmediatamente al cargar la página
+            loadAvailablePersonas();
+            personasLoaded = true;
+
+            personaSelect.addEventListener('focus', function() {
+                if (!personasLoaded) {
+                    loadAvailablePersonas();
+                    personasLoaded = true;
+                }
+            });
+
+            function loadAvailablePersonas() {
+                fetch('/api/personas/available-for-user?current_user_id=<?= (int)$userToEdit['id'] ?>')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success && data.personas) {
+                            // Mantener la opción actual como primera opción
+                            const currentOption = personaSelect.querySelector('option');
+                            personaSelect.innerHTML = '';
+                            personaSelect.appendChild(currentOption);
+                            
+                            // Agregar personas disponibles
+                            data.personas.forEach(persona => {
+                                const option = document.createElement('option');
+                                option.value = persona.id;
+                                option.textContent = `${persona.nombre} - RUT: ${persona.rut}`;
+                                personaSelect.appendChild(option);
+                            });
+                        } else {
+                            console.error('Error en respuesta:', data.message);
+                            showErrorMessage('Error cargando personas disponibles: ' + (data.message || 'Error desconocido'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error cargando personas:', error);
+                        showErrorMessage('Error de conexión al cargar personas disponibles. Verifique su conexión de red.');
+                    });
+            }
+
+            // Función para mostrar mensajes de error al usuario
+            function showErrorMessage(message) {
+                // Crear o actualizar div de error
+                let errorDiv = document.getElementById('dynamic-error-message');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.id = 'dynamic-error-message';
+                    errorDiv.className = 'alert alert-warning alert-dismissible fade show mt-2';
+                    errorDiv.innerHTML = `
+                        <i class="bi bi-exclamation-triangle"></i> <span class="error-text"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    // Insertar después de los mensajes existentes
+                    const form = document.getElementById('userEditForm');
+                    const firstChild = form.firstElementChild;
+                    form.insertBefore(errorDiv, firstChild);
+                }
+                
+                errorDiv.querySelector('.error-text').textContent = message;
+                errorDiv.style.display = 'block';
+                
+                // Auto-hide después de 8 segundos
+                setTimeout(() => {
+                    if (errorDiv && errorDiv.parentNode) {
+                        errorDiv.style.display = 'none';
+                    }
+                }, 8000);
+            }
+
+            // Validar lógica de negocio según tipo de usuario
+            function validateBusinessLogic() {
+                const clientSelect = document.getElementById('cliente_id');
+                const personaSelect = document.getElementById('persona_id');
                 const userTypeSelect = document.getElementById('usuario_tipo_id');
-                const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim();
-                const rutInput = document.getElementById('rut');
+                
+                const selectedClientOption = clientSelect.options[clientSelect.selectedIndex];
+                const selectedPersonaOption = personaSelect.options[personaSelect.selectedIndex];
+                const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim().toLowerCase();
+                
+                // Limpiar mensajes de validación previos
+                clearValidationMessages();
+                
+                // Validar usuarios tipo 'client'
+                if (userType === 'client') {
+                    if (!clientSelect.value) {
+                        showValidationError('Usuario tipo "client" debe tener un cliente asociado.');
+                        return false;
+                    }
+                    
+                    if (selectedClientOption && selectedPersonaOption) {
+                        const clientRut = selectedClientOption.getAttribute('data-rut');
+                        const personaText = selectedPersonaOption.textContent;
+                        const personaRutMatch = personaText.match(/RUT:\s*([^\s]+)/);
+                        
+                        if (clientRut && personaRutMatch) {
+                            const cleanClientRut = clientRut.replace(/[^0-9kK]/g, '').toLowerCase();
+                            const cleanPersonRut = personaRutMatch[1].replace(/[^0-9kK]/g, '').toLowerCase();
 
-                if (userType.toLowerCase() === 'client' && clientRut && rutInput.value) {
-                    const cleanClientRut = clientRut.replace(/[^0-9kK]/g, '').toLowerCase();
-                    const cleanPersonRut = rutInput.value.replace(/[^0-9kK]/g, '').toLowerCase();
-
-                    if (cleanClientRut !== cleanPersonRut) {
-                        alert('Atención: El RUT de la persona debe coincidir con el RUT del cliente seleccionado para usuarios tipo "client".');
+                            if (cleanClientRut !== cleanPersonRut) {
+                                showValidationError('El RUT de la persona debe coincidir con el RUT del cliente seleccionado para usuarios tipo "client".');
+                                return false;
+                            }
+                        }
                     }
                 }
+                
+                // Validar usuarios tipo 'counterparty'
+                else if (userType === 'counterparty') {
+                    if (!clientSelect.value) {
+                        showValidationError('Usuario tipo "counterparty" debe tener un cliente asociado.');
+                        return false;
+                    }
+                    
+                    // Validar que la persona esté registrada como contraparte del cliente
+                    if (selectedPersonaOption && selectedClientOption) {
+                        // Esta validación se complementa en el servidor
+                        // Aquí podríamos agregar una validación AJAX si fuera necesario
+                        const personaId = selectedPersonaOption.value;
+                        const clienteId = selectedClientOption.value;
+                        
+                        // Mostrar mensaje informativo
+                        if (personaId && clienteId) {
+                            showInfoMessage('Verificando que la persona esté registrada como contraparte del cliente...');
+                        }
+                    }
+                }
+                
+                // Validar usuarios internos (no deben tener cliente)
+                else if (['admin', 'planner', 'supervisor', 'executor'].includes(userType)) {
+                    if (clientSelect.value) {
+                        showValidationError(`Usuario tipo "${userType}" no debe tener cliente asociado.`);
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+
+            // Mostrar mensaje de error de validación
+            function showValidationError(message) {
+                let errorDiv = document.getElementById('validation-error-message');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.id = 'validation-error-message';
+                    errorDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                    errorDiv.innerHTML = `
+                        <i class="bi bi-exclamation-triangle"></i> <span class="error-text"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    // Insertar antes del formulario
+                    const form = document.getElementById('userEditForm');
+                    form.insertBefore(errorDiv, form.firstElementChild);
+                }
+                
+                errorDiv.querySelector('.error-text').textContent = message;
+                errorDiv.style.display = 'block';
+            }
+
+            // Mostrar mensaje informativo
+            function showInfoMessage(message) {
+                let infoDiv = document.getElementById('validation-info-message');
+                if (!infoDiv) {
+                    infoDiv = document.createElement('div');
+                    infoDiv.id = 'validation-info-message';
+                    infoDiv.className = 'alert alert-info alert-dismissible fade show mt-2';
+                    infoDiv.innerHTML = `
+                        <i class="bi bi-info-circle"></i> <span class="info-text"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    // Insertar antes del formulario
+                    const form = document.getElementById('userEditForm');
+                    form.insertBefore(infoDiv, form.firstElementChild);
+                }
+                
+                infoDiv.querySelector('.info-text').textContent = message;
+                infoDiv.style.display = 'block';
+                
+                // Auto-hide después de 5 segundos
+                setTimeout(() => {
+                    if (infoDiv && infoDiv.parentNode) {
+                        infoDiv.style.display = 'none';
+                    }
+                }, 5000);
+            }
+
+            // Limpiar mensajes de validación
+            function clearValidationMessages() {
+                const errorDiv = document.getElementById('validation-error-message');
+                const infoDiv = document.getElementById('validation-info-message');
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+                if (infoDiv) {
+                    infoDiv.style.display = 'none';
+                }
+            }
+
+            // Función de compatibilidad para llamadas existentes
+            function validateClientPersonaRut() {
+                return validateBusinessLogic();
+            }
+
+            // Agregar listeners para validación de negocio
+            document.getElementById('cliente_id').addEventListener('change', validateBusinessLogic);
+            document.getElementById('persona_id').addEventListener('change', validateBusinessLogic);
+            document.getElementById('usuario_tipo_id').addEventListener('change', function() {
+                toggleClientSection();
+                validateBusinessLogic();
             });
 
             // Validación de email en tiempo real
@@ -409,32 +625,40 @@
                 }
             });
 
-            // Actualizar avatar preview
-            document.getElementById('nombre').addEventListener('input', function() {
+            // Actualizar avatar preview cuando cambie la persona
+            document.getElementById('persona_id').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const personaName = selectedOption.textContent.split(' - ')[0];
                 const avatarPreview = document.getElementById('avatarPreview');
-                if (avatarPreview) {
-                    avatarPreview.textContent = this.value.charAt(0).toUpperCase() || 'U';
+                if (avatarPreview && personaName) {
+                    avatarPreview.textContent = personaName.charAt(0).toUpperCase() || 'U';
                 }
             });
 
             // Validación del formulario
             form.addEventListener('submit', function(e) {
-                const nombre = document.getElementById('nombre').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const usuario_tipo_id = document.getElementById('usuario_tipo_id').value;
+                const persona_id = document.getElementById('persona_id').value;
                 const clientSection = document.getElementById('client-selection');
                 const clientSelect = document.getElementById('cliente_id');
 
-                if (!nombre || !email || !usuario_tipo_id) {
+                if (!email || !usuario_tipo_id || !persona_id) {
                     e.preventDefault();
-                    alert('<?= \App\Constants\AppConstants::ERROR_REQUIRED_FIELDS ?>');
+                    alert('Por favor, complete todos los campos requeridos (Email, Tipo de Usuario, Persona).');
                     return;
                 }
 
                 // Validar selección de cliente si es requerida
                 if (clientSection.style.display !== 'none' && clientSelect.required && !clientSelect.value) {
                     e.preventDefault();
-                    alert('<?= \App\Constants\AppConstants::ERROR_CLIENT_REQUIRED ?>');
+                    alert('Debe seleccionar un cliente para este tipo de usuario.');
+                    return;
+                }
+
+                // Validar lógica de negocio (tipos de usuario, clientes, etc.)
+                if (!validateBusinessLogic()) {
+                    e.preventDefault();
                     return;
                 }
 
@@ -442,7 +666,7 @@
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
                     e.preventDefault();
-                    alert('<?= \App\Constants\AppConstants::ERROR_INVALID_EMAIL ?>');
+                    alert('Por favor, ingrese un email válido.');
                     return;
                 }
 

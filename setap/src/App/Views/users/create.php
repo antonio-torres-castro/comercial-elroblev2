@@ -265,7 +265,11 @@
         function loadAvailablePersonas(search = '') {
             const url = `/users/search-personas?search=${encodeURIComponent(search)}`;
             
-            fetch(url)
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
                 .then(response => {
                     // Verificar si la respuesta es exitosa
                     if (!response.ok) {
@@ -430,7 +434,11 @@
         });
 
         function checkEmailAvailability(email) {
-            fetch(`/users/validate-field?field=email&value=${encodeURIComponent(email)}`)
+            fetch(`/users/validate-field?field=email&value=${encodeURIComponent(email)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     const checkDiv = document.getElementById('emailCheck');
@@ -446,7 +454,11 @@
         }
 
         function checkUsernameAvailability(username) {
-            fetch(`/users/validate-field?field=username&value=${encodeURIComponent(username)}`)
+            fetch(`/users/validate-field?field=username&value=${encodeURIComponent(username)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     const checkDiv = document.getElementById('usernameCheck');
@@ -551,6 +563,9 @@
             
             fetch('/users/store', {
                 method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: formData
             })
             .then(response => response.json())

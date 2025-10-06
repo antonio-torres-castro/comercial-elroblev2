@@ -104,7 +104,7 @@ class UserController extends BaseController
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
             $clients = $this->userModel->getAvailableClients();
-
+            
             // Obtener personas disponibles (sin usuario asociado)
             $availablePersonas = $this->userModel->getAvailablePersonas();
 
@@ -259,7 +259,7 @@ class UserController extends BaseController
     {
         // Establecer header JSON
         header('Content-Type: application/json');
-
+        
         try {
             $currentUser = $this->getCurrentUser();
 
@@ -490,7 +490,7 @@ class UserController extends BaseController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
-
+            
             // Obtener clientes para la asignación
             $clients = $this->userModel->getAvailableClients();
 
@@ -542,6 +542,12 @@ class UserController extends BaseController
                 return;
             }
 
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                Security::redirect("/users/edit?id={$id}&error=Token de seguridad inválido");
+                return;
+            }
+
             // Validar datos usando ValidationService
             $errors = $this->validationService->validateUserDataForUpdate($_POST, $id);
 
@@ -551,9 +557,17 @@ class UserController extends BaseController
                 return;
             }
 
+            // Validaciones adicionales para la actualización
+            $additionalErrors = $this->validateUserUpdateSpecific($_POST, $id);
+            if (!empty($additionalErrors)) {
+                $errorMsg = implode(', ', $additionalErrors);
+                Security::redirect("/users/edit?id={$id}&error=" . urlencode($errorMsg));
+                return;
+            }
+
             // Si no hay errores, usar los datos del POST directamente
             $userData = $_POST;
-
+            
             // Agregar campos adicionales que no están en la validación estándar
             $userData['estado_tipo_id'] = (int)($_POST['estado_tipo_id'] ?? 1);
             $userData['fecha_inicio'] = !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null;
@@ -561,6 +575,10 @@ class UserController extends BaseController
 
             // Actualizar usuario
             if ($this->userModel->update($id, $userData)) {
+                Security::logSecurityEvent('user_updated', [
+                    'user_id' => $id,
+                    'updated_by' => $_SESSION['username']
+                ]);
                 Security::redirect("/users?success=Usuario actualizado correctamente");
             } else {
                 Security::redirect("/users/edit?id={$id}&error=Error al actualizar el usuario");
@@ -769,7 +787,7 @@ class UserController extends BaseController
             // Configurar headers para respuesta JSON
             header('Content-Type: application/json');
             header('Cache-Control: no-cache, must-revalidate');
-
+            
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
@@ -834,4 +852,170 @@ class UserController extends BaseController
     /**
      * Obtener nombre del tipo de usuario por ID
      */
+    private function getUserTypeName(int $userTypeId): string
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT nombre FROM usuario_tipos WHERE id = ?");
+            $stmt->execute([$userTypeId]);
+            return $stmt->fetchColumn() ?: '';
+        } catch (Exception $e) {
+            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
+     * Validaciones específicas para actualización de usuario
+     */
+    private function validateUserUpdateSpecific(array $data, int $userId): array
+    {
+        $errors = [];
+
+        try {
+            // Validar que si se cambia persona_id, la nueva persona esté disponible
+            if (isset($data['persona_id'])) {
+                $currentUserData = $this->userModel->getById($userId);
+                if (!$currentUserData) {
+                    $errors[] = 'Usuario no encontrado';
+                    return $errors;
+                }
+
+                $newPersonaId = (int)$data['persona_id'];
+                $currentPersonaId = (int)$currentUserData['persona_id'];
+
+                // Si se está cambiando la persona
+                if ($newPersonaId !== $currentPersonaId) {
+                    // Verificar que la nueva persona esté disponible (excluyendo el usuario actual)
+                    if (!$this->userModel->isPersonaAvailableForUser($newPersonaId, $userId)) {
+                        $errors[] = 'La persona seleccionada ya tiene un usuario asociado';
+                    }
+                }
+            }
+
+            // Validar reglas de negocio según tipo de usuario
+            if (isset($data['usuario_tipo_id'])) {
+                $userType = $this->getUserTypeNameById((int)$data['usuario_tipo_id']);
+                
+                // Validar usuarios tipo 'client'
+                if ($userType === 'client') {
+                    if (empty($data['cliente_id'])) {
+                        $errors[] = 'Usuario tipo client debe tener un cliente asociado';
+                    } else {
+                        // Validar que el RUT de la persona coincida con el RUT del cliente
+                        $personaId = isset($data['persona_id']) ? (int)$data['persona_id'] : null;
+                        if ($personaId) {
+                            $persona = $this->userModel->getPersonaById($personaId);
+                            if ($persona && !$this->userModel->validateClientUserRut($persona['rut'], (int)$data['cliente_id'])) {
+                                $errors[] = 'El RUT de la persona debe coincidir con el RUT del cliente';
+                            }
+                        }
+                    }
+                }
+
+                // Validar usuarios tipo 'counterparty'
+                if ($userType === 'counterparty') {
+                    if (empty($data['cliente_id'])) {
+                        $errors[] = 'Usuario tipo counterparty debe tener un cliente asociado';
+                    } else {
+                        // Validar que la persona esté registrada como contraparte del cliente
+                        $personaId = isset($data['persona_id']) ? (int)$data['persona_id'] : null;
+                        if ($personaId && !$this->userModel->validateCounterpartyExists($personaId, (int)$data['cliente_id'])) {
+                            $errors[] = 'La persona debe estar registrada como contraparte del cliente seleccionado';
+                        }
+                    }
+                }
+
+                // Validar usuarios internos (no deben tener cliente_id)
+                if (in_array($userType, ['admin', 'planner', 'supervisor', 'executor'])) {
+                    if (!empty($data['cliente_id'])) {
+                        $errors[] = "Usuario tipo $userType no debe tener cliente asociado";
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error en validación específica de usuario: " . $e->getMessage());
+            $errors[] = 'Error en validación del usuario';
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Obtener nombre del tipo de usuario por ID (para validaciones)
+     */
+    private function getUserTypeNameById(int $userTypeId): string
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT nombre FROM usuario_tipos WHERE id = ?");
+            $stmt->execute([$userTypeId]);
+            return strtolower($stmt->fetchColumn() ?: '');
+        } catch (Exception $e) {
+            error_log("Error obteniendo nombre de tipo de usuario: " . $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
+     * API: Obtener personas disponibles para asociar a usuarios
+     */
+    public function getAvailablePersonas()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                return;
+            }
+
+            $currentUserId = (int)($_GET['current_user_id'] ?? 0);
+            $search = $_GET['search'] ?? '';
+
+            // Obtener personas disponibles (sin usuario asociado) o la persona actual del usuario
+            $personas = $this->userModel->getAvailablePersonas($search);
+            
+            // Si estamos editando un usuario, incluir su persona actual aunque tenga usuario asociado
+            if ($currentUserId > 0) {
+                $currentUserData = $this->userModel->getById($currentUserId);
+                if ($currentUserData) {
+                    // Verificar si la persona actual no está ya en la lista de disponibles
+                    $personaExists = false;
+                    foreach ($personas as $persona) {
+                        if ($persona['id'] == $currentUserData['persona_id']) {
+                            $personaExists = true;
+                            break;
+                        }
+                    }
+                    
+                    // Si no está en la lista, agregarla al principio
+                    if (!$personaExists) {
+                        $currentPersona = [
+                            'id' => $currentUserData['persona_id'],
+                            'rut' => $currentUserData['rut'],
+                            'nombre' => $currentUserData['nombre_completo'],
+                            'telefono' => $currentUserData['telefono'],
+                            'direccion' => $currentUserData['direccion']
+                        ];
+                        array_unshift($personas, $currentPersona);
+                    }
+                }
+            }
+
+            echo json_encode([
+                'success' => true,
+                'personas' => $personas
+            ]);
+        } catch (Exception $e) {
+            error_log("Error en UserController::getAvailablePersonas: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+        }
+    }
+
 }

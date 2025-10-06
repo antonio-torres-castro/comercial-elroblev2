@@ -282,8 +282,30 @@ class AuthHelper
      */
     public static function isAjaxRequest(): bool
     {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        // Verificar header X-Requested-With (XMLHttpRequest y fetch con header manual)
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            return true;
+        }
+        
+        // Verificar Content-Type para requests fetch que esperan JSON
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        
+        // Si el cliente espera JSON, probablemente es AJAX
+        if (strpos($accept, 'application/json') !== false) {
+            return true;
+        }
+        
+        // Si es una request POST/PUT/DELETE sin redirect, probablemente es AJAX
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if (in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH']) && 
+            !isset($_POST['_redirect']) && 
+            strpos($accept, 'text/html') === false) {
+            return true;
+        }
+        
+        return false;
     }
 
     /**
