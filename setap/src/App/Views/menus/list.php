@@ -192,21 +192,28 @@
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm"
-                                                                            title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>"
-                                                                            onclick="toggleMenuStatus(<?php echo $menu['id']; ?>, <?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>)">
-                                                                        <i class="bi bi-<?php echo ($menu['estado_tipo_id'] == 2) ? 'toggle-on' : 'toggle-off'; ?>"></i>
-                                                                    </button>
+                                                                    <form method="POST" action="/menus/toggle-status" style="display: inline-block;" class="toggle-status-form" onsubmit="return confirmToggleStatus(this, '<?php echo ($menu['estado_tipo_id'] == 2) ? 'desactivar' : 'activar'; ?>')">
+                                                                        <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
+                                                                        <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
+                                                                        <input type="hidden" name="status" value="<?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>">
+                                                                        <button type="submit"
+                                                                                class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm"
+                                                                                title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>">
+                                                                            <i class="bi bi-<?php echo ($menu['estado_tipo_id'] == 2) ? 'toggle-on' : 'toggle-off'; ?>"></i>
+                                                                        </button>
+                                                                    </form>
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Delete') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-danger btn-sm"
-                                                                            title="Eliminar"
-                                                                            onclick="deleteMenu(<?php echo $menu['id']; ?>)">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
+                                                                    <form method="POST" action="/menus/delete" style="display: inline-block;" class="delete-menu-form" onsubmit="return confirmDeleteMenu(this, '<?php echo htmlspecialchars($menu['nombre']); ?>')">
+                                                                        <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
+                                                                        <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
+                                                                        <button type="submit"
+                                                                                class="btn btn-outline-danger btn-sm"
+                                                                                title="Eliminar">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </form>
                                                                 <?php endif; ?>
                                                             </div>
                                                         </td>
@@ -290,71 +297,26 @@
             new bootstrap.Modal(document.getElementById('menuDetailsModal')).show();
         }
 
-        function toggleMenuStatus(menuId, newStatus) {
-            const statusNames = {
-                2: 'activar',
-                3: 'desactivar'
-            };
-            const action = statusNames[newStatus] || 'cambiar estado de';
-
+        function confirmToggleStatus(form, action) {
             if (confirm(`¿Está seguro que desea ${action} este menú?`)) {
-                // Obtener el token CSRF
-                const csrfToken = '<?= \App\Helpers\Security::getCsrfToken() ?>';
-
-                // Crear formulario para envío
-                const formData = new FormData();
-                formData.append('id', menuId);
-                formData.append('status', newStatus);
-                formData.append('csrf_token', csrfToken);
-
-                fetch('/menus/toggle-status', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Recargar la página para mostrar los cambios
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (data.message || 'No se pudo cambiar el estado'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error de conexión al cambiar el estado');
-                });
+                // Deshabilitar botón para evitar múltiples envíos
+                const button = form.querySelector('button[type="submit"]');
+                button.disabled = true;
+                button.innerHTML = '<i class="bi bi-clock"></i>';
+                return true;
             }
+            return false;
         }
 
-        function deleteMenu(menuId) {
-            if (confirm('¿Está seguro que desea eliminar este menú? Esta acción no se puede deshacer.')) {
-                // Obtener el token CSRF
-                const csrfToken = '<?= \App\Helpers\Security::getCsrfToken() ?>';
-
-                // Crear formulario para envío
-                const formData = new FormData();
-                formData.append('id', menuId);
-                formData.append('csrf_token', csrfToken);
-
-                fetch('/menus/delete', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Recargar la página para mostrar los cambios
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (data.message || 'No se pudo eliminar el menú'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error de conexión al eliminar el menú');
-                });
+        function confirmDeleteMenu(form, menuName) {
+            if (confirm(`¿Está seguro que desea eliminar el menú "${menuName}"? Esta acción no se puede deshacer.`)) {
+                // Deshabilitar botón para evitar múltiples envíos
+                const button = form.querySelector('button[type="submit"]');
+                button.disabled = true;
+                button.innerHTML = '<i class="bi bi-trash"></i> Eliminando...';
+                return true;
             }
+            return false;
         }
 
         // Tooltip para botones
