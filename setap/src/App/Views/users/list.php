@@ -242,7 +242,7 @@ use App\Helpers\Security;
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <?php if (\App\Helpers\Security::hasPermission('Read')): ?>
                                                     <button type="button" class="btn btn-outline-info"
-                                                        onclick="viewUser(<?= $user['id'] ?>)"
+                                                        onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_creacion']) ?>')"
                                                         title="Ver detalles">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
@@ -259,6 +259,28 @@ use App\Helpers\Security;
                                                         title="Permisos">
                                                         <i class="bi bi-shield-lock"></i>
                                                     </a>
+                                                    
+                                                    <!-- Botón cambiar contraseña -->
+                                                    <button type="button" class="btn btn-outline-primary"
+                                                        onclick="showChangePasswordModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
+                                                        title="Cambiar contraseña">
+                                                        <i class="bi bi-key"></i>
+                                                    </button>
+                                                    
+                                                    <!-- Toggle status form -->
+                                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                                        <form method="POST" action="/users/toggle-status" style="display: inline-block;" 
+                                                              onsubmit="return confirmToggleUserStatus(this, '<?= $user['estado_tipo_id'] == 1 ? 'desactivar' : 'activar' ?>')">
+                                                            <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
+                                                            <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                                            <input type="hidden" name="new_status" value="<?= $user['estado_tipo_id'] == 1 ? '2' : '1' ?>">
+                                                            <button type="submit" 
+                                                                    class="btn btn-outline-<?= $user['estado_tipo_id'] == 1 ? 'secondary' : 'success' ?>"
+                                                                    title="<?= $user['estado_tipo_id'] == 1 ? 'Desactivar' : 'Activar' ?>">
+                                                                <i class="bi bi-power"></i>
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
 
                                                 <?php if (\App\Helpers\Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
@@ -330,25 +352,36 @@ use App\Helpers\Security;
                     <h5 class="modal-title">Cambiar Contraseña</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="passwordForm">
-                        <input type="hidden" id="passwordUserId">
+                <form method="POST" action="/users/change-password" id="passwordForm" onsubmit="return validatePasswordForm()">
+                    <div class="modal-body">
+                        <?= \App\Helpers\Security::renderCsrfField() ?>
+                        <input type="hidden" name="user_id" id="passwordUserId">
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Cambiar contraseña del usuario: <strong id="passwordUserName"></strong>
+                        </div>
+                        
                         <div class="mb-3">
-                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="newPassword"
+                            <label for="newPassword" class="form-label">Nueva Contraseña *</label>
+                            <input type="password" class="form-control" name="new_password" id="newPassword"
                                 placeholder="Mínimo 6 caracteres" minlength="6" required>
+                            <div class="invalid-feedback" id="newPasswordFeedback"></div>
                         </div>
                         <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <label for="confirmPassword" class="form-label">Confirmar Contraseña *</label>
                             <input type="password" class="form-control" id="confirmPassword"
                                 placeholder="Repite la nueva contraseña" minlength="6" required>
+                            <div class="invalid-feedback" id="confirmPasswordFeedback"></div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-setap-primary" onclick="savePassword()">Cambiar Contraseña</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-setap-primary">
+                            <i class="bi bi-key"></i> Cambiar Contraseña
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
         </main>
@@ -400,120 +433,58 @@ use App\Helpers\Security;
             });
         }
 
-        function viewUser(userId) {
+        function showUserDetailsModal(userId, userName, email, statusId, fechaCreacion) {
             const modal = new bootstrap.Modal(document.getElementById('userModal'));
             const modalBody = document.getElementById('userModalBody');
-
-            modalBody.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
-            modal.show();
-
-            // Cargar detalles del usuario via AJAX
-            fetch(`/api/users/details?id=${userId}`)
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
-                    return response.text().then(text => {
-                        console.log('Response text:', text);
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            console.error('JSON parse error:', e);
-                            throw new Error('Invalid JSON response: ' + text);
-                        }
-                    });
-                })
-                .then(data => {
-                    console.log('Parsed data:', data);
-                    if (data.success) {
-                        const user = data.user;
-                        modalBody.innerHTML = `
-                            <div class="row">
-                                <div class="col-md-4 text-center">
-                                    <div class="user-avatar-large mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                                        ${user.nombre_completo.charAt(0).toUpperCase()}
-                                    </div>
-                                    <h5 class="mb-1">${user.nombre_completo}</h5>
-                                    <p class="text-muted mb-3">@${user.nombre_usuario}</p>
-                                    <span class="badge ${user.estado_tipo_id == 2 ? 'bg-success' : 'bg-secondary'} role-badge">
-                                        ${user.estado || 'Sin estado'}
-                                    </span>
-                                </div>
-                                <div class="col-md-8">
-                                    <h6 class="fw-bold mb-3"><i class="bi bi-person-badge"></i> Información Personal</h6>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>RUT:</strong></div>
-                                        <div class="col-sm-8">${user.rut || 'No especificado'}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Email:</strong></div>
-                                        <div class="col-sm-8">${user.email}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Teléfono:</strong></div>
-                                        <div class="col-sm-8">${user.telefono || 'No especificado'}</div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-sm-4"><strong>Dirección:</strong></div>
-                                        <div class="col-sm-8">${user.direccion || 'No especificada'}</div>
-                                    </div>
-
-                                    <h6 class="fw-bold mb-3"><i class="bi bi-shield-check"></i> Información del Sistema</h6>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Rol:</strong></div>
-                                        <div class="col-sm-8">
-                                            <span class="badge bg-primary role-badge">${user.rol}</span>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Fecha de Registro:</strong></div>
-                                        <div class="col-sm-8">${new Date(user.fecha_Creado).toLocaleDateString('es-ES')}</div>
-                                    </div>
-                                    ${user.fecha_inicio ? `
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Fecha de Inicio:</strong></div>
-                                        <div class="col-sm-8">${new Date(user.fecha_inicio).toLocaleDateString('es-ES')}</div>
-                                    </div>
-                                    ` : ''}
-                                    ${user.fecha_termino ? `
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Fecha de Término:</strong></div>
-                                        <div class="col-sm-8">${new Date(user.fecha_termino).toLocaleDateString('es-ES')}</div>
-                                    </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-outline-setap-primary btn-sm" onclick="editUser(${userId})">
-                                    <i class="bi bi-pencil"></i> Editar
-                                </button>
-                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="changePassword(${userId})">
-                                    <i class="bi bi-key"></i> Cambiar Contraseña
-                                </button>
-                                <button type="button" class="btn ${user.estado_tipo_id == 1 ? 'btn-outline-secondary' : 'btn-outline-success'} btn-sm"
-                                        onclick="toggleUserStatus(${userId}, ${user.estado_tipo_id})">
-                                    <i class="bi bi-power"></i> ${user.estado_tipo_id == 1 ? 'Desactivar' : 'Activar'}
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        modalBody.innerHTML = `
-                            <div class="alert alert-danger">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                Error al cargar los detalles del usuario: ${data.message || 'Error desconocido'}
-                            </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    modalBody.innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            Error de conexión: ${error.message}
+            
+            const statusText = statusId == 2 ? 'Activo' : 'Inactivo';
+            const statusClass = statusId == 2 ? 'bg-success' : 'bg-secondary';
+            
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="user-avatar-large mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            ${userName.charAt(0).toUpperCase()}
                         </div>
-                    `;
-                });
+                        <h5 class="mb-1">@${userName}</h5>
+                        <p class="text-muted mb-3">${email}</p>
+                        <span class="badge ${statusClass} role-badge">
+                            ${statusText}
+                        </span>
+                    </div>
+                    <div class="col-md-8">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-person-badge"></i> Información del Usuario</h6>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Usuario:</strong></div>
+                            <div class="col-sm-8">${userName}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Email:</strong></div>
+                            <div class="col-sm-8">${email}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Estado:</strong></div>
+                            <div class="col-sm-8"><span class="badge ${statusClass}">${statusText}</span></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Fecha de Registro:</strong></div>
+                            <div class="col-sm-8">${new Date(fechaCreacion).toLocaleDateString('es-ES')}</div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="/users/edit?id=${userId}" class="btn btn-outline-setap-primary btn-sm">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <button type="button" class="btn btn-outline-warning btn-sm" 
+                            onclick="bootstrap.Modal.getInstance(document.getElementById('userModal')).hide(); showChangePasswordModal(${userId}, '${userName}');">
+                        <i class="bi bi-key"></i> Cambiar Contraseña
+                    </button>
+                </div>
+            `;
+            
+            modal.show();
         }
 
         function deleteUser(userId, userName) {
@@ -597,43 +568,64 @@ use App\Helpers\Security;
             }
         }
 
-        function savePassword() {
-            const userId = document.getElementById('passwordUserId').value;
+        function showChangePasswordModal(userId, userName) {
+            document.getElementById('passwordUserId').value = userId;
+            document.getElementById('passwordUserName').textContent = userName;
+            
+            // Limpiar campos
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Limpiar validaciones
+            const form = document.getElementById('passwordForm');
+            form.classList.remove('was-validated');
+            
+            const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+            modal.show();
+        }
+        
+        function validatePasswordForm() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-
+            
+            // Limpiar validaciones anteriores
+            const newPasswordInput = document.getElementById('newPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const newPasswordFeedback = document.getElementById('newPasswordFeedback');
+            const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
+            
+            let isValid = true;
+            
+            // Validar longitud de contraseña
             if (newPassword.length < 6) {
-                alert('La contraseña debe tener al menos 6 caracteres');
-                return;
+                newPasswordInput.classList.add('is-invalid');
+                newPasswordFeedback.textContent = 'La contraseña debe tener al menos 6 caracteres';
+                isValid = false;
+            } else {
+                newPasswordInput.classList.remove('is-invalid');
+                newPasswordInput.classList.add('is-valid');
+                newPasswordFeedback.textContent = '';
             }
-
+            
+            // Validar coincidencia de contraseñas
             if (newPassword !== confirmPassword) {
-                alert('Las contraseñas no coinciden');
-                return;
+                confirmPasswordInput.classList.add('is-invalid');
+                confirmPasswordFeedback.textContent = 'Las contraseñas no coinciden';
+                isValid = false;
+            } else if (confirmPassword.length >= 6) {
+                confirmPasswordInput.classList.remove('is-invalid');
+                confirmPasswordInput.classList.add('is-valid');
+                confirmPasswordFeedback.textContent = '';
             }
-
-            const formData = new FormData();
-            formData.append('user_id', userId);
-            formData.append('new_password', newPassword);
-
-            fetch('/users/change-password', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
-                        modal.hide();
-                        alert('Contraseña cambiada exitosamente');
-                    } else {
-                        alert('Error al cambiar la contraseña: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error de conexión al servidor');
-                });
+            
+            if (isValid) {
+                // Deshabilitar botón para evitar múltiples envíos
+                const submitButton = document.querySelector('#passwordForm button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="bi bi-clock"></i> Cambiando...';
+            }
+            
+            return isValid;
         }
 
         // Auto-hide alerts after 5 seconds

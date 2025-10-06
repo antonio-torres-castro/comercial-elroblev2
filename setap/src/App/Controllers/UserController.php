@@ -731,14 +731,24 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                $this->redirectToLogin();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
-                http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->redirectWithError('/users', 'Sin permisos para esta acción');
+                return;
+            }
+
+            // Verificar método POST
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectWithError('/users', 'Método no permitido');
+                return;
+            }
+
+            // Verificar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError('/users', 'Token de seguridad inválido');
                 return;
             }
 
@@ -746,25 +756,26 @@ class UserController extends BaseController
             $newStatus = (int)($_POST['new_status'] ?? 0);
 
             if (!$userId || !in_array($newStatus, [1, 2])) {
-                echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
+                $this->redirectWithError('/users', 'Datos inválidos');
                 return;
             }
 
             // No permitir desactivar el propio usuario
             if ($userId == $currentUser['id']) {
-                echo json_encode(['success' => false, 'message' => 'No puedes cambiar tu propio estado']);
+                $this->redirectWithError('/users', 'No puedes cambiar tu propio estado');
                 return;
             }
 
             $success = $this->userModel->updateStatus($userId, $newStatus);
             if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Estado actualizado correctamente']);
+                $statusText = $newStatus == 2 ? 'activado' : 'desactivado';
+                $this->redirectWithSuccess('/users', "Usuario $statusText correctamente");
             } else {
-                echo json_encode(['success' => false, 'message' => 'Error al actualizar el estado']);
+                $this->redirectWithError('/users', 'Error al actualizar el estado');
             }
         } catch (Exception $e) {
             error_log("Error en UserController::toggleStatus: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->redirectWithError('/users', 'Error interno del servidor');
         }
     }
 
@@ -777,14 +788,24 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                $this->redirectToLogin();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
-                http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->redirectWithError('/users', 'Sin permisos para esta acción');
+                return;
+            }
+
+            // Verificar método POST
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectWithError('/users', 'Método no permitido');
+                return;
+            }
+
+            // Verificar token CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError('/users', 'Token de seguridad inválido');
                 return;
             }
 
@@ -792,7 +813,7 @@ class UserController extends BaseController
             $newPassword = $_POST['new_password'] ?? '';
 
             if (!$userId || strlen($newPassword) < 6) {
-                echo json_encode(['success' => false, 'message' => 'Datos inválidos o contraseña muy corta']);
+                $this->redirectWithError('/users', 'Datos inválidos o contraseña muy corta (mínimo 6 caracteres)');
                 return;
             }
 
@@ -800,13 +821,13 @@ class UserController extends BaseController
             $success = $this->userModel->updatePassword($userId, $hashedPassword);
 
             if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Contraseña actualizada correctamente']);
+                $this->redirectWithSuccess('/users', 'Contraseña actualizada correctamente');
             } else {
-                echo json_encode(['success' => false, 'message' => 'Error al actualizar la contraseña']);
+                $this->redirectWithError('/users', 'Error al actualizar la contraseña');
             }
         } catch (Exception $e) {
             error_log("Error en UserController::changePassword: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->redirectWithError('/users', 'Error interno del servidor');
         }
     }
 
