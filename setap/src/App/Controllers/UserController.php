@@ -66,7 +66,7 @@ class UserController extends BaseController
             $userTypes = $this->getUserTypes();
 
             // Usar ViewRenderer para renderizar la vista
-            $this->viewRenderer->render('users/list', [
+            echo $this->viewRenderer->render('users/list', [
                 'users' => $users,
                 'userTypes' => $userTypes,
                 'currentUser' => $currentUser
@@ -104,12 +104,12 @@ class UserController extends BaseController
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
             $clients = $this->userModel->getAvailableClients();
-            
+
             // Obtener personas disponibles (sin usuario asociado)
             $availablePersonas = $this->userModel->getAvailablePersonas();
 
             // Usar ViewRenderer para renderizar la vista
-            $this->viewRenderer->render('users/create', [
+            echo $this->viewRenderer->render('users/create', [
                 'userTypes' => $userTypes,
                 'estadosTipo' => $estadosTipo,
                 'clients' => $clients,
@@ -409,7 +409,7 @@ class UserController extends BaseController
             // Verificar permisos para gestión de usuario individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                $this->viewRenderer->render('errors/403');
+                echo $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -440,7 +440,7 @@ class UserController extends BaseController
                 'clients' => $clients
             ];
 
-            $this->viewRenderer->render('users/form', $data);
+            echo $this->viewRenderer->render('users/form', $data);
         } catch (Exception $e) {
             error_log("Error en UserController::show: " . $e->getMessage());
             http_response_code(500);
@@ -464,7 +464,7 @@ class UserController extends BaseController
             // Verificar permisos para edición de usuarios
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                $this->viewRenderer->render('errors/403');
+                echo $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -486,7 +486,7 @@ class UserController extends BaseController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
-            
+
             // Obtener clientes para la asignación
             $clients = $this->userModel->getAvailableClients();
 
@@ -499,7 +499,7 @@ class UserController extends BaseController
                 'success' => $_GET['success'] ?? ''
             ];
 
-            $this->viewRenderer->render('users/edit', $data);
+            echo $this->viewRenderer->render('users/edit', $data);
         } catch (Exception $e) {
             error_log("Error en UserController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -523,7 +523,7 @@ class UserController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                $this->viewRenderer->render('errors/403');
+                echo $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -549,7 +549,7 @@ class UserController extends BaseController
 
             // Si no hay errores, usar los datos del POST directamente
             $userData = $_POST;
-            
+
             // Agregar campos adicionales que no están en la validación estándar
             $userData['estado_tipo_id'] = (int)($_POST['estado_tipo_id'] ?? 1);
             $userData['fecha_inicio'] = !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null;
@@ -584,7 +584,7 @@ class UserController extends BaseController
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                $this->viewRenderer->render('errors/403');
+                echo $this->viewRenderer->render('errors/403');
                 return;
             }
 
@@ -765,7 +765,7 @@ class UserController extends BaseController
             // Configurar headers para respuesta JSON
             header('Content-Type: application/json');
             header('Cache-Control: no-cache, must-revalidate');
-            
+
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
@@ -830,5 +830,4 @@ class UserController extends BaseController
     /**
      * Obtener nombre del tipo de usuario por ID
      */
-
 }

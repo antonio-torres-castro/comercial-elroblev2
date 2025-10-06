@@ -67,7 +67,7 @@ class ClientController extends BaseController
             $statusTypes = $this->clientModel->getStatusTypes();
 
             // Usar ViewRenderer para renderizar la vista
-            $this->viewRenderer->render('clients/list', [
+            echo $this->viewRenderer->render('clients/list', [
                 'user' => $currentUser,
                 'title' => 'Gestión de Clientes',
                 'subtitle' => 'Lista de todos los clientes',
@@ -106,7 +106,7 @@ class ClientController extends BaseController
             $statusTypes = $this->clientModel->getStatusTypes();
 
             // Usar ViewRenderer para renderizar la vista
-            $this->viewRenderer->render('clients/create', [
+            echo $this->viewRenderer->render('clients/create', [
                 'user' => $currentUser,
                 'title' => 'Nuevo Cliente',
                 'subtitle' => 'Crear nuevo cliente',
@@ -156,7 +156,7 @@ class ClientController extends BaseController
                 $statusTypes = $this->clientModel->getStatusTypes();
                 
                 // Usar ViewRenderer para renderizar la vista con errores
-                $this->viewRenderer->render('clients/create', [
+                echo $this->viewRenderer->render('clients/create', [
                     'user' => $currentUser,
                     'title' => 'Nuevo Cliente',
                     'subtitle' => 'Crear nuevo cliente',
@@ -214,7 +214,7 @@ class ClientController extends BaseController
             $counterparties = $this->clientModel->getCounterparties((int)$id);
 
             // Usar ViewRenderer para renderizar la vista
-            $this->viewRenderer->render('clients/edit', [
+            echo $this->viewRenderer->render('clients/edit', [
                 'user' => $currentUser,
                 'title' => 'Editar Cliente',
                 'subtitle' => 'Editando: ' . $client['razon_social'],
@@ -275,7 +275,7 @@ class ClientController extends BaseController
                 $counterparties = $this->clientModel->getCounterparties($id);
                 
                 // Usar ViewRenderer para renderizar la vista con errores
-                $this->viewRenderer->render('clients/edit', [
+                echo $this->viewRenderer->render('clients/edit', [
                     'user' => $currentUser,
                     'title' => 'Editar Cliente',
                     'subtitle' => 'Editando: ' . $client['razon_social'],
@@ -400,7 +400,7 @@ class ClientController extends BaseController
             $clients = $this->clientModel->getAll(); // Para el filtro de clientes
 
             // Usar ViewRenderer para renderizar la vista
-            $this->viewRenderer->render('client-counterparties/list', [
+            echo $this->viewRenderer->render('client-counterparties/list', [
                 'user' => $currentUser,
                 'title' => 'Contrapartes de Clientes',
                 'subtitle' => 'Lista de todas las contrapartes',
@@ -457,7 +457,7 @@ class ClientController extends BaseController
             $formData = $this->counterpartieService->getFormData();
 
             // Usar ViewRenderer para renderizar la vista
-            $this->viewRenderer->render('client-counterparties/form', [
+            echo $this->viewRenderer->render('client-counterparties/form', [
                 'user' => $currentUser,
                 'title' => $id ? 'Editar Contraparte' : 'Nueva Contraparte',
                 'subtitle' => $id ? "Editando contraparte #$id" : 'Crear nueva contraparte',
@@ -511,7 +511,7 @@ class ClientController extends BaseController
                 $formData = $this->counterpartieService->getFormData();
 
                 // Usar ViewRenderer para renderizar la vista con errores
-                $this->viewRenderer->render('client-counterparties/form', [
+                echo $this->viewRenderer->render('client-counterparties/form', [
                     'user' => $currentUser,
                     'title' => 'Nueva Contraparte',
                     'subtitle' => 'Crear nueva contraparte',
@@ -583,7 +583,7 @@ class ClientController extends BaseController
                 $formData = $this->counterpartieService->getFormData();
 
                 // Usar ViewRenderer para renderizar la vista con errores
-                $this->viewRenderer->render('client-counterparties/form', [
+                echo $this->viewRenderer->render('client-counterparties/form', [
                     'user' => $currentUser,
                     'title' => 'Editar Contraparte',
                     'subtitle' => 'Editando contraparte #' . $id,

@@ -42,7 +42,7 @@ class ViewRenderer
     /**
      * Renderizar vista con layout
      */
-    public function render(string $viewPath, array $data = [], string $layout = 'main'): string
+    public function render(string $viewPath, array $data = [], string $layout = ''): string
     {
         try {
             // Combinar datos pasados como parámetro con los datos existentes
@@ -54,6 +54,10 @@ class ViewRenderer
             // Capturar contenido de la vista
             ob_start();
             $fullViewPath = __DIR__ . '/../Views/' . ltrim($viewPath, '/');
+            // Agregar extensión .php si no la tiene
+            if (!str_ends_with($fullViewPath, '.php')) {
+                $fullViewPath .= '.php';
+            }
             
             if (file_exists($fullViewPath)) {
                 include $fullViewPath;
@@ -95,7 +99,7 @@ class ViewRenderer
     /**
      * Renderizar vista con datos específicos
      */
-    public function renderWith(string $viewPath, array $data, string $layout = 'main'): string
+    public function renderWith(string $viewPath, array $data, string $layout = ''): string
     {
         return $this->setData($data)->render($viewPath, [], $layout);
     }
