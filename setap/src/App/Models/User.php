@@ -85,7 +85,7 @@ class User
         try {
             // Determinar cliente_id según tipo de usuario y validaciones de negocio
             $clienteId = $this->determineClienteId($data);
-
+            
             $sql = "
                 INSERT INTO usuarios (
                     persona_id, 
@@ -98,7 +98,7 @@ class User
                     fecha_inicio,
                     fecha_termino,
                     fecha_Creado
-                ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, now())
+                ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, NOW())
             ";
 
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
@@ -165,7 +165,7 @@ class User
             $usuarioSql = "
                 UPDATE usuarios 
                 SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, 
-                    fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = now()
+                    fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
 
@@ -332,7 +332,7 @@ class User
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
-
+            
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (PDOException $e) {
@@ -348,12 +348,12 @@ class User
     private function determineClienteId(array $data): ?int
     {
         $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
-
+        
         // Usuarios de la empresa propietaria NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor'])) {
             return null;
         }
-
+        
         // Usuarios de cliente deben tener cliente_id
         if (in_array($tipoUsuario, ['client', 'counterparty'])) {
             if (empty($data['cliente_id'])) {
@@ -361,7 +361,7 @@ class User
             }
             return (int)$data['cliente_id'];
         }
-
+        
         return null;
     }
 
@@ -390,15 +390,15 @@ class User
             $stmt = $this->db->prepare("SELECT rut FROM clientes WHERE id = ?");
             $stmt->execute([$clientId]);
             $clientRut = $stmt->fetchColumn();
-
+            
             if (!$clientRut) {
                 return false;
             }
-
+            
             // Limpiar y comparar RUTs
             $cleanPersonRut = preg_replace('/[^0-9kK]/', '', strtolower($personRut));
             $cleanClientRut = preg_replace('/[^0-9kK]/', '', strtolower($clientRut));
-
+            
             return $cleanPersonRut === $cleanClientRut;
         } catch (PDOException $e) {
             error_log("Error validando RUT de cliente: " . $e->getMessage());
@@ -480,17 +480,17 @@ class User
                 WHERE u.persona_id IS NULL 
                 AND p.estado_tipo_id IN (1, 2)
             ";
-
+            
             $params = [];
-
+            
             if (!empty($search)) {
                 $sql .= " AND (p.nombre LIKE ? OR p.rut LIKE ?)";
                 $searchParam = "%{$search}%";
                 $params = [$searchParam, $searchParam];
             }
-
+            
             $sql .= " ORDER BY p.nombre";
-
+            
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -521,20 +521,20 @@ class User
                 LEFT JOIN usuarios u ON p.id = u.persona_id
                 WHERE p.estado_tipo_id IN (1, 2)
             ";
-
+            
             $params = [];
-
+            
             // Si no se quieren incluir personas asignadas
             if (!$includeAssigned) {
                 $sql .= " AND u.persona_id IS NULL";
             }
-
+            
             // Si se está editando un usuario, excluir de la verificación de asignación
             if ($excludeUserId !== null) {
                 $sql .= " AND (u.id IS NULL OR u.id = ?)";
                 $params[] = $excludeUserId;
             }
-
+            
             // Aplicar filtro de búsqueda según tipo
             if (!empty($search)) {
                 switch ($searchType) {
@@ -544,13 +544,13 @@ class User
                         $sql .= " AND REPLACE(REPLACE(p.rut, '-', ''), '.', '') LIKE ?";
                         $params[] = "%{$cleanRut}%";
                         break;
-
+                        
                     case 'name':
                         // Buscar por coincidencia parcial en nombre
                         $sql .= " AND p.nombre LIKE ?";
                         $params[] = "%{$search}%";
                         break;
-
+                        
                     case 'all':
                     default:
                         // Buscar en ambos campos
@@ -561,11 +561,11 @@ class User
                         break;
                 }
             }
-
+            
             $sql .= " ORDER BY 
                 CASE WHEN u.id IS NULL THEN 0 ELSE 1 END, -- Personas sin usuario primero
                 p.nombre ASC";
-
+            
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -622,15 +622,15 @@ class User
                 INNER JOIN personas p ON u.persona_id = p.id
                 WHERE u.persona_id = ? AND p.estado_tipo_id IN (1, 2)
             ";
-
+            
             $params = [$personaId];
-
+            
             // Si se está editando un usuario, excluirlo de la verificación
             if ($excludeUserId !== null) {
                 $sql .= " AND u.id != ?";
                 $params[] = $excludeUserId;
             }
-
+            
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -665,30 +665,30 @@ class User
     private function validateBusinessRules(array $data): void
     {
         $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
-
+        
         // Regla: Solo usuarios tipo 'counterparty' (id=6) pueden tener cliente_id
         if ($tipoUsuario === 'counterparty') {
             if (empty($data['cliente_id'])) {
                 throw new Exception("Usuario tipo 'counterparty' debe tener un cliente asociado");
             }
-
+            
             // Verificar que la persona existe como contraparte del cliente
             if (!$this->validateCounterpartyExists($data['persona_id'], $data['cliente_id'])) {
                 throw new Exception("La persona debe estar registrada como contraparte del cliente seleccionado");
             }
         }
-
+        
         // Regla: Usuarios internos (admin, planner, supervisor, executor) NO deben tener cliente_id
         if (in_array($tipoUsuario, ['admin', 'planner', 'supervisor', 'executor']) && !empty($data['cliente_id'])) {
             throw new Exception("Usuario tipo '$tipoUsuario' no debe tener cliente asociado");
         }
-
+        
         // Regla: Usuarios tipo 'client' deben tener cliente_id y el RUT debe coincidir
         if ($tipoUsuario === 'client') {
             if (empty($data['cliente_id'])) {
                 throw new Exception("Usuario tipo 'client' debe tener un cliente asociado");
             }
-
+            
             $persona = $this->getPersonaById($data['persona_id']);
             if (!$persona || !$this->validateClientUserRut($persona['rut'], $data['cliente_id'])) {
                 throw new Exception("El RUT de la persona debe coincidir con el RUT del cliente");
