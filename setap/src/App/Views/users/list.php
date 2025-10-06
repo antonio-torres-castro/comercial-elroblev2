@@ -242,7 +242,7 @@ use App\Helpers\Security;
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <?php if (\App\Helpers\Security::hasPermission('Read')): ?>
                                                     <button type="button" class="btn btn-outline-info"
-                                                        onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_creacion']) ?>')"
+                                                        onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>')"
                                                         title="Ver detalles">
                                                         <i class="bi bi-eye"></i>
                                                     </button>

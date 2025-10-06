@@ -234,7 +234,7 @@ class ReportService
                     ut.nombre as rol,
                     u.fecha_ultimo_acceso,
                     u.activo,
-                    u.fecha_creacion
+                    u.fecha_Creado
                 FROM usuarios u
                 LEFT JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 WHERE 1=1";
@@ -278,7 +278,7 @@ class ReportService
                 $summary['recent_logins']++;
             }
             
-            if ($user['fecha_creacion'] && $user['fecha_creacion'] >= $monthAgo) {
+            if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $monthAgo) {
                 $summary['new_users']++;
             }
         }
