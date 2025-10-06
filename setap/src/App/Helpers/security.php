@@ -32,12 +32,21 @@ class Security
     }
 
     /**
-     * Generar token CSRF
+     * Generar token CSRF (crear uno nuevo)
      * Delegado a CsrfManager
      */
     public static function generateCsrfToken(): string
     {
         return CsrfManager::generateToken();
+    }
+
+    /**
+     * Obtener token CSRF actual (reutiliza si existe)
+     * Delegado a CsrfManager
+     */
+    public static function getCsrfToken(): string
+    {
+        return CsrfManager::getToken();
     }
 
     /**
@@ -53,9 +62,9 @@ class Security
      * Renderizar campo CSRF oculto
      * Delegado a CsrfManager
      */
-    public static function renderCsrfField(): void
+    public static function renderCsrfField(): string
     {
-        CsrfManager::renderField();
+        return CsrfManager::renderField();
     }
 
     /**

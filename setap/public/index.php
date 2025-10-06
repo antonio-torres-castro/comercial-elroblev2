@@ -116,6 +116,10 @@ try {
                     $controller->changePassword();
                     break;
                     
+                case 'search-personas':
+                    $controller->searchPersonas();
+                    break;
+                    
                 case '':
                 default:
                     $controller->index();

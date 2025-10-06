@@ -257,6 +257,9 @@ class UserController extends BaseController
      */
     public function searchPersonas()
     {
+        // Establecer header JSON
+        header('Content-Type: application/json');
+
         try {
             $currentUser = $this->getCurrentUser();
 
@@ -281,6 +284,7 @@ class UserController extends BaseController
             ]);
         } catch (Exception $e) {
             error_log("Error en UserController::searchPersonas: " . $e->getMessage());
+            http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error en búsqueda']);
         }
     }

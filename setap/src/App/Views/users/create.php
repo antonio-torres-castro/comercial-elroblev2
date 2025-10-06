@@ -99,7 +99,7 @@
                 <div class="row justify-content-center">
                     <div class="col-md-10">
                         <form id="userForm" method="POST" action="/users/store">
-                            <?= Security::generateCsrfToken() ?>
+                            <?= Security::renderCsrfField() ?>
                             
                             <!-- Paso 1: Seleccionar Persona -->
                             <div class="form-section">
@@ -266,17 +266,34 @@
             const url = `/users/search-personas?search=${encodeURIComponent(search)}`;
             
             fetch(url)
-                .then(response => response.json())
+                .then(response => {
+                    // Verificar si la respuesta es exitosa
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    // Verificar si la respuesta es JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        // Si no es JSON, obtener el texto para debugging
+                        return response.text().then(text => {
+                            console.error('Respuesta no es JSON:', text.substring(0, 200));
+                            throw new Error('Respuesta del servidor no es JSON válido');
+                        });
+                    }
+                    
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         displayPersonas(data.personas);
                     } else {
-                        document.getElementById('personaResults').innerHTML = '<p class="text-danger">Error cargando personas</p>';
+                        document.getElementById('personaResults').innerHTML = '<p class="text-danger">Error: ' + (data.message || 'Error cargando personas') + '</p>';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('personaResults').innerHTML = '<p class="text-danger">Error de conexión</p>';
+                    document.getElementById('personaResults').innerHTML = '<p class="text-danger">Error de conexión: ' + error.message + '</p>';
                 });
         }
 
