@@ -389,11 +389,8 @@
             });
         }, 5000);
 
-        // Actualizar estadísticas cada 30 segundos
-        setInterval(function() {
-            // Aquí podrías hacer una llamada AJAX para actualizar las estadísticas
-            // sin recargar toda la página
-        }, 30000);
+        // Estadísticas se actualizan al recargar la página
+        // (Eliminado timer automático para optimizar performance)
     </script>
 </body>
 </html>
