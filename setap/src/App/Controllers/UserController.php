@@ -416,59 +416,13 @@ class UserController extends BaseController
     }
 
     /**
-     * Mostrar/editar usuario específico
+     * OBSOLETO: Mostrar/editar usuario específico
+     * Este método ha sido eliminado como parte de la refactorización AJAX.
+     * Ahora las rutas /user/{id} redirigen a /users/edit?id={id} o /users/create
+     * 
+     * @deprecated Eliminado en refactorización AJAX. Usar edit() o create() en su lugar.
      */
-    public function show($id = null)
-    {
-        try {
-            $currentUser = $this->getCurrentUser();
-
-            if (!$currentUser) {
-                $this->redirectToLogin();
-                return;
-            }
-
-            // Verificar permisos para gestión de usuario individual
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
-                http_response_code(403);
-                echo $this->viewRenderer->render('errors/403');
-                return;
-            }
-
-            $userToEdit = null;
-            if ($id) {
-                $userToEdit = $this->userModel->getById((int)$id);
-                if (!$userToEdit) {
-                    http_response_code(404);
-                    echo $this->renderError(AppConstants::ERROR_USER_NOT_FOUND);
-                    return;
-                }
-            }
-
-            // Obtener datos necesarios para el formulario
-            $userTypes = $this->getUserTypes();
-            $estadosTipo = $this->getEstadosTipo();
-            $clients = $this->userModel->getAvailableClients(); // GAP 1 y GAP 2: Obtener clientes
-
-            // Datos para la vista
-            $data = [
-                'user' => $currentUser,
-                'title' => $id ? 'Editar Usuario' : 'Nuevo Usuario',
-                'subtitle' => $id ? "Editando usuario: {$userToEdit['nombre_completo']}" : 'Crear nuevo usuario en el sistema',
-                'user_id' => $id,
-                'user' => $userToEdit,
-                'userTypes' => $userTypes,
-                'estadosTipo' => $estadosTipo,
-                'clients' => $clients
-            ];
-
-            echo $this->viewRenderer->render('users/form', $data);
-        } catch (Exception $e) {
-            error_log("Error en UserController::show: " . $e->getMessage());
-            http_response_code(500);
-            echo AppConstants::ERROR_INTERNAL_SERVER;
-        }
-    }
+    // public function show($id = null) - MÉTODO ELIMINADO - Ver commit history para implementación original
 
     /**
      * Mostrar formulario de edición de usuario

@@ -533,12 +533,34 @@ use App\Helpers\Security;
             window.location.href = `/users/edit?id=${userId}`;
         }
 
+        // Instancia global del modal de contraseña
+        let passwordModalInstance = null;
+
         function changePassword(userId) {
-            const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+            if (!passwordModalInstance) {
+                passwordModalInstance = new bootstrap.Modal(document.getElementById('passwordModal'));
+            }
+            
             document.getElementById('passwordUserId').value = userId;
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
-            modal.show();
+            
+            // Limpiar validaciones
+            const form = document.getElementById('passwordForm');
+            form.classList.remove('was-validated');
+            
+            // Limpiar clases de validación de los inputs
+            document.getElementById('newPassword').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('confirmPassword').classList.remove('is-invalid', 'is-valid');
+            
+            // Resetear botón de envío
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="bi bi-key"></i> Cambiar Contraseña';
+            }
+            
+            passwordModalInstance.show();
         }
 
         function toggleUserStatus(userId, currentStatus) {
@@ -569,6 +591,11 @@ use App\Helpers\Security;
         }
 
         function showChangePasswordModal(userId, userName) {
+            // Inicializar modal si no existe
+            if (!passwordModalInstance) {
+                passwordModalInstance = new bootstrap.Modal(document.getElementById('passwordModal'));
+            }
+            
             document.getElementById('passwordUserId').value = userId;
             document.getElementById('passwordUserName').textContent = userName;
             
@@ -580,8 +607,18 @@ use App\Helpers\Security;
             const form = document.getElementById('passwordForm');
             form.classList.remove('was-validated');
             
-            const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
-            modal.show();
+            // Limpiar clases de validación de los inputs
+            document.getElementById('newPassword').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('confirmPassword').classList.remove('is-invalid', 'is-valid');
+            
+            // Resetear botón de envío
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="bi bi-key"></i> Cambiar Contraseña';
+            }
+            
+            passwordModalInstance.show();
         }
         
         function validatePasswordForm() {
