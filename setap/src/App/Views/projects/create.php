@@ -140,14 +140,17 @@
                             <select class="form-select" id="contraparte_id" name="contraparte_id" required>
                                 <option value="">Seleccionar Contraparte</option>
                                 <?php foreach ($counterparts as $counterpart): ?>
-                                    <option value="<?= (int)$counterpart['id'] ?>">
+                                    <option value="<?= (int)$counterpart['id'] ?>" data-cliente-id="<?= (int)$counterpart['cliente_id'] ?>">
                                         <?= htmlspecialchars($counterpart['nombre']) ?>
                                         - <?= htmlspecialchars($counterpart['cargo']) ?>
                                         (<?= htmlspecialchars($counterpart['cliente_nombre']) ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-                            <div class="form-text">Persona de contacto del cliente para este proyecto.</div>
+                            <div class="form-text">
+                                Persona de contacto del cliente para este proyecto.
+                                <span id="contraparte-filter-info" class="text-muted"></span>
+                            </div>
                         </div>
 
 
@@ -213,29 +216,61 @@
 
             fechaFin.addEventListener('change', validateDates);
 
-            // Filtrar contrapartes por cliente seleccionado
+            // Filtrar contrapartes por cliente seleccionado (sin AJAX)
             clienteSelect.addEventListener('change', function() {
                 const clienteId = this.value;
+                const filterInfo = document.getElementById('contraparte-filter-info');
+                
+                // Resetear selección de contraparte
+                contraparteSelect.value = '';
 
-                // Habilitar todas las opciones primero
+                let visibleCount = 0;
+                let totalCount = 0;
+
+                // Mostrar/ocultar opciones de contraparte según cliente seleccionado
                 Array.from(contraparteSelect.options).forEach(option => {
-                    if (option.value !== '') {
+                    if (option.value === '') {
+                        // Opción predeterminada siempre visible
                         option.style.display = '';
                         option.disabled = false;
+                        return;
+                    }
+
+                    totalCount++;
+                    const contraparteClienteId = option.getAttribute('data-cliente-id');
+                    
+                    if (!clienteId) {
+                        // Sin cliente seleccionado: mostrar todas las contrapartes
+                        option.style.display = '';
+                        option.disabled = false;
+                        visibleCount++;
+                    } else if (contraparteClienteId === clienteId) {
+                        // Contraparte pertenece al cliente seleccionado: mostrar
+                        option.style.display = '';
+                        option.disabled = false;
+                        visibleCount++;
+                    } else {
+                        // Contraparte NO pertenece al cliente: ocultar
+                        option.style.display = 'none';
+                        option.disabled = true;
                     }
                 });
 
-                // Si hay cliente seleccionado, filtrar contrapartes
+                // Actualizar placeholder del select de contrapartes
+                const firstOption = contraparteSelect.querySelector('option[value=""]');
                 if (clienteId) {
-                    // Esta implementación es básica. En un entorno real, podrías hacer
-                    // una llamada AJAX para obtener las contrapartes del cliente seleccionado
-                    // Por ahora, mostramos todas las contrapartes
-
-                    // Resetear selección de contraparte
-                    contraparteSelect.value = '';
+                    const clienteNombre = clienteSelect.options[clienteSelect.selectedIndex].text;
+                    firstOption.textContent = `Seleccionar Contraparte de ${clienteNombre}`;
+                    
+                    // Mostrar información del filtrado
+                    if (visibleCount === 0) {
+                        filterInfo.innerHTML = '<br><small class="text-warning"><i class="bi bi-exclamation-triangle"></i> Este cliente no tiene contrapartes disponibles.</small>';
+                    } else {
+                        filterInfo.innerHTML = `<br><small class="text-success"><i class="bi bi-funnel"></i> Mostrando ${visibleCount} contraparte(s) de este cliente.</small>`;
+                    }
                 } else {
-                    // Sin cliente, resetear selección de contraparte
-                    contraparteSelect.value = '';
+                    firstOption.textContent = 'Seleccionar Contraparte';
+                    filterInfo.innerHTML = `<br><small class="text-info"><i class="bi bi-info-circle"></i> ${totalCount} contrapartes disponibles. Selecciona un cliente para filtrar.</small>`;
                 }
             });
 

@@ -500,7 +500,8 @@ class ProjectController extends BaseController
                        CONCAT(p.nombre, ' (', c.razon_social, ')') as nombre,
                        cc.email,
                        cc.cargo,
-                       c.razon_social as cliente_nombre
+                       c.razon_social as cliente_nombre,
+                       cc.cliente_id
                 FROM cliente_contrapartes cc
                 INNER JOIN personas p ON cc.persona_id = p.id
                 INNER JOIN clientes c ON cc.cliente_id = c.id
