@@ -413,8 +413,12 @@ class PersonaController extends BaseController
         }
 
         // Validar teléfono (opcional)
-        if (!empty($data['telefono']) && strlen($data['telefono']) > 20) {
-            $errors[] = 'El teléfono no puede tener más de 20 caracteres';
+        if (!empty($data['telefono'])) {
+            if (strlen($data['telefono']) > 20) {
+                $errors[] = 'El teléfono no puede tener más de 20 caracteres';
+            } elseif (!preg_match('/^[+]?[0-9\s\-\(\)]{8,15}$/', $data['telefono'])) {
+                $errors[] = 'El formato del teléfono no es válido';
+            }
         }
 
         // Validar dirección (opcional)

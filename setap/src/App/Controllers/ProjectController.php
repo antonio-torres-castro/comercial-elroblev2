@@ -409,6 +409,13 @@ class ProjectController extends BaseController
         // Validar cliente
         if (empty($data['cliente_id']) || !is_numeric($data['cliente_id'])) {
             $errors[] = 'Cliente es requerido';
+        } else {
+            // Verificar que el cliente existe
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clientes WHERE id = ? AND estado_tipo_id != 3");
+            $stmt->execute([$data['cliente_id']]);
+            if ($stmt->fetchColumn() == 0) {
+                $errors[] = 'El cliente seleccionado no existe o está inactivo';
+            }
         }
 
         // Validar fecha de inicio
@@ -430,11 +437,25 @@ class ProjectController extends BaseController
         // Validar tipo de tarea
         if (empty($data['tarea_tipo_id']) || !is_numeric($data['tarea_tipo_id'])) {
             $errors[] = 'Tipo de tarea es requerido';
+        } else {
+            // Verificar que el tipo de tarea existe
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM tarea_tipos WHERE id = ? AND estado_tipo_id != 3");
+            $stmt->execute([$data['tarea_tipo_id']]);
+            if ($stmt->fetchColumn() == 0) {
+                $errors[] = 'El tipo de tarea seleccionado no existe o está inactivo';
+            }
         }
 
         // Validar contraparte
         if (empty($data['contraparte_id']) || !is_numeric($data['contraparte_id'])) {
             $errors[] = 'Contraparte es requerida';
+        } else {
+            // Verificar que la contraparte existe
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clientes_contrapartes WHERE id = ? AND estado_tipo_id != 3");
+            $stmt->execute([$data['contraparte_id']]);
+            if ($stmt->fetchColumn() == 0) {
+                $errors[] = 'La contraparte seleccionada no existe o está inactiva';
+            }
         }
 
         return $errors;

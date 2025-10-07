@@ -1135,8 +1135,11 @@ class UserController extends BaseController
 
         if (empty($data['password'])) {
             $errors[] = 'La contraseña es requerida';
-        } elseif (strlen($data['password']) < 8) {
-            $errors[] = 'La contraseña debe tener al menos 8 caracteres';
+        } else {
+            $passwordErrors = $this->validationService->validatePasswordStrength($data['password']);
+            if (!empty($passwordErrors)) {
+                $errors = array_merge($errors, $passwordErrors);
+            }
         }
 
         if (empty($data['password_confirm'])) {
