@@ -30,22 +30,6 @@ class ValidationService
     {
         $errors = [];
 
-        // Validar nombre
-        if (empty($data['nombre'])) {
-            $errors['nombre'] = 'El nombre es requerido';
-        } elseif (strlen($data['nombre']) < 3) {
-            $errors['nombre'] = 'El nombre debe tener al menos 3 caracteres';
-        }
-
-        // Validar RUT
-        if (empty($data['rut'])) {
-            $errors['rut'] = 'El RUT es requerido';
-        } elseif (!$this->validateRut($data['rut'])) {
-            $errors['rut'] = 'El RUT no es válido';
-        } elseif (!$this->isRutAvailable($data['rut'])) {
-            $errors['rut'] = 'El RUT ya está registrado';
-        }
-
         // Validar email
         if (empty($data['email'])) {
             $errors['email'] = 'El email es requerido';
@@ -90,8 +74,8 @@ class ValidationService
         $errors = [];
 
         // Validar nombre
-        if (empty($data['nombre'])) {
-            $errors['nombre'] = 'El nombre es requerido';
+        if (empty($data['nombre_usuario'])) {
+            $errors['nombre_usuario'] = 'Nombre usuario es requerido';
         }
 
         // Validar email
@@ -185,12 +169,12 @@ class ValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = ?";
             $params = [$username];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -208,12 +192,12 @@ class ValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
             $params = [$email];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -232,12 +216,12 @@ class ValidationService
             $cleanRut = preg_replace('/[^0-9kK]/', '', $rut);
             $sql = "SELECT COUNT(*) FROM personas WHERE rut = ?";
             $params = [$cleanRut];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND usuario_id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -373,6 +357,4 @@ class ValidationService
             'message' => $message
         ];
     }
-
-
 }

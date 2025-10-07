@@ -259,9 +259,9 @@
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
     <script>
-        // Auto-hide alerts after 5 seconds
+        // Auto-hide alerts after 5 seconds (excepto los que están dentro de modales)
         setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
+            const alerts = document.querySelectorAll('.alert:not(.modal .alert)');
             alerts.forEach(alert => {
                 const bsAlert = new bootstrap.Alert(alert);
                 bsAlert.close();

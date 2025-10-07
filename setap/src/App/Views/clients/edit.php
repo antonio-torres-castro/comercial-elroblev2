@@ -421,7 +421,10 @@
         }
 
         function confirmDeleteClient(id, name) {
-            document.getElementById('clientNameDelete').textContent = name;
+            const clientNameElement = document.getElementById('clientNameDelete');
+            if (clientNameElement) {
+                clientNameElement.textContent = name;
+            }
             document.getElementById('deleteClientId').value = id;
 
             const modal = new bootstrap.Modal(document.getElementById('deleteClientModal'));

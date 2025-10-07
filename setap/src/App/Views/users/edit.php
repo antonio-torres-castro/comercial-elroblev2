@@ -620,9 +620,9 @@
                 updateBtn.disabled = true;
             });
 
-            // Auto-hide alerts después de 5 segundos
+            // Auto-hide alerts después de 5 segundos (excepto los que están dentro de modales)
             setTimeout(() => {
-                const alerts = document.querySelectorAll('.alert');
+                const alerts = document.querySelectorAll('.alert:not(.modal .alert)');
                 alerts.forEach(alert => {
                     if (bootstrap.Alert) {
                         const bsAlert = new bootstrap.Alert(alert);

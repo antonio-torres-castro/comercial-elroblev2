@@ -597,7 +597,12 @@ use App\Helpers\Security;
             }
             
             document.getElementById('passwordUserId').value = userId;
-            document.getElementById('passwordUserName').textContent = userName;
+            
+            // Verificar que el elemento existe antes de asignar el nombre
+            const passwordUserNameElement = document.getElementById('passwordUserName');
+            if (passwordUserNameElement) {
+                passwordUserNameElement.textContent = userName;
+            }
             
             // Limpiar campos
             document.getElementById('newPassword').value = '';
@@ -665,9 +670,9 @@ use App\Helpers\Security;
             return isValid;
         }
 
-        // Auto-hide alerts after 5 seconds
+        // Auto-hide alerts after 5 seconds (excepto los que están dentro de modales)
         setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
+            const alerts = document.querySelectorAll('.alert:not(.modal .alert)');
             alerts.forEach(alert => {
                 const bsAlert = new bootstrap.Alert(alert);
                 bsAlert.close();
