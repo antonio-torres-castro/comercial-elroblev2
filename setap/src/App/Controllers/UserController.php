@@ -1163,6 +1163,150 @@ class UserController extends BaseController
     }
 
     /**
+     * Mostrar mantenedor de permisos de usuario
+     */
+    public function permissions()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            // Verificar acceso al menú de gestión de usuarios
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
+                return;
+            }
+
+            // Obtener user_id del parámetro GET
+            $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : null;
+            
+            if (!$userId) {
+                http_response_code(400);
+                echo $this->renderError('ID de usuario requerido');
+                return;
+            }
+
+            // Verificar que el usuario existe
+            $user = $this->userModel->getById($userId);
+            if (!$user) {
+                http_response_code(404);
+                echo $this->renderError('Usuario no encontrado');
+                return;
+            }
+
+            // Obtener datos para el mantenedor de permisos
+            $userPermissions = $this->getUserPermissions($userId);
+            $userMenus = $this->getUserMenus($userId);
+            $allPermissions = $this->getAllPermissions();
+            $allMenus = $this->getAllMenus();
+
+            // Renderizar la vista
+            echo $this->viewRenderer->render('users/permissions', [
+                'user' => $user,
+                'userPermissions' => $userPermissions,
+                'userMenus' => $userMenus,
+                'allPermissions' => $allPermissions,
+                'allMenus' => $allMenus,
+                'currentUser' => $currentUser
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Error en UserController::permissions: " . $e->getMessage());
+            http_response_code(500);
+            echo AppConstants::ERROR_INTERNAL_SERVER;
+        }
+    }
+
+    /**
+     * Obtener permisos del usuario
+     */
+    private function getUserPermissions($userId)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT p.id, p.nombre, p.descripcion, utp.fecha_creacion
+                FROM permiso_tipos p
+                INNER JOIN usuario_tipo_permisos utp ON p.id = utp.permiso_id
+                INNER JOIN usuarios u ON u.usuario_tipo_id = utp.usuario_tipo_id
+                WHERE u.id = :user_id AND utp.estado_tipo_id = 1
+            ");
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error obteniendo permisos del usuario: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener menús del usuario
+     */
+    private function getUserMenus($userId)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT m.id, m.nombre, m.descripcion, utm.fecha_creacion
+                FROM menus m
+                INNER JOIN usuario_tipo_menus utm ON m.id = utm.menu_id
+                INNER JOIN usuarios u ON u.usuario_tipo_id = utm.usuario_tipo_id
+                WHERE u.id = :user_id AND utm.estado_tipo_id = 1
+            ");
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error obteniendo menús del usuario: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener todos los permisos disponibles
+     */
+    private function getAllPermissions()
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id, nombre, descripcion
+                FROM permiso_tipos
+                WHERE estado_tipo_id = 1
+                ORDER BY nombre
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error obteniendo todos los permisos: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener todos los menús disponibles
+     */
+    private function getAllMenus()
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id, nombre, descripcion
+                FROM menus
+                WHERE estado_tipo_id = 1
+                ORDER BY nombre
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Error obteniendo todos los menús: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Redireccionar simple
      */
     private function redirectTo(string $url): void

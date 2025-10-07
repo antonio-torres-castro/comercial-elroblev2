@@ -132,6 +132,10 @@ try {
                     $controller->store();
                     break;
                     
+                case 'permissions':
+                    $controller->permissions();
+                    break;
+                    
                 case '':
                 default:
                     $controller->index();
@@ -177,6 +181,10 @@ try {
                     
                 case 'search':
                     $controller->search();
+                    break;
+                    
+                case 'report':
+                    $controller->report();
                     break;
                     
                 case '':
