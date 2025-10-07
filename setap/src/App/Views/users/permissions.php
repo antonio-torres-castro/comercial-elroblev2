@@ -24,7 +24,7 @@ use App\Helpers\Security;
             padding: 20px;
             margin-bottom: 20px;
         }
-        
+
         .user-avatar-large {
             width: 60px;
             height: 60px;
@@ -37,18 +37,18 @@ use App\Helpers\Security;
             font-weight: bold;
             font-size: 1.5rem;
         }
-        
+
         .permission-card {
             border: none;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             transition: transform 0.2s;
         }
-        
+
         .permission-card:hover {
             transform: translateY(-2px);
         }
-        
+
         .permission-badge {
             background: var(--setap-success);
             color: white;
@@ -58,7 +58,7 @@ use App\Helpers\Security;
             margin: 0.2rem;
             display: inline-block;
         }
-        
+
         .menu-badge {
             background: var(--setap-info);
             color: white;
@@ -68,13 +68,13 @@ use App\Helpers\Security;
             margin: 0.2rem;
             display: inline-block;
         }
-        
+
         .empty-state {
             text-align: center;
             color: var(--setap-muted);
             padding: 2rem;
         }
-        
+
         .empty-state i {
             font-size: 3rem;
             margin-bottom: 1rem;
@@ -89,165 +89,148 @@ use App\Helpers\Security;
 
     <div class="container-fluid mt-4">
         <main class="main-content">
-                <!-- Header de usuario -->
-                <div class="user-header">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <div class="user-avatar-large">
-                                <?= strtoupper(substr($user['nombre_usuario'], 0, 2)) ?>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <h4 class="mb-1"><?= htmlspecialchars($user['nombre_usuario']) ?></h4>
-                            <p class="mb-0"><?= htmlspecialchars($user['nombre_completo'] ?? '') ?></p>
-                            <small class="opacity-75">Tipo: <?= htmlspecialchars($user['rol'] ?? 'N/A') ?></small>
-                        </div>
-                        <div class="col-auto">
-                            <a href="/users" class="btn btn-light">
-                                <i class="bi bi-arrow-left"></i> Volver a Usuarios
-                            </a>
+            <!-- Header de usuario -->
+            <div class="user-header">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="user-avatar-large">
+                            <?= strtoupper(substr($user['nombre_usuario'], 0, 2)) ?>
                         </div>
                     </div>
+                    <div class="col">
+                        <h4 class="mb-1"><?= htmlspecialchars($user['nombre_usuario']) ?></h4>
+                        <p class="mb-0"><?= htmlspecialchars($user['nombre_completo'] ?? '') ?></p>
+                        <small class="opacity-75">Tipo: <?= htmlspecialchars($user['rol'] ?? 'N/A') ?></small>
+                    </div>
+                    <div class="col-auto">
+                        <a href="/users" class="btn btn-light">
+                            <i class="bi bi-arrow-left"></i> Volver a Usuarios
+                        </a>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Tarjetas de permisos y menús -->
-                <div class="row">
-                    <!-- Permisos del usuario -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card permission-card h-100">
-                            <div class="card-header bg-transparent border-bottom-0 pb-0">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-shield-check text-success me-2" style="font-size: 1.5rem;"></i>
-                                    <h5 class="mb-0">Permisos Asignados</h5>
-                                </div>
-                                <p class="text-muted small mb-0">Permisos que tiene el usuario a nivel sistémico</p>
+            <!-- Tarjetas de permisos y menús -->
+            <div class="row">
+                <!-- Permisos del usuario -->
+                <div class="col-md-6 mb-4">
+                    <div class="card permission-card h-100">
+                        <div class="card-header bg-transparent border-bottom-0 pb-0">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shield-check text-success me-2" style="font-size: 1.5rem;"></i>
+                                <h5 class="mb-0">Permisos Asignados</h5>
                             </div>
-                            <div class="card-body">
-                                <?php if (!empty($userPermissions)): ?>
-                                    <div class="mb-3">
-                                        <small class="text-muted">Total: <?= count($userPermissions) ?> permisos</small>
-                                    </div>
-                                    <?php foreach ($userPermissions as $permission): ?>
-                                        <div class="permission-badge" 
-                                             title="<?= htmlspecialchars($permission['descripcion']) ?>
+                            <p class="text-muted small mb-0">Permisos que tiene el usuario a nivel sistémico</p>
+                        </div>
+                        <div class="card-body">
+                            <?php if (!empty($userPermissions)): ?>
+                                <div class="mb-3">
+                                    <small class="text-muted">Total: <?= count($userPermissions) ?> permisos</small>
+                                </div>
+                                <?php foreach ($userPermissions as $permission): ?>
+                                    <div class="permission-badge"
+                                        title="<?= htmlspecialchars($permission['descripcion']) ?>
 Asignado: <?= date('d/m/Y', strtotime($permission['fecha_creacion'])) ?>">
-                                            <i class="bi bi-check-circle me-1"></i>
-                                            <?= htmlspecialchars($permission['nombre']) ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <div class="empty-state">
-                                        <i class="bi bi-shield-x"></i>
-                                        <p>No hay permisos asignados</p>
-                                        <small class="text-muted">Este usuario no tiene permisos específicos asignados a su tipo de usuario.</small>
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        <?= htmlspecialchars($permission['nombre']) ?>
                                     </div>
-                                <?php endif; ?>
-                            </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="empty-state">
+                                    <i class="bi bi-shield-x"></i>
+                                    <p>No hay permisos asignados</p>
+                                    <small class="text-muted">Este usuario no tiene permisos específicos asignados a su tipo de usuario.</small>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Menús del usuario -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card permission-card h-100">
-                            <div class="card-header bg-transparent border-bottom-0 pb-0">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-list-ul text-info me-2" style="font-size: 1.5rem;"></i>
-                                    <h5 class="mb-0">Acceso a Menús</h5>
-                                </div>
-                                <p class="text-muted small mb-0">Menús a los que puede acceder el usuario</p>
+                <!-- Menús del usuario -->
+                <div class="col-md-6 mb-4">
+                    <div class="card permission-card h-100">
+                        <div class="card-header bg-transparent border-bottom-0 pb-0">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-list-ul text-info me-2" style="font-size: 1.5rem;"></i>
+                                <h5 class="mb-0">Acceso a Menús</h5>
                             </div>
-                            <div class="card-body">
-                                <?php if (!empty($userMenus)): ?>
-                                    <div class="mb-3">
-                                        <small class="text-muted">Total: <?= count($userMenus) ?> menús</small>
-                                    </div>
-                                    <?php foreach ($userMenus as $menu): ?>
-                                        <div class="menu-badge" 
-                                             title="<?= htmlspecialchars($menu['descripcion']) ?>
+                            <p class="text-muted small mb-0">Menús a los que puede acceder el usuario</p>
+                        </div>
+                        <div class="card-body">
+                            <?php if (!empty($userMenus)): ?>
+                                <div class="mb-3">
+                                    <small class="text-muted">Total: <?= count($userMenus) ?> menús</small>
+                                </div>
+                                <?php foreach ($userMenus as $menu): ?>
+                                    <div class="menu-badge"
+                                        title="<?= htmlspecialchars($menu['descripcion']) ?>
 Asignado: <?= date('d/m/Y', strtotime($menu['fecha_creacion'])) ?>">
-                                            <i class="bi bi-menu-button-wide me-1"></i>
-                                            <?= htmlspecialchars($menu['nombre']) ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <div class="empty-state">
-                                        <i class="bi bi-menu-button"></i>
-                                        <p>No hay menús asignados</p>
-                                        <small class="text-muted">Este usuario no tiene acceso a menús específicos.</small>
+                                        <i class="bi bi-menu-button-wide me-1"></i>
+                                        <?= htmlspecialchars($menu['nombre']) ?>
                                     </div>
-                                <?php endif; ?>
-                            </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="empty-state">
+                                    <i class="bi bi-menu-button"></i>
+                                    <p>No hay menús asignados</p>
+                                    <small class="text-muted">Este usuario no tiene acceso a menús específicos.</small>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Información adicional -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card permission-card">
-                            <div class="card-header bg-transparent border-bottom-0">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-info-circle text-warning me-2" style="font-size: 1.5rem;"></i>
-                                    <h5 class="mb-0">Información del Sistema de Permisos</h5>
-                                </div>
+            <!-- Información adicional -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card permission-card">
+                        <div class="card-header bg-transparent border-bottom-0">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle text-warning me-2" style="font-size: 1.5rem;"></i>
+                                <h5 class="mb-0">Información del Sistema de Permisos</h5>
                             </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <h6 class="text-primary">Permisos por Rol</h6>
-                                        <p class="small text-muted">
-                                            Los permisos se asignan a nivel del tipo de usuario. Todos los usuarios 
-                                            con el mismo tipo comparten los mismos permisos básicos.
-                                        </p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6 class="text-info">Acceso a Menús</h6>
-                                        <p class="small text-muted">
-                                            El acceso a menús se controla mediante la relación entre el tipo de usuario 
-                                            y los menús del sistema.
-                                        </p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6 class="text-success">Estado Activo</h6>
-                                        <p class="small text-muted">
-                                            Solo se muestran permisos y menús que están actualmente activos 
-                                            (estado_tipo_id = 1).
-                                        </p>
-                                    </div>
-                                </div>
-                                
-                                <?php if (Security::hasPermission('Modify')): ?>
-                                <div class="mt-3 pt-3 border-top">
-                                    <h6 class="text-secondary">Administración</h6>
-                                    <p class="small text-muted mb-2">
-                                        Para modificar permisos o acceso a menús, debe configurar el tipo de usuario en:
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6 class="text-primary">Permisos por Rol</h6>
+                                    <p class="small text-muted">
+                                        Los permisos se asignan a nivel del tipo de usuario. Todos los usuarios
+                                        con el mismo tipo comparten los mismos permisos básicos.
                                     </p>
-                                    <div class="d-flex gap-2">
-                                        <a href="/usuario-tipos" class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-gear"></i> Gestionar Tipos de Usuario
-                                        </a>
-                                        <a href="/menus" class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-list"></i> Gestionar Menús
-                                        </a>
-                                    </div>
                                 </div>
-                                <?php endif; ?>
+                                <div class="col-md-4">
+                                    <h6 class="text-info">Acceso a Menús</h6>
+                                    <p class="small text-muted">
+                                        El acceso a menús se controla mediante la relación entre el tipo de usuario
+                                        y los menús del sistema.
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-success">Estado Activo</h6>
+                                    <p class="small text-muted">
+                                        Solo se muestran permisos y menús que están actualmente activos
+                                        (estado_tipo_id = 1).
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
         </main>
     </div>
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . '/../layouts/scripts-base.php'; ?>
-    
+
     <script>
         // Mejorar experiencia con tooltips
         document.addEventListener('DOMContentLoaded', function() {
             // Inicializar tooltips si están disponibles
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });

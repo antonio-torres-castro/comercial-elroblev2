@@ -89,3 +89,48 @@ Preguntas para Validar:
 3. El mantenedor de usuario no crea personas nuevas
 4. Se debe poder seleccionar un cliente asociado al usuario, o desasociarlo del cliente.
 5. Cuando el usuario es asociado a un cliente, este solo puede ser en usuario_tipo_id = 6 = counterparty.
+
+#Definición del comportamiento para el mantenedor de Permisos usuario
+##Estructuras de base de datos con semántica:
+-- Referencia tipos de usuario
+SELECT
+id, -- codigo usario tipo entero auto incremental
+nombre, -- nombre del tipo de usuario_notificaciones
+descripcion -- explicacion a nivel de negocio
+FROM comerci3_bdsetap.usuario_tipos;
+-- Nivel Acceso
+SELECT 
+menu_id, -- id en tabla de menu
+usuario_tipo_id, -- id en tabla de usuario_tipos
+fecha_creacion, -- fecha creacion registro en tabla
+fecha_modificacion, -- fecha modificacion del registro en tabla
+estado_tipo_id -- id en tabla de estado_tipos
+FROM comerci3_bdsetap.usuario_tipo_menus;
+-- Nivel permisos
+SELECT 
+permiso_id, -- Id tabla permiso_tipos
+usuario_tipo_id, -- Di tabla usuario_tipo_id
+fecha_creacion, -- Fecha en que se graba el registro
+fecha_modificacion, -- Fecha en que se modifica el registro
+estado_tipo_id -- codigo que refleja un estado_tipo_id
+FROM comerci3_bdsetap.usuario_tipo_permisos;
+
+##Flujo de uso del mantenedor:
+1. El usuario desde la gestión de usuarios, tendrá un botón para invocar el mantenedor de permisos.
+2. El mantenedor de permisos tendrá:
+-- Primero en un card, la definición de los permisos que tiene asociado el usuario a nivel sistemico. Estos permisos son a nivel del rol del usuario
+-- Segundo en otro card, la definición de menús que puede acceder el usuario
+
+##Estructura de menús para manage_access
+-- El mantenedor de "Menús Accesos" es una opción de menú del grupo 1, debe implementar la mantención de la tabla "usuario_tipo_menus"
+
+Insert Into menu (id, nombre, descripcion, fecha_creacion, fecha_modificacion, estado_tipo_id, url, icono, orden, display, menu_grupo_id)
+Select '17', 'manage_access', 'Administra los menus que accede un Usuario Tipo', now(), null, 2, "/accesos", 'menu-button', 17, "Accesos", 1
+
+##Estructura de menús para manage_permissions
+-- El mantenedor de "Permisos" es una opción de menú del grupo 2, debe implementar la mantención de la tabla "usuario_tipo_permisos"
+Insert Into menu (id, nombre, descripcion, fecha_creacion, fecha_modificacion, estado_tipo_id, url, icono, orden, display, menu_grupo_id)
+Select '18', 'manage_permissions', 'Administra los permisos de un Usuario Tipo', now(), null, 2, "/permisos", 'shield-lock', 18, "Permisos", 2
+
+En setap\src\App\users\permissions de linea 219-233 eliminar, por que el usuario puede ver a que tiene permiso pero no administra sus permisos.
+
