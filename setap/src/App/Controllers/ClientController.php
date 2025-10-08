@@ -26,7 +26,6 @@ class ClientController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-        
         $this->clientModel = new Client();
         $this->personaModel = new Persona();
         $this->permissionService = new PermissionService();
@@ -42,7 +41,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -75,7 +73,6 @@ class ClientController extends BaseController
                 'statusTypes' => $statusTypes,
                 'filters' => $filters
             ]);
-
         } catch (Exception $e) {
             error_log("Error en ClientController::index: " . $e->getMessage());
             http_response_code(500);
@@ -90,7 +87,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -114,7 +110,6 @@ class ClientController extends BaseController
                 'statusTypes' => $statusTypes,
                 'action' => 'create'
             ]);
-
         } catch (Exception $e) {
             error_log("Error en ClientController::create: " . $e->getMessage());
             http_response_code(500);
@@ -129,7 +124,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -138,23 +132,22 @@ class ClientController extends BaseController
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo $this->renderError('Método no permitido');
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido');
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
             // Validar datos usando el servicio de validación
             $errors = $this->clientValidationService->validateClientData($_POST);
-            
             if (!empty($errors)) {
                 $statusTypes = $this->clientModel->getStatusTypes();
-                
+
                 // Usar ViewRenderer para renderizar la vista con errores
                 echo $this->viewRenderer->render('clients/create', [
                     'user' => $currentUser,
@@ -173,7 +166,6 @@ class ClientController extends BaseController
 
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_CREATED);
-
         } catch (Exception $e) {
             error_log("Error en ClientController::store: " . $e->getMessage());
             http_response_code(500);
@@ -188,7 +180,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -203,7 +194,6 @@ class ClientController extends BaseController
 
             // Obtener cliente
             $client = $this->clientModel->find((int)$id);
-            
             if (!$client) {
                 http_response_code(404);
                 echo $this->renderError(AppConstants::ERROR_CLIENT_NOT_FOUND);
@@ -223,7 +213,6 @@ class ClientController extends BaseController
                 'counterparties' => $counterparties,
                 'action' => 'edit'
             ]);
-
         } catch (Exception $e) {
             error_log("Error en ClientController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -238,7 +227,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -247,19 +235,18 @@ class ClientController extends BaseController
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo $this->renderError('Método no permitido');
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido');
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
-            
             if (!$id) {
                 http_response_code(400);
                 echo $this->renderError('ID de cliente requerido');
@@ -268,12 +255,11 @@ class ClientController extends BaseController
 
             // Validar datos usando el servicio de validación
             $errors = $this->clientValidationService->validateClientData($_POST, $id);
-            
             if (!empty($errors)) {
                 $client = $this->clientModel->find($id);
                 $statusTypes = $this->clientModel->getStatusTypes();
                 $counterparties = $this->clientModel->getCounterparties($id);
-                
+
                 // Usar ViewRenderer para renderizar la vista con errores
                 echo $this->viewRenderer->render('clients/edit', [
                     'user' => $currentUser,
@@ -290,13 +276,11 @@ class ClientController extends BaseController
 
             // Actualizar cliente
             $success = $this->clientModel->update($id, $_POST);
-
             if ($success) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_UPDATED);
             } else {
                 throw new Exception('No se pudo actualizar el cliente');
             }
-
         } catch (Exception $e) {
             error_log("Error en ClientController::update: " . $e->getMessage());
             http_response_code(500);
@@ -311,7 +295,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -320,19 +303,18 @@ class ClientController extends BaseController
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo $this->renderError('Método no permitido');
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido');
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
-            
             if (!$id) {
                 http_response_code(400);
                 echo $this->renderError('ID de cliente requerido');
@@ -341,13 +323,11 @@ class ClientController extends BaseController
 
             // Eliminar cliente
             $success = $this->clientModel->delete($id);
-
             if ($success) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_DELETED);
             } else {
                 throw new Exception('No se pudo eliminar el cliente');
             }
-
         } catch (Exception $e) {
             error_log("Error en ClientController::delete: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_CLIENTS, $e->getMessage());
@@ -373,7 +353,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -409,7 +388,6 @@ class ClientController extends BaseController
                 'clients' => $clients,
                 'filters' => $filters
             ]);
-
         } catch (Exception $e) {
             error_log("Error en ClientController::counterparties: " . $e->getMessage());
             http_response_code(500);
@@ -424,7 +402,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -443,13 +420,11 @@ class ClientController extends BaseController
             // Si hay ID, estamos editando
             if ($id) {
                 $counterpartie = $this->counterpartieService->findCounterpartie((int)$id);
-                
                 if (!$counterpartie) {
                     http_response_code(404);
                     echo $this->renderError('Contraparte no encontrada');
                     return;
                 }
-                
                 $action = 'edit';
             }
 
@@ -468,7 +443,6 @@ class ClientController extends BaseController
                 'statusTypes' => $formData['statusTypes'],
                 'action' => $action
             ]);
-
         } catch (Exception $e) {
             error_log("Error en ClientController::counterpartie: " . $e->getMessage());
             http_response_code(500);
@@ -483,7 +457,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -492,20 +465,19 @@ class ClientController extends BaseController
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo $this->renderError('Método no permitido');
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido');
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
             // Validar datos de contraparte usando el servicio de validación
             $errors = $this->clientValidationService->validateCounterpartieData($_POST);
-            
             if (!empty($errors)) {
                 // Obtener datos necesarios para el formulario usando el servicio
                 $formData = $this->counterpartieService->getFormData();
@@ -531,7 +503,6 @@ class ClientController extends BaseController
 
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_CREATED);
-
         } catch (Exception $e) {
             error_log("Error en ClientController::storeCounterpartie: " . $e->getMessage());
             http_response_code(500);
@@ -546,7 +517,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -555,19 +525,18 @@ class ClientController extends BaseController
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo $this->renderError('Método no permitido');
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido');
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
-            
             if (!$id) {
                 http_response_code(400);
                 echo $this->renderError('ID de contraparte requerido');
@@ -576,7 +545,6 @@ class ClientController extends BaseController
 
             // Validar datos de contraparte usando el servicio de validación
             $errors = $this->clientValidationService->validateCounterpartieData($_POST, $id);
-            
             if (!empty($errors)) {
                 // Obtener datos necesarios para el formulario usando los servicios
                 $counterpartie = $this->counterpartieService->findCounterpartie($id);
@@ -600,11 +568,9 @@ class ClientController extends BaseController
 
             // Actualizar contraparte usando el servicio
             $success = $this->counterpartieService->updateCounterpartie($id, $_POST);
-
             if ($success) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_UPDATED);
             }
-
         } catch (Exception $e) {
             error_log("Error en ClientController::updateCounterpartie: " . $e->getMessage());
             http_response_code(500);
@@ -619,7 +585,6 @@ class ClientController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -628,19 +593,18 @@ class ClientController extends BaseController
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo $this->renderError('Método no permitido');
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido');
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
-            
             if (!$id) {
                 http_response_code(400);
                 echo $this->renderError('ID de contraparte requerido');
@@ -649,18 +613,12 @@ class ClientController extends BaseController
 
             // Eliminar contraparte usando el servicio
             $success = $this->counterpartieService->deleteCounterpartie($id);
-
             if ($success) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_DELETED);
             }
-
         } catch (Exception $e) {
             error_log("Error en ClientController::deleteCounterpartie: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, $e->getMessage());
         }
     }
-
-
-
-
 }

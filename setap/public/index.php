@@ -88,7 +88,7 @@ try {
 
         case 'users':
             $controller = new UserController();
-
+            
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -97,47 +97,47 @@ try {
                         $controller->create();
                     }
                     break;
-
+                    
                 case 'edit':
                     $controller->edit($id);
                     break;
-
+                    
                 case 'update':
                     $controller->update();
                     break;
-
+                    
                 case 'delete':
                     $controller->delete();
                     break;
-
+                    
                 case 'toggle-status':
                     $controller->toggleStatus();
                     break;
-
+                    
                 case 'change-password':
                     $controller->changePassword();
                     break;
-
+                    
                 case 'search-personas':
                     $controller->searchPersonas();
                     break;
-
+                    
                 case 'seek_personas':
                     $controller->seekPersonas();
                     break;
-
+                    
                 case 'validate-field':
                     $controller->validateField();
                     break;
-
+                    
                 case 'store':
                     $controller->store();
                     break;
-
+                    
                 case 'permissions':
                     $controller->permissions();
                     break;
-
+                    
                 case '':
                 default:
                     $controller->index();
@@ -147,7 +147,7 @@ try {
 
         case 'projects':
             $controller = new ProjectController();
-
+            
             switch ($action) {
                 case 'show':
                     if ($id) {
@@ -156,7 +156,7 @@ try {
                         $controller->index();
                     }
                     break;
-
+                    
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
@@ -164,31 +164,31 @@ try {
                         $controller->create();
                     }
                     break;
-
+                    
                 case 'edit':
                     $controller->edit();
                     break;
-
+                    
                 case 'update':
                     $controller->update();
                     break;
-
+                    
                 case 'delete':
                     $controller->delete();
                     break;
-
+                    
                 case 'change-status':
                     $controller->changeStatus();
                     break;
-
+                    
                 case 'search':
                     $controller->search();
                     break;
-
+                    
                 case 'report':
                     $controller->report();
                     break;
-
+                    
                 case '':
                 default:
                     $controller->index();
@@ -198,7 +198,7 @@ try {
 
         case 'project':
             $controller = new ProjectController();
-
+            
             if ($action) {
                 $controller->show((int)$action);
             } else {
@@ -209,7 +209,7 @@ try {
 
         case 'menus':
             $controller = new MenuController();
-
+            
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -218,11 +218,11 @@ try {
                         $controller->create();
                     }
                     break;
-
+                    
                 case 'edit':
                     $controller->edit($id);
                     break;
-
+                    
                 case 'update':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update($id);
@@ -230,7 +230,7 @@ try {
                         Security::redirect('/menus');
                     }
                     break;
-
+                    
                 case 'store':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
@@ -238,7 +238,7 @@ try {
                         Security::redirect('/menus');
                     }
                     break;
-
+                    
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
@@ -246,7 +246,7 @@ try {
                         Security::redirect('/menus');
                     }
                     break;
-
+                    
                 case 'toggle-status':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->toggleStatus();
@@ -254,7 +254,7 @@ try {
                         Security::redirect('/menus');
                     }
                     break;
-
+                    
                 case '':
                 case null:
                 default:
@@ -265,12 +265,12 @@ try {
 
         case 'menu':
             $controller = new MenuController();
-
+            
             switch ($action) {
                 case 'create':
                     $controller->create();
                     break;
-
+                    
                 default:
                     if ($action) {
                         $controller->edit($action);
@@ -283,7 +283,7 @@ try {
 
         case 'personas':
             $controller = new PersonaController();
-
+            
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -292,23 +292,23 @@ try {
                         $controller->create();
                     }
                     break;
-
+                    
                 case 'edit':
                     $controller->edit();
                     break;
-
+                    
                 case 'update':
                     $controller->update();
                     break;
-
+                    
                 case 'delete':
                     $controller->delete();
                     break;
-
+                    
                 case 'store':
                     $controller->store();
                     break;
-
+                    
                 case '':
                 default:
                     $controller->index();
@@ -318,7 +318,7 @@ try {
 
         case 'persona':
             $controller = new PersonaController();
-
+            
             if ($action) {
                 $controller->show((int)$action);
             } else {
@@ -328,7 +328,7 @@ try {
 
         case 'perfil':
             $controller = new PerfilController();
-
+            
             if ($action === 'edit') {
                 $controller->edit();
             } else {
@@ -338,7 +338,7 @@ try {
 
         case 'clients':
             $controller = new ClientController();
-
+            
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -347,7 +347,7 @@ try {
                         $controller->create();
                     }
                     break;
-
+                    
                 case 'edit':
                     if ($id) {
                         $controller->edit($id);
@@ -355,19 +355,19 @@ try {
                         $controller->index();
                     }
                     break;
-
+                    
                 case 'store':
                     $controller->store();
                     break;
-
+                    
                 case 'update':
                     $controller->update();
                     break;
-
+                    
                 case 'delete':
                     $controller->delete();
                     break;
-
+                    
                 default:
                     $controller->index();
                     break;
@@ -376,12 +376,12 @@ try {
 
         case 'client':
             $controller = new ClientController();
-
+            
             switch ($action) {
                 case 'create':
                     $controller->create();
                     break;
-
+                    
                 default:
                     if ($action) {
                         $controller->edit($action);
@@ -399,12 +399,12 @@ try {
 
         case 'client-counterpartie':
             $controller = new ClientController();
-
+            
             switch ($action) {
                 case 'create':
                     $controller->counterpartie();
                     break;
-
+                    
                 case 'edit':
                     if ($id) {
                         $controller->counterpartie((int)$id);
@@ -412,19 +412,19 @@ try {
                         $controller->counterpartie();
                     }
                     break;
-
+                    
                 case 'store':
                     $controller->storeCounterpartie();
                     break;
-
+                    
                 case 'update':
                     $controller->updateCounterpartie();
                     break;
-
+                    
                 case 'delete':
                     $controller->deleteCounterpartie();
                     break;
-
+                    
                 default:
                     if ($action) {
                         $controller->counterpartie((int)$action);
@@ -437,7 +437,7 @@ try {
 
         case 'tasks':
             $controller = new TaskController();
-
+            
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -446,11 +446,11 @@ try {
                         $controller->create();
                     }
                     break;
-
+                    
                 case 'edit':
                     $controller->edit();
                     break;
-
+                    
                 case 'update':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update();
@@ -458,7 +458,7 @@ try {
                         Security::redirect('/tasks');
                     }
                     break;
-
+                    
                 case 'store':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
@@ -466,7 +466,7 @@ try {
                         Security::redirect('/tasks');
                     }
                     break;
-
+                    
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
@@ -474,7 +474,7 @@ try {
                         Security::redirect('/tasks');
                     }
                     break;
-
+                    
                 case 'show':
                     if ($id) {
                         $controller->show((int)$id);
@@ -482,7 +482,7 @@ try {
                         Security::redirect('/tasks');
                     }
                     break;
-
+                    
                 case 'change-state':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->changeState();
@@ -491,7 +491,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'check-executable':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->checkExecutable();
@@ -500,7 +500,7 @@ try {
                         echo json_encode(['valid' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'valid-transitions':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->getValidTransitions();
@@ -509,7 +509,7 @@ try {
                         echo json_encode(['transitions' => [], 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case '':
                 case null:
                 default:
@@ -520,7 +520,7 @@ try {
 
         case 'task':
             $controller = new TaskController();
-
+            
             if ($action) {
                 $controller->show((int)$action);
             } else {
@@ -530,7 +530,7 @@ try {
 
         case 'proyecto-feriados':
             $controller = new ProyectoFeriadoController();
-
+            
             switch ($action) {
                 case 'create-masivo':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -540,7 +540,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'create-especifico':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->createEspecifico();
@@ -549,7 +549,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'create-rango':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->createRango();
@@ -558,7 +558,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'list':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->list();
@@ -567,7 +567,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'update':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update();
@@ -576,7 +576,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
@@ -585,7 +585,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'check-conflicts':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->checkConflicts();
@@ -594,7 +594,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'move-tasks':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->moveTasks();
@@ -603,7 +603,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case 'working-days':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->getWorkingDays();
@@ -612,7 +612,7 @@ try {
                         echo json_encode(['success' => false, 'message' => 'Método no permitido']);
                     }
                     break;
-
+                    
                 case '':
                 case null:
                 default:
@@ -680,12 +680,12 @@ try {
 
         case 'accesos':
             $controller = new AccessController();
-
+            
             switch ($action) {
                 case 'update':
                     $controller->update();
                     break;
-
+                    
                 case '':
                 default:
                     $controller->index();
@@ -695,12 +695,12 @@ try {
 
         case 'permisos':
             $controller = new PermissionsController();
-
+            
             switch ($action) {
                 case 'update':
                     $controller->update();
                     break;
-
+                    
                 case '':
                 default:
                     $controller->index();
@@ -749,12 +749,13 @@ try {
             </html>';
             break;
     }
+    
 } catch (Throwable $e) {
     // Manejo de errores global
     error_log("Error en router: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
-
+    
     http_response_code(500);
-
+    
     // Mostrar error detallado solo en desarrollo
     if (isset($_ENV['APP_DEBUG']) && $_ENV['APP_DEBUG'] === 'true') {
         echo "<h1>Error Internal del Servidor</h1>";

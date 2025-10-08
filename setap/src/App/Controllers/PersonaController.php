@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\Persona;
@@ -21,7 +20,6 @@ class PersonaController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-
         $this->personaModel = new Persona();
         $this->permissionService = new PermissionService();
         $this->db = Database::getInstance();
@@ -34,7 +32,6 @@ class PersonaController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -49,11 +46,9 @@ class PersonaController extends BaseController
 
             // Aplicar filtros si están presentes
             $filters = [];
-
             if (!empty($_GET['estado_tipo_id'])) {
                 $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
             }
-
             if (!empty($_GET['search'])) {
                 $filters['search'] = $_GET['search'];
             }
@@ -84,7 +79,6 @@ class PersonaController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -117,7 +111,6 @@ class PersonaController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -142,7 +135,6 @@ class PersonaController extends BaseController
             }
 
             $errors = $this->validatePersonaData($_POST);
-
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/personas/create?error=" . urlencode($errorMsg));
@@ -158,13 +150,11 @@ class PersonaController extends BaseController
             ];
 
             $personaId = $this->personaModel->create($personaData);
-
             if ($personaId) {
                 Security::logSecurityEvent('persona_created', [
                     'persona_id' => $personaId,
                     'created_by' => $_SESSION['username']
                 ]);
-
                 $this->redirectWithSuccess(AppConstants::ROUTE_PERSONAS, 'Persona creada correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_CREATE_PERSONA);
@@ -182,7 +172,6 @@ class PersonaController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -196,7 +185,6 @@ class PersonaController extends BaseController
             }
 
             $id = (int)($_GET['id'] ?? 0);
-
             if ($id <= 0) {
                 $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
                 return;
@@ -229,7 +217,6 @@ class PersonaController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -248,7 +235,6 @@ class PersonaController extends BaseController
             }
 
             $id = (int)($_POST['id'] ?? 0);
-
             if ($id <= 0) {
                 $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
                 return;
@@ -261,7 +247,6 @@ class PersonaController extends BaseController
             }
 
             $errors = $this->validatePersonaData($_POST, $id);
-
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/personas/edit?id={$id}&error=" . urlencode($errorMsg));
@@ -281,7 +266,6 @@ class PersonaController extends BaseController
                     'persona_id' => $id,
                     'updated_by' => $_SESSION['username']
                 ]);
-
                 $this->redirectWithSuccess(AppConstants::ROUTE_PERSONAS, 'Persona actualizada correctamente');
             } else {
                 Security::redirect("/personas/edit?id={$id}&error=Error al actualizar persona");
@@ -300,7 +284,6 @@ class PersonaController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['error' => 'No autenticado']);
@@ -321,7 +304,6 @@ class PersonaController extends BaseController
             }
 
             $id = (int)($_POST['id'] ?? 0);
-
             if ($id <= 0) {
                 http_response_code(400);
                 echo json_encode(['error' => 'ID de persona inválido']);
@@ -340,7 +322,6 @@ class PersonaController extends BaseController
                     'persona_id' => $id,
                     'deleted_by' => $_SESSION['username']
                 ]);
-
                 $this->redirectWithSuccess(AppConstants::ROUTE_PERSONAS, 'Persona eliminada correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_PERSONA_IN_USE);
@@ -358,7 +339,6 @@ class PersonaController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -458,6 +438,4 @@ class PersonaController extends BaseController
         extract($data);
         require __DIR__ . "/../Views/{$view}.php";
     }
-
-
 }

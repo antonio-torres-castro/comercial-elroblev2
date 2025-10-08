@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\Task;
@@ -18,7 +17,6 @@ class TaskController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-
         $this->taskModel = new Task();
         $this->permissionService = new PermissionService();
     }
@@ -30,7 +28,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -76,7 +73,6 @@ class TaskController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/tasks/list.php';
-
         } catch (Exception $e) {
             error_log("Error en TaskController::index: " . $e->getMessage());
             http_response_code(500);
@@ -91,7 +87,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -113,7 +108,6 @@ class TaskController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/tasks/form.php';
-
         } catch (Exception $e) {
             error_log("Error en TaskController::show: " . $e->getMessage());
             http_response_code(500);
@@ -128,7 +122,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -155,7 +148,6 @@ class TaskController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/tasks/create.php';
-
         } catch (Exception $e) {
             error_log("Error en TaskController::create: " . $e->getMessage());
             http_response_code(500);
@@ -170,7 +162,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -196,7 +187,6 @@ class TaskController extends BaseController
 
             // Validar datos
             $errors = $this->validateTaskData($_POST);
-
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/tasks/create?error=" . urlencode($errorMsg));
@@ -230,7 +220,6 @@ class TaskController extends BaseController
             } else {
                 Security::redirect("/tasks/create?error=Error al asignar la tarea al proyecto");
             }
-
         } catch (Exception $e) {
             error_log("Error en TaskController::store: " . $e->getMessage());
             Security::redirect("/tasks/create?error=Error interno del servidor");
@@ -244,7 +233,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -284,7 +272,6 @@ class TaskController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/tasks/edit.php';
-
         } catch (Exception $e) {
             error_log("Error en TaskController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -299,7 +286,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -331,7 +317,6 @@ class TaskController extends BaseController
 
             // Validar datos básicos
             $errors = $this->validateTaskData($_POST, true);
-
             // Validar datos específicos de estado (GAP 5)
             $stateErrors = $this->taskModel->validateUpdateData($id, $_POST, $currentUser['rol']);
             $errors = array_merge($errors, $stateErrors);
@@ -360,7 +345,6 @@ class TaskController extends BaseController
             } else {
                 Security::redirect("/tasks/edit?id={$id}&error=Error al actualizar la tarea");
             }
-
         } catch (Exception $e) {
             error_log("Error en TaskController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
@@ -375,7 +359,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -430,10 +413,8 @@ class TaskController extends BaseController
                     $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_DELETE_TASK);
                 }
             }
-
         } catch (Exception $e) {
             error_log("Error en TaskController::delete: " . $e->getMessage());
-
             // Si es petición AJAX, devolver JSON
             if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
@@ -452,7 +433,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'message' => 'No autenticado']);
@@ -494,7 +474,6 @@ class TaskController extends BaseController
 
             http_response_code($result['success'] ? 200 : 400);
             echo json_encode($result);
-
         } catch (Exception $e) {
             error_log("Error en TaskController::changeState: " . $e->getMessage());
             http_response_code(500);
@@ -509,7 +488,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['valid' => false, 'message' => 'No autenticado']);
@@ -525,9 +503,7 @@ class TaskController extends BaseController
 
             // Verificar si la tarea puede ejecutarse
             $result = $this->taskModel->canExecuteTask($taskId);
-
             echo json_encode($result);
-
         } catch (Exception $e) {
             error_log("Error en TaskController::checkExecutable: " . $e->getMessage());
             http_response_code(500);
@@ -542,7 +518,6 @@ class TaskController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 http_response_code(401);
                 echo json_encode(['transitions' => [], 'message' => 'No autenticado']);
@@ -572,7 +547,6 @@ class TaskController extends BaseController
 
             foreach ($allStates as $state) {
                 $stateId = (int)$state['id'];
-
                 if ($stateId === $currentState) {
                     continue; // No incluir el estado actual
                 }
@@ -601,7 +575,6 @@ class TaskController extends BaseController
                 'current_state' => $currentState,
                 'message' => 'Transiciones obtenidas correctamente'
             ]);
-
         } catch (Exception $e) {
             error_log("Error en TaskController::getValidTransitions: " . $e->getMessage());
             http_response_code(500);
@@ -686,6 +659,4 @@ class TaskController extends BaseController
 
         return $errors;
     }
-
-
 }

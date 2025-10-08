@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\ProyectoFeriado;
@@ -31,7 +30,6 @@ class ProyectoFeriadoController extends BaseController
     public function index()
     {
         $projectId = $_GET['proyecto_id'] ?? null;
-
         if (!$projectId) {
             $this->redirectToRoute(AppConstants::ROUTE_PROJECTS);
             return;
@@ -121,7 +119,6 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $message = "Feriados creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
-
             $response = [
                 'success' => true,
                 'message' => $message,
@@ -135,7 +132,6 @@ class ProyectoFeriadoController extends BaseController
             }
 
             echo json_encode($response);
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createMasivo error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -187,7 +183,6 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $message = $result['action'] === 'created' ? AppConstants::SUCCESS_HOLIDAY_CREATED : AppConstants::SUCCESS_HOLIDAY_UPDATED;
-
             $response = [
                 'success' => true,
                 'message' => $message,
@@ -201,7 +196,6 @@ class ProyectoFeriadoController extends BaseController
             }
 
             echo json_encode($response);
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createEspecifico error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -260,7 +254,6 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $message = "Feriados en rango creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
-
             $response = [
                 'success' => true,
                 'message' => $message,
@@ -274,7 +267,6 @@ class ProyectoFeriadoController extends BaseController
             }
 
             echo json_encode($response);
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createRango error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -288,7 +280,6 @@ class ProyectoFeriadoController extends BaseController
     {
         try {
             $projectId = (int)($_GET['proyecto_id'] ?? 0);
-
             if (!$projectId) {
                 echo json_encode(['success' => false, 'message' => 'ID de proyecto requerido']);
                 return;
@@ -302,7 +293,6 @@ class ProyectoFeriadoController extends BaseController
                 'feriados' => $feriados,
                 'stats' => $stats
             ]);
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::list error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -329,7 +319,6 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $id = (int)($_POST['id'] ?? 0);
-
             if (!$id) {
                 echo json_encode(['success' => false, 'message' => 'ID de feriado requerido']);
                 return;
@@ -343,13 +332,11 @@ class ProyectoFeriadoController extends BaseController
             ];
 
             $success = $this->proyectoFeriadoModel->update($id, $data);
-
             if ($success) {
                 echo json_encode(['success' => true, 'message' => AppConstants::SUCCESS_HOLIDAY_UPDATED]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al actualizar feriado']);
             }
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::update error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -376,20 +363,17 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $id = (int)($_POST['id'] ?? 0);
-
             if (!$id) {
                 echo json_encode(['success' => false, 'message' => 'ID de feriado requerido']);
                 return;
             }
 
             $success = $this->proyectoFeriadoModel->delete($id);
-
             if ($success) {
                 echo json_encode(['success' => true, 'message' => AppConstants::SUCCESS_HOLIDAY_DELETED]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al eliminar feriado']);
             }
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::delete error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -417,7 +401,6 @@ class ProyectoFeriadoController extends BaseController
                 'success' => true,
                 'conflicts' => $conflicts
             ]);
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::checkConflicts error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -459,7 +442,6 @@ class ProyectoFeriadoController extends BaseController
             $taskIds = array_map('intval', $taskIds);
 
             $success = $this->proyectoFeriadoModel->moveTasksForward($projectId, $taskIds, $diasAMover);
-
             if ($success) {
                 echo json_encode([
                     'success' => true,
@@ -469,7 +451,6 @@ class ProyectoFeriadoController extends BaseController
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al mover tareas']);
             }
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::moveTasks error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
@@ -498,7 +479,6 @@ class ProyectoFeriadoController extends BaseController
                 'working_days' => $workingDays,
                 'total_working_days' => count($workingDays)
             ]);
-
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::getWorkingDays error: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);

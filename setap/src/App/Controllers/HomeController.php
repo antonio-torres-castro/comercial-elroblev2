@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Controllers;
-
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
@@ -16,7 +14,6 @@ class HomeController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-        
         $this->permissionService = new PermissionService();
     }
 
@@ -25,32 +22,29 @@ class HomeController extends BaseController
         try {
             // Obtener usuario actual
             $currentUser = $this->getCurrentUser();
-            
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
             }
-            
+
             // Obtener menús accesibles para el usuario
             $menus = $this->permissionService->getUserMenus($currentUser['id']);
-            
+
             // Datos para el home
             $homeData = [
                 'user' => $currentUser,
                 'menus' => $menus,
                 'stats' => $this->getHomeStats($currentUser)
             ];
-            
+
             require_once __DIR__ . '/../Views/home.php';
-            
+
         } catch (Exception $e) {
             error_log("Error en HomeController::index: " . $e->getMessage());
             http_response_code(500);
             echo AppConstants::ERROR_INTERNAL_SERVER;
         }
     }
-
-
 
     private function getHomeStats(array $user): array
     {
@@ -61,17 +55,16 @@ class HomeController extends BaseController
             'proyectos_activos' => 0,
             'tareas_pendientes' => 0
         ];
-        
+
         try {
             // Solo mostrar estadísticas si el usuario tiene permisos
             if (Security::hasPermission('Read') || Security::hasPermission('All')) {
                 $stats = $this->calculateStats();
             }
-            
         } catch (Exception $e) {
             error_log("Error calculando estadísticas: " . $e->getMessage());
         }
-        
+
         return $stats;
     }
 
