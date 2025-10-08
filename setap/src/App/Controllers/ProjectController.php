@@ -545,7 +545,7 @@ class ProjectController extends BaseController
 
             // Obtener ID del proyecto de los parámetros GET
             $projectId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-            
+
             if (!$projectId) {
                 http_response_code(400);
                 echo 'ID del proyecto requerido';
@@ -555,7 +555,6 @@ class ProjectController extends BaseController
             // TODO: Implementar lógica de generación de reportes
             // Por ahora, mostrar mensaje temporal
             echo "Generando reporte para el proyecto ID: " . $projectId;
-            
         } catch (Exception $e) {
             error_log("Error en ProjectController::report: " . $e->getMessage());
             http_response_code(500);

@@ -18,7 +18,7 @@ class PerfilController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-        
+
         $this->permissionService = new PermissionService();
         $this->userModel = new User();
     }
@@ -30,7 +30,7 @@ class PerfilController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -59,7 +59,6 @@ class PerfilController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/perfil/view.php';
-
         } catch (Exception $e) {
             error_log("Error en PerfilController::index: " . $e->getMessage());
             http_response_code(500);
@@ -74,7 +73,7 @@ class PerfilController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            
+
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -103,12 +102,11 @@ class PerfilController extends BaseController
             // Datos para la vista
             $data = [
                 'user' => $fullUserData,
-                'title' => 'Editar Perfil',
-                'subtitle' => 'Actualiza tu información personal'
+                'title' => AppConstants::UI_TITLE_VIEW_PERFIL_EDIT,
+                'subtitle' => AppConstants::UI_SUBTITLE_VIEW_PERFIL_EDIT 
             ];
 
             require_once __DIR__ . '/../Views/perfil/edit.php';
-
         } catch (Exception $e) {
             error_log("Error en PerfilController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -131,13 +129,13 @@ class PerfilController extends BaseController
 
             // Validar datos
             $errors = $this->validateProfileData($_POST);
-            
+
             if (!empty($errors)) {
                 // Mostrar formulario con errores
                 $data = [
                     'user' => array_merge($currentUser, $_POST),
-                    'title' => 'Editar Perfil',
-                    'subtitle' => 'Actualiza tu información personal',
+                    'title' => AppConstants::UI_TITLE_VIEW_PERFIL_EDIT ,
+                    'subtitle' => AppConstants::UI_SUBTITLE_VIEW_PERFIL_EDIT ,
                     'errors' => $errors
                 ];
                 require_once __DIR__ . '/../Views/perfil/edit.php';
@@ -159,21 +157,20 @@ class PerfilController extends BaseController
                 // Actualizar datos en sesión
                 $_SESSION['nombre_completo'] = $updateData['nombre'];
                 $_SESSION['email'] = $updateData['email'];
-                
+
                 $_SESSION['success_message'] = 'Perfil actualizado correctamente';
                 $this->redirectToRoute(AppConstants::ROUTE_PERFIL);
             } else {
                 throw new Exception('No se pudo actualizar el perfil');
             }
-
         } catch (Exception $e) {
             error_log("Error en PerfilController::updateProfile: " . $e->getMessage());
-            
+
             // Mostrar formulario con error
             $data = [
                 'user' => array_merge($currentUser, $_POST ?? []),
-                'title' => 'Editar Perfil',
-                'subtitle' => 'Actualiza tu información personal',
+                'title' => AppConstants::UI_TITLE_VIEW_PERFIL_EDIT ,
+                'subtitle' => AppConstants::UI_SUBTITLE_VIEW_PERFIL_EDIT ,
                 'errors' => ['Error al actualizar el perfil: ' . $e->getMessage()]
             ];
             require_once __DIR__ . '/../Views/perfil/edit.php';
@@ -220,6 +217,4 @@ class PerfilController extends BaseController
 
         return $errors;
     }
-
-
 }

@@ -95,8 +95,6 @@ class UserController extends BaseController
                 return;
             }
 
-
-
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
@@ -145,7 +143,6 @@ class UserController extends BaseController
 
             // Manejar búsqueda de persona
             $this->handlePersonaSearch();
-            
         } catch (Exception $e) {
             error_log("Error en UserController::seekPersonas: " . $e->getMessage());
             $_SESSION['errors'] = ['Error al buscar personas'];
@@ -1047,10 +1044,10 @@ class UserController extends BaseController
         $search = trim($_POST['persona_search'] ?? '');
         $searchType = $_POST['search_type'] ?? 'all'; // 'all', 'rut', 'name'
         $currentUserId = (int)($_POST['current_user_id'] ?? 0); // Para edición
-        
+
         try {
             $personas = [];
-            
+
             // Si no hay término de búsqueda, traer todas las personas
             if (empty($search)) {
                 $personas = $this->userModel->getAllPersonas($currentUserId > 0 ? $currentUserId : null);
@@ -1071,20 +1068,24 @@ class UserController extends BaseController
             }
 
             if (empty($personas)) {
-                $_SESSION['errors'] = empty($search) 
-                    ? ['No se encontraron personas en el sistema'] 
+                $_SESSION['errors'] = empty($search)
+                    ? ['No se encontraron personas en el sistema']
                     : ['No se encontraron personas con ese criterio de búsqueda'];
             } else {
                 $_SESSION['persona_results'] = $personas;
                 $_SESSION['search_stats'] = [
                     'total' => count($personas),
-                    'available' => count(array_filter($personas, function($p) { return $p['has_user'] == 0; })),
-                    'assigned' => count(array_filter($personas, function($p) { return $p['has_user'] == 1; }))
+                    'available' => count(array_filter($personas, function ($p) {
+                        return $p['has_user'] == 0;
+                    })),
+                    'assigned' => count(array_filter($personas, function ($p) {
+                        return $p['has_user'] == 1;
+                    }))
                 ];
             }
 
             $_SESSION['old_input'] = $_POST;
-            
+
             // Redireccionar según el contexto
             if ($currentUserId > 0) {
                 $this->redirectTo("/users/edit?id={$currentUserId}");
@@ -1095,7 +1096,7 @@ class UserController extends BaseController
             error_log("Error en búsqueda de personas: " . $e->getMessage());
             $_SESSION['errors'] = ['Error al buscar personas'];
             $_SESSION['old_input'] = $_POST;
-            
+
             if ($currentUserId > 0) {
                 $this->redirectTo("/users/edit?id={$currentUserId}");
             } else {
@@ -1184,7 +1185,7 @@ class UserController extends BaseController
 
             // Obtener user_id del parámetro GET
             $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : null;
-            
+
             if (!$userId) {
                 http_response_code(400);
                 echo $this->renderError('ID de usuario requerido');
@@ -1214,7 +1215,6 @@ class UserController extends BaseController
                 'allMenus' => $allMenus,
                 'currentUser' => $currentUser
             ]);
-
         } catch (Exception $e) {
             error_log("Error en UserController::permissions: " . $e->getMessage());
             http_response_code(500);

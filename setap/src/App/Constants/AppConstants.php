@@ -289,6 +289,10 @@ class AppConstants
     /** Título búsqueda avanzada */
     const UI_ADVANCED_SEARCH = 'Búsqueda Avanzada';
 
+    const UI_TITLE_VIEW_MENU = 'Gestión de Menú';
+    const UI_TITLE_VIEW_PERFIL_EDIT = 'Editar Perfil';
+    const UI_SUBTITLE_VIEW_PERFIL_EDIT = 'Actualiza tu información personal';
+
     // ===== ERRORES DE CARGA =====
 
     /** Error cargando permisos */

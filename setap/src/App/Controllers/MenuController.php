@@ -108,7 +108,7 @@ class MenuController extends BaseController
             // Datos para la vista
             $data = [
                 'user' => $currentUser,
-                'title' => 'Gestión de Menú',
+                'title' => AppConstants::UI_TITLE_VIEW_MENU,
                 'subtitle' => $id ? "Editando menú #$id" : 'Nuevo menú',
                 'menu_id' => $id,
                 'menu' => $menu,
@@ -167,12 +167,12 @@ class MenuController extends BaseController
 
             // Validar datos
             $errors = $this->validateMenuData($_POST);
-            
+
             if (!empty($errors)) {
                 $statusTypes = $this->menuModel->getStatusTypes();
                 $data = [
                     'user' => $currentUser,
-                    'title' => 'Gestión de Menú',
+                    'title' => AppConstants::UI_TITLE_VIEW_MENU,
                     'subtitle' => 'Nuevo menú',
                     'menu_id' => null,
                     'menu' => $_POST,
@@ -190,7 +190,6 @@ class MenuController extends BaseController
 
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, AppConstants::SUCCESS_CREATED);
-
         } catch (Exception $e) {
             error_log("Error en MenuController::store: " . $e->getMessage());
             http_response_code(500);
@@ -235,7 +234,7 @@ class MenuController extends BaseController
 
             // Obtener ID del menú
             $menuId = $id ?? (int)($_POST['id'] ?? 0);
-            
+
             if (!$menuId) {
                 http_response_code(400);
                 echo $this->renderError('ID de menú requerido');
@@ -252,12 +251,12 @@ class MenuController extends BaseController
 
             // Validar datos
             $errors = $this->validateMenuData($_POST, $menuId);
-            
+
             if (!empty($errors)) {
                 $statusTypes = $this->menuModel->getStatusTypes();
                 $data = [
                     'user' => $currentUser,
-                    'title' => 'Gestión de Menú',
+                    'title' => AppConstants::UI_TITLE_VIEW_MENU,
                     'subtitle' => "Editando menú #$menuId",
                     'menu_id' => $menuId,
                     'menu' => array_merge($menu, $_POST),
@@ -277,7 +276,6 @@ class MenuController extends BaseController
             } else {
                 throw new Exception('No se pudo actualizar el menú');
             }
-
         } catch (Exception $e) {
             error_log("Error en MenuController::update: " . $e->getMessage());
             http_response_code(500);
@@ -313,7 +311,7 @@ class MenuController extends BaseController
             }
 
             $menuId = (int)($_POST['id'] ?? 0);
-            
+
             if (!$menuId) {
                 http_response_code(400);
                 echo $this->renderError('ID de menú requerido');
@@ -328,7 +326,6 @@ class MenuController extends BaseController
             } else {
                 throw new Exception('No se pudo eliminar el menú');
             }
-
         } catch (Exception $e) {
             error_log("Error en MenuController::delete: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_MENUS, $e->getMessage());
@@ -363,7 +360,7 @@ class MenuController extends BaseController
             }
 
             $menuId = (int)($_POST['id'] ?? 0);
-            
+
             if (!$menuId) {
                 http_response_code(400);
                 echo $this->renderError('ID de menú requerido');
@@ -378,7 +375,6 @@ class MenuController extends BaseController
             } else {
                 throw new Exception('No se pudo cambiar el estado del menú');
             }
-
         } catch (Exception $e) {
             error_log("Error en MenuController::toggleStatus: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_MENUS, $e->getMessage());
@@ -441,6 +437,4 @@ class MenuController extends BaseController
 
         return $errors;
     }
-
-
 }

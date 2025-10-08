@@ -197,7 +197,7 @@ class AccessController extends BaseController
 
             // Eliminar accesos actuales (cambiar estado)
             $stmt = $this->db->prepare("
-                UPDATE usuario_tipo_menus 
+                UPDATE usuario_tipo_menus
                 SET estado_tipo_id = 4, fecha_modificacion = NOW()
                 WHERE usuario_tipo_id = ?
             ");
