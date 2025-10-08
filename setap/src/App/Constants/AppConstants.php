@@ -100,6 +100,9 @@ class AppConstants
     /** Error de usuario no encontrado */
     const ERROR_USER_NOT_FOUND = 'Usuario no encontrado';
 
+    /** Error de usuario no encontrado */
+    const ERROR_USER_NOT_AUTHENTICATED = 'No autenticado';
+
     /** Error de tarea no encontrada */
     const ERROR_TASK_NOT_FOUND = 'Tarea no encontrada';
 
@@ -120,6 +123,9 @@ class AppConstants
 
     /** Error de token de seguridad inválido */
     const ERROR_INVALID_SECURITY_TOKEN = 'Token de seguridad inválido';
+
+    /** Error de token CSRF inválido */
+    const ERROR_INVALID_CSRF_TOKEN = 'Token CSRF inválido';
 
     /** Error al crear persona */
     const ERROR_CREATE_PERSONA = 'Error al crear persona';

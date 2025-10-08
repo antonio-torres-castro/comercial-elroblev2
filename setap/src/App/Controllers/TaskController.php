@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\Task;
@@ -398,16 +399,20 @@ class TaskController extends BaseController
             // Eliminar tarea
             if ($this->taskModel->delete($id)) {
                 // Si es petición AJAX, devolver JSON
-                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                if (
+                    !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+                ) {
                     echo json_encode(['success' => true, 'message' => 'Tarea eliminada correctamente']);
                 } else {
                     $this->redirectWithSuccess(AppConstants::ROUTE_TASKS, AppConstants::SUCCESS_TASK_DELETED);
                 }
             } else {
                 // Si es petición AJAX, devolver JSON
-                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                if (
+                    !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+                ) {
                     echo json_encode(['success' => false, 'message' => 'Error al eliminar la tarea']);
                 } else {
                     $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_DELETE_TASK);
@@ -416,8 +421,10 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::delete: " . $e->getMessage());
             // Si es petición AJAX, devolver JSON
-            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            if (
+                !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+            ) {
                 http_response_code(500);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
             } else {
@@ -435,7 +442,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'No autenticado']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
                 return;
             }
 
@@ -448,7 +455,7 @@ class TaskController extends BaseController
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 
@@ -490,7 +497,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['valid' => false, 'message' => 'No autenticado']);
+                echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
                 return;
             }
 
@@ -520,7 +527,7 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['transitions' => [], 'message' => 'No autenticado']);
+                echo json_encode(['transitions' => [], 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
                 return;
             }
 

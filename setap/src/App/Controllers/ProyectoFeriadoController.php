@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\ProyectoFeriado;
@@ -70,14 +71,14 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
                 return;
             }
 
@@ -146,14 +147,14 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
                 return;
             }
 
@@ -210,14 +211,14 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
                 return;
             }
 
@@ -307,14 +308,14 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
                 return;
             }
 
@@ -351,14 +352,14 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
                 return;
             }
 
@@ -415,14 +416,14 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
                 return;
             }
 

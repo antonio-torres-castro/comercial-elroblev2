@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Services\AuthService;
@@ -7,15 +6,27 @@ use App\Services\AuthViewService;
 use App\Services\AuthValidationService;
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+use App\Traits\CommonValidationsTrait;
 use Exception;
 
-class AuthController extends BaseController
+/**
+ * AuthController - Refactorizado
+ * Eliminación de código duplicado y estandarización
+ */
+class AuthController extends AbstractBaseController
 {
+    use CommonValidationsTrait;
+    
     private $authService;
     private $authViewService;
     private $authValidationService;
 
-    public function __construct()
+    protected function isAuthExempt(): bool
+    {
+        return true; // AuthController está exento de autenticación
+    }
+
+    protected function initializeController(): void
     {
         $this->authService = new AuthService();
         $this->authViewService = new AuthViewService();
@@ -24,28 +35,29 @@ class AuthController extends BaseController
 
     public function showLoginForm()
     {
-        // Si ya está autenticado, redirigir al home
-        if (Security::isAuthenticated()) {
-            $this->redirectToHome();
-            return;
-        }
+        return $this->executeWithErrorHandling(function() {
+            // Si ya está autenticado, redirigir al home
+            if (Security::isAuthenticated()) {
+                $this->redirectToHome();
+                return;
+            }
 
-        // Obtener el error de login si existe y luego limpiarlo
-        $error = $_SESSION['login_error'] ?? '';
-        unset($_SESSION['login_error']);
+            // Obtener el error de login si existe y luego limpiarlo
+            $error = $_SESSION['login_error'] ?? '';
+            unset($_SESSION['login_error']);
 
-        $csrfToken = Security::generateCsrfToken();
+            $csrfToken = Security::generateCsrfToken();
 
-        // Generar y mostrar la página de login
-        echo $this->authViewService->generateLoginPage($error, $csrfToken);
+            // Generar y mostrar la página de login
+            echo $this->authViewService->generateLoginPage($error, $csrfToken);
+        }, 'showLoginForm');
     }
 
     public function login()
     {
-        try {
+        return $this->executeWithErrorHandling(function() {
             // Validar datos de entrada
             $validation = $this->authValidationService->validateLoginCredentials($_POST);
-            
             if (!$validation['isValid']) {
                 $_SESSION['login_error'] = $this->authValidationService->formatErrorsForDisplay($validation['errors']);
                 $this->redirectToLogin();
@@ -56,7 +68,6 @@ class AuthController extends BaseController
 
             // Intentar autenticar
             $userData = $this->authService->authenticate($credentials['identifier'], $credentials['password']);
-
             if (!$userData) {
                 $_SESSION['login_error'] = 'Credenciales incorrectas';
                 $this->redirectToLogin();
@@ -70,23 +81,14 @@ class AuthController extends BaseController
                 $_SESSION['login_error'] = 'Error al iniciar sesión';
                 $this->redirectToLogin();
             }
-        } catch (Exception $e) {
-            error_log("Error en login: " . $e->getMessage());
-            $_SESSION['login_error'] = AppConstants::ERROR_INTERNAL_SERVER;
-            $this->redirectToLogin();
-        }
+        }, 'login');
     }
 
     public function logout()
     {
-        try {
+        return $this->executeWithErrorHandling(function() {
             $this->authService->logout();
             $this->redirectToLogin();
-        } catch (Exception $e) {
-            error_log("Error en logout: " . $e->getMessage());
-            $this->redirectToLogin();
-        }
+        }, 'logout');
     }
-
-
 }

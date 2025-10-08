@@ -1,6 +1,7 @@
 <?php
 namespace App\Controllers;
 
+use App\Config\AppConfig;
 use App\Models\Persona;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
@@ -286,7 +287,7 @@ class PersonaController extends BaseController
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['error' => 'No autenticado']);
+                echo json_encode(['error' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
                 return;
             }
 
@@ -299,7 +300,7 @@ class PersonaController extends BaseController
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['error' => 'Método no permitido']);
+                echo json_encode(['error' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                 return;
             }
 

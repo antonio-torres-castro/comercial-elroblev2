@@ -18,6 +18,7 @@ use App\Controllers\ProyectoFeriadoController;
 use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
 use App\Helpers\Security;
+use app\Constants\AppConstants;
 
 // Configurar headers de seguridad básicos
 Security::setSecurityHeaders();
@@ -488,7 +489,7 @@ try {
                         $controller->changeState();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -497,7 +498,7 @@ try {
                         $controller->checkExecutable();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['valid' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -506,7 +507,7 @@ try {
                         $controller->getValidTransitions();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['transitions' => [], 'message' => 'Método no permitido']);
+                        echo json_encode(['transitions' => [], 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -537,7 +538,7 @@ try {
                         $controller->createMasivo();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -546,7 +547,7 @@ try {
                         $controller->createEspecifico();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -555,7 +556,7 @@ try {
                         $controller->createRango();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -564,7 +565,7 @@ try {
                         $controller->list();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -573,7 +574,7 @@ try {
                         $controller->update();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -582,7 +583,7 @@ try {
                         $controller->delete();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -591,7 +592,7 @@ try {
                         $controller->checkConflicts();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -600,7 +601,7 @@ try {
                         $controller->moveTasks();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -609,7 +610,7 @@ try {
                         $controller->getWorkingDays();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     

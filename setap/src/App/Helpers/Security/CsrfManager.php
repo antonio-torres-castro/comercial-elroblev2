@@ -2,6 +2,8 @@
 
 namespace App\Helpers\Security;
 
+use App\Constants\AppConstants;
+
 /**
  * Gestor de tokens CSRF
  * Responsabilidad única: Gestionar protección CSRF
@@ -128,9 +130,9 @@ class CsrfManager
     {
         // Buscar token en POST, GET o headers
         $token = $_POST['csrf_token'] ??
-                 $_GET['csrf_token'] ??
-                 $_SERVER['HTTP_X_CSRF_TOKEN'] ??
-                 '';
+            $_GET['csrf_token'] ??
+            $_SERVER['HTTP_X_CSRF_TOKEN'] ??
+            '';
 
         return self::validateToken($token);
     }
@@ -150,12 +152,14 @@ class CsrfManager
             http_response_code(403);
 
             // Si es AJAX, devolver JSON
-            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            if (
+                !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+            ) {
                 header('Content-Type: application/json');
-                echo json_encode(['error' => 'Token CSRF inválido']);
+                echo json_encode(['error' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
             } else {
-                echo 'Token CSRF inválido';
+                echo AppConstants::ERROR_INVALID_CSRF_TOKEN;
             }
 
             exit;

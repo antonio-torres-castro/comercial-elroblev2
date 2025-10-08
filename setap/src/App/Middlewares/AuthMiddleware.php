@@ -3,6 +3,7 @@
 namespace App\Middlewares;
 
 use App\Helpers\Security;
+use app\Constants\AppConstants;
 
 class AuthMiddleware
 {
@@ -27,7 +28,7 @@ class AuthMiddleware
         if ($this->isAjaxRequest()) {
             http_response_code(401);
             header('Content-Type: application/json');
-            echo json_encode(['error' => 'No autenticado', 'redirect' => '/login']);
+            echo json_encode(['error' => AppConstants::ERROR_USER_NOT_AUTHENTICATED, 'redirect' => '/login']);
         } else {
             header('Location: /login');
         }
@@ -47,6 +48,6 @@ class AuthMiddleware
     private function isAjaxRequest(): bool
     {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-               && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }

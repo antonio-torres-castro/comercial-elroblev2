@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\Project;
@@ -21,7 +20,6 @@ class ProjectController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-
         $this->projectModel = new Project();
         $this->permissionService = new PermissionService();
         $this->db = Database::getInstance();
@@ -38,19 +36,15 @@ class ProjectController extends BaseController
 
         // Aplicar filtros si están presentes
         $filters = [];
-
         if (!empty($_GET['cliente_id'])) {
             $filters['cliente_id'] = (int)$_GET['cliente_id'];
         }
-
         if (!empty($_GET['estado_tipo_id'])) {
             $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
         }
-
         if (!empty($_GET['fecha_desde'])) {
             $filters['fecha_desde'] = $_GET['fecha_desde'];
         }
-
         if (!empty($_GET['fecha_hasta'])) {
             $filters['fecha_hasta'] = $_GET['fecha_hasta'];
         }
@@ -83,7 +77,6 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_GET['id'] ?? 0);
-
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -158,7 +151,6 @@ class ProjectController extends BaseController
 
         try {
             $errors = $this->validateProjectData($_POST);
-
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/projects/create?error=" . urlencode($errorMsg));
@@ -176,13 +168,11 @@ class ProjectController extends BaseController
             ];
 
             $projectId = $this->projectModel->create($projectData);
-
             if ($projectId) {
                 Security::logSecurityEvent('project_created', [
                     'project_id' => $projectId,
                     'created_by' => $_SESSION['username']
                 ]);
-
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto creado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_CREATE_PROJECT);
@@ -203,7 +193,6 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_GET['id'] ?? 0);
-
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -248,7 +237,6 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_POST['id'] ?? 0);
-
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -262,7 +250,6 @@ class ProjectController extends BaseController
 
         try {
             $errors = $this->validateProjectData($_POST);
-
             if (!empty($errors)) {
                 $errorMsg = implode(', ', $errors);
                 Security::redirect("/projects/edit?id={$id}&error=" . urlencode($errorMsg));
@@ -284,7 +271,6 @@ class ProjectController extends BaseController
                     'project_id' => $id,
                     'updated_by' => $_SESSION['username']
                 ]);
-
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto actualizado correctamente');
             } else {
                 Security::redirect("/projects/edit?id={$id}&error=Error al actualizar proyecto");
@@ -305,7 +291,6 @@ class ProjectController extends BaseController
         }
 
         $id = (int)($_GET['id'] ?? 0);
-
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -323,7 +308,6 @@ class ProjectController extends BaseController
                     'project_id' => $id,
                     'deleted_by' => $_SESSION['username']
                 ]);
-
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto eliminado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_DELETE_PROJECT);
@@ -363,7 +347,6 @@ class ProjectController extends BaseController
                     'new_status_id' => $newStatusId,
                     'changed_by' => $_SESSION['username']
                 ]);
-
                 Security::redirect("/projects/show?id={$projectId}&success=Estado actualizado correctamente");
             } else {
                 Security::redirect("/projects/show?id={$projectId}&error=Error al cambiar estado");
@@ -384,7 +367,6 @@ class ProjectController extends BaseController
         }
 
         $term = Security::sanitizeInput($_GET['q'] ?? '');
-
         if (empty($term) || strlen($term) < 3) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_SEARCH_TERM_TOO_SHORT);
             return;
@@ -460,8 +442,6 @@ class ProjectController extends BaseController
 
         return $errors;
     }
-
-
 
     private function getClients(): array
     {
@@ -545,7 +525,6 @@ class ProjectController extends BaseController
 
             // Obtener ID del proyecto de los parámetros GET
             $projectId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-
             if (!$projectId) {
                 http_response_code(400);
                 echo 'ID del proyecto requerido';
