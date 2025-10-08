@@ -1,7 +1,6 @@
 <?php
 namespace App\Controllers;
 
-use App\Config\AppConfig;
 use App\Models\Persona;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;

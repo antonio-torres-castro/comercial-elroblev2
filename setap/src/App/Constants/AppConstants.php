@@ -315,16 +315,14 @@ class AppConstants
     /**
      * Construye una URL con parámetros de éxito
      */
-    public static function buildSuccessUrl(string $baseRoute, string $message): string
-    {
+    public static function buildSuccessUrl(string $baseRoute, string $message): string {
         return $baseRoute . '?' . self::PARAM_SUCCESS . '=' . $message;
     }
 
     /**
      * Construye una URL con parámetros de error
      */
-    public static function buildErrorUrl(string $baseRoute, string $message): string
-    {
+    public static function buildErrorUrl(string $baseRoute, string $message): string {
         return $baseRoute . '?' . self::PARAM_ERROR . '=' . urlencode($message);
     }
 }

@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Controllers;
-
 use App\Models\User;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
@@ -18,7 +16,6 @@ class PerfilController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-
         $this->permissionService = new PermissionService();
         $this->userModel = new User();
     }
@@ -30,7 +27,6 @@ class PerfilController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -59,6 +55,7 @@ class PerfilController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/perfil/view.php';
+
         } catch (Exception $e) {
             error_log("Error en PerfilController::index: " . $e->getMessage());
             http_response_code(500);
@@ -73,7 +70,6 @@ class PerfilController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -115,106 +111,182 @@ class PerfilController extends BaseController
     }
 
     /**
-     * Actualizar información del perfil
+     * Actualizar perfil del usuario
      */
-    private function updateProfile(array $currentUser)
+    private function updateProfile($fullUserData)
     {
         try {
-            // Verificar token CSRF
+            // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
-                echo $this->renderError('Token de seguridad inválido');
+                echo $this->renderError(AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
-            // Validar datos
+            // Validar datos requeridos
             $errors = $this->validateProfileData($_POST);
-
             if (!empty($errors)) {
-                // Mostrar formulario con errores
-                $data = [
-                    'user' => array_merge($currentUser, $_POST),
-                    'title' => AppConstants::UI_TITLE_VIEW_PERFIL_EDIT ,
-                    'subtitle' => AppConstants::UI_SUBTITLE_VIEW_PERFIL_EDIT ,
-                    'errors' => $errors
-                ];
-                require_once __DIR__ . '/../Views/perfil/edit.php';
+                http_response_code(400);
+                echo $this->renderError(implode(', ', $errors));
                 return;
             }
 
             // Preparar datos para actualización
-            $updateData = [
-                'nombre' => trim($_POST['nombre']),
-                'email' => trim($_POST['email']),
-                'telefono' => trim($_POST['telefono'] ?? ''),
-                'direccion' => trim($_POST['direccion'] ?? '')
+            $data = [
+                'nombre' => Security::sanitizeInput($_POST['nombre']),
+                'telefono' => Security::sanitizeInput($_POST['telefono'] ?? ''),
+                'direccion' => Security::sanitizeInput($_POST['direccion'] ?? ''),
+                'email' => Security::sanitizeInput($_POST['email'])
             ];
 
             // Actualizar perfil usando el modelo
-            $success = $this->userModel->updateProfile($currentUser['id'], $updateData);
-
-            if ($success) {
-                // Actualizar datos en sesión
-                $_SESSION['nombre_completo'] = $updateData['nombre'];
-                $_SESSION['email'] = $updateData['email'];
-
+            if ($this->userModel->updateProfile($fullUserData['id'], $data)) {
+                // Redirigir con mensaje de éxito
                 $_SESSION['success_message'] = 'Perfil actualizado correctamente';
-                $this->redirectToRoute(AppConstants::ROUTE_PERFIL);
+                header('Location: /perfil');
+                exit;
             } else {
-                throw new Exception('No se pudo actualizar el perfil');
+                throw new Exception('Error al actualizar el perfil');
             }
+
         } catch (Exception $e) {
             error_log("Error en PerfilController::updateProfile: " . $e->getMessage());
-
-            // Mostrar formulario con error
-            $data = [
-                'user' => array_merge($currentUser, $_POST ?? []),
-                'title' => AppConstants::UI_TITLE_VIEW_PERFIL_EDIT ,
-                'subtitle' => AppConstants::UI_SUBTITLE_VIEW_PERFIL_EDIT ,
-                'errors' => ['Error al actualizar el perfil: ' . $e->getMessage()]
-            ];
-            require_once __DIR__ . '/../Views/perfil/edit.php';
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
     /**
      * Validar datos del perfil
      */
-    private function validateProfileData(array $data): array
+    private function validateProfileData($data): array
     {
         $errors = [];
 
-        // Nombre requerido
-        if (empty(trim($data['nombre'] ?? ''))) {
-            $errors[] = 'El nombre completo es requerido';
-        } elseif (strlen($data['nombre']) < 2) {
+        // Validar nombre
+        if (empty($data['nombre'])) {
+            $errors[] = 'El nombre es requerido';
+        } elseif (strlen(trim($data['nombre'])) < 2) {
             $errors[] = 'El nombre debe tener al menos 2 caracteres';
-        } elseif (strlen($data['nombre']) > 100) {
-            $errors[] = 'El nombre no puede exceder 100 caracteres';
         }
 
-        // Email requerido y válido
-        if (empty(trim($data['email'] ?? ''))) {
+        // Validar email
+        if (empty($data['email'])) {
             $errors[] = 'El email es requerido';
-        } elseif (!Security::validateEmail($data['email'])) {
-            $errors[] = 'El email no tiene un formato válido';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'El email no es válido';
         }
 
-        // Teléfono opcional pero validar formato si se proporciona
+        // Validar teléfono (opcional pero si se proporciona debe ser válido)
         if (!empty($data['telefono'])) {
-            $telefono = preg_replace('/[^0-9+\-\s]/', '', $data['telefono']);
-            if (strlen($telefono) < 8) {
-                $errors[] = 'El teléfono debe tener al menos 8 dígitos';
-            } elseif (strlen($telefono) > 20) {
-                $errors[] = 'El teléfono no puede exceder 20 caracteres';
+            if (!preg_match('/^[0-9+\-\s()]{7,15}$/', $data['telefono'])) {
+                $errors[] = 'El teléfono no es válido';
             }
         }
 
-        // Dirección opcional pero validar longitud
-        if (!empty($data['direccion']) && strlen($data['direccion']) > 200) {
-            $errors[] = 'La dirección no puede exceder 200 caracteres';
-        }
-
         return $errors;
+    }
+
+    /**
+     * Cambiar contraseña del usuario
+     */
+    public function changePassword()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            // Verificar permisos para cambiar contraseña
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_perfil')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_EDIT_PERMISSIONS);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $this->processPasswordChange($currentUser);
+                return;
+            }
+
+            // Mostrar formulario de cambio de contraseña
+            $data = [
+                'user' => $currentUser,
+                'title' => 'Cambiar Contraseña',
+                'subtitle' => 'Actualizar tu contraseña de acceso'
+            ];
+
+            require_once __DIR__ . '/../Views/perfil/change_password.php';
+
+        } catch (Exception $e) {
+            error_log("Error en PerfilController::changePassword: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    /**
+     * Procesar cambio de contraseña
+     */
+    private function processPasswordChange($currentUser)
+    {
+        try {
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_INVALID_CSRF_TOKEN);
+                return;
+            }
+
+            // Validar contraseña actual
+            $currentPassword = $_POST['current_password'] ?? '';
+            $newPassword = $_POST['new_password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
+
+            $errors = [];
+
+            if (empty($currentPassword)) {
+                $errors[] = 'La contraseña actual es requerida';
+            }
+
+            if (empty($newPassword)) {
+                $errors[] = 'La nueva contraseña es requerida';
+            } elseif (strlen($newPassword) < 8) {
+                $errors[] = 'La nueva contraseña debe tener al menos 8 caracteres';
+            }
+
+            if ($newPassword !== $confirmPassword) {
+                $errors[] = 'Las contraseñas no coinciden';
+            }
+
+            if (!empty($errors)) {
+                http_response_code(400);
+                echo $this->renderError(implode(', ', $errors));
+                return;
+            }
+
+            // Verificar contraseña actual
+            if (!$this->userModel->verifyPassword($currentUser['id'], $currentPassword)) {
+                http_response_code(400);
+                echo $this->renderError('La contraseña actual es incorrecta');
+                return;
+            }
+
+            // Actualizar contraseña
+            if ($this->userModel->updatePassword($currentUser['id'], $newPassword)) {
+                $_SESSION['success_message'] = 'Contraseña actualizada correctamente';
+                header('Location: /perfil');
+                exit;
+            } else {
+                throw new Exception('Error al actualizar la contraseña');
+            }
+
+        } catch (Exception $e) {
+            error_log("Error en PerfilController::processPasswordChange: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
     }
 }

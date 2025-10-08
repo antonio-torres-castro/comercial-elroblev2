@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\Task;
@@ -399,20 +398,16 @@ class TaskController extends BaseController
             // Eliminar tarea
             if ($this->taskModel->delete($id)) {
                 // Si es petición AJAX, devolver JSON
-                if (
-                    !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
-                ) {
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                     echo json_encode(['success' => true, 'message' => 'Tarea eliminada correctamente']);
                 } else {
                     $this->redirectWithSuccess(AppConstants::ROUTE_TASKS, AppConstants::SUCCESS_TASK_DELETED);
                 }
             } else {
                 // Si es petición AJAX, devolver JSON
-                if (
-                    !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
-                ) {
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                     echo json_encode(['success' => false, 'message' => 'Error al eliminar la tarea']);
                 } else {
                     $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_DELETE_TASK);
@@ -421,10 +416,8 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::delete: " . $e->getMessage());
             // Si es petición AJAX, devolver JSON
-            if (
-                !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
-            ) {
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                 http_response_code(500);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
             } else {

@@ -32,7 +32,6 @@ class UserController extends BaseController
     {
         // Verificar autenticación
         (new AuthMiddleware())->handle();
-
         $this->userModel = new User();
         $this->authService = new AuthService();
         $this->permissionService = new PermissionService();
@@ -47,7 +46,6 @@ class UserController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -82,7 +80,6 @@ class UserController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -211,6 +208,9 @@ class UserController extends BaseController
         }
     }
 
+    /**
+     * Validar campos específicos de usuario via AJAX
+     */
     public function validateField()
     {
         try {
@@ -276,7 +276,6 @@ class UserController extends BaseController
      */
     public function searchPersonas()
     {
-        // Establecer header JSON
         header('Content-Type: application/json');
 
         try {
@@ -413,15 +412,6 @@ class UserController extends BaseController
     }
 
     /**
-     * OBSOLETO: Mostrar/editar usuario específico
-     * Este método ha sido eliminado como parte de la refactorización AJAX.
-     * Ahora las rutas /user/{id} redirigen a /users/edit?id={id} o /users/create
-     * 
-     * @deprecated Eliminado en refactorización AJAX. Usar edit() o create() en su lugar.
-     */
-    // public function show($id = null) - MÉTODO ELIMINADO - Ver commit history para implementación original
-
-    /**
      * Mostrar formulario de edición de usuario
      */
     public function edit($id = null)
@@ -434,14 +424,12 @@ class UserController extends BaseController
                 return;
             }
 
-            // Verificar permisos para edición de usuarios
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
                 echo $this->viewRenderer->render('errors/403');
                 return;
             }
 
-            // Obtener ID del parámetro GET si no se pasó como argumento
             $id = $id ?: (int)($_GET['id'] ?? 0);
 
             if ($id <= 0) {
@@ -456,21 +444,16 @@ class UserController extends BaseController
                 return;
             }
 
-            // Obtener datos del usuario a editar
             $userToEdit = $this->userModel->getById($id);
             if (!$userToEdit) {
                 $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_USER_NOT_FOUND);
                 return;
             }
 
-            // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
-
-            // Obtener clientes para la asignación
             $clients = $this->userModel->getAvailableClients();
 
-            // Obtener personas disponibles (incluyendo la actual del usuario)
             $availablePersonas = $this->userModel->getAllPersonas($id);
 
             $data = [
@@ -505,7 +488,6 @@ class UserController extends BaseController
                 return;
             }
 
-            // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
                 echo $this->viewRenderer->render('errors/403');
@@ -523,13 +505,11 @@ class UserController extends BaseController
                 return;
             }
 
-            // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 Security::redirect("/users/edit?id={$id}&error=Token de seguridad inválido");
                 return;
             }
 
-            // Validar datos usando ValidationService
             $errors = $this->validationService->validateUserDataForUpdate($_POST, $id);
 
             if (!empty($errors)) {
@@ -538,7 +518,6 @@ class UserController extends BaseController
                 return;
             }
 
-            // Validaciones adicionales para la actualización
             $additionalErrors = $this->validateUserUpdateSpecific($_POST, $id);
             if (!empty($additionalErrors)) {
                 $errorMsg = implode(', ', $additionalErrors);
@@ -546,20 +525,16 @@ class UserController extends BaseController
                 return;
             }
 
-            // Si no hay errores, usar los datos del POST directamente
             $userData = $_POST;
 
-            // Manejar cambio de persona si se seleccionó una nueva
             if (!empty($_POST['new_persona_id'])) {
                 $userData['persona_id'] = (int)$_POST['new_persona_id'];
             }
 
-            // Agregar campos adicionales que no están en la validación estándar
             $userData['estado_tipo_id'] = (int)($_POST['estado_tipo_id'] ?? 1);
             $userData['fecha_inicio'] = !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null;
             $userData['fecha_termino'] = !empty($_POST['fecha_termino']) ? $_POST['fecha_termino'] : null;
 
-            // Actualizar usuario
             if ($this->userModel->update($id, $userData)) {
                 Security::logSecurityEvent('user_updated', [
                     'user_id' => $id,
@@ -589,7 +564,6 @@ class UserController extends BaseController
                 return;
             }
 
-            // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
                 echo $this->viewRenderer->render('errors/403');
@@ -607,7 +581,6 @@ class UserController extends BaseController
                 return;
             }
 
-            // Validar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 $this->redirectWithError(AppConstants::ROUTE_USERS, 'Token de seguridad inválido');
                 return;
@@ -619,7 +592,6 @@ class UserController extends BaseController
                 return;
             }
 
-            // Eliminar usuario (soft delete)
             if ($this->userModel->delete($id)) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_USER_DELETED);
             } else {
@@ -848,9 +820,6 @@ class UserController extends BaseController
         }
     }
 
-    /**
-     * Obtener nombre del tipo de usuario por ID
-     */
     private function getUserTypeName(int $userTypeId): string
     {
         try {
@@ -1023,9 +992,9 @@ class UserController extends BaseController
     private function searchAvailablePersonas(string $search): array
     {
         $sql = "SELECT id, nombre_completo, rut, telefono
-                FROM personas 
-                WHERE (nombre_completo LIKE :search 
-                   OR rut LIKE :search) 
+                FROM personas
+                WHERE (nombre_completo LIKE :search
+                   OR rut LIKE :search)
                 AND id NOT IN (SELECT persona_id FROM usuarios WHERE persona_id IS NOT NULL)
                 ORDER BY nombre_completo
                 LIMIT 10";
