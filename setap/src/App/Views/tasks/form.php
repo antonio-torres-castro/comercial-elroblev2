@@ -37,7 +37,7 @@
                                 <h5 class="mb-0"><?php echo $data['subtitle']; ?></h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="<?= $data['task_id'] ? '/tasks/update/' . $data['task_id'] : '/tasks/store' ?>" id="taskForm">
+                                <form method="POST" action="<?= isset($data['task']['id']) ? '/tasks/update/' . $data['task']['id'] : '/tasks/store' ?>" id="taskForm">
                                     <div class="row">
                                         <div class="col-12">
                                             <!-- Información básica de la tarea -->
@@ -151,7 +151,7 @@
                                                 </a>
                                                 <button type="submit" class="btn btn-success">
                                                     <i class="bi bi-check-lg"></i>
-                                                    <?= $data['task_id'] ? 'Actualizar Tarea' : 'Crear Tarea' ?>
+                                                    <?= isset($data['task']['id']) ? 'Actualizar Tarea' : 'Crear Tarea' ?>
                                                 </button>
                                             </div>
                                         </div>

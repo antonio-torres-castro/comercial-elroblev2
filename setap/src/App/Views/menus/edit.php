@@ -50,7 +50,7 @@
                             <div class="card-body">
                                 <form method="POST" action="/menus/update">
                                     <?php \App\Helpers\Security::renderCsrfField(); ?>
-                                    <input type="hidden" name="id" value="<?php echo $data['menu_id']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo $data['menu']['id']; ?>">
 
                                     <div class="row">
                                         <div class="col-md-6">
@@ -163,7 +163,7 @@
                                         <div>
                                             <!-- Botón eliminar -->
                                             <button type="button" class="btn btn-outline-danger me-2"
-                                                    onclick="confirmarEliminacion(<?php echo $data['menu_id']; ?>)">
+                                                    onclick="confirmarEliminacion(<?php echo $data['menu']['id']; ?>)">
                                                 <i class="bi bi-trash"></i> Eliminar
                                             </button>
                                             <!-- Botón actualizar -->
@@ -177,7 +177,7 @@
                                 <!-- Formulario oculto para eliminar -->
                                 <form id="formEliminar" method="POST" action="/menus/delete" style="display: none;">
                                     <?php \App\Helpers\Security::renderCsrfField(); ?>
-                                    <input type="hidden" name="id" value="<?php echo $data['menu_id']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo $data['menu']['id']; ?>">
                                 </form>
                             </div>
                         </div>

@@ -272,11 +272,15 @@ class MenuController extends BaseController
 
             // Obtener grupos de menú
             $menuGroups = $this->menuModel->getMenuGroups();
+            
+            // Obtener tipos de estado disponibles
+            $statusTypes = $this->menuModel->getStatusTypes();
 
             // Datos para la vista
             $data = [
                 'menu' => $menu,
                 'menuGroups' => $menuGroups,
+                'statusTypes' => $statusTypes,
                 'title' => 'Editar Menú',
                 'subtitle' => "Editando: {$menu['nombre']}"
             ];

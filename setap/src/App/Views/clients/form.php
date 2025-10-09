@@ -39,8 +39,8 @@
                                     <i class="bi bi-tools"></i>
                                     <strong>Formulario en Construcción</strong><br>
                                     El formulario de gestión de clientes está en desarrollo.
-                                    <?php if ($data['client_id']): ?>
-                                        <br>ID del cliente a editar: <strong><?php echo $data['client_id']; ?></strong>
+                                    <?php if (isset($data['client']['id'])): ?>
+                                        <br>ID del cliente a editar: <strong><?php echo $data['client']['id']; ?></strong>
                                     <?php else: ?>
                                         <br>Aquí podrás crear un nuevo cliente.
                                     <?php endif; ?>

@@ -51,10 +51,10 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <form method="POST" action="<?= $data['menu_id'] ? '/menus/update/' . $data['menu_id'] : '/menus/store' ?>" id="menuForm">
+                                <form method="POST" action="<?= isset($data['menu']['id']) ? '/menus/update/' . $data['menu']['id'] : '/menus/store' ?>" id="menuForm">
                                     <?= \App\Helpers\Security::renderCsrfField() ?>
-                                    <?php if ($data['menu_id']): ?>
-                                        <input type="hidden" name="id" value="<?= $data['menu_id'] ?>">
+                                    <?php if (isset($data['menu']['id'])): ?>
+                                        <input type="hidden" name="id" value="<?= $data['menu']['id'] ?>">
                                     <?php endif; ?>
 
                                     <div class="row">
@@ -155,7 +155,7 @@
                                                 </a>
                                                 <button type="submit" class="btn btn-setap-primary">
                                                     <i class="bi bi-save"></i>
-                                                    <?= $data['menu_id'] ? 'Actualizar Menú' : 'Crear Menú' ?>
+                                                    <?= isset($data['menu']['id']) ? 'Actualizar Menú' : 'Crear Menú' ?>
                                                 </button>
                                             </div>
                                         </div>
