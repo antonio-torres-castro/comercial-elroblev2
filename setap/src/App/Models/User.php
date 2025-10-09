@@ -28,8 +28,8 @@ class User
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
                        c.razon_social as cliente_nombre
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id /*siempre tiene un estado el registro*/
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -88,13 +88,13 @@ class User
 
             $sql = "
                 INSERT INTO usuarios (
-                    persona_id, 
-                    nombre_usuario, 
-                    email, 
-                    clave_hash, 
-                    usuario_tipo_id, 
-                    cliente_id, 
-                    estado_tipo_id, 
+                    persona_id,
+                    nombre_usuario,
+                    email,
+                    clave_hash,
+                    usuario_tipo_id,
+                    cliente_id,
+                    estado_tipo_id,
                     fecha_inicio,
                     fecha_termino,
                     fecha_Creado
@@ -133,8 +133,8 @@ class User
                 ut.nombre as rol,
                 et.nombre as estado, /*atributo de estado desplegado al usuario*/
                 c.razon_social as cliente_nombre
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON et.Id = u.estado_tipo_id /* Siempre tiene un estado */
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -163,8 +163,8 @@ class User
 
             // Solo actualizar campos específicos del usuario - NO datos de persona
             $usuarioSql = "
-                UPDATE usuarios 
-                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?, 
+                UPDATE usuarios
+                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?,
                     fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -298,7 +298,7 @@ class User
 
             // Actualizar datos de persona (nombre, teléfono, dirección)
             $personaSql = "
-                UPDATE personas 
+                UPDATE personas
                 SET nombre = ?, telefono = ?, direccion = ?, fecha_modificacion = NOW()
                 WHERE id = (SELECT persona_id FROM usuarios WHERE id = ?)
             ";
@@ -313,7 +313,7 @@ class User
 
             // Actualizar email del usuario (sin cambiar el rol)
             $usuarioSql = "
-                UPDATE usuarios 
+                UPDATE usuarios
                 SET email = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -345,8 +345,8 @@ class User
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
                        c.razon_social as cliente_nombre
-                FROM usuarios u 
-                INNER JOIN personas p ON u.persona_id = p.id 
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id
                 LEFT JOIN clientes c ON u.cliente_id = c.id
@@ -437,8 +437,8 @@ class User
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT COUNT(*) 
-                FROM cliente_contrapartes 
+                SELECT COUNT(*)
+                FROM cliente_contrapartes
                 WHERE persona_id = ? AND cliente_id = ? AND estado_tipo_id != 4
             ");
             $stmt->execute([$personaId, $clientId]);
@@ -456,9 +456,9 @@ class User
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id, razon_social, rut 
-                FROM clientes 
-                WHERE estado_tipo_id IN (1, 2) 
+                SELECT id, razon_social, rut
+                FROM clientes
+                WHERE estado_tipo_id IN (1, 2)
                 ORDER BY razon_social
             ");
             $stmt->execute();
@@ -500,7 +500,7 @@ class User
                 SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion
                 FROM personas p
                 LEFT JOIN usuarios u ON p.id = u.persona_id
-                WHERE u.persona_id IS NULL 
+                WHERE u.persona_id IS NULL
                 AND p.estado_tipo_id IN (1, 2)
             ";
 
@@ -525,7 +525,7 @@ class User
 
     /**
      * Búsqueda mejorada de personas con opciones flexibles
-     * 
+     *
      * @param string|null $search Término de búsqueda
      * @param string $searchType Tipo de búsqueda: 'all', 'rut', 'name'
      * @param bool $includeAssigned Si incluir personas ya asignadas a usuarios
@@ -585,7 +585,7 @@ class User
                 }
             }
 
-            $sql .= " ORDER BY 
+            $sql .= " ORDER BY
                 CASE WHEN u.id IS NULL THEN 0 ELSE 1 END, -- Personas sin usuario primero
                 p.nombre ASC";
 
@@ -600,7 +600,7 @@ class User
 
     /**
      * Obtener todas las personas del sistema (para búsqueda sin parámetros)
-     * 
+     *
      * @param int|null $excludeUserId ID de usuario a excluir (para edición)
      * @return array Lista de todas las personas
      */
@@ -611,7 +611,7 @@ class User
 
     /**
      * Buscar personas por RUT completo y válido
-     * 
+     *
      * @param string $rut RUT a buscar
      * @param int|null $excludeUserId ID de usuario a excluir (para edición)
      * @return array Lista de personas encontradas
@@ -623,7 +623,7 @@ class User
 
     /**
      * Buscar personas por coincidencia parcial en nombre
-     * 
+     *
      * @param string $name Parte del nombre a buscar
      * @param int|null $excludeUserId ID de usuario a excluir (para edición)
      * @return array Lista de personas encontradas
@@ -640,8 +640,8 @@ class User
     {
         try {
             $sql = "
-                SELECT COUNT(*) 
-                FROM usuarios u 
+                SELECT COUNT(*)
+                FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 WHERE u.persona_id = ? AND p.estado_tipo_id IN (1, 2)
             ";
@@ -671,7 +671,7 @@ class User
         try {
             $stmt = $this->db->prepare("
                 SELECT id, rut, nombre, telefono, direccion
-                FROM personas 
+                FROM personas
                 WHERE id = ? AND estado_tipo_id IN (1, 2)
             ");
             $stmt->execute([$personaId]);
@@ -730,7 +730,7 @@ class User
                 FROM cliente_contrapartes cc
                 INNER JOIN personas p ON cc.persona_id = p.id
                 LEFT JOIN usuarios u ON p.id = u.persona_id
-                WHERE cc.cliente_id = ? 
+                WHERE cc.cliente_id = ?
                 AND cc.estado_tipo_id IN (1, 2)
                 AND u.persona_id IS NULL
                 ORDER BY p.nombre

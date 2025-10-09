@@ -103,6 +103,9 @@ class AppConstants
     /** Error de usuario no encontrado */
     const ERROR_USER_NOT_AUTHENTICATED = 'No autenticado';
 
+     /** Error de usuario no encontrado */
+    const ERROR_USER_NOT_AUTHORIZED = 'No autorizado';
+
     /** Error de tarea no encontrada */
     const ERROR_TASK_NOT_FOUND = 'Tarea no encontrada';
 
