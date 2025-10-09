@@ -14,6 +14,7 @@ use App\Controllers\PersonaController;
 use App\Controllers\PerfilController;
 use App\Controllers\ClientController;
 use App\Controllers\TaskController;
+use App\Controllers\ReportController;
 use App\Controllers\ProyectoFeriadoController;
 use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
@@ -708,6 +709,58 @@ try {
                     break;
                     
                 case '':
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+
+        case 'reports':
+            $controller = new ReportController();
+            
+            switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->generate();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+                    
+                case 'generate':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->generate();
+                    } else {
+                        Security::redirect('/reports');
+                    }
+                    break;
+                    
+                case 'download':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->download();
+                    } else {
+                        Security::redirect('/reports');
+                    }
+                    break;
+                    
+                case 'users-report':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->usersReport();
+                    } else {
+                        Security::redirect('/reports');
+                    }
+                    break;
+                    
+                case 'projects-report':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->projectsReport();
+                    } else {
+                        Security::redirect('/reports');
+                    }
+                    break;
+                    
+                case '':
+                case null:
                 default:
                     $controller->index();
                     break;

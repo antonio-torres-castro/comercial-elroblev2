@@ -59,3 +59,7 @@ register_shutdown_function(function () {
 
 // NOTA: Hemos eliminado completamente el autoloader personalizado
 // Composer's autoloader se encarga de todo ahora
+
+// ===== HELPERS PARA VISTAS - FASE 3 MEJORAS =====
+// Incluir helpers para acceso seguro a datos en vistas
+require_once __DIR__ . '/Helpers/ViewHelpers.php';

@@ -53,8 +53,8 @@
                                 <form method="POST" action="<?php echo $data['action'] === 'edit' ? '/client-counterpartie/update' : '/client-counterpartie/store'; ?>">
                                     <?= \App\Helpers\Security::renderCsrfField() ?>
 
-                                    <?php if ($data['action'] === 'edit' && $data['counterpartie']): ?>
-                                        <input type="hidden" name="id" value="<?php echo $data['counterpartie']['id']; ?>">
+                                    <?php if (safe($data, 'action') === 'edit' && safe($data, 'counterpartie')): ?>
+                                        <input type="hidden" name="id" value="<?php echo safeHtml($data, 'counterpartie.id'); ?>">
                                     <?php endif; ?>
 
                                     <div class="row g-3">
@@ -68,15 +68,7 @@
                                                 <option value="">Seleccionar cliente...</option>
                                                 <?php foreach ($data['clients'] as $client): ?>
                                                     <option value="<?php echo $client['id']; ?>"
-                                                        <?php
-                                                        $selected = false;
-                                                        if ($data['action'] === 'edit' && $data['counterpartie']) {
-                                                            $selected = ($data['counterpartie']['cliente_id'] == $client['id']);
-                                                        } elseif (isset($_POST['cliente_id'])) {
-                                                            $selected = ($_POST['cliente_id'] == $client['id']);
-                                                        }
-                                                        echo $selected ? 'selected' : '';
-                                                        ?>>
+                                                        <?php echo safeSelected($data, 'counterpartie.cliente_id', $client['id']); ?>>
                                                         <?php echo htmlspecialchars($client['razon_social']); ?>
                                                     </option>
                                                 <?php endforeach; ?>

@@ -1,7 +1,13 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Services\ReportService;
+use App\Services\PermissionService;
+use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Constants\AppConstants;
+use app\Config\Database;
 use PDO;
 use Exception;
 
@@ -9,35 +15,15 @@ class ReportController extends BaseController
 {
     private $db;
     private $reportService;
+    private $permissionService;
 
-    public function __construct(PDO $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->reportService = new ReportService($db);
-    }
-
-    /**
-     * Mostrar lista de reportes disponibles
-     */
-    public function index()
-    {
-        try {
-            // Verificar permisos
-            if (!Security::hasPermission('Read')) {
-                http_response_code(403);
-                include __DIR__ . '/../Views/errors/403.php';
-                return;
-            }
-
-            // Obtener estadísticas básicas
-            $stats = $this->reportService->getBasicStats();
-
-            include __DIR__ . '/../Views/reports/list.php';
-        } catch (Exception $e) {
-            error_log("Error en ReportController::index: " . $e->getMessage());
-            $error = "Error al cargar la página de reportes.";
-            include __DIR__ . '/../Views/reports/list.php';
-        }
+        // Verificar autenticación
+        (new AuthMiddleware())->handle();
+        $this->db = Database::getInstance();
+        $this->reportService = new ReportService($this->db);
+        $this->permissionService = new PermissionService();
     }
 
     /**
@@ -46,18 +32,32 @@ class ReportController extends BaseController
     public function create()
     {
         try {
-            // Verificar permisos
-            if (!Security::hasPermission('Write')) {
-                http_response_code(403);
-                include __DIR__ . '/../Views/errors/403.php';
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
                 return;
             }
 
-            include __DIR__ . '/../Views/reports/create.php';
+            // Verificar permisos - ESTANDARIZADO
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'create_reports')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            // Datos para la vista - ESTANDARIZADO
+            $data = [
+                'user' => $currentUser,
+                'title' => 'Crear Reporte',
+                'subtitle' => 'Generar reporte personalizado',
+                'action' => 'create'
+            ];
+
+            require_once __DIR__ . '/../Views/reports/create.php';
         } catch (Exception $e) {
             error_log("Error en ReportController::create: " . $e->getMessage());
-            $error = "Error al cargar el formulario de reportes.";
-            include __DIR__ . '/../Views/reports/create.php';
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -67,18 +67,28 @@ class ReportController extends BaseController
     public function generate()
     {
         try {
-            // Verificar permisos
-            if (!Security::hasPermission('Write')) {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            // Verificar permisos - ESTANDARIZADO
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'generate_reports')) {
                 http_response_code(403);
-                include __DIR__ . '/../Views/errors/403.php';
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectToRoute(AppConstants::ROUTE_REPORTS);
                 return;
             }
 
             // Verificar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                http_response_code(400);
-                $error = "Token de seguridad inválido.";
-                include __DIR__ . '/../Views/reports/create.php';
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
@@ -91,8 +101,7 @@ class ReportController extends BaseController
 
             // Validar parámetros obligatorios
             if (empty($reportType)) {
-                $error = "Debe seleccionar un tipo de reporte.";
-                include __DIR__ . '/../Views/reports/create.php';
+                $this->redirectWithError('/reports/create', 'Debe seleccionar un tipo de reporte');
                 return;
             }
 
@@ -104,15 +113,21 @@ class ReportController extends BaseController
                 'project_id' => $projectId
             ]);
 
-            // Preparar datos para la vista
-            $reportTitle = $this->getReportTitle($reportType);
-            $generatedAt = date('Y-m-d H:i:s');
+            // Preparar datos para la vista - ESTANDARIZADO
+            $data = [
+                'user' => $currentUser,
+                'title' => 'Reporte Generado',
+                'subtitle' => $this->getReportTitle($reportType),
+                'reportData' => $reportData,
+                'reportType' => $reportType,
+                'generatedAt' => date('Y-m-d H:i:s'),
+                'action' => 'view'
+            ];
 
-            include __DIR__ . '/../Views/reports/view.php';
+            require_once __DIR__ . '/../Views/reports/view.php';
         } catch (Exception $e) {
             error_log("Error en ReportController::generate: " . $e->getMessage());
-            $error = "Error al generar el reporte: " . $e->getMessage();
-            include __DIR__ . '/../Views/reports/create.php';
+            $this->redirectWithError('/reports/create', 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 
@@ -145,7 +160,7 @@ class ReportController extends BaseController
 
             // Validar que el archivo esté en el directorio de reportes
             $reportPath = __DIR__ . '/../../storage/reports/' . basename($filename);
-            
+
             if (!file_exists($reportPath)) {
                 http_response_code(404);
                 echo $this->renderError('Archivo no encontrado');
@@ -162,7 +177,6 @@ class ReportController extends BaseController
             // Enviar archivo
             readfile($reportPath);
             exit;
-
         } catch (Exception $e) {
             error_log("Error en ReportController::download: " . $e->getMessage());
             http_response_code(500);
@@ -171,13 +185,12 @@ class ReportController extends BaseController
     }
 
     /**
-     * Listar reportes disponibles
+     * Listar reportes disponibles - ESTANDARIZADO
      */
     public function index()
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 $this->redirectToLogin();
                 return;
@@ -193,16 +206,16 @@ class ReportController extends BaseController
             // Obtener reportes generados
             $reports = $this->getGeneratedReports();
 
-            // Datos para la vista
+            // Datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,
-                'reports' => $reports,
                 'title' => 'Reportes del Sistema',
-                'subtitle' => 'Gestión y descarga de reportes generados'
+                'subtitle' => 'Gestión y descarga de reportes generados',
+                'reports' => $reports,
+                'action' => 'index'
             ];
 
-            include __DIR__ . '/../Views/reports/index.php';
-
+            require_once __DIR__ . '/../Views/reports/index.php';
         } catch (Exception $e) {
             error_log("Error en ReportController::index: " . $e->getMessage());
             http_response_code(500);
@@ -232,7 +245,7 @@ class ReportController extends BaseController
 
             // Generar reporte de usuarios
             $userData = $this->getUsersData();
-            
+
             // Crear archivo Excel o CSV
             $filename = $this->generateUsersExcelReport($userData);
 
@@ -246,7 +259,6 @@ class ReportController extends BaseController
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
-
         } catch (Exception $e) {
             error_log("Error en ReportController::usersReport: " . $e->getMessage());
             echo json_encode([
@@ -281,7 +293,7 @@ class ReportController extends BaseController
 
             // Obtener datos de proyectos
             $projectData = $this->getProjectsData($startDate, $endDate);
-            
+
             // Generar archivo
             $filename = $this->generateProjectsExcelReport($projectData, $startDate, $endDate);
 
@@ -294,7 +306,6 @@ class ReportController extends BaseController
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
-
         } catch (Exception $e) {
             error_log("Error en ReportController::projectsReport: " . $e->getMessage());
             echo json_encode([
@@ -326,7 +337,7 @@ class ReportController extends BaseController
         }
 
         // Ordenar por fecha de creación (más recientes primero)
-        usort($reports, function($a, $b) {
+        usort($reports, function ($a, $b) {
             return $b['created'] - $a['created'];
         });
 
@@ -340,7 +351,7 @@ class ReportController extends BaseController
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT 
+                SELECT
                     u.id,
                     p.nombre as nombre_completo,
                     p.rut,
@@ -371,7 +382,7 @@ class ReportController extends BaseController
     {
         try {
             $sql = "
-                SELECT 
+                SELECT
                     p.id,
                     p.nombre as proyecto_nombre,
                     c.nombre as cliente_nombre,
@@ -419,11 +430,18 @@ class ReportController extends BaseController
         }
 
         $file = fopen($filepath, 'w');
-        
+
         // Headers CSV
         fputcsv($file, [
-            'ID', 'Nombre Completo', 'RUT', 'Email', 'Usuario', 
-            'Tipo Usuario', 'Estado', 'Fecha Creación', 'Último Acceso'
+            'ID',
+            'Nombre Completo',
+            'RUT',
+            'Email',
+            'Usuario',
+            'Tipo Usuario',
+            'Estado',
+            'Fecha Creación',
+            'Último Acceso'
         ]);
 
         // Datos
@@ -465,11 +483,17 @@ class ReportController extends BaseController
         }
 
         $file = fopen($filepath, 'w');
-        
+
         // Headers CSV
         fputcsv($file, [
-            'ID', 'Proyecto', 'Cliente', 'Descripción', 
-            'Fecha Inicio', 'Fecha Término', 'Estado', 'Fecha Creación'
+            'ID',
+            'Proyecto',
+            'Cliente',
+            'Descripción',
+            'Fecha Inicio',
+            'Fecha Término',
+            'Estado',
+            'Fecha Creación'
         ]);
 
         // Datos
@@ -488,5 +512,21 @@ class ReportController extends BaseController
 
         fclose($file);
         return $filename;
+    }
+
+    /**
+     * Obtener título del reporte según el tipo
+     */
+    private function getReportTitle(string $reportType): string
+    {
+        $titles = [
+            'users' => 'Reporte de Usuarios',
+            'projects' => 'Reporte de Proyectos',
+            'tasks' => 'Reporte de Tareas',
+            'clients' => 'Reporte de Clientes',
+            'general' => 'Reporte General del Sistema'
+        ];
+
+        return $titles[$reportType] ?? 'Reporte Personalizado';
     }
 }

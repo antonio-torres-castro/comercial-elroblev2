@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\User;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
@@ -55,7 +57,6 @@ class PerfilController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/perfil/view.php';
-
         } catch (Exception $e) {
             error_log("Error en PerfilController::index: " . $e->getMessage());
             http_response_code(500);
@@ -99,7 +100,7 @@ class PerfilController extends BaseController
             $data = [
                 'user' => $fullUserData,
                 'title' => AppConstants::UI_TITLE_VIEW_PERFIL_EDIT,
-                'subtitle' => AppConstants::UI_SUBTITLE_VIEW_PERFIL_EDIT 
+                'subtitle' => AppConstants::UI_SUBTITLE_VIEW_PERFIL_EDIT
             ];
 
             require_once __DIR__ . '/../Views/perfil/edit.php';
@@ -148,7 +149,6 @@ class PerfilController extends BaseController
             } else {
                 throw new Exception('Error al actualizar el perfil');
             }
-
         } catch (Exception $e) {
             error_log("Error en PerfilController::updateProfile: " . $e->getMessage());
             http_response_code(500);
@@ -219,7 +219,6 @@ class PerfilController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/perfil/change_password.php';
-
         } catch (Exception $e) {
             error_log("Error en PerfilController::changePassword: " . $e->getMessage());
             http_response_code(500);
@@ -282,7 +281,6 @@ class PerfilController extends BaseController
             } else {
                 throw new Exception('Error al actualizar la contraseña');
             }
-
         } catch (Exception $e) {
             error_log("Error en PerfilController::processPasswordChange: " . $e->getMessage());
             http_response_code(500);

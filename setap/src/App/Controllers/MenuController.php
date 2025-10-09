@@ -196,24 +196,34 @@ class MenuController extends BaseController
                 return;
             }
 
-            // Validar datos del menú
-            $errors = $this->validateMenuData($_POST);
-            if (!empty($errors)) {
-                $_SESSION['errors'] = $errors;
-                $_SESSION['old_input'] = $_POST;
-                $this->redirectTo('/menus/create');
-                return;
-            }
+            // Validar datos del menú con validaciones mejoradas - FASE 3
+            $postData = $this->validatePostData([
+                'nombre' => '',
+                'descripcion' => '',
+                'display' => '',
+                'icono' => '',
+                'url' => '',
+                'menu_grupo_id' => 0,
+                'orden' => 0
+            ]);
 
-            // Crear el menú
+            $errors = $this->validateRequiredFields($postData, ['nombre', 'display']);
+            // Añadir validaciones adicionales
+            $errors = array_merge($errors, $this->validateLength($postData['nombre'], 'nombre', 3, 100));
+            $errors = array_merge($errors, $this->validateLength($postData['display'], 'display', 3, 100));
+            
+            // Manejo estandarizado de errores - FASE 3.3
+            $this->handleValidationErrors($errors, $_POST, '/menus/create');
+
+            // Crear el menú con datos validados
             $menuData = [
-                'nombre' => Security::sanitizeInput($_POST['nombre']),
-                'descripcion' => Security::sanitizeInput($_POST['descripcion'] ?? ''),
-                'display' => Security::sanitizeInput($_POST['display']),
-                'icono' => Security::sanitizeInput($_POST['icono'] ?? ''),
-                'url' => Security::sanitizeInput($_POST['url'] ?? ''),
-                'menu_grupo_id' => (int)($_POST['menu_grupo_id'] ?? 0),
-                'orden' => (int)($_POST['orden'] ?? 0),
+                'nombre' => $postData['nombre'],
+                'descripcion' => $postData['descripcion'],
+                'display' => $postData['display'],
+                'icono' => $postData['icono'],
+                'url' => $postData['url'],
+                'menu_grupo_id' => (int)$postData['menu_grupo_id'],
+                'orden' => (int)$postData['orden'],
                 'estado_tipo_id' => 2 // Activo por defecto
             ];
 
@@ -329,25 +339,36 @@ class MenuController extends BaseController
                 return;
             }
 
-            // Validar datos del menú
-            $errors = $this->validateMenuData($_POST, $id);
-            if (!empty($errors)) {
-                $_SESSION['errors'] = $errors;
-                $_SESSION['old_input'] = $_POST;
-                $this->redirectTo("/menus/edit?id=$id");
-                return;
-            }
+            // Validar datos del menú con validaciones mejoradas - FASE 3
+            $postData = $this->validatePostData([
+                'nombre' => '',
+                'descripcion' => '',
+                'display' => '',
+                'icono' => '',
+                'url' => '',
+                'menu_grupo_id' => 0,
+                'orden' => 0,
+                'estado_tipo_id' => 2
+            ]);
 
-            // Actualizar el menú
+            $errors = $this->validateRequiredFields($postData, ['nombre', 'display']);
+            // Añadir validaciones adicionales
+            $errors = array_merge($errors, $this->validateLength($postData['nombre'], 'nombre', 3, 100));
+            $errors = array_merge($errors, $this->validateLength($postData['display'], 'display', 3, 100));
+            
+            // Manejo estandarizado de errores - FASE 3.3
+            $this->handleValidationErrors($errors, $_POST, "/menus/edit?id=$id");
+
+            // Actualizar el menú con datos validados
             $menuData = [
-                'nombre' => Security::sanitizeInput($_POST['nombre']),
-                'descripcion' => Security::sanitizeInput($_POST['descripcion'] ?? ''),
-                'display' => Security::sanitizeInput($_POST['display']),
-                'icono' => Security::sanitizeInput($_POST['icono'] ?? ''),
-                'url' => Security::sanitizeInput($_POST['url'] ?? ''),
-                'menu_grupo_id' => (int)($_POST['menu_grupo_id'] ?? 0),
-                'orden' => (int)($_POST['orden'] ?? 0),
-                'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2)
+                'nombre' => $postData['nombre'],
+                'descripcion' => $postData['descripcion'],
+                'display' => $postData['display'],
+                'icono' => $postData['icono'],
+                'url' => $postData['url'],
+                'menu_grupo_id' => (int)$postData['menu_grupo_id'],
+                'orden' => (int)$postData['orden'],
+                'estado_tipo_id' => (int)$postData['estado_tipo_id']
             ];
 
             if ($this->menuModel->update($id, $menuData)) {
