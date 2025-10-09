@@ -1,9 +1,10 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Personas - SETAP</title>
+    <title><?= AppConstants::UI_PERSONA_MANAGEMENT ?> - SETAP</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -37,13 +38,13 @@
         <div class="row mb-4">
             <div class="col-md-6">
                 <h2>
-                    <i class="bi bi-people"></i> Gestión de Personas
+                    <i class="bi bi-people"></i> <?= AppConstants::UI_PERSONA_MANAGEMENT ?>
                     <span class="badge bg-secondary ms-2"><?= count($personas) ?> personas</span>
                 </h2>
             </div>
             <div class="col-md-6 text-end">
                 <a href="/personas/create" class="btn btn-setap-primary">
-                    <i class="bi bi-plus-circle"></i> Nueva Persona
+                    <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PERSONA ?>
                 </a>
             </div>
         </div>

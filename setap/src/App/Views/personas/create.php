@@ -1,3 +1,4 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -46,7 +47,7 @@
             </div>
             <div class="col-md-4 text-end">
                 <a href="/personas" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver a Personas
+                    <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_PERSONAS ?>
                 </a>
             </div>
         </div>

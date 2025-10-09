@@ -1,3 +1,4 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -41,7 +42,7 @@
                                     <div class="row">
                                         <div class="col-12">
                                             <!-- Información básica de la tarea -->
-                                            <h6 class="border-bottom pb-2 mb-3">Información de la Tarea</h6>
+                                            <h6 class="border-bottom pb-2 mb-3"><?= AppConstants::UI_TASK_INFORMATION ?></h6>
 
                                             <div class="mb-3">
                                                 <label for="nombre" class="form-label">Nombre de la Tarea <span class="text-danger">*</span></label>

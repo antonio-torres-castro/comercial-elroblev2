@@ -386,6 +386,62 @@ class AppConstants
     /** Lista de tareas */
     const UI_TASK_LIST = 'Lista de tareas';
 
+    // ===== TÍTULOS DE GESTIÓN ESPECÍFICOS =====
+    
+    /** Gestión de Tareas */
+    const UI_TASK_MANAGEMENT = 'Gestión de Tareas';
+    
+    /** Gestión de Proyectos */
+    const UI_PROJECT_MANAGEMENT = 'Gestión de Proyectos';
+    
+    /** Gestión de Personas */
+    const UI_PERSONA_MANAGEMENT = 'Gestión de Personas';
+    
+    /** Reportes del Sistema */
+    const UI_SYSTEM_REPORTS = 'Reportes del Sistema';
+    
+    // ===== ACCIONES DE NAVEGACIÓN ESPECÍFICAS =====
+    
+    /** Volver a Tareas */
+    const UI_BACK_TO_TASKS = 'Volver a Tareas';
+    
+    /** Volver a Proyectos */
+    const UI_BACK_TO_PROJECTS = 'Volver a Proyectos';
+    
+    /** Volver a Personas */
+    const UI_BACK_TO_PERSONAS = 'Volver a Personas';
+    
+    /** Volver a Reportes */
+    const UI_BACK_TO_REPORTS = 'Volver a Reportes';
+    
+    /** Búsqueda Avanzada */
+    const UI_ADVANCED_SEARCH_BTN = 'Búsqueda Avanzada';
+    
+    // ===== TÍTULOS DE SECCIONES =====
+    
+    /** Información Básica */
+    const UI_BASIC_INFORMATION = 'Información Básica';
+    
+    /** Información de la Tarea */
+    const UI_TASK_INFORMATION = 'Información de la Tarea';
+    
+    // ===== TÍTULOS DE CREACIÓN ESPECÍFICOS =====
+    
+    /** Nueva Tarea */
+    const UI_NEW_TASK = 'Nueva Tarea';
+    
+    /** Nueva Persona */
+    const UI_NEW_PERSONA = 'Nueva Persona';
+    
+    /** Crear Proyecto */
+    const UI_CREATE_PROJECT_TITLE = 'Crear Proyecto';
+    
+    /** Crear Nuevo Proyecto */
+    const UI_CREATE_NEW_PROJECT = 'Crear Nuevo Proyecto';
+    
+    /** Editar Tarea */
+    const UI_EDIT_TASK_TITLE = 'Editar Tarea';
+
     const UI_TITLE_VIEW_MENU = 'Gestión de Menú';
     const UI_TITLE_VIEW_PERFIL_EDIT = 'Editar Perfil';
     const UI_SUBTITLE_VIEW_PERFIL_EDIT = 'Actualiza tu información personal';

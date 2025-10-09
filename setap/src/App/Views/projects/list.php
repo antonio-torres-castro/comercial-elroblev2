@@ -1,9 +1,10 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Proyectos - SETAP</title>
+    <title><?= AppConstants::UI_PROJECT_MANAGEMENT ?> - SETAP</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -41,16 +42,16 @@
         <div class="row mb-4">
             <div class="col-md-6">
                 <h2>
-                    <i class="bi bi-folder"></i> Gestión de Proyectos
+                    <i class="bi bi-folder"></i> <?= AppConstants::UI_PROJECT_MANAGEMENT ?>
                     <span class="badge bg-secondary ms-2"><?= count($projects) ?> proyectos</span>
                 </h2>
             </div>
             <div class="col-md-6 text-end">
                 <a href="/projects/create" class="btn btn-setap-primary">
-                    <i class="bi bi-plus-circle"></i> Nuevo Proyecto
+                    <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PROJECT ?>
                 </a>
                 <a href="/projects/search" class="btn btn-outline-secondary">
-                    <i class="bi bi-search"></i> Búsqueda Avanzada
+                    <i class="bi bi-search"></i> <?= AppConstants::UI_ADVANCED_SEARCH_BTN ?>
                 </a>
             </div>
         </div>

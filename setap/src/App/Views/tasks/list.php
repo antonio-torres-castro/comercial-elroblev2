@@ -1,3 +1,4 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -23,7 +24,7 @@
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="/tasks/create" class="btn btn-sm btn-setap-primary">
-                            <i class="bi bi-plus-circle"></i> Nueva Tarea
+                            <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_TASK ?>
                         </a>
                     </div>
                 </div>
@@ -38,7 +39,7 @@
                     </div>
                     <div class="col-md-6 text-end">
                         <a href="/tasks/create" class="btn btn-setap-primary">
-                            <i class="bi bi-plus-lg"></i> Nueva Tarea
+                            <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
                         </a>
                     </div>
                 </div>

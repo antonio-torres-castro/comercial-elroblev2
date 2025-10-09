@@ -1,3 +1,4 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -23,7 +24,7 @@
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="/tasks" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Volver a Tareas
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_TASKS ?>
                         </a>
                     </div>
                 </div>

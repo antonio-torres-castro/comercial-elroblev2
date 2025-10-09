@@ -1,9 +1,10 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Proyecto - SETAP</title>
+    <title><?= AppConstants::UI_CREATE_PROJECT_TITLE ?> - SETAP</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -45,13 +46,13 @@
         <div class="row mb-4">
             <div class="col-md-8">
                 <h2>
-                    <i class="bi bi-plus-circle"></i> Crear Nuevo Proyecto
+                    <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_CREATE_NEW_PROJECT ?>
                 </h2>
                 <p class="text-muted">Complete los datos para crear un nuevo proyecto en el sistema.</p>
             </div>
             <div class="col-md-4 text-end">
                 <a href="/projects" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver a Proyectos
+                    <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_PROJECTS ?>
                 </a>
             </div>
         </div>
@@ -70,9 +71,9 @@
 
             <div class="row justify-content-center">
                 <div class="col-lg-8">
-                    <!-- Información Básica -->
+                    <!-- <?= AppConstants::UI_BASIC_INFORMATION ?> -->
                     <div class="form-section">
-                        <h5><i class="bi bi-info-circle"></i> Información Básica</h5>
+                        <h5><i class="bi bi-info-circle"></i> <?= AppConstants::UI_BASIC_INFORMATION ?></h5>
 
                         <div class="row">
                             <div class="col-md-6">
@@ -162,7 +163,7 @@
                             <i class="bi bi-x-lg"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-success" id="createBtn">
-                            <i class="bi bi-plus-lg"></i> Crear Proyecto
+                            <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_CREATE_PROJECT ?>
                         </button>
                     </div>
                 </div>

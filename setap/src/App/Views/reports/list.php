@@ -1,3 +1,4 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -41,13 +42,13 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <h2>
-                        <i class="bi bi-bar-chart"></i> Reportes del Sistema
+                        <i class="bi bi-bar-chart"></i> <?= AppConstants::UI_SYSTEM_REPORTS ?>
                     </h2>
                     <p class="text-muted">Genere y consulte reportes de actividad del sistema</p>
                 </div>
                 <div class="col-md-6 text-end">
                     <a href="/reports/create" class="btn btn-setap-primary">
-                        <i class="bi bi-plus-circle"></i> Nuevo Reporte
+                        <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_REPORT ?>
                     </a>
                 </div>
             </div>

@@ -1,9 +1,10 @@
+<?php use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Tarea - SETAP</title>
+    <title><?= AppConstants::UI_EDIT_TASK_TITLE ?> - SETAP</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -41,7 +42,7 @@
                 <div class="card shadow">
                     <div class="card-header bg-warning text-dark">
                         <h4 class="card-title mb-0">
-                            <i class="bi bi-pencil-square"></i> Editar Tarea: <?= htmlspecialchars($task['nombre']) ?>
+                            <i class="bi bi-pencil-square"></i> <?= AppConstants::UI_EDIT_TASK_TITLE ?>: <?= htmlspecialchars($task['nombre']) ?>
                         </h4>
                     </div>
                     <div class="card-body">

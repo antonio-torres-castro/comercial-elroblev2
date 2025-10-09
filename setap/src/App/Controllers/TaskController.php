@@ -66,7 +66,7 @@ class TaskController extends BaseController
                 'taskStates' => $taskStates,
                 'users' => $users,
                 'filters' => $filters,
-                'title' => 'Gestión de Tareas',
+                'title' => AppConstants::UI_TASK_MANAGEMENT,
                 'subtitle' => 'Lista de todas las tareas',
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
