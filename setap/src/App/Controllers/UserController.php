@@ -64,12 +64,16 @@ class UserController extends BaseController
             // Obtener tipos de usuario para filtro
             $userTypes = $this->getUserTypes();
 
-            // Usar ViewRenderer para renderizar la vista
-            echo $this->viewRenderer->render('users/list', [
+            // Estandarizar estructura de datos
+            $data = [
+                'user' => $currentUser,
                 'users' => $users,
                 'userTypes' => $userTypes,
-                'currentUser' => $currentUser
-            ]);
+                'title' => 'Gestión de Usuarios',
+                'subtitle' => 'Lista de todos los usuarios'
+            ];
+
+            require_once __DIR__ . '/../Views/users/list.php';
         } catch (Exception $e) {
             error_log("Error en UserController::index: " . $e->getMessage());
             http_response_code(500);
@@ -101,14 +105,19 @@ class UserController extends BaseController
             // Obtener todas las personas disponibles
             $availablePersonas = $this->userModel->getAllPersonas();
 
-            // Usar ViewRenderer para renderizar la vista
-            echo $this->viewRenderer->render('users/create', [
+            // Estandarizar estructura de datos
+            $data = [
+                'user' => $currentUser,
                 'userTypes' => $userTypes,
                 'estadosTipo' => $estadosTipo,
                 'clients' => $clients,
                 'availablePersonas' => $availablePersonas,
-                'currentUser' => $currentUser
-            ]);
+                'title' => 'Crear Usuario',
+                'subtitle' => 'Agregar nuevo usuario al sistema',
+                'action' => 'create'
+            ];
+
+            require_once __DIR__ . '/../Views/users/create.php';
         } catch (Exception $e) {
             error_log("Error en UserController::create: " . $e->getMessage());
             http_response_code(500);

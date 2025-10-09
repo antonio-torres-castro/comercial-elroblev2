@@ -74,7 +74,7 @@ class MenuController extends BaseController
     }
 
     /**
-     * Mostrar/editar menú individual (singular)
+     * Mostrar/editar menú individual (singular) - SIMPLIFICADO
      */
     public function show($id = null)
     {
@@ -92,37 +92,32 @@ class MenuController extends BaseController
                 return;
             }
 
-            $menu = null;
+            // Si hay ID, delegar al método edit() que ya está estandarizado
             if ($id) {
-                $menu = $this->menuModel->find((int)$id);
-                if (!$menu) {
-                    http_response_code(404);
-                    echo $this->renderError(AppConstants::ERROR_MENU_NOT_FOUND);
-                    return;
-                }
+                $this->edit($id);
+                return;
             }
 
             // Obtener estados disponibles usando el modelo
             $statusTypes = $this->menuModel->getStatusTypes();
+            
+            // Obtener grupos de menú para consistencia
+            $menuGroups = $this->menuModel->getMenuGroups();
 
-            // Datos para la vista
+            // Datos para nuevo menú
             $data = [
                 'user' => $currentUser,
                 'title' => AppConstants::UI_TITLE_VIEW_MENU,
-                'subtitle' => $id ? "Editando menú #$id" : 'Nuevo menú',
-                'menu_id' => $id,
-                'menu' => $menu,
+                'subtitle' => 'Nuevo menú',
+                'menu_id' => null,
+                'menu' => null,
+                'menuGroups' => $menuGroups,
                 'statusTypes' => $statusTypes,
-                'action' => $id ? 'edit' : 'create',
-                'next_order' => $id ? null : $this->menuModel->getNextOrder()
+                'action' => 'create',
+                'next_order' => $this->menuModel->getNextOrder()
             ];
 
-            // Usar vista específica según la acción
-            if ($id) {
-                require_once __DIR__ . '/../Views/menus/edit.php';
-            } else {
-                require_once __DIR__ . '/../Views/menus/create.php';
-            }
+            require_once __DIR__ . '/../Views/menus/create.php';
         } catch (Exception $e) {
             error_log("Error en MenuController::show: " . $e->getMessage());
             http_response_code(500);
@@ -276,13 +271,16 @@ class MenuController extends BaseController
             // Obtener tipos de estado disponibles
             $statusTypes = $this->menuModel->getStatusTypes();
 
-            // Datos para la vista
+            // Datos para la vista - ESTANDARIZADO con show()
             $data = [
+                'user' => $currentUser,
+                'title' => 'Editar Menú',
+                'subtitle' => "Editando: {$menu['nombre']}",
+                'menu_id' => $id,
                 'menu' => $menu,
                 'menuGroups' => $menuGroups,
                 'statusTypes' => $statusTypes,
-                'title' => 'Editar Menú',
-                'subtitle' => "Editando: {$menu['nombre']}"
+                'action' => 'edit'
             ];
 
             require_once __DIR__ . '/../Views/menus/edit.php';

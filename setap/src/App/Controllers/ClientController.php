@@ -207,6 +207,7 @@ class ClientController extends BaseController
                 'user' => $currentUser,
                 'title' => 'Editar Cliente',
                 'subtitle' => 'Editando: ' . $client['razon_social'],
+                'client_id' => $id,  // Añadir para consistencia
                 'client' => $client,
                 'statusTypes' => $statusTypes,
                 'counterparties' => $counterparties,

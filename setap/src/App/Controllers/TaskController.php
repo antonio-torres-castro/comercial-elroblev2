@@ -99,12 +99,18 @@ class TaskController extends BaseController
                 return;
             }
 
-            // Datos para la vista
+            // Datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,
                 'title' => 'Gestión de Tarea',
                 'subtitle' => $id ? "Editando tarea #$id" : 'Nueva tarea',
-                'task_id' => $id
+                'task_id' => $id,
+                'task' => $id ? $this->taskModel->getById($id) : null,
+                'projects' => $this->taskModel->getProjects(),
+                'taskTypes' => $this->taskModel->getTaskTypes(),
+                'users' => $this->taskModel->getUsers(),
+                'taskStates' => $this->taskModel->getTaskStates(),
+                'action' => $id ? 'edit' : 'create'
             ];
 
             require_once __DIR__ . '/../Views/tasks/form.php';
@@ -260,13 +266,14 @@ class TaskController extends BaseController
             $data = [
                 'user' => $currentUser,
                 'task' => $task,
-                'task_id' => $id,
+                'task_id' => $id,  // Mantener para compatibilidad
                 'title' => 'Editar Tarea',
                 'subtitle' => "Editando: {$task['nombre']}",
                 'projects' => $this->taskModel->getProjects(),
                 'taskTypes' => $this->taskModel->getTaskTypes(),
                 'users' => $this->taskModel->getUsers(),
                 'taskStates' => $this->taskModel->getTaskStates(),
+                'action' => 'edit',  // Estandarizar
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
             ];
