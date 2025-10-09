@@ -298,6 +298,94 @@ class AppConstants
     /** Título búsqueda avanzada */
     const UI_ADVANCED_SEARCH = 'Búsqueda Avanzada';
 
+    // ===== TEXTOS DE BOTONES Y ACCIONES COMUNES =====
+
+    /** Texto del botón Crear */
+    const UI_BTN_CREATE = 'Crear';
+
+    /** Texto del botón Editar */
+    const UI_BTN_EDIT = 'Editar';
+
+    /** Texto del botón Guardar */
+    const UI_BTN_SAVE = 'Guardar';
+
+    /** Texto del botón Guardar Cambios */
+    const UI_BTN_SAVE_CHANGES = 'Guardar Cambios';
+
+    /** Texto del botón Cancelar */
+    const UI_BTN_CANCEL = 'Cancelar';
+
+    /** Texto del botón Eliminar */
+    const UI_BTN_DELETE = 'Eliminar';
+
+    /** Texto del botón Volver */
+    const UI_BTN_BACK = 'Volver';
+
+    /** Texto del botón Nuevo */
+    const UI_BTN_NEW = 'Nuevo';
+
+    /** Texto Lista */
+    const UI_LIST = 'Lista';
+
+    /** Texto Volver a Lista */
+    const UI_BACK_TO_LIST = 'Volver a Lista';
+
+    // ===== TEXTOS DE ACCIONES ESPECÍFICAS =====
+
+    /** Crear Nuevo */
+    const UI_CREATE_NEW = 'Crear Nuevo';
+
+    /** Nuevo Usuario */
+    const UI_NEW_USER = 'Nuevo Usuario';
+
+    /** Nuevo Cliente */
+    const UI_NEW_CLIENT = 'Nuevo Cliente';
+
+    /** Nuevo Proyecto */
+    const UI_NEW_PROJECT = 'Nuevo Proyecto';
+
+    /** Nuevo Menú */
+    const UI_NEW_MENU = 'Nuevo Menú';
+
+    /** Nuevo Reporte */
+    const UI_NEW_REPORT = 'Nuevo Reporte';
+
+    /** Crear Usuario */
+    const UI_CREATE_USER = 'Crear Usuario';
+
+    /** Crear Cliente */
+    const UI_CREATE_CLIENT = 'Crear Cliente';
+
+    /** Crear Proyecto */
+    const UI_CREATE_PROJECT = 'Crear Proyecto';
+
+    /** Crear Menú */
+    const UI_CREATE_MENU = 'Crear Menú';
+
+    /** Crear Tarea */
+    const UI_CREATE_TASK = 'Crear Tarea';
+
+    /** Crear Reporte */
+    const UI_CREATE_REPORT = 'Crear Reporte';
+
+    /** Editar Usuario */
+    const UI_EDIT_USER = 'Editar Usuario';
+
+    /** Editar Tarea */
+    const UI_EDIT_TASK = 'Editar Tarea';
+
+    /** Lista de usuarios */
+    const UI_USER_LIST = 'Lista de usuarios';
+
+    /** Lista de clientes */
+    const UI_CLIENT_LIST = 'Lista de clientes';
+
+    /** Lista de proyectos */
+    const UI_PROJECT_LIST = 'Lista de proyectos';
+
+    /** Lista de tareas */
+    const UI_TASK_LIST = 'Lista de tareas';
+
     const UI_TITLE_VIEW_MENU = 'Gestión de Menú';
     const UI_TITLE_VIEW_PERFIL_EDIT = 'Editar Perfil';
     const UI_SUBTITLE_VIEW_PERFIL_EDIT = 'Actualiza tu información personal';

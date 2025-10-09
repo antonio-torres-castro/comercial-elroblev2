@@ -70,7 +70,7 @@ class UserController extends BaseController
                 'users' => $users,
                 'userTypes' => $userTypes,
                 'title' => 'Gestión de Usuarios',
-                'subtitle' => 'Lista de todos los usuarios'
+                'subtitle' => AppConstants::UI_USER_LIST
             ];
 
             require_once __DIR__ . '/../Views/users/list.php';
@@ -112,7 +112,7 @@ class UserController extends BaseController
                 'estadosTipo' => $estadosTipo,
                 'clients' => $clients,
                 'availablePersonas' => $availablePersonas,
-                'title' => 'Crear Usuario',
+                'title' => AppConstants::UI_CREATE_USER,
                 'subtitle' => 'Agregar nuevo usuario al sistema',
                 'action' => 'create'
             ];

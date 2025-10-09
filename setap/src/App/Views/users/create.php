@@ -52,17 +52,20 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php 
+    use App\Helpers\Security; 
+    use App\Constants\AppConstants;
+    ?>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
         <div class="row">
             <main class="col-12 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Crear Nuevo Usuario</h1>
+                    <h1 class="h2"><?= AppConstants::UI_CREATE_NEW ?> Usuario</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="/users" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Volver a Lista
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_LIST ?>
                         </a>
                     </div>
                 </div>
@@ -341,10 +344,10 @@
                                 <div class="col-12">
                                     <div class="d-flex justify-content-between">
                                         <a href="/users" class="btn btn-secondary">
-                                            <i class="bi bi-arrow-left"></i> Cancelar
+                                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                         </a>
                                         <button type="submit" name="create_user" class="btn btn-primary">
-                                            <i class="bi bi-person-plus"></i> Crear Usuario
+                                            <i class="bi bi-person-plus"></i> <?= AppConstants::UI_CREATE_USER ?>
                                         </button>
                                     </div>
                                 </div>

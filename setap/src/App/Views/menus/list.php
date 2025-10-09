@@ -47,7 +47,10 @@
 <body>
     <?php use App\Helpers\Security; ?>
 
-    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
+    <?php 
+use App\Constants\AppConstants;
+include __DIR__ . '/../layouts/navigation.php'; 
+?>
 
     <div class="container-fluid mt-4">
         <div class="row">
@@ -58,7 +61,7 @@
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <?php if (\App\Helpers\Security::hasPermission('Create') || \App\Helpers\Security::hasPermission('All')): ?>
                             <a href="/menu" class="btn btn-sm btn-setap-primary">
-                                <i class="bi bi-plus-circle"></i> Nuevo Menú
+                                <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_MENU ?>
                             </a>
                         <?php endif; ?>
                     </div>

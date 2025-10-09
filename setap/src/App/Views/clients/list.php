@@ -14,7 +14,10 @@
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
 <body>
-    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
+    <?php 
+    use App\Constants\AppConstants;
+    include __DIR__ . '/../layouts/navigation.php'; 
+    ?>
 
     <div class="container-fluid mt-4">
         <div class="row">
@@ -24,7 +27,7 @@
                     <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="/client" class="btn btn-sm btn-setap-primary">
-                            <i class="bi bi-plus-circle"></i> Nuevo Cliente
+                            <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_CLIENT ?>
                         </a>
                     </div>
                 </div>

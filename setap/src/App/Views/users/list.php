@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -75,7 +76,7 @@ use App\Helpers\Security;
             <div class="col-md-6 text-end">
                 <?php if (\App\Helpers\Security::hasPermission('Create')): ?>
                     <a href="/users/create" class="btn btn-setap-primary">
-                        <i class="bi bi-person-plus"></i> Nuevo Usuario
+                        <i class="bi bi-person-plus"></i> <?= AppConstants::UI_NEW_USER ?>
                     </a>
                 <?php endif; ?>
             </div>
@@ -251,7 +252,7 @@ use App\Helpers\Security;
                                                 <?php if (\App\Helpers\Security::hasPermission('Modify')): ?>
                                                     <a href="/users/edit?id=<?= $user['id'] ?>"
                                                         class="btn btn-outline-warning"
-                                                        title="Editar">
+                                                        title="<?= AppConstants::UI_BTN_EDIT ?>">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <a href="/users/permissions?user_id=<?= $user['id'] ?>"
@@ -286,7 +287,7 @@ use App\Helpers\Security;
                                                 <?php if (\App\Helpers\Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
                                                     <button type="button" class="btn btn-outline-danger"
                                                         onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
-                                                        title="Eliminar">
+                                                        title="<?= AppConstants::UI_BTN_DELETE ?>">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 <?php endif; ?>
@@ -333,11 +334,11 @@ use App\Helpers\Security;
                     <p class="text-muted">Esta acción no se puede deshacer.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= AppConstants::UI_BTN_CANCEL ?></button>
                     <form method="POST" action="/users/delete" style="display: inline;" id="deleteUserForm">
                         <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deleteUserId">
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <button type="submit" class="btn btn-danger"><?= AppConstants::UI_BTN_DELETE ?></button>
                     </form>
                 </div>
             </div>
@@ -475,7 +476,7 @@ use App\Helpers\Security;
                 <hr>
                 <div class="d-flex justify-content-end gap-2">
                     <a href="/users/edit?id=${userId}" class="btn btn-outline-setap-primary btn-sm">
-                        <i class="bi bi-pencil"></i> Editar
+                        <i class="bi bi-pencil"></i> <?= AppConstants::UI_BTN_EDIT ?>
                     </a>
                     <button type="button" class="btn btn-outline-warning btn-sm" 
                             onclick="bootstrap.Modal.getInstance(document.getElementById('userModal')).hide(); showChangePasswordModal(${userId}, '${userName}');">
