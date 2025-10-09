@@ -162,6 +162,7 @@ class MenuController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/menus/create.php';
+
         } catch (Exception $e) {
             error_log("Error en MenuController::create: " . $e->getMessage());
             http_response_code(500);
@@ -226,6 +227,7 @@ class MenuController extends BaseController
             } else {
                 throw new Exception('Error al crear el menú');
             }
+
         } catch (Exception $e) {
             error_log("Error en MenuController::store: " . $e->getMessage());
             $_SESSION['errors'] = ['Error interno del servidor'];
@@ -280,6 +282,7 @@ class MenuController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/menus/edit.php';
+
         } catch (Exception $e) {
             error_log("Error en MenuController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -350,6 +353,7 @@ class MenuController extends BaseController
             } else {
                 throw new Exception('Error al actualizar el menú');
             }
+
         } catch (Exception $e) {
             error_log("Error en MenuController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
@@ -397,6 +401,7 @@ class MenuController extends BaseController
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al eliminar el menú']);
             }
+
         } catch (Exception $e) {
             error_log("Error en MenuController::delete: " . $e->getMessage());
             echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
@@ -537,4 +542,5 @@ class MenuController extends BaseController
         header("Location: $url");
         exit;
     }
+
 }
