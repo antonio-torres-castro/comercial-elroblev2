@@ -185,7 +185,7 @@
 
                                     <!-- Botones de Acción -->
                                     <div class="mt-4 text-end">
-                                        <a href="/tasks" class="btn btn-secondary me-2">
+                                        <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary me-2">
                                             <i class="bi bi-arrow-left"></i> Volver a Tareas
                                         </a>
                                         <button type="submit" class="btn btn-warning" id="updateBtn">

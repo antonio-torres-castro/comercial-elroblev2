@@ -23,7 +23,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/tasks/create" class="btn btn-sm btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_TASK ?>
                         </a>
                     </div>
@@ -38,7 +38,7 @@
                         </h2>
                     </div>
                     <div class="col-md-6 text-end">
-                        <a href="/tasks/create" class="btn btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
                             <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
                         </a>
                     </div>
@@ -96,7 +96,7 @@
                                         <button type="submit" class="btn btn-outline-setap-primary me-2">
                                             <i class="bi bi-search"></i> Filtrar
                                         </button>
-                                        <a href="/tasks" class="btn btn-outline-secondary">
+                                        <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-outline-secondary">
                                             <i class="bi bi-x-lg"></i> Limpiar
                                         </a>
                                     </div>
@@ -223,7 +223,7 @@
                                     <i class="bi bi-inbox display-1 text-muted"></i>
                                     <h4 class="mt-3">No hay tareas registradas</h4>
                                     <p class="text-muted">Comienza creando tu primera tarea.</p>
-                                    <a href="/tasks/create" class="btn btn-setap-primary">
+                                    <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
                                         <i class="bi bi-plus-lg"></i> Crear Primera Tarea
                                     </a>
                                 </div>

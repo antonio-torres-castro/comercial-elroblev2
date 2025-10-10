@@ -51,7 +51,7 @@
                 <p class="text-muted">Complete los datos para crear un nuevo proyecto en el sistema.</p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="/projects" class="btn btn-outline-secondary">
+                <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_PROJECTS ?>
                 </a>
             </div>
@@ -159,7 +159,7 @@
 
                     <!-- Botones de Acción -->
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="/projects" class="btn btn-secondary">
+                        <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-secondary">
                             <i class="bi bi-x-lg"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-success" id="createBtn">

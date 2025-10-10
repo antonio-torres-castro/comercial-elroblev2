@@ -103,7 +103,7 @@ class TaskController extends BaseController
             $data = [
                 'user' => $currentUser,
                 'title' => 'Gestión de Tarea',
-                'subtitle' => $id ? "Editando tarea #$id" : 'Nueva tarea',
+                'subtitle' => $id ? AppConstants::UI_EDITING_TASK . " #$id" : AppConstants::UI_NEW_TASK,
                 'task_id' => $id,
                 'task' => $id ? $this->taskModel->getById($id) : null,
                 'projects' => $this->taskModel->getProjects(),
@@ -142,7 +142,7 @@ class TaskController extends BaseController
 
             $data = [
                 'user' => $currentUser,
-                'title' => 'Nueva Tarea',
+                'title' => AppConstants::UI_NEW_TASK,
                 'subtitle' => 'Asignar tarea a proyecto',
                 'projects' => $this->taskModel->getProjects(),
                 'taskTypes' => $this->taskModel->getTaskTypes(), // Catálogo de tareas existentes
@@ -267,7 +267,7 @@ class TaskController extends BaseController
                 'user' => $currentUser,
                 'task' => $task,
                 'task_id' => $id,  // Mantener para compatibilidad
-                'title' => 'Editar Tarea',
+                'title' => AppConstants::UI_EDIT_TASK_TITLE,
                 'subtitle' => "Editando: {$task['nombre']}",
                 'projects' => $this->taskModel->getProjects(),
                 'taskTypes' => $this->taskModel->getTaskTypes(),

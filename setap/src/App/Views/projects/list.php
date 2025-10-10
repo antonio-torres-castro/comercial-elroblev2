@@ -74,7 +74,7 @@
         <!-- Filtros -->
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" action="/projects" class="row align-items-end">
+                <form method="GET" action="<?= AppConstants::ROUTE_PROJECTS ?>" class="row align-items-end">
                     <div class="col-md-3">
                         <label for="cliente_id" class="form-label">Cliente</label>
                         <select class="form-select" name="cliente_id" id="cliente_id">
@@ -113,7 +113,7 @@
                         <button type="submit" class="btn btn-setap-primary me-2">
                             <i class="bi bi-funnel"></i> Filtrar
                         </button>
-                        <a href="/projects" class="btn btn-outline-secondary">
+                        <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-x-circle"></i> Limpiar
                         </a>
                     </div>

@@ -23,7 +23,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/tasks" class="btn btn-sm btn-secondary">
+                        <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-sm btn-secondary">
                             <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_TASKS ?>
                         </a>
                     </div>
@@ -218,7 +218,7 @@
                                         <div class="col-12">
                                             <hr>
                                             <div class="d-flex justify-content-end gap-2">
-                                                <a href="/tasks" class="btn btn-secondary">
+                                                <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary">
                                                     <i class="bi bi-x-lg"></i> Cancelar
                                                 </a>
                                                 <button type="submit" class="btn btn-setap-primary">
@@ -358,7 +358,7 @@
 
                         <!-- Botones de Acción -->
                         <div class="mt-4 text-end">
-                            <a href="/tasks" class="btn btn-secondary me-2">
+                            <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary me-2">
                                 <i class="bi bi-x-lg"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-success" id="createBtn">

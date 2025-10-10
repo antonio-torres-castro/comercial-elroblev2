@@ -441,6 +441,9 @@ class AppConstants
     
     /** Editar Tarea */
     const UI_EDIT_TASK_TITLE = 'Editar Tarea';
+    
+    /** Texto para editando tarea */
+    const UI_EDITING_TASK = 'Editando tarea';
 
     const UI_TITLE_VIEW_MENU = 'Gestión de Menú';
     const UI_TITLE_VIEW_PERFIL_EDIT = 'Editar Perfil';
