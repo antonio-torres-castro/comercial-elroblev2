@@ -145,6 +145,8 @@ class TaskControllerTest extends TestCase
         $invalidDates = [
             '2025-13-01', // Mes inválido
             '2025-02-30', // Día inválido
+	    '2025-02-31', // Día inválido
+            '2025-02-32', // Día inválido (32 no está en el rango)
             '25-10-11',   // Formato incorrecto
             'invalid',    // Completamente inválido
             ''
@@ -155,10 +157,10 @@ class TaskControllerTest extends TestCase
         }
 
         foreach ($invalidDates as $date) {
-            if ($date !== '') {
+            if ($date !== '' && $date !== null) {
                 $this->assertDoesNotMatchRegularExpression('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/', $date, "Fecha inválida: {$date}");
             } else {
-                $this->assertEmpty($date, "Fecha vacía");
+                $this->assertTrue(empty($date), "Fecha vacía o null");
             }
         }
     }

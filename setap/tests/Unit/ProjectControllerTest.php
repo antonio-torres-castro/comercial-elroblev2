@@ -73,14 +73,8 @@ class ProjectControllerTest extends TestCase
             ->method('getAll')
             ->willReturn($expectedProjects);
 
-        // Mock de datos auxiliares
-        $this->projectModelMock->method('getClients')->willReturn([
-            ['id' => 1, 'nombre' => 'Cliente Test']
-        ]);
-        
-        $this->projectModelMock->method('getProjectStates')->willReturn([
-            ['id' => 1, 'nombre' => 'En Progreso']
-        ]);
+        // Mock de datos auxiliares - usando métodos que existen en el modelo real
+        // Los datos auxiliares se manejan directamente en los tests
 
         // Assert: Estructura de datos válida
         $this->assertIsArray($expectedProjects);
@@ -247,10 +241,10 @@ class ProjectControllerTest extends TestCase
             'estado_tipo_id' => 1
         ];
         
+        // Simulamos que el proyecto existe usando getAll con filtros
         $this->projectModelMock
-            ->method('getById')
-            ->with($projectId)
-            ->willReturn($existingProject);
+            ->method('getAll')
+            ->willReturn([$existingProject]);
 
         // Assert: Proyecto puede ser editado
         $this->assertIsArray($existingProject);
@@ -278,9 +272,7 @@ class ProjectControllerTest extends TestCase
             ['id' => 3, 'nombre' => 'Usuario 3']
         ];
         
-        $this->projectModelMock
-            ->method('getAvailableUsers')
-            ->willReturn($availableUsers);
+        // Mock eliminado - el método getAvailableUsers no existe en el modelo
 
         // Validar que el responsable asignado existe en la lista
         $responsableIds = array_column($availableUsers, 'id');
@@ -304,9 +296,7 @@ class ProjectControllerTest extends TestCase
             ['id' => 5, 'nombre' => 'En Pausa']
         ];
 
-        $this->projectModelMock
-            ->method('getProjectStates')
-            ->willReturn($projectStates);
+        // Mock eliminado - el método getProjectStates no existe en el modelo
 
         // Validar estructura de estados
         foreach ($projectStates as $state) {
@@ -357,10 +347,10 @@ class ProjectControllerTest extends TestCase
     {
         $nonExistentId = 999;
         
+        // Simulamos que no se encuentra el proyecto
         $this->projectModelMock
-            ->method('getById')
-            ->with($nonExistentId)
-            ->willReturn(null);
+            ->method('getAll')
+            ->willReturn([]);
 
         // Assert: Proyecto no encontrado
         $this->assertNull(null); // Simula proyecto no encontrado
@@ -377,9 +367,7 @@ class ProjectControllerTest extends TestCase
             ['id' => 3, 'nombre' => 'Cliente C']
         ];
         
-        $this->projectModelMock
-            ->method('getClients')
-            ->willReturn($availableClients);
+        // Mock eliminado - el método getClients no existe en el modelo Project
 
         $selectedClientId = 2;
         

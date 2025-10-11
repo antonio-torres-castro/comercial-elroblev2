@@ -63,7 +63,7 @@ class UserTest extends TestCase
         $this->assertArrayHasKey('password', $validUserData);
         
         // Validación de email
-        $this->assertFilter($validUserData['email'], FILTER_VALIDATE_EMAIL);
+        $this->assertNotFalse(filter_var($validUserData['email'], FILTER_VALIDATE_EMAIL));
         
         // Validación de nombre de usuario (sin espacios, caracteres especiales)
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9_]+$/', $validUserData['nombre_usuario']);
@@ -278,7 +278,7 @@ class UserTest extends TestCase
         ];
         
         $this->userModelMock
-            ->method('find')
+            ->method('getById')
             ->with($userId)
             ->willReturn($existingUser);
 
