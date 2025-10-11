@@ -141,24 +141,8 @@ trait CommonValidationsTrait
         return $errors;
     }
 
-    /**
-     * Validación de email (opcional)
-     */
-    protected function validateEmail(?string $email, bool $required = false): array
-    {
-        $errors = [];
-
-        if ($required && empty($email)) {
-            $errors[] = 'Email es obligatorio';
-            return $errors;
-        }
-
-        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Formato de email inválido';
-        }
-
-        return $errors;
-    }
+    // El método validateEmail fue removido para evitar conflictos de firma con BaseController
+    // Los controladores que usan este trait pueden usar $this->validateEmail() del BaseController
 
     /**
      * Validación de RUT chileno

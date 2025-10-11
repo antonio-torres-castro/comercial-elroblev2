@@ -33,7 +33,10 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php 
+    use App\Helpers\Security; 
+    use App\Constants\AppConstants;
+    ?>
 
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/layouts/navigation.php'; ?>
@@ -123,7 +126,7 @@
                                 <div class="row mt-3">
                                     <?php if (\App\Helpers\Security::hasMenuAccess('users')): ?>
                                         <div class="col-md-6 mb-2">
-                                            <a href="/users" class="btn btn-outline-setap-primary w-100">
+                                            <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-outline-setap-primary w-100">
                                                 <i class="bi bi-people"></i> Gestionar Usuarios
                                             </a>
                                         </div>
@@ -131,7 +134,7 @@
 
                                     <?php if (\App\Helpers\Security::hasMenuAccess('projects')): ?>
                                         <div class="col-md-6 mb-2">
-                                            <a href="/projects" class="btn btn-outline-setap-primary w-100">
+                                            <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-outline-setap-primary w-100">
                                                 <i class="bi bi-briefcase"></i> Ver Proyectos
                                             </a>
                                         </div>

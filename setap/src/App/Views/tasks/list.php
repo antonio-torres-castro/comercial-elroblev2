@@ -196,7 +196,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="btn-group btn-group-sm">
-                                                                <a href="/tasks/show/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
+                                                                <a href="<?= \App\Constants\AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
                                                                 <a href="/tasks/edit?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">

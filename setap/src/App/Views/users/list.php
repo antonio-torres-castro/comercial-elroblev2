@@ -75,7 +75,7 @@ use App\Constants\AppConstants;
             </div>
             <div class="col-md-6 text-end">
                 <?php if (\App\Helpers\Security::hasPermission('Create')): ?>
-                    <a href="/users/create" class="btn btn-setap-primary">
+                    <a href="<?= \App\Constants\AppConstants::ROUTE_USERS_CREATE ?>" class="btn btn-setap-primary">
                         <i class="bi bi-person-plus"></i> <?= AppConstants::UI_NEW_USER ?>
                     </a>
                 <?php endif; ?>

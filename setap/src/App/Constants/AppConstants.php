@@ -17,14 +17,32 @@ class AppConstants
     /** Ruta principal de home */
     const ROUTE_HOME = '/home';
 
+    /** Ruta de logout */
+    const ROUTE_LOGOUT = '/logout';
+
     /** Ruta base de usuarios */
     const ROUTE_USERS = '/users';
 
     /** Ruta base de clientes */
     const ROUTE_CLIENTS = '/clients';
+    
+    /** Ruta de creación de clientes */
+    const ROUTE_CLIENTS_CREATE = '/clients/create';
+    
+    /** Ruta de edición de clientes */
+    const ROUTE_CLIENTS_EDIT = '/clients/edit';
 
     /** Ruta base de tareas */
     const ROUTE_TASKS = '/tasks';
+    
+    /** Ruta de creación de tareas */
+    const ROUTE_TASKS_CREATE = '/tasks/create';
+    
+    /** Ruta de vista de tarea */
+    const ROUTE_TASKS_SHOW = '/tasks/show';
+    
+    /** Ruta de edición de tarea */
+    const ROUTE_TASKS_EDIT = '/tasks/edit';
 
     /** Ruta base de personas */
     const ROUTE_PERSONAS = '/personas';
@@ -43,9 +61,24 @@ class AppConstants
 
     /** Ruta de contrapartes de clientes */
     const ROUTE_CLIENT_COUNTERPARTIES = '/client-counterparties';
+    
+    /** Ruta de permisos */
+    const ROUTE_PERMISOS = '/permisos';
 
     /** Ruta de creación de proyectos */
     const ROUTE_PROJECTS_CREATE = '/projects/create';
+    
+    /** Ruta de búsqueda de proyectos */
+    const ROUTE_PROJECTS_SEARCH = '/projects/search';
+    
+    /** Ruta de vista de proyecto */
+    const ROUTE_PROJECTS_SHOW = '/projects/show';
+    
+    /** Ruta de edición de proyecto */
+    const ROUTE_PROJECTS_EDIT = '/projects/edit';
+    
+    /** Ruta de reporte de proyecto */
+    const ROUTE_PROJECTS_REPORT = '/projects/report';
 
     // ===== RUTAS CON ACCIONES =====
 
@@ -54,6 +87,9 @@ class AppConstants
 
     /** Ruta de edición de usuarios */
     const ROUTE_USERS_EDIT = '/users/edit';
+
+    /** Ruta de permisos de usuarios */
+    const ROUTE_USERS_PERMISSIONS = '/users/permissions';
 
     /** Ruta de creación de personas */
     const ROUTE_PERSONAS_CREATE = '/personas/create';
@@ -199,6 +235,21 @@ class AppConstants
     /** Error de ID de cliente inválido */
     const ERROR_INVALID_CLIENT_ID = 'ID de cliente inválido';
 
+    /** Error al guardar el cliente */
+    const ERROR_SAVE_CLIENT = 'Error al guardar el cliente';
+    
+    /** Error al actualizar el cliente */
+    const ERROR_UPDATE_CLIENT = 'Error al actualizar el cliente';
+    
+    /** Error al guardar la contraparte */
+    const ERROR_SAVE_COUNTERPARTY = 'Error al guardar la contraparte';
+    
+    /** Error al actualizar la contraparte */
+    const ERROR_UPDATE_COUNTERPARTY = 'Error al actualizar la contraparte';
+    
+    /** ID de cliente requerido */
+    const ERROR_CLIENT_ID_REQUIRED = 'ID de cliente requerido';
+
     /** Error de ID de menú inválido */
     const ERROR_INVALID_MENU_ID = 'ID de menú inválido';
 
@@ -282,6 +333,12 @@ class AppConstants
 
     /** Etiqueta de confirmar contraseña */
     const UI_CONFIRM_PASSWORD = 'Confirmar Contraseña';
+
+    /** Mi Perfil */
+    const UI_MY_PROFILE = 'Mi Perfil';
+    
+    /** Cambiar Contraseña */
+    const UI_CHANGE_PASSWORD = 'Cambiar Contraseña';
 
     /** Texto de acción irreversible */
     const UI_ACTION_IRREVERSIBLE = 'Esta acción no se puede deshacer';
@@ -370,6 +427,9 @@ class AppConstants
 
     /** Crear Reporte */
     const UI_CREATE_REPORT = 'Crear Reporte';
+    
+    /** Reporte Generado */
+    const UI_REPORT_GENERATED = 'Reporte Generado';
 
     /** Editar Usuario */
     const UI_EDIT_USER = 'Editar Usuario';
@@ -399,6 +459,24 @@ class AppConstants
     
     /** Gestión de Personas */
     const UI_PERSONA_MANAGEMENT = 'Gestión de Personas';
+    
+    /** Gestión de Clientes */
+    const UI_CLIENT_MANAGEMENT = 'Gestión de Clientes';
+    
+    /** Editar Cliente */
+    const UI_EDIT_CLIENT = 'Editar Cliente';
+    
+    /** Contrapartes de Clientes */
+    const UI_CLIENT_COUNTERPARTIES = 'Contrapartes de Clientes';
+    
+    /** Nueva Contraparte */
+    const UI_NEW_COUNTERPARTY = 'Nueva Contraparte';
+    
+    /** Editar Contraparte */
+    const UI_EDIT_COUNTERPARTY = 'Editar Contraparte';
+    
+    /** Editando contraparte */
+    const UI_EDITING_COUNTERPARTY = 'Editando contraparte';
     
     /** Reportes del Sistema */
     const UI_SYSTEM_REPORTS = 'Reportes del Sistema';

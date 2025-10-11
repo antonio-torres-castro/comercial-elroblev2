@@ -47,7 +47,7 @@ class ReportController extends BaseController
             // Datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,
-                'title' => 'Crear Reporte',
+                'title' => AppConstants::UI_CREATE_REPORT,
                 'subtitle' => 'Generar reporte personalizado',
                 'action' => 'create'
             ];
@@ -115,7 +115,7 @@ class ReportController extends BaseController
             // Preparar datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,
-                'title' => 'Reporte Generado',
+                'title' => AppConstants::UI_REPORT_GENERATED,
                 'subtitle' => $this->getReportTitle($reportType),
                 'reportData' => $reportData,
                 'reportType' => $reportType,
@@ -209,7 +209,7 @@ class ReportController extends BaseController
             // Datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,
-                'title' => 'Reportes del Sistema',
+                'title' => AppConstants::UI_SYSTEM_REPORTS,
                 'subtitle' => 'Gestión y descarga de reportes generados',
                 'reports' => $reports,
                 'action' => 'index'

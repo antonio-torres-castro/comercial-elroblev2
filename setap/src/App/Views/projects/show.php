@@ -82,7 +82,7 @@
                 </p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="/projects/edit?id=<?= $project['id'] ?>" class="btn btn-warning">
+                <a href="<?= \App\Constants\AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning">
                     <i class="bi bi-pencil"></i> Editar Proyecto
                 </a>
                 <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>" class="btn btn-info">
@@ -198,7 +198,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><i class="bi bi-list-task"></i> Tareas del Proyecto</h5>
-                        <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-setap-primary">
+                        <a href="<?= \App\Constants\AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus"></i> Nueva Tarea
                         </a>
                     </div>

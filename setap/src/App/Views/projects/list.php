@@ -47,7 +47,7 @@
                 </h2>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/projects/create" class="btn btn-setap-primary">
+                <a href="<?= \App\Constants\AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
                     <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PROJECT ?>
                 </a>
                 <a href="/projects/search" class="btn btn-outline-secondary">
@@ -128,7 +128,7 @@
                     <i class="bi bi-folder-x display-1 text-muted"></i>
                     <h4 class="mt-3">No hay proyectos</h4>
                     <p class="text-muted">No se encontraron proyectos con los filtros seleccionados.</p>
-                    <a href="/projects/create" class="btn btn-setap-primary">
+                    <a href="<?= \App\Constants\AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
                         <i class="bi bi-plus-circle"></i> Crear Primer Proyecto
                     </a>
                 </div>

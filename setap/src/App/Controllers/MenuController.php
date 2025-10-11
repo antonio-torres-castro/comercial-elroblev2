@@ -186,7 +186,7 @@ class MenuController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectTo('/menus');
+                $this->redirectTo(AppConstants::ROUTE_MENUS);
                 return;
             }
 
@@ -228,7 +228,7 @@ class MenuController extends BaseController
             ];
 
             if ($this->menuModel->create($menuData)) {
-                $this->redirectWithSuccess('/menus', 'Menú creado correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, 'Menú creado correctamente');
             } else {
                 throw new Exception('Error al crear el menú');
             }
@@ -264,14 +264,14 @@ class MenuController extends BaseController
             $id = $id ?: (int)($_GET['id'] ?? 0);
 
             if ($id <= 0) {
-                $this->redirectWithError('/menus', 'ID de menú inválido');
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'ID de menú inválido');
                 return;
             }
 
             // Obtener el menú a editar
             $menu = $this->menuModel->find($id);
             if (!$menu) {
-                $this->redirectWithError('/menus', 'Menú no encontrado');
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Menú no encontrado');
                 return;
             }
 
@@ -323,13 +323,13 @@ class MenuController extends BaseController
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectTo('/menus');
+                $this->redirectTo(AppConstants::ROUTE_MENUS);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                $this->redirectWithError('/menus', 'ID de menú inválido');
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'ID de menú inválido');
                 return;
             }
 
@@ -372,7 +372,7 @@ class MenuController extends BaseController
             ];
 
             if ($this->menuModel->update($id, $menuData)) {
-                $this->redirectWithSuccess('/menus', 'Menú actualizado correctamente');
+                $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, 'Menú actualizado correctamente');
             } else {
                 throw new Exception('Error al actualizar el menú');
             }

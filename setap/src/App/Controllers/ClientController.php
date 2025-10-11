@@ -66,7 +66,7 @@ class ClientController extends BaseController
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('clients/list', [
                 'user' => $currentUser,
-                'title' => 'Gestión de Clientes',
+                'title' => AppConstants::UI_CLIENT_MANAGEMENT,
                 'subtitle' => 'Lista de todos los clientes',
                 'clients' => $clients,
                 'statusTypes' => $statusTypes,
@@ -103,7 +103,7 @@ class ClientController extends BaseController
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('clients/create', [
                 'user' => $currentUser,
-                'title' => 'Nuevo Cliente',
+                'title' => AppConstants::UI_NEW_CLIENT,
                 'subtitle' => 'Crear nuevo cliente',
                 'client' => null,
                 'statusTypes' => $statusTypes,
@@ -150,7 +150,7 @@ class ClientController extends BaseController
                 // Usar ViewRenderer para renderizar la vista con errores
                 echo $this->viewRenderer->render('clients/create', [
                     'user' => $currentUser,
-                    'title' => 'Nuevo Cliente',
+                    'title' => AppConstants::UI_NEW_CLIENT,
                     'subtitle' => 'Crear nuevo cliente',
                     'client' => $_POST,
                     'statusTypes' => $statusTypes,
@@ -168,7 +168,7 @@ class ClientController extends BaseController
         } catch (Exception $e) {
             error_log("Error en ClientController::store: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error al guardar el cliente: ' . $e->getMessage());
+            echo $this->renderError(AppConstants::ERROR_SAVE_CLIENT . ': ' . $e->getMessage());
         }
     }
 
@@ -205,7 +205,7 @@ class ClientController extends BaseController
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('clients/edit', [
                 'user' => $currentUser,
-                'title' => 'Editar Cliente',
+                'title' => AppConstants::UI_EDIT_CLIENT,
                 'subtitle' => 'Editando: ' . $client['razon_social'],
                 'client_id' => $id,  // Añadir para consistencia
                 'client' => $client,
@@ -263,7 +263,7 @@ class ClientController extends BaseController
                 // Usar ViewRenderer para renderizar la vista con errores
                 echo $this->viewRenderer->render('clients/edit', [
                     'user' => $currentUser,
-                    'title' => 'Editar Cliente',
+                    'title' => AppConstants::UI_EDIT_CLIENT,
                     'subtitle' => 'Editando: ' . $client['razon_social'],
                     'client' => array_merge($client, $_POST),
                     'statusTypes' => $statusTypes,
@@ -284,7 +284,7 @@ class ClientController extends BaseController
         } catch (Exception $e) {
             error_log("Error en ClientController::update: " . $e->getMessage());
             http_response_code(500);
-            echo $this->renderError('Error al actualizar el cliente: ' . $e->getMessage());
+            echo $this->renderError(AppConstants::ERROR_UPDATE_CLIENT . ': ' . $e->getMessage());
         }
     }
 
@@ -381,7 +381,7 @@ class ClientController extends BaseController
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('client-counterparties/list', [
                 'user' => $currentUser,
-                'title' => 'Contrapartes de Clientes',
+                'title' => AppConstants::UI_CLIENT_COUNTERPARTIES,
                 'subtitle' => 'Lista de todas las contrapartes',
                 'counterparties' => $counterparties,
                 'statusTypes' => $statusTypes,
@@ -434,8 +434,8 @@ class ClientController extends BaseController
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('client-counterparties/form', [
                 'user' => $currentUser,
-                'title' => $id ? 'Editar Contraparte' : 'Nueva Contraparte',
-                'subtitle' => $id ? "Editando contraparte #$id" : 'Crear nueva contraparte',
+                'title' => $id ? AppConstants::UI_EDIT_COUNTERPARTY : AppConstants::UI_NEW_COUNTERPARTY,
+                'subtitle' => $id ? AppConstants::UI_EDITING_COUNTERPARTY . " #$id" : 'Crear nueva contraparte',
                 'counterpartie' => $counterpartie,
                 'counterpartie_id' => $id,
                 'clients' => $formData['clients'],

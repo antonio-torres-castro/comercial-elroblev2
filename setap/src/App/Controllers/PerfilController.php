@@ -50,7 +50,7 @@ class PerfilController extends BaseController
             // Datos para la vista
             $data = [
                 'user' => $fullUserData,
-                'title' => 'Mi Perfil',
+                'title' => AppConstants::UI_MY_PROFILE,
                 'subtitle' => 'Información de tu cuenta'
             ];
 
@@ -214,7 +214,7 @@ class PerfilController extends BaseController
             // Mostrar formulario de cambio de contraseña
             $data = [
                 'user' => $currentUser,
-                'title' => 'Cambiar Contraseña',
+                'title' => AppConstants::UI_CHANGE_PASSWORD,
                 'subtitle' => 'Actualizar tu contraseña de acceso'
             ];
 

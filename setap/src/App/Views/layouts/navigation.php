@@ -1,6 +1,7 @@
 <?php
 use App\Helpers\Security;
 use App\Models\Menu;
+use App\Constants\AppConstants;
 
 // Obtener menús agrupados del usuario actual
 $groupedMenus = [];
@@ -26,7 +27,7 @@ try {
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-setap">
     <div class="container">
-        <a class="navbar-brand" href="/home">
+        <a class="navbar-brand" href="<?= AppConstants::ROUTE_HOME ?>">>
             <i class="bi bi-grid-3x3-gap"></i> SETAP
         </a>
 
@@ -38,7 +39,7 @@ try {
             <ul class="navbar-nav ms-auto">
                 <!-- Home siempre visible -->
                 <li class="nav-item">
-                    <a class="nav-link text-light" href="/home">
+                    <a class="nav-link text-light" href="<?= AppConstants::ROUTE_HOME ?>">>
                         <i class="bi bi-house"></i> Home
                     </a>
                 </li>
@@ -84,7 +85,7 @@ try {
                 <?php if (empty($groupedMenus) && empty($ungroupedMenus)): ?>
                     <?php if (\App\Helpers\Security::hasMenuAccess('manage_users')): ?>
                         <li class="nav-item">
-                            <a class="nav-link text-light" href="/users">
+                            <a class="nav-link text-light" href="<?= AppConstants::ROUTE_USERS ?>">
                                 <i class="bi bi-people"></i> Usuarios
                             </a>
                         </li>
@@ -92,7 +93,7 @@ try {
 
                     <?php if (\App\Helpers\Security::hasMenuAccess('manage_clients')): ?>
                         <li class="nav-item">
-                            <a class="nav-link text-light" href="/clients">
+                            <a class="nav-link text-light" href="<?= AppConstants::ROUTE_CLIENTS ?>">
                                 <i class="bi bi-building"></i> Clientes
                             </a>
                         </li>
@@ -100,7 +101,7 @@ try {
 
                     <?php if (\App\Helpers\Security::hasMenuAccess('manage_projects')): ?>
                         <li class="nav-item">
-                            <a class="nav-link text-light" href="/projects">
+                            <a class="nav-link text-light" href="<?= AppConstants::ROUTE_PROJECTS ?>">
                                 <i class="bi bi-folder"></i> Proyectos
                             </a>
                         </li>
@@ -108,7 +109,7 @@ try {
 
                     <?php if (\App\Helpers\Security::hasMenuAccess('manage_tasks')): ?>
                         <li class="nav-item">
-                            <a class="nav-link text-light" href="/tasks">
+                            <a class="nav-link text-light" href="<?= AppConstants::ROUTE_TASKS ?>">
                                 <i class="bi bi-list-task"></i> Tareas
                             </a>
                         </li>
@@ -116,7 +117,7 @@ try {
 
                     <?php if (\App\Helpers\Security::hasMenuAccess('manage_menus')): ?>
                         <li class="nav-item">
-                            <a class="nav-link text-light" href="/menus">
+                            <a class="nav-link text-light" href="<?= AppConstants::ROUTE_MENUS ?>">
                                 <i class="bi bi-list-ul"></i> Menús
                             </a>
                         </li>
@@ -131,13 +132,13 @@ try {
                     </a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="/perfil">
+                            <a class="dropdown-item" href="<?= AppConstants::ROUTE_PERFIL ?>">
                                 <i class="bi bi-person"></i> Mi Perfil
                             </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item" href="/logout">
+                            <a class="dropdown-item" href="<?= AppConstants::ROUTE_LOGOUT ?>">
                                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                             </a>
                         </li>

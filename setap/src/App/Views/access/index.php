@@ -84,7 +84,7 @@ use App\Helpers\Security;
                 </div>
                 <div class="col-md-6 text-end">
                     <div class="btn-group" role="group">
-                        <a href="/users" class="btn btn-outline-secondary">
+                        <a href="<?= \App\Constants\AppConstants::ROUTE_USERS ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-people"></i> Gestión de Usuarios
                         </a>
                         <a href="/permisos" class="btn btn-outline-primary">
