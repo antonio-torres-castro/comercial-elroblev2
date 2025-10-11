@@ -69,14 +69,18 @@ class AppConfig
 
     private static function loadDatabaseConfig(): void
     {
-        // Validar variables de base de datos requeridas
-        self::validateRequired(['DB_HOST', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD']);
+        // Validar variables de base de datos requeridas (excepto password en desarrollo)
+        $requiredVars = ['DB_HOST', 'DB_DATABASE', 'DB_USERNAME'];
+        if (($_ENV['APP_ENV'] ?? '') !== 'development') {
+            $requiredVars[] = 'DB_PASSWORD';
+        }
+        self::validateRequired($requiredVars);
 
         self::$config['db_host'] = $_ENV['DB_HOST'];
         self::$config['db_port'] = (int)($_ENV['DB_PORT'] ?? -1);
         self::$config['db_database'] = $_ENV['DB_DATABASE'];
         self::$config['db_username'] = $_ENV['DB_USERNAME'];
-        self::$config['db_password'] = $_ENV['DB_PASSWORD'];
+        self::$config['db_password'] = $_ENV['DB_PASSWORD'] ?? '';
     }
 
     private static function loadSecurityConfig(): void

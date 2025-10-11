@@ -97,7 +97,7 @@ class AppConstantsTest extends TestCase
         $this->assertNotEmpty(AppConstants::SUCCESS_USER_DELETED);
         $this->assertNotEmpty(AppConstants::SUCCESS_TASK_DELETED);
         $this->assertNotEmpty(AppConstants::SUCCESS_CLIENT_CREATED);
-        $this->assertNotEmpty(AppConstants::SUCCESS_PROJECT_NOT_FOUND);
+        $this->assertNotEmpty(AppConstants::SUCCESS_PROJECT_CREATED);
     }
 
     /**
@@ -291,7 +291,7 @@ class AppConstantsTest extends TestCase
         
         // Verificar que es una clase y no un trait o interface
         $reflection = new \ReflectionClass(AppConstants::class);
-        $this->assertTrue($reflection->isClass());
+        $this->assertTrue($reflection->isInstantiable() === false); // Clase con solo constantes
         $this->assertFalse($reflection->isInterface());
         $this->assertFalse($reflection->isTrait());
         

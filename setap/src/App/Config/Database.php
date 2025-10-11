@@ -16,27 +16,57 @@ class Database
     public static function getInstance(): PDO
     {
         if (self::$instance === null) {
-            // Usar las claves correctas con prefijo 'db_'
-            $host = AppConfig::get('db_host', '');
-            $db   = AppConfig::get('db_database', '');
-            $user = AppConfig::get('db_username', '');
-            $pass = AppConfig::get('db_password', '');
-            $port = AppConfig::get('db_port', 3306);
-            $charset = 'utf8mb4';
+            // Verificar si estamos en desarrollo para usar SQLite
+            if (AppConfig::get('app_env', '') === 'development') {
+                // Usar SQLite para desarrollo
+                $dbPath = __DIR__ . '/../../../storage/database.sqlite';
+                
+                // Crear el directorio storage si no existe
+                $storageDir = dirname($dbPath);
+                if (!is_dir($storageDir)) {
+                    mkdir($storageDir, 0755, true);
+                }
+                
+                // Crear archivo de base de datos si no existe
+                if (!file_exists($dbPath)) {
+                    touch($dbPath);
+                }
+                
+                $dsn = "sqlite:$dbPath";
+                $options = [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                ];
+                
+                try {
+                    self::$instance = new PDO($dsn, null, null, $options);
+                } catch (PDOException $e) {
+                    throw new RuntimeException('Error de conexión a SQLite: ' . $e->getMessage());
+                }
+            } else {
+                // Usar MySQL para producción
+                $host = AppConfig::get('db_host', '');
+                $db   = AppConfig::get('db_database', '');
+                $user = AppConfig::get('db_username', '');
+                $pass = AppConfig::get('db_password', '');
+                $port = AppConfig::get('db_port', 3306);
+                $charset = 'utf8mb4';
 
-            $dsn = "mysql:host=$host;dbname=$db;port=$port;charset=$charset";
+                $dsn = "mysql:host=$host;dbname=$db;port=$port;charset=$charset";
 
-            $options = [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-                PDO::ATTR_PERSISTENT         => false,
-            ];
+                $options = [
+                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                    PDO::ATTR_PERSISTENT         => false,
+                ];
 
-            try {
-                self::$instance = new PDO($dsn, $user, $pass, $options);
-            } catch (PDOException $e) {
-                throw new RuntimeException('Error de conexión a la base de datos: ' . $e->getMessage());
+                try {
+                    self::$instance = new PDO($dsn, $user, $pass, $options);
+                } catch (PDOException $e) {
+                    throw new RuntimeException('Error de conexión a la base de datos: ' . $e->getMessage());
+                }
             }
         }
 
