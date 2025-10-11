@@ -153,7 +153,7 @@ class UserController extends BaseController
         } catch (Exception $e) {
             error_log("Error en UserController::seekPersonas: " . $e->getMessage());
             $_SESSION['errors'] = ['Error al buscar personas'];
-            $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+            $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
         }
     }
 
@@ -186,7 +186,7 @@ class UserController extends BaseController
                 // Guardar errores y datos antiguos en sesión
                 $_SESSION['errors'] = $errors;
                 $_SESSION['old_input'] = $_POST;
-                $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+                $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
                 return;
             }
 
@@ -214,7 +214,7 @@ class UserController extends BaseController
             error_log("Error en UserController::store: " . $e->getMessage());
             $_SESSION['errors'] = [AppConstants::ERROR_INTERNAL_SERVER];
             $_SESSION['old_input'] = $_POST;
-            $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+            $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
         }
     }
 
@@ -677,13 +677,13 @@ class UserController extends BaseController
 
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectWithError('/users', 'Método no permitido');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->redirectWithError('/users', 'Token de seguridad inválido');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
@@ -735,13 +735,13 @@ class UserController extends BaseController
 
             // Verificar método POST
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectWithError('/users', 'Método no permitido');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Verificar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->redirectWithError('/users', 'Token de seguridad inválido');
+                $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_INVALID_SECURITY_TOKEN);
                 return;
             }
 
@@ -1070,9 +1070,9 @@ class UserController extends BaseController
 
             // Redireccionar según el contexto
             if ($currentUserId > 0) {
-                $this->redirectTo("/users/edit?id={$currentUserId}");
+                $this->redirectToRoute(AppConstants::ROUTE_USERS_EDIT . "?id={$currentUserId}");
             } else {
-                $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+                $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
             }
         } catch (Exception $e) {
             error_log("Error en búsqueda de personas: " . $e->getMessage());
@@ -1080,9 +1080,9 @@ class UserController extends BaseController
             $_SESSION['old_input'] = $_POST;
 
             if ($currentUserId > 0) {
-                $this->redirectTo("/users/edit?id={$currentUserId}");
+                $this->redirectToRoute(AppConstants::ROUTE_USERS_EDIT . "?id={$currentUserId}");
             } else {
-                $this->redirectTo(AppConstants::ROUTE_USERS_CREATE);
+                $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
             }
         }
     }
@@ -1286,12 +1286,5 @@ class UserController extends BaseController
         }
     }
 
-    /**
-     * Redireccionar simple
-     */
-    private function redirectTo(string $url): void
-    {
-        header("Location: $url");
-        exit;
-    }
+
 }

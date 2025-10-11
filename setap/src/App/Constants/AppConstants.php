@@ -52,6 +52,9 @@ class AppConstants
     /** Ruta de creación de usuarios */
     const ROUTE_USERS_CREATE = '/users/create';
 
+    /** Ruta de edición de usuarios */
+    const ROUTE_USERS_EDIT = '/users/edit';
+
     /** Ruta de creación de personas */
     const ROUTE_PERSONAS_CREATE = '/personas/create';
 
