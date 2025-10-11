@@ -1,4 +1,5 @@
 <?php
+
 use App\Helpers\Security;
 use App\Models\Menu;
 use App\Constants\AppConstants;
@@ -27,7 +28,7 @@ try {
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-setap">
     <div class="container">
-        <a class="navbar-brand" href="<?= AppConstants::ROUTE_HOME ?>">>
+        <a class="navbar-brand" href="<?= AppConstants::ROUTE_HOME ?>">
             <i class="bi bi-grid-3x3-gap"></i> SETAP
         </a>
 
@@ -39,7 +40,7 @@ try {
             <ul class="navbar-nav ms-auto">
                 <!-- Home siempre visible -->
                 <li class="nav-item">
-                    <a class="nav-link text-light" href="<?= AppConstants::ROUTE_HOME ?>">>
+                    <a class="nav-link text-light" href="<?= AppConstants::ROUTE_HOME ?>">
                         <i class="bi bi-house"></i> Home
                     </a>
                 </li>
@@ -136,7 +137,9 @@ try {
                                 <i class="bi bi-person"></i> Mi Perfil
                             </a>
                         </li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li>
                             <a class="dropdown-item" href="<?= AppConstants::ROUTE_LOGOUT ?>">
                                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
@@ -151,18 +154,18 @@ try {
 
 <!-- Script para inicializar dropdowns -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Asegurar que Bootstrap esté disponible antes de inicializar
-    if (typeof bootstrap !== 'undefined') {
-        // Inicializar todos los dropdowns manualmente
-        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-            return new bootstrap.Dropdown(dropdownToggleEl);
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Asegurar que Bootstrap esté disponible antes de inicializar
+        if (typeof bootstrap !== 'undefined') {
+            // Inicializar todos los dropdowns manualmente
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
 
-        console.log('Dropdowns de navegación inicializados:', dropdownList.length);
-    } else {
-        console.error('Bootstrap no está disponible para inicializar dropdowns');
-    }
-});
+            console.log('Dropdowns de navegación inicializados:', dropdownList.length);
+        } else {
+            console.error('Bootstrap no está disponible para inicializar dropdowns');
+        }
+    });
 </script>
