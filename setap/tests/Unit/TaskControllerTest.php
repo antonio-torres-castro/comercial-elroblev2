@@ -158,7 +158,18 @@ class TaskControllerTest extends TestCase
 
         foreach ($invalidDates as $date) {
             if ($date !== '' && $date !== null) {
-                $this->assertDoesNotMatchRegularExpression('/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/', $date, "Fecha inválida: {$date}");
+                // Para fechas con formato aparentemente válido pero lógicamente incorrectas, 
+                // verificamos si la fecha es realmente válida usando checkdate
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                    $parts = explode('-', $date);
+                    $year = (int)$parts[0];
+                    $month = (int)$parts[1];
+                    $day = (int)$parts[2];
+                    $this->assertFalse(checkdate($month, $day, $year), "Fecha inválida: {$date}");
+                } else {
+                    // Para fechas con formato incorrecto
+                    $this->assertDoesNotMatchRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date, "Formato inválido: {$date}");
+                }
             } else {
                 $this->assertTrue(empty($date), "Fecha vacía o null");
             }

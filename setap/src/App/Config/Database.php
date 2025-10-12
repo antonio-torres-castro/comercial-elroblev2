@@ -16,23 +16,30 @@ class Database
     public static function getInstance(): PDO
     {
         if (self::$instance === null) {
-            // Verificar si estamos en desarrollo para usar SQLite
-            if (AppConfig::get('app_env', '') === 'development') {
-                // Usar SQLite para desarrollo
-                $dbPath = __DIR__ . '/../../../storage/database.sqlite';
-                
-                // Crear el directorio storage si no existe
-                $storageDir = dirname($dbPath);
-                if (!is_dir($storageDir)) {
-                    mkdir($storageDir, 0755, true);
+            // Verificar si estamos en desarrollo o testing para usar SQLite
+            $env = AppConfig::get('app_env', '');
+            if ($env === 'development' || $env === 'testing') {
+                // Usar SQLite para desarrollo o testing
+                if ($env === 'testing' && ($_ENV['DB_DATABASE'] ?? '') === ':memory:') {
+                    // Base de datos en memoria para testing
+                    $dsn = "sqlite::memory:";
+                } else {
+                    // Archivo SQLite para desarrollo
+                    $dbPath = __DIR__ . '/../../../storage/database.sqlite';
+                    
+                    // Crear el directorio storage si no existe
+                    $storageDir = dirname($dbPath);
+                    if (!is_dir($storageDir)) {
+                        mkdir($storageDir, 0755, true);
+                    }
+                    
+                    // Crear archivo de base de datos si no existe
+                    if (!file_exists($dbPath)) {
+                        touch($dbPath);
+                    }
+                    
+                    $dsn = "sqlite:$dbPath";
                 }
-                
-                // Crear archivo de base de datos si no existe
-                if (!file_exists($dbPath)) {
-                    touch($dbPath);
-                }
-                
-                $dsn = "sqlite:$dbPath";
                 $options = [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

@@ -21,7 +21,7 @@
             <!-- Main content -->
             <main class="col-12 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><?php echo $data['title']; ?></h1>
+                    <h1 class="h2"><?php echo AppConstants::UI_TASK_MANAGEMENT; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_TASK ?>
@@ -33,7 +33,7 @@
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <h2>
-                            <i class="bi bi-list-check"></i> <?php echo $data['title']; ?>
+                            <i class="bi bi-list-check"></i> <?php echo AppConstants::UI_TASK_MANAGEMENT; ?>
                             <span class="badge bg-secondary ms-2"><?= count($data['tasks'] ?? []) ?> tareas</span>
                         </h2>
                     </div>
