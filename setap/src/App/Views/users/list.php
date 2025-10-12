@@ -65,242 +65,242 @@ use App\Constants\AppConstants;
 
     <div class="container-fluid mt-4">
         <main class="main-content">
-        <!-- Header y Filtros -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <h2>
-                    <i class="bi bi-people"></i> Gestión de Usuarios
-                    <span class="badge bg-secondary ms-2"><?= count($users) ?> usuarios</span>
-                </h2>
+            <!-- Header and New User -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h2>
+                        <i class="bi bi-people"></i> Gestión de Usuarios
+                        <span class="badge bg-secondary ms-2"><?= count($users) ?> usuarios</span>
+                    </h2>
+                </div>
+                <div class="col-md-6 text-end">
+                    <?php if (\App\Helpers\Security::hasPermission('Create')): ?>
+                        <a href="<?= \App\Constants\AppConstants::ROUTE_USERS_CREATE ?>" class="btn btn-setap-primary">
+                            <i class="bi bi-person-plus"></i> <?= AppConstants::UI_NEW_USER ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="col-md-6 text-end">
-                <?php if (\App\Helpers\Security::hasPermission('Create')): ?>
-                    <a href="<?= \App\Constants\AppConstants::ROUTE_USERS_CREATE ?>" class="btn btn-setap-primary">
-                        <i class="bi bi-person-plus"></i> <?= AppConstants::UI_NEW_USER ?>
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
 
-        <!-- Alertas -->
-        <?php if (!empty($success)): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
+            <!-- Alertas -->
+            <?php if (!empty($success)): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
 
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
 
-        <!-- Filtros y Búsqueda -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-4">
-                        <div class="input-group search-box">
-                            <input type="text" class="form-control" id="searchInput"
-                                placeholder="Buscar usuarios...">
-                            <button class="btn btn-outline-secondary" type="button">
-                                <i class="bi bi-search"></i>
+            <!-- Filtros y Búsqueda -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <div class="input-group search-box">
+                                <input type="text" class="form-control" id="searchInput"
+                                    placeholder="Buscar usuarios...">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="roleFilter">
+                                <option value="">Todos los roles</option>
+                                <?php
+                                $uniqueRoles = array_unique(array_column($users, 'rol'));
+                                foreach ($uniqueRoles as $role):
+                                ?>
+                                    <option value="<?= htmlspecialchars($role) ?>">
+                                        <?= htmlspecialchars(ucfirst($role)) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+                                <i class="bi bi-x-circle"></i> Limpiar
                             </button>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="roleFilter">
-                            <option value="">Todos los roles</option>
-                            <?php
-                            $uniqueRoles = array_unique(array_column($users, 'rol'));
-                            foreach ($uniqueRoles as $role):
-                            ?>
-                                <option value="<?= htmlspecialchars($role) ?>">
-                                    <?= htmlspecialchars(ucfirst($role)) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-outline-secondary" id="clearFilters">
-                            <i class="bi bi-x-circle"></i> Limpiar
-                        </button>
-                    </div>
-                    <div class="col-md-3 text-end">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-secondary" id="exportBtn">
-                                <i class="bi bi-download"></i> Exportar
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" id="refreshBtn">
-                                <i class="bi bi-arrow-clockwise"></i> Actualizar
-                            </button>
+                        <div class="col-md-3 text-end">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary" id="exportBtn">
+                                    <i class="bi bi-download"></i> Exportar
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="refreshBtn">
+                                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tabla de Usuarios -->
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="usersTable">
-                        <thead class="table-setap-primary">
-                            <tr>
-                                <th>Usuario</th>
-                                <th>Información Personal</th>
-                                <th>Contacto</th>
-                                <th>Rol</th>
-                                <th>Cliente</th> <!-- GAP 1 y GAP 2: Nueva columna -->
-                                <th>Estado</th>
-                                <th>Registro</th>
-                                <th class="table-actions">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($users)): ?>
+            <!-- Tabla de Usuarios -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="usersTable">
+                            <thead class="table-setap-primary">
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">
-                                        <i class="bi bi-inbox"></i> No hay usuarios registrados
-                                    </td>
+                                    <th>Usuario</th>
+                                    <th>Información Personal</th>
+                                    <th>Contacto</th>
+                                    <th>Rol</th>
+                                    <th>Cliente</th> <!-- GAP 1 y GAP 2: Nueva columna -->
+                                    <th>Estado</th>
+                                    <th>Registro</th>
+                                    <th class="table-actions">Acciones</th>
                                 </tr>
-                            <?php else: ?>
-                                <?php foreach ($users as $user): ?>
-                                    <tr data-user-id="<?= $user['id'] ?>">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="user-avatar me-3">
-                                                    <?= strtoupper(substr($user['nombre_completo'], 0, 2)) ?>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold"><?= htmlspecialchars($user['nombre_usuario']) ?></div>
-                                                    <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold"><?= htmlspecialchars($user['nombre_completo']) ?></div>
-                                            <div class="text-muted small">RUT: <?= htmlspecialchars($user['rut']) ?></div>
-                                        </td>
-                                        <td>
-                                            <?php if (!empty($user['telefono'])): ?>
-                                                <div><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['telefono']) ?></div>
-                                            <?php endif; ?>
-                                            <?php if (!empty($user['direccion'])): ?>
-                                                <div class="text-muted small">
-                                                    <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($user['direccion']) ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php
-                                            $badgeClass = match ($user['rol']) {
-                                                'admin' => 'bg-danger',
-                                                'planner' => 'bg-primary',
-                                                'supervisor' => 'bg-warning text-dark',
-                                                'executor' => 'bg-success',
-                                                'client' => 'bg-info',
-                                                default => 'bg-secondary'
-                                            };
-                                            ?>
-                                            <span class="badge <?= $badgeClass ?> role-badge">
-                                                <?= htmlspecialchars(ucfirst($user['rol'])) ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <!-- GAP 1 y GAP 2: Mostrar cliente asignado -->
-                                            <?php if (!empty($user['cliente_id']) && !empty($user['cliente_nombre'])): ?>
-                                                <div class="small">
-                                                    <i class="bi bi-building"></i>
-                                                    <span class="fw-semibold"><?= htmlspecialchars($user['cliente_nombre']) ?></span>
-                                                </div>
-                                                <div class="text-muted smaller">
-                                                    ID: <?= $user['cliente_id'] ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="text-muted small">
-                                                    <i class="bi bi-dash"></i> No asignado
-                                                </span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php
-                                            $statusClass = strtolower($user['estado']) === 'activo' ? 'success' : 'warning';
-                                            $statusText = $user['estado'];
-                                            ?>
-                                            <span class="badge bg-<?= $statusClass ?>">
-                                                <i class="bi bi-circle-fill"></i> <?= htmlspecialchars($statusText) ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="small text-muted">
-                                                <?= date('d/m/Y', strtotime($user['fecha_Creado'])) ?>
-                                            </div>
-                                        </td>
-                                        <td class="table-actions">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <?php if (\App\Helpers\Security::hasPermission('Read')): ?>
-                                                    <button type="button" class="btn btn-outline-info"
-                                                        onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>')"
-                                                        title="Ver detalles">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                <?php endif; ?>
-
-                                                <?php if (\App\Helpers\Security::hasPermission('Modify')): ?>
-                                                    <a href="/users/edit?id=<?= $user['id'] ?>"
-                                                        class="btn btn-outline-warning"
-                                                        title="<?= AppConstants::UI_BTN_EDIT ?>">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-                                                    <a href="/users/permissions?user_id=<?= $user['id'] ?>"
-                                                        class="btn btn-outline-secondary"
-                                                        title="Permisos">
-                                                        <i class="bi bi-shield-lock"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Botón cambiar contraseña -->
-                                                    <button type="button" class="btn btn-outline-primary"
-                                                        onclick="showChangePasswordModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
-                                                        title="Cambiar contraseña">
-                                                        <i class="bi bi-key"></i>
-                                                    </button>
-                                                    
-                                                    <!-- Toggle status form -->
-                                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                                        <form method="POST" action="/users/toggle-status" style="display: inline-block;" 
-                                                              onsubmit="return confirmToggleUserStatus(this, '<?= $user['estado_tipo_id'] == 1 ? 'desactivar' : 'activar' ?>')">
-                                                            <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
-                                                            <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                                                            <input type="hidden" name="new_status" value="<?= $user['estado_tipo_id'] == 1 ? '2' : '1' ?>">
-                                                            <button type="submit" 
-                                                                    class="btn btn-outline-<?= $user['estado_tipo_id'] == 1 ? 'secondary' : 'success' ?>"
-                                                                    title="<?= $user['estado_tipo_id'] == 1 ? 'Desactivar' : 'Activar' ?>">
-                                                                <i class="bi bi-power"></i>
-                                                            </button>
-                                                        </form>
-                                                    <?php endif; ?>
-                                                <?php endif; ?>
-
-                                                <?php if (\App\Helpers\Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
-                                                    <button type="button" class="btn btn-outline-danger"
-                                                        onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
-                                                        title="<?= AppConstants::UI_BTN_DELETE ?>">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                <?php endif; ?>
-                                            </div>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($users)): ?>
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox"></i> No hay usuarios registrados
                                         </td>
                                     </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                                <?php else: ?>
+                                    <?php foreach ($users as $user): ?>
+                                        <tr data-user-id="<?= $user['id'] ?>">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="user-avatar me-3">
+                                                        <?= strtoupper(substr($user['nombre_completo'], 0, 2)) ?>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold"><?= htmlspecialchars($user['nombre_usuario']) ?></div>
+                                                        <div class="text-muted small"><?= htmlspecialchars($user['email']) ?></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold"><?= htmlspecialchars($user['nombre_completo']) ?></div>
+                                                <div class="text-muted small">RUT: <?= htmlspecialchars($user['rut']) ?></div>
+                                            </td>
+                                            <td>
+                                                <?php if (!empty($user['telefono'])): ?>
+                                                    <div><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['telefono']) ?></div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($user['direccion'])): ?>
+                                                    <div class="text-muted small">
+                                                        <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($user['direccion']) ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $badgeClass = match ($user['rol']) {
+                                                    'admin' => 'bg-danger',
+                                                    'planner' => 'bg-primary',
+                                                    'supervisor' => 'bg-warning text-dark',
+                                                    'executor' => 'bg-success',
+                                                    'client' => 'bg-info',
+                                                    default => 'bg-secondary'
+                                                };
+                                                ?>
+                                                <span class="badge <?= $badgeClass ?> role-badge">
+                                                    <?= htmlspecialchars(ucfirst($user['rol'])) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <!-- GAP 1 y GAP 2: Mostrar cliente asignado -->
+                                                <?php if (!empty($user['cliente_id']) && !empty($user['cliente_nombre'])): ?>
+                                                    <div class="small">
+                                                        <i class="bi bi-building"></i>
+                                                        <span class="fw-semibold"><?= htmlspecialchars($user['cliente_nombre']) ?></span>
+                                                    </div>
+                                                    <div class="text-muted smaller">
+                                                        ID: <?= $user['cliente_id'] ?>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted small">
+                                                        <i class="bi bi-dash"></i> No asignado
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $statusClass = strtolower($user['estado']) === 'activo' ? 'success' : 'warning';
+                                                $statusText = $user['estado'];
+                                                ?>
+                                                <span class="badge bg-<?= $statusClass ?>">
+                                                    <i class="bi bi-circle-fill"></i> <?= htmlspecialchars($statusText) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="small text-muted">
+                                                    <?= date('d/m/Y', strtotime($user['fecha_Creado'])) ?>
+                                                </div>
+                                            </td>
+                                            <td class="table-actions">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <?php if (\App\Helpers\Security::hasPermission('Read')): ?>
+                                                        <button type="button" class="btn btn-outline-info"
+                                                            onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>')"
+                                                            title="Ver detalles">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+
+                                                    <?php if (\App\Helpers\Security::hasPermission('Modify')): ?>
+                                                        <a href="/users/edit?id=<?= $user['id'] ?>"
+                                                            class="btn btn-outline-warning"
+                                                            title="<?= AppConstants::UI_BTN_EDIT ?>">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <a href="/users/permissions?user_id=<?= $user['id'] ?>"
+                                                            class="btn btn-outline-secondary"
+                                                            title="Permisos">
+                                                            <i class="bi bi-shield-lock"></i>
+                                                        </a>
+
+                                                        <!-- Botón cambiar contraseña -->
+                                                        <button type="button" class="btn btn-outline-primary"
+                                                            onclick="showChangePasswordModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
+                                                            title="Cambiar contraseña">
+                                                            <i class="bi bi-key"></i>
+                                                        </button>
+
+                                                        <!-- Toggle status form -->
+                                                        <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                                            <form method="POST" action="/users/toggle-status" style="display: inline-block;"
+                                                                onsubmit="return confirmToggleUserStatus(this, '<?= $user['estado_tipo_id'] == 1 ? 'desactivar' : 'activar' ?>')">
+                                                                <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
+                                                                <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                                                <input type="hidden" name="new_status" value="<?= $user['estado_tipo_id'] == 1 ? '2' : '1' ?>">
+                                                                <button type="submit"
+                                                                    class="btn btn-outline-<?= $user['estado_tipo_id'] == 1 ? 'secondary' : 'success' ?>"
+                                                                    title="<?= $user['estado_tipo_id'] == 1 ? 'Desactivar' : 'Activar' ?>">
+                                                                    <i class="bi bi-power"></i>
+                                                                </button>
+                                                            </form>
+                                                        <?php endif; ?>
+                                                    <?php endif; ?>
+
+                                                    <?php if (\App\Helpers\Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
+                                                        <button type="button" class="btn btn-outline-danger"
+                                                            onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
+                                                            title="<?= AppConstants::UI_BTN_DELETE ?>">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <!-- Modal para Ver Usuario -->
@@ -357,12 +357,12 @@ use App\Constants\AppConstants;
                     <div class="modal-body">
                         <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="user_id" id="passwordUserId">
-                        
+
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i>
                             Cambiar contraseña del usuario: <strong id="passwordUserName"></strong>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="newPassword" class="form-label">Nueva Contraseña *</label>
                             <input type="password" class="form-control" name="new_password" id="newPassword"
@@ -387,6 +387,9 @@ use App\Constants\AppConstants;
         </div>
         </main>
     </div>
+
+    <!-- Contenedor para mostrar alertas -->
+    <div id="alertContainer" class="mt-3"></div>
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
@@ -437,10 +440,10 @@ use App\Constants\AppConstants;
         function showUserDetailsModal(userId, userName, email, statusId, fechaCreacion) {
             const modal = new bootstrap.Modal(document.getElementById('userModal'));
             const modalBody = document.getElementById('userModalBody');
-            
+
             const statusText = statusId == 2 ? 'Activo' : 'Inactivo';
             const statusClass = statusId == 2 ? 'bg-success' : 'bg-secondary';
-            
+
             modalBody.innerHTML = `
                 <div class="row">
                     <div class="col-md-4 text-center">
@@ -484,7 +487,7 @@ use App\Constants\AppConstants;
                     </button>
                 </div>
             `;
-            
+
             modal.show();
         }
 
@@ -541,26 +544,26 @@ use App\Constants\AppConstants;
             if (!passwordModalInstance) {
                 passwordModalInstance = new bootstrap.Modal(document.getElementById('passwordModal'));
             }
-            
+
             document.getElementById('passwordUserId').value = userId;
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
-            
+
             // Limpiar validaciones
             const form = document.getElementById('passwordForm');
             form.classList.remove('was-validated');
-            
+
             // Limpiar clases de validación de los inputs
             document.getElementById('newPassword').classList.remove('is-invalid', 'is-valid');
             document.getElementById('confirmPassword').classList.remove('is-invalid', 'is-valid');
-            
+
             // Resetear botón de envío
             const submitButton = form.querySelector('button[type="submit"]');
             if (submitButton) {
                 submitButton.disabled = false;
                 submitButton.innerHTML = '<i class="bi bi-key"></i> Cambiar Contraseña';
             }
-            
+
             passwordModalInstance.show();
         }
 
@@ -596,49 +599,49 @@ use App\Constants\AppConstants;
             if (!passwordModalInstance) {
                 passwordModalInstance = new bootstrap.Modal(document.getElementById('passwordModal'));
             }
-            
+
             document.getElementById('passwordUserId').value = userId;
-            
+
             // Verificar que el elemento existe antes de asignar el nombre
             const passwordUserNameElement = document.getElementById('passwordUserName');
             if (passwordUserNameElement) {
                 passwordUserNameElement.textContent = userName;
             }
-            
+
             // Limpiar campos
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
-            
+
             // Limpiar validaciones
             const form = document.getElementById('passwordForm');
             form.classList.remove('was-validated');
-            
+
             // Limpiar clases de validación de los inputs
             document.getElementById('newPassword').classList.remove('is-invalid', 'is-valid');
             document.getElementById('confirmPassword').classList.remove('is-invalid', 'is-valid');
-            
+
             // Resetear botón de envío
             const submitButton = form.querySelector('button[type="submit"]');
             if (submitButton) {
                 submitButton.disabled = false;
                 submitButton.innerHTML = '<i class="bi bi-key"></i> Cambiar Contraseña';
             }
-            
+
             passwordModalInstance.show();
         }
-        
+
         function validatePasswordForm() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
+
             // Limpiar validaciones anteriores
             const newPasswordInput = document.getElementById('newPassword');
             const confirmPasswordInput = document.getElementById('confirmPassword');
             const newPasswordFeedback = document.getElementById('newPasswordFeedback');
             const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
-            
+
             let isValid = true;
-            
+
             // Validar longitud de contraseña
             if (newPassword.length < 6) {
                 newPasswordInput.classList.add('is-invalid');
@@ -649,7 +652,7 @@ use App\Constants\AppConstants;
                 newPasswordInput.classList.add('is-valid');
                 newPasswordFeedback.textContent = '';
             }
-            
+
             // Validar coincidencia de contraseñas
             if (newPassword !== confirmPassword) {
                 confirmPasswordInput.classList.add('is-invalid');
@@ -660,17 +663,68 @@ use App\Constants\AppConstants;
                 confirmPasswordInput.classList.add('is-valid');
                 confirmPasswordFeedback.textContent = '';
             }
-            
+
             if (isValid) {
                 // Deshabilitar botón para evitar múltiples envíos
                 const submitButton = document.querySelector('#passwordForm button[type="submit"]');
                 submitButton.disabled = true;
                 submitButton.innerHTML = '<i class="bi bi-clock"></i> Cambiando...';
             }
-            
+
             return isValid;
         }
 
+        // Escuchar el envío del formulario de eliminación
+        document.getElementById('deleteUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Evita recargar la página
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const csrfToken = formData.get('csrf_token');
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    }
+                });
+
+                // Intentar interpretar la respuesta como JSON
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    // Opcional: recargar lista de usuarios después de unos segundos
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert(result.message || 'Ocurrió un error al eliminar el usuario.', 'danger');
+                }
+
+            } catch (error) {
+                console.error('Error al procesar la solicitud:', error);
+                showAlert('Error inesperado. Intente nuevamente.', 'danger');
+            }
+
+            // Cierra el modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            if (modal) modal.hide();
+        });
+
+        // Función para mostrar alertas Bootstrap
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <strong>${type === 'success' ? '✔️' : '⚠️'}</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+            // Desaparece automáticamente después de 3 segundos
+            setTimeout(() => {
+                const alert = bootstrap.Alert.getOrCreateInstance(document.querySelector('.alert'));
+                if (alert) alert.close();
+            }, 3000);
+        }
         // Auto-hide alerts after 5 seconds (excepto los que están dentro de modales)
         setTimeout(() => {
             const alerts = document.querySelectorAll('.alert:not(.modal .alert)');
