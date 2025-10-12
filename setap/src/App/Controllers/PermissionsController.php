@@ -56,7 +56,7 @@ class PermissionsController extends AbstractBaseController
             // Validación POST y CSRF en una línea
             $errors = $this->validatePostRequest();
             if (!empty($errors)) {
-                $this->jsonResponse(false, implode(', ', $errors));
+                $this->jsonResponse(['success' => false, 'message' => implode(', ', $errors)], 400);
                 return;
             }
 
@@ -64,15 +64,16 @@ class PermissionsController extends AbstractBaseController
             $permissionIds = $_POST['permission_ids'] ?? [];
 
             if (!$userTypeId) {
-                $this->jsonResponse(false, 'Tipo de usuario requerido');
+                $this->jsonResponse(['success' => false, 'message' => 'Tipo de usuario requerido'], 400);
                 return;
             }
 
             // Lógica de negocio limpia
             $result = $this->updateUserTypePermissions($userTypeId, $permissionIds);
             $message = $result ? 'Permisos actualizados correctamente' : 'Error al actualizar permisos';
+            $statusCode = $result ? 200 : 500;
 
-            $this->jsonResponse($result, $message);
+            $this->jsonResponse(['success' => $result, 'message' => $message], $statusCode);
         }, 'update');
     }
 

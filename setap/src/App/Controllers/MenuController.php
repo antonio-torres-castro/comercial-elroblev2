@@ -395,39 +395,37 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                $this->jsonResponse(['success' => false, 'message' => 'No autorizado'], 401);
                 return;
             }
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menus')) {
-                http_response_code(403);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
+                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS], 403);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                echo json_encode(['success' => false, 'message' => 'ID de menú inválido']);
+                $this->jsonResponse(['success' => false, 'message' => 'ID de menú inválido'], 400);
                 return;
             }
 
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                $this->jsonResponse(['success' => false, 'message' => 'Token CSRF inválido'], 400);
                 return;
             }
 
             if ($this->menuModel->delete($id)) {
-                echo json_encode(['success' => true, 'message' => 'Menú eliminado correctamente']);
+                $this->jsonResponse(['success' => true, 'message' => 'Menú eliminado correctamente'], 200);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Error al eliminar el menú']);
+                $this->jsonResponse(['success' => false, 'message' => 'Error al eliminar el menú'], 500);
             }
 
         } catch (Exception $e) {
             error_log("Error en MenuController::delete: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
         }
     }
 
@@ -440,14 +438,12 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'No autorizado']);
+                $this->jsonResponse(['success' => false, 'message' => 'No autorizado'], 401);
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menus')) {
-                http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonResponse(['success' => false, 'message' => 'Sin permisos'], 403);
                 return;
             }
 
@@ -455,7 +451,7 @@ class MenuController extends BaseController
             $newStatus = (int)($_POST['new_status'] ?? 0);
 
             if (!$menuId || !in_array($newStatus, [1, 2])) {
-                echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
+                $this->jsonResponse(['success' => false, 'message' => 'Datos inválidos'], 400);
                 return;
             }
 
@@ -463,13 +459,13 @@ class MenuController extends BaseController
             $success = $this->menuModel->toggleStatus($menuId);
 
             if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Estado del menú actualizado correctamente']);
+                $this->jsonResponse(['success' => true, 'message' => 'Estado del menú actualizado correctamente'], 200);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Error al actualizar el estado del menú']);
+                $this->jsonResponse(['success' => false, 'message' => 'Error al actualizar el estado del menú'], 500);
             }
         } catch (Exception $e) {
             error_log("Error en MenuController::toggleStatus: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
         }
     }
 

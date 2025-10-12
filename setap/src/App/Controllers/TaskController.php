@@ -407,7 +407,7 @@ class TaskController extends BaseController
                 // Si es petición AJAX, devolver JSON
                 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-                    echo json_encode(['success' => true, 'message' => 'Tarea eliminada correctamente']);
+                    $this->jsonSuccess('Tarea eliminada correctamente');
                 } else {
                     $this->redirectWithSuccess(AppConstants::ROUTE_TASKS, AppConstants::SUCCESS_TASK_DELETED);
                 }
@@ -415,7 +415,7 @@ class TaskController extends BaseController
                 // Si es petición AJAX, devolver JSON
                 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-                    echo json_encode(['success' => false, 'message' => 'Error al eliminar la tarea']);
+                    $this->jsonError('Error al eliminar la tarea', [], 500);
                 } else {
                     $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_DELETE_TASK);
                 }
@@ -426,7 +426,7 @@ class TaskController extends BaseController
             if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                 http_response_code(500);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+                $this->jsonInternalError();
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INTERNAL_SERVER);
             }
@@ -442,20 +442,20 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                $this->jsonError(AppConstants::ERROR_METHOD_NOT_ALLOWED, [], 405);
                 return;
             }
 
@@ -466,7 +466,7 @@ class TaskController extends BaseController
 
             if ($taskId <= 0 || $newState <= 0) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
+                $this->jsonError('Datos inválidos', [], 400);
                 return;
             }
 
@@ -479,12 +479,11 @@ class TaskController extends BaseController
                 $reason
             );
 
-            http_response_code($result['success'] ? 200 : 400);
-            echo json_encode($result);
+            $this->jsonResponse($result, $result['success'] ? 200 : 400);
         } catch (Exception $e) {
             error_log("Error en TaskController::changeState: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonInternalError();
         }
     }
 
@@ -497,24 +496,24 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
+                $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED], 401);
                 return;
             }
 
             $taskId = (int)($_GET['task_id'] ?? 0);
             if ($taskId <= 0) {
                 http_response_code(400);
-                echo json_encode(['valid' => false, 'message' => 'ID de tarea inválido']);
+                $this->jsonResponse(['valid' => false, 'message' => 'ID de tarea inválido'], 400);
                 return;
             }
 
             // Verificar si la tarea puede ejecutarse
             $result = $this->taskModel->canExecuteTask($taskId);
-            echo json_encode($result);
+            $this->jsonResponse($result);
         } catch (Exception $e) {
             error_log("Error en TaskController::checkExecutable: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
         }
     }
 
@@ -527,21 +526,21 @@ class TaskController extends BaseController
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['transitions' => [], 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
+                $this->jsonResponse(['transitions' => [], 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED], 401);
                 return;
             }
 
             $taskId = (int)($_GET['task_id'] ?? 0);
             if ($taskId <= 0) {
                 http_response_code(400);
-                echo json_encode(['transitions' => [], 'message' => 'ID de tarea inválido']);
+                $this->jsonResponse(['transitions' => [], 'message' => 'ID de tarea inválido'], 400);
                 return;
             }
 
             $task = $this->taskModel->getById($taskId);
             if (!$task) {
                 http_response_code(404);
-                echo json_encode(['transitions' => [], 'message' => 'Tarea no encontrada']);
+                $this->jsonResponse(['transitions' => [], 'message' => 'Tarea no encontrada'], 404);
                 return;
             }
 
@@ -577,7 +576,7 @@ class TaskController extends BaseController
                 ];
             }
 
-            echo json_encode([
+            $this->jsonResponse([
                 'transitions' => $validTransitions,
                 'current_state' => $currentState,
                 'message' => 'Transiciones obtenidas correctamente'
@@ -585,7 +584,7 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             error_log("Error en TaskController::getValidTransitions: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['transitions' => [], 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonResponse(['transitions' => [], 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
         }
     }
 

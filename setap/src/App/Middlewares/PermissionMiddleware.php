@@ -70,13 +70,11 @@ class PermissionMiddleware
     private function redirectToLogin(): void
     {
         if ($this->isAjaxRequest()) {
-            http_response_code(401);
-            header('Content-Type: application/json');
-            echo json_encode(['error' => AppConstants::ERROR_USER_NOT_AUTHENTICATED, 'redirect' => '/login']);
+            $this->sendMiddlewareError(AppConstants::ERROR_USER_NOT_AUTHENTICATED, 401, ['redirect' => '/login']);
         } else {
             header('Location: /login');
+            exit;
         }
-        exit;
     }
 
     /**
@@ -85,14 +83,12 @@ class PermissionMiddleware
     private function accessDenied(): void
     {
         if ($this->isAjaxRequest()) {
-            http_response_code(403);
-            header('Content-Type: application/json');
-            echo json_encode(['error' => 'Acceso denegado']);
+            $this->sendMiddlewareError('Acceso denegado', 403);
         } else {
             http_response_code(403);
             echo $this->getAccessDeniedPage();
+            exit;
         }
-        exit;
     }
 
     /**
@@ -139,5 +135,27 @@ class PermissionMiddleware
             </div>
         </body>
         </html>';
+    }
+
+    /**
+     * Envía una respuesta JSON de error de middleware y termina la ejecución
+     * @param string $message Mensaje de error
+     * @param int $statusCode Código de estado HTTP
+     * @param array $additionalData Datos adicionales
+     */
+    private function sendMiddlewareError(string $message, int $statusCode = 401, array $additionalData = []): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-cache, must-revalidate');
+        
+        $response = array_merge([
+            'success' => false,
+            'error' => $message,
+            'message' => $message
+        ], $additionalData);
+        
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }

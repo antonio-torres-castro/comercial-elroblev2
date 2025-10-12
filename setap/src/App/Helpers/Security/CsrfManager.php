@@ -156,13 +156,12 @@ class CsrfManager
                 !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
             ) {
-                header('Content-Type: application/json');
-                echo json_encode(['error' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
+                self::sendCsrfError(AppConstants::ERROR_INVALID_CSRF_TOKEN, 403);
             } else {
+                http_response_code(403);
                 echo AppConstants::ERROR_INVALID_CSRF_TOKEN;
+                exit;
             }
-
-            exit;
         }
     }
 
@@ -222,5 +221,25 @@ class CsrfManager
             'expires_in' => $_SESSION[self::$tokenKey]['expires'] - time(),
             'is_expired' => self::isTokenExpired()
         ];
+    }
+
+    /**
+     * Envía una respuesta JSON de error CSRF y termina la ejecución
+     * @param string $message Mensaje de error
+     * @param int $statusCode Código de estado HTTP
+     */
+    private static function sendCsrfError(string $message, int $statusCode = 403): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-cache, must-revalidate');
+        
+        echo json_encode([
+            'success' => false,
+            'error' => $message,
+            'message' => $message,
+            'csrf_error' => true
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }

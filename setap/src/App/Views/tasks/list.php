@@ -434,25 +434,8 @@
                     });
 
                     // Función para mostrar alertas
-                    function showAlert(type, message) {
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-                        alertDiv.style.top = '20px';
-                        alertDiv.style.right = '20px';
-                        alertDiv.style.zIndex = '9999';
-                        alertDiv.innerHTML = `
-                            ${message}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        `;
-                        document.body.appendChild(alertDiv);
-
-                        // Auto-remove after 5 seconds
-                        setTimeout(() => {
-                            if (alertDiv.parentNode) {
-                                alertDiv.parentNode.removeChild(alertDiv);
-                            }
-                        }, 5000);
-                    }
+                    // Usar el sistema estándar de alertas SETAP (ya cargado por scripts-base.php)
+                    // La función showAlert ya está disponible globalmente
                 </script>
             </main>
         </div>

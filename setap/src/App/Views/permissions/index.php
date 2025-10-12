@@ -248,8 +248,8 @@ use App\Helpers\Security;
                             btn.classList.remove('btn-setap-primary');
                             btn.classList.add('btn-success');
                             
-                            // Mostrar notificación
-                            showNotification('Permisos actualizados correctamente', 'success');
+                            // Mostrar notificación usando sistema estándar
+                            showAlert('Permisos actualizados correctamente', 'success');
                             
                             // Restaurar botón después de 2 segundos
                             setTimeout(() => {
@@ -264,7 +264,7 @@ use App\Helpers\Security;
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        showNotification('Error al guardar los permisos: ' + error.message, 'error');
+                        showAlert('Error al guardar los permisos: ' + error.message, 'danger');
                         
                         // Restaurar botón
                         btn.innerHTML = originalText;
@@ -274,27 +274,8 @@ use App\Helpers\Security;
             });
         });
 
-        function showNotification(message, type) {
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle';
-            
-            const alert = document.createElement('div');
-            alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alert.innerHTML = `
-                <i class="bi ${icon}"></i> ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(alert);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
-        }
+        // Sistema estándar de alertas SETAP ya cargado
+        // La función showAlert está disponible globalmente desde alert-system.js
     </script>
 </body>
 

@@ -227,16 +227,12 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
-                return;
+                $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED], 401);
             }
 
             // Verificar acceso al menú de gestión de usuario individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
-                http_response_code(403);
-                echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED]);
-                return;
+                $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
             }
 
             $field = $_GET['field'] ?? '';
@@ -271,13 +267,13 @@ class UserController extends BaseController
                     $message = 'Campo no válido';
             }
 
-            echo json_encode([
+            $this->jsonResponse([
                 'valid' => $isValid,
                 'message' => $message
             ]);
         } catch (Exception $e) {
             error_log("Error en UserController::validateField: " . $e->getMessage());
-            echo json_encode(['valid' => false, 'message' => 'Error de validación']);
+            $this->jsonResponse(['valid' => false, 'message' => 'Error de validación'], 500);
         }
     }
 
@@ -293,27 +289,23 @@ class UserController extends BaseController
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
             $search = $_GET['search'] ?? '';
             $personas = $this->userModel->getAvailablePersonas($search);
 
-            echo json_encode([
-                'success' => true,
-                'personas' => $personas
-            ]);
+            $this->jsonSuccess('Personas obtenidas correctamente', ['personas' => $personas]);
         } catch (Exception $e) {
             error_log("Error en UserController::searchPersonas: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error en búsqueda']);
+            $this->jsonError('Error en búsqueda', [], 500);
         }
     }
 
@@ -327,31 +319,28 @@ class UserController extends BaseController
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
             $clientId = (int)($_GET['client_id'] ?? 0);
             if (!$clientId) {
-                echo json_encode(['success' => false, 'message' => 'ID de cliente requerido']);
+                $this->jsonError('ID de cliente requerido', [], 400);
                 return;
             }
 
             $counterparties = $this->userModel->getAvailableCounterparties($clientId);
 
-            echo json_encode([
-                'success' => true,
-                'counterparties' => $counterparties
-            ]);
+            $this->jsonSuccess('Contrapartes obtenidas correctamente', ['counterparties' => $counterparties]);
         } catch (Exception $e) {
             error_log("Error en UserController::getClientCounterparties: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Error obteniendo contrapartes']);
+            $this->jsonError('Error obteniendo contrapartes', [], 500);
         }
     }
 
@@ -365,35 +354,32 @@ class UserController extends BaseController
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
             $personaId = (int)($_GET['persona_id'] ?? 0);
             if (!$personaId) {
-                echo json_encode(['success' => false, 'message' => 'ID de persona requerido']);
+                $this->jsonError('ID de persona requerido', [], 400);
                 return;
             }
 
             $persona = $this->userModel->getPersonaById($personaId);
             if (!$persona) {
-                echo json_encode(['success' => false, 'message' => 'Persona no encontrada']);
+                $this->jsonNotFound('Persona no encontrada');
                 return;
             }
 
-            echo json_encode([
-                'success' => true,
-                'persona' => $persona
-            ]);
+            $this->jsonSuccess('Información de persona obtenida', ['persona' => $persona]);
         } catch (Exception $e) {
             error_log("Error en UserController::getPersonaInfo: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Error obteniendo información']);
+            $this->jsonError('Error obteniendo información', [], 500);
         }
     }
 
@@ -576,7 +562,7 @@ class UserController extends BaseController
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED]);
+                $this->jsonForbidden(AppConstants::ERROR_ACCESS_DENIED);
                 return;
             }
 
@@ -593,23 +579,23 @@ class UserController extends BaseController
             }
 
             if ($id <= 0) {
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_USER_ID]);
+                $this->jsonError(AppConstants::ERROR_INVALID_USER_ID, [], 400);
                 return;
             }
 
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
+                $this->jsonError(AppConstants::ERROR_INVALID_CSRF_TOKEN, [], 403);
                 return;
             }
 
             if ($this->userModel->delete($id)) {
-                echo json_encode(['success' => true, 'message' => 'Usuario eliminado correctamente']);
+                $this->jsonSuccess('Usuario eliminado correctamente');
             } else {
-                echo json_encode(['success' => false, 'message' => 'Error al eliminar el usuario']);
+                $this->jsonError('Error al eliminar el usuario', [], 500);
             }
         } catch (Exception $e) {
             error_log("Error en UserController::delete: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonInternalError();
         }
     }
 
@@ -623,35 +609,32 @@ class UserController extends BaseController
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
             $userId = (int)($_GET['id'] ?? 0);
             if (!$userId) {
-                echo json_encode(['success' => false, 'message' => 'ID de usuario requerido']);
+                $this->jsonError('ID de usuario requerido', [], 400);
                 return;
             }
 
             $user = $this->userModel->getById($userId);
             if (!$user) {
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_FOUND]);
+                $this->jsonNotFound(AppConstants::ERROR_USER_NOT_FOUND);
                 return;
             }
 
-            echo json_encode([
-                'success' => true,
-                'user' => $user
-            ]);
+            $this->jsonSuccess('Detalles del usuario obtenidos', ['user' => $user]);
         } catch (Exception $e) {
             error_log("Error en UserController::getUserDetails: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonInternalError();
         }
     }
 
@@ -665,13 +648,13 @@ class UserController extends BaseController
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
@@ -691,25 +674,25 @@ class UserController extends BaseController
             $newStatus = (int)($_POST['new_status'] ?? 0);
 
             if (!$userId || !in_array($newStatus, [1, 2])) {
-                echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
+                $this->jsonError('Datos inválidos', [], 400);
                 return;
             }
 
             // No permitir desactivar el propio usuario
             if ($userId == $currentUser['id']) {
-                echo json_encode(['success' => false, 'message' => 'No puedes cambiar tu propio estado']);
+                $this->jsonError('No puedes cambiar tu propio estado', [], 403);
                 return;
             }
 
             $success = $this->userModel->updateStatus($userId, $newStatus);
             if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Estado actualizado correctamente']);
+                $this->jsonSuccess('Estado actualizado correctamente');
             } else {
-                echo json_encode(['success' => false, 'message' => 'Error al actualizar el estado']);
+                $this->jsonError('Error al actualizar el estado', [], 500);
             }
         } catch (Exception $e) {
             error_log("Error en UserController::toggleStatus: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonInternalError();
         }
     }
 
@@ -723,13 +706,13 @@ class UserController extends BaseController
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
@@ -749,7 +732,7 @@ class UserController extends BaseController
             $newPassword = $_POST['new_password'] ?? '';
 
             if (!$userId || strlen($newPassword) < 6) {
-                echo json_encode(['success' => false, 'message' => 'Datos inválidos o contraseña muy corta']);
+                $this->jsonError('Datos inválidos o contraseña muy corta', [], 400);
                 return;
             }
 
@@ -757,13 +740,13 @@ class UserController extends BaseController
             $success = $this->userModel->updatePassword($userId, $hashedPassword);
 
             if ($success) {
-                echo json_encode(['success' => true, 'message' => 'Contraseña actualizada correctamente']);
+                $this->jsonSuccess('Contraseña actualizada correctamente');
             } else {
-                echo json_encode(['success' => false, 'message' => 'Error al actualizar la contraseña']);
+                $this->jsonError('Error al actualizar la contraseña', [], 500);
             }
         } catch (Exception $e) {
             error_log("Error en UserController::changePassword: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+            $this->jsonInternalError();
         }
     }
 
@@ -780,9 +763,7 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['valid' => false, 'available' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
-                return;
+                $this->jsonResponse(['valid' => false, 'available' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED], 401);
             }
 
             $type = $_GET['type'] ?? '';
@@ -822,14 +803,14 @@ class UserController extends BaseController
                     $message = 'Tipo de validación no válido';
             }
 
-            echo json_encode([
+            $this->jsonResponse([
                 'valid' => $isValid,
                 'available' => $isValid,  // Para compatibilidad con el JavaScript
                 'message' => $message
             ]);
         } catch (Exception $e) {
             error_log("Error en UserController::validateUserCheck: " . $e->getMessage());
-            echo json_encode(['valid' => false, 'available' => false, 'message' => 'Error de validación']);
+            $this->jsonError('Error de validación', ['valid' => false, 'available' => false], 500);
         }
     }
 
@@ -945,15 +926,11 @@ class UserController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
-                return;
+                $this->jsonUnauthorized();
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
-                http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
-                return;
+                $this->jsonForbidden();
             }
 
             $currentUserId = (int)($_GET['current_user_id'] ?? 0);
@@ -989,13 +966,10 @@ class UserController extends BaseController
                 }
             }
 
-            echo json_encode([
-                'success' => true,
-                'personas' => $personas
-            ]);
+            $this->jsonSuccess('Personas obtenidas correctamente', ['personas' => $personas]);
         } catch (Exception $e) {
             error_log("Error en UserController::getAvailablePersonas: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Error interno del servidor']);
+            $this->jsonInternalError('Error interno del servidor');
         }
     }
 
@@ -1155,20 +1129,20 @@ class UserController extends BaseController
 
             if (!$currentUser) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED]);
+                $this->jsonUnauthorized();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
                 http_response_code(403);
-                echo json_encode(['success' => false, 'message' => 'Sin permisos']);
+                $this->jsonForbidden();
                 return;
             }
 
             $userId = (int)($_GET['user_id'] ?? $_POST['user_id'] ?? 0);
 
             if (!$userId) {
-                echo json_encode(['success' => false, 'message' => 'ID de usuario requerido']);
+                $this->jsonError('ID de usuario requerido', [], 400);
                 return;
             }
 

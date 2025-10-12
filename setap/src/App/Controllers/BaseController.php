@@ -251,4 +251,115 @@ abstract class BaseController
             $this->redirectToRoute($redirectUrl);
         }
     }
+
+    // ===== MÉTODOS PARA RESPUESTAS JSON ELEGANTES - SISTEMA DE ALERTAS =====
+
+    /**
+     * Envía una respuesta JSON estandarizada y termina la ejecución
+     * Reemplaza el uso crudo de echo json_encode()
+     * @param array $data Datos a enviar como JSON
+     * @param int $statusCode Código de estado HTTP (default: 200)
+     * @param bool $prettyPrint Si debe formatearse el JSON (default: false)
+     */
+    protected function jsonResponse(array $data, int $statusCode = 200, bool $prettyPrint = false): void
+    {
+        // Configurar headers apropiados
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-cache, must-revalidate');
+        
+        // Preparar opciones de JSON
+        $options = JSON_UNESCAPED_UNICODE;
+        if ($prettyPrint) {
+            $options |= JSON_PRETTY_PRINT;
+        }
+        
+        // Enviar respuesta y terminar
+        echo json_encode($data, $options);
+        exit;
+    }
+
+    /**
+     * Envía una respuesta JSON de éxito estandarizada
+     * @param string $message Mensaje de éxito
+     * @param array $additionalData Datos adicionales para incluir (opcional)
+     * @param int $statusCode Código de estado HTTP (default: 200)
+     */
+    protected function jsonSuccess(string $message, array $additionalData = [], int $statusCode = 200): void
+    {
+        $data = array_merge([
+            'success' => true,
+            'message' => $message
+        ], $additionalData);
+        
+        $this->jsonResponse($data, $statusCode);
+    }
+
+    /**
+     * Envía una respuesta JSON de error estandarizada
+     * @param string $message Mensaje de error
+     * @param array $additionalData Datos adicionales para incluir (opcional)
+     * @param int $statusCode Código de estado HTTP (default: 400)
+     */
+    protected function jsonError(string $message, array $additionalData = [], int $statusCode = 400): void
+    {
+        $data = array_merge([
+            'success' => false,
+            'message' => $message
+        ], $additionalData);
+        
+        $this->jsonResponse($data, $statusCode);
+    }
+
+    /**
+     * Envía una respuesta JSON de validación fallida
+     * @param array $errors Lista de errores de validación
+     * @param string $message Mensaje general (opcional)
+     * @param int $statusCode Código de estado HTTP (default: 422)
+     */
+    protected function jsonValidationError(array $errors, string $message = 'Error de validación', int $statusCode = 422): void
+    {
+        $this->jsonError($message, ['errors' => $errors], $statusCode);
+    }
+
+    /**
+     * Envía una respuesta JSON de no autorizado
+     * @param string $message Mensaje personalizado (opcional)
+     */
+    protected function jsonUnauthorized(string $message = null): void
+    {
+        $message = $message ?? AppConstants::ERROR_USER_NOT_AUTHORIZED;
+        $this->jsonError($message, [], 401);
+    }
+
+    /**
+     * Envía una respuesta JSON de prohibido/sin permisos
+     * @param string $message Mensaje personalizado (opcional)
+     */
+    protected function jsonForbidden(string $message = 'Sin permisos suficientes'): void
+    {
+        $this->jsonError($message, [], 403);
+    }
+
+    /**
+     * Envía una respuesta JSON de recurso no encontrado
+     * @param string $message Mensaje personalizado (opcional)
+     */
+    protected function jsonNotFound(string $message = 'Recurso no encontrado'): void
+    {
+        $this->jsonError($message, [], 404);
+    }
+
+    /**
+     * Envía una respuesta JSON para errores internos del servidor
+     * @param string $message Mensaje personalizado (opcional)
+     * @param bool $logError Si debe registrar el error en logs (default: true)
+     */
+    protected function jsonInternalError(string $message = 'Error interno del servidor', bool $logError = true): void
+    {
+        if ($logError) {
+            error_log("JSON Internal Error: {$message}");
+        }
+        $this->jsonError($message, [], 500);
+    }
 }

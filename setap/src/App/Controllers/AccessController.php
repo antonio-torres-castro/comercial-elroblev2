@@ -56,7 +56,7 @@ class AccessController extends AbstractBaseController
             // Validación POST y CSRF en una línea
             $errors = $this->validatePostRequest();
             if (!empty($errors)) {
-                $this->jsonResponse(false, implode(', ', $errors));
+                $this->jsonResponse(['success' => false, 'message' => implode(', ', $errors)], 400);
                 return;
             }
 
@@ -64,15 +64,16 @@ class AccessController extends AbstractBaseController
             $menuIds = $_POST['menu_ids'] ?? [];
 
             if (!$userTypeId) {
-                $this->jsonResponse(false, 'Tipo de usuario requerido');
+                $this->jsonResponse(['success' => false, 'message' => 'Tipo de usuario requerido'], 400);
                 return;
             }
 
             // Lógica de negocio limpia
             $result = $this->updateUserTypeAccess($userTypeId, $menuIds);
             $message = $result ? 'Accesos actualizados correctamente' : 'Error al actualizar accesos';
+            $statusCode = $result ? 200 : 500;
 
-            $this->jsonResponse($result, $message);
+            $this->jsonResponse(['success' => $result, 'message' => $message], $statusCode);
         }, 'update');
     }
 

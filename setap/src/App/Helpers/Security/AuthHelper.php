@@ -184,10 +184,7 @@ class AuthHelper
         if (!self::isAuthenticated()) {
             // Si es AJAX, devolver error JSON
             if (self::isAjaxRequest()) {
-                http_response_code(401);
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'No autorizado']);
-                exit;
+                self::sendJsonError('No autorizado', 401);
             }
 
             // Redirigir a login
@@ -199,10 +196,7 @@ class AuthHelper
             self::logout();
 
             if (self::isAjaxRequest()) {
-                http_response_code(401);
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'Sesión expirada']);
-                exit;
+                self::sendJsonError('Sesión expirada', 401);
             }
 
             self::redirectToLogin('Sesión expirada');
@@ -220,16 +214,13 @@ class AuthHelper
         self::requireAuth();
 
         if (!self::hasPermission($permission)) {
-            http_response_code(403);
-
             if (self::isAjaxRequest()) {
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'Acceso denegado']);
+                self::sendJsonError('Acceso denegado', 403);
             } else {
+                http_response_code(403);
                 echo 'Acceso denegado';
+                exit;
             }
-
-            exit;
         }
     }
 
@@ -241,16 +232,13 @@ class AuthHelper
         self::requireAuth();
 
         if (!self::hasMenuAccess($menuName)) {
-            http_response_code(403);
-
             if (self::isAjaxRequest()) {
-                header('Content-Type: application/json');
-                echo json_encode(['error' => 'Acceso denegado al menú']);
+                self::sendJsonError('Acceso denegado al menú', 403);
             } else {
+                http_response_code(403);
                 echo 'Acceso denegado';
+                exit;
             }
-
-            exit;
         }
     }
 
@@ -364,5 +352,25 @@ class AuthHelper
         ];
 
         error_log("USER_ACTIVITY: " . json_encode($logData));
+    }
+
+    /**
+     * Envía una respuesta JSON de error y termina la ejecución
+     * Helper para respuestas AJAX elegantes
+     * @param string $message Mensaje de error
+     * @param int $statusCode Código de estado HTTP
+     */
+    private static function sendJsonError(string $message, int $statusCode = 401): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-cache, must-revalidate');
+        
+        echo json_encode([
+            'success' => false,
+            'error' => $message,
+            'message' => $message
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }

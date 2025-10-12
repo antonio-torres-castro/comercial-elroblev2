@@ -119,17 +119,12 @@ class RateLimiter
             header('Retry-After: ' . $timeUntilReset);
 
             if (self::isAjaxRequest()) {
-                header('Content-Type: application/json');
-                echo json_encode([
-                    'error' => 'Demasiados intentos',
-                    'retry_after' => $timeUntilReset,
-                    'message' => "Intenta nuevamente en {$timeUntilReset} segundos"
-                ]);
+                self::sendRateLimitError($timeUntilReset);
             } else {
+                http_response_code(429);
                 echo "Demasiados intentos. Intenta nuevamente en {$timeUntilReset} segundos.";
+                exit;
             }
-
-            exit;
         }
     }
 
@@ -280,5 +275,26 @@ class RateLimiter
             'last_attempt' => !empty($attempts) ? max($attempts) : null,
             'identifier' => $identifier
         ];
+    }
+
+    /**
+     * Envía una respuesta JSON de límite de intentos y termina la ejecución
+     * @param int $retryAfter Segundos hasta el próximo intento
+     */
+    private static function sendRateLimitError(int $retryAfter): void
+    {
+        http_response_code(429); // Too Many Requests
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-cache, must-revalidate');
+        header("Retry-After: {$retryAfter}");
+        
+        echo json_encode([
+            'success' => false,
+            'error' => 'Demasiados intentos',
+            'message' => "Intenta nuevamente en {$retryAfter} segundos",
+            'retry_after' => $retryAfter,
+            'rate_limit_exceeded' => true
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }

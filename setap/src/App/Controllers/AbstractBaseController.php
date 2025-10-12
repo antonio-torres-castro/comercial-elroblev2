@@ -121,8 +121,7 @@ abstract class AbstractBaseController extends BaseController
 
             // Si es petición AJAX, devolver JSON
             if ($this->isAjaxRequest()) {
-                http_response_code(500);
-                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
                 return null;
             }
 
@@ -167,17 +166,7 @@ abstract class AbstractBaseController extends BaseController
         echo $this->viewRenderer->render($view, $data);
     }
 
-    /**
-     * Respuesta JSON estandarizada
-     */
-    protected function jsonResponse(bool $success, string $message, array $data = []): void
-    {
-        echo json_encode([
-            'success' => $success,
-            'message' => $message,
-            'data' => $data
-        ]);
-    }
+
 
     /**
      * Métodos de datos comunes centralizados
