@@ -285,35 +285,30 @@ class PersonaController extends BaseController
         try {
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
-                http_response_code(401);
-                echo json_encode(['error' => AppConstants::ERROR_USER_NOT_AUTHENTICATED]);
+                $this->jsonResponse(['error' => AppConstants::ERROR_USER_NOT_AUTHENTICATED], 401);
                 return;
             }
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
-                http_response_code(403);
-                echo json_encode(['error' => 'No tienes permisos para realizar esta acción']);
+                $this->jsonResponse(['error' => 'No tienes permisos para realizar esta acción'], 403);
                 return;
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                http_response_code(405);
-                echo json_encode(['error' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                $this->jsonResponse(['error' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                http_response_code(400);
-                echo json_encode(['error' => 'ID de persona inválido']);
+                $this->jsonResponse(['error' => 'ID de persona inválido'], 400);
                 return;
             }
 
             // Validar token CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                http_response_code(403);
-                echo json_encode(['error' => 'Token de seguridad inválido']);
+                $this->jsonResponse(['error' => 'Token de seguridad inválido'], 403);
                 return;
             }
 

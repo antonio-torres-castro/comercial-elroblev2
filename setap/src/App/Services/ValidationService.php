@@ -232,12 +232,12 @@ class ValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = ?";
             $params = [$username];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -255,12 +255,12 @@ class ValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
             $params = [$email];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -279,12 +279,12 @@ class ValidationService
             $cleanRut = preg_replace('/[^0-9kK]/', '', $rut);
             $sql = "SELECT COUNT(*) FROM personas WHERE rut = ?";
             $params = [$cleanRut];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND usuario_id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
@@ -448,7 +448,7 @@ class ValidationService
     public function isValidUserTypeId(int $userTypeId): bool
     {
         try {
-            $sql = "SELECT COUNT(*) FROM usuario_tipos WHERE id = ? AND estado_tipo_id != 3";
+            $sql = "SELECT COUNT(*) FROM usuario_tipos WHERE id = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$userTypeId]);
             return $stmt->fetchColumn() > 0;
@@ -531,5 +531,4 @@ class ValidationService
 
         return $errors;
     }
-
 }

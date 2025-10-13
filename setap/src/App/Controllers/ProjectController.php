@@ -30,7 +30,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyectos
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
             http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
@@ -72,7 +72,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
@@ -112,7 +112,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
@@ -134,7 +134,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
@@ -188,7 +188,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
@@ -227,7 +227,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
@@ -285,8 +285,7 @@ class ProjectController extends BaseController
     {
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
-            http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
             return;
         }
 
@@ -322,8 +321,7 @@ class ProjectController extends BaseController
     {
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
-            http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
             return;
         }
 
@@ -362,7 +360,7 @@ class ProjectController extends BaseController
         // Verificar acceso al menú de gestión de proyectos
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
             http_response_code(403);
-            echo AppConstants::ERROR_ACCESS_DENIED;
+            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
@@ -518,26 +516,23 @@ class ProjectController extends BaseController
         try {
             // Verificar acceso al menú de gestión de proyectos
             if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
-                http_response_code(403);
-                echo AppConstants::ERROR_ACCESS_DENIED;
+                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
                 return;
             }
 
             // Obtener ID del proyecto de los parámetros GET
             $projectId = isset($_GET['id']) ? (int)$_GET['id'] : null;
             if (!$projectId) {
-                http_response_code(400);
-                echo 'ID del proyecto requerido';
+                $this->jsonResponse(['success' => false, 'message' => 'ID del proyecto requerido'], 400);
                 return;
             }
 
             // TODO: Implementar lógica de generación de reportes
             // Por ahora, mostrar mensaje temporal
-            echo "Generando reporte para el proyecto ID: " . $projectId;
+            $this->jsonResponse(['success' => true, 'message' => "Generando reporte para el proyecto ID: " . $projectId], 200);
         } catch (Exception $e) {
             error_log("Error en ProjectController::report: " . $e->getMessage());
-            http_response_code(500);
-            echo AppConstants::ERROR_INTERNAL_SERVER;
+            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
         }
     }
 
