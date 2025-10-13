@@ -88,7 +88,7 @@ class ReportService
     {
         $sql = "SELECT 
                     p.id,
-                    c.nombre as cliente_nombre,
+                    c.razon_social as nombre as cliente_nombre,
                     p.fecha_inicio,
                     p.fecha_fin,
                     et.nombre as estado,
@@ -159,7 +159,7 @@ class ReportService
                     t.id,
                     t.nombre as tarea_nombre,
                     p.id as proyecto_id,
-                    c.nombre as cliente_nombre,
+                    c.razon_social as nombre as cliente_nombre,
                     tt.nombre as tipo_tarea,
                     et.nombre as estado,
                     t.fecha_creacion
@@ -228,31 +228,30 @@ class ReportService
     {
         $sql = "SELECT 
                     u.id,
-                    u.username,
-                    u.nombre_completo,
+                    u.nombre_usuario as username,
+                    p.nombre as nombre_completo,
                     u.email,
                     ut.nombre as rol,
-                    u.fecha_ultimo_acceso,
-                    u.activo,
                     u.fecha_Creado
                 FROM usuarios u
                 LEFT JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
+                LEFT JOIN personas p ON u.persona_id = p.id
                 WHERE 1=1";
 
         $params = [];
 
         // Filtros de fecha
         if (!empty($parameters['date_from'])) {
-            $sql .= " AND u.fecha_ultimo_acceso >= ?";
+            $sql .= " AND u.fecha_Creado >= ?";
             $params[] = $parameters['date_from'];
         }
 
         if (!empty($parameters['date_to'])) {
-            $sql .= " AND u.fecha_ultimo_acceso <= ?";
+            $sql .= " AND u.fecha_Creado <= ?";
             $params[] = $parameters['date_to'];
         }
 
-        $sql .= " ORDER BY u.fecha_ultimo_acceso DESC";
+        $sql .= " ORDER BY u.fecha_Creado DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -274,7 +273,7 @@ class ReportService
                 $summary['active_users']++;
             }
             
-            if ($user['fecha_ultimo_acceso'] && $user['fecha_ultimo_acceso'] >= $weekAgo) {
+            if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $weekAgo) {
                 $summary['recent_logins']++;
             }
             
@@ -297,12 +296,12 @@ class ReportService
     {
         $sql = "SELECT 
                     c.id,
-                    c.nombre,
+                    c.razon_social as nombre,
                     c.rut,
                     c.email,
                     c.telefono,
-                    c.activo,
-                    c.fecha_creacion,
+                    (CASE WHEN c.estado_tipo_id = 1 THEN 1 ELSE 0 END) as activo,
+                    c.fecha_Creado as fecha_creacion,
                     COUNT(p.id) as total_proyectos
                 FROM clientes c
                 LEFT JOIN proyectos p ON c.id = p.cliente_id
@@ -312,16 +311,16 @@ class ReportService
 
         // Filtros de fecha
         if (!empty($parameters['date_from'])) {
-            $sql .= " AND c.fecha_creacion >= ?";
+            $sql .= " AND c.fecha_Creado as fecha_creacion >= ?";
             $params[] = $parameters['date_from'];
         }
 
         if (!empty($parameters['date_to'])) {
-            $sql .= " AND c.fecha_creacion <= ?";
+            $sql .= " AND c.fecha_Creado as fecha_creacion <= ?";
             $params[] = $parameters['date_to'];
         }
 
-        $sql .= " GROUP BY c.id ORDER BY c.nombre";
+        $sql .= " GROUP BY c.id ORDER BY c.razon_social as nombre";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);

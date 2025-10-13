@@ -415,8 +415,7 @@ class PersonaController extends BaseController
     private function getEstadosTipo(): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM estado_tipos WHERE id IN (1, 2, 3, 4) ORDER BY id
-            ");
+            $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM estado_tipos WHERE id IN (1, 2, 3, 4) ORDER BY id");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {

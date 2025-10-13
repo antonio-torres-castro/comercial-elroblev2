@@ -431,7 +431,7 @@ class ProjectController extends BaseController
             $errors[] = 'Contraparte es requerida';
         } else {
             // Verificar que la contraparte existe
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clientes_contrapartes WHERE id = ? AND estado_tipo_id != 3");
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM cliente_contrapartes WHERE id = ? AND estado_tipo_id != 3");
             $stmt->execute([$data['contraparte_id']]);
             if ($stmt->fetchColumn() == 0) {
                 $errors[] = 'La contraparte seleccionada no existe o está inactiva';

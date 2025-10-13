@@ -85,7 +85,7 @@ class CommonDataService
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT u.id, u.username, p.nombre as nombre_completo, ut.nombre as tipo_usuario
+                SELECT u.id, u.nombre_usuario as username, p.nombre as nombre_completo, ut.nombre as tipo_usuario
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id

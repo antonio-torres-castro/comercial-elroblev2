@@ -978,12 +978,12 @@ class UserController extends BaseController
      */
     private function searchAvailablePersonas(string $search): array
     {
-        $sql = "SELECT id, nombre_completo, rut, telefono
+        $sql = "SELECT id, nombre, rut, telefono
                 FROM personas
-                WHERE (nombre_completo LIKE :search
+                WHERE (nombre LIKE :search
                    OR rut LIKE :search)
                 AND id NOT IN (SELECT persona_id FROM usuarios WHERE persona_id IS NOT NULL)
-                ORDER BY nombre_completo
+                ORDER BY nombre
                 LIMIT 10";
 
         $stmt = $this->db->prepare($sql);

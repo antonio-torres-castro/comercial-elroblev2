@@ -252,21 +252,21 @@ class ReportController extends BaseController
 
             if ($filename) {
                 // Respuesta JSON para AJAX
-                echo json_encode([
+                $this->jsonResponse([
                     'success' => true,
                     'message' => 'Reporte de usuarios generado correctamente',
                     'filename' => $filename
-                ]);
+                ], 200);
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
 
         } catch (Exception $e) {
             error_log("Error en ReportController::usersReport: " . $e->getMessage());
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => false,
                 'message' => 'Error al generar el reporte: ' . $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
@@ -300,21 +300,21 @@ class ReportController extends BaseController
             $filename = $this->generateProjectsExcelReport($projectData, $startDate, $endDate);
 
             if ($filename) {
-                echo json_encode([
+                $this->jsonResponse([
                     'success' => true,
                     'message' => 'Reporte de proyectos generado correctamente',
                     'filename' => $filename
-                ]);
+                ], 200);
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
 
         } catch (Exception $e) {
             error_log("Error en ReportController::projectsReport: " . $e->getMessage());
-            echo json_encode([
+            $this->jsonResponse([
                 'success' => false,
                 'message' => 'Error al generar el reporte: ' . $e->getMessage()
-            ]);
+            ], 500);
         }
     }
 
