@@ -22,7 +22,7 @@ class AuthViewService
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
             <style>
                 body {
-                    background: linear-gradient(135deg, #7f1933 0%, #5a1124 100%);
+                    background: linear-gradient(135deg, #BB2E2E 0%, #942828 100%);
                     min-height: 100vh;
                     display: flex;
                     align-items: center;
@@ -33,14 +33,14 @@ class AuthViewService
                     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
                 }
                 .login-header {
-                    background: linear-gradient(135deg, #7f1933 0%, #5a1124 100%);
+                    background: linear-gradient(135deg, #BB2E2E 0%, #942828 100%);
                     border-radius: 15px 15px 0 0;
                     padding: 2rem;
                     text-align: center;
                     color: white;
                 }
                 .btn-login {
-                    background: linear-gradient(135deg, #7f1933 0%, #5a1124 100%);
+                    background: linear-gradient(135deg, #BB2E2E 0%, #942828 100%);
                     border: none;
                     border-radius: 25px;
                     padding: 0.75rem 2rem;
@@ -49,7 +49,7 @@ class AuthViewService
                 }
                 .btn-login:hover {
                     transform: translateY(-2px);
-                    background: linear-gradient(135deg, #a53353 0%, #7f1933 100%);
+                    background: linear-gradient(135deg, #D93B3B 0%, #BB2E2E 100%);
                 }
                 .form-control {
                     border-radius: 10px;
@@ -57,8 +57,8 @@ class AuthViewService
                     padding: 0.75rem 1rem;
                 }
                 .form-control:focus {
-                    border-color: #a53353;
-                    box-shadow: 0 0 0 0.2rem rgba(127, 25, 51, 0.25);
+                    border-color: #D93B3B;
+                    box-shadow: 0 0 0 0.2rem rgba(187, 46, 46, 0.25);
                 }
             </style>
         </head>

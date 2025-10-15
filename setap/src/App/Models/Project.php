@@ -260,7 +260,7 @@ class Project
                        e.nombre_usuario as ejecutor_nombre,
                        s.nombre_usuario as supervisor_nombre,
                        et.nombre as estado_nombre,
-                       ht.fecha_inicio_real, ht.fecha_fin_real, ht.observaciones
+                       ht.fecha_evento, ht.comentario
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN usuarios p ON pt.planificador_id = p.id

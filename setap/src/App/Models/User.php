@@ -259,6 +259,7 @@ class User
         try {
             $stmt = $this->db->prepare("
                 SELECT u.clave_hash FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
                 WHERE (u.id = ?) AND p.estado_tipo_id = 2 AND u.estado_tipo_id = 2
             ");
             $stmt->execute([$id]);

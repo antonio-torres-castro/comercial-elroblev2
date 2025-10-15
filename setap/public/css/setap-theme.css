@@ -1,14 +1,15 @@
 /* 
-Paleta de colores SETAP basada en #7f1933 
+Paleta de colores SETAP basada en colores corporativos de Comercial El Roble
+Actualizada: Colores 5% más oscuros para mayor alineación con comercial-elroble.cl
 */
 
 :root {
-    /* Color principal */
-    --setap-primary: #7f1933;
-    --setap-primary-light: #a53353;
-    --setap-primary-lighter: #d15a7f;
-    --setap-primary-dark: #5a1124;
-    --setap-primary-darker: #3d0b18;
+    /* Color principal - Rojo Comercial El Roble */
+    --setap-primary: #BB2E2E;
+    --setap-primary-light: #D93B3B;
+    --setap-primary-lighter: #F1CCCC;
+    --setap-primary-dark: #942828;
+    --setap-primary-darker: #6E2828;
     
     /* Colores de apoyo */
     --setap-secondary: #6c757d;
@@ -25,7 +26,7 @@ Paleta de colores SETAP basada en #7f1933
     --setap-text-light: #ffffff;
     
     /* Backgrounds */
-    --setap-bg-primary: #7f1933;
+    --setap-bg-primary: #BB2E2E;
     --setap-bg-light: #f8f9fa;
     --setap-bg-white: #ffffff;
 }
@@ -73,7 +74,7 @@ Paleta de colores SETAP basada en #7f1933
 
 .btn-setap-primary:focus,
 .btn-setap-primary.focus {
-    box-shadow: 0 0 0 0.2rem rgba(127, 25, 51, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(197, 48, 48, 0.5);
 }
 
 .btn-setap-primary:not(:disabled):not(.disabled):active,
@@ -96,7 +97,7 @@ Paleta de colores SETAP basada en #7f1933
 
 .btn-outline-setap-primary:focus,
 .btn-outline-setap-primary.focus {
-    box-shadow: 0 0 0 0.2rem rgba(127, 25, 51, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(197, 48, 48, 0.5);
 }
 
 /* Links */
@@ -127,7 +128,7 @@ Paleta de colores SETAP basada en #7f1933
 }
 
 .sidebar-setap .nav-link:hover {
-    background-color: rgba(127, 25, 51, 0.1);
+    background-color: rgba(197, 48, 48, 0.1);
     color: var(--setap-primary);
 }
 
@@ -150,8 +151,8 @@ Paleta de colores SETAP basada en #7f1933
 /* Alerts */
 .alert-setap-primary {
     color: var(--setap-primary-dark);
-    background-color: rgba(127, 25, 51, 0.1);
-    border-color: rgba(127, 25, 51, 0.2);
+    background-color: rgba(197, 48, 48, 0.1);
+    border-color: rgba(197, 48, 48, 0.2);
 }
 
 /* Progress bars */
@@ -162,12 +163,12 @@ Paleta de colores SETAP basada en #7f1933
 /* Form controls focus */
 .form-control:focus {
     border-color: var(--setap-primary-light);
-    box-shadow: 0 0 0 0.2rem rgba(127, 25, 51, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(197, 48, 48, 0.25);
 }
 
 .form-select:focus {
     border-color: var(--setap-primary-light);
-    box-shadow: 0 0 0 0.2rem rgba(127, 25, 51, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(197, 48, 48, 0.25);
 }
 
 /* Tables */
@@ -194,7 +195,7 @@ Paleta de colores SETAP basada en #7f1933
 /* Dropdown */
 .dropdown-item:hover,
 .dropdown-item:focus {
-    background-color: rgba(127, 25, 51, 0.1);
+    background-color: rgba(197, 48, 48, 0.1);
     color: var(--setap-primary);
 }
 

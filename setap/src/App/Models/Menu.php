@@ -140,7 +140,7 @@ class Menu
                 $data['orden'] ?? 0,
                 $data['estado_tipo_id'] ?? 1,
                 $data['display'] ?? $data['nombre'] ?? '',
-                $data['menu_grupo_id'] ?? null
+                $data['menu_grupo_id'] ?? 1 // NOT NULL - Grupo por defecto
             ]);
 
             return (int)$this->db->lastInsertId();
@@ -180,7 +180,7 @@ class Menu
                 $data['orden'] ?? 0,
                 $data['estado_tipo_id'] ?? 1,
                 $data['display'] ?? $data['nombre'] ?? '',
-                $data['menu_grupo_id'] ?? null,
+                $data['menu_grupo_id'] ?? 1, // NOT NULL - Mantener grupo existente o por defecto
                 $id
             ]);
         } catch (Exception $e) {

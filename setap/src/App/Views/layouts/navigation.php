@@ -29,7 +29,7 @@ try {
 <nav class="navbar navbar-expand-lg navbar-setap">
     <div class="container">
         <a class="navbar-brand" href="<?= AppConstants::ROUTE_HOME ?>">
-            <i class="bi bi-grid-3x3-gap"></i> SETAP
+            <i class="bi bi-building"></i> SETAP - Comercial El Roble
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
