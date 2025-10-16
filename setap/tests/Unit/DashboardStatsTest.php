@@ -8,7 +8,7 @@ use App\Config\Database;
 class DashboardStatsTest extends TestCase
 {
     private $db;
-    
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -148,7 +148,7 @@ class DashboardStatsTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM usuarios WHERE estado_tipo_id != 4");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertEquals(2, $count, "Debe haber 2 usuarios activos en los datos de prueba");
     }
 
@@ -160,7 +160,7 @@ class DashboardStatsTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id != 4");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertEquals(3, $count, "Debe haber 3 proyectos no eliminados en los datos de prueba");
     }
 
@@ -172,7 +172,7 @@ class DashboardStatsTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id IN (2, 5)");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertEquals(2, $count, "Debe haber 2 proyectos activos/iniciados en los datos de prueba");
     }
 
@@ -184,7 +184,7 @@ class DashboardStatsTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyecto_tareas WHERE estado_tipo_id IN (1, 2, 5)");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertEquals(4, $count, "Debe haber 4 tareas pendientes en los datos de prueba");
     }
 
@@ -195,9 +195,9 @@ class DashboardStatsTest extends TestCase
     {
         // Simular el método calculateStats del HomeController
         $stats = $this->calculateDashboardStats();
-        
+
         $this->assertIsArray($stats, "Las estadísticas deben devolver un array");
-        
+
         $expectedKeys = ['total_usuarios', 'total_proyectos', 'proyectos_activos', 'tareas_pendientes'];
         foreach ($expectedKeys as $key) {
             $this->assertArrayHasKey($key, $stats, "Las estadísticas deben incluir '$key'");
@@ -222,29 +222,28 @@ class DashboardStatsTest extends TestCase
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM usuarios WHERE estado_tipo_id != 4");
             $stmt->execute();
             $totalUsuarios = $stmt->fetchColumn();
-            
+
             // 2. Total proyectos (excluir eliminados: estado_tipo_id != 4)
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id != 4");
             $stmt->execute();
             $totalProyectos = $stmt->fetchColumn();
-            
+
             // 3. Proyectos activos (estado activo=2 o iniciado=5)
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id IN (2, 5)");
             $stmt->execute();
             $proyectosActivos = $stmt->fetchColumn();
-            
+
             // 4. Tareas pendientes (estado creado=1, activo=2, o iniciado=5)
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyecto_tareas WHERE estado_tipo_id IN (1, 2, 5)");
             $stmt->execute();
             $tareasPendientes = $stmt->fetchColumn();
-            
+
             return [
                 'total_usuarios' => (int)$totalUsuarios,
                 'total_proyectos' => (int)$totalProyectos,
                 'proyectos_activos' => (int)$proyectosActivos,
                 'tareas_pendientes' => (int)$tareasPendientes
             ];
-            
         } catch (\Exception $e) {
             // Retornar valores por defecto en caso de error
             return [
@@ -262,17 +261,22 @@ class DashboardStatsTest extends TestCase
     public function testStatsNotHardcoded()
     {
         $stats = $this->calculateDashboardStats();
-        
+
         // Verificar que al menos uno de los valores es mayor a 0
-        $hasNonZeroValues = array_filter($stats, function($value) {
+        $hasNonZeroValues = array_filter($stats, function ($value) {
             return $value > 0;
         });
-        
-        $this->assertNotEmpty($hasNonZeroValues, 
-            "Las estadísticas deben mostrar datos reales, no valores hardcoded en 0");
-        
+
+        $this->assertNotEmpty(
+            $hasNonZeroValues,
+            "Las estadísticas deben mostrar datos reales, no valores hardcoded en 0"
+        );
+
         // Verificar que los proyectos activos no exceden el total
-        $this->assertLessThanOrEqual($stats['total_proyectos'], $stats['proyectos_activos'], 
-            "Proyectos activos no puede exceder el total de proyectos");
+        $this->assertLessThanOrEqual(
+            $stats['total_proyectos'],
+            $stats['proyectos_activos'],
+            "Proyectos activos no puede exceder el total de proyectos"
+        );
     }
 }

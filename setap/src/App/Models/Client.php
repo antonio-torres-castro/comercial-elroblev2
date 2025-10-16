@@ -26,10 +26,10 @@ class Client
                 SELECT
                     c.*,
                     et.nombre as estado_nombre,
-                    (SELECT COUNT(*) FROM cliente_contrapartes cc WHERE cc.cliente_id = c.id AND cc.estado_tipo_id != 3) as total_contrapartes
+                    (SELECT COUNT(*) FROM cliente_contrapartes cc WHERE cc.cliente_id = c.id AND cc.estado_tipo_id = 2) as total_contrapartes
                 FROM {$this->table} c
                 LEFT JOIN estado_tipos et ON c.estado_tipo_id = et.id
-                WHERE c.estado_tipo_id != 3
+                WHERE c.estado_tipo_id = 2
             ";
 
             $params = [];
@@ -74,7 +74,7 @@ class Client
                     et.nombre as estado_nombre
                 FROM {$this->table} c
                 LEFT JOIN estado_tipos et ON c.estado_tipo_id = et.id
-                WHERE c.id = ? AND c.estado_tipo_id != 3
+                WHERE c.id = ?
             ";
 
             $stmt = $this->db->prepare($query);
@@ -140,7 +140,7 @@ class Client
                     fecha_termino_contrato = ?,
                     estado_tipo_id = ?,
                     fecha_modificacion = CURRENT_TIMESTAMP
-                WHERE id = ? AND estado_tipo_id != 3
+                WHERE id = ? AND estado_tipo_id != 4
             ";
 
             $stmt = $this->db->prepare($query);
@@ -178,9 +178,9 @@ class Client
             // Realizar soft delete
             $query = "
                 UPDATE {$this->table} SET
-                    estado_tipo_id = 3,
+                    estado_tipo_id = 4,
                     fecha_modificacion = CURRENT_TIMESTAMP
-                WHERE id = ? AND estado_tipo_id != 3
+                WHERE id = ? AND estado_tipo_id != 4
             ";
 
             $stmt = $this->db->prepare($query);
@@ -238,7 +238,7 @@ class Client
                 FROM cliente_contrapartes cc
                 JOIN personas p ON cc.persona_id = p.id
                 LEFT JOIN estado_tipos et ON cc.estado_tipo_id = et.id
-                WHERE cc.cliente_id = ? AND cc.estado_tipo_id != 3
+                WHERE cc.cliente_id = ? AND cc.estado_tipo_id != 4
                 ORDER BY p.nombre ASC
             ";
 
@@ -287,7 +287,7 @@ class Client
     private function hasAssociatedProjects(int $clientId): bool
     {
         try {
-            $query = "SELECT COUNT(*) FROM proyectos WHERE cliente_id = ? AND estado_tipo_id != 3";
+            $query = "SELECT COUNT(*) FROM proyectos WHERE cliente_id = ? AND estado_tipo_id != 4";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$clientId]);
 
@@ -477,12 +477,13 @@ class Client
     }
 
     /**
-     * Verificar si una contraparte tiene proyectos activos
+     * Verificar si una contraparte tiene proyectos activos,
+     *  los proyectos tienen estado: creado, activo, terminado.
      */
     private function counterpartieHasActiveProjects(int $counterpartieId): bool
     {
         try {
-            $query = "SELECT COUNT(*) FROM proyectos WHERE contraparte_id = ? AND estado_tipo_id IN (1, 2, 5)";
+            $query = "SELECT COUNT(*) FROM proyectos WHERE contraparte_id = ? AND estado_tipo_id IN (1, 2)";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$counterpartieId]);
 
@@ -501,7 +502,7 @@ class Client
         try {
             $query = "
                 UPDATE cliente_contrapartes SET
-                    estado_tipo_id = 4,
+                    estado_tipo_id = 3,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE cliente_id = ? AND estado_tipo_id != 4
             ";

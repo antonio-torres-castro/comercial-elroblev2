@@ -459,7 +459,7 @@ class User
             $stmt = $this->db->prepare("
                 SELECT id, razon_social, rut
                 FROM clientes
-                WHERE estado_tipo_id IN (1, 2)
+                WHERE estado_tipo_id = 2
                 ORDER BY razon_social
             ");
             $stmt->execute();
@@ -502,7 +502,7 @@ class User
                 FROM personas p
                 LEFT JOIN usuarios u ON p.id = u.persona_id
                 WHERE u.persona_id IS NULL
-                AND p.estado_tipo_id IN (1, 2)
+                AND p.estado_tipo_id = 2
             ";
 
             $params = [];
@@ -644,7 +644,7 @@ class User
                 SELECT COUNT(*)
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
-                WHERE u.persona_id = ? AND p.estado_tipo_id IN (1, 2)
+                WHERE u.persona_id = ? AND p.estado_tipo_id = 2
             ";
 
             $params = [$personaId];

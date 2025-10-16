@@ -15,7 +15,7 @@ class ReportService
     }
 
     /**
-     * Obtener estadísticas básicas para la página principal de reportes
+     * Obtener estadï¿½sticas bï¿½sicas para la pï¿½gina principal de reportes
      */
     public function getBasicStats()
     {
@@ -51,7 +51,7 @@ class ReportService
     }
 
     /**
-     * Generar reporte según el tipo y parámetros especificados
+     * Generar reporte segï¿½n el tipo y parï¿½metros especificados
      */
     public function generateReport($reportType, $parameters = [])
     {
@@ -59,21 +59,21 @@ class ReportService
             switch ($reportType) {
                 case 'projects_summary':
                     return $this->generateProjectsSummary($parameters);
-                
+
                 case 'tasks_summary':
                     return $this->generateTasksSummary($parameters);
-                
+
                 case 'users_activity':
                     return $this->generateUsersActivity($parameters);
-                
+
                 case 'clients_summary':
                     return $this->generateClientsSummary($parameters);
-                
+
                 case 'custom':
                     return $this->generateCustomReport($parameters);
-                
+
                 default:
-                    throw new Exception("Tipo de reporte no válido: $reportType");
+                    throw new Exception("Tipo de reporte no vï¿½lido: $reportType");
             }
         } catch (Exception $e) {
             error_log("Error en ReportService::generateReport: " . $e->getMessage());
@@ -137,8 +137,10 @@ class ReportService
             if (strpos(strtolower($project['estado']), 'activo') !== false) {
                 $summary['active_projects']++;
             }
-            if (strpos(strtolower($project['estado']), 'terminado') !== false || 
-                strpos(strtolower($project['estado']), 'completado') !== false) {
+            if (
+                strpos(strtolower($project['estado']), 'terminado') !== false ||
+                strpos(strtolower($project['estado']), 'completado') !== false
+            ) {
                 $summary['completed_projects']++;
             }
         }
@@ -272,11 +274,11 @@ class ReportService
             if ($user['activo']) {
                 $summary['active_users']++;
             }
-            
+
             if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $weekAgo) {
                 $summary['recent_logins']++;
             }
-            
+
             if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $monthAgo) {
                 $summary['new_users']++;
             }
@@ -300,7 +302,7 @@ class ReportService
                     c.rut,
                     c.email,
                     c.telefono,
-                    (CASE WHEN c.estado_tipo_id = 1 THEN 1 ELSE 0 END) as activo,
+                    (CASE WHEN c.estado_tipo_id = 2 THEN 1 ELSE 0 END) as activo,
                     c.fecha_Creado as fecha_creacion,
                     COUNT(p.id) as total_proyectos
                 FROM clientes c
@@ -340,11 +342,11 @@ class ReportService
             if ($client['activo']) {
                 $summary['active_clients']++;
             }
-            
+
             if ($client['total_proyectos'] > 0) {
                 $summary['clients_with_projects']++;
             }
-            
+
             if ($client['fecha_creacion'] && $client['fecha_creacion'] >= $monthAgo) {
                 $summary['new_clients']++;
             }
@@ -362,9 +364,9 @@ class ReportService
      */
     private function generateCustomReport($parameters)
     {
-        // Implementación básica para reporte personalizado
-        // En una implementación real, esto podría ser mucho más complejo
-        
+        // Implementaciï¿½n bï¿½sica para reporte personalizado
+        // En una implementaciï¿½n real, esto podrï¿½a ser mucho mï¿½s complejo
+
         return [
             'summary' => [
                 'message' => 'Reporte personalizado',
@@ -379,7 +381,7 @@ class ReportService
                     'status' => 'Configurado'
                 ],
                 [
-                    'parameter' => 'Fecha de generación',
+                    'parameter' => 'Fecha de generaciï¿½n',
                     'value' => date('d/m/Y H:i:s'),
                     'status' => 'Actual'
                 ]

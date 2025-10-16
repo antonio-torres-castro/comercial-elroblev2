@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Services\ReportService;
@@ -159,7 +160,7 @@ class ReportController extends BaseController
 
             // Validar que el archivo esté en el directorio de reportes
             $reportPath = __DIR__ . '/../../storage/reports/' . basename($filename);
-            
+
             if (!file_exists($reportPath)) {
                 http_response_code(404);
                 echo $this->renderError('Archivo no encontrado');
@@ -176,7 +177,6 @@ class ReportController extends BaseController
             // Enviar archivo
             readfile($reportPath);
             exit;
-
         } catch (Exception $e) {
             error_log("Error en ReportController::download: " . $e->getMessage());
             http_response_code(500);
@@ -216,7 +216,6 @@ class ReportController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/reports/index.php';
-
         } catch (Exception $e) {
             error_log("Error en ReportController::index: " . $e->getMessage());
             http_response_code(500);
@@ -246,7 +245,7 @@ class ReportController extends BaseController
 
             // Generar reporte de usuarios
             $userData = $this->getUsersData();
-            
+
             // Crear archivo Excel o CSV
             $filename = $this->generateUsersExcelReport($userData);
 
@@ -260,7 +259,6 @@ class ReportController extends BaseController
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
-
         } catch (Exception $e) {
             error_log("Error en ReportController::usersReport: " . $e->getMessage());
             $this->jsonResponse([
@@ -295,7 +293,7 @@ class ReportController extends BaseController
 
             // Obtener datos de proyectos
             $projectData = $this->getProjectsData($startDate, $endDate);
-            
+
             // Generar archivo
             $filename = $this->generateProjectsExcelReport($projectData, $startDate, $endDate);
 
@@ -308,7 +306,6 @@ class ReportController extends BaseController
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
-
         } catch (Exception $e) {
             error_log("Error en ReportController::projectsReport: " . $e->getMessage());
             $this->jsonResponse([
@@ -340,7 +337,7 @@ class ReportController extends BaseController
         }
 
         // Ordenar por fecha de creación (más recientes primero)
-        usort($reports, function($a, $b) {
+        usort($reports, function ($a, $b) {
             return $b['created'] - $a['created'];
         });
 
@@ -433,11 +430,18 @@ class ReportController extends BaseController
         }
 
         $file = fopen($filepath, 'w');
-        
+
         // Headers CSV
         fputcsv($file, [
-            'ID', 'Nombre Completo', 'RUT', 'Email', 'Usuario', 
-            'Tipo Usuario', 'Estado', 'Fecha Creación', 'Último Acceso'
+            'ID',
+            'Nombre Completo',
+            'RUT',
+            'Email',
+            'Usuario',
+            'Tipo Usuario',
+            'Estado',
+            'Fecha Creación',
+            'Último Acceso'
         ]);
 
         // Datos
@@ -479,11 +483,17 @@ class ReportController extends BaseController
         }
 
         $file = fopen($filepath, 'w');
-        
+
         // Headers CSV
         fputcsv($file, [
-            'ID', 'Proyecto', 'Cliente', 'Descripción', 
-            'Fecha Inicio', 'Fecha Término', 'Estado', 'Fecha Creación'
+            'ID',
+            'Proyecto',
+            'Cliente',
+            'Descripción',
+            'Fecha Inicio',
+            'Fecha Término',
+            'Estado',
+            'Fecha Creación'
         ]);
 
         // Datos

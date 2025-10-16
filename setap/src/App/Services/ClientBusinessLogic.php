@@ -107,7 +107,7 @@ class ClientBusinessLogic
             $stmt = $this->db->prepare("
                 SELECT id, razon_social, rut
                 FROM clientes
-                WHERE estado_tipo_id IN (1, 2)
+                WHERE estado_tipo_id = 2
                 ORDER BY razon_social
             ");
             $stmt->execute();
@@ -236,7 +236,6 @@ class ClientBusinessLogic
                     $errors['cliente_id'] = 'El RUT de la persona no coincide con el RUT del cliente seleccionado';
                 }
             }
-
         } catch (Exception $e) {
             error_log("Error validando cambio de cliente: " . $e->getMessage());
             $errors['sistema'] = 'Error interno del sistema';
@@ -290,7 +289,7 @@ class ClientBusinessLogic
                 FROM clientes c
                 LEFT JOIN usuarios u ON c.id = u.cliente_id
                 LEFT JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
-                WHERE c.estado_tipo_id IN (1, 2)
+                WHERE c.estado_tipo_id = 2
                 GROUP BY c.id, c.razon_social
                 ORDER BY c.razon_social
             ");

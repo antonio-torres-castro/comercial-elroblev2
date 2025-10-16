@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Config\Database;
@@ -131,7 +132,7 @@ class CommonDataService
                        CONCAT(c.razon_social, ' - ', p.direccion) as proyecto_display
                 FROM proyectos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
-                WHERE p.estado_tipo_id IN (1, 2, 5)
+                WHERE p.estado_tipo_id IN (2, 5)
                 ORDER BY c.razon_social, p.direccion
             ");
             $stmt->execute();
@@ -237,15 +238,20 @@ class CommonDataService
                 'total_usuarios' => $this->getCount('usuarios'),
                 'total_clientes' => $this->getCount('clientes'),
                 'total_proyectos' => $this->getCount('proyectos'),
-                'proyectos_activos' => $this->getCount('proyectos', 'estado_tipo_id IN (1, 2, 5)'),
-                'tareas_pendientes' => $this->getCount('proyecto_tareas', 'estado_tipo_id IN (1, 2, 6)')
+                'proyectos_activos' => $this->getCount('proyectos', 'estado_tipo_id IN (2, 5)'),
+                /// ToDo: esto tiene que agregar a su logica la fecha actual,
+                ///       ya que solo una tarea activa, iniciada, 
+                ///       terminada que tenga una fech_inicio <= fecha_actual = Now() esta pendiente
+                'tareas_pendientes' => $this->getCount('proyecto_tareas', 'estado_tipo_id IN (2, 5, 6)')
             ];
         } catch (Exception $e) {
             error_log("Error obteniendo estadísticas básicas: " . $e->getMessage());
             return [];
         }
     }
-
+    /// ToDo: Aumentar su funcionalidad para que pueda recibir una fecha de parametro, 
+    ///       y ademas el nombre de campo fecha que debe compararse, con lo cual debe 
+    ///       consultar si la tabla tiene campo fecha que se le indica es el parametro
     private function getCount(string $table, string $condition = 'estado_tipo_id != 4'): int
     {
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$table} WHERE {$condition}");

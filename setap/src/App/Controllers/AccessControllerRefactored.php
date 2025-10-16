@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Constants\AppConstants;
@@ -130,7 +131,8 @@ class AccessControllerRefactored extends AbstractBaseController
                     $values[] = (int)$menuId;
                 }
 
-                $stmt = $this->db->prepare("
+                $stmt = $this->db->prepare(
+                    "
                     INSERT INTO usuario_tipo_menus (usuario_tipo_id, menu_id, fecha_creacion, estado_tipo_id)
                     VALUES " . str_repeat('(?,?,NOW(),1),', count($menuIds) - 1) . "(?,?,NOW(),1)"
                 );

@@ -100,7 +100,7 @@ class MenuController extends BaseController
 
             // Obtener estados disponibles usando el modelo
             $statusTypes = $this->menuModel->getStatusTypes();
-            
+
             // Obtener grupos de menú para consistencia
             $menuGroups = $this->menuModel->getMenuGroups();
 
@@ -157,7 +157,6 @@ class MenuController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/menus/create.php';
-
         } catch (Exception $e) {
             error_log("Error en MenuController::create: " . $e->getMessage());
             http_response_code(500);
@@ -211,7 +210,7 @@ class MenuController extends BaseController
             // Añadir validaciones adicionales
             $errors = array_merge($errors, $this->validateLength($postData['nombre'], 'nombre', 3, 100));
             $errors = array_merge($errors, $this->validateLength($postData['display'], 'display', 3, 100));
-            
+
             // Manejo estandarizado de errores - FASE 3.3
             $this->handleValidationErrors($errors, $_POST, '/menus/create');
 
@@ -224,7 +223,7 @@ class MenuController extends BaseController
                 'url' => $postData['url'],
                 'menu_grupo_id' => (int)$postData['menu_grupo_id'],
                 'orden' => (int)$postData['orden'],
-                'estado_tipo_id' => 2 // Activo por defecto
+                'estado_tipo_id' => 1 // Estado = Creado, por defecto
             ];
 
             if ($this->menuModel->create($menuData)) {
@@ -232,7 +231,6 @@ class MenuController extends BaseController
             } else {
                 throw new Exception('Error al crear el menú');
             }
-
         } catch (Exception $e) {
             error_log("Error en MenuController::store: " . $e->getMessage());
             $_SESSION['errors'] = ['Error interno del servidor'];
@@ -277,7 +275,7 @@ class MenuController extends BaseController
 
             // Obtener grupos de menú
             $menuGroups = $this->menuModel->getMenuGroups();
-            
+
             // Obtener tipos de estado disponibles
             $statusTypes = $this->menuModel->getStatusTypes();
 
@@ -294,7 +292,6 @@ class MenuController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/menus/edit.php';
-
         } catch (Exception $e) {
             error_log("Error en MenuController::edit: " . $e->getMessage());
             http_response_code(500);
@@ -355,7 +352,7 @@ class MenuController extends BaseController
             // Añadir validaciones adicionales
             $errors = array_merge($errors, $this->validateLength($postData['nombre'], 'nombre', 3, 100));
             $errors = array_merge($errors, $this->validateLength($postData['display'], 'display', 3, 100));
-            
+
             // Manejo estandarizado de errores - FASE 3.3
             $this->handleValidationErrors($errors, $_POST, "/menus/edit?id=$id");
 
@@ -376,7 +373,6 @@ class MenuController extends BaseController
             } else {
                 throw new Exception('Error al actualizar el menú');
             }
-
         } catch (Exception $e) {
             error_log("Error en MenuController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
@@ -422,7 +418,6 @@ class MenuController extends BaseController
             } else {
                 $this->jsonResponse(['success' => false, 'message' => 'Error al eliminar el menú'], 500);
             }
-
         } catch (Exception $e) {
             error_log("Error en MenuController::delete: " . $e->getMessage());
             $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
@@ -561,5 +556,4 @@ class MenuController extends BaseController
         header("Location: $url");
         exit;
     }
-
 }

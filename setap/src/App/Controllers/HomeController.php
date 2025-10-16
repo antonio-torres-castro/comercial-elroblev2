@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
@@ -38,7 +40,6 @@ class HomeController extends BaseController
             ];
 
             require_once __DIR__ . '/../Views/home.php';
-
         } catch (Exception $e) {
             error_log("Error en HomeController::index: " . $e->getMessage());
             http_response_code(500);
@@ -72,37 +73,38 @@ class HomeController extends BaseController
     {
         try {
             $db = \App\Config\Database::getInstance();
-            
+
             // 1. Total usuarios (excluir eliminados: estado_tipo_id != 4)
             $stmt = $db->prepare("SELECT COUNT(*) FROM usuarios WHERE estado_tipo_id != 4");
             $stmt->execute();
             $totalUsuarios = $stmt->fetchColumn();
-            
+
             // 2. Total proyectos (excluir eliminados: estado_tipo_id != 4)
             $stmt = $db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id != 4");
             $stmt->execute();
             $totalProyectos = $stmt->fetchColumn();
-            
+
             // 3. Proyectos activos (estado activo=2 o iniciado=5)
             $stmt = $db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id IN (2, 5)");
             $stmt->execute();
             $proyectosActivos = $stmt->fetchColumn();
-            
-            // 4. Tareas pendientes (estado creado=1, activo=2, o iniciado=5)
-            $stmt = $db->prepare("SELECT COUNT(*) FROM proyecto_tareas WHERE estado_tipo_id IN (1, 2, 5)");
+
+            // 4. Tareas pendientes (estado activo=2, o iniciado=5, rechazado=7).
+            //// ToDo: Esto debe ser consultado con la fecha actual (Now()),
+            ////       todas las tareas con los estados en (2, 5) que tengan fecha_inicio < = fecha actual
+            $stmt = $db->prepare("SELECT COUNT(*) FROM proyecto_tareas WHERE estado_tipo_id IN (2, 5, 7)");
             $stmt->execute();
             $tareasPendientes = $stmt->fetchColumn();
-            
+
             return [
                 'total_usuarios' => (int)$totalUsuarios,
                 'total_proyectos' => (int)$totalProyectos,
                 'proyectos_activos' => (int)$proyectosActivos,
                 'tareas_pendientes' => (int)$tareasPendientes
             ];
-            
         } catch (\Exception $e) {
             error_log("Error calculando estadísticas del dashboard: " . $e->getMessage());
-            
+
             // Retornar valores por defecto en caso de error
             return [
                 'total_usuarios' => 0,

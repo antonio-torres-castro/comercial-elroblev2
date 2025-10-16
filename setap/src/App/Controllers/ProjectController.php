@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\Project;
@@ -390,8 +391,8 @@ class ProjectController extends BaseController
         if (empty($data['cliente_id']) || !is_numeric($data['cliente_id'])) {
             $errors[] = 'Cliente es requerido';
         } else {
-            // Verificar que el cliente existe
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clientes WHERE id = ? AND estado_tipo_id != 3");
+            // Verificar que el cliente existe, el cliente en 3 esta inactivo, y en 4 eliminado, inactivo existe, eliminado ya no existe
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM clientes WHERE id = ? AND estado_tipo_id != 4");
             $stmt->execute([$data['cliente_id']]);
             if ($stmt->fetchColumn() == 0) {
                 $errors[] = 'El cliente seleccionado no existe o está inactivo';
@@ -419,7 +420,7 @@ class ProjectController extends BaseController
             $errors[] = 'Tipo de tarea es requerido';
         } else {
             // Verificar que el tipo de tarea existe
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM tarea_tipos WHERE id = ? AND estado_tipo_id != 3");
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM tarea_tipos WHERE id = ?");
             $stmt->execute([$data['tarea_tipo_id']]);
             if ($stmt->fetchColumn() == 0) {
                 $errors[] = 'El tipo de tarea seleccionado no existe o está inactivo';

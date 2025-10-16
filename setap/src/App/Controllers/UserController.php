@@ -1187,7 +1187,7 @@ class UserController extends BaseController
                 FROM permiso_tipos p
                 INNER JOIN usuario_tipo_permisos utp ON p.id = utp.permiso_id
                 INNER JOIN usuarios u ON u.usuario_tipo_id = utp.usuario_tipo_id
-                WHERE u.id = :user_id AND utp.estado_tipo_id = 1
+                WHERE u.id = :user_id AND utp.estado_tipo_id = 2
             ");
             $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
             $stmt->execute();
@@ -1209,7 +1209,7 @@ class UserController extends BaseController
                 FROM menus m
                 INNER JOIN usuario_tipo_menus utm ON m.id = utm.menu_id
                 INNER JOIN usuarios u ON u.usuario_tipo_id = utm.usuario_tipo_id
-                WHERE u.id = :user_id AND utm.estado_tipo_id = 1
+                WHERE u.id = :user_id AND utm.estado_tipo_id = 2
             ");
             $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
             $stmt->execute();
@@ -1229,7 +1229,6 @@ class UserController extends BaseController
             $stmt = $this->db->prepare("
                 SELECT id, nombre, descripcion
                 FROM permiso_tipos
-                WHERE estado_tipo_id = 1
                 ORDER BY nombre
             ");
             $stmt->execute();
@@ -1249,7 +1248,7 @@ class UserController extends BaseController
             $stmt = $this->db->prepare("
                 SELECT id, nombre, descripcion
                 FROM menus
-                WHERE estado_tipo_id = 1
+                WHERE estado_tipo_id = 2
                 ORDER BY nombre
             ");
             $stmt->execute();
@@ -1259,6 +1258,4 @@ class UserController extends BaseController
             return [];
         }
     }
-
-
 }

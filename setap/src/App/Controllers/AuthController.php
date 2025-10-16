@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Services\AuthService;
@@ -16,7 +17,7 @@ use Exception;
 class AuthController extends AbstractBaseController
 {
     use CommonValidationsTrait;
-    
+
     private $authService;
     private $authViewService;
     private $authValidationService;
@@ -35,7 +36,7 @@ class AuthController extends AbstractBaseController
 
     public function showLoginForm()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             // Si ya está autenticado, redirigir al home
             if (Security::isAuthenticated()) {
                 $this->redirectToHome();
@@ -55,7 +56,7 @@ class AuthController extends AbstractBaseController
 
     public function login()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             // Validar datos de entrada
             $validation = $this->authValidationService->validateLoginCredentials($_POST);
             if (!$validation['isValid']) {
@@ -86,7 +87,7 @@ class AuthController extends AbstractBaseController
 
     public function logout()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             $this->authService->logout();
             $this->redirectToLogin();
         }, 'logout');
