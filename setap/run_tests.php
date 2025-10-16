@@ -8,7 +8,7 @@
  */
 
 // Cargar autoloader
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/venv/vendor/autoload.php';
 
 echo "🧪 SETAP Testing Framework - Validación de Cobertura\n";
 echo "================================================\n\n";

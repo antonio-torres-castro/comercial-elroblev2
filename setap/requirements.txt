@@ -1,0 +1,111 @@
+# SETAP - Lista de Extensiones y Dependencias Instaladas
+# Generado automaticamente el 2025-10-16 23:34:46
+# Esta lista documenta el estado actual antes de la migracion a virtual environment
+
+# ============================================================
+# EXTENSIONES PHP INSTALADAS (php -m)
+# ============================================================
+# [PHP Modules]
+calendar
+Core
+ctype
+date
+dom
+exif
+FFI
+fileinfo
+filter
+ftp
+gettext
+hash
+iconv
+intl
+json
+libxml
+mbstring
+openssl
+pcntl
+pcre
+PDO
+Phar
+posix
+random
+readline
+Reflection
+session
+shmop
+SimpleXML
+sockets
+sodium
+SPL
+standard
+sysvmsg
+sysvsem
+sysvshm
+tokenizer
+xml
+xmlreader
+xmlwriter
+xsl
+Zend_OPcache
+zip
+zlib
+
+# [Zend Modules]
+Zend_OPcache
+
+# ============================================================
+# DEPENDENCIAS DE COMPOSER INSTALADAS
+# ============================================================
+# Basado en composer.json y composer.lock
+
+# Dependencias principales (require):
+vlucas/phpdotenv@5.6.2
+
+# Dependencias de desarrollo (require-dev):
+phpunit/phpunit@10.5.58
+
+# ============================================================
+# DEPENDENCIAS TRANSITIVAS (instaladas automaticamente)
+# ============================================================
+# Listadas en vendor/composer/installed.json
+sebastian/version@4.0.1
+sebastian/type@4.0.0
+sebastian/recursion-context@5.0.1
+sebastian/object-reflector@3.0.0
+sebastian/object-enumerator@5.0.0
+sebastian/global-state@6.0.2
+symfony/polyfill-mbstring@v1.33.0
+sebastian/exporter@5.1.4
+sebastian/environment@6.1.0
+sebastian/diff@5.1.1
+sebastian/comparator@5.0.3
+sebastian/code-unit@2.0.0
+sebastian/cli-parser@2.0.1
+psr/container@2.0.2
+phpunit/php-timer@6.0.0
+phpunit/php-text-template@3.0.1
+phpunit/php-invoker@4.0.0
+phpunit/php-file-iterator@4.1.0
+phpunit/php-code-coverage@10.1.18
+nikic/php-parser@v5.3.1
+theseer/tokenizer@1.2.4
+phar-io/version@3.2.1
+phar-io/manifest@2.0.4
+myclabs/deep-copy@1.13.4
+symfony/polyfill-php80@v1.33.0
+phpoption/phpoption@1.9.4
+graham-campbell/result-type@v1.1.3
+
+# ============================================================
+# INFORMACION ADICIONAL
+# ============================================================
+# PHP Version: 8.2.29
+# Composer Version: 2.5.5
+# Directorio vendor: Si existe
+# Archivo .env: No existe (se intento copiar de .env.example)
+
+# NOTA: Durante la instalacion se detecto:
+# - Advertencia sobre extension curl no habilitada
+# - Archivo de autoload con clase que no cumple PSR-4: security.php
+# - Falta archivo .env.example para copia automatica
