@@ -17,7 +17,7 @@ class Client
     }
 
     /**
-     * Obtener todos los clientes activos
+     * Obtener todos los clientes
      */
     public function getAll(array $filters = []): array
     {
@@ -26,10 +26,13 @@ class Client
                 SELECT
                     c.*,
                     et.nombre as estado_nombre,
-                    (SELECT COUNT(*) FROM cliente_contrapartes cc WHERE cc.cliente_id = c.id AND cc.estado_tipo_id = 2) as total_contrapartes
+                    (SELECT COUNT(*) 
+                    FROM cliente_contrapartes cc 
+                    WHERE 
+                        cc.cliente_id = c.id 
+                    AND cc.estado_tipo_id = 2) as total_contrapartes
                 FROM {$this->table} c
                 LEFT JOIN estado_tipos et ON c.estado_tipo_id = et.id
-                WHERE c.estado_tipo_id = 2
             ";
 
             $params = [];
@@ -110,8 +113,8 @@ class Client
                 $data['email'] ?? null,
                 $data['telefono'] ?? null,
                 $data['fecha_inicio_contrato'] ?? null,
-                $data['fecha_facturacion'] ?? null,
-                $data['fecha_termino_contrato'] ?? null,
+                empty($data['fecha_facturacion']) ? null : $data['fecha_facturacion'],
+                empty($data['fecha_termino_contrato']) ? null : $data['fecha_termino_contrato'],
                 $data['estado_tipo_id'] ?? 1 // 1 = Activo por defecto
             ]);
 
