@@ -60,6 +60,62 @@
             </div>
         <?php endif; ?>
 
+        <!-- Modales para mensajes -->
+        <!-- Modal de Error de RUT -->
+        <div class="modal fade" id="rutErrorModal" tabindex="-1" aria-labelledby="rutErrorModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="rutErrorModalLabel">
+                            <i class="bi bi-exclamation-triangle"></i> RUT Inválido
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">Por favor, ingresa un RUT válido.</p>
+                        <small class="text-muted">El formato debe ser: 12.345.678-9</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                            <i class="bi bi-check-lg"></i> Entendido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmación -->
+        <div class="modal fade" id="confirmCreateModal" tabindex="-1" aria-labelledby="confirmCreateModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="confirmCreateModalLabel">
+                            <i class="bi bi-question-circle"></i> Confirmar Creación
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">¿Estás seguro de que deseas crear esta persona?</p>
+                        <div class="bg-light p-3 rounded">
+                            <strong>Datos a registrar:</strong>
+                            <div class="mt-2">
+                                <small class="text-muted d-block"><strong>RUT:</strong> <span id="confirm-rut"></span></small>
+                                <small class="text-muted d-block"><strong>Nombre:</strong> <span id="confirm-nombre"></span></small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </button>
+                        <button type="button" class="btn btn-success" id="confirmCreateBtn">
+                            <i class="bi bi-check-lg"></i> Sí, Crear Persona
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Formulario de Creación -->
         <form method="POST" action="/personas/store" id="createPersonaForm">
             <?= \App\Helpers\Security::renderCsrfField() ?>
@@ -148,6 +204,14 @@
             const rutInput = document.getElementById('rut');
             const nombreInput = document.getElementById('nombre');
             
+            // Referencias a los modales
+            const rutErrorModal = new bootstrap.Modal(document.getElementById('rutErrorModal'));
+            const confirmCreateModal = new bootstrap.Modal(document.getElementById('confirmCreateModal'));
+            const confirmCreateBtn = document.getElementById('confirmCreateBtn');
+            
+            // Variable para controlar el envío del formulario
+            let formSubmissionConfirmed = false;
+            
             // Inicializar campo oculto si hay valor inicial en el RUT
             if (rutInput.value) {
                 let value = rutInput.value.replace(/[^0-9kK]/g, '');
@@ -218,21 +282,29 @@
                 }
             });
 
-            // Envío del formulario
-            form.addEventListener('submit', function(e) {
-                // Validar RUT antes de enviar
-                if (rutInput.value && !validateRut(rutInput.value)) {
-                    e.preventDefault();
-                    alert('Por favor, ingresa un RUT válido.');
+            // Función para mostrar el modal de error de RUT
+            function showRutErrorModal() {
+                rutErrorModal.show();
+                // Enfocar el campo RUT cuando se cierre el modal
+                document.getElementById('rutErrorModal').addEventListener('hidden.bs.modal', function() {
                     rutInput.focus();
-                    return;
-                }
+                }, { once: true });
+            }
 
-                if (!confirm('¿Estás seguro de que deseas crear esta persona?')) {
-                    e.preventDefault();
-                    return;
-                }
+            // Función para mostrar el modal de confirmación
+            function showConfirmCreateModal() {
+                // Actualizar los datos en el modal de confirmación
+                document.getElementById('confirm-rut').textContent = rutInput.value || 'No especificado';
+                document.getElementById('confirm-nombre').textContent = nombreInput.value || 'No especificado';
+                confirmCreateModal.show();
+            }
 
+            // Manejar confirmación de creación
+            confirmCreateBtn.addEventListener('click', function() {
+                formSubmissionConfirmed = true;
+                confirmCreateModal.hide();
+                
+                // Proceder con el envío del formulario
                 // Mostrar indicador de carga
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
                 createBtn.disabled = true;
@@ -243,6 +315,35 @@
                 additionalButtons.forEach(button => {
                     button.disabled = true;
                 });
+
+                // Enviar el formulario
+                form.submit();
+            });
+
+            // Envío del formulario
+            form.addEventListener('submit', function(e) {
+                // Si ya fue confirmado, permitir el envío
+                if (formSubmissionConfirmed) {
+                    return;
+                }
+
+                e.preventDefault(); // Siempre prevenir el envío inicial
+
+                // Validar RUT antes de mostrar confirmación
+                if (rutInput.value && !validateRut(rutInput.value)) {
+                    showRutErrorModal();
+                    return;
+                }
+
+                // Mostrar modal de confirmación
+                showConfirmCreateModal();
+            });
+
+            // Evitar que se cierre el modal de confirmación con ESC si hay datos importantes
+            document.getElementById('confirmCreateModal').addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    // Permitir cerrar con ESC
+                }
             });
         });
     </script>

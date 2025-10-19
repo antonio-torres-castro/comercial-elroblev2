@@ -15,7 +15,7 @@ class ReportService
     }
 
     /**
-     * Obtener estad�sticas b�sicas para la p�gina principal de reportes
+     * Obtener estadísticas básicas para la página principal de reportes
      */
     public function getBasicStats()
     {
@@ -51,7 +51,7 @@ class ReportService
     }
 
     /**
-     * Generar reporte seg�n el tipo y par�metros especificados
+     * Generar reporte según el tipo y parámetros especificados
      */
     public function generateReport($reportType, $parameters = [])
     {
@@ -73,7 +73,7 @@ class ReportService
                     return $this->generateCustomReport($parameters);
 
                 default:
-                    throw new Exception("Tipo de reporte no v�lido: $reportType");
+                    throw new Exception("Tipo de reporte no válido: $reportType");
             }
         } catch (Exception $e) {
             error_log("Error en ReportService::generateReport: " . $e->getMessage());
@@ -137,10 +137,8 @@ class ReportService
             if (strpos(strtolower($project['estado']), 'activo') !== false) {
                 $summary['active_projects']++;
             }
-            if (
-                strpos(strtolower($project['estado']), 'terminado') !== false ||
-                strpos(strtolower($project['estado']), 'completado') !== false
-            ) {
+            if (strpos(strtolower($project['estado']), 'terminado') !== false || 
+                strpos(strtolower($project['estado']), 'completado') !== false) {
                 $summary['completed_projects']++;
             }
         }
@@ -274,11 +272,11 @@ class ReportService
             if ($user['activo']) {
                 $summary['active_users']++;
             }
-
+            
             if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $weekAgo) {
                 $summary['recent_logins']++;
             }
-
+            
             if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $monthAgo) {
                 $summary['new_users']++;
             }
@@ -364,9 +362,9 @@ class ReportService
      */
     private function generateCustomReport($parameters)
     {
-        // Implementaci�n b�sica para reporte personalizado
-        // En una implementaci�n real, esto podr�a ser mucho m�s complejo
-
+        // Implementación básica para reporte personalizado
+        // En una implementación real, esto podría ser mucho más complejo
+        
         return [
             'summary' => [
                 'message' => 'Reporte personalizado',

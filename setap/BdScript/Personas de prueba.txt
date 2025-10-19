@@ -2,7 +2,6 @@ Personas de prueba:
 Torrealba Avila Pedro Juan	6.104.383-7	VAR	Lsas Rosas 204 Linderos	Buin
 Wilkins Vaccaro Max	16.209.707-5	VAR	California 2250 401	Providencia
 Collipal Collipal Francisca Ivonne	15.759.467-2	MUJ	Sector Copin Mehuin	Mehuin
-
 Ibarra Pedreros Hernan Patricio	7.706.131-2	VAR	M Brunet 95 Caupolican F A	Forestal
 Gacitua Gajardo Luz Mira	2.871.003-8	N/A	No Disponible	No Disponible
 Robles Mena Mirtha Elvira	9.288.140-7	MUJ	Sacarias Rivera 69 Forestal	Forestal
