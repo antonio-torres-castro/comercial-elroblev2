@@ -111,8 +111,8 @@ class User
                 $hashedPassword,
                 $data['usuario_tipo_id'],
                 $clienteId,
-                $data['fecha_inicio'] ?? null,
-                $data['fecha_termino'] ?? null
+                empty($data['fecha_inicio']) ? null : $data['fecha_inicio'],
+                empty($data['fecha_termino']) ? null : $data['fecha_termino']
             ]);
 
             return $this->db->lastInsertId();

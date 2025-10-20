@@ -1206,7 +1206,7 @@ class UserController extends BaseController
         try {
             $stmt = $this->db->prepare("
                 SELECT m.id, m.nombre, m.descripcion, utm.fecha_creacion
-                FROM menus m
+                FROM menu m
                 INNER JOIN usuario_tipo_menus utm ON m.id = utm.menu_id
                 INNER JOIN usuarios u ON u.usuario_tipo_id = utm.usuario_tipo_id
                 WHERE u.id = :user_id AND utm.estado_tipo_id = 2
@@ -1247,7 +1247,7 @@ class UserController extends BaseController
         try {
             $stmt = $this->db->prepare("
                 SELECT id, nombre, descripcion
-                FROM menus
+                FROM menu
                 WHERE estado_tipo_id = 2
                 ORDER BY nombre
             ");

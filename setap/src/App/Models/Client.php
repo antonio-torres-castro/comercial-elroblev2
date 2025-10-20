@@ -154,8 +154,8 @@ class Client
                 $data['email'] ?? null,
                 $data['telefono'] ?? null,
                 $data['fecha_inicio_contrato'] ?? null,
-                $data['fecha_facturacion'] ?? null,
-                $data['fecha_termino_contrato'] ?? null,
+                empty($data['fecha_facturacion']) ? null : $data['fecha_facturacion'],
+                empty($data['fecha_termino_contrato']) ? null : $data['fecha_termino_contrato'],
                 $data['estado_tipo_id'] ?? 1,
                 $id
             ]);
