@@ -132,7 +132,7 @@ class AccessController extends AbstractBaseController
         try {
             $this->db->beginTransaction();
 
-            // 1. Obtener las tuplas actuales activas (usuario_tipo_id, menu_id)
+            // 1. Obtener las tuplas actuales (usuario_tipo_id, menu_id)
             $stmt = $this->db->prepare("
                 SELECT menu_id
                 FROM usuario_tipo_menus
@@ -140,6 +140,15 @@ class AccessController extends AbstractBaseController
             ");
             $stmt->execute([$userTypeId]);
             $currentMenuIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'menu_id');
+
+            // 1. Obtener las tuplas eliminadas (usuario_tipo_id, menu_id)
+            $stmt = $this->db->prepare("
+                SELECT menu_id
+                FROM usuario_tipo_menus
+                WHERE usuario_tipo_id = ? AND estado_tipo_id = 4
+            ");
+            $stmt->execute([$userTypeId]);
+            $deletedMenuIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'menu_id');
 
             // Asegurar que $menuIds es array y convertir a enteros
             $menuIds = !empty($menuIds) ? array_map('intval', (array)$menuIds) : [];
@@ -158,8 +167,23 @@ class AccessController extends AbstractBaseController
                 $stmt->execute(array_merge([$userTypeId], $menuIdsToDeactivate));
             }
 
-            // 4. Encontrar los menu_id nuevos que deben insertarse
-            $menuIdsToInsert = array_diff($menuIds, $currentMenuIds);
+            // 4. Encontrar los menu_id que nuevamente están seleccionados (deben activarse)
+            $menuIdsToActivate = array_intersect($deletedMenuIds, $menuIds);
+
+            // 5. Activar los accesos que se han vuelto a seleccionar
+            if (!empty($menuIdsToActivate)) {
+                $placeholders = str_repeat('?,', count($menuIdsToActivate) - 1) . '?';
+                $stmt = $this->db->prepare("
+                    UPDATE usuario_tipo_menus
+                    SET estado_tipo_id = 2, fecha_modificacion = NOW()
+                    WHERE usuario_tipo_id = ? AND menu_id IN ($placeholders)
+                ");
+                $stmt->execute(array_merge([$userTypeId], $menuIdsToActivate));
+            }
+
+            // 6. Encontrar los menu_id nuevos que deben insertarse
+            $allNewMenu_Id = array_merge($currentMenuIds, $menuIdsToActivate);
+            $menuIdsToInsert = array_diff($menuIds, $allNewMenu_Id);
 
             // Insertar los nuevos accesos
             if (!empty($menuIdsToInsert)) {

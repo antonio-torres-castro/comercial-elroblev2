@@ -223,75 +223,12 @@ use App\Helpers\Security;
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
-                    const userTypeId = this.dataset.userTypeId;
-                    const formData = new FormData(this);
-                    formData.append('user_type_id', userTypeId);
-                    
-                    // Mostrar loading en el botón
-                    const btn = this.querySelector('button[type="submit"]');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
-                    btn.disabled = true;
-                    
-                    fetch('/accesos/update', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Mostrar éxito
-                            btn.innerHTML = '<i class="bi bi-check-circle"></i> ¡Guardado!';
-                            btn.classList.remove('btn-setap-primary');
-                            btn.classList.add('btn-success');
-                            
-                            // Mostrar notificación
-                            showNotification('Accesos actualizados correctamente', 'success');
-                            
-                            // Restaurar botón después de 2 segundos
-                            setTimeout(() => {
-                                btn.innerHTML = originalText;
-                                btn.classList.remove('btn-success');
-                                btn.classList.add('btn-setap-primary');
-                                btn.disabled = false;
-                            }, 2000);
-                        } else {
-                            throw new Error(data.message || 'Error al guardar');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Error al guardar los accesos: ' + error.message, 'error');
-                        
-                        // Restaurar botón
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    });
+                    // Enviar formulario normalmente (sin AJAX) para seguir patrón POST-Redirect-GET
+                    this.submit();
                 });
             });
         });
 
-        function showNotification(message, type) {
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle';
-            
-            const alert = document.createElement('div');
-            alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alert.innerHTML = `
-                <i class="bi ${icon}"></i> ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(alert);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
-        }
     </script>
 </body>
 
