@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -23,11 +24,11 @@ use App\Helpers\Security;
             border-radius: 10px;
             transition: transform 0.2s;
         }
-        
+
         .user-type-card:hover {
             transform: translateY(-2px);
         }
-        
+
         .menu-checkbox {
             margin: 0.5rem;
             padding: 0.75rem;
@@ -36,30 +37,30 @@ use App\Helpers\Security;
             background: #f8f9fa;
             transition: all 0.2s;
         }
-        
+
         .menu-checkbox:hover {
             background: #e9ecef;
         }
-        
+
         .menu-checkbox.checked {
             background: var(--setap-primary);
             color: white;
             border-color: var(--setap-primary);
         }
-        
+
         .menu-group {
             background: var(--setap-light);
             border-radius: 8px;
             padding: 1rem;
             margin-bottom: 1rem;
         }
-        
+
         .menu-group-title {
             color: var(--setap-primary);
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
-        
+
         .save-btn {
             position: sticky;
             bottom: 20px;
@@ -97,67 +98,67 @@ use App\Helpers\Security;
             <!-- Tipos de Usuario -->
             <div class="row">
                 <?php foreach ($userTypes as $userType): ?>
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card user-type-card h-100">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">
-                                <i class="bi bi-person-badge"></i> <?= htmlspecialchars($userType['nombre']) ?>
-                            </h5>
-                            <small><?= htmlspecialchars($userType['descripcion']) ?></small>
-                        </div>
-                        <div class="card-body">
-                            <form class="access-form" action="<?= AppConstants::ROUTE_ACCESS ?>/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
-                                <!-- Token CSRF para seguridad -->
-                                <?= Security::renderCsrfField() ?>
-                                <!-- ID del tipo de usuario -->
-                                <input type="hidden" name="user_type_id" value="<?= $userType['id'] ?>">
-                                <!-- Agrupar menús por grupo -->
-                                <?php 
-                                $groupedMenus = [];
-                                foreach ($allMenus as $menu) {
-                                    $grupo = $menu['grupo_nombre'] ?: 'Sin Grupo';
-                                    $groupedMenus[$grupo][] = $menu;
-                                }
-                                ?>
-                                
-                                <?php foreach ($groupedMenus as $grupoNombre => $menus): ?>
-                                <div class="menu-group">
-                                    <div class="menu-group-title">
-                                        <i class="bi bi-folder"></i> <?= htmlspecialchars($grupoNombre) ?>
-                                    </div>
-                                    
-                                    <?php foreach ($menus as $menu): ?>
-                                    <?php 
-                                    $hasAccess = isset($accessByUserType[$userType['id']]) && 
-                                                in_array($menu['id'], $accessByUserType[$userType['id']]);
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card user-type-card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-person-badge"></i> <?= htmlspecialchars($userType['nombre']) ?>
+                                </h5>
+                                <small><?= htmlspecialchars($userType['descripcion']) ?></small>
+                            </div>
+                            <div class="card-body">
+                                <form class="access-form" action="<?= AppConstants::ROUTE_ACCESS ?>/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
+                                    <!-- Token CSRF para seguridad -->
+                                    <?= Security::renderCsrfField() ?>
+                                    <!-- ID del tipo de usuario -->
+                                    <input type="hidden" name="user_type_id" value="<?= $userType['id'] ?>">
+                                    <!-- Agrupar menús por grupo -->
+                                    <?php
+                                    $groupedMenus = [];
+                                    foreach ($allMenus as $menu) {
+                                        $grupo = $menu['grupo_nombre'] ?: 'Sin Grupo';
+                                        $groupedMenus[$grupo][] = $menu;
+                                    }
                                     ?>
-                                    <div class="form-check menu-checkbox <?= $hasAccess ? 'checked' : '' ?>">
-                                        <input class="form-check-input" type="checkbox" 
-                                               name="menu_ids[]" value="<?= $menu['id'] ?>"
-                                               id="menu_<?= $userType['id'] ?>_<?= $menu['id'] ?>"
-                                               <?= $hasAccess ? 'checked' : '' ?>>
-                                        <label class="form-check-label" 
-                                               for="menu_<?= $userType['id'] ?>_<?= $menu['id'] ?>">
-                                            <i class="bi bi-<?= $menu['icono'] ?: 'circle' ?>"></i>
-                                            <?= htmlspecialchars($menu['display'] ?: $menu['nombre']) ?>
-                                            <?php if ($menu['descripcion']): ?>
-                                                <br><small class="text-muted"><?= htmlspecialchars($menu['descripcion']) ?></small>
-                                            <?php endif; ?>
-                                        </label>
-                                    </div>
+
+                                    <?php foreach ($groupedMenus as $grupoNombre => $menus): ?>
+                                        <div class="menu-group">
+                                            <div class="menu-group-title">
+                                                <i class="bi bi-folder"></i> <?= htmlspecialchars($grupoNombre) ?>
+                                            </div>
+
+                                            <?php foreach ($menus as $menu): ?>
+                                                <?php
+                                                $hasAccess = isset($accessByUserType[$userType['id']]) &&
+                                                    in_array($menu['id'], $accessByUserType[$userType['id']]);
+                                                ?>
+                                                <div class="form-check menu-checkbox <?= $hasAccess ? 'checked' : '' ?>">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        name="menu_ids[]" value="<?= $menu['id'] ?>"
+                                                        id="menu_<?= $userType['id'] ?>_<?= $menu['id'] ?>"
+                                                        <?= $hasAccess ? 'checked' : '' ?>>
+                                                    <label class="form-check-label"
+                                                        for="menu_<?= $userType['id'] ?>_<?= $menu['id'] ?>">
+                                                        <i class="bi bi-<?= $menu['icono'] ?: 'circle' ?>"></i>
+                                                        <?= htmlspecialchars($menu['display'] ?: $menu['nombre']) ?>
+                                                        <?php if ($menu['descripcion']): ?>
+                                                            <br><small class="text-muted"><?= htmlspecialchars($menu['descripcion']) ?></small>
+                                                        <?php endif; ?>
+                                                    </label>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endforeach; ?>
-                                </div>
-                                <?php endforeach; ?>
-                                
-                                <div class="mt-3 save-btn">
-                                    <button type="submit" class="btn btn-setap-primary w-100">
-                                        <i class="bi bi-check-circle"></i> Guardar Accesos
-                                    </button>
-                                </div>
-                            </form>
+
+                                    <div class="mt-3 save-btn">
+                                        <button type="submit" class="btn btn-setap-primary w-100">
+                                            <i class="bi bi-check-circle"></i> Guardar Accesos
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
                 <?php endforeach; ?>
             </div>
 
@@ -175,21 +176,21 @@ use App\Helpers\Security;
                                 <div class="col-md-4">
                                     <h6 class="text-primary">Gestión de Accesos</h6>
                                     <p class="small text-muted">
-                                        Configure qué menús puede acceder cada tipo de usuario. 
+                                        Configure qué menús puede acceder cada tipo de usuario.
                                         Los cambios se aplican inmediatamente a todos los usuarios del tipo.
                                     </p>
                                 </div>
                                 <div class="col-md-4">
                                     <h6 class="text-info">Tipos de Usuario</h6>
                                     <p class="small text-muted">
-                                        Cada tarjeta representa un tipo de usuario diferente. 
+                                        Cada tarjeta representa un tipo de usuario diferente.
                                         Seleccione los menús que desea habilitar para cada tipo.
                                     </p>
                                 </div>
                                 <div class="col-md-4">
                                     <h6 class="text-success">Estado Activo</h6>
                                     <p class="small text-muted">
-                                        Solo se muestran menús y tipos de usuario activos. 
+                                        Solo se muestran menús y tipos de usuario activos.
                                         Los cambios se guardan automáticamente al hacer clic en "Guardar Accesos".
                                     </p>
                                 </div>
@@ -203,7 +204,7 @@ use App\Helpers\Security;
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . '/../layouts/scripts-base.php'; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Manejar cambios en checkboxes para actualizar estilos
@@ -222,13 +223,12 @@ use App\Helpers\Security;
             document.querySelectorAll('.access-form').forEach(form => {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     // Enviar formulario normalmente (sin AJAX) para seguir patrón POST-Redirect-GET
                     this.submit();
                 });
             });
         });
-
     </script>
 </body>
 

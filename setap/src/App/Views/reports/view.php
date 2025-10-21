@@ -1,5 +1,9 @@
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,20 +22,25 @@
             padding: 2rem 0;
             margin-bottom: 2rem;
         }
+
         .report-data-table {
             font-size: 0.9rem;
         }
+
         .report-card {
             border: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .main-content {
             margin-top: 2rem;
         }
+
         @media print {
             .no-print {
                 display: none !important;
             }
+
             .report-header {
                 background: var(--setap-primary) !important;
                 -webkit-print-color-adjust: exact;
@@ -97,101 +106,101 @@
 
                 <!-- Resumen Ejecutivo -->
                 <?php if (isset($reportData['summary'])): ?>
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card report-card">
-                            <div class="card-header bg-setap-primary text-white">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-graph-up"></i> Resumen Ejecutivo
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <?php foreach ($reportData['summary'] as $key => $value): ?>
-                                        <div class="col-md-3 mb-3">
-                                            <div class="text-center">
-                                                <h3 class="text-setap-primary mb-1"><?= htmlspecialchars($value) ?></h3>
-                                                <p class="text-muted mb-0"><?= ucwords(str_replace('_', ' ', $key)) ?></p>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card report-card">
+                                <div class="card-header bg-setap-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-graph-up"></i> Resumen Ejecutivo
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <?php foreach ($reportData['summary'] as $key => $value): ?>
+                                            <div class="col-md-3 mb-3">
+                                                <div class="text-center">
+                                                    <h3 class="text-setap-primary mb-1"><?= htmlspecialchars($value) ?></h3>
+                                                    <p class="text-muted mb-0"><?= ucwords(str_replace('_', ' ', $key)) ?></p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
 
                 <!-- Datos Detallados -->
                 <?php if (isset($reportData['data']) && !empty($reportData['data'])): ?>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card report-card">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-table"></i> Datos Detallados
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover report-data-table">
-                                        <thead class="table-setap-primary">
-                                            <tr>
-                                                <?php if (!empty($reportData['data'])): ?>
-                                                    <?php foreach (array_keys($reportData['data'][0]) as $column): ?>
-                                                        <th><?= htmlspecialchars(ucwords(str_replace('_', ' ', $column))) ?></th>
-                                                    <?php endforeach; ?>
-                                                <?php endif; ?>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($reportData['data'] as $row): ?>
-                                                <tr>
-                                                    <?php foreach ($row as $cell): ?>
-                                                        <td><?= htmlspecialchars($cell) ?></td>
-                                                    <?php endforeach; ?>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card report-card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-table"></i> Datos Detallados
+                                    </h5>
                                 </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover report-data-table">
+                                            <thead class="table-setap-primary">
+                                                <tr>
+                                                    <?php if (!empty($reportData['data'])): ?>
+                                                        <?php foreach (array_keys($reportData['data'][0]) as $column): ?>
+                                                            <th><?= htmlspecialchars(ucwords(str_replace('_', ' ', $column))) ?></th>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($reportData['data'] as $row): ?>
+                                                    <tr>
+                                                        <?php foreach ($row as $cell): ?>
+                                                            <td><?= htmlspecialchars($cell) ?></td>
+                                                        <?php endforeach; ?>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
 
-                                <!-- Paginación o información adicional -->
-                                <div class="mt-3 text-muted">
-                                    <small>
-                                        <i class="bi bi-info-circle"></i>
-                                        Mostrando <?= count($reportData['data']) ?> registros
-                                        <?php if (isset($reportData['total_records'])): ?>
-                                            de <?= $reportData['total_records'] ?> totales
-                                        <?php endif; ?>
-                                    </small>
+                                    <!-- Paginación o información adicional -->
+                                    <div class="mt-3 text-muted">
+                                        <small>
+                                            <i class="bi bi-info-circle"></i>
+                                            Mostrando <?= count($reportData['data']) ?> registros
+                                            <?php if (isset($reportData['total_records'])): ?>
+                                                de <?= $reportData['total_records'] ?> totales
+                                            <?php endif; ?>
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
 
                 <!-- Gráficos o Análisis (si existen) -->
                 <?php if (isset($reportData['charts']) && !empty($reportData['charts'])): ?>
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card report-card">
-                            <div class="card-header bg-info text-white">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-bar-chart"></i> Análisis Gráfico
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <!-- Aquí se pueden incluir gráficos generados -->
-                                <div class="text-center text-muted">
-                                    <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
-                                    <p class="mt-3">Gráficos y análisis visual en desarrollo</p>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card report-card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-bar-chart"></i> Análisis Gráfico
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Aquí se pueden incluir gráficos generados -->
+                                    <div class="text-center text-muted">
+                                        <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
+                                        <p class="mt-3">Gráficos y análisis visual en desarrollo</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
 
             <?php else: ?>
@@ -279,4 +288,5 @@
         });
     </script>
 </body>
+
 </html>

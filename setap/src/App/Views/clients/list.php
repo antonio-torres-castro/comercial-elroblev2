@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,10 +14,13 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
+
 <body>
-    <?php 
+    <?php
+
     use App\Constants\AppConstants;
-    include __DIR__ . '/../layouts/navigation.php'; 
+
+    include __DIR__ . '/../layouts/navigation.php';
     ?>
 
     <div class="container-fluid mt-4">
@@ -37,9 +41,9 @@
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php
                         $messages = [
-                            'created' => \App\Constants\AppConstants::SUCCESS_CLIENT_CREATED,
-                            'updated' => \App\Constants\AppConstants::SUCCESS_CLIENT_UPDATED,
-                            'deleted' => \App\Constants\AppConstants::SUCCESS_CLIENT_DELETED
+                            'created' => AppConstants::SUCCESS_CLIENT_CREATED,
+                            'updated' => AppConstants::SUCCESS_CLIENT_UPDATED,
+                            'deleted' => AppConstants::SUCCESS_CLIENT_DELETED
                         ];
                         echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
                         ?>
@@ -64,14 +68,14 @@
                             <div class="col-md-3">
                                 <label for="rut" class="form-label">RUT</label>
                                 <input type="text" class="form-control" id="rut" name="rut"
-                                       value="<?php echo htmlspecialchars($data['filters']['rut']); ?>"
-                                       placeholder="Buscar por RUT">
+                                    value="<?php echo htmlspecialchars($data['filters']['rut']); ?>"
+                                    placeholder="Buscar por RUT">
                             </div>
                             <div class="col-md-4">
                                 <label for="razon_social" class="form-label">Razón Social</label>
                                 <input type="text" class="form-control" id="razon_social" name="razon_social"
-                                       value="<?php echo htmlspecialchars($data['filters']['razon_social']); ?>"
-                                       placeholder="Buscar por razón social">
+                                    value="<?php echo htmlspecialchars($data['filters']['razon_social']); ?>"
+                                    placeholder="Buscar por razón social">
                             </div>
                             <div class="col-md-3">
                                 <label for="estado_tipo_id" class="form-label">Estado</label>
@@ -79,7 +83,7 @@
                                     <option value="">Todos los estados</option>
                                     <?php foreach ($data['statusTypes'] as $status): ?>
                                         <option value="<?php echo $status['id']; ?>"
-                                                <?php echo $data['filters']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
+                                            <?php echo $data['filters']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($status['nombre']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -183,12 +187,12 @@
                                                 <td>
                                                     <div class="btn-group btn-group-sm" role="group">
                                                         <a href="/client/<?php echo $client['id']; ?>"
-                                                           class="btn btn-outline-setap-primary" title="Editar">
+                                                            class="btn btn-outline-setap-primary" title="Editar">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
                                                         <button type="button" class="btn btn-outline-danger"
-                                                                onclick="confirmDelete(<?php echo $client['id']; ?>, '<?php echo addslashes($client['razon_social']); ?>')"
-                                                                title="Eliminar">
+                                                            onclick="confirmDelete(<?php echo $client['id']; ?>, '<?php echo addslashes($client['razon_social']); ?>')"
+                                                            title="Eliminar">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
@@ -236,7 +240,8 @@
     </div>
 
     <!-- Scripts Optimizados de SETAP -->
-    <?php $scripts = ['jquery', 'datatables']; include __DIR__ . '/../layouts/scripts-advanced.php'; ?>
+    <?php $scripts = ['jquery', 'datatables'];
+    include __DIR__ . '/../layouts/scripts-advanced.php'; ?>
     <?php include __DIR__ . '/../layouts/scripts-base.php'; ?>
 
     <script>
@@ -247,14 +252,14 @@
                     url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 },
                 pageLength: 25,
-                order: [[1, 'asc']], // Ordenar por razón social
-                columnDefs: [
-                    {
-                        targets: [-1], // Última columna (acciones)
-                        orderable: false,
-                        searchable: false
-                    }
-                ]
+                order: [
+                    [1, 'asc']
+                ], // Ordenar por razón social
+                columnDefs: [{
+                    targets: [-1], // Última columna (acciones)
+                    orderable: false,
+                    searchable: false
+                }]
             });
         });
 
@@ -270,4 +275,5 @@
         }
     </script>
 </body>
+
 </html>

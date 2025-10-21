@@ -1,5 +1,9 @@
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,12 +22,14 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
@@ -31,7 +37,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -75,18 +83,18 @@
                                 <div class="mb-3">
                                     <label for="rut" class="form-label">RUT <span class="required">*</span></label>
                                     <input type="text" class="form-control" id="rut" name="rut" required
-                                           value="<?php 
-                                               $cleanRut = preg_replace('/[^0-9kK]/', '', $persona['rut']);
-                                               if (strlen($cleanRut) > 1) {
-                                                   $dv = strtoupper(substr($cleanRut, -1));
-                                                   $number = substr($cleanRut, 0, -1);
-                                                   $formattedNumber = number_format($number, 0, '', '.');
-                                                   echo htmlspecialchars($formattedNumber . '-' . $dv);
-                                               } else {
-                                                   echo htmlspecialchars($persona['rut']);
-                                               }
-                                           ?>"
-                                           placeholder="12.345.678-9" maxlength="20">
+                                        value="<?php
+                                                $cleanRut = preg_replace('/[^0-9kK]/', '', $persona['rut']);
+                                                if (strlen($cleanRut) > 1) {
+                                                    $dv = strtoupper(substr($cleanRut, -1));
+                                                    $number = substr($cleanRut, 0, -1);
+                                                    $formattedNumber = number_format($number, 0, '', '.');
+                                                    echo htmlspecialchars($formattedNumber . '-' . $dv);
+                                                } else {
+                                                    echo htmlspecialchars($persona['rut']);
+                                                }
+                                                ?>"
+                                        placeholder="12.345.678-9" maxlength="20">
                                     <input type="hidden" id="rut_clean" name="rut_clean" value="<?= htmlspecialchars(preg_replace('/[^0-9kK]/', '', strtolower($persona['rut']))) ?>">
                                     <div class="form-text">Formato: 12.345.678-9 o 12345678-9</div>
                                 </div>
@@ -96,8 +104,8 @@
                                 <div class="mb-3">
                                     <label for="nombre" class="form-label">Nombre Completo <span class="required">*</span></label>
                                     <input type="text" class="form-control" id="nombre" name="nombre" required
-                                           value="<?= htmlspecialchars($persona['nombre']) ?>"
-                                           placeholder="Nombre y apellidos" maxlength="150">
+                                        value="<?= htmlspecialchars($persona['nombre']) ?>"
+                                        placeholder="Nombre y apellidos" maxlength="150">
                                 </div>
                             </div>
                         </div>
@@ -107,8 +115,8 @@
                                 <div class="mb-3">
                                     <label for="telefono" class="form-label">Teléfono</label>
                                     <input type="text" class="form-control" id="telefono" name="telefono"
-                                           value="<?= htmlspecialchars($persona['telefono'] ?? '') ?>"
-                                           placeholder="+56 9 1234 5678" maxlength="20">
+                                        value="<?= htmlspecialchars($persona['telefono'] ?? '') ?>"
+                                        placeholder="+56 9 1234 5678" maxlength="20">
                                     <div class="form-text">Campo opcional</div>
                                 </div>
                             </div>
@@ -131,7 +139,7 @@
                         <div class="mb-3">
                             <label for="direccion" class="form-label">Dirección</label>
                             <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                      placeholder="Dirección completa..." maxlength="255"><?= htmlspecialchars($persona['direccion'] ?? '') ?></textarea>
+                                placeholder="Dirección completa..." maxlength="255"><?= htmlspecialchars($persona['direccion'] ?? '') ?></textarea>
                             <div class="form-text">Campo opcional. Máximo 255 caracteres.</div>
                         </div>
                     </div>
@@ -151,12 +159,12 @@
                                 <p><strong>Modificado:</strong><br><?= date('d/m/Y H:i', strtotime($persona['fecha_modificacion'])) ?></p>
                             <?php endif; ?>
                             <p><strong>Estado Actual:</strong><br>
-                                <span class="badge bg-<?= match($persona['estado_tipo_id']) {
-                                    1 => 'secondary', // Creado
-                                    2 => 'success',   // Activo
-                                    3 => 'warning',   // Inactivo
-                                    default => 'dark'
-                                } ?>">
+                                <span class="badge bg-<?= match ($persona['estado_tipo_id']) {
+                                                            1 => 'secondary', // Creado
+                                                            2 => 'success',   // Activo
+                                                            3 => 'warning',   // Inactivo
+                                                            default => 'dark'
+                                                        } ?>">
                                     <?= htmlspecialchars($persona['estado']) ?>
                                 </span>
                             </p>
@@ -210,7 +218,7 @@
             const saveBtn = document.getElementById('saveBtn');
             const rutInput = document.getElementById('rut');
             const nombreInput = document.getElementById('nombre');
-            
+
             // Inicializar campo oculto con el valor actual del RUT
             if (rutInput.value) {
                 let value = rutInput.value.replace(/[^0-9kK]/g, '');
@@ -220,7 +228,7 @@
             // Formatear RUT mientras se escribe
             rutInput.addEventListener('input', function() {
                 let value = this.value.replace(/[^0-9kK]/g, '');
-                
+
                 // Actualizar campo oculto con RUT limpio (solo números y K/k, sin puntos ni guión)
                 document.getElementById('rut_clean').value = value.toLowerCase();
 
@@ -310,4 +318,5 @@
         });
     </script>
 </body>
+
 </html>

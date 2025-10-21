@@ -1,5 +1,9 @@
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,18 +22,22 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
+
         .main-content {
             margin-top: 2rem;
         }
+
         .report-preview {
             background: #f8f9fa;
             border: 1px dashed #dee2e6;
@@ -42,7 +50,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
@@ -348,7 +358,7 @@
 
             dateTo.value = today.toISOString().split('T')[0];
 
-            switch(period) {
+            switch (period) {
                 case 'today':
                     dateFrom.value = today.toISOString().split('T')[0];
                     break;
@@ -379,4 +389,5 @@
         }
     </script>
 </body>
+
 </html>

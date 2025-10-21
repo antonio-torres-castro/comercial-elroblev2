@@ -1,5 +1,10 @@
+<?php
+
+use App\Constants\AppConstants;
+?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +17,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -38,44 +44,48 @@
                 <?php endif; ?>
 
                 <form method="POST" class="row g-3" id="profileForm">
-                    <?php use App\Helpers\Security; \App\Helpers\Security::renderCsrfField(); ?>
+                    <?php
+
+                    use App\Helpers\Security;
+
+                    \App\Helpers\Security::renderCsrfField(); ?>
 
                     <div class="col-md-6">
                         <label for="nombre" class="form-label">Nombre Completo *</label>
                         <input type="text" class="form-control" id="nombre" name="nombre"
-                               value="<?php echo htmlspecialchars($data['user']['nombre_completo'] ?? ''); ?>"
-                               required maxlength="100">
+                            value="<?php echo htmlspecialchars($data['user']['nombre_completo'] ?? ''); ?>"
+                            required maxlength="100">
                         <div class="form-text">Tu nombre completo como aparecerá en el sistema</div>
                     </div>
 
                     <div class="col-md-6">
                         <label for="email" class="form-label">Email *</label>
                         <input type="email" class="form-control" id="email" name="email"
-                               value="<?php echo htmlspecialchars($data['user']['email'] ?? ''); ?>"
-                               required maxlength="150">
+                            value="<?php echo htmlspecialchars($data['user']['email'] ?? ''); ?>"
+                            required maxlength="150">
                         <div class="form-text">Tu dirección de correo electrónico</div>
                     </div>
 
                     <div class="col-md-6">
                         <label for="telefono" class="form-label">Teléfono</label>
                         <input type="tel" class="form-control" id="telefono" name="telefono"
-                               value="<?php echo htmlspecialchars($data['user']['telefono'] ?? ''); ?>"
-                               maxlength="20">
+                            value="<?php echo htmlspecialchars($data['user']['telefono'] ?? ''); ?>"
+                            maxlength="20">
                         <div class="form-text">Tu número de teléfono (opcional)</div>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Usuario</label>
                         <input type="text" class="form-control"
-                               value="<?php echo htmlspecialchars($data['user']['nombre_usuario'] ?? ''); ?>"
-                               disabled>
+                            value="<?php echo htmlspecialchars($data['user']['nombre_usuario'] ?? ''); ?>"
+                            disabled>
                         <div class="form-text">El nombre de usuario no se puede modificar</div>
                     </div>
 
                     <div class="col-12">
                         <label for="direccion" class="form-label">Dirección</label>
                         <textarea class="form-control" id="direccion" name="direccion"
-                                  rows="3" maxlength="200"><?php echo htmlspecialchars($data['user']['direccion'] ?? ''); ?></textarea>
+                            rows="3" maxlength="200"><?php echo htmlspecialchars($data['user']['direccion'] ?? ''); ?></textarea>
                         <div class="form-text">Tu dirección completa (opcional)</div>
                     </div>
 
@@ -138,4 +148,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -1,6 +1,9 @@
-<?php use App\Constants\AppConstants; ?>
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,12 +22,14 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
@@ -32,7 +37,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -131,7 +138,7 @@
                                 <div class="mb-3">
                                     <label for="rut" class="form-label">RUT <span class="required">*</span></label>
                                     <input type="text" class="form-control" id="rut" name="rut" required
-                                           placeholder="12.345.678-9" maxlength="20">
+                                        placeholder="12.345.678-9" maxlength="20">
                                     <input type="hidden" id="rut_clean" name="rut_clean">
                                     <div class="form-text">Formato: 12.345.678-9 o 12345678-9</div>
                                 </div>
@@ -141,7 +148,7 @@
                                 <div class="mb-3">
                                     <label for="nombre" class="form-label">Nombre Completo <span class="required">*</span></label>
                                     <input type="text" class="form-control" id="nombre" name="nombre" required
-                                           placeholder="Nombre y apellidos" maxlength="150">
+                                        placeholder="Nombre y apellidos" maxlength="150">
                                 </div>
                             </div>
                         </div>
@@ -151,7 +158,7 @@
                                 <div class="mb-3">
                                     <label for="telefono" class="form-label">Teléfono</label>
                                     <input type="text" class="form-control" id="telefono" name="telefono"
-                                           placeholder="+56 9 1234 5678" maxlength="20">
+                                        placeholder="+56 9 1234 5678" maxlength="20">
                                     <div class="form-text">Campo opcional</div>
                                 </div>
                             </div>
@@ -174,7 +181,7 @@
                         <div class="mb-3">
                             <label for="direccion" class="form-label">Dirección</label>
                             <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                      placeholder="Dirección completa..." maxlength="255"></textarea>
+                                placeholder="Dirección completa..." maxlength="255"></textarea>
                             <div class="form-text">Campo opcional. Máximo 255 caracteres.</div>
                         </div>
 
@@ -203,15 +210,15 @@
             const createBtn = document.getElementById('createBtn');
             const rutInput = document.getElementById('rut');
             const nombreInput = document.getElementById('nombre');
-            
+
             // Referencias a los modales
             const rutErrorModal = new bootstrap.Modal(document.getElementById('rutErrorModal'));
             const confirmCreateModal = new bootstrap.Modal(document.getElementById('confirmCreateModal'));
             const confirmCreateBtn = document.getElementById('confirmCreateBtn');
-            
+
             // Variable para controlar el envío del formulario
             let formSubmissionConfirmed = false;
-            
+
             // Inicializar campo oculto si hay valor inicial en el RUT
             if (rutInput.value) {
                 let value = rutInput.value.replace(/[^0-9kK]/g, '');
@@ -221,7 +228,7 @@
             // Formatear RUT mientras se escribe
             rutInput.addEventListener('input', function() {
                 let value = this.value.replace(/[^0-9kK]/g, '');
-                
+
                 // Actualizar campo oculto con RUT limpio (solo números y K/k, sin puntos ni guión)
                 document.getElementById('rut_clean').value = value.toLowerCase();
 
@@ -288,7 +295,9 @@
                 // Enfocar el campo RUT cuando se cierre el modal
                 document.getElementById('rutErrorModal').addEventListener('hidden.bs.modal', function() {
                     rutInput.focus();
-                }, { once: true });
+                }, {
+                    once: true
+                });
             }
 
             // Función para mostrar el modal de confirmación
@@ -303,7 +312,7 @@
             confirmCreateBtn.addEventListener('click', function() {
                 formSubmissionConfirmed = true;
                 confirmCreateModal.hide();
-                
+
                 // Proceder con el envío del formulario
                 // Mostrar indicador de carga
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Creando...';
@@ -348,4 +357,5 @@
         });
     </script>
 </body>
+
 </html>

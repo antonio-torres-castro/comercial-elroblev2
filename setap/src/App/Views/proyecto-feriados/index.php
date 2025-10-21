@@ -1,5 +1,7 @@
 <?php
+
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 ?>
 
 <div class="container-fluid">
@@ -98,12 +100,12 @@ use App\Helpers\Security;
                                     <div class="col-md-6">
                                         <label for="fecha_inicio_masivo" class="form-label">Fecha Inicio *</label>
                                         <input type="date" class="form-control" id="fecha_inicio_masivo" name="fecha_inicio"
-                                               value="<?= $project['fecha_inicio'] ?>" required>
+                                            value="<?= $project['fecha_inicio'] ?>" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="fecha_fin_masivo" class="form-label">Fecha Fin *</label>
                                         <input type="date" class="form-control" id="fecha_fin_masivo" name="fecha_fin"
-                                               value="<?= $project['fecha_fin'] ?? '' ?>" required>
+                                            value="<?= $project['fecha_fin'] ?? '' ?>" required>
                                     </div>
                                 </div>
 
@@ -174,7 +176,7 @@ use App\Helpers\Security;
                                     <div class="col-md-6">
                                         <label for="observaciones_masivo" class="form-label">Observaciones</label>
                                         <input type="text" class="form-control" id="observaciones_masivo" name="observaciones"
-                                               placeholder="Ej: Fines de semana regulares" maxlength="100">
+                                            placeholder="Ej: Fines de semana regulares" maxlength="100">
                                     </div>
                                 </div>
 
@@ -214,7 +216,7 @@ use App\Helpers\Security;
                                     <div class="col-12">
                                         <label for="observaciones_especifico" class="form-label">Observaciones</label>
                                         <input type="text" class="form-control" id="observaciones_especifico" name="observaciones"
-                                               placeholder="Ej: Feriado Nacional" maxlength="100">
+                                            placeholder="Ej: Feriado Nacional" maxlength="100">
                                     </div>
                                 </div>
 
@@ -258,7 +260,7 @@ use App\Helpers\Security;
                                     <div class="col-md-6">
                                         <label for="observaciones_rango" class="form-label">Observaciones</label>
                                         <input type="text" class="form-control" id="observaciones_rango" name="observaciones"
-                                               placeholder="Ej: Vacaciones de verano" maxlength="100">
+                                            placeholder="Ej: Vacaciones de verano" maxlength="100">
                                     </div>
                                 </div>
 
@@ -299,36 +301,36 @@ use App\Helpers\Security;
                             </thead>
                             <tbody id="holidays-tbody">
                                 <?php foreach ($feriados as $feriado): ?>
-                                <tr>
-                                    <td><?= date('d/m/Y', strtotime($feriado['fecha'])) ?></td>
-                                    <td><?= htmlspecialchars($feriado['dia_semana']) ?></td>
-                                    <td>
-                                        <span class="badge bg-<?= $feriado['tipo_feriado'] === 'recurrente' ? 'info' : 'primary' ?>">
-                                            <?= ucfirst($feriado['tipo_feriado']) ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <?php if ($feriado['ind_irrenunciable']): ?>
-                                            <span class="badge bg-warning">Irrenunciable</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-success">Renunciable</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><?= htmlspecialchars($feriado['observaciones'] ?? '') ?></td>
-                                    <td>
-                                        <span class="badge bg-<?= $feriado['estado_tipo_id'] == 2 ? 'success' : 'secondary' ?>">
-                                            <?= htmlspecialchars($feriado['estado_nombre']) ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editHoliday(<?= $feriado['id'] ?>)" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteHoliday(<?= $feriado['id'] ?>)" title="Eliminar">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td><?= date('d/m/Y', strtotime($feriado['fecha'])) ?></td>
+                                        <td><?= htmlspecialchars($feriado['dia_semana']) ?></td>
+                                        <td>
+                                            <span class="badge bg-<?= $feriado['tipo_feriado'] === 'recurrente' ? 'info' : 'primary' ?>">
+                                                <?= ucfirst($feriado['tipo_feriado']) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php if ($feriado['ind_irrenunciable']): ?>
+                                                <span class="badge bg-warning">Irrenunciable</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-success">Renunciable</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?= htmlspecialchars($feriado['observaciones'] ?? '') ?></td>
+                                        <td>
+                                            <span class="badge bg-<?= $feriado['estado_tipo_id'] == 2 ? 'success' : 'secondary' ?>">
+                                                <?= htmlspecialchars($feriado['estado_nombre']) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="editHoliday(<?= $feriado['id'] ?>)" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteHoliday(<?= $feriado['id'] ?>)" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>

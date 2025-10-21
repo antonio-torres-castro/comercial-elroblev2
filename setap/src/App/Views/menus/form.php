@@ -1,5 +1,10 @@
+<?php
+
+use App\Constants\AppConstants;
+?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +17,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -62,8 +68,8 @@
                                             <div class="mb-3">
                                                 <label for="nombre" class="form-label">Nombre interno *</label>
                                                 <input type="text" class="form-control" id="nombre" name="nombre"
-                                                       value="<?= htmlspecialchars($data['menu']['nombre'] ?? '') ?>"
-                                                       required maxlength="150">
+                                                    value="<?= htmlspecialchars($data['menu']['nombre'] ?? '') ?>"
+                                                    required maxlength="150">
                                                 <div class="form-text">Nombre interno del sistema (ej: manage_users)</div>
                                             </div>
                                         </div>
@@ -72,8 +78,8 @@
                                             <div class="mb-3">
                                                 <label for="display" class="form-label">Título de visualización *</label>
                                                 <input type="text" class="form-control" id="display" name="display"
-                                                       value="<?= htmlspecialchars($data['menu']['display'] ?? '') ?>"
-                                                       required maxlength="150">
+                                                    value="<?= htmlspecialchars($data['menu']['display'] ?? '') ?>"
+                                                    required maxlength="150">
                                                 <div class="form-text">Nombre que verá el usuario (ej: Usuarios)</div>
                                             </div>
                                         </div>
@@ -84,7 +90,7 @@
                                             <div class="mb-3">
                                                 <label for="descripcion" class="form-label">Descripción</label>
                                                 <textarea class="form-control" id="descripcion" name="descripcion"
-                                                          maxlength="300" rows="3"><?= htmlspecialchars($data['menu']['descripcion'] ?? '') ?></textarea>
+                                                    maxlength="300" rows="3"><?= htmlspecialchars($data['menu']['descripcion'] ?? '') ?></textarea>
                                                 <div class="form-text">Descripción de las funcionalidades (opcional)</div>
                                             </div>
                                         </div>
@@ -95,8 +101,8 @@
                                             <div class="mb-3">
                                                 <label for="url" class="form-label">URL *</label>
                                                 <input type="text" class="form-control" id="url" name="url"
-                                                       value="<?= htmlspecialchars($data['menu']['url'] ?? '') ?>"
-                                                       required maxlength="100">
+                                                    value="<?= htmlspecialchars($data['menu']['url'] ?? '') ?>"
+                                                    required maxlength="100">
                                                 <div class="form-text">Ruta relativa del menú (ej: /users, /projects)</div>
                                             </div>
                                         </div>
@@ -109,8 +115,8 @@
                                                         <i class="bi bi-<?= htmlspecialchars($data['menu']['icono'] ?? 'circle') ?>" id="icon-preview"></i>
                                                     </span>
                                                     <input type="text" class="form-control" id="icono" name="icono"
-                                                           value="<?= htmlspecialchars($data['menu']['icono'] ?? '') ?>"
-                                                           maxlength="50" placeholder="circle">
+                                                        value="<?= htmlspecialchars($data['menu']['icono'] ?? '') ?>"
+                                                        maxlength="50" placeholder="circle">
                                                 </div>
                                                 <div class="form-text">Icono de Bootstrap Icons (sin prefijo 'bi bi-')</div>
                                             </div>
@@ -120,8 +126,8 @@
                                             <div class="mb-3">
                                                 <label for="orden" class="form-label">Orden *</label>
                                                 <input type="number" class="form-control" id="orden" name="orden"
-                                                       value="<?= htmlspecialchars($data['menu']['orden'] ?? '1') ?>"
-                                                       required min="1" max="999">
+                                                    value="<?= htmlspecialchars($data['menu']['orden'] ?? '1') ?>"
+                                                    required min="1" max="999">
                                                 <div class="form-text">Orden de aparición en el menú</div>
                                             </div>
                                         </div>
@@ -235,4 +241,5 @@
         });
     </script>
 </body>
+
 </html>

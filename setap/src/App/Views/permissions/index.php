@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -23,11 +24,11 @@ use App\Helpers\Security;
             border-radius: 10px;
             transition: transform 0.2s;
         }
-        
+
         .user-type-card:hover {
             transform: translateY(-2px);
         }
-        
+
         .permission-checkbox {
             margin: 0.5rem;
             padding: 0.75rem;
@@ -36,23 +37,23 @@ use App\Helpers\Security;
             background: #f8f9fa;
             transition: all 0.2s;
         }
-        
+
         .permission-checkbox:hover {
             background: #e9ecef;
         }
-        
+
         .permission-checkbox.checked {
             background: var(--setap-success);
             color: white;
             border-color: var(--setap-success);
         }
-        
+
         .permission-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 0.5rem;
         }
-        
+
         .save-btn {
             position: sticky;
             bottom: 20px;
@@ -90,51 +91,51 @@ use App\Helpers\Security;
             <!-- Tipos de Usuario -->
             <div class="row">
                 <?php foreach ($userTypes as $userType): ?>
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card user-type-card h-100">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">
-                                <i class="bi bi-person-badge"></i> <?= htmlspecialchars($userType['nombre']) ?>
-                            </h5>
-                            <small><?= htmlspecialchars($userType['descripcion']) ?></small>
-                        </div>
-                        <div class="card-body">
-                            <form class="permissions-form" action="<?= AppConstants::ROUTE_PERMISSIONS ?>/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
-                                <!-- Token CSRF para seguridad -->
-                                <?= Security::renderCsrfField() ?>
-                                <!-- ID del tipo de usuario -->
-                                <input type="hidden" name="user_type_id" value="<?= $userType['id'] ?>">
-                                <div class="permission-grid">
-                                    <?php foreach ($allPermissions as $permission): ?>
-                                    <?php 
-                                    $hasPermission = isset($permissionsByUserType[$userType['id']]) && 
-                                                   in_array($permission['id'], $permissionsByUserType[$userType['id']]);
-                                    ?>
-                                    <div class="form-check permission-checkbox <?= $hasPermission ? 'checked' : '' ?>">
-                                        <input class="form-check-input" type="checkbox" 
-                                               name="permission_ids[]" value="<?= $permission['id'] ?>"
-                                               id="permission_<?= $userType['id'] ?>_<?= $permission['id'] ?>"
-                                               <?= $hasPermission ? 'checked' : '' ?>>
-                                        <label class="form-check-label" 
-                                               for="permission_<?= $userType['id'] ?>_<?= $permission['id'] ?>">
-                                            <strong><?= htmlspecialchars($permission['nombre']) ?></strong>
-                                            <?php if ($permission['descripcion']): ?>
-                                                <br><small class="opacity-75"><?= htmlspecialchars($permission['descripcion']) ?></small>
-                                            <?php endif; ?>
-                                        </label>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card user-type-card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-person-badge"></i> <?= htmlspecialchars($userType['nombre']) ?>
+                                </h5>
+                                <small><?= htmlspecialchars($userType['descripcion']) ?></small>
+                            </div>
+                            <div class="card-body">
+                                <form class="permissions-form" action="<?= AppConstants::ROUTE_PERMISSIONS ?>/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
+                                    <!-- Token CSRF para seguridad -->
+                                    <?= Security::renderCsrfField() ?>
+                                    <!-- ID del tipo de usuario -->
+                                    <input type="hidden" name="user_type_id" value="<?= $userType['id'] ?>">
+                                    <div class="permission-grid">
+                                        <?php foreach ($allPermissions as $permission): ?>
+                                            <?php
+                                            $hasPermission = isset($permissionsByUserType[$userType['id']]) &&
+                                                in_array($permission['id'], $permissionsByUserType[$userType['id']]);
+                                            ?>
+                                            <div class="form-check permission-checkbox <?= $hasPermission ? 'checked' : '' ?>">
+                                                <input class="form-check-input" type="checkbox"
+                                                    name="permission_ids[]" value="<?= $permission['id'] ?>"
+                                                    id="permission_<?= $userType['id'] ?>_<?= $permission['id'] ?>"
+                                                    <?= $hasPermission ? 'checked' : '' ?>>
+                                                <label class="form-check-label"
+                                                    for="permission_<?= $userType['id'] ?>_<?= $permission['id'] ?>">
+                                                    <strong><?= htmlspecialchars($permission['nombre']) ?></strong>
+                                                    <?php if ($permission['descripcion']): ?>
+                                                        <br><small class="opacity-75"><?= htmlspecialchars($permission['descripcion']) ?></small>
+                                                    <?php endif; ?>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
                                     </div>
-                                    <?php endforeach; ?>
-                                </div>
-                                
-                                <div class="mt-3 save-btn">
-                                    <button type="submit" class="btn btn-setap-primary w-100">
-                                        <i class="bi bi-shield-check"></i> Guardar Permisos
-                                    </button>
-                                </div>
-                            </form>
+
+                                    <div class="mt-3 save-btn">
+                                        <button type="submit" class="btn btn-setap-primary w-100">
+                                            <i class="bi bi-shield-check"></i> Guardar Permisos
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
                 <?php endforeach; ?>
             </div>
 
@@ -150,17 +151,17 @@ use App\Helpers\Security;
                         <div class="card-body">
                             <div class="row">
                                 <?php foreach ($allPermissions as $permission): ?>
-                                <div class="col-md-4 mb-3">
-                                    <div class="d-flex align-items-start">
-                                        <i class="bi bi-shield-check text-success me-2 mt-1"></i>
-                                        <div>
-                                            <strong><?= htmlspecialchars($permission['nombre']) ?></strong>
-                                            <?php if ($permission['descripcion']): ?>
-                                                <br><small class="text-muted"><?= htmlspecialchars($permission['descripcion']) ?></small>
-                                            <?php endif; ?>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-shield-check text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong><?= htmlspecialchars($permission['nombre']) ?></strong>
+                                                <?php if ($permission['descripcion']): ?>
+                                                    <br><small class="text-muted"><?= htmlspecialchars($permission['descripcion']) ?></small>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -182,21 +183,21 @@ use App\Helpers\Security;
                                 <div class="col-md-4">
                                     <h6 class="text-primary">Gestión de Permisos</h6>
                                     <p class="small text-muted">
-                                        Configure qué permisos sistémicos tiene cada tipo de usuario. 
+                                        Configure qué permisos sistémicos tiene cada tipo de usuario.
                                         Los permisos controlan las acciones que pueden realizar en el sistema.
                                     </p>
                                 </div>
                                 <div class="col-md-4">
                                     <h6 class="text-success">Aplicación Inmediata</h6>
                                     <p class="small text-muted">
-                                        Los cambios en permisos se aplican inmediatamente a todos los usuarios 
+                                        Los cambios en permisos se aplican inmediatamente a todos los usuarios
                                         que pertenecen al tipo de usuario modificado.
                                     </p>
                                 </div>
                                 <div class="col-md-4">
                                     <h6 class="text-warning">Precaución</h6>
                                     <p class="small text-muted">
-                                        Tenga cuidado al modificar permisos de tipos de usuario críticos. 
+                                        Tenga cuidado al modificar permisos de tipos de usuario críticos.
                                         Podría afectar el acceso de usuarios importantes del sistema.
                                     </p>
                                 </div>
@@ -210,7 +211,7 @@ use App\Helpers\Security;
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . '/../layouts/scripts-base.php'; ?>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Manejar cambios en checkboxes para actualizar estilos
@@ -229,51 +230,51 @@ use App\Helpers\Security;
             document.querySelectorAll('.permissions-form').forEach(form => {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const userTypeId = this.dataset.userTypeId;
                     const formData = new FormData(this);
                     formData.append('user_type_id', userTypeId);
-                    
+
                     // Mostrar loading en el botón
                     const btn = this.querySelector('button[type="submit"]');
                     const originalText = btn.innerHTML;
                     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
                     btn.disabled = true;
-                    
+
                     fetch('/permisos/update', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Mostrar éxito
-                            btn.innerHTML = '<i class="bi bi-shield-check"></i> ¡Guardado!';
-                            btn.classList.remove('btn-setap-primary');
-                            btn.classList.add('btn-success');
-                            
-                            // Mostrar notificación usando sistema estándar
-                            showAlert('Permisos actualizados correctamente', 'success');
-                            
-                            // Restaurar botón después de 2 segundos
-                            setTimeout(() => {
-                                btn.innerHTML = originalText;
-                                btn.classList.remove('btn-success');
-                                btn.classList.add('btn-setap-primary');
-                                btn.disabled = false;
-                            }, 2000);
-                        } else {
-                            throw new Error(data.message || 'Error al guardar');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showAlert('Error al guardar los permisos: ' + error.message, 'danger');
-                        
-                        // Restaurar botón
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    });
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Mostrar éxito
+                                btn.innerHTML = '<i class="bi bi-shield-check"></i> ¡Guardado!';
+                                btn.classList.remove('btn-setap-primary');
+                                btn.classList.add('btn-success');
+
+                                // Mostrar notificación usando sistema estándar
+                                showAlert('Permisos actualizados correctamente', 'success');
+
+                                // Restaurar botón después de 2 segundos
+                                setTimeout(() => {
+                                    btn.innerHTML = originalText;
+                                    btn.classList.remove('btn-success');
+                                    btn.classList.add('btn-setap-primary');
+                                    btn.disabled = false;
+                                }, 2000);
+                            } else {
+                                throw new Error(data.message || 'Error al guardar');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showAlert('Error al guardar los permisos: ' + error.message, 'danger');
+
+                            // Restaurar botón
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        });
                 });
             });
         });

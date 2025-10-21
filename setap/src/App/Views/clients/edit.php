@@ -1,3 +1,7 @@
+<?php
+
+use App\Constants\AppConstants;
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

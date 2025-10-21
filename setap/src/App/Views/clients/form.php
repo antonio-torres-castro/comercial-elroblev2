@@ -1,5 +1,10 @@
+<?php
+
+use App\Constants\AppConstants;
+?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +17,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -22,7 +28,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= \App\Constants\AppConstants::ROUTE_CLIENTS ?>" class="btn btn-sm btn-secondary">
+                        <a href="<?= AppConstants::ROUTE_CLIENTS ?>" class="btn btn-sm btn-secondary">
                             <i class="bi bi-arrow-left"></i> Volver
                         </a>
                     </div>
@@ -56,4 +62,5 @@
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 </body>
+
 </html>

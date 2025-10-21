@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,13 +45,18 @@
         }
     </style>
 </head>
-<body>
-    <?php use App\Helpers\Security; ?>
 
-    <?php 
-use App\Constants\AppConstants;
-include __DIR__ . '/../layouts/navigation.php'; 
-?>
+<body>
+    <?php
+
+    use App\Helpers\Security; ?>
+
+    <?php
+
+    use App\Constants\AppConstants;
+
+    include __DIR__ . '/../layouts/navigation.php';
+    ?>
 
     <div class="container-fluid mt-4">
         <div class="row">
@@ -179,17 +185,17 @@ include __DIR__ . '/../layouts/navigation.php';
                                                             <div class="btn-group btn-group-sm" role="group">
                                                                 <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <a href="/menu/<?php echo $menu['id']; ?>"
-                                                                       class="btn btn-outline-setap-primary btn-sm"
-                                                                       title="Editar">
+                                                                        class="btn btn-outline-setap-primary btn-sm"
+                                                                        title="Editar">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Read') || \App\Helpers\Security::hasPermission('All')): ?>
                                                                     <button type="button"
-                                                                            class="btn btn-outline-setap-primary-light btn-sm"
-                                                                            title="Ver detalles"
-                                                                            onclick="showMenuDetails(<?php echo htmlspecialchars(json_encode($menu)); ?>)">
+                                                                        class="btn btn-outline-setap-primary-light btn-sm"
+                                                                        title="Ver detalles"
+                                                                        onclick="showMenuDetails(<?php echo htmlspecialchars(json_encode($menu)); ?>)">
                                                                         <i class="bi bi-eye"></i>
                                                                     </button>
                                                                 <?php endif; ?>
@@ -200,8 +206,8 @@ include __DIR__ . '/../layouts/navigation.php';
                                                                         <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
                                                                         <input type="hidden" name="status" value="<?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>">
                                                                         <button type="submit"
-                                                                                class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm"
-                                                                                title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>">
+                                                                            class="btn btn-outline-<?php echo ($menu['estado_tipo_id'] == 2) ? 'warning' : 'success'; ?> btn-sm"
+                                                                            title="<?php echo ($menu['estado_tipo_id'] == 2) ? 'Desactivar' : 'Activar'; ?>">
                                                                             <i class="bi bi-<?php echo ($menu['estado_tipo_id'] == 2) ? 'toggle-on' : 'toggle-off'; ?>"></i>
                                                                         </button>
                                                                     </form>
@@ -212,8 +218,8 @@ include __DIR__ . '/../layouts/navigation.php';
                                                                         <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
                                                                         <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
                                                                         <button type="submit"
-                                                                                class="btn btn-outline-danger btn-sm"
-                                                                                title="Eliminar">
+                                                                            class="btn btn-outline-danger btn-sm"
+                                                                            title="Eliminar">
                                                                             <i class="bi bi-trash"></i>
                                                                         </button>
                                                                     </form>
@@ -265,17 +271,44 @@ include __DIR__ . '/../layouts/navigation.php';
     <script>
         function showMenuDetails(menu) {
             const estadoInfo = {
-                1: { badge: 'warning', texto: 'Creado' },
-                2: { badge: 'success', texto: 'Activo' },
-                3: { badge: 'secondary', texto: 'Inactivo' },
-                4: { badge: 'danger', texto: 'Eliminado' },
-                5: { badge: 'setap-primary-light', texto: 'Iniciado' },
-                6: { badge: 'setap-primary', texto: 'Terminado' },
-                7: { badge: 'danger', texto: 'Rechazado' },
-                8: { badge: 'success', texto: 'Aprobado' }
+                1: {
+                    badge: 'warning',
+                    texto: 'Creado'
+                },
+                2: {
+                    badge: 'success',
+                    texto: 'Activo'
+                },
+                3: {
+                    badge: 'secondary',
+                    texto: 'Inactivo'
+                },
+                4: {
+                    badge: 'danger',
+                    texto: 'Eliminado'
+                },
+                5: {
+                    badge: 'setap-primary-light',
+                    texto: 'Iniciado'
+                },
+                6: {
+                    badge: 'setap-primary',
+                    texto: 'Terminado'
+                },
+                7: {
+                    badge: 'danger',
+                    texto: 'Rechazado'
+                },
+                8: {
+                    badge: 'success',
+                    texto: 'Aprobado'
+                }
             };
 
-            const estado = estadoInfo[menu.estado_tipo_id] || { badge: 'dark', texto: 'Desconocido' };
+            const estado = estadoInfo[menu.estado_tipo_id] || {
+                badge: 'dark',
+                texto: 'Desconocido'
+            };
 
             const content = `
                 <div class="row">
@@ -325,10 +358,11 @@ include __DIR__ . '/../layouts/navigation.php';
         // Tooltip para botones
         document.addEventListener('DOMContentLoaded', function() {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
     </script>
 </body>
+
 </html>

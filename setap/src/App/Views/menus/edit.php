@@ -1,5 +1,10 @@
+<?php
+
+use App\Constants\AppConstants;
+?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +17,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/setap-theme.css">
 </head>
+
 <body>
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
@@ -57,8 +65,8 @@
                                             <div class="mb-3">
                                                 <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" id="nombre" name="nombre"
-                                                       value="<?php echo htmlspecialchars($data['menu']['nombre'] ?? ''); ?>"
-                                                       placeholder="Ej: Gestión de Usuarios" required>
+                                                    value="<?php echo htmlspecialchars($data['menu']['nombre'] ?? ''); ?>"
+                                                    placeholder="Ej: Gestión de Usuarios" required>
                                                 <div class="form-text">Nombre interno del menú para identificación.</div>
                                             </div>
                                         </div>
@@ -67,8 +75,8 @@
                                             <div class="mb-3">
                                                 <label for="url" class="form-label">URL <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" id="url" name="url"
-                                                       value="<?php echo htmlspecialchars($data['menu']['url'] ?? ''); ?>"
-                                                       placeholder="Ej: /users" required>
+                                                    value="<?php echo htmlspecialchars($data['menu']['url'] ?? ''); ?>"
+                                                    placeholder="Ej: /users" required>
                                                 <div class="form-text">URL de destino del menú. Debe comenzar con "/"</div>
                                             </div>
                                         </div>
@@ -79,8 +87,8 @@
                                             <div class="mb-3">
                                                 <label for="icono" class="form-label">Icono</label>
                                                 <input type="text" class="form-control" id="icono" name="icono"
-                                                       value="<?php echo htmlspecialchars($data['menu']['icono'] ?? ''); ?>"
-                                                       placeholder="Ej: bi-people">
+                                                    value="<?php echo htmlspecialchars($data['menu']['icono'] ?? ''); ?>"
+                                                    placeholder="Ej: bi-people">
                                                 <div class="form-text">Clase de icono Bootstrap Icons (opcional).</div>
                                             </div>
                                         </div>
@@ -89,8 +97,8 @@
                                             <div class="mb-3">
                                                 <label for="orden" class="form-label">Orden <span class="text-danger">*</span></label>
                                                 <input type="number" class="form-control" id="orden" name="orden"
-                                                       value="<?php echo htmlspecialchars($data['menu']['orden'] ?? 1); ?>"
-                                                       min="1" required>
+                                                    value="<?php echo htmlspecialchars($data['menu']['orden'] ?? 1); ?>"
+                                                    min="1" required>
                                                 <div class="form-text">Orden de visualización en el menú.</div>
                                             </div>
                                         </div>
@@ -106,7 +114,7 @@
                                                     foreach ($data['statusTypes'] as $status):
                                                     ?>
                                                         <option value="<?php echo $status['id']; ?>"
-                                                                <?php echo ($status['id'] == $selectedStatus) ? 'selected' : ''; ?>>
+                                                            <?php echo ($status['id'] == $selectedStatus) ? 'selected' : ''; ?>>
                                                             <?php echo htmlspecialchars($status['nombre']); ?>
                                                         </option>
                                                     <?php endforeach; ?>
@@ -118,8 +126,8 @@
                                             <div class="mb-3">
                                                 <label for="display" class="form-label">Título de visualización <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" id="display" name="display"
-                                                       value="<?php echo htmlspecialchars($data['menu']['display'] ?? ''); ?>"
-                                                       required maxlength="150" placeholder="Ej: Usuarios, Clientes, Proyectos">
+                                                    value="<?php echo htmlspecialchars($data['menu']['display'] ?? ''); ?>"
+                                                    required maxlength="150" placeholder="Ej: Usuarios, Clientes, Proyectos">
                                                 <div class="form-text">Texto que verá el usuario en el menú (ej: "Usuarios" para nombre interno "manage_users")</div>
                                             </div>
                                         </div>
@@ -128,7 +136,7 @@
                                     <div class="mb-3">
                                         <label for="descripcion" class="form-label">Descripción</label>
                                         <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                                                  placeholder="Descripción opcional del menú"><?php echo htmlspecialchars($data['menu']['descripcion'] ?? ''); ?></textarea>
+                                            placeholder="Descripción opcional del menú"><?php echo htmlspecialchars($data['menu']['descripcion'] ?? ''); ?></textarea>
                                         <div class="form-text">Descripción opcional para documentación interna.</div>
                                     </div>
 
@@ -139,7 +147,7 @@
                                                 <div class="mb-3">
                                                     <label class="form-label">Fecha de Creación</label>
                                                     <input type="text" class="form-control"
-                                                           value="<?php echo htmlspecialchars($data['menu']['fecha_creacion']); ?>" readonly>
+                                                        value="<?php echo htmlspecialchars($data['menu']['fecha_creacion']); ?>" readonly>
                                                 </div>
                                             </div>
                                             <?php if (!empty($data['menu']['fecha_modificacion'])): ?>
@@ -147,7 +155,7 @@
                                                     <div class="mb-3">
                                                         <label class="form-label">Última Modificación</label>
                                                         <input type="text" class="form-control"
-                                                               value="<?php echo htmlspecialchars($data['menu']['fecha_modificacion']); ?>" readonly>
+                                                            value="<?php echo htmlspecialchars($data['menu']['fecha_modificacion']); ?>" readonly>
                                                     </div>
                                                 </div>
                                             <?php endif; ?>
@@ -163,7 +171,7 @@
                                         <div>
                                             <!-- Botón eliminar -->
                                             <button type="button" class="btn btn-outline-danger me-2"
-                                                    onclick="confirmarEliminacion(<?php echo $data['menu']['id']; ?>)">
+                                                onclick="confirmarEliminacion(<?php echo $data['menu']['id']; ?>)">
                                                 <i class="bi bi-trash"></i> Eliminar
                                             </button>
                                             <!-- Botón actualizar -->
@@ -215,4 +223,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -1,3 +1,6 @@
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -73,7 +76,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -135,25 +140,25 @@
                                 <div class="col-md-6">
                                     <div class="form-section">
                                         <h6><i class="bi bi-person"></i> Información Personal</h6>
-                                        
+
                                         <!-- Solo mostrar la información de la persona, sin permitir edición -->
                                         <div class="mb-3">
                                             <label class="form-label">RUT de la Persona</label>
-                                            <input type="text" class="form-control" 
+                                            <input type="text" class="form-control"
                                                 value="<?= htmlspecialchars($userToEdit['rut']) ?>" readonly>
                                             <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Nombre Completo</label>
-                                            <input type="text" class="form-control" 
+                                            <input type="text" class="form-control"
                                                 value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?>" readonly>
                                             <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Teléfono</label>
-                                            <input type="text" class="form-control" 
+                                            <input type="text" class="form-control"
                                                 value="<?= htmlspecialchars($userToEdit['telefono'] ?? '') ?>" readonly>
                                             <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
@@ -169,12 +174,12 @@
                                             <label class="form-label">Buscar Nueva Persona (Opcional)</label>
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="persona_search" 
-                                                           name="persona_search"
-                                                           placeholder="RUT o nombre para buscar"
-                                                           value="<?= htmlspecialchars($_SESSION['old_input']['persona_search'] ?? '') ?>">
+                                                    <input type="text"
+                                                        class="form-control"
+                                                        id="persona_search"
+                                                        name="persona_search"
+                                                        placeholder="RUT o nombre para buscar"
+                                                        value="<?= htmlspecialchars($_SESSION['old_input']['persona_search'] ?? '') ?>">
                                                 </div>
                                                 <div class="col-md-3">
                                                     <select class="form-select" id="search_type" name="search_type">
@@ -220,12 +225,12 @@
                                                             <div class="col-12 mb-2">
                                                                 <div class="persona-result-card small <?= $persona['has_user'] ? 'border-warning' : '' ?> <?= $persona['id'] == $userToEdit['persona_id'] ? 'border-info bg-info bg-opacity-10' : '' ?>">
                                                                     <div class="form-check">
-                                                                        <input class="form-check-input" 
-                                                                               type="radio" 
-                                                                               name="new_persona_id" 
-                                                                               id="new_persona_<?= $persona['id'] ?>"
-                                                                               value="<?= $persona['id'] ?>"
-                                                                               <?= ($_SESSION['old_input']['new_persona_id'] ?? '') == $persona['id'] ? 'checked' : '' ?>>
+                                                                        <input class="form-check-input"
+                                                                            type="radio"
+                                                                            name="new_persona_id"
+                                                                            id="new_persona_<?= $persona['id'] ?>"
+                                                                            value="<?= $persona['id'] ?>"
+                                                                            <?= ($_SESSION['old_input']['new_persona_id'] ?? '') == $persona['id'] ? 'checked' : '' ?>>
                                                                         <label class="form-check-label w-100" for="new_persona_<?= $persona['id'] ?>">
                                                                             <strong><?= htmlspecialchars($persona['nombre']) ?></strong>
                                                                             - RUT: <?= htmlspecialchars($persona['rut']) ?>
@@ -251,9 +256,9 @@
                                         <!-- Campo persona actual (solo lectura para información) -->
                                         <div class="mb-3">
                                             <label for="persona_id" class="form-label">Persona Actualmente Asociada</label>
-                                            <input type="text" class="form-control" 
-                                                   value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?> - RUT: <?= htmlspecialchars($userToEdit['rut']) ?>" 
-                                                   readonly>
+                                            <input type="text" class="form-control"
+                                                value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?> - RUT: <?= htmlspecialchars($userToEdit['rut']) ?>"
+                                                readonly>
                                             <input type="hidden" name="persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
                                             <div class="form-text">Para cambiar la persona, use la búsqueda de arriba y seleccione una nueva persona.</div>
                                         </div>
@@ -300,7 +305,8 @@
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                                 <?php if (isset($estadosTipo) && is_array($estadosTipo)): ?>
                                                     <?php foreach ($estadosTipo as $estado): ?>
-                                                        <?php if ($estado['id'] < 5): // No mostrar "Eliminado" ?>
+                                                        <?php if ($estado['id'] < 5): // No mostrar "Eliminado" 
+                                                        ?>
                                                             <option value="<?= (int)$estado['id'] ?>"
                                                                 <?= ($userToEdit['estado_tipo_id'] ?? 1) == $estado['id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($estado['nombre']) ?>
@@ -393,13 +399,13 @@
                                 </div>
 
                                 <?php if (isset($userToEdit['fecha_modificacion']) && $userToEdit['fecha_modificacion']): ?>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Última Modificación</label>
-                                        <input type="text" class="form-control"
-                                            value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_modificacion'])) ?>" readonly>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Última Modificación</label>
+                                            <input type="text" class="form-control"
+                                                value="<?= date('d/m/Y H:i', strtotime($userToEdit['fecha_modificacion'])) ?>" readonly>
+                                        </div>
                                     </div>
-                                </div>
                                 <?php endif; ?>
                             </div>
 
@@ -472,12 +478,12 @@
             function validateBusinessLogic() {
                 const clientSelect = document.getElementById('cliente_id');
                 const userTypeSelect = document.getElementById('usuario_tipo_id');
-                
+
                 const userType = userTypeSelect.options[userTypeSelect.selectedIndex].text.split(' - ')[0].trim().toLowerCase();
-                
+
                 // Limpiar mensajes de validación previos
                 clearValidationMessages();
-                
+
                 // Validar usuarios tipo 'client' y 'counterparty'
                 if (userType === 'client' || userType === 'counterparty') {
                     if (!clientSelect.value) {
@@ -485,7 +491,7 @@
                         return false;
                     }
                 }
-                
+
                 // Validar usuarios internos (no deben tener cliente)
                 else if (['admin', 'planner', 'supervisor', 'executor'].includes(userType)) {
                     if (clientSelect.value) {
@@ -493,7 +499,7 @@
                         return false;
                     }
                 }
-                
+
                 // Nota: Validaciones adicionales de RUT y contraparte se manejan en el backend
                 return true;
             }
@@ -509,12 +515,12 @@
                         <i class="bi bi-exclamation-triangle"></i> <span class="error-text"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     `;
-                    
+
                     // Insertar antes del formulario
                     const form = document.getElementById('userEditForm');
                     form.insertBefore(errorDiv, form.firstElementChild);
                 }
-                
+
                 errorDiv.querySelector('.error-text').textContent = message;
                 errorDiv.style.display = 'block';
             }
@@ -530,15 +536,15 @@
                         <i class="bi bi-info-circle"></i> <span class="info-text"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     `;
-                    
+
                     // Insertar antes del formulario
                     const form = document.getElementById('userEditForm');
                     form.insertBefore(infoDiv, form.firstElementChild);
                 }
-                
+
                 infoDiv.querySelector('.info-text').textContent = message;
                 infoDiv.style.display = 'block';
-                
+
                 // Auto-hide después de 5 segundos
                 setTimeout(() => {
                     if (infoDiv && infoDiv.parentNode) {
@@ -633,4 +639,5 @@
         });
     </script>
 </body>
+
 </html>
