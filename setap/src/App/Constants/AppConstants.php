@@ -65,6 +65,12 @@ class AppConstants
     /** Ruta de permisos */
     const ROUTE_PERMISOS = '/permisos';
 
+    /** Ruta base de accesos */
+    const ROUTE_ACCESS = '/access';
+
+    /** Ruta base de permisos */
+    const ROUTE_PERMISSIONS = '/permissions';
+
     /** Ruta de creación de proyectos */
     const ROUTE_PROJECTS_CREATE = '/projects/create';
     

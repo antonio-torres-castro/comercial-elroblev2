@@ -57,7 +57,7 @@ class AccessController extends AbstractBaseController
             // Validación POST y CSRF en una línea
             $errors = $this->validatePostRequest();
             if (!empty($errors)) {
-                $this->jsonResponse(['success' => false, 'message' => implode(', ', $errors)], 400);
+                $this->redirectWithError(AppConstants::ROUTE_ACCESS, implode(', ', $errors));
                 return;
             }
 
@@ -65,16 +65,19 @@ class AccessController extends AbstractBaseController
             $menuIds = $_POST['menu_ids'] ?? [];
 
             if (!$userTypeId) {
-                $this->jsonResponse(['success' => false, 'message' => 'Tipo de usuario requerido'], 400);
+                $this->redirectWithError(AppConstants::ROUTE_ACCESS, 'Tipo de usuario requerido');
                 return;
             }
 
             // Lógica de negocio limpia
             $result = $this->updateUserTypeAccess($userTypeId, $menuIds);
             $message = $result ? 'Accesos actualizados correctamente' : 'Error al actualizar accesos';
-            $statusCode = $result ? 200 : 500;
 
-            $this->jsonResponse(['success' => $result, 'message' => $message], $statusCode);
+            if ($result) {
+                $this->redirectWithSuccess(AppConstants::ROUTE_ACCESS, $message);
+            } else {
+                $this->redirectWithError(AppConstants::ROUTE_ACCESS, $message);
+            }
         }, 'update');
     }
 
@@ -129,26 +132,46 @@ class AccessController extends AbstractBaseController
         try {
             $this->db->beginTransaction();
 
-            // Eliminar accesos actuales (cambiar estado)
+            // 1. Obtener las tuplas actuales activas (usuario_tipo_id, menu_id)
             $stmt = $this->db->prepare("
-                UPDATE usuario_tipo_menus
-                SET estado_tipo_id = 4, fecha_modificacion = NOW()
-                WHERE usuario_tipo_id = ?
+                SELECT menu_id
+                FROM usuario_tipo_menus
+                WHERE usuario_tipo_id = ? AND estado_tipo_id = 2
             ");
             $stmt->execute([$userTypeId]);
+            $currentMenuIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'menu_id');
 
-            // Agregar nuevos accesos
-            if (!empty($menuIds)) {
+            // Asegurar que $menuIds es array y convertir a enteros
+            $menuIds = !empty($menuIds) ? array_map('intval', (array)$menuIds) : [];
+
+            // 2. Encontrar los menu_id que ya no están seleccionados (deben desactivarse)
+            $menuIdsToDeactivate = array_diff($currentMenuIds, $menuIds);
+
+            // 3. Desactivar los accesos que ya no están seleccionados
+            if (!empty($menuIdsToDeactivate)) {
+                $placeholders = str_repeat('?,', count($menuIdsToDeactivate) - 1) . '?';
+                $stmt = $this->db->prepare("
+                    UPDATE usuario_tipo_menus
+                    SET estado_tipo_id = 4, fecha_modificacion = NOW()
+                    WHERE usuario_tipo_id = ? AND menu_id IN ($placeholders)
+                ");
+                $stmt->execute(array_merge([$userTypeId], $menuIdsToDeactivate));
+            }
+
+            // 4. Encontrar los menu_id nuevos que deben insertarse
+            $menuIdsToInsert = array_diff($menuIds, $currentMenuIds);
+
+            // Insertar los nuevos accesos
+            if (!empty($menuIdsToInsert)) {
                 $values = [];
-                foreach ($menuIds as $menuId) {
+                foreach ($menuIdsToInsert as $menuId) {
                     $values[] = $userTypeId;
                     $values[] = (int)$menuId;
                 }
 
                 $stmt = $this->db->prepare(
-                    "
-                    INSERT INTO usuario_tipo_menus (usuario_tipo_id, menu_id, fecha_creacion, estado_tipo_id)
-                    VALUES " . str_repeat('(?,?,NOW(),2),', count($menuIds) - 1) . "(?,?,NOW(),2)"
+                    "INSERT INTO usuario_tipo_menus (usuario_tipo_id, menu_id, fecha_creacion, estado_tipo_id)
+                    VALUES " . str_repeat('(?,?,NOW(),2),', count($menuIdsToInsert) - 1) . "(?,?,NOW(),2)"
                 );
                 $stmt->execute($values);
             }

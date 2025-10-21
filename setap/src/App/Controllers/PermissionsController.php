@@ -56,7 +56,7 @@ class PermissionsController extends AbstractBaseController
             // Validación POST y CSRF en una línea
             $errors = $this->validatePostRequest();
             if (!empty($errors)) {
-                $this->jsonResponse(['success' => false, 'message' => implode(', ', $errors)], 400);
+                $this->redirectWithError(AppConstants::ROUTE_PERMISSIONS, implode(', ', $errors));
                 return;
             }
 
@@ -64,16 +64,19 @@ class PermissionsController extends AbstractBaseController
             $permissionIds = $_POST['permission_ids'] ?? [];
 
             if (!$userTypeId) {
-                $this->jsonResponse(['success' => false, 'message' => 'Tipo de usuario requerido'], 400);
+                $this->redirectWithError(AppConstants::ROUTE_PERMISSIONS, 'Tipo de usuario requerido');
                 return;
             }
 
             // Lógica de negocio limpia
             $result = $this->updateUserTypePermissions($userTypeId, $permissionIds);
             $message = $result ? 'Permisos actualizados correctamente' : 'Error al actualizar permisos';
-            $statusCode = $result ? 200 : 500;
 
-            $this->jsonResponse(['success' => $result, 'message' => $message], $statusCode);
+            if ($result) {
+                $this->redirectWithSuccess(AppConstants::ROUTE_PERMISSIONS, $message);
+            } else {
+                $this->redirectWithError(AppConstants::ROUTE_PERMISSIONS, $message);
+            }
         }, 'update');
     }
 
@@ -126,25 +129,46 @@ class PermissionsController extends AbstractBaseController
         try {
             $this->db->beginTransaction();
 
-            // Eliminar permisos actuales (cambiar estado)
+            // 1. Obtener las tuplas actuales activas (usuario_tipo_id, permiso_id)
             $stmt = $this->db->prepare("
-                UPDATE usuario_tipo_permisos
-                SET estado_tipo_id = 4, fecha_modificacion = NOW()
-                WHERE usuario_tipo_id = ?
+                SELECT permiso_id
+                FROM usuario_tipo_permisos
+                WHERE usuario_tipo_id = ? AND estado_tipo_id = 2
             ");
             $stmt->execute([$userTypeId]);
+            $currentPermissionIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'permiso_id');
 
-            // Agregar nuevos permisos
-            if (!empty($permissionIds)) {
+            // Asegurar que $permissionIds es array y convertir a enteros
+            $permissionIds = !empty($permissionIds) ? array_map('intval', (array)$permissionIds) : [];
+
+            // 2. Encontrar los permiso_id que ya no están seleccionados (deben desactivarse)
+            $permissionIdsToDeactivate = array_diff($currentPermissionIds, $permissionIds);
+
+            // 3. Desactivar los permisos que ya no están seleccionados
+            if (!empty($permissionIdsToDeactivate)) {
+                $placeholders = str_repeat('?,', count($permissionIdsToDeactivate) - 1) . '?';
+                $stmt = $this->db->prepare("
+                    UPDATE usuario_tipo_permisos
+                    SET estado_tipo_id = 4, fecha_modificacion = NOW()
+                    WHERE usuario_tipo_id = ? AND permiso_id IN ($placeholders)
+                ");
+                $stmt->execute(array_merge([$userTypeId], $permissionIdsToDeactivate));
+            }
+
+            // 4. Encontrar los permiso_id nuevos que deben insertarse
+            $permissionIdsToInsert = array_diff($permissionIds, $currentPermissionIds);
+
+            // Insertar los nuevos permisos
+            if (!empty($permissionIdsToInsert)) {
                 $values = [];
-                foreach ($permissionIds as $permissionId) {
+                foreach ($permissionIdsToInsert as $permissionId) {
                     $values[] = $userTypeId;
                     $values[] = (int)$permissionId;
                 }
 
                 $stmt = $this->db->prepare(
                     "INSERT INTO usuario_tipo_permisos (usuario_tipo_id, permiso_id, fecha_creacion, estado_tipo_id)
-                    VALUES " . str_repeat('(?,?,NOW(),2),', count($permissionIds) - 1) . "(?,?,NOW(),2)"
+                    VALUES " . str_repeat('(?,?,NOW(),2),', count($permissionIdsToInsert) - 1) . "(?,?,NOW(),2)"
                 );
                 $stmt->execute($values);
             }

@@ -219,62 +219,26 @@ class UserController extends BaseController
     }
 
     /**
-     * Validar campos específicos de usuario via AJAX
+     * Redireccionar a vista de usuarios - validación de campos se maneja en frontend
+     * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
     public function validateField()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
+        $currentUser = $this->getCurrentUser();
 
-            if (!$currentUser) {
-                $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED], 401);
-            }
-
-            // Verificar acceso al menú de gestión de usuario individual
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
-                $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
-            }
-
-            $field = $_GET['field'] ?? '';
-            $value = $_GET['value'] ?? '';
-            $excludeUserId = isset($_GET['exclude_user_id']) ? (int)$_GET['exclude_user_id'] : 0;
-
-            $isValid = true;
-            $message = '';
-
-            switch ($field) {
-                case 'username':
-                    $isValid = $this->validationService->isUsernameAvailable($value, $excludeUserId);
-                    $message = $isValid ? 'Nombre de usuario disponible' : 'Nombre de usuario ya existe';
-                    break;
-
-                case 'email':
-                    $isValid = $this->validationService->isEmailAvailable($value, $excludeUserId);
-                    $message = $isValid ? 'Email disponible' : 'Email ya registrado';
-                    break;
-
-                case 'rut':
-                    $isValid = Security::validateRut($value);
-                    $message = $isValid ? 'RUT válido' : 'RUT inválido';
-                    if ($isValid) {
-                        $isValid = $this->validationService->isRutAvailable($value, $excludeUserId);
-                        $message = $isValid ? 'RUT disponible' : 'RUT ya registrado';
-                    }
-                    break;
-
-                default:
-                    $isValid = false;
-                    $message = 'Campo no válido';
-            }
-
-            $this->jsonResponse([
-                'valid' => $isValid,
-                'message' => $message
-            ]);
-        } catch (Exception $e) {
-            error_log("Error en UserController::validateField: " . $e->getMessage());
-            $this->jsonResponse(['valid' => false, 'message' => 'Error de validación'], 500);
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
         }
+
+        // Verificar acceso al menú de gestión de usuario individual
+        if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_user')) {
+            $this->redirectWithError(AppConstants::ROUTE_USERS, AppConstants::ERROR_ACCESS_DENIED);
+            return;
+        }
+
+        // Redirigir a la vista de usuarios donde la validación se maneje sin Ajax
+        $this->redirectToRoute(AppConstants::ROUTE_USERS);
     }
 
     /**
@@ -751,67 +715,20 @@ class UserController extends BaseController
     }
 
     /**
-     * API: Validar campos de usuario (para create.php)
+     * Redireccionar a vista de usuarios - validación se maneja en frontend
+     * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
     public function validateUserCheck()
     {
-        try {
-            // Configurar headers para respuesta JSON
-            header('Content-Type: application/json');
-            header('Cache-Control: no-cache, must-revalidate');
+        $currentUser = $this->getCurrentUser();
 
-            $currentUser = $this->getCurrentUser();
-
-            if (!$currentUser) {
-                $this->jsonResponse(['valid' => false, 'available' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHORIZED], 401);
-            }
-
-            $type = $_GET['type'] ?? '';
-            $value = $_GET['value'] ?? '';
-            $excludeUserId = isset($_GET['exclude_user_id']) ? (int)$_GET['exclude_user_id'] : 0;
-
-            $isValid = true;
-            $message = '';
-
-            switch ($type) {
-                case 'email':
-                    if (Security::validateEmail($value)) {
-                        $isValid = $this->validationService->isEmailAvailable($value, $excludeUserId);
-                        $message = $isValid ? 'Email disponible' : 'Email ya registrado';
-                    } else {
-                        $isValid = false;
-                        $message = 'Email inválido';
-                    }
-                    break;
-
-                case 'username':
-                    $isValid = $this->validationService->isUsernameAvailable($value, $excludeUserId);
-                    $message = $isValid ? 'Nombre de usuario disponible' : 'Nombre de usuario ya existe';
-                    break;
-
-                case 'rut':
-                    $isValid = Security::validateRut($value);
-                    $message = $isValid ? 'RUT válido' : 'RUT inválido';
-                    if ($isValid) {
-                        $isValid = $this->validationService->isRutAvailable($value, $excludeUserId);
-                        $message = $isValid ? 'RUT disponible' : 'RUT ya registrado';
-                    }
-                    break;
-
-                default:
-                    $isValid = false;
-                    $message = 'Tipo de validación no válido';
-            }
-
-            $this->jsonResponse([
-                'valid' => $isValid,
-                'available' => $isValid,  // Para compatibilidad con el JavaScript
-                'message' => $message
-            ]);
-        } catch (Exception $e) {
-            error_log("Error en UserController::validateUserCheck: " . $e->getMessage());
-            $this->jsonError('Error de validación', ['valid' => false, 'available' => false], 500);
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
         }
+
+        // Redirigir a la vista de usuarios donde la validación se maneje sin Ajax
+        $this->redirectToRoute(AppConstants::ROUTE_USERS);
     }
 
     private function getUserTypeName(int $userTypeId): string

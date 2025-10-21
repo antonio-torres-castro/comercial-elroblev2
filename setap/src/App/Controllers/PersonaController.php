@@ -289,12 +289,4 @@ class PersonaController extends AbstractBaseController
 
         return $errors;
     }
-
-    /**
-     * Obtener tipos de estado - Usa método heredado de AbstractBaseController
-     */
-    private function getEstadosTipo(): array
-    {
-        return parent::getEstadosTipo();
-    }
 }

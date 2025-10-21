@@ -448,21 +448,24 @@ class TaskController extends BaseController
         try {
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
-                http_response_code(401);
-                $this->jsonUnauthorized();
+                $this->redirectToLogin();
                 return;
             }
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
-                http_response_code(403);
-                $this->jsonForbidden();
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Sin permisos suficientes');
                 return;
             }
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                http_response_code(405);
-                $this->jsonError(AppConstants::ERROR_METHOD_NOT_ALLOWED, [], 405);
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
+                return;
+            }
+
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Token CSRF inválido');
                 return;
             }
 
@@ -472,8 +475,7 @@ class TaskController extends BaseController
             $reason = trim($_POST['reason'] ?? '');
 
             if ($taskId <= 0 || $newState <= 0) {
-                http_response_code(400);
-                $this->jsonError('Datos inválidos', [], 400);
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Datos inválidos');
                 return;
             }
 
@@ -486,113 +488,59 @@ class TaskController extends BaseController
                 $reason
             );
 
-            $this->jsonResponse($result, $result['success'] ? 200 : 400);
+            if ($result['success']) {
+                $this->redirectWithSuccess(AppConstants::ROUTE_TASKS, $result['message'] ?? 'Estado de tarea actualizado correctamente');
+            } else {
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, $result['message'] ?? 'Error al cambiar estado de la tarea');
+            }
         } catch (Exception $e) {
             error_log("Error en TaskController::changeState: " . $e->getMessage());
-            http_response_code(500);
-            $this->jsonInternalError();
+            $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Error interno del servidor');
         }
     }
 
     /**
-     * Verificar si una tarea puede ejecutarse (GAP 5)
+     * Redireccionar a la vista de tareas - verificación ejecutable se maneja en frontend
+     * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
     public function checkExecutable()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                http_response_code(401);
-                $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED], 401);
-                return;
-            }
-
-            $taskId = (int)($_GET['task_id'] ?? 0);
-            if ($taskId <= 0) {
-                http_response_code(400);
-                $this->jsonResponse(['valid' => false, 'message' => 'ID de tarea inválido'], 400);
-                return;
-            }
-
-            // Verificar si la tarea puede ejecutarse
-            $result = $this->taskModel->canExecuteTask($taskId);
-            $this->jsonResponse($result);
-        } catch (Exception $e) {
-            error_log("Error en TaskController::checkExecutable: " . $e->getMessage());
-            http_response_code(500);
-            $this->jsonResponse(['valid' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
         }
+
+        $taskId = (int)($_GET['task_id'] ?? 0);
+        if ($taskId <= 0) {
+            $this->redirectWithError(AppConstants::ROUTE_TASKS, 'ID de tarea inválido');
+            return;
+        }
+
+        // Redirigir a la vista de tareas donde se puede verificar ejecutabilidad sin Ajax
+        $this->redirectToRoute(AppConstants::ROUTE_TASKS . "?task_id={$taskId}");
     }
 
     /**
-     * Obtener transiciones de estado válidas para una tarea (GAP 5)
+     * Redireccionar a la vista de tareas - transiciones válidas se manejan en frontend
+     * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
     public function getValidTransitions()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                http_response_code(401);
-                $this->jsonResponse(['transitions' => [], 'message' => AppConstants::ERROR_USER_NOT_AUTHENTICATED], 401);
-                return;
-            }
-
-            $taskId = (int)($_GET['task_id'] ?? 0);
-            if ($taskId <= 0) {
-                http_response_code(400);
-                $this->jsonResponse(['transitions' => [], 'message' => 'ID de tarea inválido'], 400);
-                return;
-            }
-
-            $task = $this->taskModel->getById($taskId);
-            if (!$task) {
-                http_response_code(404);
-                $this->jsonResponse(['transitions' => [], 'message' => 'Tarea no encontrada'], 404);
-                return;
-            }
-
-            $currentState = (int)$task['estado_tipo_id'];
-            $userRole = $currentUser['rol'];
-
-            // Obtener todos los estados posibles
-            $allStates = $this->taskModel->getTaskStates();
-            $validTransitions = [];
-
-            foreach ($allStates as $state) {
-                $stateId = (int)$state['id'];
-                if ($stateId === $currentState) {
-                    continue; // No incluir el estado actual
-                }
-
-                // Verificar si la transición es válida
-                $transitionCheck = $this->taskModel->isValidStateTransition($currentState, $stateId);
-                if (!$transitionCheck['valid']) {
-                    continue;
-                }
-
-                // Verificar permisos del usuario
-                $userCheck = $this->taskModel->canUserChangeState($currentState, $stateId, $userRole);
-                if (!$userCheck['valid']) {
-                    continue;
-                }
-
-                $validTransitions[] = [
-                    'id' => $stateId,
-                    'nombre' => $state['nombre'],
-                    'descripcion' => $state['descripcion']
-                ];
-            }
-
-            $this->jsonResponse([
-                'transitions' => $validTransitions,
-                'current_state' => $currentState,
-                'message' => 'Transiciones obtenidas correctamente'
-            ]);
-        } catch (Exception $e) {
-            error_log("Error en TaskController::getValidTransitions: " . $e->getMessage());
-            http_response_code(500);
-            $this->jsonResponse(['transitions' => [], 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
         }
+
+        $taskId = (int)($_GET['task_id'] ?? 0);
+        if ($taskId <= 0) {
+            $this->redirectWithError(AppConstants::ROUTE_TASKS, 'ID de tarea inválido');
+            return;
+        }
+
+        // Redirigir a la vista de tareas donde se pueden manejar transiciones sin Ajax
+        $this->redirectToRoute(AppConstants::ROUTE_TASKS . "?task_id={$taskId}");
     }
 
     /**

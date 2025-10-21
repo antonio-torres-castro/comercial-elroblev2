@@ -391,36 +391,41 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                $this->jsonResponse(['success' => false, 'message' => 'No autorizado'], 401);
+                $this->redirectToLogin();
                 return;
             }
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menus')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS], 403);
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Método no permitido');
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) {
-                $this->jsonResponse(['success' => false, 'message' => 'ID de menú inválido'], 400);
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'ID de menú inválido');
                 return;
             }
 
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['success' => false, 'message' => 'Token CSRF inválido'], 400);
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Token CSRF inválido');
                 return;
             }
 
             if ($this->menuModel->delete($id)) {
-                $this->jsonResponse(['success' => true, 'message' => 'Menú eliminado correctamente'], 200);
+                $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, 'Menú eliminado correctamente');
             } else {
-                $this->jsonResponse(['success' => false, 'message' => 'Error al eliminar el menú'], 500);
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Error al eliminar el menú');
             }
         } catch (Exception $e) {
             error_log("Error en MenuController::delete: " . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
+            $this->redirectWithError(AppConstants::ROUTE_MENUS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
@@ -433,12 +438,23 @@ class MenuController extends BaseController
             $currentUser = $this->getCurrentUser();
 
             if (!$currentUser) {
-                $this->jsonResponse(['success' => false, 'message' => 'No autorizado'], 401);
+                $this->redirectToLogin();
                 return;
             }
 
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_menus')) {
-                $this->jsonResponse(['success' => false, 'message' => 'Sin permisos'], 403);
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Sin permisos');
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Método no permitido');
+                return;
+            }
+
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Token CSRF inválido');
                 return;
             }
 
@@ -446,7 +462,7 @@ class MenuController extends BaseController
             $newStatus = (int)($_POST['new_status'] ?? 0);
 
             if (!$menuId || !in_array($newStatus, [1, 2])) {
-                $this->jsonResponse(['success' => false, 'message' => 'Datos inválidos'], 400);
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Datos inválidos');
                 return;
             }
 
@@ -454,13 +470,13 @@ class MenuController extends BaseController
             $success = $this->menuModel->toggleStatus($menuId);
 
             if ($success) {
-                $this->jsonResponse(['success' => true, 'message' => 'Estado del menú actualizado correctamente'], 200);
+                $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, 'Estado del menú actualizado correctamente');
             } else {
-                $this->jsonResponse(['success' => false, 'message' => 'Error al actualizar el estado del menú'], 500);
+                $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Error al actualizar el estado del menú');
             }
         } catch (Exception $e) {
             error_log("Error en MenuController::toggleStatus: " . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
+            $this->redirectWithError(AppConstants::ROUTE_MENUS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 

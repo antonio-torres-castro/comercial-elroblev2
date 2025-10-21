@@ -238,8 +238,18 @@ class ReportController extends BaseController
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'generate_reports')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                $this->redirectWithError(AppConstants::ROUTE_REPORTS, AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Método no permitido');
+                return;
+            }
+
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Token CSRF inválido');
                 return;
             }
 
@@ -250,21 +260,13 @@ class ReportController extends BaseController
             $filename = $this->generateUsersExcelReport($userData);
 
             if ($filename) {
-                // Respuesta JSON para AJAX
-                $this->jsonResponse([
-                    'success' => true,
-                    'message' => 'Reporte de usuarios generado correctamente',
-                    'filename' => $filename
-                ], 200);
+                $this->redirectWithSuccess(AppConstants::ROUTE_REPORTS, "Reporte de usuarios generado correctamente: {$filename}");
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
         } catch (Exception $e) {
             error_log("Error en ReportController::usersReport: " . $e->getMessage());
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Error al generar el reporte: ' . $e->getMessage()
-            ], 500);
+            $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 
@@ -283,8 +285,18 @@ class ReportController extends BaseController
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'generate_reports')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                $this->redirectWithError(AppConstants::ROUTE_REPORTS, AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Método no permitido');
+                return;
+            }
+
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Token CSRF inválido');
                 return;
             }
 
@@ -298,20 +310,13 @@ class ReportController extends BaseController
             $filename = $this->generateProjectsExcelReport($projectData, $startDate, $endDate);
 
             if ($filename) {
-                $this->jsonResponse([
-                    'success' => true,
-                    'message' => 'Reporte de proyectos generado correctamente',
-                    'filename' => $filename
-                ], 200);
+                $this->redirectWithSuccess(AppConstants::ROUTE_REPORTS, "Reporte de proyectos generado correctamente: {$filename}");
             } else {
                 throw new Exception('Error al generar el archivo del reporte');
             }
         } catch (Exception $e) {
             error_log("Error en ReportController::projectsReport: " . $e->getMessage());
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Error al generar el reporte: ' . $e->getMessage()
-            ], 500);
+            $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 

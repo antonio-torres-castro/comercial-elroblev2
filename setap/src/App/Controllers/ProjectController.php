@@ -286,11 +286,22 @@ class ProjectController extends BaseController
     {
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
-            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
-        $id = (int)($_GET['id'] ?? 0);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Método no permitido');
+            return;
+        }
+
+        // Validar CSRF token
+        if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Token CSRF inválido');
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -322,12 +333,18 @@ class ProjectController extends BaseController
     {
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
-            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
+            return;
+        }
+
+        // Validar CSRF token
+        if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Token CSRF inválido');
             return;
         }
 
@@ -517,23 +534,23 @@ class ProjectController extends BaseController
         try {
             // Verificar acceso al menú de gestión de proyectos
             if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED], 403);
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_ACCESS_DENIED);
                 return;
             }
 
             // Obtener ID del proyecto de los parámetros GET
             $projectId = isset($_GET['id']) ? (int)$_GET['id'] : null;
             if (!$projectId) {
-                $this->jsonResponse(['success' => false, 'message' => 'ID del proyecto requerido'], 400);
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'ID del proyecto requerido');
                 return;
             }
 
             // TODO: Implementar lógica de generación de reportes
-            // Por ahora, mostrar mensaje temporal
-            $this->jsonResponse(['success' => true, 'message' => "Generando reporte para el proyecto ID: " . $projectId], 200);
+            // Por ahora, redirigir con mensaje temporal
+            $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, "Generando reporte para el proyecto ID: " . $projectId);
         } catch (Exception $e) {
             error_log("Error en ProjectController::report: " . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER], 500);
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 
