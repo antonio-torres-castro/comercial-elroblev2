@@ -47,7 +47,7 @@
                     <p class="text-muted">Genere y consulte reportes de actividad del sistema</p>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="/reports/create" class="btn btn-setap-primary">
+                    <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
                         <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_REPORT ?>
                     </a>
                 </div>

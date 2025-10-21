@@ -23,7 +23,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/menus" class="btn btn-sm btn-secondary">
+                        <a href="<?= AppConstants::ROUTE_MENUS ?>" class="btn btn-sm btn-secondary">
                             <i class="bi bi-arrow-left"></i> Volver a Lista
                         </a>
                     </div>
@@ -48,7 +48,7 @@
                                 <h5 class="mb-0"><?php echo htmlspecialchars($data['subtitle']); ?></h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="/menus/store">
+                                <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/store">
                                     <?php \App\Helpers\Security::renderCsrfField(); ?>
 
                                     <div class="row">

@@ -103,7 +103,7 @@ use App\Helpers\Security;
                             <small class="opacity-75">Tipo: <?= htmlspecialchars($user['rol'] ?? 'N/A') ?></small>
                         </div>
                         <div class="col-auto">
-                            <a href="/users" class="btn btn-light">
+                            <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-light">
                                 <i class="bi bi-arrow-left"></i> Volver a Usuarios
                             </a>
                         </div>

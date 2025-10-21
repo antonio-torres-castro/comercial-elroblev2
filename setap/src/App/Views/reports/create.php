@@ -58,7 +58,7 @@
                     <p class="text-muted">Configure los parámetros para generar un reporte personalizado</p>
                 </div>
                 <div class="col-md-4 text-end">
-                    <a href="/reports" class="btn btn-outline-secondary">
+                    <a href="<?= AppConstants::ROUTE_REPORTS ?>" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Volver a Reportes
                     </a>
                 </div>
@@ -73,7 +73,7 @@
             <?php endif; ?>
 
             <!-- Formulario de Configuración -->
-            <form method="POST" action="/reports/generate" id="createReportForm">
+            <form method="POST" action="<?= AppConstants::ROUTE_REPORTS ?>/generate" id="createReportForm">
                 <?= \App\Helpers\Security::renderCsrfField() ?>
 
                 <div class="row justify-content-center">

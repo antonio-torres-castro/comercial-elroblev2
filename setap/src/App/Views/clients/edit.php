@@ -22,7 +22,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/clients" class="btn btn-sm btn-secondary">
+                        <a href="<?= AppConstants::ROUTE_CLIENTS ?>" class="btn btn-sm btn-secondary">
                             <i class="bi bi-arrow-left"></i> Volver a Lista
                         </a>
                     </div>
@@ -48,7 +48,7 @@
                                 <h5 class="mb-0"><?php echo htmlspecialchars($data['subtitle']); ?></h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="/clients/update" id="clientForm">
+                                <form method="POST" action="<?= AppConstants::ROUTE_CLIENTS ?>/update" id="clientForm">
                                     <?= \App\Helpers\Security::renderCsrfField() ?>
                                     <input type="hidden" name="id" value="<?php echo $data['client']['id']; ?>">
 
@@ -324,7 +324,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="POST" action="/clients/delete" style="display: inline;" id="deleteClientForm">
+                    <form method="POST" action="<?= AppConstants::ROUTE_CLIENTS ?>/delete" style="display: inline;" id="deleteClientForm">
                         <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deleteClientId">
                         <button type="submit" class="btn btn-danger">

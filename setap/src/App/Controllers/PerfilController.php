@@ -143,7 +143,7 @@ class PerfilController extends BaseController
             if ($this->userModel->updateProfile($fullUserData['id'], $data)) {
                 // Redirigir con mensaje de éxito
                 $_SESSION['success_message'] = 'Perfil actualizado correctamente';
-                header('Location: /perfil');
+                header('Location: ' . AppConstants::ROUTE_PERFIL);
                 exit;
             } else {
                 throw new Exception('Error al actualizar el perfil');
@@ -277,7 +277,7 @@ class PerfilController extends BaseController
             // Actualizar contraseña
             if ($this->userModel->updatePassword($currentUser['id'], $newPassword)) {
                 $_SESSION['success_message'] = 'Contraseña actualizada correctamente';
-                header('Location: /perfil');
+                header('Location: ' . AppConstants::ROUTE_PERFIL);
                 exit;
             } else {
                 throw new Exception('Error al actualizar la contraseña');

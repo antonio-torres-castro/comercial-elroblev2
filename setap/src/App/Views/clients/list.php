@@ -60,7 +60,7 @@
                         <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros de Búsqueda</h5>
                     </div>
                     <div class="card-body">
-                        <form method="GET" action="/clients" class="row g-3">
+                        <form method="GET" action="<?= AppConstants::ROUTE_CLIENTS ?>" class="row g-3">
                             <div class="col-md-3">
                                 <label for="rut" class="form-label">RUT</label>
                                 <input type="text" class="form-control" id="rut" name="rut"
@@ -91,7 +91,7 @@
                                     <button type="submit" class="btn btn-setap-primary">
                                         <i class="bi bi-search"></i> Buscar
                                     </button>
-                                    <a href="/clients" class="btn btn-outline-secondary">
+                                    <a href="<?= AppConstants::ROUTE_CLIENTS ?>" class="btn btn-outline-secondary">
                                         <i class="bi bi-x-circle"></i> Limpiar
                                     </a>
                                 </div>
@@ -223,7 +223,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="POST" action="/clients/delete" style="display: inline;" id="deleteForm">
+                    <form method="POST" action="<?= AppConstants::ROUTE_CLIENTS ?>/delete" style="display: inline;" id="deleteForm">
                         <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deleteClientId">
                         <button type="submit" class="btn btn-danger">

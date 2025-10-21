@@ -11,13 +11,13 @@ use App\Helpers\Security;
                     <h2 class="mb-1">Gestión de Feriados</h2>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/projects">Proyectos</a></li>
-                            <li class="breadcrumb-item"><a href="/projects/show/<?= $project['id'] ?>"><?= htmlspecialchars($project['cliente_nombre']) ?></a></li>
+                            <li class="breadcrumb-item"><a href="<?= AppConstants::ROUTE_PROJECTS ?>">Proyectos</a></li>
+                            <li class="breadcrumb-item"><a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= $project['id'] ?>"><?= htmlspecialchars($project['cliente_nombre']) ?></a></li>
                             <li class="breadcrumb-item active">Feriados</li>
                         </ol>
                     </nav>
                 </div>
-                <a href="/projects/show/<?= $project['id'] ?>" class="btn btn-secondary">
+                <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= $project['id'] ?>" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver al Proyecto
                 </a>
             </div>

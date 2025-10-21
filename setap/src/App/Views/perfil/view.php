@@ -20,7 +20,7 @@
             <div class="card-header">
                 <h1><?php echo $data['title']; ?></h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="/perfil/edit" class="btn btn-sm btn-primary">
+                    <a href="<?= AppConstants::ROUTE_PERFIL ?>/edit" class="btn btn-sm btn-primary">
                         <i class="bi bi-pencil"></i> Editar Perfil
                     </a>
                 </div>

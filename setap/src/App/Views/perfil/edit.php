@@ -20,7 +20,7 @@
             <div class="card-header">
                 <h1><?php echo $data['title']; ?></h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="/perfil" class="btn btn-sm btn-secondary">
+                    <a href="<?= AppConstants::ROUTE_PERFIL ?>" class="btn btn-sm btn-secondary">
                         <i class="bi bi-arrow-left"></i> Volver
                     </a>
                 </div>

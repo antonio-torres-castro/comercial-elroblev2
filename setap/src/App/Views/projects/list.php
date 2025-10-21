@@ -50,7 +50,7 @@
                 <a href="<?= \App\Constants\AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
                     <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PROJECT ?>
                 </a>
-                <a href="/projects/search" class="btn btn-outline-secondary">
+                <a href="<?= AppConstants::ROUTE_PROJECTS_SEARCH ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-search"></i> <?= AppConstants::UI_ADVANCED_SEARCH_BTN ?>
                 </a>
             </div>
@@ -204,12 +204,12 @@
                                         Tipo: <?= htmlspecialchars($project['tipo_tarea']) ?>
                                     </small>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="/projects/show?id=<?= $project['id'] ?>"
+                                        <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>?id=<?= $project['id'] ?>"
                                            class="btn btn-outline-setap-primary"
                                            onclick="event.stopPropagation()" title="Ver Proyecto">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="/projects/edit?id=<?= $project['id'] ?>"
+                                        <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>"
                                            class="btn btn-outline-secondary"
                                            onclick="event.stopPropagation()" title="Editar Proyecto">
                                             <i class="bi bi-pencil"></i>

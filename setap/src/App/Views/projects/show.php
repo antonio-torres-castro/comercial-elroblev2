@@ -208,7 +208,7 @@
                                 <i class="bi bi-list-task display-3 text-muted"></i>
                                 <h5 class="mt-3">No hay tareas asignadas</h5>
                                 <p class="text-muted">Comienza agregando tareas a este proyecto.</p>
-                                <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-setap-primary">
+                                <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-setap-primary">
                                     <i class="bi bi-plus"></i> Crear Primera Tarea
                                 </a>
                             </div>
@@ -256,7 +256,7 @@
                                                 <?= htmlspecialchars($task['estado_nombre']) ?>
                                             </span>
                                             <div class="mt-2">
-                                                <a href="/tasks/show?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline-setap-primary">
+                                                <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline-setap-primary">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                             </div>
@@ -327,7 +327,7 @@
                             <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
                                 <i class="bi bi-plus-circle"></i> Agregar Tarea
                             </a>
-                            <a href="/projects/report?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
+                            <a href="<?= AppConstants::ROUTE_PROJECTS_REPORT ?>?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
                                 <i class="bi bi-file-earmark-text"></i> Generar Reporte
                             </a>
                             <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
@@ -348,7 +348,7 @@
                     <h5 class="modal-title">Cambiar Estado del Proyecto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="/projects/change-status">
+                <form method="POST" action="<?= AppConstants::ROUTE_PROJECTS ?>/change-status">
                     <div class="modal-body">
                         <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
                         <div class="mb-3">

@@ -32,7 +32,7 @@
                             Si crees que esto es un error, contacta al administrador del sistema.
                         </p>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <a href="/home" class="btn btn-setap-primary">
+                            <a href="<?= \App\Constants\AppConstants::ROUTE_HOME ?>" class="btn btn-setap-primary">
                                 <i class="bi bi-house"></i> Ir al Home
                             </a>
                             <a href="javascript:history.back()" class="btn btn-secondary">

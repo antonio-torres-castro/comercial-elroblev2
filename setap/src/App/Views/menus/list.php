@@ -195,7 +195,7 @@ include __DIR__ . '/../layouts/navigation.php';
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <form method="POST" action="/menus/toggle-status" style="display: inline-block;" class="toggle-status-form" onsubmit="return confirmToggleStatus(this, '<?php echo ($menu['estado_tipo_id'] == 2) ? 'desactivar' : 'activar'; ?>')">
+                                                                    <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/toggle-status" style="display: inline-block;" class="toggle-status-form" onsubmit="return confirmToggleStatus(this, '<?php echo ($menu['estado_tipo_id'] == 2) ? 'desactivar' : 'activar'; ?>')">
                                                                         <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
                                                                         <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
                                                                         <input type="hidden" name="status" value="<?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>">
@@ -208,7 +208,7 @@ include __DIR__ . '/../layouts/navigation.php';
                                                                 <?php endif; ?>
 
                                                                 <?php if (\App\Helpers\Security::hasPermission('Delete') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <form method="POST" action="/menus/delete" style="display: inline-block;" class="delete-menu-form" onsubmit="return confirmDeleteMenu(this, '<?php echo htmlspecialchars($menu['nombre']); ?>')">
+                                                                    <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/delete" style="display: inline-block;" class="delete-menu-form" onsubmit="return confirmDeleteMenu(this, '<?php echo htmlspecialchars($menu['nombre']); ?>')">
                                                                         <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
                                                                         <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
                                                                         <button type="submit"

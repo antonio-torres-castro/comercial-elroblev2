@@ -47,7 +47,7 @@
                                 <h5 class="mb-0"><?php echo htmlspecialchars($data['subtitle']); ?></h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="/clients/store" id="clientForm">
+                                <form method="POST" action="<?= AppConstants::ROUTE_CLIENTS ?>/store" id="clientForm">
                                     <?= \App\Helpers\Security::renderCsrfField() ?>
 
                                     <!-- Información Básica -->
@@ -144,7 +144,7 @@
 
                                     <!-- Botones -->
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                        <a href="/clients" class="btn btn-secondary">
+                                        <a href="<?= AppConstants::ROUTE_CLIENTS ?>" class="btn btn-secondary">
                                             <i class="bi bi-x-circle"></i> Cancelar
                                         </a>
                                         <button type="submit" class="btn btn-setap-primary">

@@ -26,9 +26,9 @@ class AuthMiddleware
     private function redirectToLogin(): void
     {
         if ($this->isAjaxRequest()) {
-            $this->sendMiddlewareError(AppConstants::ERROR_USER_NOT_AUTHENTICATED, 401, ['redirect' => '/login']);
+            $this->sendMiddlewareError(AppConstants::ERROR_USER_NOT_AUTHENTICATED, 401, ['redirect' => AppConstants::ROUTE_LOGIN]);
         } else {
-            header('Location: /login');
+            header('Location: ' . AppConstants::ROUTE_LOGIN);
             exit;
         }
     }

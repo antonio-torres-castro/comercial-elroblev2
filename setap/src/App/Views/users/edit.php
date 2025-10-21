@@ -115,7 +115,7 @@
                             </div>
                         <?php endif; ?>
 
-                        <form method="POST" action="/users/update" id="userEditForm">
+                        <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/update" id="userEditForm">
                             <?= \App\Helpers\Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$userToEdit['id'] ?>">
                             <input type="hidden" name="current_persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
@@ -407,7 +407,7 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="d-flex gap-2 justify-content-end">
-                                        <a href="/users" class="btn btn-secondary">
+                                        <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-secondary">
                                             <i class="bi bi-arrow-left"></i> Cancelar
                                         </a>
                                         <button type="submit" class="btn btn-warning" id="updateBtn">

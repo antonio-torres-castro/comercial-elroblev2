@@ -47,7 +47,7 @@
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="/tasks/store">
+                                <form method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/store">
                                     <?= \App\Helpers\Security::renderCsrfField() ?>
 
                                     <div class="row g-3">

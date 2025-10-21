@@ -46,7 +46,7 @@
                 <p class="text-muted">Complete los datos para registrar una nueva persona en el sistema.</p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="/personas" class="btn btn-outline-secondary">
+                <a href="<?= AppConstants::ROUTE_PERSONAS ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_PERSONAS ?>
                 </a>
             </div>
@@ -117,7 +117,7 @@
         </div>
 
         <!-- Formulario de Creación -->
-        <form method="POST" action="/personas/store" id="createPersonaForm">
+        <form method="POST" action="<?= AppConstants::ROUTE_PERSONAS ?>/store" id="createPersonaForm">
             <?= \App\Helpers\Security::renderCsrfField() ?>
 
             <div class="row">

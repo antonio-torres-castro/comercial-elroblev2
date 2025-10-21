@@ -45,7 +45,7 @@
                 <p class="text-muted">Persona: <?= htmlspecialchars($persona['nombre']) ?></p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="/personas" class="btn btn-outline-secondary">
+                <a href="<?= AppConstants::ROUTE_PERSONAS ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Volver a Personas
                 </a>
             </div>
@@ -60,7 +60,7 @@
         <?php endif; ?>
 
         <!-- Formulario de Edición -->
-        <form method="POST" action="/personas/update" id="editPersonaForm">
+        <form method="POST" action="<?= AppConstants::ROUTE_PERSONAS ?>/update" id="editPersonaForm">
             <?= \App\Helpers\Security::renderCsrfField() ?>
             <input type="hidden" name="id" value="<?= (int)$persona['id'] ?>">
 

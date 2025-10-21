@@ -43,7 +43,7 @@
                 </h2>
             </div>
             <div class="col-md-6 text-end">
-                <a href="/personas/create" class="btn btn-setap-primary">
+                <a href="<?= AppConstants::ROUTE_PERSONAS_CREATE ?>" class="btn btn-setap-primary">
                     <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PERSONA ?>
                 </a>
             </div>
@@ -133,7 +133,7 @@
         <!-- Filtros -->
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" action="/personas" class="row align-items-end">
+                <form method="GET" action="<?= AppConstants::ROUTE_PERSONAS ?>" class="row align-items-end">
                     <div class="col-md-4">
                         <label for="search" class="form-label">Buscar</label>
                         <input type="text" class="form-control" name="search" id="search"
@@ -157,7 +157,7 @@
                             <button type="submit" class="btn btn-setap-primary">
                                 <i class="bi bi-search"></i> Buscar
                             </button>
-                            <a href="/personas" class="btn btn-outline-secondary">
+                            <a href="<?= AppConstants::ROUTE_PERSONAS ?>" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-clockwise"></i> Limpiar
                             </a>
                         </div>
@@ -176,7 +176,7 @@
                     <div class="text-center py-4">
                         <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
                         <p class="text-muted mt-2">No se encontraron personas.</p>
-                        <a href="/personas/create" class="btn btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_PERSONAS_CREATE ?>" class="btn btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Crear Primera Persona
                         </a>
                     </div>
@@ -236,7 +236,7 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="/personas/edit?id=<?= (int)$persona['id'] ?>"
+                                            <a href="<?= AppConstants::ROUTE_PERSONAS ?>/edit?id=<?= (int)$persona['id'] ?>"
                                                class="btn btn-outline-setap-primary" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
@@ -274,7 +274,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="POST" action="/personas/delete" class="d-inline" id="deleteForm">
+                    <form method="POST" action="<?= AppConstants::ROUTE_PERSONAS ?>/delete" class="d-inline" id="deleteForm">
                         <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deletePersonaId">
                         <button type="submit" class="btn btn-danger">

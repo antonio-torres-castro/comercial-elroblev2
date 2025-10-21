@@ -250,12 +250,12 @@ use App\Constants\AppConstants;
                                                     <?php endif; ?>
 
                                                     <?php if (\App\Helpers\Security::hasPermission('Modify')): ?>
-                                                        <a href="/users/edit?id=<?= $user['id'] ?>"
+                                                        <a href="<?= AppConstants::ROUTE_USERS_EDIT ?>?id=<?= $user['id'] ?>"
                                                             class="btn btn-outline-warning"
                                                             title="<?= AppConstants::UI_BTN_EDIT ?>">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <a href="/users/permissions?user_id=<?= $user['id'] ?>"
+                                                        <a href="<?= AppConstants::ROUTE_USERS_PERMISSIONS ?>?user_id=<?= $user['id'] ?>"
                                                             class="btn btn-outline-secondary"
                                                             title="Permisos">
                                                             <i class="bi bi-shield-lock"></i>
@@ -270,7 +270,7 @@ use App\Constants\AppConstants;
 
                                                         <!-- Toggle status form -->
                                                         <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                                            <form method="POST" action="/users/toggle-status" style="display: inline-block;"
+                                                            <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/toggle-status" style="display: inline-block;"
                                                                 onsubmit="return confirmToggleUserStatus(this, '<?= $user['estado_tipo_id'] == 1 ? 'desactivar' : 'activar' ?>')">
                                                                 <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
                                                                 <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
@@ -335,7 +335,7 @@ use App\Constants\AppConstants;
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= AppConstants::UI_BTN_CANCEL ?></button>
-                    <form method="POST" action="/users/delete" style="display: inline;" id="deleteUserForm">
+                    <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/delete" style="display: inline;" id="deleteUserForm">
                         <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deleteUserId">
                         <button type="submit" class="btn btn-danger"><?= AppConstants::UI_BTN_DELETE ?></button>
@@ -353,7 +353,7 @@ use App\Constants\AppConstants;
                     <h5 class="modal-title">Cambiar Contraseña</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="/users/change-password" id="passwordForm" onsubmit="return validatePasswordForm()">
+                <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/change-password" id="passwordForm" onsubmit="return validatePasswordForm()">
                     <div class="modal-body">
                         <?= \App\Helpers\Security::renderCsrfField() ?>
                         <input type="hidden" name="user_id" id="passwordUserId">
@@ -478,7 +478,7 @@ use App\Constants\AppConstants;
                 </div>
                 <hr>
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="/users/edit?id=${userId}" class="btn btn-outline-setap-primary btn-sm">
+                    <a href="<?= AppConstants::ROUTE_USERS_EDIT ?>?id=${userId}" class="btn btn-outline-setap-primary btn-sm">
                         <i class="bi bi-pencil"></i> <?= AppConstants::UI_BTN_EDIT ?>
                     </a>
                     <button type="button" class="btn btn-outline-warning btn-sm" 
@@ -575,7 +575,7 @@ use App\Constants\AppConstants;
                 formData.append('user_id', userId);
                 formData.append('new_status', currentStatus == 1 ? 2 : 1);
 
-                fetch('/users/toggle-status', {
+                fetch('<?= AppConstants::ROUTE_USERS ?>/toggle-status', {
                         method: 'POST',
                         body: formData
                     })

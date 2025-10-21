@@ -70,9 +70,9 @@ class PermissionMiddleware
     private function redirectToLogin(): void
     {
         if ($this->isAjaxRequest()) {
-            $this->sendMiddlewareError(AppConstants::ERROR_USER_NOT_AUTHENTICATED, 401, ['redirect' => '/login']);
+            $this->sendMiddlewareError(AppConstants::ERROR_USER_NOT_AUTHENTICATED, 401, ['redirect' => AppConstants::ROUTE_LOGIN]);
         } else {
-            header('Location: /login');
+            header('Location: ' . AppConstants::ROUTE_LOGIN);
             exit;
         }
     }
@@ -127,7 +127,7 @@ class PermissionMiddleware
                                     <i class="bi bi-shield-exclamation" style="font-size: 3rem; color: #dc3545;"></i>
                                 </div>
                                 <p class="mb-3">No tienes permisos para acceder a esta sección.</p>
-                                <a href="/home" class="btn btn-primary">Volver al Home</a>
+                                <a href="<?= AppConstants::ROUTE_HOME ?>" class="btn btn-primary">Volver al Home</a>
                             </div>
                         </div>
                     </div>

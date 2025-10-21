@@ -82,10 +82,10 @@
             <div class="row mb-4 no-print">
                 <div class="col-12">
                     <div class="d-flex justify-content-between">
-                        <a href="/reports" class="btn btn-outline-secondary">
+                        <a href="<?= AppConstants::ROUTE_REPORTS ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> Volver a Reportes
                         </a>
-                        <a href="/reports/create" class="btn btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Nuevo Reporte
                         </a>
                     </div>
@@ -206,7 +206,7 @@
                                     No se encontraron datos para los parámetros especificados.
                                     Intente ajustar los filtros o el período de tiempo.
                                 </p>
-                                <a href="/reports/create" class="btn btn-setap-primary">
+                                <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
                                     <i class="bi bi-gear"></i> Configurar Nuevo Reporte
                                 </a>
                             </div>

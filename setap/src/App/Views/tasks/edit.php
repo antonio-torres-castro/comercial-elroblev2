@@ -60,7 +60,7 @@
                             </div>
                         <?php endif; ?>
 
-                        <form method="POST" action="/tasks/update" id="taskEditForm">
+                        <form method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/update" id="taskEditForm">
                             <?= \App\Helpers\Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$task['id'] ?>">
 

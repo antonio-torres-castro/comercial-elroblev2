@@ -77,10 +77,10 @@ use App\Helpers\Security;
                 </div>
                 <div class="col-md-6 text-end">
                     <div class="btn-group" role="group">
-                        <a href="/users" class="btn btn-outline-secondary">
+                        <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-people"></i> Gestión de Usuarios
                         </a>
-                        <a href="/accesos" class="btn btn-outline-info">
+                        <a href="<?= AppConstants::ROUTE_ACCESS ?>" class="btn btn-outline-info">
                             <i class="bi bi-menu-button"></i> Gestión de Accesos
                         </a>
                     </div>
@@ -99,7 +99,7 @@ use App\Helpers\Security;
                             <small><?= htmlspecialchars($userType['descripcion']) ?></small>
                         </div>
                         <div class="card-body">
-                            <form class="permissions-form" action="/permissions/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
+                            <form class="permissions-form" action="<?= AppConstants::ROUTE_PERMISSIONS ?>/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
                                 <!-- Token CSRF para seguridad -->
                                 <?= Security::renderCsrfField() ?>
                                 <!-- ID del tipo de usuario -->

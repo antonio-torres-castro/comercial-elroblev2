@@ -22,7 +22,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/client-counterpartie" class="btn btn-sm btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/create" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Nueva Contraparte
                         </a>
                     </div>
@@ -58,7 +58,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form method="GET" action="/client-counterparties">
+                        <form method="GET" action="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>">
                             <div class="row g-3">
                                 <div class="col-md-3">
                                     <label for="cliente_id" class="form-label">Cliente</label>
@@ -100,7 +100,7 @@
                                     <button type="submit" class="btn btn-primary me-2">
                                         <i class="bi bi-search"></i> Buscar
                                     </button>
-                                    <a href="/client-counterparties" class="btn btn-secondary">
+                                    <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>" class="btn btn-secondary">
                                         <i class="bi bi-x-lg"></i>
                                     </a>
                                 </div>
@@ -123,7 +123,7 @@
                                 <i class="bi bi-inbox display-1 text-muted"></i>
                                 <h5 class="mt-3 text-muted">No se encontraron contrapartes</h5>
                                 <p class="text-muted">No hay contrapartes que coincidan con los filtros aplicados.</p>
-                                <a href="/client-counterpartie" class="btn btn-setap-primary">
+                                <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/create" class="btn btn-setap-primary">
                                     <i class="bi bi-plus-circle"></i> Crear Primera Contraparte
                                 </a>
                             </div>
@@ -185,7 +185,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="/client-counterpartie/<?php echo $counterpartie['id']; ?>"
+                                                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/<?php echo $counterpartie['id']; ?>"
                                                            class="btn btn-outline-primary" title="Editar">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
@@ -219,7 +219,7 @@
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                                 Cancelar
                                                             </button>
-                                                            <form method="POST" action="/client-counterpartie/delete" style="display: inline;">
+                                                            <form method="POST" action="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/delete" style="display: inline;">
                                                                 <?= \App\Helpers\Security::renderCsrfField() ?>
                                                                 <input type="hidden" name="id" value="<?php echo $counterpartie['id']; ?>">
                                                                 <button type="submit" class="btn btn-danger">

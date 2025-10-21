@@ -50,7 +50,7 @@
                 <p class="text-muted">Proyecto: <?= htmlspecialchars($project['cliente_nombre']) ?></p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="/projects/show/<?= (int)$project['id'] ?>" class="btn btn-outline-secondary">
+                <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= (int)$project['id'] ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Volver al Proyecto
                 </a>
             </div>
@@ -65,7 +65,7 @@
         <?php endif; ?>
 
         <!-- Formulario de Edición -->
-        <form method="POST" action="/projects/update" id="editProjectForm">
+        <form method="POST" action="<?= AppConstants::ROUTE_PROJECTS ?>/update" id="editProjectForm">
             <?= \App\Helpers\Security::renderCsrfField() ?>
             <input type="hidden" name="id" value="<?= (int)$project['id'] ?>">
 
@@ -183,7 +183,7 @@
 
                     <!-- Botones de Acción -->
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="/projects/show/<?= (int)$project['id'] ?>" class="btn btn-secondary">
+                        <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= (int)$project['id'] ?>" class="btn btn-secondary">
                             <i class="bi bi-x-lg"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-success" id="saveBtn">

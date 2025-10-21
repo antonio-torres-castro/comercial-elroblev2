@@ -199,7 +199,7 @@
                                                                 <a href="<?= \App\Constants\AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
-                                                                <a href="/tasks/edit?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
+                                                                <a href="<?= AppConstants::ROUTE_TASKS_EDIT ?>?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
                                                                 <!-- GAP 5: Validar si puede eliminar según estado -->

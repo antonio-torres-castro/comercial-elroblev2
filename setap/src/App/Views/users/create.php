@@ -64,7 +64,7 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?= AppConstants::UI_CREATE_NEW ?> Usuario</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/users" class="btn btn-sm btn-secondary">
+                        <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-sm btn-secondary">
                             <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_LIST ?>
                         </a>
                     </div>
@@ -109,7 +109,7 @@
                             <h6><i class="bi bi-person-check"></i> Paso 1: Buscar y Seleccionar Persona</h6>
                             
                             <!-- Formulario de búsqueda -->
-                            <form method="POST" action="/users/seek_personas" class="needs-validation" novalidate id="search-form">
+                            <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/seek_personas" class="needs-validation" novalidate id="search-form">
                                 <?= Security::renderCsrfField() ?>
                                 
                                 <!-- Formulario de búsqueda mejorado -->
@@ -209,7 +209,7 @@
                         </div>
 
                         <!-- Paso 2: Crear Usuario -->
-                        <form method="POST" action="/users/store" class="needs-validation" novalidate id="create-form">
+                        <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/store" class="needs-validation" novalidate id="create-form">
                             <?= Security::renderCsrfField() ?>
                             
                             <!-- Campo oculto para persona seleccionada -->

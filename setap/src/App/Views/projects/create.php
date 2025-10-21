@@ -66,7 +66,7 @@
         <?php endif; ?>
 
         <!-- Formulario de Creación -->
-        <form method="POST" action="/projects/store" id="createProjectForm">
+        <form method="POST" action="<?= AppConstants::ROUTE_PROJECTS ?>/store" id="createProjectForm">
             <?= \App\Helpers\Security::renderCsrfField() ?>
 
             <div class="row justify-content-center">
