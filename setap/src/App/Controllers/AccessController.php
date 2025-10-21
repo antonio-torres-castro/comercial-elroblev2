@@ -150,8 +150,8 @@ class AccessController extends AbstractBaseController
             $stmt->execute([$userTypeId]);
             $deletedMenuIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'menu_id');
 
-            // Asegurar que $menuIds es array y convertir a enteros
-            $menuIds = !empty($menuIds) ? array_map('intval', (array)$menuIds) : [];
+            // Asegurar que $menuIds es array, convertir a enteros y eliminar duplicados
+            $menuIds = !empty($menuIds) ? array_unique(array_map('intval', (array)$menuIds)) : [];
 
             // 2. Encontrar los menu_id que ya no están seleccionados (deben desactivarse)
             $menuIdsToDeactivate = array_diff($currentMenuIds, $menuIds);

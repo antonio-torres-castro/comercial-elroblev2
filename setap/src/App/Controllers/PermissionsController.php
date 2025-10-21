@@ -138,13 +138,22 @@ class PermissionsController extends AbstractBaseController
             $stmt->execute([$userTypeId]);
             $currentPermissionIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'permiso_id');
 
-            // Asegurar que $permissionIds es array y convertir a enteros
-            $permissionIds = !empty($permissionIds) ? array_map('intval', (array)$permissionIds) : [];
+            // 2. Obtener las tuplas eliminadas (usuario_tipo_id, permiso_id)
+            $stmt = $this->db->prepare("
+                SELECT permiso_id
+                FROM usuario_tipo_permisos
+                WHERE usuario_tipo_id = ? AND estado_tipo_id = 4
+            ");
+            $stmt->execute([$userTypeId]);
+            $deletedPermissionIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'permiso_id');
 
-            // 2. Encontrar los permiso_id que ya no están seleccionados (deben desactivarse)
+            // Asegurar que $permissionIds es array, convertir a enteros y eliminar duplicados
+            $permissionIds = !empty($permissionIds) ? array_unique(array_map('intval', (array)$permissionIds)) : [];
+
+            // 3. Encontrar los permiso_id que ya no están seleccionados (deben desactivarse)
             $permissionIdsToDeactivate = array_diff($currentPermissionIds, $permissionIds);
 
-            // 3. Desactivar los permisos que ya no están seleccionados
+            // 4. Desactivar los permisos que ya no están seleccionados
             if (!empty($permissionIdsToDeactivate)) {
                 $placeholders = str_repeat('?,', count($permissionIdsToDeactivate) - 1) . '?';
                 $stmt = $this->db->prepare("
@@ -155,8 +164,23 @@ class PermissionsController extends AbstractBaseController
                 $stmt->execute(array_merge([$userTypeId], $permissionIdsToDeactivate));
             }
 
-            // 4. Encontrar los permiso_id nuevos que deben insertarse
-            $permissionIdsToInsert = array_diff($permissionIds, $currentPermissionIds);
+            // 5. Encontrar los permiso_id que nuevamente están seleccionados (deben activarse)
+            $permissionIdsToActivate = array_intersect($deletedPermissionIds, $permissionIds);
+
+            // 6. Activar los permisos que se han vuelto a seleccionar
+            if (!empty($permissionIdsToActivate)) {
+                $placeholders = str_repeat('?,', count($permissionIdsToActivate) - 1) . '?';
+                $stmt = $this->db->prepare("
+                    UPDATE usuario_tipo_permisos
+                    SET estado_tipo_id = 2, fecha_modificacion = NOW()
+                    WHERE usuario_tipo_id = ? AND permiso_id IN ($placeholders)
+                ");
+                $stmt->execute(array_merge([$userTypeId], $permissionIdsToActivate));
+            }
+
+            // 7. Encontrar los permiso_id nuevos que deben insertarse
+            $allExistingPermissionIds = array_merge($currentPermissionIds, $permissionIdsToActivate);
+            $permissionIdsToInsert = array_diff($permissionIds, $allExistingPermissionIds);
 
             // Insertar los nuevos permisos
             if (!empty($permissionIdsToInsert)) {
