@@ -106,9 +106,11 @@ use App\Helpers\Security;
                             <small><?= htmlspecialchars($userType['descripcion']) ?></small>
                         </div>
                         <div class="card-body">
-                            <form class="access-form" data-user-type-id="<?= $userType['id'] ?>">
+                            <form class="access-form" action="/accesos/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
                                 <!-- Token CSRF para seguridad -->
                                 <?= Security::renderCsrfField() ?>
+                                <!-- ID del tipo de usuario -->
+                                <input type="hidden" name="user_type_id" value="<?= $userType['id'] ?>">
                                 <!-- Agrupar menús por grupo -->
                                 <?php 
                                 $groupedMenus = [];
