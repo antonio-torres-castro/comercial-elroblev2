@@ -70,13 +70,13 @@ class ProyectoFeriadoController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN], 403);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
@@ -88,14 +88,22 @@ class ProyectoFeriadoController extends BaseController
             $indIrrenunciable = (int)($_POST['irrenunciable'] ?? 0);
             $observaciones = trim($_POST['observaciones'] ?? '');
 
+            // Validar que tenemos un proyecto válido para construir la URL de retorno
+            if (!$projectId) {
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Proyecto no válido');
+                return;
+            }
+
+            $returnUrl = "/proyecto-feriados?proyecto_id={$projectId}";
+
             // Validaciones
-            if (!$projectId || empty($diasSemana) || !$fechaInicio || !$fechaFin) {
-                $this->jsonResponse(['success' => false, 'message' => 'Datos incompletos'], 400);
+            if (empty($diasSemana) || !$fechaInicio || !$fechaFin) {
+                $this->redirectWithError($returnUrl, 'Datos incompletos');
                 return;
             }
 
             if (strtotime($fechaInicio) > strtotime($fechaFin)) {
-                $this->jsonResponse(['success' => false, 'message' => 'La fecha de inicio debe ser menor a la fecha fin'], 400);
+                $this->redirectWithError($returnUrl, 'La fecha de inicio debe ser menor a la fecha fin');
                 return;
             }
 
@@ -113,27 +121,23 @@ class ProyectoFeriadoController extends BaseController
             );
 
             if (isset($result['error'])) {
-                $this->jsonResponse(['success' => false, 'message' => $result['error']], 400);
+                $this->redirectWithError($returnUrl, $result['error']);
                 return;
             }
 
             $message = "Feriados creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
-            $response = [
-                'success' => true,
-                'message' => $message,
-                'data' => $result
-            ];
-
-            // Si hay conflictos con tareas, incluirlos en la respuesta
+            
+            // Si hay conflictos con tareas, incluirlos en el mensaje
             if (!empty($result['conflicts'])) {
-                $response['conflicts'] = $result['conflicts'];
-                $response['message'] .= '. Se detectaron conflictos con tareas existentes.';
+                $message .= '. Se detectaron conflictos con tareas existentes.';
             }
 
-            $this->jsonResponse($response, 200);
+            $this->redirectWithSuccess($returnUrl, $message);
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createMasivo error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
 
@@ -144,13 +148,13 @@ class ProyectoFeriadoController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN], 403);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
@@ -160,9 +164,17 @@ class ProyectoFeriadoController extends BaseController
             $indIrrenunciable = (int)($_POST['irrenunciable'] ?? 0);
             $observaciones = trim($_POST['observaciones'] ?? '');
 
+            // Validar que tenemos un proyecto válido para construir la URL de retorno
+            if (!$projectId) {
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Proyecto no válido');
+                return;
+            }
+
+            $returnUrl = "/proyecto-feriados?proyecto_id={$projectId}";
+
             // Validaciones
-            if (!$projectId || !$fecha) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_PROJECT_DATE_REQUIRED], 400);
+            if (!$fecha) {
+                $this->redirectWithError($returnUrl, AppConstants::ERROR_PROJECT_DATE_REQUIRED);
                 return;
             }
 
@@ -175,27 +187,23 @@ class ProyectoFeriadoController extends BaseController
             );
 
             if (isset($result['error'])) {
-                $this->jsonResponse(['success' => false, 'message' => $result['error']], 400);
+                $this->redirectWithError($returnUrl, $result['error']);
                 return;
             }
 
             $message = $result['action'] === 'created' ? AppConstants::SUCCESS_HOLIDAY_CREATED : AppConstants::SUCCESS_HOLIDAY_UPDATED;
-            $response = [
-                'success' => true,
-                'message' => $message,
-                'data' => $result
-            ];
-
-            // Si hay conflictos con tareas, incluirlos en la respuesta
+            
+            // Si hay conflictos con tareas, incluirlos en el mensaje
             if (!empty($result['task_conflicts'])) {
-                $response['conflicts'] = [['fecha' => $fecha, 'tasks' => $result['task_conflicts']]];
-                $response['message'] .= '. Se detectaron conflictos con tareas existentes.';
+                $message .= '. Se detectaron conflictos con tareas existentes.';
             }
 
-            $this->jsonResponse($response, 200);
+            $this->redirectWithSuccess($returnUrl, $message);
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createEspecifico error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
 
@@ -206,13 +214,13 @@ class ProyectoFeriadoController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN], 403);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
@@ -223,14 +231,22 @@ class ProyectoFeriadoController extends BaseController
             $indIrrenunciable = (int)($_POST['irrenunciable'] ?? 0);
             $observaciones = trim($_POST['observaciones'] ?? '');
 
+            // Validar que tenemos un proyecto válido para construir la URL de retorno
+            if (!$projectId) {
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Proyecto no válido');
+                return;
+            }
+
+            $returnUrl = "/proyecto-feriados?proyecto_id={$projectId}";
+
             // Validaciones
-            if (!$projectId || !$fechaInicio || !$fechaFin) {
-                $this->jsonResponse(['success' => false, 'message' => 'Datos incompletos'], 400);
+            if (!$fechaInicio || !$fechaFin) {
+                $this->redirectWithError($returnUrl, 'Datos incompletos');
                 return;
             }
 
             if (strtotime($fechaInicio) > strtotime($fechaFin)) {
-                $this->jsonResponse(['success' => false, 'message' => 'La fecha de inicio debe ser menor a la fecha fin'], 400);
+                $this->redirectWithError($returnUrl, 'La fecha de inicio debe ser menor a la fecha fin');
                 return;
             }
 
@@ -244,54 +260,40 @@ class ProyectoFeriadoController extends BaseController
             );
 
             if (isset($result['error'])) {
-                $this->jsonResponse(['success' => false, 'message' => $result['error']], 400);
+                $this->redirectWithError($returnUrl, $result['error']);
                 return;
             }
 
             $message = "Feriados en rango creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
-            $response = [
-                'success' => true,
-                'message' => $message,
-                'data' => $result
-            ];
-
-            // Si hay conflictos con tareas, incluirlos en la respuesta
+            
+            // Si hay conflictos con tareas, incluirlos en el mensaje
             if (!empty($result['conflicts'])) {
-                $response['conflicts'] = $result['conflicts'];
-                $response['message'] .= '. Se detectaron conflictos con tareas existentes.';
+                $message .= '. Se detectaron conflictos con tareas existentes.';
             }
 
-            $this->jsonResponse($response, 200);
+            $this->redirectWithSuccess($returnUrl, $message);
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::createRango error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
 
     /**
-     * Listar feriados de un proyecto (API)
+     * Redireccionar a la vista principal de feriados de un proyecto
+     * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
     public function list()
     {
-        try {
-            $projectId = (int)($_GET['proyecto_id'] ?? 0);
-            if (!$projectId) {
-                $this->jsonResponse(['success' => false, 'message' => 'ID de proyecto requerido'], 400);
-                return;
-            }
-
-            $feriados = $this->proyectoFeriadoModel->getByProject($projectId);
-            $stats = $this->proyectoFeriadoModel->getProjectHolidayStats($projectId);
-
-            $this->jsonResponse([
-                'success' => true,
-                'feriados' => $feriados,
-                'stats' => $stats
-            ], 200);
-        } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::list error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+        $projectId = (int)($_GET['proyecto_id'] ?? 0);
+        if (!$projectId) {
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'ID de proyecto requerido');
+            return;
         }
+
+        // Redirigir a la vista principal de feriados del proyecto
+        $this->redirectToRoute("/proyecto-feriados?proyecto_id={$projectId}");
     }
 
     /**
@@ -301,21 +303,26 @@ class ProyectoFeriadoController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN], 403);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            
             if (!$id) {
-                $this->jsonResponse(['success' => false, 'message' => 'ID de feriado requerido'], 400);
+                $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+                $this->redirectWithError($returnUrl, 'ID de feriado requerido');
                 return;
             }
+
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
 
             $data = [
                 'tipo_feriado' => $_POST['tipo_feriado'] ?? 'especifico',
@@ -326,13 +333,15 @@ class ProyectoFeriadoController extends BaseController
 
             $success = $this->proyectoFeriadoModel->update($id, $data);
             if ($success) {
-                $this->jsonResponse(['success' => true, 'message' => AppConstants::SUCCESS_HOLIDAY_UPDATED], 200);
+                $this->redirectWithSuccess($returnUrl, AppConstants::SUCCESS_HOLIDAY_UPDATED);
             } else {
-                $this->jsonResponse(['success' => false, 'message' => 'Error al actualizar feriado'], 500);
+                $this->redirectWithError($returnUrl, 'Error al actualizar feriado');
             }
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::update error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
 
@@ -343,59 +352,56 @@ class ProyectoFeriadoController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN], 403);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            
             if (!$id) {
-                $this->jsonResponse(['success' => false, 'message' => 'ID de feriado requerido'], 400);
+                $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+                $this->redirectWithError($returnUrl, 'ID de feriado requerido');
                 return;
             }
 
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+
             $success = $this->proyectoFeriadoModel->delete($id);
             if ($success) {
-                $this->jsonResponse(['success' => true, 'message' => AppConstants::SUCCESS_HOLIDAY_DELETED], 200);
+                $this->redirectWithSuccess($returnUrl, AppConstants::SUCCESS_HOLIDAY_DELETED);
             } else {
-                $this->jsonResponse(['success' => false, 'message' => 'Error al eliminar feriado'], 500);
+                $this->redirectWithError($returnUrl, 'Error al eliminar feriado');
             }
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::delete error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
 
     /**
-     * Detectar conflictos con tareas
+     * Redireccionar a la vista principal - detección de conflictos se maneja en el frontend
+     * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
     public function checkConflicts()
     {
-        try {
-            $projectId = (int)($_GET['proyecto_id'] ?? 0);
-            $fechas = $_GET['fechas'] ?? '';
-
-            if (!$projectId || !$fechas) {
-                $this->jsonResponse(['success' => false, 'message' => 'Parámetros incompletos'], 400);
-                return;
-            }
-
-            $fechasArray = explode(',', $fechas);
-            $conflicts = $this->proyectoFeriadoModel->detectTaskConflicts($projectId, $fechasArray);
-
-            $this->jsonResponse([
-                'success' => true,
-                'conflicts' => $conflicts
-            ], 200);
-        } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::checkConflicts error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+        $projectId = (int)($_GET['proyecto_id'] ?? 0);
+        if (!$projectId) {
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Parámetros incompletos');
+            return;
         }
+
+        // Redirigir a la vista principal de feriados del proyecto
+        // La detección de conflictos debería manejarse en la vista sin Ajax
+        $this->redirectToRoute("/proyecto-feriados?proyecto_id={$projectId}");
     }
 
     /**
@@ -405,13 +411,13 @@ class ProyectoFeriadoController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN], 403);
+                $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
@@ -419,8 +425,15 @@ class ProyectoFeriadoController extends BaseController
             $taskIds = $_POST['task_ids'] ?? [];
             $diasAMover = (int)($_POST['dias_a_mover'] ?? 1);
 
-            if (!$projectId || empty($taskIds)) {
-                $this->jsonResponse(['success' => false, 'message' => 'Parámetros incompletos'], 400);
+            if (!$projectId) {
+                $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Proyecto no válido');
+                return;
+            }
+
+            $returnUrl = "/proyecto-feriados?proyecto_id={$projectId}";
+
+            if (empty($taskIds)) {
+                $this->redirectWithError($returnUrl, 'Parámetros incompletos');
                 return;
             }
 
@@ -432,45 +445,33 @@ class ProyectoFeriadoController extends BaseController
 
             $success = $this->proyectoFeriadoModel->moveTasksForward($projectId, $taskIds, $diasAMover);
             if ($success) {
-                $this->jsonResponse([
-                    'success' => true,
-                    'message' => 'Tareas movidas exitosamente',
-                    'moved_tasks' => count($taskIds)
-                ], 200);
+                $message = 'Tareas movidas exitosamente (' . count($taskIds) . ' tareas)';
+                $this->redirectWithSuccess($returnUrl, $message);
             } else {
-                $this->jsonResponse(['success' => false, 'message' => 'Error al mover tareas'], 500);
+                $this->redirectWithError($returnUrl, 'Error al mover tareas');
             }
         } catch (\Exception $e) {
             error_log('ProyectoFeriadoController::moveTasks error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
 
     /**
-     * Obtener días laborables en un rango
+     * Redireccionar a la vista principal - días laborables se calculan en el frontend
+     * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
     public function getWorkingDays()
     {
-        try {
-            $projectId = (int)($_GET['proyecto_id'] ?? 0);
-            $startDate = $_GET['start_date'] ?? '';
-            $endDate = $_GET['end_date'] ?? '';
-
-            if (!$projectId || !$startDate || !$endDate) {
-                $this->jsonResponse(['success' => false, 'message' => 'Parámetros incompletos'], 400);
-                return;
-            }
-
-            $workingDays = $this->proyectoFeriadoModel->getWorkingDays($projectId, $startDate, $endDate);
-
-            $this->jsonResponse([
-                'success' => true,
-                'working_days' => $workingDays,
-                'total_working_days' => count($workingDays)
-            ], 200);
-        } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::getWorkingDays error: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error interno del servidor'], 500);
+        $projectId = (int)($_GET['proyecto_id'] ?? 0);
+        if (!$projectId) {
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Parámetros incompletos');
+            return;
         }
+
+        // Redirigir a la vista principal de feriados del proyecto
+        // El cálculo de días laborables debería manejarse en la vista sin Ajax
+        $this->redirectToRoute("/proyecto-feriados?proyecto_id={$projectId}");
     }
 }

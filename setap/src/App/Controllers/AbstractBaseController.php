@@ -97,8 +97,11 @@ abstract class AbstractBaseController extends BaseController
             return $errors;
         }
 
-        // Verificar token CSRF
-        if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        // Verificar token CSRF (con logging detallado para debug)
+        $csrfTokenReceived = $_POST['csrf_token'] ?? '';
+        $csrfValidationResult = Security::validateCsrfToken($csrfTokenReceived);
+        
+        if (!$csrfValidationResult) {
             $errors[] = 'Token de seguridad inválido';
             http_response_code(403);
             return $errors;

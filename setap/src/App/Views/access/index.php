@@ -107,6 +107,8 @@ use App\Helpers\Security;
                         </div>
                         <div class="card-body">
                             <form class="access-form" data-user-type-id="<?= $userType['id'] ?>">
+                                <!-- Token CSRF para seguridad -->
+                                <?= Security::renderCsrfField() ?>
                                 <!-- Agrupar menús por grupo -->
                                 <?php 
                                 $groupedMenus = [];
