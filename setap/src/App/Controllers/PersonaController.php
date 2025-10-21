@@ -2,27 +2,20 @@
 namespace App\Controllers;
 
 use App\Models\Persona;
-use App\Services\PermissionService;
-use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
-use App\Config\Database;
 use App\Constants\AppConstants;
-use PDO;
 use Exception;
 
-class PersonaController extends BaseController
+class PersonaController extends AbstractBaseController
 {
     private $personaModel;
-    private $permissionService;
-    private $db;
 
-    public function __construct()
+    /**
+     * Hook para inicialización específica del controlador
+     */
+    protected function initializeController(): void
     {
-        // Verificar autenticación
-        (new AuthMiddleware())->handle();
         $this->personaModel = new Persona();
-        $this->permissionService = new PermissionService();
-        $this->db = Database::getInstance();
     }
 
     /**
@@ -30,34 +23,20 @@ class PersonaController extends BaseController
      */
     public function index()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->redirectToLogin();
-                return;
-            }
-
-            // Verificar permisos para gestión de personas
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_personas')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+        return $this->executeWithErrorHandling(function() {
+            // Verificar autenticación y permisos
+            if (!$this->requireAuthAndPermission('manage_personas')) {
                 return;
             }
 
             // Aplicar filtros si están presentes
-            $filters = [];
-            if (!empty($_GET['estado_tipo_id'])) {
-                $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
-            }
-            if (!empty($_GET['search'])) {
-                $filters['search'] = $_GET['search'];
-            }
-
+            $filters = $this->extractFilters(['estado_tipo_id', 'search']);
+            
             $personas = $this->personaModel->getAll($filters);
             $estadosTipo = $this->getEstadosTipo();
             $stats = $this->personaModel->getStats();
 
-            $this->view('personas/list', [
+            $this->render('personas/list', [
                 'personas' => $personas,
                 'estadosTipo' => $estadosTipo,
                 'stats' => $stats,
@@ -65,11 +44,7 @@ class PersonaController extends BaseController
                 'success' => $_GET['success'] ?? '',
                 'error' => $_GET['error'] ?? ''
             ]);
-        } catch (Exception $e) {
-            error_log("Error en PersonaController::index: " . $e->getMessage());
-            http_response_code(500);
-            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
-        }
+        }, 'index');
     }
 
     /**
@@ -77,31 +52,19 @@ class PersonaController extends BaseController
      */
     public function create()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->redirectToLogin();
-                return;
-            }
-
-            // Verificar permisos para gestión de persona individual
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+        return $this->executeWithErrorHandling(function() {
+            // Verificar autenticación y permisos
+            if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
             }
 
             $estadosTipo = $this->getEstadosTipo();
 
-            $this->view('personas/create', [
+            $this->render('personas/create', [
                 'estadosTipo' => $estadosTipo,
                 'error' => $_GET['error'] ?? ''
             ]);
-        } catch (Exception $e) {
-            error_log("Error en PersonaController::create: " . $e->getMessage());
-            http_response_code(500);
-            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
-        }
+        }, 'create');
     }
 
     /**
@@ -109,34 +72,23 @@ class PersonaController extends BaseController
      */
     public function store()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->redirectToLogin();
+        return $this->executeWithErrorHandling(function() {
+            // Verificar autenticación y permisos
+            if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
             }
 
-            // Verificar permisos
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_ACTION_PERMISSIONS);
-                return;
-            }
-
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_METHOD_NOT_ALLOWED);
-                return;
-            }
-
-            // Validar token CSRF
-            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_INVALID_SECURITY_TOKEN);
-                return;
-            }
-
-            $errors = $this->validatePersonaData($_POST);
+            // Validar método POST y token CSRF centralizadamente
+            $errors = $this->validatePostRequest();
             if (!empty($errors)) {
-                $errorMsg = implode(', ', $errors);
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, implode(', ', $errors));
+                return;
+            }
+
+            // Validar datos de la persona
+            $validationErrors = $this->validatePersonaData($_POST);
+            if (!empty($validationErrors)) {
+                $errorMsg = implode(', ', $validationErrors);
                 Security::redirect("/personas/create?error=" . urlencode($errorMsg));
                 return;
             }
@@ -159,10 +111,7 @@ class PersonaController extends BaseController
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_CREATE_PERSONA);
             }
-        } catch (Exception $e) {
-            error_log('PersonaController::store error: ' . $e->getMessage());
-            $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, AppConstants::ERROR_INTERNAL_SYSTEM);
-        }
+        }, 'store');
     }
 
     /**
@@ -170,25 +119,13 @@ class PersonaController extends BaseController
      */
     public function edit()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->redirectToLogin();
+        return $this->executeWithErrorHandling(function() {
+            // Verificar autenticación y permisos
+            if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
             }
 
-            // Verificar permisos
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
-                return;
-            }
-
-            $id = (int)($_GET['id'] ?? 0);
-            if ($id <= 0) {
-                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
-                return;
-            }
+            $id = $this->validateId($_GET['id'] ?? null, AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
 
             $persona = $this->personaModel->find($id);
             if (!$persona) {
@@ -198,16 +135,12 @@ class PersonaController extends BaseController
 
             $estadosTipo = $this->getEstadosTipo();
 
-            $this->view('personas/edit', [
+            $this->render('personas/edit', [
                 'persona' => $persona,
                 'estadosTipo' => $estadosTipo,
                 'error' => $_GET['error'] ?? ''
             ]);
-        } catch (Exception $e) {
-            error_log("Error en PersonaController::edit: " . $e->getMessage());
-            http_response_code(500);
-            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
-        }
+        }, 'edit');
     }
 
     /**
@@ -215,40 +148,24 @@ class PersonaController extends BaseController
      */
     public function update()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->redirectToLogin();
+        return $this->executeWithErrorHandling(function() {
+            // Verificar autenticación y permisos
+            if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
             }
 
-            // Verificar permisos
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_ACTION_PERMISSIONS);
-                return;
-            }
-
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
-                return;
-            }
-
-            $id = (int)($_POST['id'] ?? 0);
-            if ($id <= 0) {
-                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
-                return;
-            }
-
-            // Validar token CSRF
-            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                Security::redirect("/personas/edit?id={$id}&error=Token de seguridad inválido");
-                return;
-            }
-
-            $errors = $this->validatePersonaData($_POST, $id);
+            // Validar método POST y token CSRF centralizadamente
+            $errors = $this->validatePostRequest();
             if (!empty($errors)) {
-                $errorMsg = implode(', ', $errors);
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, implode(', ', $errors));
+                return;
+            }
+
+            $id = $this->validateId($_POST['id'] ?? null, AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
+
+            $validationErrors = $this->validatePersonaData($_POST, $id);
+            if (!empty($validationErrors)) {
+                $errorMsg = implode(', ', $validationErrors);
                 Security::redirect("/personas/edit?id={$id}&error=" . urlencode($errorMsg));
                 return;
             }
@@ -270,11 +187,7 @@ class PersonaController extends BaseController
             } else {
                 Security::redirect("/personas/edit?id={$id}&error=Error al actualizar persona");
             }
-        } catch (Exception $e) {
-            error_log('PersonaController::update error: ' . $e->getMessage());
-            $id = (int)($_POST['id'] ?? 0);
-            Security::redirect("/personas/edit?id={$id}&error=Error interno del sistema");
-        }
+        }, 'update');
     }
 
     /**
@@ -282,35 +195,18 @@ class PersonaController extends BaseController
      */
     public function delete()
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->jsonResponse(['error' => AppConstants::ERROR_USER_NOT_AUTHENTICATED], 401);
+        return $this->executeWithErrorHandling(function() {
+            if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
             }
 
-            // Verificar permisos
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
-                $this->jsonResponse(['error' => 'No tienes permisos para realizar esta acción'], 403);
+            $errors = $this->validatePostRequest();
+            if (!empty($errors)) {
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS, implode(', ', $errors));
                 return;
             }
 
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->jsonResponse(['error' => AppConstants::ERROR_METHOD_NOT_ALLOWED], 405);
-                return;
-            }
-
-            $id = (int)($_POST['id'] ?? 0);
-            if ($id <= 0) {
-                $this->jsonResponse(['error' => 'ID de persona inválido'], 400);
-                return;
-            }
-
-            // Validar token CSRF
-            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->jsonResponse(['error' => 'Token de seguridad inválido'], 403);
-                return;
-            }
+            $id = $this->validateId($_POST['id'] ?? null, AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
 
             if ($this->personaModel->delete($id)) {
                 Security::logSecurityEvent('persona_deleted', [
@@ -321,10 +217,7 @@ class PersonaController extends BaseController
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_PERSONA_IN_USE);
             }
-        } catch (Exception $e) {
-            error_log('PersonaController::delete error: ' . $e->getMessage());
-            $this->redirectWithError(AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INTERNAL_SYSTEM);
-        }
+        }, 'delete');
     }
 
     /**
@@ -332,17 +225,9 @@ class PersonaController extends BaseController
      */
     public function show($id = null)
     {
-        try {
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->redirectToLogin();
-                return;
-            }
-
-            // Verificar permisos para gestión de persona individual
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_persona')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+        return $this->executeWithErrorHandling(function() use ($id) {
+            // Verificar autenticación y permisos
+            if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
             }
 
@@ -355,11 +240,7 @@ class PersonaController extends BaseController
                 $this->redirectToRoute(AppConstants::ROUTE_PERSONAS_CREATE);
                 return;
             }
-        } catch (Exception $e) {
-            error_log("Error en PersonaController::show: " . $e->getMessage());
-            http_response_code(500);
-            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
-        }
+        }, 'show');
     }
 
     /**
@@ -410,26 +291,10 @@ class PersonaController extends BaseController
     }
 
     /**
-     * Obtener tipos de estado
+     * Obtener tipos de estado - Usa método heredado de AbstractBaseController
      */
     private function getEstadosTipo(): array
     {
-        try {
-            $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM estado_tipos WHERE id IN (1, 2, 3, 4) ORDER BY id");
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            error_log('PersonaController::getEstadosTipo error: ' . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Renderizar vista
-     */
-    private function view($view, $data = [])
-    {
-        extract($data);
-        require __DIR__ . "/../Views/{$view}.php";
+        return parent::getEstadosTipo();
     }
 }

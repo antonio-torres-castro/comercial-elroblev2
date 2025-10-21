@@ -267,16 +267,11 @@ class DashboardStatsTest extends TestCase
             return $value > 0;
         });
 
-        $this->assertNotEmpty(
-            $hasNonZeroValues,
-            "Las estadísticas deben mostrar datos reales, no valores hardcoded en 0"
-        );
+        $this->assertNotEmpty($hasNonZeroValues,
+            "Las estadísticas deben mostrar datos reales, no valores hardcoded en 0");
 
         // Verificar que los proyectos activos no exceden el total
-        $this->assertLessThanOrEqual(
-            $stats['total_proyectos'],
-            $stats['proyectos_activos'],
-            "Proyectos activos no puede exceder el total de proyectos"
-        );
+        $this->assertLessThanOrEqual($stats['total_proyectos'], $stats['proyectos_activos'],
+            "Proyectos activos no puede exceder el total de proyectos");
     }
 }

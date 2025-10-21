@@ -379,7 +379,7 @@ class ReportService
                     'status' => 'Configurado'
                 ],
                 [
-                    'parameter' => 'Fecha de generaci�n',
+                    'parameter' => 'Fecha de generación',
                     'value' => date('d/m/Y H:i:s'),
                     'status' => 'Actual'
                 ]

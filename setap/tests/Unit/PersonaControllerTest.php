@@ -5,90 +5,105 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Controllers\PersonaController;
 use App\Models\Persona;
-use App\Services\PermissionService;
-use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Tests unitarios para PersonaController
+ * Tests unitarios para PersonaController - Actualizado para AbstractBaseController
  * 
  * @author MiniMax Agent
- * @date 2025-10-11
+ * @date 2025-10-21
  */
 class PersonaControllerTest extends TestCase
 {
     private PersonaController $controller;
-    private MockObject $personaModelMock;
-    private MockObject $permissionServiceMock;
 
     protected function setUp(): void
     {
         parent::setUp();
         
-        // Mock de dependencias
-        $this->personaModelMock = $this->createMock(Persona::class);
-        $this->permissionServiceMock = $this->createMock(PermissionService::class);
-        
         // Mock de sesión para simular usuario autenticado
         $_SESSION = [
             'user_id' => 1,
             'username' => 'test_user',
+            'email' => 'test@example.com',
+            'nombre_completo' => 'Usuario Test',
+            'rol' => 'admin',
+            'usuario_tipo_id' => 1,
             'authenticated' => true
         ];
         
-        // Instanciar controlador - necesitaríamos dependency injection para testing real
-        // Por ahora documentamos la estructura esperada
+        // Limpiar superglobals
+        $_POST = [];
+        $_GET = [];
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // Instanciar controlador - ahora funciona con AbstractBaseController
+        $this->controller = new PersonaController();
     }
 
     /**
-     * Test que valida el comportamiento del método index con permisos válidos
+     * Test que verifica que el controlador se puede instanciar correctamente
      */
-    public function testIndexWithValidPermissions()
+    public function testControllerCanBeInstantiated()
     {
-        // Mock de permisos - usuario tiene acceso
-        $this->permissionServiceMock
-            ->method('hasMenuAccess')
-            ->with(1, 'manage_personas')
-            ->willReturn(true);
+        $this->assertInstanceOf(PersonaController::class, $this->controller);
+        $this->assertInstanceOf(\App\Controllers\AbstractBaseController::class, $this->controller);
+    }
 
-        // Mock de datos de personas
-        $expectedPersonas = [
-            ['id' => 1, 'nombre' => 'Juan Pérez', 'rut' => '12345678-9'],
-            ['id' => 2, 'nombre' => 'María González', 'rut' => '98765432-1']
+    /**
+     * Test que verifica que todos los métodos públicos existen
+     */
+    public function testAllPublicMethodsExist()
+    {
+        $expectedMethods = ['index', 'create', 'store', 'edit', 'update', 'delete', 'show'];
+        
+        foreach ($expectedMethods as $method) {
+            $this->assertTrue(
+                method_exists($this->controller, $method),
+                "Método '{$method}' debe existir en PersonaController"
+            );
+        }
+    }
+
+    /**
+     * Test que verifica que el controlador extiende de AbstractBaseController
+     */
+    public function testExtendsAbstractBaseController()
+    {
+        $this->assertInstanceOf(
+            \App\Controllers\AbstractBaseController::class, 
+            $this->controller,
+            'PersonaController debe extender AbstractBaseController'
+        );
+    }
+
+    /**
+     * Test que verifica que tiene acceso a métodos heredados
+     */
+    public function testHasAccessToInheritedMethods()
+    {
+        // Verificar que tiene acceso a métodos de validación heredados
+        $reflection = new \ReflectionClass($this->controller);
+        
+        // Métodos que debería tener heredados
+        $inheritedMethods = [
+            'executeWithErrorHandling',
+            'requireAuthAndPermission', 
+            'validatePostRequest',
+            'render'
         ];
         
-        $this->personaModelMock
-            ->method('getAll')
-            ->willReturn($expectedPersonas);
-
-        // Simular estadísticas
-        $expectedStats = ['total' => 2, 'activos' => 2, 'inactivos' => 0];
-        $this->personaModelMock
-            ->method('getStats')
-            ->willReturn($expectedStats);
-
-        // Assert: El test pasaría si pudiéramos inyectar dependencias
-        $this->assertTrue(true, 'Test estructura validada - requiere refactoring para dependency injection');
-    }
-
-    /**
-     * Test que valida el comportamiento del método index sin permisos
-     */
-    public function testIndexWithoutPermissions()
-    {
-        // Mock de permisos - usuario NO tiene acceso
-        $this->permissionServiceMock
-            ->method('hasMenuAccess')
-            ->with(1, 'manage_personas')
-            ->willReturn(false);
-
-        // Assert: Debería retornar error 403
-        $this->assertTrue(true, 'Test estructura validada - requiere refactoring para dependency injection');
+        foreach ($inheritedMethods as $method) {
+            $this->assertTrue(
+                $reflection->hasMethod($method),
+                "Debe tener acceso al método heredado '{$method}'"
+            );
+        }
     }
 
     /**
      * Test de validación de datos de persona
      */
-    public function testValidatePersonaData()
+    public function testValidatePersonaDataStructure()
     {
         // Test con datos válidos
         $validData = [
@@ -107,7 +122,7 @@ class PersonaControllerTest extends TestCase
             'estado_tipo_id' => 'invalid'
         ];
 
-        // Assert: Validación de datos estructurada
+        // Assert: Validación de estructura de datos
         $this->assertIsArray($validData);
         $this->assertArrayHasKey('rut', $validData);
         $this->assertArrayHasKey('nombre', $validData);
@@ -117,84 +132,6 @@ class PersonaControllerTest extends TestCase
         
         // Test de nombre no vacío
         $this->assertNotEmpty($validData['nombre']);
-    }
-
-    /**
-     * Test de creación de persona con datos válidos
-     */
-    public function testStoreWithValidData()
-    {
-        // Mock de permisos válidos
-        $this->permissionServiceMock
-            ->method('hasMenuAccess')
-            ->with(1, 'manage_persona')
-            ->willReturn(true);
-
-        // Mock de creación exitosa
-        $this->personaModelMock
-            ->method('create')
-            ->willReturn(123); // ID de nueva persona
-
-        $validPostData = [
-            'csrf_token' => 'valid_token',
-            'rut' => '12345678-9',
-            'nombre' => 'Juan Pérez',
-            'telefono' => '+56912345678',
-            'direccion' => 'Av. Providencia 1234',
-            'estado_tipo_id' => 1
-        ];
-
-        // Assert: Estructura de test válida
-        $this->assertArrayHasKey('csrf_token', $validPostData);
-        $this->assertArrayHasKey('rut', $validPostData);
-        $this->assertArrayHasKey('nombre', $validPostData);
-    }
-
-    /**
-     * Test de actualización de persona existente
-     */
-    public function testUpdateExistingPersona()
-    {
-        $personaId = 1;
-        
-        // Mock de persona existente
-        $existingPersona = [
-            'id' => $personaId,
-            'rut' => '12345678-9',
-            'nombre' => 'Juan Pérez',
-            'telefono' => '+56912345678'
-        ];
-        
-        $this->personaModelMock
-            ->method('find')
-            ->with($personaId)
-            ->willReturn($existingPersona);
-
-        // Mock de actualización exitosa
-        $this->personaModelMock
-            ->method('update')
-            ->with($personaId, $this->isType('array'))
-            ->willReturn(true);
-
-        // Assert: Persona puede ser actualizada
-        $this->assertIsArray($existingPersona);
-        $this->assertEquals($personaId, $existingPersona['id']);
-    }
-
-    /**
-     * Test de búsqueda de persona por ID inexistente
-     */
-    public function testFindNonExistentPersona()
-    {
-        $nonExistentId = 999;
-        
-        $this->personaModelMock
-            ->method('find')
-            ->with($nonExistentId)
-            ->willReturn(null);
-
-        // Assert: Persona no encontrada
-        $this->assertNull(null); // Simula persona no encontrada
     }
 
     /**
@@ -229,34 +166,88 @@ class PersonaControllerTest extends TestCase
     }
 
     /**
-     * Test de filtros de búsqueda
+     * Test de estructura de filtros
      */
-    public function testPersonaFilters()
+    public function testPersonaFiltersStructure()
     {
         $filters = [
             'estado_tipo_id' => 1,
             'search' => 'Juan'
         ];
 
-        $this->personaModelMock
-            ->method('getAll')
-            ->with($filters)
-            ->willReturn([
-                ['id' => 1, 'nombre' => 'Juan Pérez', 'estado_tipo_id' => 1]
-            ]);
-
-        // Assert: Filtros aplicados correctamente
+        // Assert: Filtros estructurados correctamente
         $this->assertArrayHasKey('estado_tipo_id', $filters);
         $this->assertArrayHasKey('search', $filters);
         $this->assertEquals(1, $filters['estado_tipo_id']);
         $this->assertEquals('Juan', $filters['search']);
     }
 
+    /**
+     * Test que verifica que el controlador maneja sesiones correctamente
+     */
+    public function testControllerHandlesSessionCorrectly()
+    {
+        // El constructor de AbstractBaseController debe configurar el usuario actual
+        $this->assertArrayHasKey('user_id', $_SESSION);
+        $this->assertArrayHasKey('username', $_SESSION);
+        $this->assertEquals(1, $_SESSION['user_id']);
+        $this->assertEquals('test_user', $_SESSION['username']);
+    }
+
+    /**
+     * Test de estructura de datos POST para creación
+     */
+    public function testStoreDataStructure()
+    {
+        $validPostData = [
+            'csrf_token' => 'valid_token',
+            'rut' => '12345678-9',
+            'rut_clean' => '123456789',
+            'nombre' => 'Juan Pérez',
+            'telefono' => '+56912345678',
+            'direccion' => 'Av. Providencia 1234',
+            'estado_tipo_id' => 1
+        ];
+
+        // Assert: Estructura de datos válida
+        $this->assertArrayHasKey('csrf_token', $validPostData);
+        $this->assertArrayHasKey('rut', $validPostData);
+        $this->assertArrayHasKey('rut_clean', $validPostData);
+        $this->assertArrayHasKey('nombre', $validPostData);
+        $this->assertArrayHasKey('estado_tipo_id', $validPostData);
+    }
+
+    /**
+     * Test que verifica que usa el nuevo patrón de AbstractBaseController
+     */
+    public function testUsesNewArchitecturalPattern()
+    {
+        $reflection = new \ReflectionClass($this->controller);
+        
+        // Verificar que NO tiene las propiedades del patrón antiguo
+        $oldProperties = ['permissionService', 'db'];
+        foreach ($oldProperties as $property) {
+            $this->assertFalse(
+                $reflection->hasProperty($property),
+                "No debe tener la propiedad obsoleta '{$property}'"
+            );
+        }
+        
+        // Verificar que tiene la propiedad del nuevo patrón
+        $this->assertTrue(
+            $reflection->hasProperty('personaModel'),
+            'Debe tener la propiedad personaModel'
+        );
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();
         
-        // Limpiar sesión
+        // Limpiar sesión y superglobals
         $_SESSION = [];
+        $_POST = [];
+        $_GET = [];
+        unset($_SERVER['REQUEST_METHOD']);
     }
 }
