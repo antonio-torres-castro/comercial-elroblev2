@@ -46,6 +46,7 @@ class AccessController extends AbstractBaseController
     /**
      * Actualizar accesos de un tipo de usuario
      * ANTES: 60+ líneas, DESPUÉS: 25 líneas
+     * Formulario tradicional con redirect
      */
     public function update()
     {
@@ -73,6 +74,7 @@ class AccessController extends AbstractBaseController
             $result = $this->updateUserTypeAccess($userTypeId, $menuIds);
             $message = $result ? 'Accesos actualizados correctamente' : 'Error al actualizar accesos';
 
+            // Respuesta tradicional con redirect
             if ($result) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_ACCESS, $message);
             } else {

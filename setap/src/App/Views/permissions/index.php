@@ -214,7 +214,7 @@ use App\Constants\AppConstants;
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Manejar cambios en checkboxes para actualizar estilos
+            // Manejar cambios en checkboxes para actualizar estilos visuales
             document.querySelectorAll('.permission-checkbox input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     const container = this.closest('.permission-checkbox');
@@ -226,61 +226,9 @@ use App\Constants\AppConstants;
                 });
             });
 
-            // Manejar envío de formularios
-            document.querySelectorAll('.permissions-form').forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    const userTypeId = this.dataset.userTypeId;
-                    const formData = new FormData(this);
-                    formData.append('user_type_id', userTypeId);
-
-                    // Mostrar loading en el botón
-                    const btn = this.querySelector('button[type="submit"]');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
-                    btn.disabled = true;
-
-                    fetch('/permisos/update', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Mostrar éxito
-                                btn.innerHTML = '<i class="bi bi-shield-check"></i> ¡Guardado!';
-                                btn.classList.remove('btn-setap-primary');
-                                btn.classList.add('btn-success');
-
-                                // Mostrar notificación usando sistema estándar
-                                showAlert('Permisos actualizados correctamente', 'success');
-
-                                // Restaurar botón después de 2 segundos
-                                setTimeout(() => {
-                                    btn.innerHTML = originalText;
-                                    btn.classList.remove('btn-success');
-                                    btn.classList.add('btn-setap-primary');
-                                    btn.disabled = false;
-                                }, 2000);
-                            } else {
-                                throw new Error(data.message || 'Error al guardar');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showAlert('Error al guardar los permisos: ' + error.message, 'danger');
-
-                            // Restaurar botón
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
-                        });
-                });
-            });
+            // Los formularios usan submit tradicional (sin AJAX)
+            // Las alertas se muestran mediante el sistema de mensajes flash de sesión
         });
-
-        // Sistema estándar de alertas SETAP ya cargado
-        // La función showAlert está disponible globalmente desde alert-system.js
     </script>
 </body>
 

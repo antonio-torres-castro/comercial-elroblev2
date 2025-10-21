@@ -45,6 +45,7 @@ class PermissionsController extends AbstractBaseController
     /**
      * Actualizar permisos de un tipo de usuario
      * ANTES: 60+ líneas, DESPUÉS: 25 líneas
+     * Formulario tradicional con redirect
      */
     public function update()
     {
@@ -72,6 +73,7 @@ class PermissionsController extends AbstractBaseController
             $result = $this->updateUserTypePermissions($userTypeId, $permissionIds);
             $message = $result ? 'Permisos actualizados correctamente' : 'Error al actualizar permisos';
 
+            // Respuesta tradicional con redirect
             if ($result) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_PERMISSIONS, $message);
             } else {
