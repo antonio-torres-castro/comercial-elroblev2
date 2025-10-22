@@ -11,15 +11,15 @@
 // Scripts disponibles
 $available_scripts = [
     'jquery' => [
-        'url' => 'https://code.jquery.com/jquery-3.7.1.min.js',
+        'url' => 'https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js',
         'check' => 'window.jQuery'
     ],
     'datatables' => [
         'requires' => ['jquery'],
-        'css' => 'https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css',
+        'css' => 'https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css',
         'js' => [
-            'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js',
-            'https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js'
+            'https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js',
+            'https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/js/dataTables.bootstrap5.min.js'
         ],
         'check' => 'window.jQuery && window.jQuery.fn.DataTable'
     ]
