@@ -28,7 +28,7 @@ use App\Constants\AppConstants;
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/create" class="btn btn-sm btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/create" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Nueva Contraparte
                         </a>
                     </div>
@@ -136,7 +136,7 @@ use App\Constants\AppConstants;
                                 <i class="bi bi-inbox display-1 text-muted"></i>
                                 <h5 class="mt-3 text-muted">No se encontraron contrapartes</h5>
                                 <p class="text-muted">No hay contrapartes que coincidan con los filtros aplicados.</p>
-                                <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/create" class="btn btn-setap-primary">
+                                <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/create" class="btn btn-setap-primary">
                                     <i class="bi bi-plus-circle"></i> Crear Primera Contraparte
                                 </a>
                             </div>
@@ -204,7 +204,7 @@ use App\Constants\AppConstants;
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/<?php echo $counterpartie['id']; ?>"
+                                                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/<?php echo $counterpartie['id']; ?>"
                                                             class="btn btn-outline-primary" title="Editar">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
@@ -238,7 +238,7 @@ use App\Constants\AppConstants;
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                                 Cancelar
                                                             </button>
-                                                            <form method="POST" action="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>/delete" style="display: inline;">
+                                                            <form method="POST" action="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/delete" style="display: inline;">
                                                                 <?= \App\Helpers\Security::renderCsrfField() ?>
                                                                 <input type="hidden" name="id" value="<?php echo $counterpartie['id']; ?>">
                                                                 <button type="submit" class="btn btn-danger">

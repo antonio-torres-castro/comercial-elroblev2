@@ -25,22 +25,22 @@ class AppConstants
 
     /** Ruta base de clientes */
     const ROUTE_CLIENTS = '/clients';
-    
+
     /** Ruta de creación de clientes */
     const ROUTE_CLIENTS_CREATE = '/clients/create';
-    
+
     /** Ruta de edición de clientes */
     const ROUTE_CLIENTS_EDIT = '/clients/edit';
 
     /** Ruta base de tareas */
     const ROUTE_TASKS = '/tasks';
-    
+
     /** Ruta de creación de tareas */
     const ROUTE_TASKS_CREATE = '/tasks/create';
-    
+
     /** Ruta de vista de tarea */
     const ROUTE_TASKS_SHOW = '/tasks/show';
-    
+
     /** Ruta de edición de tarea */
     const ROUTE_TASKS_EDIT = '/tasks/edit';
 
@@ -61,7 +61,9 @@ class AppConstants
 
     /** Ruta de contrapartes de clientes */
     const ROUTE_CLIENT_COUNTERPARTIES = '/client-counterparties';
-    
+    /** Ruta de contraparte de cliente */
+    const ROUTE_CLIENT_COUNTERPARTIE = '/client-counterpartie';
+
     /** Ruta de permisos */
     const ROUTE_PERMISOS = '/permisos';
 
@@ -73,16 +75,16 @@ class AppConstants
 
     /** Ruta de creación de proyectos */
     const ROUTE_PROJECTS_CREATE = '/projects/create';
-    
+
     /** Ruta de búsqueda de proyectos */
     const ROUTE_PROJECTS_SEARCH = '/projects/search';
-    
+
     /** Ruta de vista de proyecto */
     const ROUTE_PROJECTS_SHOW = '/projects/show';
-    
+
     /** Ruta de edición de proyecto */
     const ROUTE_PROJECTS_EDIT = '/projects/edit';
-    
+
     /** Ruta de reporte de proyecto */
     const ROUTE_PROJECTS_REPORT = '/projects/report';
 
@@ -148,7 +150,7 @@ class AppConstants
     /** Error de usuario no encontrado */
     const ERROR_USER_NOT_AUTHENTICATED = 'No autenticado';
 
-     /** Error de usuario no encontrado */
+    /** Error de usuario no encontrado */
     const ERROR_USER_NOT_AUTHORIZED = 'No autorizado';
 
     /** Error de tarea no encontrada */
@@ -243,16 +245,16 @@ class AppConstants
 
     /** Error al guardar el cliente */
     const ERROR_SAVE_CLIENT = 'Error al guardar el cliente';
-    
+
     /** Error al actualizar el cliente */
     const ERROR_UPDATE_CLIENT = 'Error al actualizar el cliente';
-    
+
     /** Error al guardar la contraparte */
     const ERROR_SAVE_COUNTERPARTY = 'Error al guardar la contraparte';
-    
+
     /** Error al actualizar la contraparte */
     const ERROR_UPDATE_COUNTERPARTY = 'Error al actualizar la contraparte';
-    
+
     /** ID de cliente requerido */
     const ERROR_CLIENT_ID_REQUIRED = 'ID de cliente requerido';
 
@@ -342,7 +344,7 @@ class AppConstants
 
     /** Mi Perfil */
     const UI_MY_PROFILE = 'Mi Perfil';
-    
+
     /** Cambiar Contraseña */
     const UI_CHANGE_PASSWORD = 'Cambiar Contraseña';
 
@@ -433,7 +435,7 @@ class AppConstants
 
     /** Crear Reporte */
     const UI_CREATE_REPORT = 'Crear Reporte';
-    
+
     /** Reporte Generado */
     const UI_REPORT_GENERATED = 'Reporte Generado';
 
@@ -456,79 +458,79 @@ class AppConstants
     const UI_TASK_LIST = 'Lista de tareas';
 
     // ===== TÍTULOS DE GESTIÓN ESPECÍFICOS =====
-    
+
     /** Gestión de Tareas */
     const UI_TASK_MANAGEMENT = 'Gestión de Tareas';
-    
+
     /** Gestión de Proyectos */
     const UI_PROJECT_MANAGEMENT = 'Gestión de Proyectos';
-    
+
     /** Gestión de Personas */
     const UI_PERSONA_MANAGEMENT = 'Gestión de Personas';
-    
+
     /** Gestión de Clientes */
     const UI_CLIENT_MANAGEMENT = 'Gestión de Clientes';
-    
+
     /** Editar Cliente */
     const UI_EDIT_CLIENT = 'Editar Cliente';
-    
+
     /** Contrapartes de Clientes */
     const UI_CLIENT_COUNTERPARTIES = 'Contrapartes de Clientes';
-    
+
     /** Nueva Contraparte */
     const UI_NEW_COUNTERPARTY = 'Nueva Contraparte';
-    
+
     /** Editar Contraparte */
     const UI_EDIT_COUNTERPARTY = 'Editar Contraparte';
-    
+
     /** Editando contraparte */
     const UI_EDITING_COUNTERPARTY = 'Editando contraparte';
-    
+
     /** Reportes del Sistema */
     const UI_SYSTEM_REPORTS = 'Reportes del Sistema';
-    
+
     // ===== ACCIONES DE NAVEGACIÓN ESPECÍFICAS =====
-    
+
     /** Volver a Tareas */
     const UI_BACK_TO_TASKS = 'Volver a Tareas';
-    
+
     /** Volver a Proyectos */
     const UI_BACK_TO_PROJECTS = 'Volver a Proyectos';
-    
+
     /** Volver a Personas */
     const UI_BACK_TO_PERSONAS = 'Volver a Personas';
-    
+
     /** Volver a Reportes */
     const UI_BACK_TO_REPORTS = 'Volver a Reportes';
-    
+
     /** Búsqueda Avanzada */
     const UI_ADVANCED_SEARCH_BTN = 'Búsqueda Avanzada';
-    
+
     // ===== TÍTULOS DE SECCIONES =====
-    
+
     /** Información Básica */
     const UI_BASIC_INFORMATION = 'Información Básica';
-    
+
     /** Información de la Tarea */
     const UI_TASK_INFORMATION = 'Información de la Tarea';
-    
+
     // ===== TÍTULOS DE CREACIÓN ESPECÍFICOS =====
-    
+
     /** Nueva Tarea */
     const UI_NEW_TASK = 'Nueva Tarea';
-    
+
     /** Nueva Persona */
     const UI_NEW_PERSONA = 'Nueva Persona';
-    
+
     /** Crear Proyecto */
     const UI_CREATE_PROJECT_TITLE = 'Crear Proyecto';
-    
+
     /** Crear Nuevo Proyecto */
     const UI_CREATE_NEW_PROJECT = 'Crear Nuevo Proyecto';
-    
+
     /** Editar Tarea */
     const UI_EDIT_TASK_TITLE = 'Editar Tarea';
-    
+
     /** Texto para editando tarea */
     const UI_EDITING_TASK = 'Editando tarea';
 
@@ -552,14 +554,16 @@ class AppConstants
     /**
      * Construye una URL con parámetros de éxito
      */
-    public static function buildSuccessUrl(string $baseRoute, string $message): string {
+    public static function buildSuccessUrl(string $baseRoute, string $message): string
+    {
         return $baseRoute . '?' . self::PARAM_SUCCESS . '=' . $message;
     }
 
     /**
      * Construye una URL con parámetros de error
      */
-    public static function buildErrorUrl(string $baseRoute, string $message): string {
+    public static function buildErrorUrl(string $baseRoute, string $message): string
+    {
         return $baseRoute . '?' . self::PARAM_ERROR . '=' . urlencode($message);
     }
 }
