@@ -14,7 +14,6 @@ INSERT INTO tarea_tipos (id, nombre) VALUES
 (1, 'intelectual'),
 (2, 'physical');
 
-use comerci3_bdsetap;
 -- Poblar tabla usuario_tipos
 INSERT INTO usuario_tipos (id, nombre, descripcion) VALUES
 (1, 'admin',       'Administrador del sistema con acceso completo'),

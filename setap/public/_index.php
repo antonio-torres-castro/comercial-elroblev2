@@ -84,13 +84,13 @@ try {
                 $controller = new HomeController();
                 $controller->index();
             } else {
-                Security::redirect('/login');
+                Security::redirect(AppConstants::ROUTE_LOGIN);
             }
             break;
 
         case 'dashboard':
             // Redirigir a la nueva ruta /home para compatibilidad
-            header('Location: /home', true, 301);
+            header('Location: ' . AppConstants::ROUTE_HOME, true, 301);
             exit;
 
         case 'users':
@@ -234,7 +234,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update($id);
                     } else {
-                        Security::redirect('/menus');
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
                     
@@ -242,7 +242,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
                     } else {
-                        Security::redirect('/menus');
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
                     
@@ -250,7 +250,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
                     } else {
-                        Security::redirect('/menus');
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
                     
@@ -258,7 +258,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->toggleStatus();
                     } else {
-                        Security::redirect('/menus');
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
                     
@@ -462,7 +462,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update();
                     } else {
-                        Security::redirect('/tasks');
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
                     
@@ -470,7 +470,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
                     } else {
-                        Security::redirect('/tasks');
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
                     
@@ -478,7 +478,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
                     } else {
-                        Security::redirect('/tasks');
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
                     
@@ -486,7 +486,7 @@ try {
                     if ($id) {
                         $controller->show((int)$id);
                     } else {
-                        Security::redirect('/tasks');
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
                     
@@ -632,10 +632,10 @@ try {
             // Redireccionar las rutas /user/{id} a las rutas estándar
             if ($action) {
                 // Editar usuario existente
-                Security::redirect("/users/edit?id={$action}");
+                Security::redirect(AppConstants::ROUTE_USERS . "/edit?id={$action}");
             } else {
                 // Nuevo usuario
-                Security::redirect("/users/create");
+                Security::redirect(AppConstants::ROUTE_USERS . "/create");
             }
             break;
 
@@ -731,7 +731,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->generate();
                     } else {
-                        Security::redirect('/reports');
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
                     
@@ -739,7 +739,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->download();
                     } else {
-                        Security::redirect('/reports');
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
                     
@@ -747,7 +747,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->usersReport();
                     } else {
-                        Security::redirect('/reports');
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
                     
@@ -755,7 +755,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->projectsReport();
                     } else {
-                        Security::redirect('/reports');
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
                     

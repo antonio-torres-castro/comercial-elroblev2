@@ -22,16 +22,16 @@ Options -Indexes
 # Priorizar index.php
 DirectoryIndex index.php index.html
 
-# # Bloquear archivos sensibles (compatible con Apache 2.2/2.4)
-# <FilesMatch "\.(env|ini|phps|log|sh|bak|config|sql|tpl\.php)$">
-#     <IfModule !mod_authz_core.c>
-#         Order allow,deny
-#         Deny from all
-#     </IfModule>
-#     <IfModule mod_authz_core.c>
-#         Require all denied
-#     </IfModule>
-# </FilesMatch>
+# Bloquear archivos sensibles (compatible con Apache 2.2/2.4)
+<FilesMatch "\.(env|ini|phps|log|sh|bak|config|sql|tpl\.php)$">
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
 
 # Charset
 AddDefaultCharset UTF-8

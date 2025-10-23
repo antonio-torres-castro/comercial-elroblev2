@@ -4,8 +4,10 @@
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # RewriteBase /setap/
     
     # Redirigir todo a la carpeta public/
+    RewriteCond %{REQUEST_URI} !^/setap/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
