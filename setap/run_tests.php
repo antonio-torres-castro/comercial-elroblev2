@@ -1,4 +1,4 @@
-#!/usr/bin/env php8.2
+﻿#!/usr/bin/env php8.2
 <?php
 /**
  * Script de ejecución de tests para validar la cobertura implementada
@@ -8,7 +8,7 @@
  */
 
 // Cargar autoloader
-require_once __DIR__ . '/venv/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 echo "🧪 SETAP Testing Framework - Validación de Cobertura\n";
 echo "================================================\n\n";

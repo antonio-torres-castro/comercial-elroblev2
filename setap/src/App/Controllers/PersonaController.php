@@ -89,7 +89,7 @@ class PersonaController extends AbstractBaseController
             $validationErrors = $this->validatePersonaData($_POST);
             if (!empty($validationErrors)) {
                 $errorMsg = implode(', ', $validationErrors);
-                Security::redirect("/personas/create?error=" . urlencode($errorMsg));
+                Security::redirect(AppConstants::ROUTE_PERSONAS . "/create?error=" . urlencode($errorMsg));
                 return;
             }
 
@@ -166,7 +166,7 @@ class PersonaController extends AbstractBaseController
             $validationErrors = $this->validatePersonaData($_POST, $id);
             if (!empty($validationErrors)) {
                 $errorMsg = implode(', ', $validationErrors);
-                Security::redirect("/personas/edit?id={$id}&error=" . urlencode($errorMsg));
+                Security::redirect(AppConstants::ROUTE_PERSONAS . "/edit?id={$id}&error=" . urlencode($errorMsg));
                 return;
             }
 
@@ -185,7 +185,7 @@ class PersonaController extends AbstractBaseController
                 ]);
                 $this->redirectWithSuccess(AppConstants::ROUTE_PERSONAS, 'Persona actualizada correctamente');
             } else {
-                Security::redirect("/personas/edit?id={$id}&error=Error al actualizar persona");
+                Security::redirect(AppConstants::ROUTE_PERSONAS . "/edit?id={$id}&error=Error al actualizar persona");
             }
         }, 'update');
     }
@@ -233,7 +233,7 @@ class PersonaController extends AbstractBaseController
 
             if ($id) {
                 // Redirigir al método edit
-                Security::redirect("/personas/edit?id={$id}");
+                Security::redirect(AppConstants::ROUTE_PERSONAS . "/edit?id={$id}");
                 return;
             } else {
                 // Redirigir al método create

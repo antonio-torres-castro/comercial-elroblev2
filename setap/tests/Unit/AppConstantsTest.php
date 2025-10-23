@@ -49,11 +49,11 @@ class AppConstantsTest extends TestCase
         $this->assertStringStartsWith('/', AppConstants::ROUTE_PROJECTS);
         
         // Rutas específicas deben tener el formato correcto
-        $this->assertEquals('/login', AppConstants::ROUTE_LOGIN);
-        $this->assertEquals('/home', AppConstants::ROUTE_HOME);
-        $this->assertEquals('/users', AppConstants::ROUTE_USERS);
-        $this->assertEquals('/tasks', AppConstants::ROUTE_TASKS);
-        $this->assertEquals('/projects', AppConstants::ROUTE_PROJECTS);
+        $this->assertEquals('/setap/login', AppConstants::ROUTE_LOGIN);
+        $this->assertEquals('/setap/home', AppConstants::ROUTE_HOME);
+        $this->assertEquals('/setap/users', AppConstants::ROUTE_USERS);
+        $this->assertEquals('/setap/tasks', AppConstants::ROUTE_TASKS);
+        $this->assertEquals('/setap/projects', AppConstants::ROUTE_PROJECTS);
     }
 
     /**
@@ -152,16 +152,16 @@ class AppConstantsTest extends TestCase
     public function testUtilityMethods()
     {
         // Test buildSuccessUrl
-        $baseRoute = '/users';
+        $baseRoute = '/setap/users';
         $message = 'created';
-        $expectedUrl = '/users?success=created';
+        $expectedUrl = '/setap/users?success=created';
         
         $result = AppConstants::buildSuccessUrl($baseRoute, $message);
         $this->assertEquals($expectedUrl, $result);
         
         // Test buildErrorUrl
         $errorMessage = 'Error de validación';
-        $expectedErrorUrl = '/users?error=' . urlencode($errorMessage);
+        $expectedErrorUrl = '/setap/users?error=' . urlencode($errorMessage);
         
         $result = AppConstants::buildErrorUrl($baseRoute, $errorMessage);
         $this->assertEquals($expectedErrorUrl, $result);
@@ -252,11 +252,11 @@ class AppConstantsTest extends TestCase
         $this->assertEquals('error', AppConstants::PARAM_ERROR);
         
         // Test de uso en URLs
-        $url1 = '/test?' . AppConstants::PARAM_SUCCESS . '=created';
-        $this->assertEquals('/test?success=created', $url1);
+        $url1 = '/setap/test?' . AppConstants::PARAM_SUCCESS . '=created';
+        $this->assertEquals('/setap/test?success=created', $url1);
         
-        $url2 = '/test?' . AppConstants::PARAM_ERROR . '=failed';
-        $this->assertEquals('/test?error=failed', $url2);
+        $url2 = '/setap/test?' . AppConstants::PARAM_ERROR . '=failed';
+        $this->assertEquals('/setap/test?error=failed', $url2);
     }
 
     /**

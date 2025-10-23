@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Security;
 
+use App\Constants\AppConstants;
 use App\Services\PermissionService;
 
 /**
@@ -247,6 +248,10 @@ class AuthHelper
      */
     public static function redirect(string $url): void
     {
+        // Agregar el base path si no está presente
+        if (strpos($url, '/setap/') !== 0) {
+            $url = '/setap' . $url;
+        }
         header("Location: $url");
         exit;
     }
@@ -256,7 +261,7 @@ class AuthHelper
      */
     public static function redirectToLogin(string $message = ''): void
     {
-        $loginUrl = '/login';
+        $loginUrl = AppConstants::ROUTE_LOGIN;
 
         if (!empty($message)) {
             $loginUrl .= '?message=' . urlencode($message);

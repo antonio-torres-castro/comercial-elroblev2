@@ -81,7 +81,7 @@ composer install --no-dev --optimize-autoloader
 
 ```bash
 # En la carpeta setap
-zip -r setap-deploy.zip . -x "*.git*" "tests/*" "storage/*.sqlite" "node_modules/*" "venv/*"
+zip -r setap-deploy.zip . -x "*.git*" "tests/*" "storage/*.sqlite" "node_modules/*" "*"
 ```
 
 ---

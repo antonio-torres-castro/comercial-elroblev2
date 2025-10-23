@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /**
  * Script de Validación de Optimización de Constantes
@@ -12,7 +12,7 @@
 
 namespace App\Tools;
 
-require_once __DIR__ . '/../../venv/vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Constants\AppConstants;
 

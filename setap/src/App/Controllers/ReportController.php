@@ -101,7 +101,7 @@ class ReportController extends BaseController
 
             // Validar parámetros obligatorios
             if (empty($reportType)) {
-                $this->redirectWithError('/reports/create', 'Debe seleccionar un tipo de reporte');
+                $this->redirectWithError(AppConstants::ROUTE_REPORTS . '/create', 'Debe seleccionar un tipo de reporte');
                 return;
             }
 
@@ -127,7 +127,7 @@ class ReportController extends BaseController
             require_once __DIR__ . '/../Views/reports/view.php';
         } catch (Exception $e) {
             error_log("Error en ReportController::generate: " . $e->getMessage());
-            $this->redirectWithError('/reports/create', 'Error al generar el reporte: ' . $e->getMessage());
+            $this->redirectWithError(AppConstants::ROUTE_REPORTS . '/create', 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 

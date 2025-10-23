@@ -15,7 +15,7 @@ use App\Constants\AppConstants;
     <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/setap-theme.css">
+    <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
 
 <body>

@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+﻿#!/usr/bin/env php
 <?php
 /**
  * Generador de reporte detallado de testing
@@ -7,7 +7,7 @@
  * @date 2025-10-11
  */
 
-require_once __DIR__ . '/venv/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 echo "📊 REPORTE DETALLADO DE TESTING - SETAP\n";
 echo "=====================================\n\n";

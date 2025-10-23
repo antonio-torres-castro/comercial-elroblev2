@@ -69,7 +69,7 @@ window.SETAP.TaskStates = {
             formData.append('new_state', newStateId);
             formData.append('reason', reason);
 
-            const response = await fetch('/tasks/change-state', {
+            const response = await fetch('/setap/tasks/change-state', {
                 method: 'POST',
                 body: formData
             });

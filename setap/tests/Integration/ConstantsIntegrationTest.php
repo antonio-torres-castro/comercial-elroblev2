@@ -155,17 +155,17 @@ class ConstantsIntegrationTest extends TestCase
             [
                 'route' => AppConstants::ROUTE_USERS,
                 'message' => AppConstants::SUCCESS_CREATED,
-                'expected' => '/users?success=created'
+                'expected' => AppConstants::ROUTE_USERS . '?success=created'
             ],
             [
                 'route' => AppConstants::ROUTE_TASKS,
                 'message' => AppConstants::SUCCESS_UPDATED,
-                'expected' => '/tasks?success=updated'
+                'expected' => AppConstants::ROUTE_TASKS . '?success=updated'
             ],
             [
                 'route' => AppConstants::ROUTE_PROJECTS,
                 'message' => AppConstants::SUCCESS_DELETED,
-                'expected' => '/projects?success=deleted'
+                'expected' => AppConstants::ROUTE_PROJECTS . '?success=deleted'
             ]
         ];
         
@@ -337,8 +337,8 @@ class ConstantsIntegrationTest extends TestCase
     {
         // Verificar que constantes críticas mantienen sus valores esperados
         $criticalConstants = [
-            'ROUTE_LOGIN' => '/login',
-            'ROUTE_HOME' => '/home',
+            'ROUTE_LOGIN' => '/setap/login',
+            'ROUTE_HOME' => '/setap/home',
             'PARAM_SUCCESS' => 'success',
             'PARAM_ERROR' => 'error',
             'UI_BTN_CREATE' => 'Crear',

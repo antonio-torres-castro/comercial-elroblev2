@@ -12,95 +12,95 @@ class AppConstants
     // ===== RUTAS DE REDIRECCIÓN =====
 
     /** Ruta principal de login */
-    const ROUTE_LOGIN = '/login';
+    const ROUTE_LOGIN = '/setap/login';
 
     /** Ruta principal de home */
-    const ROUTE_HOME = '/home';
+    const ROUTE_HOME = '/setap/home';
 
     /** Ruta de logout */
-    const ROUTE_LOGOUT = '/logout';
+    const ROUTE_LOGOUT = '/setap/setap/logout';
 
     /** Ruta base de usuarios */
-    const ROUTE_USERS = '/users';
+    const ROUTE_USERS = '/setap/users';
 
     /** Ruta base de clientes */
-    const ROUTE_CLIENTS = '/clients';
+    const ROUTE_CLIENTS = '/setap/clients';
 
     /** Ruta de creación de clientes */
-    const ROUTE_CLIENTS_CREATE = '/clients/create';
+    const ROUTE_CLIENTS_CREATE = '/setap/clients/create';
 
     /** Ruta de edición de clientes */
-    const ROUTE_CLIENTS_EDIT = '/clients/edit';
+    const ROUTE_CLIENTS_EDIT = '/setap/clients/edit';
 
     /** Ruta base de tareas */
-    const ROUTE_TASKS = '/tasks';
+    const ROUTE_TASKS = '/setap/tasks';
 
     /** Ruta de creación de tareas */
-    const ROUTE_TASKS_CREATE = '/tasks/create';
+    const ROUTE_TASKS_CREATE = '/setap/tasks/create';
 
     /** Ruta de vista de tarea */
-    const ROUTE_TASKS_SHOW = '/tasks/show';
+    const ROUTE_TASKS_SHOW = '/setap/tasks/show';
 
     /** Ruta de edición de tarea */
-    const ROUTE_TASKS_EDIT = '/tasks/edit';
+    const ROUTE_TASKS_EDIT = '/setap/tasks/edit';
 
     /** Ruta base de personas */
-    const ROUTE_PERSONAS = '/personas';
+    const ROUTE_PERSONAS = '/setap/personas';
 
     /** Ruta base de menús */
-    const ROUTE_MENUS = '/menus';
+    const ROUTE_MENUS = '/setap/menus';
 
     /** Ruta base de perfil */
-    const ROUTE_PERFIL = '/perfil';
+    const ROUTE_PERFIL = '/setap/perfil';
 
     /** Ruta base de reportes */
-    const ROUTE_REPORTS = '/reports';
+    const ROUTE_REPORTS = '/setap/reports';
 
     /** Ruta base de proyectos */
-    const ROUTE_PROJECTS = '/projects';
+    const ROUTE_PROJECTS = '/setap/projects';
 
     /** Ruta de contrapartes de clientes */
-    const ROUTE_CLIENT_COUNTERPARTIES = '/client-counterparties';
+    const ROUTE_CLIENT_COUNTERPARTIES = '/setap/client-counterparties';
     /** Ruta de contraparte de cliente */
-    const ROUTE_CLIENT_COUNTERPARTIE = '/client-counterpartie';
+    const ROUTE_CLIENT_COUNTERPARTIE = '/setap/client-counterpartie';
 
     /** Ruta de permisos */
-    const ROUTE_PERMISOS = '/permisos';
+    const ROUTE_PERMISOS = '/setap/permisos';
 
     /** Ruta base de accesos */
-    const ROUTE_ACCESS = '/accesos';
+    const ROUTE_ACCESS = '/setap/accesos';
 
     /** Ruta base de permisos */
-    const ROUTE_PERMISSIONS = '/permisos';
+    const ROUTE_PERMISSIONS = '/setap/permisos';
 
     /** Ruta de creación de proyectos */
-    const ROUTE_PROJECTS_CREATE = '/projects/create';
+    const ROUTE_PROJECTS_CREATE = '/setap/projects/create';
 
     /** Ruta de búsqueda de proyectos */
-    const ROUTE_PROJECTS_SEARCH = '/projects/search';
+    const ROUTE_PROJECTS_SEARCH = '/setap/projects/search';
 
     /** Ruta de vista de proyecto */
-    const ROUTE_PROJECTS_SHOW = '/projects/show';
+    const ROUTE_PROJECTS_SHOW = '/setap/projects/show';
 
     /** Ruta de edición de proyecto */
-    const ROUTE_PROJECTS_EDIT = '/projects/edit';
+    const ROUTE_PROJECTS_EDIT = '/setap/projects/edit';
 
     /** Ruta de reporte de proyecto */
-    const ROUTE_PROJECTS_REPORT = '/projects/report';
+    const ROUTE_PROJECTS_REPORT = '/setap/projects/report';
 
     // ===== RUTAS CON ACCIONES =====
 
     /** Ruta de creación de usuarios */
-    const ROUTE_USERS_CREATE = '/users/create';
+    const ROUTE_USERS_CREATE = '/setap/users/create';
 
     /** Ruta de edición de usuarios */
-    const ROUTE_USERS_EDIT = '/users/edit';
+    const ROUTE_USERS_EDIT = '/setap/users/edit';
 
     /** Ruta de permisos de usuarios */
-    const ROUTE_USERS_PERMISSIONS = '/users/permissions';
+    const ROUTE_USERS_PERMISSIONS = '/setap/users/permissions';
 
     /** Ruta de creación de personas */
-    const ROUTE_PERSONAS_CREATE = '/personas/create';
+    const ROUTE_PERSONAS_CREATE = '/setap/personas/create';
 
     // ===== PARÁMETROS DE URL =====
 

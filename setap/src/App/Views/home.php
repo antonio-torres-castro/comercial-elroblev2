@@ -12,7 +12,7 @@
     <!-- Estilos -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/css/setap-theme.css">
+    <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
     <style>
         .navbar-brand {
             font-weight: bold;
@@ -170,7 +170,7 @@
         // Funcionalidad básica
         document.addEventListener('DOMContentLoaded', function() {
             // Confirmar logout
-            const logoutLink = document.querySelector('a[href="/logout"]');
+            const logoutLink = document.querySelector('a[href="<?= AppConstants::ROUTE_LOGOUT ?>"]');
             if (logoutLink) {
                 logoutLink.addEventListener('click', function(e) {
                     if (!confirm('¿Está seguro que desea cerrar sesión?')) {

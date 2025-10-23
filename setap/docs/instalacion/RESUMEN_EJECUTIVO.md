@@ -132,7 +132,7 @@ Locale: es_CL
 - `tests/` - Pruebas unitarias
 - `storage/*.sqlite` - BD de desarrollo
 - `node_modules/` - Dependencias frontend
-- `venv/` - Entorno virtual
+- `` - Entorno virtual
 
 ---
 

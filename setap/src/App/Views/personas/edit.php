@@ -14,7 +14,7 @@ use App\Constants\AppConstants; ?>
     <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/css/setap-theme.css">
+    <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
     <style>
         .form-section {
             background: var(--setap-bg-light);
@@ -197,7 +197,7 @@ use App\Constants\AppConstants; ?>
                                 <button type="submit" class="btn btn-success" id="saveBtn">
                                     <i class="bi bi-check-lg"></i> Guardar Cambios
                                 </button>
-                                <a href="/personas" class="btn btn-secondary">
+                                <a href="<?php AppConstants::ROUTE_PERSONAS; ?>" class="btn btn-secondary">
                                     <i class="bi bi-x-lg"></i> Cancelar
                                 </a>
                             </div>

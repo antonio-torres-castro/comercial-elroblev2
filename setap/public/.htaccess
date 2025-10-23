@@ -1,7 +1,7 @@
 # Front controller (URLs limpias) — permite que index.php maneje rutas
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+    RewriteBase /setap/public/
 
     # Redirigir a HTTPS si está detrás de un proxy con HTTPS
     RewriteCond %{HTTP:X-Forwarded-Proto} =https
@@ -22,16 +22,16 @@ Options -Indexes
 # Priorizar index.php
 DirectoryIndex index.php index.html
 
-# Bloquear archivos sensibles (compatible con Apache 2.2/2.4)
-<FilesMatch "\.(env|ini|phps|log|sh|bak|config|sql|tpl\.php)$">
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-    </IfModule>
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-</FilesMatch>
+# # Bloquear archivos sensibles (compatible con Apache 2.2/2.4)
+# <FilesMatch "\.(env|ini|phps|log|sh|bak|config|sql|tpl\.php)$">
+#     <IfModule !mod_authz_core.c>
+#         Order allow,deny
+#         Deny from all
+#     </IfModule>
+#     <IfModule mod_authz_core.c>
+#         Require all denied
+#     </IfModule>
+# </FilesMatch>
 
 # Charset
 AddDefaultCharset UTF-8
@@ -49,4 +49,13 @@ AddDefaultCharset UTF-8
     ExpiresByType application/x-shockwave-flash "access plus 1 month"
     ExpiresByType image/x-icon "access plus 1 year"
     ExpiresDefault "access plus 2 days"
+</IfModule>
+
+# PHP Handler - Activar segun entorno
+<IfModule mime_module>
+  ## PHP Handler (production - cPanel EasyApache)
+  #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+  
+  # PHP Handler (local - Apache estandar Windows)
+  AddHandler application/x-httpd-php .php .php8 .phtml
 </IfModule>

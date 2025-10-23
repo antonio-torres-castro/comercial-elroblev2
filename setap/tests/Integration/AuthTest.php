@@ -2,6 +2,7 @@
 
 namespace Tests\Integration;
 
+use App\Constants\AppConstants;
 use PHPUnit\Framework\TestCase;
 use App\Controllers\AuthController;
 use App\Services\AuthService;
@@ -9,7 +10,7 @@ use App\Models\User;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Tests de integración para funcionalidades de autenticación
+ * Tests de integraciÃ³n para funcionalidades de autenticaciÃ³n
  * 
  * @author MiniMax Agent
  * @date 2025-10-11
@@ -27,12 +28,12 @@ class AuthTest extends TestCase
         $this->authServiceMock = $this->createMock(AuthService::class);
         $this->userModelMock = $this->createMock(User::class);
         
-        // Limpiar sesión antes de cada test
+        // Limpiar sesiÃ³n antes de cada test
         $_SESSION = [];
     }
 
     /**
-     * Test de login exitoso con credenciales válidas
+     * Test de login exitoso con credenciales vÃ¡lidas
      */
     public function testSuccessfulLogin()
     {
@@ -48,7 +49,7 @@ class AuthTest extends TestCase
             'usuario_tipo_id' => 1
         ];
 
-        // Mock de autenticación exitosa
+        // Mock de autenticaciÃ³n exitosa
         $this->authServiceMock
             ->method('authenticate')
             ->with($credentials['nombre_usuario'], $credentials['password'])
@@ -67,7 +68,7 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test de login fallido con credenciales inválidas
+     * Test de login fallido con credenciales invÃ¡lidas
      */
     public function testFailedLogin()
     {
@@ -76,22 +77,22 @@ class AuthTest extends TestCase
             'password' => 'wrong_password'
         ];
 
-        // Mock de autenticación fallida
+        // Mock de autenticaciÃ³n fallida
         $this->authServiceMock
             ->method('authenticate')
             ->with($invalidCredentials['nombre_usuario'], $invalidCredentials['password'])
             ->willReturn(false);
 
-        // Assert: Autenticación fallida retorna false
-        $this->assertTrue(true, 'Test de autenticación fallida estructurado correctamente');
+        // Assert: AutenticaciÃ³n fallida retorna false
+        $this->assertTrue(true, 'Test de autenticaciÃ³n fallida estructurado correctamente');
     }
 
     /**
-     * Test de validación de sesión activa
+     * Test de validaciÃ³n de sesiÃ³n activa
      */
     public function testSessionValidation()
     {
-        // Simular sesión activa
+        // Simular sesiÃ³n activa
         $_SESSION = [
             'user_id' => 1,
             'username' => 'test_user',
@@ -99,7 +100,7 @@ class AuthTest extends TestCase
             'login_time' => time()
         ];
 
-        // Validaciones de sesión
+        // Validaciones de sesiÃ³n
         $this->assertArrayHasKey('user_id', $_SESSION);
         $this->assertArrayHasKey('username', $_SESSION);
         $this->assertArrayHasKey('authenticated', $_SESSION);
@@ -109,11 +110,11 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test de logout y limpieza de sesión
+     * Test de logout y limpieza de sesiÃ³n
      */
     public function testLogout()
     {
-        // Configurar sesión activa
+        // Configurar sesiÃ³n activa
         $_SESSION = [
             'user_id' => 1,
             'username' => 'test_user',
@@ -123,31 +124,31 @@ class AuthTest extends TestCase
         // Simular logout
         $_SESSION = [];
 
-        // Validar que la sesión está limpia
+        // Validar que la sesiÃ³n estÃ¡ limpia
         $this->assertEmpty($_SESSION);
         $this->assertArrayNotHasKey('user_id', $_SESSION);
         $this->assertArrayNotHasKey('authenticated', $_SESSION);
     }
 
     /**
-     * Test de validación de permisos de usuario
+     * Test de validaciÃ³n de permisos de usuario
      */
     public function testUserPermissions()
     {
         $userId = 1;
         $requiredPermission = 'manage_users';
 
-        // Mock de verificación de permisos
+        // Mock de verificaciÃ³n de permisos
         $permissionServiceMock = $this->createMock(\App\Services\PermissionService::class);
         $permissionServiceMock
             ->method('hasMenuAccess')
             ->with($userId, $requiredPermission)
             ->willReturn(true);
 
-        // Test con permiso válido
+        // Test con permiso vÃ¡lido
         $this->assertTrue(true, 'Usuario tiene permisos necesarios');
 
-        // Mock de verificación de permisos denegados
+        // Mock de verificaciÃ³n de permisos denegados
         $permissionServiceMock2 = $this->createMock(\App\Services\PermissionService::class);
         $permissionServiceMock2
             ->method('hasMenuAccess')
@@ -155,73 +156,73 @@ class AuthTest extends TestCase
             ->willReturn(false);
 
         // Test con permiso denegado
-        $this->assertTrue(true, 'Validación de permisos denegados funcional');
+        $this->assertTrue(true, 'ValidaciÃ³n de permisos denegados funcional');
     }
 
     /**
-     * Test de protección de rutas autenticadas
+     * Test de protecciÃ³n de rutas autenticadas
      */
     public function testAuthenticatedRouteProtection()
     {
-        // Rutas que requieren autenticación
+        // Rutas que requieren autenticaciÃ³n
         $protectedRoutes = [
-            '/home',
-            '/users',
-            '/tasks',
-            '/projects',
-            '/reports'
+            AppConstants::ROUTE_HOME,
+            AppConstants::ROUTE_USERS,
+            AppConstants::ROUTE_TASKS,
+            AppConstants::ROUTE_PROJECTS,
+            AppConstants::ROUTE_REPORTS
         ];
 
         foreach ($protectedRoutes as $route) {
-            $this->assertStringStartsWith('/', $route, "Ruta protegida válida: {$route}");
+            $this->assertStringStartsWith('/', $route, "Ruta protegida vÃ¡lida: {$route}");
         }
 
-        // Simular acceso sin autenticación
-        $_SESSION = []; // Sin sesión
+        // Simular acceso sin autenticaciÃ³n
+        $_SESSION = []; // Sin sesiÃ³n
 
-        // Validar que se requiere autenticación
+        // Validar que se requiere autenticaciÃ³n
         $this->assertArrayNotHasKey('authenticated', $_SESSION);
         $this->assertEmpty($_SESSION);
     }
 
     /**
-     * Test de tiempo de expiración de sesión
+     * Test de tiempo de expiraciÃ³n de sesiÃ³n
      */
     public function testSessionTimeout()
     {
         $currentTime = time();
         $sessionTimeout = 3600; // 1 hora
         
-        // Sesión reciente (válida)
+        // SesiÃ³n reciente (vÃ¡lida)
         $recentSession = [
-            'login_time' => $currentTime - 1800, // 30 minutos atrás
+            'login_time' => $currentTime - 1800, // 30 minutos atrÃ¡s
             'user_id' => 1,
             'authenticated' => true
         ];
 
         $sessionAge = $currentTime - $recentSession['login_time'];
-        $this->assertLessThan($sessionTimeout, $sessionAge, 'Sesión reciente dentro del tiempo límite');
+        $this->assertLessThan($sessionTimeout, $sessionAge, 'SesiÃ³n reciente dentro del tiempo lï¿½mite');
 
-        // Sesión expirada
+        // SesiÃ³n expirada
         $expiredSession = [
-            'login_time' => $currentTime - 7200, // 2 horas atrás
+            'login_time' => $currentTime - 7200, // 2 horas atrÃ¡s
             'user_id' => 1,
             'authenticated' => true
         ];
 
         $expiredSessionAge = $currentTime - $expiredSession['login_time'];
-        $this->assertGreaterThan($sessionTimeout, $expiredSessionAge, 'Sesión expirada fuera del tiempo límite');
+        $this->assertGreaterThan($sessionTimeout, $expiredSessionAge, 'SesiÃ³n expirada fuera del tiempo lï¿½mite');
     }
 
     /**
-     * Test de validación de CSRF token
+     * Test de validaciÃ³n de CSRF token
      */
     public function testCSRFTokenValidation()
     {
         $validToken = 'abc123xyz789';
         $invalidToken = 'invalid_token';
 
-        // Simular token en sesión
+        // Simular token en sesiÃ³n
         $_SESSION['csrf_token'] = $validToken;
 
         // Validar token correcto
@@ -245,7 +246,7 @@ class AuthTest extends TestCase
         ];
 
         $this->assertArrayHasKey($username, $failedAttempts);
-        $this->assertLessThan($maxAttempts, $failedAttempts[$username], 'Intentos bajo el límite');
+        $this->assertLessThan($maxAttempts, $failedAttempts[$username], 'Intentos bajo el lï¿½mite');
 
         // Simular exceso de intentos
         $tooManyAttempts = [
@@ -256,18 +257,18 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test de redirección después de login exitoso
+     * Test de redirecciÃ³n despuÃ©s de login exitoso
      */
     public function testPostLoginRedirect()
     {
-        $defaultRedirect = '/home';
-        $intendedUrl = '/users';
+        $defaultRedirect = AppConstants::ROUTE_HOME;
+        $intendedUrl = AppConstants::ROUTE_USERS;
 
-        // Test redirección por defecto
-        $this->assertEquals('/home', $defaultRedirect);
+        // Test redirecciÃ³n por defecto
+        $this->assertEquals(AppConstants::ROUTE_HOME, $defaultRedirect);
         $this->assertStringStartsWith('/', $defaultRedirect);
 
-        // Test redirección a URL pretendida
+        // Test redirecciÃ³n a URL pretendida
         $_SESSION['intended_url'] = $intendedUrl;
         $this->assertEquals($intendedUrl, $_SESSION['intended_url']);
         $this->assertStringStartsWith('/', $_SESSION['intended_url']);
@@ -277,7 +278,7 @@ class AuthTest extends TestCase
     {
         parent::tearDown();
         
-        // Limpiar sesión después de cada test
+        // Limpiar sesiÃ³n despuÃ©s de cada test
         $_SESSION = [];
     }
 }

@@ -30,7 +30,7 @@ class UserTest extends TestCase
         $this->permissionServiceMock = $this->createMock(PermissionService::class);
         $this->validationServiceMock = $this->createMock(ValidationService::class);
         
-        // Mock de sesi髇 para simular usuario autenticado
+        // Mock de sesi贸n para simular usuario autenticado
         $_SESSION = [
             'user_id' => 1,
             'username' => 'test_user',
@@ -39,11 +39,11 @@ class UserTest extends TestCase
     }
 
     /**
-     * Test de validaci髇 de datos de usuario
+     * Test de validaci贸n de datos de usuario
      */
     public function testUserDataValidation()
     {
-        // Datos v醠idos de usuario
+        // Datos v锟絣idos de usuario
         $validUserData = [
             'persona_id' => 1,
             'email' => 'usuario@test.com',
@@ -55,25 +55,25 @@ class UserTest extends TestCase
             'fecha_termino' => '2025-12-31'
         ];
 
-        // Validaciones b醩icas
+        // Validaciones b谩sicas
         $this->assertIsArray($validUserData);
         $this->assertArrayHasKey('persona_id', $validUserData);
         $this->assertArrayHasKey('email', $validUserData);
         $this->assertArrayHasKey('nombre_usuario', $validUserData);
         $this->assertArrayHasKey('password', $validUserData);
         
-        // Validaci髇 de email
+        // Validaci贸n de email
         $this->assertNotFalse(filter_var($validUserData['email'], FILTER_VALIDATE_EMAIL));
         
-        // Validaci髇 de nombre de usuario (sin espacios, caracteres especiales)
+        // Validaci贸n de nombre de usuario (sin espacios, caracteres especiales)
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9_]+$/', $validUserData['nombre_usuario']);
         
-        // Validaci髇 de password (m韓imo 8 caracteres)
+        // Validaci贸n de password (m贸nimo 8 caracteres)
         $this->assertGreaterThanOrEqual(8, strlen($validUserData['password']));
     }
 
     /**
-     * Test de validaci髇 de email duplicado
+     * Test de validaci贸n de email duplicado
      */
     public function testEmailUniqueValidation()
     {
@@ -91,12 +91,12 @@ class UserTest extends TestCase
             ->with('nuevo@test.com', 0)
             ->willReturn(true);
 
-        // Assert: Validaci髇 de unicidad funcional
-        $this->assertTrue(true, 'Validaci髇 de email 鷑ico estructurada correctamente');
+        // Assert: Validaci贸n de unicidad funcional
+        $this->assertTrue(true, 'Validaci贸n de email 贸nico estructurada correctamente');
     }
 
     /**
-     * Test de validaci髇 de nombre de usuario 鷑ico
+     * Test de validaci贸n de nombre de usuario 贸nico
      */
     public function testUsernameUniqueValidation()
     {
@@ -114,12 +114,12 @@ class UserTest extends TestCase
             ->with('nuevo_usuario', 0)
             ->willReturn(true);
 
-        // Assert: Validaci髇 de unicidad funcional
-        $this->assertTrue(true, 'Validaci髇 de username 鷑ico estructurada correctamente');
+        // Assert: Validaci贸n de unicidad funcional
+        $this->assertTrue(true, 'Validaci贸n de username 贸nico estructurada correctamente');
     }
 
     /**
-     * Test de creaci髇 de usuario con datos v醠idos
+     * Test de creaci贸n de usuario con datos v锟絣idos
      */
     public function testCreateUserWithValidData()
     {
@@ -132,13 +132,13 @@ class UserTest extends TestCase
             'cliente_id' => 1
         ];
 
-        // Mock de creaci髇 exitosa
+        // Mock de creaci贸n exitosa
         $this->userModelMock
             ->method('create')
             ->with($userData)
             ->willReturn(123); // ID del nuevo usuario
 
-        // Validaciones de datos antes de creaci髇
+        // Validaciones de datos antes de creaci贸n
         $this->assertIsInt($userData['persona_id']);
         $this->assertIsInt($userData['usuario_tipo_id']);
         $this->assertNotEmpty($userData['email']);
@@ -147,13 +147,13 @@ class UserTest extends TestCase
     }
 
     /**
-     * Test de b鷖queda de personas disponibles
+     * Test de b谩squeda de personas disponibles
      */
     public function testGetAvailablePersonas()
     {
         $expectedPersonas = [
-            ['id' => 1, 'nombre' => 'Juan P閞ez', 'rut' => '12345678-9'],
-            ['id' => 2, 'nombre' => 'Mar韆 Gonz醠ez', 'rut' => '98765432-1']
+            ['id' => 1, 'nombre' => 'Juan P锟絩ez', 'rut' => '12345678-9'],
+            ['id' => 2, 'nombre' => 'Mar锟絘 Gonz锟絣ez', 'rut' => '98765432-1']
         ];
         
         $this->userModelMock
@@ -168,7 +168,7 @@ class UserTest extends TestCase
     }
 
     /**
-     * Test de validaci髇 de tipos de usuario
+     * Test de validaci贸n de tipos de usuario
      */
     public function testUserTypes()
     {
@@ -189,11 +189,11 @@ class UserTest extends TestCase
     }
 
     /**
-     * Test de validaci髇 de fechas de usuario
+     * Test de validaci贸n de fechas de usuario
      */
     public function testUserDateValidation()
     {
-        // Fechas v醠idas
+        // Fechas v锟絣idas
         $validDates = [
             'fecha_inicio' => '2025-10-11',
             'fecha_termino' => '2025-12-31'
@@ -201,21 +201,21 @@ class UserTest extends TestCase
 
         foreach ($validDates as $key => $date) {
             // Validar formato de fecha
-            $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date, "Fecha {$key} formato v醠ido");
+            $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date, "Fecha {$key} formato v锟絣ido");
             
-            // Validar que la fecha es v醠ida
+            // Validar que la fecha es v锟絣ida
             $timestamp = strtotime($date);
-            $this->assertNotFalse($timestamp, "Fecha {$key} es v醠ida");
+            $this->assertNotFalse($timestamp, "Fecha {$key} es v锟絣ida");
         }
 
         // Validar que fecha_termino > fecha_inicio
         $inicio = strtotime($validDates['fecha_inicio']);
         $termino = strtotime($validDates['fecha_termino']);
-        $this->assertGreaterThan($inicio, $termino, 'Fecha t閞mino posterior a fecha inicio');
+        $this->assertGreaterThan($inicio, $termino, 'Fecha t锟絩mino posterior a fecha inicio');
     }
 
     /**
-     * Test de validaci髇 de password seguro
+     * Test de validaci贸n de password seguro
      */
     public function testPasswordSecurity()
     {
@@ -233,14 +233,14 @@ class UserTest extends TestCase
             'abc',
             '',
             'sinNumeros',
-            '12345678' // Solo n鷐eros
+            '12345678' // Solo n煤meros
         ];
 
         foreach ($securePasswords as $password) {
-            // M韓imo 8 caracteres
+            // M贸nimo 8 caracteres
             $this->assertGreaterThanOrEqual(8, strlen($password));
             
-            // Contiene al menos un n鷐ero
+            // Contiene al menos un n煤mero
             $this->assertMatchesRegularExpression('/\d/', $password);
             
             // Contiene al menos una letra
@@ -248,7 +248,7 @@ class UserTest extends TestCase
         }
 
         foreach ($insecurePasswords as $password) {
-            // Passwords inseguros fallan validaciones b醩icas
+            // Passwords inseguros fallan validaciones b谩sicas
             $isSecure = strlen($password) >= 8 && 
                        preg_match('/\d/', $password) && 
                        preg_match('/[a-zA-Z]/', $password);
@@ -258,7 +258,7 @@ class UserTest extends TestCase
     }
 
     /**
-     * Test de actualizaci髇 de usuario existente
+     * Test de actualizaci贸n de usuario existente
      */
     public function testUpdateExistingUser()
     {
@@ -282,7 +282,7 @@ class UserTest extends TestCase
             ->with($userId)
             ->willReturn($existingUser);
 
-        // Mock de actualizaci髇 exitosa
+        // Mock de actualizaci贸n exitosa
         $this->userModelMock
             ->method('update')
             ->with($userId, $updateData)
@@ -331,7 +331,7 @@ class UserTest extends TestCase
     {
         parent::tearDown();
         
-        // Limpiar sesi髇
+        // Limpiar sesi贸n
         $_SESSION = [];
     }
 }

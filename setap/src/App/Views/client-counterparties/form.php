@@ -15,7 +15,7 @@ use App\Constants\AppConstants;
     <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/setap-theme.css">
+    <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
 
 <body>
@@ -56,7 +56,7 @@ use App\Constants\AppConstants;
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="<?php echo $data['action'] === 'edit' ? '/client-counterpartie/update' : '/client-counterpartie/store'; ?>">
+                                <form method="POST" action="<?php echo $data['action'] === 'edit' ? AppConstants::ROUTE_CLIENT_COUNTERPARTIE . '/update' : AppConstants::ROUTE_CLIENT_COUNTERPARTIE . '/store'; ?>">
                                     <?= \App\Helpers\Security::renderCsrfField() ?>
 
                                     <?php if (safe($data, 'action') === 'edit' && safe($data, 'counterpartie')): ?>

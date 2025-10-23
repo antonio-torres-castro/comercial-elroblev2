@@ -69,7 +69,7 @@ setap-deploy.zip
 ❌ Definicion_Negocio/   (Documentación de desarrollo)
 ❌ docs/                 (Documentación - no necesaria en servidor)
 ❌ tests/                (Tests unitarios)
-❌ venv/                 (Entorno virtual Python)
+❌                  (Entorno virtual Python)
 ```
 
 ---

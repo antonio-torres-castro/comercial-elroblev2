@@ -55,7 +55,7 @@ cp .env.example .env
 composer install --no-dev --optimize-autoloader
 
 # 3. Comprimir para subir
-zip -r setap-deploy.zip . -x "*.git*" "tests/*" "storage/*.sqlite" "node_modules/*" "venv/*"
+zip -r setap-deploy.zip . -x "*.git*" "tests/*" "storage/*.sqlite" "node_modules/*" "*"
 ```
 
 ### Paso 2: Configuración en cPanel (⏱️ 10 min)

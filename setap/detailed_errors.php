@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+﻿#!/usr/bin/env php
 <?php
 /**
  * Lista detallada de errores específicos en tests
@@ -27,7 +27,7 @@ $errorCount = 1;
 foreach ($testFiles as $testFile) {
     echo "🔍 Analizando: $testFile\n";
     
-    $output = shell_exec("cd " . __DIR__ . " && php ./venv/vendor/bin/phpunit $testFile --testdox 2>&1");
+    $output = shell_exec("cd " . __DIR__ . " && php ./vendor/bin/phpunit $testFile --testdox 2>&1");
     
     // Buscar errores en la salida
     if (strpos($output, '✘') !== false) {

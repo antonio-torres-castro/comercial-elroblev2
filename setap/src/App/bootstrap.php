@@ -5,12 +5,15 @@ declare(strict_types=1);
 // Cargar configuración
 App\Config\AppConfig::load();
 
+// Configurar base path
+define('BASE_PATH', '/setap/');
+
 // No necesitamos requires manuales - Composer los maneja automáticamente
 // La sesión debe iniciarse antes de cualquier output
 if (session_status() === PHP_SESSION_NONE) {
     // Configuración básica de sesión por defecto
     $sessionLifetime = 3600;
-    $appUrl = 'http://localhost:8080';
+    $appUrl = 'http://localhost:8080/setap';
 
     // Intentar cargar configuración desde variables de entorno si están disponibles
     if (class_exists('Dotenv\Dotenv')) {
@@ -23,7 +26,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
     session_set_cookie_params([
         'lifetime' => (int)$sessionLifetime,
-        'path' => '/',
+        'path' => '/setap/',
         'domain' => parse_url($appUrl, PHP_URL_HOST),
         'secure' => parse_url($appUrl, PHP_URL_SCHEME) === 'https',
         'httponly' => true,

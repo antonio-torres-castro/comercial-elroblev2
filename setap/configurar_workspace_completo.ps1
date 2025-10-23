@@ -1,9 +1,12 @@
-# CONFIGURACIÓN VS CODE PARA AMBIENTE VIRTUAL
+﻿# CONFIGURACIÓN VS CODE PARA AMBIENTE ESTANDAR PHP
 Write-Host "=== CONFIGURANDO VS CODE ===" -ForegroundColor Green
+Write-Host "Ambiente: Estandar PHP (sin venv)" -ForegroundColor Cyan
+Write-Host ""
 
 # Verificar que estamos en el lugar correcto
-if (-not (Test-Path "venv")) {
-    Write-Host "ERROR: No se encuentra venv. Ejecuta desde setap/" -ForegroundColor Red
+if (-not (Test-Path "vendor")) {
+    Write-Host "ERROR: No se encuentra vendor/. Ejecuta desde setap/" -ForegroundColor Red
+    Write-Host "Ejecuta primero: php composer.phar install" -ForegroundColor Yellow
     exit 1
 }
 
@@ -32,7 +35,7 @@ $settingsContent = @'
         "*.php": "php"
     },
     "intelephense.environment.includePaths": [
-        "./venv/vendor"
+        "./vendor"
     ]
 }
 '@

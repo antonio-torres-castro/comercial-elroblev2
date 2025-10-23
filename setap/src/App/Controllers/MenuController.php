@@ -191,7 +191,7 @@ class MenuController extends BaseController
 
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->redirectWithError('/menus/create', 'Token CSRF inválido');
+                $this->redirectWithError(AppConstants::ROUTE_MENUS . '/create', 'Token CSRF inválido');
                 return;
             }
 
@@ -212,7 +212,7 @@ class MenuController extends BaseController
             $errors = array_merge($errors, $this->validateLength($postData['display'], 'display', 3, 100));
 
             // Manejo estandarizado de errores - FASE 3.3
-            $this->handleValidationErrors($errors, $_POST, '/menus/create');
+            $this->handleValidationErrors($errors, $_POST, AppConstants::ROUTE_MENUS . '/create');
 
             // Crear el menú con datos validados
             $menuData = [
@@ -235,7 +235,7 @@ class MenuController extends BaseController
             error_log("Error en MenuController::store: " . $e->getMessage());
             $_SESSION['errors'] = ['Error interno del servidor'];
             $_SESSION['old_input'] = $_POST;
-            $this->redirectTo('/menus/create');
+            $this->redirectTo(AppConstants::ROUTE_MENUS . '/create');
         }
     }
 

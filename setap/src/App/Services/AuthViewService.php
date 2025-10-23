@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Constants\AppConstants;
+
 class AuthViewService
 {
     /**
@@ -10,6 +12,7 @@ class AuthViewService
     public function generateLoginPage(string $error = '', string $csrfToken = ''): string
     {
         $errorAlert = $this->generateErrorAlert($error);
+        $pathForm = AppConstants::ROUTE_LOGIN;
 
         return <<<HTML
         <!DOCTYPE html>
@@ -75,7 +78,7 @@ class AuthViewService
                             <div class="card-body p-4">
                                 {$errorAlert}
 
-                                <form method="POST" action="/login">
+                                <form method="POST" action="{$pathForm}">
                                     <input type="hidden" name="csrf_token" value="{$csrfToken}">
 
                                     <div class="mb-3">

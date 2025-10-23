@@ -80,7 +80,7 @@ async function handleMasivoSubmit(e) {
         }
 
         const formData = new FormData(e.target);
-        const response = await fetch('/proyecto-feriados/create-masivo', {
+        const response = await fetch('/setap/proyecto-feriados/create-masivo', {
             method: 'POST',
             body: formData
         });
@@ -125,7 +125,7 @@ async function handleEspecificoSubmit(e) {
         button.disabled = true;
 
         const formData = new FormData(e.target);
-        const response = await fetch('/proyecto-feriados/create-especifico', {
+        const response = await fetch('/setap/proyecto-feriados/create-especifico', {
             method: 'POST',
             body: formData
         });
@@ -166,7 +166,7 @@ async function handleRangoSubmit(e) {
         button.disabled = true;
 
         const formData = new FormData(e.target);
-        const response = await fetch('/proyecto-feriados/create-rango', {
+        const response = await fetch('/setap/proyecto-feriados/create-rango', {
             method: 'POST',
             body: formData
         });
@@ -247,7 +247,7 @@ async function handleMoveTasksClick() {
         formData.append('task_ids', taskIds.join(','));
         formData.append('dias_a_mover', '1');
 
-        const response = await fetch('/proyecto-feriados/move-tasks', {
+        const response = await fetch('/setap/proyecto-feriados/move-tasks', {
             method: 'POST',
             body: formData
         });
@@ -370,7 +370,7 @@ async function handleEditSubmit(e) {
     
     try {
         const formData = new FormData(e.target);
-        const response = await fetch('/proyecto-feriados/update', {
+        const response = await fetch('/setap/proyecto-feriados/update', {
             method: 'POST',
             body: formData
         });
@@ -407,7 +407,7 @@ async function deleteHoliday(id) {
         formData.append('csrf_token', getCsrfToken());
         formData.append('id', id);
 
-        const response = await fetch('/proyecto-feriados/delete', {
+        const response = await fetch('/setap/proyecto-feriados/delete', {
             method: 'POST',
             body: formData
         });

@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+﻿#!/usr/bin/env php
 <?php
 /**
  * Analizador de errores en tests - SETAP
@@ -7,13 +7,13 @@
  * @date 2025-10-11
  */
 
-require_once __DIR__ . '/venv/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 echo "🔍 ANÁLISIS DETALLADO DE ERRORES EN TESTS\n";
 echo "==========================================\n\n";
 
 // Ejecutar PHPUnit y capturar salida
-$output = shell_exec("cd " . __DIR__ . " && php ./venv/vendor/bin/phpunit --testdox 2>&1");
+$output = shell_exec("cd " . __DIR__ . " && php ./vendor/bin/phpunit --testdox 2>&1");
 
 // Parsear errores y failures
 $lines = explode("\n", $output);

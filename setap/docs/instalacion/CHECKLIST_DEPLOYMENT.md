@@ -49,7 +49,7 @@
 
 - [ ] **2.4** Comprimir archivos:
   ```bash
-  zip -r setap-deploy.zip . -x "*.git*" "tests/*" "storage/*.sqlite" "node_modules/*" "venv/*"
+  zip -r setap-deploy.zip . -x "*.git*" "tests/*" "storage/*.sqlite" "node_modules/*" "*"
   ```
   - **Tamaño del archivo**: _____________ MB
 

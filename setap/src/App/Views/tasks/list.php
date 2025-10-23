@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/setap-theme.css">
+    <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
@@ -341,7 +341,7 @@
                     document.getElementById('confirmChangeState').addEventListener('click', function() {
                         const formData = new FormData(document.getElementById('changeStateForm'));
 
-                        fetch('/tasks/change-state', {
+                        fetch('<?php AppConstants::ROUTE_TASKS; ?>/change-state', {
                             method: 'POST',
                             body: formData
                         })
@@ -411,7 +411,7 @@
                             const formData = new FormData();
                             formData.append('id', taskToDelete);
 
-                            fetch('/tasks/delete', {
+                            fetch('<?php AppConstants::ROUTE_TASKS; ?>/delete', {
                                 method: 'POST',
                                 body: formData
                             })
