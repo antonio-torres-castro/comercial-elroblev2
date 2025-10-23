@@ -187,7 +187,7 @@ use App\Constants\AppConstants; ?>
 
                         <!-- Botones de Acción -->
                         <div class="mt-4 text-end">
-                            <a href="/personas" class="btn btn-secondary me-2">
+                            <a href="<?php AppConstants::ROUTE_PERSONAS; ?>" class="btn btn-secondary me-2">
                                 <i class="bi bi-x-lg"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-success" id="createBtn">
