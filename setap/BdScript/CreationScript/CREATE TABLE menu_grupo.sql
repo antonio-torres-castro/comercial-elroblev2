@@ -17,10 +17,10 @@ CREATE TABLE menu_grupo (
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 Insert into comerci3_bdsetap.menu_grupo (id, nombre, descripcion, icono, orden, display, fecha_creacion, fecha_modificacion, estado_tipo_id)
-Select 1, 'module_menus', 'Modulo para gestionar menus', 'list-ul', 1, 'Menus', now(), null, 2 union
-Select 2, 'module_persons', 'Modulo para gestionar personas', 'people-fill', 2, 'Personas', now(), null, 2 union
-Select 3, 'module_clients', 'Modulo para gestionar clientes', 'building', 3, 'Clientes', now(), null, 2 union
-Select 4, 'module_projects', 'Modulo para gestionar proyectos', 'briefcase', 4, 'Proyectos', now(), null, 2;
+VALUES (1, 'module_menus', 'Modulo para gestionar menus', 'list-ul', 1, 'Menus', now(), null, 2),
+(2, 'module_persons', 'Modulo para gestionar personas', 'people-fill', 2, 'Personas', now(), null, 2),
+(3, 'module_clients', 'Modulo para gestionar clientes', 'building', 3, 'Clientes', now(), null, 2),
+(4, 'module_projects', 'Modulo para gestionar proyectos', 'briefcase', 4, 'Proyectos', now(), null, 2);
 
 ALTER TABLE menu ADD menu_grupo_id int not null;
 

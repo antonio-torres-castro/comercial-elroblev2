@@ -1,13 +1,3 @@
-use comerci3_bdsetap;
--- Poblar tabla usuario_tipos
-INSERT INTO usuario_tipos (id, nombre, descripcion) VALUES
-(1, 'admin',       'Administrador del sistema con acceso completo'),
-(2, 'planner',     'Crea planes y tareas, asigna ejecutores'),
-(3, 'supervisor',  'Valida tareas, aprueba/rechaza ejecuciones'),
-(4, 'executor',    'Ejecuta las tareas asignadas, adjunta fotos'),
-(5, 'client',      'Cliente externo con acceso a tableros de control'),
-(6, 'counterparty','Contraparte designada en el cliente para monitoreo de proyectos');
-
 -- Poblar tabla estado_tipos
 INSERT INTO estado_tipos (id, nombre, descripcion) VALUES
 (1, 'creado',    'Registro en proceso de definición, aún no operativo'),
@@ -23,6 +13,17 @@ INSERT INTO estado_tipos (id, nombre, descripcion) VALUES
 INSERT INTO tarea_tipos (id, nombre) VALUES
 (1, 'intelectual'),
 (2, 'physical');
+
+use comerci3_bdsetap;
+-- Poblar tabla usuario_tipos
+INSERT INTO usuario_tipos (id, nombre, descripcion) VALUES
+(1, 'admin',       'Administrador del sistema con acceso completo'),
+(2, 'planner',     'Crea planes y tareas, asigna ejecutores'),
+(3, 'supervisor',  'Valida tareas, aprueba/rechaza ejecuciones'),
+(4, 'executor',    'Ejecuta las tareas asignadas, adjunta fotos'),
+(5, 'client',      'Cliente externo con acceso a tableros de control'),
+(6, 'counterparty','Contraparte designada en el cliente para monitoreo de proyectos');
+
 
 -- Poblamiento inicial de permisos
 INSERT INTO permiso_tipos (Id, nombre, descripcion) VALUES

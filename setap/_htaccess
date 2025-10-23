@@ -1,0 +1,30 @@
+# .htaccess en la raíz de /setap/
+# Redirige todo el tráfico a la carpeta public/
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirigir todo a la carpeta public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Evitar listado de directorios
+Options -Indexes
+
+# Bloquear acceso a archivos sensibles
+<FilesMatch "\.(env|ini|log|sh|bak|config|sql)$">
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php83” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit

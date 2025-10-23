@@ -1,0 +1,29 @@
+# Entorno de la aplicación
+APP_ENV=produccion
+APP_DEBUG=false
+APP_NAME=SETAP
+APP_URL=https://www.comercial-elroble.cl/setap
+
+# Base de datos MySQL #127.0.0.1
+DB_HOST=localhost 
+DB_PORT=3306
+DB_DATABASE=comerci3_bdsetap
+DB_USERNAME=comerci3_admin
+DB_PASSWORD=Micomercial.1
+# Seguridad
+PASSWORD_MIN_LENGTH=8
+SESSION_LIFETIME=3600
+
+# Mail (para futuras notificaciones)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=contacto@comercial-elroble.cl
+MAIL_FROM_NAME="SETAP"
+
+# Otros parámetros globales
+TIMEZONE=America/Santiago
+LOCALE=es_CL
