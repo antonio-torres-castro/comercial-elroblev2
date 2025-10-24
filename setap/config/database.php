@@ -31,7 +31,7 @@ function loadEnv($path) {
 }
 
 // Cargar archivo _env si existe
-$envPath = __DIR__ . '/../_env';
+$envPath = __DIR__ . '/../.env';
 if (file_exists($envPath)) {
     loadEnv($envPath);
 }

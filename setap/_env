@@ -8,7 +8,7 @@
 # ENTORNO DE LA APLICACIÓN
 # ----------------------------------------------
 APP_ENV=production
-APP_DEBUG=false
+APP_DEBUG=true
 APP_NAME=SETAP
 APP_URL=https://comercial-elroble.cl/setap
 
@@ -34,15 +34,15 @@ DB_PASSWORD=Micomercial.1
 PASSWORD_MIN_LENGTH=8
 SESSION_LIFETIME=3600
 
-## Mail (para futuras notificaciones)
-#MAIL_MAILER=smtp
-#MAIL_HOST=smtp.mailtrap.io
-#MAIL_PORT=2525
-#MAIL_USERNAME=null
-#MAIL_PASSWORD=null
-#MAIL_ENCRYPTION=null
-#MAIL_FROM_ADDRESS=contacto@comercial-elroble.cl
-#MAIL_FROM_NAME="SETAP"
+# Mail (para futuras notificaciones)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=contacto@comercial-elroble.cl
+MAIL_FROM_NAME="SETAP"
 
 # ----------------------------------------------
 # CONFIGURACIÓN REGIONAL
