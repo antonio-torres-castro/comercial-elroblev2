@@ -1,12 +1,13 @@
-# .htaccess para carpeta logs
+# .htaccess - Carpeta /setap/logs/
 # Proteccion maxima de archivos de log
+# Codificación UTF-8
 
 # ===== PROTECCION ABSOLUTA DE LOGS =====
 # Solo permitir acceso interno desde el servidor
 <RequireAll>
     # Permitir acceso solo desde IPs autorizadas
     Require ip 127.0.0.1
-    Require ip localhost
+    Require ip ::1
     Require ip 181.72.88.67
 </RequireAll>
 
@@ -18,7 +19,6 @@
 </FilesMatch>
 
 # ===== PERMITIR ACCESO DESDE SCRIPTS DE DEBUG =====
-# Permitir acceso a archivos .php que vengan desde /setap/debug/
 <Files "*.php">
     <IfModule mod_rewrite.c>
         RewriteEngine On
@@ -48,8 +48,7 @@
 # ===== EVITAR LISTADO DE DIRECTORIO =====
 Options -Indexes
 
-# ===== CONFIGURACION PHP PARA LOGS =====
-# Deshabilitar ejecucion de PHP en directorio de logs (por seguridad)
+# ===== DESHABILITAR PHP EN LOGS =====
 <FilesMatch "\.php$">
     <IfModule mod_php.c>
         php_flag engine Off

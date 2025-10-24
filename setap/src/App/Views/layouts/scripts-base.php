@@ -12,7 +12,7 @@ if (!defined('SETAP_BASE_SCRIPTS_LOADED')) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Sistema Estandarizado de Alertas SETAP -->
-    <script src="/js/alert-system.js"></script>
+    <script src="/setap/public/js/alert-system.js"></script>
     
     <script>
         // Variables globales para evitar conflictos

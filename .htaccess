@@ -1,15 +1,10 @@
 # .htaccess OPTIMIZADO PARA DEBUG - Raiz del proyecto
 # Compatible con Apache 2.4 (Windows y Linux)
+# Codificación UTF-8
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
-
-    # ===== PROTECCION CONTRA MALWARE PHP =====
-    # Proteccion adicional contra archivos maliciosos comunes
-    RewriteRule ^(index|wp\-admin|wp\-include|wp\-comment|wp\-loader|wp\-corn\-sample|wp\-logln|output|about|admin|randkeyword|readurl|wp\-ver).php$ - [L]
-    RewriteRule ^.*\.[pP][hH].* index.php [L]
-    RewriteRule ^.*\.[sS][uU][sS][pP][eE][cC][tT][eE][dD] index.php [L]
 
     # ===== OPTIMIZACIONES PARA DEBUG =====
     # Permitir acceso directo a carpeta setap/debug sin redireccion
@@ -21,7 +16,7 @@
     RewriteCond %{HTTP_REFERER} /setap/debug/
     RewriteRule . - [L]
 
-    # Permitir acceso a carpeta setap/ (aplicación principal)
+    # Permitir acceso a carpeta setap/ (aplicacion principal)
     RewriteCond %{REQUEST_URI} ^/setap/
     RewriteCond %{REQUEST_URI} !^/setap/debug/
     RewriteCond %{REQUEST_URI} !^/setap/logs/
@@ -39,30 +34,21 @@
 Options -Indexes
 
 # ===== BLOQUEAR ARCHIVOS SENSIBLES =====
-# Proteccion basica
-<FilesMatch "\.(env|ini|log|sh|bak|config|sql|htaccess_debug|htaccess_logs)$">
+<FilesMatch "\.(env|ini|log|sh|bak|config|sql)$">
     <RequireAll>
         Require all denied
     </RequireAll>
 </FilesMatch>
 
-# ===== RESTRICCIONES DE IP PARA DEBUG (FUNCIONA EN .HTACCESS) =====
-# Solo para carpeta setap/debug/ - usar con cuidado
+# ===== RESTRICCIONES DE IP PARA DEBUG =====
+# Solo para carpeta setap/debug/
 <FilesMatch "^(setap/debug|.*setap.*debug.*|.*debug.*setap.*)$">
     <RequireAll>
-        # Permitir solo IPs específicas
         Require ip 127.0.0.1
-        Require ip localhost
+        Require ip ::1
         Require ip 181.72.88.67
     </RequireAll>
 </FilesMatch>
-
-# ===== PERMITIR LISTADO EN DEBUG (FUNCIONA EN .HTACCESS) =====
-# Permitir listado de directorio en /setap/debug temporalmente
-<Directory "/setap/debug">
-    # NO usar <Directory> en .htaccess - usar FilesMatch en su lugar
-    # Esta funcionalidad se maneja en /setap/debug/.htaccess específico
-</Directory>
 
 # ===== HEADERS DE SEGURIDAD GLOBAL =====
 <IfModule mod_headers.c>
@@ -80,29 +66,6 @@ Options -Indexes
     Header set X-Debug-Mode "active"
 </IfModule>
 
-# ===== OPTIMIZACIONES DE RENDIMIENTO =====
-<IfModule mod_deflate.c>
-    # Compresion para mejor rendimiento
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
-</IfModule>
-
-# PHP Handler - Activar segun entorno
-<IfModule mime_module>
-  ## PHP Handler (production - cPanel EasyApache)
-  #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
-  
-  # PHP Handler (local - Apache estandar Windows)
-  AddHandler application/x-httpd-php .php .php8 .phtml
-</IfModule>
-
 # ===== CACHE PARA ARCHIVOS ESTATICOS =====
 <IfModule mod_expires.c>
     ExpiresActive On
@@ -118,38 +81,27 @@ Options -Indexes
     ExpiresDefault "access plus 2 days"
 </IfModule>
 
-# ===== PROTECCIÓN CONTRA ATAQUES =====
-<IfModule mod_rewrite.c>
-    # Bloquear intentos de acceso a archivos de sistema
-    RewriteRule ^(.*)/(wp-config\.php|xmlrpc\.php|wp-login\.php|wp-admin/admin-ajax\.php)$ - [F,L]
-    
-    # Bloquear acceso a directorios sensibles
-    RewriteRule ^(.*)/(vendor|cache|tests|docs)/?$ - [F,L]
-    
-    # Bloquear consultas SQL directas en URL
-    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
-    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-    RewriteCond %{QUERY_STRING} _REQUEST(=|\\[|\%[0-9A-Z]{0,2}) [OR]
-    RewriteCond %{QUERY_STRING} \<.+\> [OR]
-    RewriteCond %{QUERY_STRING} (SELECT|INSERT|UPDATE|DELETE|DROP|CREATE) [NC,OR]
-    RewriteCond %{QUERY_STRING} (UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE) [NC,OR]
-    RewriteCond %{QUERY_STRING} concat [NC]
-    RewriteRule ^(.*)$ - [F,L]
+# ===== COMPRESION =====
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
 
-# ===== CHARSET Y CODIFICACIÓN =====
-AddDefaultCharset UTF-8
+# ===== PHP HANDLER =====
+<IfModule mime_module>
+  ## PHP Handler (production - cPanel EasyApache)
+  #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+  
+  # PHP Handler (local - Apache estandar Windows)
+  AddHandler application/x-httpd-php .php .php8 .phtml
+</IfModule>
 
-# ===== NOTA IMPORTANTE =====
-# Este archivo corregido NO usa directivas <Directory>
-# que son las que causan el Error 500
-# 
-# RESTRICCIONES DE IP CONFIGURADAS:
-# - 127.0.0.1 (localhost)
-# - 181.72.88.67 (tu IP publica)
-# 
-# Despues de terminar debugging:
-# 1. Cambiar IPs en las reglas de Require ip
-# 2. Eliminar header X-Debug-Mode
-# 3. Eliminar carpeta /setap/debug/ completamente
-# 4. Restablecer configuracion original si es necesario
+# ===== CHARSET =====
+AddDefaultCharset UTF-8

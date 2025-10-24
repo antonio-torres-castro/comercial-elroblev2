@@ -1,12 +1,13 @@
-# .htaccess FINAL para carpeta debug
-# Configuracion definitiva para herramientas de debug web-only
+# .htaccess - Carpeta /setap/debug/
+# Configuracion para herramientas de debug
 # Restricciones de IP específicas
+# Codificacion UTF-8
 
 # ===== RESTRICCIONES DE IP =====
 <RequireAll>
     # Permitir solo IPs especificas
     Require ip 127.0.0.1
-    Require ip localhost
+    Require ip ::1
     Require ip 181.72.88.67
 </RequireAll>
 

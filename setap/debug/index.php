@@ -9,12 +9,11 @@
 $allowedIPs = [
     '127.0.0.1',
     'localhost',
-    // REEMPLAZA CON TU IP PÚBLICA
     '181.72.88.67'
 ];
 
 $clientIP = $_SERVER['REMOTE_ADDR'] ?? '';
-$isAuthorized = in_array($clientIP, $allowedIPs) || $allowedIPs[0] === 'TU_IP_PUBLICA_AQUI';
+$isAuthorized = in_array($clientIP, $allowedIPs) || $allowedIPs[0] === '181.72.88.67';
 
 if (!$isAuthorized) {
     http_response_code(403);

@@ -1,13 +1,13 @@
-# .htaccess DEBUG OPTIMIZADO - Carpeta /setap/public/
-# Renombra a .htaccess cuando subas al servidor
-
+# .htaccess - Carpeta /setap/public/
 # Front controller (URLs limpias) — permite que index.php maneje rutas
+# Codificacion UTF-8
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /setap/public/
     
     # ===== OPTIMIZACION PARA DEBUG =====
-    # Permitir acceso a archivos de debug desde public
+    # Permitir acceso a archivos estaticos
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteCond %{REQUEST_FILENAME} \.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$
     RewriteRule ^ - [L]
@@ -25,14 +25,13 @@
     RewriteRule ^ index.php [L,QSA]
 </IfModule>
 
-# ===== CONFIGURACION ESPECIAL PARA DEBUG =====
-# Evitar listado de directorios
+# ===== CONFIGURACION GENERAL =====
 Options -Indexes
 
 # Priorizar index.php
 DirectoryIndex index.php index.html
 
-# ===== HEADERS DE SEGURIDAD MEJORADOS =====
+# ===== HEADERS DE SEGURIDAD =====
 <IfModule mod_headers.c>
     # Headers de seguridad basicos
     Header always set X-Frame-Options SAMEORIGIN
@@ -51,108 +50,19 @@ DirectoryIndex index.php index.html
 </IfModule>
 
 # ===== PROTECCION DE ARCHIVOS SENSIBLES =====
-# Bloquear archivos sensibles (compatible con Apache 2.2/2.4)
-<FilesMatch "\.(env|ini|phps|log|sh|bak|config|sql|tpl\.php)$">
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-    </IfModule>
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-</FilesMatch>
-
-# ===== PROTECCION ADICIONAL PARA DEBUG =====
-# Bloquear archivos de debug si se acceden directamente (solo permitir desde panel)
-<FilesMatch "\.(debug|debug_|htaccess_debug|htaccess_logs)$">
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-    </IfModule>
-    <IfModule mod_authz_core.c>
-        # Permitir solo si viene referer del panel de debug
-        RewriteEngine On
-        RewriteCond %{HTTP_REFERER} /setap/debug/
-        RewriteRule . - [L]
-        Require all denied
-    </IfModule>
-</FilesMatch>
-
-# ===== CONFIGURACION PARA MANEJAR ERRORES EN DEBUG =====
-<IfModule mod_rewrite.c>
-    # Permitir acceso a archivos de manejo de errores
-    RewriteRule ^(detailed_errors|error_analyzer)\.php$ - [L]
-</IfModule>
-
-<Files "detailed_errors.php">
+<FilesMatch "\.(env|ini|phps|log|sh|bak|config|sql)$">
     <RequireAll>
-        Require all granted
+        Require all denied
     </RequireAll>
-</Files>
-
-<Files "error_analyzer.php">
-    <RequireAll>
-        Require all granted
-    </RequireAll>
-</Files>
-
-# ===== CHARSET Y CODIFICACION =====
-AddDefaultCharset UTF-8
-
-# ===== CACHE OPTIMIZADO PARA DEBUG =====
-# Cache mas agresivo para assets estaticos
-<IfModule mod_expires.c>
-    ExpiresActive On
-    
-    # Archivos estaticos con cache mas largo
-    ExpiresByType image/jpg "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/gif "access plus 1 month"
-    ExpiresByType image/png "access plus 1 month"
-    ExpiresByType image/svg+xml "access plus 1 month"
-    ExpiresByType image/x-icon "access plus 1 year"
-    ExpiresByType image/vnd.microsoft.icon "access plus 1 year"
-    
-    # CSS y JS con cache mas largo para desarrollo
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType text/javascript "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType application/x-javascript "access plus 1 month"
-    
-    # Fuentes con cache
-    ExpiresByType font/woff "access plus 1 month"
-    ExpiresByType font/woff2 "access plus 1 month"
-    ExpiresByType font/ttf "access plus 1 month"
-    ExpiresByType application/font-woff "access plus 1 month"
-    
-    # Archivos con cache mas corto para debug
-    ExpiresByType text/html "access plus 1 hour"
-    ExpiresDefault "access plus 1 month"
-</IfModule>
-
-# ===== COMPRESION PARA MEJOR RENDIMIENTO =====
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE text/javascript
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
-    AddOutputFilterByType DEFLATE application/json
-    AddOutputFilterByType DEFLATE application/ld+json
-</IfModule>
+</FilesMatch>
 
 # ===== PROTECCION CONTRA ATAQUES =====
 <IfModule mod_rewrite.c>
-    # Prevenir ataques de inclusión de archivos
+    # Prevenir ataques de inclusion de archivos
     RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=http:// [OR]
     RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=https:// [OR]
     RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=(\.\./?)* [OR]
-    RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=/([a-z0-9_.] /?)+ [NC]
+    RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=/([a-z0-9_.]/?)+ [NC]
     RewriteRule .* - [F]
     
     # Bloquear intentos de SQL injection
@@ -170,9 +80,58 @@ AddDefaultCharset UTF-8
     RewriteRule ^(.*)/base64_decode\(.*$ - [F,L]
 </IfModule>
 
-# ===== CONFIGURACION ESPECIFICA PARA MANEJO DE ERRORES =====
+# ===== CONFIGURACION PARA MANEJO DE ERRORES =====
+<Files "detailed_errors.php">
+    <RequireAll>
+        Require all granted
+    </RequireAll>
+</Files>
+
+<Files "error_analyzer.php">
+    <RequireAll>
+        Require all granted
+    </RequireAll>
+</Files>
+
+# ===== CACHE OPTIMIZADO =====
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/x-javascript "access plus 1 month"
+    ExpiresByType font/woff "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 month"
+    ExpiresByType font/ttf "access plus 1 month"
+    ExpiresByType application/font-woff "access plus 1 month"
+    ExpiresByType text/html "access plus 1 hour"
+    ExpiresDefault "access plus 1 month"
+</IfModule>
+
+# ===== COMPRESION =====
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/ld+json
+</IfModule>
+
+# ===== CONFIGURACION PHP PARA DEBUG =====
 <IfModule mod_php.c>
-    # Habilitar mostrar errores solo en modo debug
     php_flag display_errors On
     php_flag display_startup_errors On
     php_value error_reporting E_ALL
@@ -180,16 +139,7 @@ AddDefaultCharset UTF-8
     php_value error_log "/setap/logs/php_errors.log"
 </IfModule>
 
-# ===== PROTECCION PARA ARCHIVOS DE CONFIGURACION =====
-# Anadir headers especificos para archivos de configuracion
-<FilesMatch "\.(env|config|ini)$">
-    <IfModule mod_headers.c>
-        Header set Content-Disposition "attachment"
-        Header set X-Content-Type-Options nosniff
-    </IfModule>
-</FilesMatch>
-
-# PHP Handler - Activar segun entorno
+# ===== PHP HANDLER =====
 <IfModule mime_module>
   ## PHP Handler (production - cPanel EasyApache)
   #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
@@ -198,18 +148,12 @@ AddDefaultCharset UTF-8
   AddHandler application/x-httpd-php .php .php8 .phtml
 </IfModule>
 
-# ===== CONFIGURACION FINAL PARA DEBUG =====
-# Headers finales que indican modo debug activo
+# ===== HEADERS FINALES =====
 <IfModule mod_headers.c>
     Header set X-Debug-Public "enabled"
     Header set X-Error-Handling "verbose"
     Header set X-Cache-Policy "debug-friendly"
 </IfModule>
 
-# ===== NOTA PARA PRODUCCION =====
-# Despues de terminar debugging, eliminar:
-# 1. Headers especificos de debug (X-App-Debug, X-Debug-*, etc.)
-# 2. Los "Require all granted" para detailed_errors.php y error_analyzer.php
-# 3. Las reglas especiales para archivos de debug
-# 4. Los headers de PHP que muestran errores
-# 5. Renombrar este archivo a .htaccess.production si quieres conservar backup
+# ===== CHARSET =====
+AddDefaultCharset UTF-8
