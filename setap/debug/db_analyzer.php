@@ -9,8 +9,8 @@
 $allowedIPs = [
     '127.0.0.1',
     'localhost',
-    // REEMPLAZA CON TU IP PÚBLICA
-    'TU_IP_PUBLICA_AQUI'
+    '::1',
+    '181.72.88.67'
 ];
 
 $clientIP = $_SERVER['REMOTE_ADDR'] ?? '';

@@ -9,8 +9,8 @@
 $allowedIPs = [
     '127.0.0.1',
     'localhost',
-    // Agrega tu IP pública aquí - REEMPLAZA ESTA IP
-    'TU_IP_PUBLICA_AQUI'
+    '::1',
+    '181.72.88.67'
 ];
 
 // Verificar IP

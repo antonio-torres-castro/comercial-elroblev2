@@ -1,13 +1,30 @@
 # .htaccess - Carpeta /setap/debug/
 # Configuracion para herramientas de debug
 # Codificacion UTF-8
+RewriteEngine On
+
+<IfModule mod_env.c>
+    SetEnvIf Remote_Addr ".*" CLIENT_IP=$0
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set X-Debug-Client-IP "%{REMOTE_ADDR}e"
+</IfModule>
 
 # ===== RESTRICCIONES DE IP =====
-<RequireAll>
+<RequireAny>
     Require ip 127.0.0.1
-    Require ip ::1
+    Require ip 0:0:0:0:0:0:0:1
+    Require ip ::1/128
     Require ip 181.72.88.67
-</RequireAll>
+</RequireAny>
+
+<IfModule mod_headers.c>
+    Header always set X-Debug-Phase "AFTER-AUTH-SUCCESS"
+</IfModule>
+
+# Bloquear acceso si no cumple las IPs
+ErrorDocument 403 "Acceso no autorizado al debug"
 
 # ===== PROTECCION DE ARCHIVOS SENSIBLES =====
 <FilesMatch "\.(env|log|ini|conf|config|bak|backup|old|txt)$">

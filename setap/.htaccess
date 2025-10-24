@@ -1,6 +1,6 @@
 # .htaccess - Carpeta /setap/
 # Compatible con Apache 24 (Windows y Linux)
-# Codificación UTF-8
+# Codificacion UTF-8
 
 <IfModule mod_rewrite.c>
     RewriteEngine On

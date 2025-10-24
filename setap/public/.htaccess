@@ -43,7 +43,7 @@ DirectoryIndex index.php index.html
     Header unset X-Powered-By
     Header unset Server
     
-    # Headers específicos para modo debug
+    # Headers especificos para modo debug
     <Files "index.php">
         Header set X-App-Debug "enabled"
     </Files>
