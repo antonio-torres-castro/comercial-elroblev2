@@ -6,22 +6,7 @@
     RewriteEngine On
     RewriteBase /
 
-    # ===== OPTIMIZACIONES PARA DEBUG =====
-    # Permitir acceso directo a carpeta setap/debug sin redireccion
-    RewriteCond %{REQUEST_URI} ^/setap/debug/
-    RewriteRule ^(.*)$ - [L]
-
-    # Permitir acceso a carpeta setap/logs (solo desde referer del debug)
-    RewriteCond %{REQUEST_URI} ^/setap/logs/
-    RewriteCond %{HTTP_REFERER} /setap/debug/
-    RewriteRule . - [L]
-
-    # Permitir acceso a carpeta setap/ (aplicacion principal)
-    RewriteCond %{REQUEST_URI} ^/setap/
-    RewriteCond %{REQUEST_URI} !^/setap/debug/
-    RewriteCond %{REQUEST_URI} !^/setap/logs/
-    RewriteRule ^(.*)$ - [L]
-
+    # ===== SOLO ROUTING GENERAL =====
     # Si el archivo o directorio no existe, redirigir a index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

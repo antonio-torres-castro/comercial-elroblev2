@@ -5,6 +5,7 @@
 # ===== RESTRICCIONES DE IP =====
 <RequireAll>
     # Permitir solo IPs especificas
+    # Localhost IPv4 y IPv6 + IP publica
     Require ip 127.0.0.1
     Require ip ::1
     Require ip 181.72.88.67

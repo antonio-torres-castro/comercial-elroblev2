@@ -1,6 +1,6 @@
 # .htaccess - Carpeta /setap/logs/
 # Proteccion maxima de archivos de log
-# Codificación UTF-8
+# Codificacion UTF-8
 
 # ===== PROTECCION ABSOLUTA DE LOGS =====
 # Solo permitir acceso interno desde el servidor

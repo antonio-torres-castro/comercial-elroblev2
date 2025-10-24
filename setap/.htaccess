@@ -6,20 +6,11 @@
     RewriteEngine On
     RewriteBase /setap/
     
-    # ===== OPTIMIZACION PARA DEBUG =====
-    # Permitir acceso directo a carpeta debug sin redireccion
-    RewriteCond %{REQUEST_URI} ^/setap/debug/
-    RewriteRule ^(.*)$ - [L]
-    
-    # Permitir acceso a carpeta logs (solo desde referer del debug)
-    RewriteCond %{REQUEST_URI} ^/setap/logs/
-    RewriteCond %{HTTP_REFERER} /setap/debug/
-    RewriteRule . - [L]
-    
-    # Redirigir todo lo demas a la carpeta public/
+    # ===== ROUTING SIMPLE A PUBLIC/ =====
+    # Redirigir todo a la carpeta public/ excepto debug y logs
     RewriteCond %{REQUEST_URI} !^/setap/debug/
-    RewriteCond %{REQUEST_URI} !^/setap/public/
     RewriteCond %{REQUEST_URI} !^/setap/logs/
+    RewriteCond %{REQUEST_URI} !^/setap/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
