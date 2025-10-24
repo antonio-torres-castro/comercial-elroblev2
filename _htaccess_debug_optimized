@@ -1,36 +1,36 @@
-# .htaccess OPTIMIZADO PARA DEBUG - Raiz del proyecto
+# .htaccess OPTIMIZADO PARA DEBUG - Raíz del proyecto
 # Renombra a .htaccess cuando subas al servidor
 
 <IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
+RewriteEngine On
+RewriteBase /
 
-    # ===== PROTECCION CONTRA MALWARE PHP =====
-    # Proteccion adicional contra archivos maliciosos comunes
-    RewriteRule ^(index|wp\-admin|wp\-include|wp\-comment|wp\-loader|wp\-corn\-sample|wp\-logln|output|about|admin|randkeyword|readurl|wp\-ver).php$ - [L]
-    RewriteRule ^.*\.[pP][hH].* index.php [L]
-    RewriteRule ^.*\.[sS][uU][sS][pP][eE][cC][tT][eE][dD] index.php [L]
+# ===== PROTECCIÓN CONTRA MALWARE PHP =====
+# Protección adicional contra archivos maliciosos comunes
+RewriteRule ^(index|wp\-admin|wp\-include|wp\-comment|wp\-loader|wp\-corn\-sample|wp\-logln|output|about|admin|randkeyword|readurl|wp\-ver).php$ - [L]
+RewriteRule ^.*\.[pP][hH].* index.php [L]
+RewriteRule ^.*\.[sS][uU][sS][pP][eE][cC][tT][eE][dD] index.php [L]
 
-    # ===== OPTIMIZACIONES PARA DEBUG =====
-    # Permitir acceso a carpeta de debug desde cualquier IP durante debugging
-    RewriteRule ^setap/debug/ - [L]
+# ===== OPTIMIZACIONES PARA DEBUG =====
+# Permitir acceso a carpeta de debug desde cualquier IP durante debugging
+RewriteRule ^setap/debug/ - [L]
 
-    # Redireccionar intentos de acceso directo a carpeta debug
-    RewriteCond %{REQUEST_URI} ^/setap/debug/ [NC]
-    RewriteRule . - [L]
+# Redireccionar intentos de acceso directo a carpeta debug
+RewriteCond %{REQUEST_URI} ^/setap/debug/ [NC]
+RewriteRule . - [L]
 
-    # Si el archivo o directorio no existe, redirigir a index.php
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} !^/setap/debug/
-    RewriteRule . index.php [L]
+# Si el archivo o directorio no existe, redirigir a index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/setap/debug/
+RewriteRule . index.php [L]
 </IfModule>
 
-# ===== CONFIGURACION PARA DEBUG =====
-# Permisos especiales para debugging (deshabilitar despues)
+# ===== CONFIGURACIÓN PARA DEBUG =====
+# Permisos especiales para debugging (deshabilitar después)
 <Directory "/setap/debug">
     # Permitir acceso desde cualquier IP durante debugging
-    # IMPORTANTE: Eliminar esta linea despues de terminar debugging
+    # IMPORTANTE: Eliminar esta línea después de terminar debugging
     <RequireAll>
         Require all granted
     </RequireAll>
@@ -41,7 +41,7 @@
 </Directory>
 
 # ===== BLOQUEAR ARCHIVOS SENSIBLES =====
-# Proteccion basica
+# Protección básica
 <FilesMatch "\.(env|ini|log|sh|bak|config|sql|htaccess_debug|htaccess_logs)$">
     <RequireAll>
         Require all denied
@@ -56,14 +56,14 @@
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     
-    # Remover headers que revelan informacion del servidor
+    # Remover headers que revelan información del servidor
     Header unset X-Powered-By
     Header unset Server
 </IfModule>
 
 # ===== OPTIMIZACIONES DE RENDIMIENTO =====
 <IfModule mod_deflate.c>
-    # Compresion para mejor rendimiento
+    # Compresión para mejor rendimiento
     AddOutputFilterByType DEFLATE text/plain
     AddOutputFilterByType DEFLATE text/html
     AddOutputFilterByType DEFLATE text/xml
@@ -75,23 +75,23 @@
     AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
 
-# PHP Handler - Activar segun entorno
+# PHP Handler - Activar según entorno
 <IfModule mime_module>
   ## PHP Handler (production - cPanel EasyApache)
   #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
   
-  # PHP Handler (local - Apache estandar Windows)
+  # PHP Handler (local - Apache estándar Windows)
   AddHandler application/x-httpd-php .php .php8 .phtml
 </IfModule>
 
-# ===== CONFIGURACION ESPECIAL PARA DEBUG =====
+# ===== CONFIGURACIÓN ESPECIAL PARA DEBUG =====
 # Permitir listado de directorio en /setap/debug temporalmente (solo para debugging)
 <Directory "/setap/debug">
     Options +Indexes
 </Directory>
 
 # ===== MENSAJE DE DEBUG =====
-# Anadir header para identificar que esta en modo debug (eliminar despues)
+# Añadir header para identificar que está en modo debug (eliminar después)
 <IfModule mod_headers.c>
     Header set X-Debug-Mode "active"
 </IfModule>

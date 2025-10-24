@@ -6,12 +6,12 @@
     RewriteEngine On
     # RewriteBase /setap/
     
-    # ===== OPTIMIZACION PARA DEBUG =====
-    # Permitir acceso directo a carpeta debug sin redireccion
+    # ===== OPTIMIZACIÓN PARA DEBUG =====
+    # Permitir acceso directo a carpeta debug sin redirección
     RewriteCond %{REQUEST_URI} ^/setap/debug/
     RewriteRule ^(.*)$ - [L]
     
-    # Redirigir todo lo demas a la carpeta public/
+    # Redirigir todo lo demás a la carpeta public/
     RewriteCond %{REQUEST_URI} !^/setap/debug/
     RewriteCond %{REQUEST_URI} !^/setap/public/
     RewriteRule ^(.*)$ public/$1 [L]
@@ -22,24 +22,24 @@
     RewriteRule . - [L]
 </IfModule>
 
-# ===== CONFIGURACION ESPECIAL PARA DEBUG =====
+# ===== CONFIGURACIÓN ESPECIAL PARA DEBUG =====
 # Evitar listado de directorios (excepto debug temporalmente)
 <Directory "/setap">
     Options -Indexes
 </Directory>
 
 <Directory "/setap/debug">
-    # Permitir listado para debugging (eliminar despues)
+    # Permitir listado para debugging (eliminar después)
     Options +Indexes
     
-    # Headers de seguridad especificos para debug
+    # Headers de seguridad específicos para debug
     Header always set X-Frame-Options SAMEORIGIN
     Header always set X-Content-Type-Options nosniff
     Header always set Cache-Control "no-cache, no-store, must-revalidate"
 </Directory>
 
 <Directory "/setap/logs">
-    # Proteccion adicional para logs
+    # Protección adicional para logs
     Header always set X-Frame-Options DENY
     Header always set X-Content-Type-Options nosniff
     
@@ -47,7 +47,7 @@
     <RequireAll>
         Require ip 127.0.0.1
         Require ip localhost
-        Require ip 181.72.88.67
+        Require ip TU_IP_PUBLICA_AQUI
     </RequireAll>
 </Directory>
 
@@ -70,26 +70,26 @@
             # Permitir acceso solo desde IPs autorizadas
             Require ip 127.0.0.1
             Require ip localhost
-            Require ip 181.72.88.67
+            Require ip TU_IP_PUBLICA_AQUI
         </RequireAll>
     </Files>
 </Directory>
 
-# ===== CONFIGURACION DE HEADERS PARA DEBUG =====
+# ===== CONFIGURACIÓN DE HEADERS PARA DEBUG =====
 <IfModule mod_headers.c>
-    # Headers de seguridad para toda la aplicacion
+    # Headers de seguridad para toda la aplicación
     Header always set X-Frame-Options SAMEORIGIN
     Header always set X-Content-Type-Options nosniff
     Header always set X-XSS-Protection "1; mode=block"
     
-    # Headers especificos para modo debug
+    # Headers específicos para modo debug
     <Directory "/setap/debug">
         Header set X-Debug-Panel "enabled"
         Header unset X-Powered-By
     </Directory>
 </IfModule>
 
-# ===== PROTECCION CONTRA ATAQUES =====
+# ===== PROTECCIÓN CONTRA ATAQUES =====
 <IfModule mod_rewrite.c>
     # Bloquear intentos de acceso a archivos de sistema
     RewriteRule ^(.*)/(wp-config\.php|xmlrpc\.php|wp-login\.php|wp-admin/admin-ajax\.php)$ - [F,L]
@@ -108,10 +108,10 @@
     RewriteRule ^(.*)$ - [F,L]
 </IfModule>
 
-# ===== CONFIGURACION PARA LOGS =====
+# ===== CONFIGURACIÓN PARA LOGS =====
 # Permitir acceso a logs solo desde el sistema
 <Directory "/setap/logs">
-    # Deshabilitar ejecucion de PHP en logs
+    # Deshabilitar ejecución de PHP en logs
     <FilesMatch "\.php$">
         <RequireAll>
             Require all denied
@@ -119,25 +119,25 @@
     </FilesMatch>
 </Directory>
 
-# PHP Handler - Activar segun entorno
+# PHP Handler - Activar según entorno
 <IfModule mime_module>
   ## PHP Handler (production - cPanel EasyApache)
   #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
   
-  # PHP Handler (local - Apache estandar Windows)
+  # PHP Handler (local - Apache estándar Windows)
   AddHandler application/x-httpd-php .php .php8 .phtml
 </IfModule>
 
-# ===== CONFIGURACION FINAL PARA DEBUG =====
-# Añadir indicadores de modo debug (eliminar despues)
+# ===== CONFIGURACIÓN FINAL PARA DEBUG =====
+# Añadir indicadores de modo debug (eliminar después)
 <IfModule mod_headers.c>
     Header set X-Debug-Active "true"
     Header set X-Tools "web-debug-enabled"
 </IfModule>
 
 # ===== NOTA IMPORTANTE =====
-# Despues de terminar debugging:
-# 1. Cambiar "Require ip "TU_IP_PUBLICA_AQUI" por las IPs especificas que necesites
+# Después de terminar debugging:
+# 1. Cambiar "Require ip TU_IP_PUBLICA_AQUI" por las IPs específicas que necesites
 # 2. Restablecer "Options -Indexes" en /setap/debug
 # 3. Eliminar headers de debug (X-Debug-*, X-Tools, etc.)
 # 4. Eliminar o cambiar permisos especiales para carpeta logs/

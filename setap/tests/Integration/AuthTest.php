@@ -201,7 +201,7 @@ class AuthTest extends TestCase
         ];
 
         $sessionAge = $currentTime - $recentSession['login_time'];
-        $this->assertLessThan($sessionTimeout, $sessionAge, 'Sesión reciente dentro del tiempo l�mite');
+        $this->assertLessThan($sessionTimeout, $sessionAge, 'Sesión reciente dentro del tiempo limite');
 
         // Sesión expirada
         $expiredSession = [
@@ -211,7 +211,7 @@ class AuthTest extends TestCase
         ];
 
         $expiredSessionAge = $currentTime - $expiredSession['login_time'];
-        $this->assertGreaterThan($sessionTimeout, $expiredSessionAge, 'Sesión expirada fuera del tiempo l�mite');
+        $this->assertGreaterThan($sessionTimeout, $expiredSessionAge, 'Sesión expirada fuera del tiempo limite');
     }
 
     /**
@@ -246,7 +246,7 @@ class AuthTest extends TestCase
         ];
 
         $this->assertArrayHasKey($username, $failedAttempts);
-        $this->assertLessThan($maxAttempts, $failedAttempts[$username], 'Intentos bajo el l�mite');
+        $this->assertLessThan($maxAttempts, $failedAttempts[$username], 'Intentos bajo el limite');
 
         // Simular exceso de intentos
         $tooManyAttempts = [

@@ -170,7 +170,7 @@
         // Funcionalidad básica
         document.addEventListener('DOMContentLoaded', function() {
             // Confirmar logout
-            const logoutLink = document.querySelector('a[href="<?= AppConstants::ROUTE_LOGOUT ?>"]');
+            const logoutLink = document.querySelector('a[href="<?= AppConstants::ROUTE_LOGOUT; ?>"]');
             if (logoutLink) {
                 logoutLink.addEventListener('click', function(e) {
                     if (!confirm('¿Está seguro que desea cerrar sesión?')) {

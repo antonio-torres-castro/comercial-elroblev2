@@ -43,7 +43,7 @@ class UserTest extends TestCase
      */
     public function testUserDataValidation()
     {
-        // Datos v�lidos de usuario
+        // Datos validos de usuario
         $validUserData = [
             'persona_id' => 1,
             'email' => 'usuario@test.com',
@@ -119,7 +119,7 @@ class UserTest extends TestCase
     }
 
     /**
-     * Test de creación de usuario con datos v�lidos
+     * Test de creación de usuario con datos validos
      */
     public function testCreateUserWithValidData()
     {
@@ -152,8 +152,8 @@ class UserTest extends TestCase
     public function testGetAvailablePersonas()
     {
         $expectedPersonas = [
-            ['id' => 1, 'nombre' => 'Juan P�rez', 'rut' => '12345678-9'],
-            ['id' => 2, 'nombre' => 'Mar�a Gonz�lez', 'rut' => '98765432-1']
+            ['id' => 1, 'nombre' => 'Juan Perez', 'rut' => '12345678-9'],
+            ['id' => 2, 'nombre' => 'Maria Gonzolez', 'rut' => '98765432-1']
         ];
         
         $this->userModelMock
@@ -193,7 +193,7 @@ class UserTest extends TestCase
      */
     public function testUserDateValidation()
     {
-        // Fechas v�lidas
+        // Fechas validas
         $validDates = [
             'fecha_inicio' => '2025-10-11',
             'fecha_termino' => '2025-12-31'
@@ -201,17 +201,17 @@ class UserTest extends TestCase
 
         foreach ($validDates as $key => $date) {
             // Validar formato de fecha
-            $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date, "Fecha {$key} formato v�lido");
+            $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date, "Fecha {$key} formato valido");
             
-            // Validar que la fecha es v�lida
+            // Validar que la fecha es valida
             $timestamp = strtotime($date);
-            $this->assertNotFalse($timestamp, "Fecha {$key} es v�lida");
+            $this->assertNotFalse($timestamp, "Fecha {$key} es valida");
         }
 
         // Validar que fecha_termino > fecha_inicio
         $inicio = strtotime($validDates['fecha_inicio']);
         $termino = strtotime($validDates['fecha_termino']);
-        $this->assertGreaterThan($inicio, $termino, 'Fecha t�rmino posterior a fecha inicio');
+        $this->assertGreaterThan($inicio, $termino, 'Fecha termino posterior a fecha inicio');
     }
 
     /**
