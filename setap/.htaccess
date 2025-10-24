@@ -1,5 +1,4 @@
 # .htaccess - Carpeta /setap/
-# Version unificada sin duplicaciones
 # Compatible con Apache 2.4 (Windows y Linux)
 # Codificación UTF-8
 
@@ -35,16 +34,6 @@ DirectoryIndex index.php index.html
 <FilesMatch "\.(env|ini|log|sh|bak|config|sql)$">
     <RequireAll>
         Require all denied
-    </RequireAll>
-</FilesMatch>
-
-# ===== RESTRICCIONES DE IP PARA DEBUG =====
-# Solo para carpeta debug/
-<FilesMatch "^(debug|.*debug.*|.*debug.*)$">
-    <RequireAll>
-        Require ip 127.0.0.1
-        Require ip ::1
-        Require ip 181.72.88.67
     </RequireAll>
 </FilesMatch>
 

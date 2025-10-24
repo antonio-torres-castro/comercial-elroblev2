@@ -1,4 +1,4 @@
-# .htaccess OPTIMIZADO PARA DEBUG - Raiz del proyecto
+# .htaccess - Raiz del proyecto
 # Compatible con Apache 2.4 (Windows y Linux)
 # Codificación UTF-8
 
@@ -37,16 +37,6 @@ Options -Indexes
 <FilesMatch "\.(env|ini|log|sh|bak|config|sql)$">
     <RequireAll>
         Require all denied
-    </RequireAll>
-</FilesMatch>
-
-# ===== RESTRICCIONES DE IP PARA DEBUG =====
-# Solo para carpeta setap/debug/
-<FilesMatch "^(setap/debug|.*setap.*debug.*|.*debug.*setap.*)$">
-    <RequireAll>
-        Require ip 127.0.0.1
-        Require ip ::1
-        Require ip 181.72.88.67
     </RequireAll>
 </FilesMatch>
 

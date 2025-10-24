@@ -1,6 +1,5 @@
 # .htaccess - Carpeta /setap/debug/
 # Configuracion para herramientas de debug
-# Restricciones de IP específicas
 # Codificacion UTF-8
 
 # ===== RESTRICCIONES DE IP =====
