@@ -1,92 +1,65 @@
 # .htaccess DEBUG OPTIMIZADO - Carpeta /setap/
 # Renombra a .htaccess cuando subas al servidor
-# IMPORTANTE: Antes de usar, reemplaza "TU_IP_PUBLICA_AQUI" con tu IP real
+# Compatible con Apache 2.4 (Windows y Linux)
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    # RewriteBase /setap/
+    #RewriteBase /setap/
     
     # ===== OPTIMIZACION PARA DEBUG =====
     # Permitir acceso directo a carpeta debug sin redireccion
     RewriteCond %{REQUEST_URI} ^/setap/debug/
     RewriteRule ^(.*)$ - [L]
     
-    # Redirigir todo lo demas a la carpeta public/
-    RewriteCond %{REQUEST_URI} !^/setap/debug/
-    RewriteCond %{REQUEST_URI} !^/setap/public/
-    RewriteRule ^(.*)$ public/$1 [L]
-    
-    # Permitir acceso a logs si viene desde debug
+    # Permitir acceso a carpeta logs (solo desde referer del debug)
     RewriteCond %{REQUEST_URI} ^/setap/logs/
     RewriteCond %{HTTP_REFERER} /setap/debug/
     RewriteRule . - [L]
+    
+    # Redirigir todo lo demas a la carpeta public/
+    RewriteCond %{REQUEST_URI} !^/setap/debug/
+    RewriteCond %{REQUEST_URI} !^/setap/public/
+    RewriteCond %{REQUEST_URI} !^/setap/logs/
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
-# ===== CONFIGURACION ESPECIAL PARA DEBUG =====
-# Evitar listado de directorios (excepto debug temporalmente)
-<Directory "/setap">
-    Options -Indexes
-</Directory>
+# ===== CONFIGURACION GENERAL =====
+# Evitar listado de directorios
+Options -Indexes
 
-<Directory "/setap/debug">
-    # Permitir listado para debugging (eliminar despues)
-    Options +Indexes
-    
-    # Headers de seguridad especificos para debug
-    Header always set X-Frame-Options SAMEORIGIN
-    Header always set X-Content-Type-Options nosniff
-    Header always set Cache-Control "no-cache, no-store, must-revalidate"
-</Directory>
+# Priorizar index.php
+DirectoryIndex index.php index.html
 
-<Directory "/setap/logs">
-    # Proteccion adicional para logs
-    Header always set X-Frame-Options DENY
-    Header always set X-Content-Type-Options nosniff
-    
-    # Solo permitir acceso desde IPs autorizadas (tu IP + localhost)
+# ===== PROTECCION DE ARCHIVOS SENSIBLES =====
+<FilesMatch "\.(env|ini|log|sh|bak|config|sql|htaccess_debug|htaccess_logs|htaccess_debug_optimized)$">
     <RequireAll>
+        Require all denied
+    </RequireAll>
+</FilesMatch>
+
+# ===== RESTRICCIONES DE IP PARA DEBUG (FUNCIONA EN .HTACCESS) =====
+# Solo para carpeta debug/ - usar con cuidado
+<FilesMatch "^(debug|.*debug.*|.*debug.*)$">
+    <RequireAll>
+        # Permitir solo IPs especificas
         Require ip 127.0.0.1
         Require ip localhost
         Require ip 181.72.88.67
     </RequireAll>
-</Directory>
-
-# ===== BLOQUEAR ACCESO A ARCHIVOS SENSIBLES =====
-<FilesMatch "\.(env|ini|log|sh|bak|config|sql|htaccess_debug|htaccess_logs|htaccess_debug_optimized)$">
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-    </IfModule>
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
 </FilesMatch>
 
-# ===== PERMISOS ESPECIALES PARA DEBUG =====
-# Permitir acceso a archivos PHP en carpeta debug
-<Directory "/setap/debug">
-    <Files "*.php">
-        <RequireAll>
-            # Permitir acceso solo desde IPs autorizadas
-            Require ip 127.0.0.1
-            Require ip localhost
-            Require ip 181.72.88.67
-        </RequireAll>
-    </Files>
-</Directory>
-
-# ===== CONFIGURACION DE HEADERS PARA DEBUG =====
+# ===== HEADERS DE SEGURIDAD (SI mod_headers ESTA DISPONIBLE) =====
 <IfModule mod_headers.c>
-    # Headers de seguridad para toda la aplicacion
+    # Headers basicos de seguridad
     Header always set X-Frame-Options SAMEORIGIN
     Header always set X-Content-Type-Options nosniff
     Header always set X-XSS-Protection "1; mode=block"
     
     # Headers especificos para modo debug
-    <Directory "/setap/debug">
-        Header set X-Debug-Panel "enabled"
-        Header unset X-Powered-By
-    </Directory>
+    Header set X-Debug-Panel "enabled"
+    Header set X-Debug-Active "true"
+    Header set X-Tools "web-debug-enabled"
+    Header unset X-Powered-By
 </IfModule>
 
 # ===== PROTECCION CONTRA ATAQUES =====
@@ -100,7 +73,7 @@
     # Bloquear consultas SQL directas en URL
     RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
     RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\\[|\%[0-9A-Z]{0,2}) [OR]
     RewriteCond %{QUERY_STRING} \<.+\> [OR]
     RewriteCond %{QUERY_STRING} (SELECT|INSERT|UPDATE|DELETE|DROP|CREATE) [NC,OR]
     RewriteCond %{QUERY_STRING} (UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE) [NC,OR]
@@ -108,16 +81,36 @@
     RewriteRule ^(.*)$ - [F,L]
 </IfModule>
 
-# ===== CONFIGURACION PARA LOGS =====
-# Permitir acceso a logs solo desde el sistema
-<Directory "/setap/logs">
-    # Deshabilitar ejecucion de PHP en logs
-    <FilesMatch "\.php$">
-        <RequireAll>
-            Require all denied
-        </RequireAll>
-    </FilesMatch>
-</Directory>
+# ===== CHARSET Y CODIFICACION =====
+AddDefaultCharset UTF-8
+
+# ===== CACHE PARA ARCHIVOS ESTATICOS =====
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType text/x-javascript "access plus 1 month"
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresDefault "access plus 2 days"
+</IfModule>
+
+# ===== COMPRESION PARA MEJOR RENDIMIENTO =====
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
 
 # PHP Handler - Activar segun entorno
 <IfModule mime_module>
@@ -128,18 +121,12 @@
   AddHandler application/x-httpd-php .php .php8 .phtml
 </IfModule>
 
-# ===== CONFIGURACION FINAL PARA DEBUG =====
-# Añadir indicadores de modo debug (eliminar despues)
-<IfModule mod_headers.c>
-    Header set X-Debug-Active "true"
-    Header set X-Tools "web-debug-enabled"
-</IfModule>
-
 # ===== NOTA IMPORTANTE =====
+# Este archivo corregido NO usa directivas <Directory>
+# que son las que causan el Error 500
+# 
 # Despues de terminar debugging:
-# 1. Cambiar "Require ip "TU_IP_PUBLICA_AQUI" por las IPs especificas que necesites
-# 2. Restablecer "Options -Indexes" en /setap/debug
-# 3. Eliminar headers de debug (X-Debug-*, X-Tools, etc.)
-# 4. Eliminar o cambiar permisos especiales para carpeta logs/
-# 5. Renombrar este archivo a .htaccess.production si quieres conservar backup
-# 6. Eliminar carpeta /setap/debug/ completamente del servidor
+# 1. Cambiar IPs en las reglas de Require ip
+# 2. Eliminar headers de debug (X-Debug-*, X-Tools, etc.)
+# 3. Eliminar carpeta /setap/debug/ completamente
+# 4. Restablecer configuración original si es necesario

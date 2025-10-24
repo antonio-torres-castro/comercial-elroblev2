@@ -1,63 +1,57 @@
 # .htaccess para carpeta logs
-# Renombra a .htaccess cuando subas al servidor
+# Proteccion maxima de archivos de log
 
 # ===== PROTECCION ABSOLUTA DE LOGS =====
 # Solo permitir acceso interno desde el servidor
 <RequireAll>
+    # Permitir acceso solo desde IPs autorizadas
     Require ip 127.0.0.1
-    Require ip ::1
     Require ip localhost
+    Require ip 181.72.88.67
 </RequireAll>
 
 # ===== BLOQUEAR TODOS LOS ARCHIVOS DE LOG =====
-<FilesMatch "\.(log|Logs|LOG)$">
+<FilesMatch "\.(log|Logs|LOG|txt|TXT)$">
     <RequireAll>
         Require all denied
     </RequireAll>
 </FilesMatch>
 
-# Bloquear archivos de texto que podrian contener logs
-<FilesMatch "\.(txt|TXT)$">
-    <RequireAll>
-        Require all denied
-    </RequireAll>
-</FilesMatch>
-
-# ===== CONFIGURACION ESPECIFICA PARA DEBUG =====
-# Permitir acceso solo a scripts internos del debug
+# ===== PERMITIR ACCESO DESDE SCRIPTS DE DEBUG =====
+# Permitir acceso a archivos .php que vengan desde /setap/debug/
 <Files "*.php">
-    <RequireAll>
-        # Permitir acceso desde el panel de debug
+    <IfModule mod_rewrite.c>
         RewriteEngine On
         RewriteCond %{HTTP_REFERER} /setap/debug/
         RewriteRule . - [L]
-        
-        # O permitir por IP especifica (tu IP)
-        Require ip 181.72.88.67
-        Require ip 127.0.0.1
+    </IfModule>
+    <RequireAll>
+        Require all granted
     </RequireAll>
 </Files>
 
 # ===== HEADERS DE SEGURIDAD =====
-Header always set X-Frame-Options DENY
-Header always set X-Content-Type-Options nosniff
-Header always set Cache-Control "no-cache, no-store, must-revalidate"
-Header always set Pragma "no-cache"
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options DENY
+    Header always set X-Content-Type-Options nosniff
+    Header always set Cache-Control "no-cache, no-store, must-revalidate"
+    Header always set Pragma "no-cache"
+</IfModule>
 
 # ===== BLOQUEAR METODOS PELIGROSOS =====
-<RequireAll>
-    <RequireMethod GET>
-    <RequireMethod POST>
+<LimitExcept GET POST>
     <RequireAll>
-</RequireAll>
+        Require all denied
+    </RequireAll>
+</LimitExcept>
 
 # ===== EVITAR LISTADO DE DIRECTORIO =====
 Options -Indexes
 
 # ===== CONFIGURACION PHP PARA LOGS =====
-# Deshabilitar ejecucion de PHP en directorio de logs
+# Deshabilitar ejecucion de PHP en directorio de logs (por seguridad)
 <FilesMatch "\.php$">
-    <RequireAll>
-        Require all denied
-    </RequireAll>
+    <IfModule mod_php.c>
+        php_flag engine Off
+    </IfModule>
 </FilesMatch>

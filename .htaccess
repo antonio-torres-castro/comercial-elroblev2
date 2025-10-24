@@ -1,5 +1,5 @@
 # .htaccess OPTIMIZADO PARA DEBUG - Raiz del proyecto
-# Renombra a .htaccess cuando subas al servidor
+# Compatible con Apache 2.4 (Windows y Linux)
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -12,33 +12,31 @@
     RewriteRule ^.*\.[sS][uU][sS][pP][eE][cC][tT][eE][dD] index.php [L]
 
     # ===== OPTIMIZACIONES PARA DEBUG =====
-    # Permitir acceso a carpeta de debug desde cualquier IP durante debugging
-    RewriteRule ^setap/debug/ - [L]
+    # Permitir acceso directo a carpeta setap/debug sin redireccion
+    RewriteCond %{REQUEST_URI} ^/setap/debug/
+    RewriteRule ^(.*)$ - [L]
 
-    # Redireccionar intentos de acceso directo a carpeta debug
-    RewriteCond %{REQUEST_URI} ^/setap/debug/ [NC]
+    # Permitir acceso a carpeta setap/logs (solo desde referer del debug)
+    RewriteCond %{REQUEST_URI} ^/setap/logs/
+    RewriteCond %{HTTP_REFERER} /setap/debug/
     RewriteRule . - [L]
+
+    # Permitir acceso a carpeta setap/ (aplicación principal)
+    RewriteCond %{REQUEST_URI} ^/setap/
+    RewriteCond %{REQUEST_URI} !^/setap/debug/
+    RewriteCond %{REQUEST_URI} !^/setap/logs/
+    RewriteRule ^(.*)$ - [L]
 
     # Si el archivo o directorio no existe, redirigir a index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} !^/setap/debug/
+    RewriteCond %{REQUEST_URI} !^/setap/
     RewriteRule . index.php [L]
 </IfModule>
 
-# ===== CONFIGURACION PARA DEBUG =====
-# Permisos especiales para debugging (deshabilitar despues)
-<Directory "/setap/debug">
-    # Permitir acceso desde cualquier IP durante debugging
-    # IMPORTANTE: Eliminar esta linea despues de terminar debugging
-    <RequireAll>
-        Require all granted
-    </RequireAll>
-    
-    # Headers de seguridad
-    Header always set X-Frame-Options SAMEORIGIN
-    Header always set X-Content-Type-Options nosniff
-</Directory>
+# ===== CONFIGURACION GENERAL =====
+# Evitar listado de directorios
+Options -Indexes
 
 # ===== BLOQUEAR ARCHIVOS SENSIBLES =====
 # Proteccion basica
@@ -47,6 +45,24 @@
         Require all denied
     </RequireAll>
 </FilesMatch>
+
+# ===== RESTRICCIONES DE IP PARA DEBUG (FUNCIONA EN .HTACCESS) =====
+# Solo para carpeta setap/debug/ - usar con cuidado
+<FilesMatch "^(setap/debug|.*setap.*debug.*|.*debug.*setap.*)$">
+    <RequireAll>
+        # Permitir solo IPs específicas
+        Require ip 127.0.0.1
+        Require ip localhost
+        Require ip 181.72.88.67
+    </RequireAll>
+</FilesMatch>
+
+# ===== PERMITIR LISTADO EN DEBUG (FUNCIONA EN .HTACCESS) =====
+# Permitir listado de directorio en /setap/debug temporalmente
+<Directory "/setap/debug">
+    # NO usar <Directory> en .htaccess - usar FilesMatch en su lugar
+    # Esta funcionalidad se maneja en /setap/debug/.htaccess específico
+</Directory>
 
 # ===== HEADERS DE SEGURIDAD GLOBAL =====
 <IfModule mod_headers.c>
@@ -59,6 +75,9 @@
     # Remover headers que revelan informacion del servidor
     Header unset X-Powered-By
     Header unset Server
+    
+    # Header para identificar modo debug (eliminar despues)
+    Header set X-Debug-Mode "active"
 </IfModule>
 
 # ===== OPTIMIZACIONES DE RENDIMIENTO =====
@@ -84,14 +103,53 @@
   AddHandler application/x-httpd-php .php .php8 .phtml
 </IfModule>
 
-# ===== CONFIGURACION ESPECIAL PARA DEBUG =====
-# Permitir listado de directorio en /setap/debug temporalmente (solo para debugging)
-<Directory "/setap/debug">
-    Options +Indexes
-</Directory>
-
-# ===== MENSAJE DE DEBUG =====
-# Anadir header para identificar que esta en modo debug (eliminar despues)
-<IfModule mod_headers.c>
-    Header set X-Debug-Mode "active"
+# ===== CACHE PARA ARCHIVOS ESTATICOS =====
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType text/x-javascript "access plus 1 month"
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresDefault "access plus 2 days"
 </IfModule>
+
+# ===== PROTECCIÓN CONTRA ATAQUES =====
+<IfModule mod_rewrite.c>
+    # Bloquear intentos de acceso a archivos de sistema
+    RewriteRule ^(.*)/(wp-config\.php|xmlrpc\.php|wp-login\.php|wp-admin/admin-ajax\.php)$ - [F,L]
+    
+    # Bloquear acceso a directorios sensibles
+    RewriteRule ^(.*)/(vendor|cache|tests|docs)/?$ - [F,L]
+    
+    # Bloquear consultas SQL directas en URL
+    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} \<.+\> [OR]
+    RewriteCond %{QUERY_STRING} (SELECT|INSERT|UPDATE|DELETE|DROP|CREATE) [NC,OR]
+    RewriteCond %{QUERY_STRING} (UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE) [NC,OR]
+    RewriteCond %{QUERY_STRING} concat [NC]
+    RewriteRule ^(.*)$ - [F,L]
+</IfModule>
+
+# ===== CHARSET Y CODIFICACIÓN =====
+AddDefaultCharset UTF-8
+
+# ===== NOTA IMPORTANTE =====
+# Este archivo corregido NO usa directivas <Directory>
+# que son las que causan el Error 500
+# 
+# RESTRICCIONES DE IP CONFIGURADAS:
+# - 127.0.0.1 (localhost)
+# - 181.72.88.67 (tu IP publica)
+# 
+# Despues de terminar debugging:
+# 1. Cambiar IPs en las reglas de Require ip
+# 2. Eliminar header X-Debug-Mode
+# 3. Eliminar carpeta /setap/debug/ completamente
+# 4. Restablecer configuracion original si es necesario
