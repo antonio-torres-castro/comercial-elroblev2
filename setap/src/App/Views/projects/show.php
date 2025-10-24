@@ -9,9 +9,9 @@ use App\Constants\AppConstants; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto - <?= htmlspecialchars($project['cliente_nombre']) ?> - SETAP</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="icon" type="image/x-icon" href="/setap/public/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/setap/public/favicon.svg">
+    <link rel="apple-touch-icon" href="/setap/public/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">

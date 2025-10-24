@@ -4,8 +4,6 @@
 
 # ===== RESTRICCIONES DE IP =====
 <RequireAll>
-    # Permitir solo IPs especificas
-    # Localhost IPv4 y IPv6 + IP publica
     Require ip 127.0.0.1
     Require ip ::1
     Require ip 181.72.88.67
@@ -29,7 +27,6 @@
 </IfModule>
 
 # ===== CONFIGURACION PHP PARA DEBUG =====
-# Permitir mostrar errores temporalmente
 <IfModule mod_php.c>
     php_flag display_errors On
     php_flag display_startup_errors On

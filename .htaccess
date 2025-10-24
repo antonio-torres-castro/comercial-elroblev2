@@ -1,13 +1,12 @@
 # .htaccess - Raiz del proyecto
-# Compatible con Apache 2.4 (Windows y Linux)
+# Compatible con Apache 24 (Windows y Linux)
 # Codificación UTF-8
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
-    # ===== SOLO ROUTING GENERAL =====
-    # Si el archivo o directorio no existe, redirigir a index.php
+    # Si archivo o directorio no existe redirigir a index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} !^/setap/
@@ -17,6 +16,7 @@
 # ===== CONFIGURACION GENERAL =====
 # Evitar listado de directorios
 Options -Indexes
+DirectoryIndex index.php index.html
 
 # ===== BLOQUEAR ARCHIVOS SENSIBLES =====
 <FilesMatch "\.(env|ini|log|sh|bak|config|sql)$">
@@ -25,20 +25,12 @@ Options -Indexes
     </RequireAll>
 </FilesMatch>
 
-# ===== HEADERS DE SEGURIDAD GLOBAL =====
+# ===== HEADERS DE SEGURIDAD =====
 <IfModule mod_headers.c>
-    # Prevenir clickjacking
     Header always set X-Frame-Options SAMEORIGIN
     Header always set X-Content-Type-Options nosniff
     Header always set X-XSS-Protection "1; mode=block"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    
-    # Remover headers que revelan informacion del servidor
     Header unset X-Powered-By
-    Header unset Server
-    
-    # Header para identificar modo debug (eliminar despues)
-    Header set X-Debug-Mode "active"
 </IfModule>
 
 # ===== CACHE PARA ARCHIVOS ESTATICOS =====
@@ -69,14 +61,11 @@ Options -Indexes
     AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
 
-# ===== PHP HANDLER =====
-<IfModule mime_module>
-  ## PHP Handler (production - cPanel EasyApache)
-  #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
-  
-  # PHP Handler (local - Apache estandar Windows)
-  AddHandler application/x-httpd-php .php .php8 .phtml
-</IfModule>
+## ===== PHP HANDLER =====
+#<IfModule mime_module>
+#  # PHP Handler (production - cPanel EasyApache)
+#  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+#</IfModule>
 
 # ===== CHARSET =====
 AddDefaultCharset UTF-8

@@ -1,13 +1,13 @@
 # .htaccess - Carpeta /setap/
-# Compatible con Apache 2.4 (Windows y Linux)
+# Compatible con Apache 24 (Windows y Linux)
 # Codificación UTF-8
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /setap/
     
-    # ===== ROUTING SIMPLE A PUBLIC/ =====
-    # Redirigir todo a la carpeta public/ excepto debug y logs
+    # ===== ROUTING SIMPLE=====
+    # Redirigir todo a la carpeta public excepto debug y logs
     RewriteCond %{REQUEST_URI} !^/setap/debug/
     RewriteCond %{REQUEST_URI} !^/setap/logs/
     RewriteCond %{REQUEST_URI} !^/setap/public/
@@ -15,10 +15,7 @@
 </IfModule>
 
 # ===== CONFIGURACION GENERAL =====
-# Evitar listado de directorios
 Options -Indexes
-
-# Priorizar index.php
 DirectoryIndex index.php index.html
 
 # ===== PROTECCION DE ARCHIVOS SENSIBLES =====
@@ -30,53 +27,19 @@ DirectoryIndex index.php index.html
 
 # ===== HEADERS DE SEGURIDAD =====
 <IfModule mod_headers.c>
-    # Headers basicos de seguridad
     Header always set X-Frame-Options SAMEORIGIN
     Header always set X-Content-Type-Options nosniff
     Header always set X-XSS-Protection "1; mode=block"
-    
-    # Headers especificos para modo debug
     Header unset X-Powered-By
     Header set X-Debug-Panel "enabled"
     Header set X-Debug-Active "true"
 </IfModule>
 
-# ===== CACHE PARA ARCHIVOS ESTATICOS =====
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType image/jpg "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/gif "access plus 1 month"
-    ExpiresByType image/png "access plus 1 month"
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/pdf "access plus 1 month"
-    ExpiresByType text/x-javascript "access plus 1 month"
-    ExpiresByType application/x-shockwave-flash "access plus 1 month"
-    ExpiresByType image/x-icon "access plus 1 year"
-    ExpiresDefault "access plus 2 days"
-</IfModule>
-
-# ===== COMPRESION =====
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
-</IfModule>
-
-# ===== PHP HANDLER =====
-<IfModule mime_module>
-  ## PHP Handler (production - cPanel EasyApache)
-  #AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
-  
-  # PHP Handler (local - Apache estandar Windows)
-  AddHandler application/x-httpd-php .php .php8 .phtml
-</IfModule>
+## ===== PHP HANDLER =====
+#<IfModule mime_module>
+#  # PHP Handler (production - cPanel EasyApache)
+#  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+#</IfModule>
 
 # ===== CHARSET =====
 AddDefaultCharset UTF-8
