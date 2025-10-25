@@ -3,7 +3,7 @@
 namespace App\Middlewares;
 
 use App\Helpers\Security;
-use app\Constants\AppConstants;
+use App\Constants\AppConstants;
 
 class AuthMiddleware
 {

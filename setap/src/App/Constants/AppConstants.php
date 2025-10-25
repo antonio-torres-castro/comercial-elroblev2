@@ -70,9 +70,6 @@ class AppConstants
     /** Ruta base de accesos */
     const ROUTE_ACCESS = '/setap/accesos';
 
-    /** Ruta base de permisos */
-    const ROUTE_PERMISSIONS = '/setap/permisos';
-
     /** Ruta de creación de proyectos */
     const ROUTE_PROJECTS_CREATE = '/setap/projects/create';
 

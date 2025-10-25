@@ -20,43 +20,7 @@ use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
 use App\Controllers\LogController;
 use App\Helpers\Security;
-
-// Wrapper seguro para AppConstants - intenta cargar, usa fallback si falla
-class SafeAppConstants
-{
-    public static function __callStatic($name, $args)
-    {
-        try {
-            // Intentar usar AppConstants real
-            return constant("App\\Constants\\AppConst($name");
-        } catch (Error $e) {
-            // Fallback a valores hardcoded si falla
-            switch ($name) {
-                case 'ROUTE_LOGIN':
-                    return '/setap/login';
-                case 'ROUTE_HOME':
-                    return '/setap/home';
-                case 'ROUTE_MENUS':
-                    return '/setap/menus';
-                case 'ROUTE_TASKS':
-                    return '/setap/tasks';
-                case 'ROUTE_USERS':
-                    return '/setap/users';
-                case 'ROUTE_REPORTS':
-                    return '/setap/reports';
-                case 'ERROR_METHOD_NOT_ALLOWED':
-                    return 'Método no permitido';
-                default:
-                    return "Error: Constante $name no encontrada";
-            }
-        }
-    }
-}
-
-// Función helper para usar AppConstants de manera segura
-function AppConst($name) {
-    return SafeAppConst(__callStatic($name, []);
-}
+use App\Constants\AppConstants;
 
 // Configurar headers de seguridad básicos
 Security::setSecurityHeaders();
@@ -121,18 +85,18 @@ try {
                 $controller = new HomeController();
                 $controller->index();
             } else {
-                Security::redirect(AppConst('ROUTE_LOGIN'));
+                Security::redirect(AppConstants::ROUTE_LOGIN);
             }
             break;
 
         case 'dashboard':
             // Redirigir a la nueva ruta /home para compatibilidad
-            header('Location: ' . AppConst('ROUTE_HOME'), true, 301);
+            header('Location: ' . AppConstants::ROUTE_HOME, true, 301);
             exit;
 
         case 'users':
             $controller = new UserController();
-            
+
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -141,47 +105,47 @@ try {
                         $controller->create();
                     }
                     break;
-                    
+
                 case 'edit':
                     $controller->edit($id);
                     break;
-                    
+
                 case 'update':
                     $controller->update();
                     break;
-                    
+
                 case 'delete':
                     $controller->delete();
                     break;
-                    
+
                 case 'toggle-status':
                     $controller->toggleStatus();
                     break;
-                    
+
                 case 'change-password':
                     $controller->changePassword();
                     break;
-                    
+
                 case 'search-personas':
                     $controller->searchPersonas();
                     break;
-                    
+
                 case 'seek_personas':
                     $controller->seekPersonas();
                     break;
-                    
+
                 case 'validate-field':
                     $controller->validateField();
                     break;
-                    
+
                 case 'store':
                     $controller->store();
                     break;
-                    
+
                 case 'permissions':
                     $controller->permissions();
                     break;
-                    
+
                 case '':
                 default:
                     $controller->index();
@@ -191,7 +155,7 @@ try {
 
         case 'projects':
             $controller = new ProjectController();
-            
+
             switch ($action) {
                 case 'show':
                     if ($id) {
@@ -200,7 +164,7 @@ try {
                         $controller->index();
                     }
                     break;
-                    
+
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
@@ -208,31 +172,31 @@ try {
                         $controller->create();
                     }
                     break;
-                    
+
                 case 'edit':
                     $controller->edit();
                     break;
-                    
+
                 case 'update':
                     $controller->update();
                     break;
-                    
+
                 case 'delete':
                     $controller->delete();
                     break;
-                    
+
                 case 'change-status':
                     $controller->changeStatus();
                     break;
-                    
+
                 case 'search':
                     $controller->search();
                     break;
-                    
+
                 case 'report':
                     $controller->report();
                     break;
-                    
+
                 case '':
                 default:
                     $controller->index();
@@ -242,7 +206,7 @@ try {
 
         case 'project':
             $controller = new ProjectController();
-            
+
             if ($action) {
                 $controller->show((int)$action);
             } else {
@@ -253,7 +217,7 @@ try {
 
         case 'menus':
             $controller = new MenuController();
-            
+
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -262,43 +226,43 @@ try {
                         $controller->create();
                     }
                     break;
-                    
+
                 case 'edit':
                     $controller->edit($id);
                     break;
-                    
+
                 case 'update':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update($id);
                     } else {
-                        Security::redirect(AppConst(ROUTE_MENUS);
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
-                    
+
                 case 'store':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
                     } else {
-                        Security::redirect(AppConst(ROUTE_MENUS);
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
-                    
+
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
                     } else {
-                        Security::redirect(AppConst(ROUTE_MENUS);
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
-                    
+
                 case 'toggle-status':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->toggleStatus();
                     } else {
-                        Security::redirect(AppConst(ROUTE_MENUS);
+                        Security::redirect(AppConstants::ROUTE_MENUS);
                     }
                     break;
-                    
+
                 case '':
                 case null:
                 default:
@@ -309,12 +273,12 @@ try {
 
         case 'menu':
             $controller = new MenuController();
-            
+
             switch ($action) {
                 case 'create':
                     $controller->create();
                     break;
-                    
+
                 default:
                     if ($action) {
                         $controller->edit($action);
@@ -327,7 +291,7 @@ try {
 
         case 'personas':
             $controller = new PersonaController();
-            
+
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -336,23 +300,23 @@ try {
                         $controller->create();
                     }
                     break;
-                    
+
                 case 'edit':
                     $controller->edit();
                     break;
-                    
+
                 case 'update':
                     $controller->update();
                     break;
-                    
+
                 case 'delete':
                     $controller->delete();
                     break;
-                    
+
                 case 'store':
                     $controller->store();
                     break;
-                    
+
                 case '':
                 default:
                     $controller->index();
@@ -362,7 +326,7 @@ try {
 
         case 'persona':
             $controller = new PersonaController();
-            
+
             if ($action) {
                 $controller->show((int)$action);
             } else {
@@ -372,7 +336,7 @@ try {
 
         case 'perfil':
             $controller = new PerfilController();
-            
+
             if ($action === 'edit') {
                 $controller->edit();
             } else {
@@ -382,7 +346,7 @@ try {
 
         case 'clients':
             $controller = new ClientController();
-            
+
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -391,7 +355,7 @@ try {
                         $controller->create();
                     }
                     break;
-                    
+
                 case 'edit':
                     if ($id) {
                         $controller->edit($id);
@@ -399,19 +363,19 @@ try {
                         $controller->index();
                     }
                     break;
-                    
+
                 case 'store':
                     $controller->store();
                     break;
-                    
+
                 case 'update':
                     $controller->update();
                     break;
-                    
+
                 case 'delete':
                     $controller->delete();
                     break;
-                    
+
                 default:
                     $controller->index();
                     break;
@@ -420,12 +384,12 @@ try {
 
         case 'client':
             $controller = new ClientController();
-            
+
             switch ($action) {
                 case 'create':
                     $controller->create();
                     break;
-                    
+
                 default:
                     if ($action) {
                         $controller->edit($action);
@@ -443,12 +407,12 @@ try {
 
         case 'client-counterpartie':
             $controller = new ClientController();
-            
+
             switch ($action) {
                 case 'create':
                     $controller->counterpartie();
                     break;
-                    
+
                 case 'edit':
                     if ($id) {
                         $controller->counterpartie((int)$id);
@@ -456,19 +420,19 @@ try {
                         $controller->counterpartie();
                     }
                     break;
-                    
+
                 case 'store':
                     $controller->storeCounterpartie();
                     break;
-                    
+
                 case 'update':
                     $controller->updateCounterpartie();
                     break;
-                    
+
                 case 'delete':
                     $controller->deleteCounterpartie();
                     break;
-                    
+
                 default:
                     if ($action) {
                         $controller->counterpartie((int)$action);
@@ -481,7 +445,7 @@ try {
 
         case 'tasks':
             $controller = new TaskController();
-            
+
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -490,70 +454,70 @@ try {
                         $controller->create();
                     }
                     break;
-                    
+
                 case 'edit':
                     $controller->edit();
                     break;
-                    
+
                 case 'update':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update();
                     } else {
-                        Security::redirect(AppConst(ROUTE_TASKS);
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
-                    
+
                 case 'store':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
                     } else {
-                        Security::redirect(AppConst(ROUTE_TASKS);
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
-                    
+
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
                     } else {
-                        Security::redirect(AppConst(ROUTE_TASKS);
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
-                    
+
                 case 'show':
                     if ($id) {
                         $controller->show((int)$id);
                     } else {
-                        Security::redirect(AppConst(ROUTE_TASKS);
+                        Security::redirect(AppConstants::ROUTE_TASKS);
                     }
                     break;
-                    
+
                 case 'change-state':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->changeState();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'check-executable':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->checkExecutable();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['valid' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'valid-transitions':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->getValidTransitions();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['transitions' => [], 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['transitions' => [], 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case '':
                 case null:
                 default:
@@ -564,7 +528,7 @@ try {
 
         case 'task':
             $controller = new TaskController();
-            
+
             if ($action) {
                 $controller->show((int)$action);
             } else {
@@ -574,89 +538,89 @@ try {
 
         case 'proyecto-feriados':
             $controller = new ProyectoFeriadoController();
-            
+
             switch ($action) {
                 case 'create-masivo':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->createMasivo();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'create-especifico':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->createEspecifico();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'create-rango':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->createRango();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'list':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->list();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'update':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'check-conflicts':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->checkConflicts();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'move-tasks':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->moveTasks();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case 'working-days':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->getWorkingDays();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
-                    
+
                 case '':
                 case null:
                 default:
@@ -669,10 +633,10 @@ try {
             // Redireccionar las rutas /user/{id} a las rutas estándar
             if ($action) {
                 // Editar usuario existente
-                Security::redirect(AppConst(ROUTE_USERS . "/edit?id={$action}");
+                Security::redirect(AppConstants::ROUTE_USERS . "/edit?id={$action}");
             } else {
                 // Nuevo usuario
-                Security::redirect(AppConst(ROUTE_USERS . "/create");
+                Security::redirect(AppConstants::ROUTE_USERS . "/create");
             }
             break;
 
@@ -724,12 +688,12 @@ try {
 
         case 'accesos':
             $controller = new AccessController();
-            
+
             switch ($action) {
                 case 'update':
                     $controller->update();
                     break;
-                    
+
                 case '':
                 default:
                     $controller->index();
@@ -739,12 +703,12 @@ try {
 
         case 'permisos':
             $controller = new PermissionsController();
-            
+
             switch ($action) {
                 case 'update':
                     $controller->update();
                     break;
-                    
+
                 case '':
                 default:
                     $controller->index();
@@ -760,7 +724,7 @@ try {
 
         case 'reports':
             $controller = new ReportController();
-            
+
             switch ($action) {
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -769,39 +733,39 @@ try {
                         $controller->create();
                     }
                     break;
-                    
+
                 case 'generate':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->generate();
                     } else {
-                        Security::redirect(AppConst(ROUTE_REPORTS);
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
-                    
+
                 case 'download':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->download();
                     } else {
-                        Security::redirect(AppConst(ROUTE_REPORTS);
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
-                    
+
                 case 'users-report':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->usersReport();
                     } else {
-                        Security::redirect(AppConst(ROUTE_REPORTS);
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
-                    
+
                 case 'projects-report':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->projectsReport();
                     } else {
-                        Security::redirect(AppConst(ROUTE_REPORTS);
+                        Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
                     break;
-                    
+
                 case '':
                 case null:
                 default:
@@ -844,13 +808,12 @@ try {
             </html>';
             break;
     }
-    
 } catch (Throwable $e) {
     // Manejo de errores global
     error_log("Error en router: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
-    
+
     http_response_code(500);
-    
+
     // Mostrar error detallado solo en desarrollo
     if (isset($_ENV['APP_DEBUG']) && $_ENV['APP_DEBUG'] === 'true') {
         echo "<h1>Error Internal del Servidor</h1>";

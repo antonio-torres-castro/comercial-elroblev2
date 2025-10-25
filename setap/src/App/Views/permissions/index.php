@@ -100,7 +100,7 @@ use App\Constants\AppConstants;
                                 <small><?= htmlspecialchars($userType['descripcion']) ?></small>
                             </div>
                             <div class="card-body">
-                                <form class="permissions-form" action="<?= AppConstants::ROUTE_PERMISSIONS ?>/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
+                                <form class="permissions-form" action="<?= AppConstants::ROUTE_PERMISOS ?>/update" method="POST" data-user-type-id="<?= $userType['id'] ?>">
                                     <!-- Token CSRF para seguridad -->
                                     <?= Security::renderCsrfField() ?>
                                     <!-- ID del tipo de usuario -->

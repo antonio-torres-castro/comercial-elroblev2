@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Constants\AppConstants;
@@ -57,7 +58,7 @@ class PermissionsController extends AbstractBaseController
             // Validación POST y CSRF en una línea
             $errors = $this->validatePostRequest();
             if (!empty($errors)) {
-                $this->redirectWithError(AppConstants::ROUTE_PERMISSIONS, implode(', ', $errors));
+                $this->redirectWithError(AppConstants::ROUTE_PERMISOS, implode(', ', $errors));
                 return;
             }
 
@@ -65,7 +66,7 @@ class PermissionsController extends AbstractBaseController
             $permissionIds = $_POST['permission_ids'] ?? [];
 
             if (!$userTypeId) {
-                $this->redirectWithError(AppConstants::ROUTE_PERMISSIONS, 'Tipo de usuario requerido');
+                $this->redirectWithError(AppConstants::ROUTE_PERMISOS, 'Tipo de usuario requerido');
                 return;
             }
 
@@ -75,9 +76,9 @@ class PermissionsController extends AbstractBaseController
 
             // Respuesta tradicional con redirect
             if ($result) {
-                $this->redirectWithSuccess(AppConstants::ROUTE_PERMISSIONS, $message);
+                $this->redirectWithSuccess(AppConstants::ROUTE_PERMISOS, $message);
             } else {
-                $this->redirectWithError(AppConstants::ROUTE_PERMISSIONS, $message);
+                $this->redirectWithError(AppConstants::ROUTE_PERMISOS, $message);
             }
         }, 'update');
     }
@@ -201,7 +202,6 @@ class PermissionsController extends AbstractBaseController
 
             $this->db->commit();
             return true;
-
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log("Error actualizando permisos: " . $e->getMessage());

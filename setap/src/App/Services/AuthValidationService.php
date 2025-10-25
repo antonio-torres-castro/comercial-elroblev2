@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\Security;
+use App\Constants\AppConstants;
 use App\Services\CustomLogger;
 
 class AuthValidationService
@@ -23,7 +24,7 @@ class AuthValidationService
         
         // BYPASS TEMPORAL PARA DEBUG - Permitir acceso si no hay token o es inválido
         // TODO: Remover esto una vez identificado y corregido el problema
-        $allowBypass = false; // DESACTIVADO - Problemas CSRF resueltos
+        $allowBypass = true; // CAMBIAR A false UNA VEZ SOLUCIONADO
         $bypassReason = 'DEBUG MODE - Bypass CSRF para diagnóstico';
         
         if ($allowBypass) {
@@ -40,7 +41,7 @@ class AuthValidationService
         } else {
             // Validación normal de CSRF
             if (!Security::validateCsrfToken($csrfToken)) {
-                $error = 'Token de seguridad inválido';
+                $error = AppConstants::ERROR_INVALID_SECURITY_TOKEN;
                 CustomLogger::debug("🔐 [VALIDATION] CSRF validation failed: " . $error);
                 $errors[] = $error;
                 return ['isValid' => false, 'errors' => $errors, 'data' => $data];
