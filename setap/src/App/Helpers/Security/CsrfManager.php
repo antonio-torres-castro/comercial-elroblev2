@@ -30,9 +30,6 @@ class CsrfManager
             'expires' => time() + self::$tokenExpiry
         ];
 
-        CustomLogger::debug("🔐 [CSRF] Generated new token: " . substr($token, 0, 10) . "...");
-        CustomLogger::debug("🔐 [CSRF] Session ID: " . session_id());
-
         return $token;
     }
 
@@ -62,27 +59,21 @@ class CsrfManager
             session_start();
         }
 
-        CustomLogger::debug("🔐 [CSRF] Validating token: " . substr($token, 0, 10) . "...");
-
         // Verificar que existe el token en sesión
         if (!isset($_SESSION[self::$tokenKey])) {
-            CustomLogger::debug("🔐 [CSRF] No token found in session");
             return false;
         }
 
         $sessionToken = $_SESSION[self::$tokenKey];
-        CustomLogger::debug("🔐 [CSRF] Session token: " . substr($sessionToken['token'], 0, 10) . "...");
 
         // Verificar que no ha expirado
         if (self::isTokenExpired()) {
-            CustomLogger::debug("🔐 [CSRF] Token expired");
             self::clearToken();
             return false;
         }
 
         // Comparar tokens usando hash_equals para evitar timing attacks
         $isValid = hash_equals($sessionToken['token'], $token);
-        CustomLogger::debug("🔐 [CSRF] Token comparison result: " . ($isValid ? "VALID" : "INVALID"));
 
         return $isValid;
     }
@@ -93,15 +84,12 @@ class CsrfManager
     private static function isTokenExpired(): bool
     {
         if (!isset($_SESSION[self::$tokenKey]['expires'])) {
-            CustomLogger::debug("🔐 [CSRF] Token expiry not set");
             return true;
         }
 
         $currentTime = time();
         $tokenExpiry = $_SESSION[self::$tokenKey]['expires'];
         $timeLeft = $tokenExpiry - $currentTime;
-        
-        CustomLogger::debug("🔐 [CSRF] Current time: $currentTime, Token expiry: $tokenExpiry, Time left: $timeLeft seconds");
 
         return $currentTime > $tokenExpiry;
     }
@@ -254,7 +242,7 @@ class CsrfManager
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-cache, must-revalidate');
-        
+
         echo json_encode([
             'success' => false,
             'error' => $message,

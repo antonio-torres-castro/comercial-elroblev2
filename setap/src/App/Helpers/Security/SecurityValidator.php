@@ -274,7 +274,7 @@ class SecurityValidator
      */
     public static function validateHexToken(string $token, int $expectedLength = 64): bool
     {
-        return preg_match('/^[a-f0-9]{'.$expectedLength.'}$/', $token);
+        return preg_match('/^[a-f0-9]{' . $expectedLength . '}$/', $token);
     }
 
     /**

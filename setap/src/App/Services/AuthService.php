@@ -23,8 +23,7 @@ class AuthService
      */
     public function authenticate(string $identifier, string $password)
     {
-        CustomLogger::debug("🔐 [AUTH SERVICE] Starting authentication for identifier: " . $identifier);
-        
+
         try {
             //El estado estado_tipo_id = 2, es un registro activo, que en el contexto de persona y usuario debe estar en ese punto para poder ser un usuario valido
             $stmt = $this->db->prepare("
@@ -41,11 +40,8 @@ class AuthService
 
             $stmt->execute([$identifier, $identifier]);
             $user = $stmt->fetch();
-            
-            CustomLogger::debug("🔐 [AUTH SERVICE] Query result: " . ($user ? "User found" : "No user found"));
 
             if (!$user) {
-                CustomLogger::debug("🔐 [AUTH SERVICE] User not found");
                 return [
                     'success' => false,
                     'error_type' => 'USER_NOT_FOUND',
@@ -56,10 +52,8 @@ class AuthService
 
             // Verificar password
             $passwordValid = password_verify($password, $user['clave_hash']);
-            CustomLogger::debug("🔐 [AUTH SERVICE] Password verification: " . ($passwordValid ? "Valid" : "Invalid"));
-            
+
             if (!$passwordValid) {
-                CustomLogger::debug("🔐 [AUTH SERVICE] Invalid password");
                 return [
                     'success' => false,
                     'error_type' => 'INVALID_PASSWORD',
@@ -68,23 +62,14 @@ class AuthService
                 ];
             }
 
-            CustomLogger::debug("🔐 [AUTH SERVICE] Authentication successful for user: " . $user['nombre_usuario']);
             return [
                 'success' => true,
                 'user' => $user,
                 'raw_error' => null
             ];
-            
         } catch (PDOException $e) {
             $rawError = "Error de conexión a la base de datos: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine();
-            CustomLogger::error("🔐 [AUTH SERVICE] Database error: " . $rawError);
-            CustomLogger::error("🔐 [AUTH SERVICE] Database error details: " . json_encode([
-                'code' => $e->getCode(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]));
-            
+
             return [
                 'success' => false,
                 'error_type' => 'DATABASE_ERROR',
@@ -93,14 +78,6 @@ class AuthService
             ];
         } catch (Exception $e) {
             $rawError = "Error inesperado: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine();
-            CustomLogger::error("🔐 [AUTH SERVICE] Unexpected error: " . $rawError);
-            CustomLogger::error("🔐 [AUTH SERVICE] Unexpected error details: " . json_encode([
-                'code' => $e->getCode(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]));
-            
             return [
                 'success' => false,
                 'error_type' => 'UNEXPECTED_ERROR',

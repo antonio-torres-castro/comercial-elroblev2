@@ -14,7 +14,7 @@ class RateLimiter
     /**
      * Verificar rate limiting
      */
-    public static function checkLimit(string $action, int $maxAttempts = 5, int $timeWindow = 300, string $identifier = null): bool
+    public static function checkLimit(string $action, int $maxAttempts = 5, int $timeWindow = 300, ?string $identifier = null): bool
     {
         $identifier = $identifier ?: self::getIdentifier();
         $key = $action . '_' . $identifier;
@@ -24,7 +24,7 @@ class RateLimiter
         $attempts = self::loadAttempts($key);
 
         // Limpiar intentos antiguos
-        $attempts = array_filter($attempts, function($timestamp) use ($now, $timeWindow) {
+        $attempts = array_filter($attempts, function ($timestamp) use ($now, $timeWindow) {
             return ($now - $timestamp) <= $timeWindow;
         });
 
@@ -43,7 +43,7 @@ class RateLimiter
     /**
      * Registrar intento fallido
      */
-    public static function recordAttempt(string $action, string $identifier = null): void
+    public static function recordAttempt(string $action, ?string $identifier = null): void
     {
         $identifier = $identifier ?: self::getIdentifier();
         $key = $action . '_' . $identifier;
@@ -58,7 +58,7 @@ class RateLimiter
     /**
      * Obtener número de intentos restantes
      */
-    public static function getRemainingAttempts(string $action, int $maxAttempts = 5, int $timeWindow = 300, string $identifier = null): int
+    public static function getRemainingAttempts(string $action, int $maxAttempts = 5, int $timeWindow = 300, ?string $identifier = null): int
     {
         $identifier = $identifier ?: self::getIdentifier();
         $key = $action . '_' . $identifier;
@@ -67,7 +67,7 @@ class RateLimiter
         $attempts = self::loadAttempts($key);
 
         // Contar intentos dentro del timeWindow
-        $validAttempts = array_filter($attempts, function($timestamp) use ($now, $timeWindow) {
+        $validAttempts = array_filter($attempts, function ($timestamp) use ($now, $timeWindow) {
             return ($now - $timestamp) <= $timeWindow;
         });
 
@@ -77,7 +77,7 @@ class RateLimiter
     /**
      * Obtener tiempo hasta que se permita el siguiente intento
      */
-    public static function getTimeUntilReset(string $action, int $timeWindow = 300, string $identifier = null): int
+    public static function getTimeUntilReset(string $action, int $timeWindow = 300, ?string $identifier = null): int
     {
         $identifier = $identifier ?: self::getIdentifier();
         $key = $action . '_' . $identifier;
@@ -99,7 +99,7 @@ class RateLimiter
     /**
      * Limpiar intentos de una acción específica
      */
-    public static function clearAttempts(string $action, string $identifier = null): void
+    public static function clearAttempts(string $action, ?string $identifier = null): void
     {
         $identifier = $identifier ?: self::getIdentifier();
         $key = $action . '_' . $identifier;
@@ -230,7 +230,7 @@ class RateLimiter
     private static function isAjaxRequest(): bool
     {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 
     /**
@@ -259,7 +259,7 @@ class RateLimiter
     /**
      * Obtener estadísticas de rate limiting
      */
-    public static function getStats(string $action, string $identifier = null): array
+    public static function getStats(string $action, ?string $identifier = null): array
     {
         $identifier = $identifier ?: self::getIdentifier();
         $key = $action . '_' . $identifier;
@@ -268,7 +268,7 @@ class RateLimiter
 
         return [
             'total_attempts' => count($attempts),
-            'recent_attempts' => count(array_filter($attempts, function($timestamp) use ($now) {
+            'recent_attempts' => count(array_filter($attempts, function ($timestamp) use ($now) {
                 return ($now - $timestamp) <= 300; // últimos 5 minutos
             })),
             'first_attempt' => !empty($attempts) ? min($attempts) : null,
@@ -287,7 +287,7 @@ class RateLimiter
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-cache, must-revalidate');
         header("Retry-After: {$retryAfter}");
-        
+
         echo json_encode([
             'success' => false,
             'error' => 'Demasiados intentos',
