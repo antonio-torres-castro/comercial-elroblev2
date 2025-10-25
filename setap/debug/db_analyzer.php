@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Analizador de Base de Datos Web-Only
  * Complementa phpMyAdmin con análisis específico para la aplicación
@@ -14,14 +15,15 @@ $allowedIPs = [
 ];
 
 $clientIP = $_SERVER['REMOTE_ADDR'] ?? '';
-$isAuthorized = in_array($clientIP, $allowedIPs) || $allowedIPs[0] === 'TU_IP_PUBLICA_AQUI';
+$isAuthorized = in_array($clientIP, $allowedIPs) || $allowedIPs[0] === '181.72.88.67';
 
 if (!$isAuthorized) {
     http_response_code(403);
     die('<h1>403 - Acceso Denegado</h1><p>Esta herramienta solo está disponible para IPs autorizadas.</p>');
 }
 
-function writeAppLog($message) {
+function writeAppLog($message)
+{
     $logFile = __DIR__ . '/../logs/web_debug.log';
     if (!is_dir(dirname($logFile))) {
         mkdir(dirname($logFile), 0755, true);
@@ -76,162 +78,212 @@ $query = $_GET['query'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🗄️ Analizador de Base de Datos - Comercial El Roble</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #f5f5f5; 
-            padding: 20px; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            background: white; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
-        .header { 
-            background: #2c3e50; 
-            color: white; 
-            padding: 20px; 
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
         }
-        .nav { 
-            background: #ecf0f1; 
-            padding: 15px 20px; 
-            display: flex; 
-            gap: 20px; 
+
+        .nav {
+            background: #ecf0f1;
+            padding: 15px 20px;
+            display: flex;
+            gap: 20px;
             border-bottom: 1px solid #bdc3c7;
         }
-        .nav a { 
-            color: #2c3e50; 
-            text-decoration: none; 
-            padding: 8px 16px; 
+
+        .nav a {
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 8px 16px;
             border-radius: 4px;
             transition: background 0.3s ease;
         }
-        .nav a:hover, .nav a.active { 
-            background: #3498db; 
-            color: white; 
+
+        .nav a:hover,
+        .nav a.active {
+            background: #3498db;
+            color: white;
         }
-        .content { 
-            padding: 20px; 
+
+        .content {
+            padding: 20px;
         }
-        .error-box { 
-            background: #fdf2f2; 
-            border-left: 4px solid #e74c3c; 
-            padding: 15px; 
-            margin: 15px 0; 
+
+        .error-box {
+            background: #fdf2f2;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 15px 0;
             border-radius: 0 6px 6px 0;
         }
-        .success-box { 
-            background: #f0f9f4; 
-            border-left: 4px solid #27ae60; 
-            padding: 15px; 
-            margin: 15px 0; 
+
+        .success-box {
+            background: #f0f9f4;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
             border-radius: 0 6px 6px 0;
         }
-        .info-box { 
-            background: #e8f4f8; 
-            border-left: 4px solid #3498db; 
-            padding: 15px; 
-            margin: 15px 0; 
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
             border-radius: 0 6px 6px 0;
         }
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 20px; 
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
             margin: 20px 0;
         }
-        .card { 
-            background: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 8px; 
+
+        .card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
             border: 1px solid #dee2e6;
         }
-        .card h3 { 
-            color: #2c3e50; 
-            margin-bottom: 15px; 
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
         }
-        .db-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 15px 0; 
+
+        .db-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
             font-size: 14px;
         }
-        .db-table th, .db-table td { 
-            padding: 12px; 
-            text-align: left; 
-            border-bottom: 1px solid #dee2e6; 
+
+        .db-table th,
+        .db-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
         }
-        .db-table th { 
-            background: #f8f9fa; 
-            font-weight: 600; 
+
+        .db-table th {
+            background: #f8f9fa;
+            font-weight: 600;
             color: #2c3e50;
             cursor: pointer;
         }
-        .db-table tr:hover { background: #f1f3f4; }
-        .metric { 
-            font-size: 24px; 
-            font-weight: bold; 
-            margin: 10px 0; 
+
+        .db-table tr:hover {
+            background: #f1f3f4;
+        }
+
+        .metric {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
             color: #2c3e50;
         }
-        .btn { 
-            background: #3498db; 
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin: 5px; 
+
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
             text-decoration: none;
             display: inline-block;
         }
-        .btn:hover { background: #2980b9; }
-        .btn.danger { background: #e74c3c; }
-        .btn.danger:hover { background: #c0392b; }
-        .btn.success { background: #27ae60; }
-        .btn.success:hover { background: #229954; }
-        .query-form { 
-            background: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 8px; 
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn.danger {
+            background: #e74c3c;
+        }
+
+        .btn.danger:hover {
+            background: #c0392b;
+        }
+
+        .btn.success {
+            background: #27ae60;
+        }
+
+        .btn.success:hover {
+            background: #229954;
+        }
+
+        .query-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
             margin: 20px 0;
         }
-        .query-form textarea { 
-            width: 100%; 
-            height: 100px; 
-            padding: 10px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
+
+        .query-form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-family: monospace;
         }
-        .query-form select, .query-form input { 
-            padding: 8px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
+
+        .query-form select,
+        .query-form input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             margin: 5px;
         }
-        .result-table { 
-            max-height: 400px; 
-            overflow-y: auto; 
-            border: 1px solid #ddd; 
+
+        .result-table {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
             border-radius: 4px;
         }
-        .table-info { 
-            background: #ecf0f1; 
-            padding: 15px; 
-            margin: 10px 0; 
+
+        .table-info {
+            background: #ecf0f1;
+            padding: 15px;
+            margin: 10px 0;
             border-radius: 4px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -260,16 +312,16 @@ $query = $_GET['query'] ?? '';
                     </ul>
                 </div>
             <?php else: ?>
-                
+
                 <?php if ($action === 'overview'): ?>
                     <h2>📊 Resumen de Base de Datos</h2>
-                    
+
                     <?php
                     // Obtener estadísticas generales
                     $totalTables = count($tables);
                     $totalSize = 0;
                     $tableStats = [];
-                    
+
                     foreach ($tables as $table) {
                         try {
                             $stmt = $pdo->query("SELECT 
@@ -290,7 +342,7 @@ $query = $_GET['query'] ?? '';
                         }
                     }
                     ?>
-                    
+
                     <div class="grid">
                         <div class="card">
                             <h3>📊 Estadísticas Generales</h3>
@@ -299,7 +351,7 @@ $query = $_GET['query'] ?? '';
                             <div class="metric"><?= round($totalSize, 2) ?> MB</div>
                             <p>Tamaño total de datos</p>
                         </div>
-                        
+
                         <div class="card">
                             <h3>🔗 Información de Conexión</h3>
                             <p><strong>Host:</strong> <?= DB_HOST ?></p>
@@ -307,7 +359,7 @@ $query = $_GET['query'] ?? '';
                             <p><strong>Usuario:</strong> <?= DB_USER ?></p>
                             <p><strong>Charset:</strong> utf8mb4</p>
                         </div>
-                        
+
                         <div class="card">
                             <h3>⚡ Estado de Conexión</h3>
                             <div class="metric status-ok">✅ Activa</div>
@@ -315,7 +367,7 @@ $query = $_GET['query'] ?? '';
                             <p>Tiempo: <?= round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 3) ?>s</p>
                         </div>
                     </div>
-                    
+
                     <div class="card">
                         <h3>📋 Tablas Principales</h3>
                         <div class="result-table">
@@ -330,69 +382,69 @@ $query = $_GET['query'] ?? '';
                                 </thead>
                                 <tbody>
                                     <?php foreach ($tableStats as $table): ?>
-                                    <tr>
-                                        <td><strong><?= htmlspecialchars($table['name']) ?></strong></td>
-                                        <td><?= number_format($table['rows']) ?></td>
-                                        <td><?= $table['size_mb'] ?></td>
-                                        <td>
-                                            <a href="?action=table_detail&table=<?= urlencode($table['name']) ?>" class="btn">Ver</a>
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td><strong><?= htmlspecialchars($table['name']) ?></strong></td>
+                                            <td><?= number_format($table['rows']) ?></td>
+                                            <td><?= $table['size_mb'] ?></td>
+                                            <td>
+                                                <a href="?action=table_detail&table=<?= urlencode($table['name']) ?>" class="btn">Ver</a>
+                                            </td>
+                                        </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    
+
                 <?php elseif ($action === 'tables'): ?>
                     <h2>📋 Gestión de Tablas</h2>
-                    
+
                     <div class="grid">
                         <?php foreach ($tables as $table): ?>
-                        <?php
-                        // Obtener información de la tabla
-                        try {
-                            $stmt = $pdo->query("SELECT COUNT(*) as count FROM `$table`");
-                            $rowCount = $stmt->fetchColumn();
-                            
-                            $stmt = $pdo->query("DESCRIBE `$table`");
-                            $columns = $stmt->fetchAll();
-                        } catch (Exception $e) {
-                            $rowCount = 0;
-                            $columns = [];
-                        }
-                        ?>
-                        <div class="card">
-                            <h3><?= htmlspecialchars($table) ?></h3>
-                            <div class="metric"><?= number_format($rowCount) ?></div>
-                            <p>Registros</p>
-                            
-                            <div class="table-info">
-                                <strong>Columnas:</strong>
-                                <?php foreach (array_slice($columns, 0, 3) as $column): ?>
-                                    <span style="background: #ecf0f1; padding: 2px 6px; border-radius: 3px; margin: 2px; font-size: 12px;">
-                                        <?= htmlspecialchars($column['Field']) ?>
-                                    </span>
-                                <?php endforeach; ?>
-                                <?php if (count($columns) > 3): ?>
-                                    <span style="font-size: 12px; color: #7f8c8d;">+<?= count($columns) - 3 ?> más</span>
-                                <?php endif; ?>
+                            <?php
+                            // Obtener información de la tabla
+                            try {
+                                $stmt = $pdo->query("SELECT COUNT(*) as count FROM `$table`");
+                                $rowCount = $stmt->fetchColumn();
+
+                                $stmt = $pdo->query("DESCRIBE `$table`");
+                                $columns = $stmt->fetchAll();
+                            } catch (Exception $e) {
+                                $rowCount = 0;
+                                $columns = [];
+                            }
+                            ?>
+                            <div class="card">
+                                <h3><?= htmlspecialchars($table) ?></h3>
+                                <div class="metric"><?= number_format($rowCount) ?></div>
+                                <p>Registros</p>
+
+                                <div class="table-info">
+                                    <strong>Columnas:</strong>
+                                    <?php foreach (array_slice($columns, 0, 3) as $column): ?>
+                                        <span style="background: #ecf0f1; padding: 2px 6px; border-radius: 3px; margin: 2px; font-size: 12px;">
+                                            <?= htmlspecialchars($column['Field']) ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                    <?php if (count($columns) > 3): ?>
+                                        <span style="font-size: 12px; color: #7f8c8d;">+<?= count($columns) - 3 ?> más</span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <a href="?action=table_detail&table=<?= urlencode($table) ?>" class="btn">Ver Detalles</a>
+                                <a href="?action=table_data&table=<?= urlencode($table) ?>" class="btn success">Ver Datos</a>
                             </div>
-                            
-                            <a href="?action=table_detail&table=<?= urlencode($table) ?>" class="btn">Ver Detalles</a>
-                            <a href="?action=table_data&table=<?= urlencode($table) ?>" class="btn success">Ver Datos</a>
-                        </div>
                         <?php endforeach; ?>
                     </div>
-                    
+
                 <?php elseif ($action === 'query'): ?>
                     <h2>🔍 Consultas SQL</h2>
-                    
+
                     <div class="query-form">
                         <h3>Ejecutar Consulta</h3>
                         <form action="" method="GET">
                             <input type="hidden" name="action" value="query">
-                            
+
                             <div>
                                 <label>Tipo de consulta:</label>
                                 <select name="query_type" id="queryType" onchange="toggleQueryOptions()">
@@ -401,32 +453,32 @@ $query = $_GET['query'] ?? '';
                                     <option value="count">COUNT (Contar registros)</option>
                                 </select>
                             </div>
-                            
+
                             <div id="queryOptions">
                                 <label>Consulta personalizada:</label>
                                 <textarea name="query" id="customQuery" placeholder="Escribe tu consulta SQL aquí..."><?= htmlspecialchars($query) ?></textarea>
                             </div>
-                            
+
                             <div id="tableOptions" style="display: none;">
                                 <label>Seleccionar tabla:</label>
                                 <select name="table">
                                     <option value="">Selecciona una tabla...</option>
                                     <?php foreach ($tables as $table): ?>
-                                    <option value="<?= htmlspecialchars($table) ?>"><?= htmlspecialchars($table) ?></option>
+                                        <option value="<?= htmlspecialchars($table) ?>"><?= htmlspecialchars($table) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            
+
                             <button type="submit" class="btn">🚀 Ejecutar Consulta</button>
                         </form>
                     </div>
-                    
+
                     <?php if (!empty($query)): ?>
                         <?php
                         try {
                             // Solo permitir ciertos tipos de consultas por seguridad
                             $queryType = $_GET['query_type'] ?? 'show';
-                            
+
                             if ($queryType === 'show') {
                                 $stmt = $pdo->query($query);
                             } elseif ($queryType === 'select') {
@@ -442,15 +494,15 @@ $query = $_GET['query'] ?? '';
                                 }
                                 $stmt = $pdo->query("SELECT COUNT(*) as total FROM `$table`");
                             }
-                            
+
                             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                            
+
                             echo '<div class="success-box"><strong>✅ Éxito:</strong> Consulta ejecutada. Se encontraron ' . count($results) . ' resultados.</div>';
-                            
+
                             if (!empty($results)) {
                                 echo '<div class="result-table">';
                                 echo '<table class="db-table">';
-                                
+
                                 // Headers
                                 $headers = array_keys($results[0]);
                                 echo '<thead><tr>';
@@ -458,7 +510,7 @@ $query = $_GET['query'] ?? '';
                                     echo '<th>' . htmlspecialchars($header) . '</th>';
                                 }
                                 echo '</tr></thead>';
-                                
+
                                 // Data
                                 echo '<tbody>';
                                 foreach ($results as $row) {
@@ -473,39 +525,38 @@ $query = $_GET['query'] ?? '';
                                 echo '</table>';
                                 echo '</div>';
                             }
-                            
                         } catch (Exception $e) {
                             echo '<div class="error-box"><strong>❌ Error:</strong> ' . htmlspecialchars($e->getMessage()) . '</div>';
                         }
                         ?>
                     <?php endif; ?>
-                    
+
                 <?php elseif ($action === 'users'): ?>
                     <h2>👥 Información de Usuarios</h2>
-                    
+
                     <?php
                     if (in_array('usuarios', $tables)) {
                         try {
                             $stmt = $pdo->query("SELECT 
                                 COUNT(*) as total,
                                 COUNT(CASE WHEN activo = 1 THEN 1 END) as activos,
-                                COUNT(CASE WHEN fecha_creacion >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 END) as nuevos_mes
+                                COUNT(CASE WHEN fecha_Creado >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 END) as nuevos_mes
                                 FROM usuarios");
                             $stats = $stmt->fetch();
-                            
+
                             echo '<div class="grid">';
                             echo '<div class="card"><h3>📊 Total Usuarios</h3><div class="metric">' . number_format($stats['total']) . '</div></div>';
                             echo '<div class="card"><h3>✅ Activos</h3><div class="metric">' . number_format($stats['activos']) . '</div></div>';
                             echo '<div class="card"><h3>🆕 Nuevos (30 días)</h3><div class="metric">' . number_format($stats['nuevos_mes']) . '</div></div>';
                             echo '</div>';
-                            
+
                             // Usuarios recientes
-                            $stmt = $pdo->query("SELECT id, nombre, email, activo, fecha_creacion 
+                            $stmt = $pdo->query("SELECT id, nombre_usuario, email, estado_tipo_id, fecha_Creado 
                                                FROM usuarios 
-                                               ORDER BY fecha_creacion DESC 
+                                               ORDER BY fecha_Creado DESC 
                                                LIMIT 10");
                             $recentUsers = $stmt->fetchAll();
-                            
+
                             echo '<div class="card">';
                             echo '<h3>🆕 Usuarios Recientes</h3>';
                             echo '<div class="result-table">';
@@ -513,20 +564,19 @@ $query = $_GET['query'] ?? '';
                             echo '<thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Estado</th><th>Fecha</th></tr></thead>';
                             echo '<tbody>';
                             foreach ($recentUsers as $user) {
-                                $status = $user['activo'] ? 'Activo' : 'Inactivo';
-                                $statusClass = $user['activo'] ? 'status-ok' : 'status-error';
+                                $status = $user['estado_tipo_id'] == 2 ? 'Activo' : 'Otro';
+                                $statusClass = $user['estado_tipo_id'] > 1 ? 'status-ok' : 'status-error';
                                 echo '<tr>';
                                 echo '<td>' . htmlspecialchars($user['id']) . '</td>';
-                                echo '<td>' . htmlspecialchars($user['nombre']) . '</td>';
+                                echo '<td>' . htmlspecialchars($user['nombre_usuario']) . '</td>';
                                 echo '<td>' . htmlspecialchars($user['email']) . '</td>';
                                 echo '<td class="' . $statusClass . '">' . $status . '</td>';
-                                echo '<td>' . htmlspecialchars($user['fecha_creacion']) . '</td>';
+                                echo '<td>' . htmlspecialchars($user['fecha_Creado']) . '</td>';
                                 echo '</tr>';
                             }
                             echo '</tbody></table>';
                             echo '</div>';
                             echo '</div>';
-                            
                         } catch (Exception $e) {
                             echo '<div class="error-box"><strong>❌ Error:</strong> ' . htmlspecialchars($e->getMessage()) . '</div>';
                         }
@@ -534,20 +584,20 @@ $query = $_GET['query'] ?? '';
                         echo '<div class="info-box">ℹ️ No se encontró la tabla "usuarios" en la base de datos.</div>';
                     }
                     ?>
-                    
+
                 <?php elseif ($action === 'health'): ?>
                     <h2>🏥 Salud de la Base de Datos</h2>
-                    
+
                     <?php
                     $healthChecks = [];
-                    
+
                     // Check 1: Conectividad
                     $healthChecks[] = [
                         'name' => 'Conectividad',
                         'status' => $dbConnected ? 'ok' : 'error',
                         'message' => $dbConnected ? 'Conexión establecida correctamente' : 'Error de conexión'
                     ];
-                    
+
                     // Check 2: Tamaño de tablas
                     $largeTables = [];
                     foreach ($tableStats as $table) {
@@ -560,7 +610,7 @@ $query = $_GET['query'] ?? '';
                         'status' => empty($largeTables) ? 'ok' : 'warning',
                         'message' => empty($largeTables) ? 'Todas las tablas tienen tamaño normal' : 'Tablas grandes: ' . implode(', ', $largeTables)
                     ];
-                    
+
                     // Check 3: Usuarios activos vs inactivos
                     if (in_array('usuarios', $tables)) {
                         try {
@@ -569,7 +619,7 @@ $query = $_GET['query'] ?? '';
                                 COUNT(CASE WHEN activo = 1 THEN 1 END) as activos
                                 FROM usuarios");
                             $userStats = $stmt->fetch();
-                            
+
                             $inactiveRatio = $userStats['total'] > 0 ? ($userStats['total'] - $userStats['activos']) / $userStats['total'] : 0;
                             $healthChecks[] = [
                                 'name' => 'Ratio de Usuarios Activos',
@@ -580,13 +630,13 @@ $query = $_GET['query'] ?? '';
                             // Ignorar error
                         }
                     }
-                    
+
                     // Mostrar resultados
                     echo '<div class="grid">';
                     foreach ($healthChecks as $check) {
                         $statusClass = $check['status'] === 'ok' ? 'success-box' : ($check['status'] === 'warning' ? 'info-box' : 'error-box');
                         $icon = $check['status'] === 'ok' ? '✅' : ($check['status'] === 'warning' ? '⚠️' : '❌');
-                        
+
                         echo '<div class="' . $statusClass . '">';
                         echo '<h3>' . $icon . ' ' . htmlspecialchars($check['name']) . '</h3>';
                         echo '<p>' . htmlspecialchars($check['message']) . '</p>';
@@ -594,31 +644,31 @@ $query = $_GET['query'] ?? '';
                     }
                     echo '</div>';
                     ?>
-                    
+
                 <?php elseif ($action === 'table_detail'): ?>
                     <h2>📋 Detalles de Tabla: <?= htmlspecialchars($selectedTable) ?></h2>
-                    
+
                     <?php if (in_array($selectedTable, $tables)): ?>
                         <?php
                         try {
                             // Información de columnas
                             $stmt = $pdo->query("DESCRIBE `$selectedTable`");
                             $columns = $stmt->fetchAll();
-                            
+
                             // Información de índices
                             $stmt = $pdo->query("SHOW INDEX FROM `$selectedTable`");
                             $indexes = $stmt->fetchAll();
-                            
+
                             // Estadísticas
                             $stmt = $pdo->query("SELECT COUNT(*) as row_count FROM `$selectedTable`");
                             $rowCount = $stmt->fetchColumn();
-                            
+
                             echo '<div class="grid">';
                             echo '<div class="card"><h3>📊 Estadísticas</h3><div class="metric">' . number_format($rowCount) . '</div><p>Registros</p></div>';
                             echo '<div class="card"><h3>📋 Columnas</h3><div class="metric">' . count($columns) . '</div><p>Campos definidos</p></div>';
                             echo '<div class="card"><h3>🔑 Índices</h3><div class="metric">' . count($indexes) . '</div><p>Índices creados</p></div>';
                             echo '</div>';
-                            
+
                             echo '<div class="card">';
                             echo '<h3>📋 Estructura de Columnas</h3>';
                             echo '<div class="result-table">';
@@ -638,7 +688,7 @@ $query = $_GET['query'] ?? '';
                             echo '</tbody></table>';
                             echo '</div>';
                             echo '</div>';
-                            
+
                             if (!empty($indexes)) {
                                 echo '<div class="card">';
                                 echo '<h3>🔑 Índices</h3>';
@@ -658,18 +708,17 @@ $query = $_GET['query'] ?? '';
                                 echo '</div>';
                                 echo '</div>';
                             }
-                            
                         } catch (Exception $e) {
                             echo '<div class="error-box"><strong>❌ Error:</strong> ' . htmlspecialchars($e->getMessage()) . '</div>';
                         }
                         ?>
-                        
+
                     <?php else: ?>
                         <div class="error-box">❌ La tabla seleccionada no existe.</div>
                     <?php endif; ?>
-                    
+
                 <?php endif; ?>
-                
+
             <?php endif; ?>
         </div>
     </div>
@@ -679,7 +728,7 @@ $query = $_GET['query'] ?? '';
             const queryType = document.getElementById('queryType').value;
             const queryOptions = document.getElementById('queryOptions');
             const tableOptions = document.getElementById('tableOptions');
-            
+
             if (queryType === 'show') {
                 queryOptions.style.display = 'block';
                 tableOptions.style.display = 'none';
@@ -691,9 +740,10 @@ $query = $_GET['query'] ?? '';
                 tableOptions.style.display = 'block';
             }
         }
-        
+
         // Ejecutar al cargar la página
         document.addEventListener('DOMContentLoaded', toggleQueryOptions);
     </script>
 </body>
+
 </html>

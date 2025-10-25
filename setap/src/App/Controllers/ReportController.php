@@ -364,13 +364,13 @@ class ReportController extends BaseController
                     u.nombre_usuario,
                     ut.nombre as tipo_usuario,
                     et.nombre as estado,
-                    u.fecha_creacion,
-                    u.ultimo_acceso
+                    u.fecha_Creado,
+                    u.fecha_modificacion
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id
-                ORDER BY u.fecha_creacion DESC
+                ORDER BY u.fecha_Creado DESC
             ");
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -459,8 +459,8 @@ class ReportController extends BaseController
                 $row['nombre_usuario'],
                 $row['tipo_usuario'],
                 $row['estado'],
-                $row['fecha_creacion'],
-                $row['ultimo_acceso']
+                $row['fecha_Creado'],
+                $row['fecha_modificacion']
             ]);
         }
 
