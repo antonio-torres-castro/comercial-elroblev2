@@ -68,15 +68,30 @@ class AuthController extends AbstractBaseController
             $credentials = $validation['data'];
 
             // Intentar autenticar
-            $userData = $this->authService->authenticate($credentials['identifier'], $credentials['password']);
-            if (!$userData) {
-                $_SESSION['login_error'] = 'Credenciales incorrectas';
+            $authResult = $this->authService->authenticate($credentials['identifier'], $credentials['password']);
+            
+            if (!$authResult['success']) {
+                // Manejar diferentes tipos de error
+                switch ($authResult['error_type']) {
+                    case 'USER_NOT_FOUND':
+                    case 'INVALID_PASSWORD':
+                        // Para errores de autenticación específicos, mostrar mensaje amigable
+                        $_SESSION['login_error'] = $authResult['friendly_message'];
+                        break;
+                        
+                    default:
+                        // Para todos los demás errores, mostrar error crudo con mensaje de soporte
+                        $rawError = $authResult['raw_error'] ?? 'Error desconocido';
+                        $_SESSION['login_error'] = "Error, informe a soporte: " . $rawError;
+                        break;
+                }
+                
                 $this->redirectToLogin();
                 return;
             }
 
             // Iniciar sesión
-            if ($this->authService->login($userData)) {
+            if ($this->authService->login($authResult['user'])) {
                 $this->redirectToHome();
             } else {
                 $_SESSION['login_error'] = 'Error al iniciar sesión';

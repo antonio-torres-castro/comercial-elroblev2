@@ -141,6 +141,7 @@ function writeAppLog($message)
 // Log de acceso
 writeAppLog("Acceso al panel de debug - IP: $clientIP");
 
+// Función para convertir strings de tamaño (128M, 1G, etc.) a bytes
 function parse_size($size)
 {
     $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);

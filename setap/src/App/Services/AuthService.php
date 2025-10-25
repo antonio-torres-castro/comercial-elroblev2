@@ -18,7 +18,7 @@ class AuthService
 
     /**
      * Autenticar usuario por username/email y password
-     * @return array|null
+     * @return array con informacion del resultado
      */
     public function authenticate(string $identifier, string $password)
     {
@@ -40,18 +40,50 @@ class AuthService
             $user = $stmt->fetch();
 
             if (!$user) {
-                return null;
+                return [
+                    'success' => false,
+                    'error_type' => 'USER_NOT_FOUND',
+                    'friendly_message' => 'Usuario o email no encontrado',
+                    'raw_error' => null
+                ];
             }
 
             // Verificar password
             if (!password_verify($password, $user['clave_hash'])) {
-                return null;
+                return [
+                    'success' => false,
+                    'error_type' => 'INVALID_PASSWORD',
+                    'friendly_message' => 'Contraseña incorrecta',
+                    'raw_error' => null
+                ];
             }
 
-            return $user;
+            return [
+                'success' => true,
+                'user' => $user,
+                'raw_error' => null
+            ];
+            
         } catch (PDOException $e) {
-            error_log("Error en autenticación: " . $e->getMessage());
-            return null;
+            $rawError = "Error de conexión a la base de datos: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine();
+            error_log("Error en autenticación: " . $rawError);
+            
+            return [
+                'success' => false,
+                'error_type' => 'DATABASE_ERROR',
+                'friendly_message' => null,
+                'raw_error' => $rawError
+            ];
+        } catch (Exception $e) {
+            $rawError = "Error inesperado: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine();
+            error_log("Error en autenticación: " . $rawError);
+            
+            return [
+                'success' => false,
+                'error_type' => 'UNEXPECTED_ERROR',
+                'friendly_message' => null,
+                'raw_error' => $rawError
+            ];
         }
     }
 

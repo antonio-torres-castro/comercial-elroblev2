@@ -97,7 +97,13 @@ class AuthServiceTest extends TestCase
     {
         // Test con credenciales que no existen
         $result = $this->authService->authenticate('nonexistent_user', 'wrong_password');
-        $this->assertNull($result, 'authenticate debe retornar null con credenciales inválidas');
+        
+        // Con la nueva implementación, debe retornar array con success => false
+        $this->assertIsArray($result, 'authenticate debe retornar array');
+        $this->assertFalse($result['success'], 'authenticate debe retornar success=false con credenciales inválidas');
+        $this->assertArrayHasKey('error_type', $result, 'Resultado debe incluir error_type');
+        $this->assertArrayHasKey('friendly_message', $result, 'Resultado debe incluir friendly_message');
+        $this->assertEquals('USER_NOT_FOUND', $result['error_type'], 'Error debe ser USER_NOT_FOUND');
     }
 
     public function testLoginRequiresArray()
@@ -157,10 +163,31 @@ class AuthServiceTest extends TestCase
         
         // No debe lanzar excepción de tipo
         $result = $this->authService->authenticate($identifier, $password);
-        $this->assertTrue(
-            is_null($result) || is_array($result),
-            'authenticate debe retornar null o array'
-        );
+        $this->assertIsArray($result, 'authenticate debe retornar array');
+        $this->assertArrayHasKey('success', $result, 'Resultado debe incluir success');
+        $this->assertIsBool($result['success'], 'success debe ser boolean');
+    }
+
+    public function testAuthenticateReturnsProperStructure()
+    {
+        // Test de estructura completa de respuesta
+        $identifier = 'test_user';
+        $password = 'test_password';
+        
+        $result = $this->authService->authenticate($identifier, $password);
+        
+        if ($result['success']) {
+            // Si es exitoso, debe tener user
+            $this->assertArrayHasKey('user', $result, 'Resultado exitoso debe incluir user');
+            $this->assertNull($result['raw_error'], 'Resultado exitoso no debe tener raw_error');
+        } else {
+            // Si falla, debe tener error_type y friendly_message
+            $this->assertArrayHasKey('error_type', $result, 'Resultado fallido debe incluir error_type');
+            $this->assertArrayHasKey('friendly_message', $result, 'Resultado fallido debe incluir friendly_message');
+        }
+        
+        // raw_error debe estar presente en todos los casos
+        $this->assertArrayHasKey('raw_error', $result, 'Resultado siempre debe incluir raw_error');
     }
 
     public function testIsAuthenticatedAfterLogin()

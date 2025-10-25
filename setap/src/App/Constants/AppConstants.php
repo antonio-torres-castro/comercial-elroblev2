@@ -18,7 +18,7 @@ class AppConstants
     const ROUTE_HOME = '/setap/home';
 
     /** Ruta de logout */
-    const ROUTE_LOGOUT = '/setap/setap/logout';
+    const ROUTE_LOGOUT = '/setap/logout';
 
     /** Ruta base de usuarios */
     const ROUTE_USERS = '/setap/users';
