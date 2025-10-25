@@ -2,7 +2,6 @@
 
 namespace App\Helpers\Security;
 
-use App\Constants\AppConstants;
 use App\Services\CustomLogger;
 
 /**
@@ -20,6 +19,11 @@ class CsrfManager
     public static function generateToken(): string
     {
         if (session_status() === PHP_SESSION_NONE) {
+            // Configuración de sesión para asegurar persistencia
+            ini_set('session.gc_maxlifetime', 3600);
+            ini_set('session.cookie_lifetime', 3600);
+            ini_set('session.cookie_httponly', 1);
+            
             session_start();
         }
 
@@ -30,8 +34,15 @@ class CsrfManager
             'expires' => time() + self::$tokenExpiry
         ];
 
+        // Forzar guardado de sesión
+        session_write_close();
+        // Re-abrir sesión para continuar
+        session_start();
+        
         CustomLogger::debug("🔐 [CSRF] Generated new token: " . substr($token, 0, 10) . "...");
         CustomLogger::debug("🔐 [CSRF] Session ID: " . session_id());
+        CustomLogger::debug("🔐 [CSRF] Session status: " . session_status());
+        CustomLogger::debug("🔐 [CSRF] Token stored in session: " . isset($_SESSION[self::$tokenKey]) ? "YES" : "NO");
 
         return $token;
     }
@@ -63,15 +74,19 @@ class CsrfManager
         }
 
         CustomLogger::debug("🔐 [CSRF] Validating token: " . substr($token, 0, 10) . "...");
+        CustomLogger::debug("🔐 [CSRF] Current session ID: " . session_id());
+        CustomLogger::debug("🔐 [CSRF] Session status: " . session_status());
 
         // Verificar que existe el token en sesión
         if (!isset($_SESSION[self::$tokenKey])) {
             CustomLogger::debug("🔐 [CSRF] No token found in session");
+            CustomLogger::debug("🔐 [CSRF] Session keys: " . implode(', ', array_keys($_SESSION)));
             return false;
         }
 
         $sessionToken = $_SESSION[self::$tokenKey];
         CustomLogger::debug("🔐 [CSRF] Session token: " . substr($sessionToken['token'], 0, 10) . "...");
+        CustomLogger::debug("🔐 [CSRF] Session token expiry: " . ($sessionToken['expires'] ?? 'NOT_SET'));
 
         // Verificar que no ha expirado
         if (self::isTokenExpired()) {
@@ -173,14 +188,15 @@ class CsrfManager
             http_response_code(403);
 
             // Si es AJAX, devolver JSON
+            $errorMessage = 'Token CSRF inválido';
             if (
                 !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
             ) {
-                self::sendCsrfError(AppConstants::ERROR_INVALID_CSRF_TOKEN, 403);
+                self::sendCsrfError($errorMessage, 403);
             } else {
                 http_response_code(403);
-                echo AppConstants::ERROR_INVALID_CSRF_TOKEN;
+                echo $errorMessage;
                 exit;
             }
         }

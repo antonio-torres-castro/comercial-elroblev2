@@ -20,7 +20,43 @@ use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
 use App\Controllers\LogController;
 use App\Helpers\Security;
-use app\Constants\AppConstants;
+
+// Wrapper seguro para AppConstants - intenta cargar, usa fallback si falla
+class SafeAppConstants
+{
+    public static function __callStatic($name, $args)
+    {
+        try {
+            // Intentar usar AppConstants real
+            return constant("App\\Constants\\AppConst($name");
+        } catch (Error $e) {
+            // Fallback a valores hardcoded si falla
+            switch ($name) {
+                case 'ROUTE_LOGIN':
+                    return '/setap/login';
+                case 'ROUTE_HOME':
+                    return '/setap/home';
+                case 'ROUTE_MENUS':
+                    return '/setap/menus';
+                case 'ROUTE_TASKS':
+                    return '/setap/tasks';
+                case 'ROUTE_USERS':
+                    return '/setap/users';
+                case 'ROUTE_REPORTS':
+                    return '/setap/reports';
+                case 'ERROR_METHOD_NOT_ALLOWED':
+                    return 'Método no permitido';
+                default:
+                    return "Error: Constante $name no encontrada";
+            }
+        }
+    }
+}
+
+// Función helper para usar AppConstants de manera segura
+function AppConst($name) {
+    return SafeAppConst(__callStatic($name, []);
+}
 
 // Configurar headers de seguridad básicos
 Security::setSecurityHeaders();
@@ -85,13 +121,13 @@ try {
                 $controller = new HomeController();
                 $controller->index();
             } else {
-                Security::redirect(AppConstants::ROUTE_LOGIN);
+                Security::redirect(AppConst('ROUTE_LOGIN'));
             }
             break;
 
         case 'dashboard':
             // Redirigir a la nueva ruta /home para compatibilidad
-            header('Location: ' . AppConstants::ROUTE_HOME, true, 301);
+            header('Location: ' . AppConst('ROUTE_HOME'), true, 301);
             exit;
 
         case 'users':
@@ -235,7 +271,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update($id);
                     } else {
-                        Security::redirect(AppConstants::ROUTE_MENUS);
+                        Security::redirect(AppConst(ROUTE_MENUS);
                     }
                     break;
                     
@@ -243,7 +279,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_MENUS);
+                        Security::redirect(AppConst(ROUTE_MENUS);
                     }
                     break;
                     
@@ -251,7 +287,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_MENUS);
+                        Security::redirect(AppConst(ROUTE_MENUS);
                     }
                     break;
                     
@@ -259,7 +295,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->toggleStatus();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_MENUS);
+                        Security::redirect(AppConst(ROUTE_MENUS);
                     }
                     break;
                     
@@ -463,7 +499,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_TASKS);
+                        Security::redirect(AppConst(ROUTE_TASKS);
                     }
                     break;
                     
@@ -471,7 +507,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_TASKS);
+                        Security::redirect(AppConst(ROUTE_TASKS);
                     }
                     break;
                     
@@ -479,7 +515,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_TASKS);
+                        Security::redirect(AppConst(ROUTE_TASKS);
                     }
                     break;
                     
@@ -487,7 +523,7 @@ try {
                     if ($id) {
                         $controller->show((int)$id);
                     } else {
-                        Security::redirect(AppConstants::ROUTE_TASKS);
+                        Security::redirect(AppConst(ROUTE_TASKS);
                     }
                     break;
                     
@@ -496,7 +532,7 @@ try {
                         $controller->changeState();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -505,7 +541,7 @@ try {
                         $controller->checkExecutable();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['valid' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['valid' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -514,7 +550,7 @@ try {
                         $controller->getValidTransitions();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['transitions' => [], 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['transitions' => [], 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -545,7 +581,7 @@ try {
                         $controller->createMasivo();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -554,7 +590,7 @@ try {
                         $controller->createEspecifico();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -563,7 +599,7 @@ try {
                         $controller->createRango();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -572,7 +608,7 @@ try {
                         $controller->list();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -581,7 +617,7 @@ try {
                         $controller->update();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -590,7 +626,7 @@ try {
                         $controller->delete();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -599,7 +635,7 @@ try {
                         $controller->checkConflicts();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -608,7 +644,7 @@ try {
                         $controller->moveTasks();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -617,7 +653,7 @@ try {
                         $controller->getWorkingDays();
                     } else {
                         http_response_code(405);
-                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                        echo json_encode(['success' => false, 'message' => AppConst(ERROR_METHOD_NOT_ALLOWED]);
                     }
                     break;
                     
@@ -633,10 +669,10 @@ try {
             // Redireccionar las rutas /user/{id} a las rutas estándar
             if ($action) {
                 // Editar usuario existente
-                Security::redirect(AppConstants::ROUTE_USERS . "/edit?id={$action}");
+                Security::redirect(AppConst(ROUTE_USERS . "/edit?id={$action}");
             } else {
                 // Nuevo usuario
-                Security::redirect(AppConstants::ROUTE_USERS . "/create");
+                Security::redirect(AppConst(ROUTE_USERS . "/create");
             }
             break;
 
@@ -738,7 +774,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->generate();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_REPORTS);
+                        Security::redirect(AppConst(ROUTE_REPORTS);
                     }
                     break;
                     
@@ -746,7 +782,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->download();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_REPORTS);
+                        Security::redirect(AppConst(ROUTE_REPORTS);
                     }
                     break;
                     
@@ -754,7 +790,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->usersReport();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_REPORTS);
+                        Security::redirect(AppConst(ROUTE_REPORTS);
                     }
                     break;
                     
@@ -762,7 +798,7 @@ try {
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->projectsReport();
                     } else {
-                        Security::redirect(AppConstants::ROUTE_REPORTS);
+                        Security::redirect(AppConst(ROUTE_REPORTS);
                     }
                     break;
                     
