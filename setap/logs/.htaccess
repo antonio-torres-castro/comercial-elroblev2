@@ -4,12 +4,12 @@
 
 # ===== PROTECCION ABSOLUTA DE LOGS =====
 # Solo permitir acceso interno desde el servidor
-<RequireAll>
+<RequireAny>
     # Permitir acceso solo desde IPs autorizadas
     Require ip 127.0.0.1
     Require ip ::1
     Require ip 181.72.88.67
-</RequireAll>
+</RequireAny>
 
 # ===== BLOQUEAR TODOS LOS ARCHIVOS DE LOG =====
 <FilesMatch "\.(log|Logs|LOG|txt|TXT)$">
