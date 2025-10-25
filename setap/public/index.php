@@ -716,12 +716,6 @@ try {
             }
             break;
 
-        case 'logs':
-            // Solo para debugging - solo acceso local permitido
-            $controller = new LogController();
-            $controller->viewAuthLogs();
-            break;
-
         case 'reports':
             $controller = new ReportController();
 

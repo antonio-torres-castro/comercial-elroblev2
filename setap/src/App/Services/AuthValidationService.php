@@ -13,31 +13,22 @@ class AuthValidationService
      */
     public function validateLoginCredentials(array $postData): array
     {
-        CustomLogger::debug("🔐 [VALIDATION] Starting validation for: " . json_encode(array_keys($postData)));
-
         $errors = [];
         $data = [];
 
         // Validar CSRF token
         $csrfToken = $postData['csrf_token'] ?? '';
-        CustomLogger::debug("🔐 [VALIDATION] CSRF token received: " . ($csrfToken ? "Present" : "Missing"));
 
         // Validación normal de CSRF
         if (!Security::validateCsrfToken($csrfToken)) {
             $error = AppConstants::ERROR_INVALID_SECURITY_TOKEN;
-            CustomLogger::debug("🔐 [VALIDATION] CSRF validation failed: " . $error);
             $errors[] = $error;
             return ['isValid' => false, 'errors' => $errors, 'data' => $data];
-        } else {
-            CustomLogger::debug("🔐 [VALIDATION] CSRF token valid");
         }
 
         // Obtener y validar credenciales
         $identifier = Security::sanitizeInput($postData['identifier'] ?? '');
         $password = $postData['password'] ?? '';
-
-        CustomLogger::debug("🔐 [VALIDATION] Identifier: " . ($identifier ? "Present" : "Missing"));
-        CustomLogger::debug("🔐 [VALIDATION] Password: " . ($password ? "Present" : "Missing"));
 
         if (empty($identifier)) {
             $errors[] = 'El usuario o email es requerido';
@@ -50,9 +41,6 @@ class AuthValidationService
         if (empty($errors)) {
             $data['identifier'] = $identifier;
             $data['password'] = $password;
-            CustomLogger::debug("🔐 [VALIDATION] Validation successful");
-        } else {
-            CustomLogger::debug("🔐 [VALIDATION] Validation errors: " . implode(', ', $errors));
         }
 
         return [
