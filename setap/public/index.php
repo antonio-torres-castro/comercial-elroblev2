@@ -18,6 +18,7 @@ use App\Controllers\ReportController;
 use App\Controllers\ProyectoFeriadoController;
 use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
+use App\Controllers\LogController;
 use App\Helpers\Security;
 use app\Constants\AppConstants;
 
@@ -713,6 +714,12 @@ try {
                     $controller->index();
                     break;
             }
+            break;
+
+        case 'logs':
+            // Solo para debugging - solo acceso local permitido
+            $controller = new LogController();
+            $controller->viewAuthLogs();
             break;
 
         case 'reports':

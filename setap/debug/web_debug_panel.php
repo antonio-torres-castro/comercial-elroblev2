@@ -417,6 +417,7 @@ function parse_size($size)
             padding: 15px;
             margin: 15px 0;
             border-radius: 0 6px 6px 0;
+            color: #2c3e50;
         }
 
         .warning-box {
@@ -425,6 +426,7 @@ function parse_size($size)
             padding: 15px;
             margin: 15px 0;
             border-radius: 0 6px 6px 0;
+            color: #8b4513;
         }
 
         .error-box {
@@ -433,6 +435,47 @@ function parse_size($size)
             padding: 15px;
             margin: 15px 0;
             border-radius: 0 6px 6px 0;
+            color: #721c24;
+        }
+        .success-box { 
+            background: #d5f4e6; 
+            border-left: 4px solid #27ae60; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 0 6px 6px 0;
+            color: #155724;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            color: #2c3e50;
+        }
+        .card p {
+            color: #495057;
+            line-height: 1.5;
+        }
+        .card strong {
+            color: #212529;
         }
     </style>
 </head>

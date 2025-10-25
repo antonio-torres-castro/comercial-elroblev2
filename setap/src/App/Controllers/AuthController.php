@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Services\AuthService;
 use App\Services\AuthViewService;
 use App\Services\AuthValidationService;
+use App\Services\CustomLogger;
 use App\Helpers\Security;
 use App\Constants\AppConstants;
 use App\Traits\CommonValidationsTrait;
@@ -57,18 +58,28 @@ class AuthController extends AbstractBaseController
     public function login()
     {
         return $this->executeWithErrorHandling(function () {
+            CustomLogger::debug("🔐 [LOGIN DEBUG] Iniciando proceso de login");
+            CustomLogger::debug("🔐 [LOGIN DEBUG] POST data: " . json_encode($_POST));
+            CustomLogger::debug("🔐 [LOGIN DEBUG] Session data: " . json_encode($_SESSION));
+            
             // Validar datos de entrada
             $validation = $this->authValidationService->validateLoginCredentials($_POST);
+            CustomLogger::debug("🔐 [LOGIN DEBUG] Validation result: " . json_encode($validation));
+            
             if (!$validation['isValid']) {
-                $_SESSION['login_error'] = $this->authValidationService->formatErrorsForDisplay($validation['errors']);
+                $validationError = $this->authValidationService->formatErrorsForDisplay($validation['errors']);
+                CustomLogger::debug("🔐 [LOGIN DEBUG] Validation failed: " . $validationError);
+                $_SESSION['login_error'] = $validationError;
                 $this->redirectToLogin();
                 return;
             }
 
             $credentials = $validation['data'];
+            CustomLogger::debug("🔐 [LOGIN DEBUG] Credentials validated for identifier: " . $credentials['identifier']);
 
             // Intentar autenticar
             $authResult = $this->authService->authenticate($credentials['identifier'], $credentials['password']);
+            CustomLogger::debug("🔐 [LOGIN DEBUG] Auth result: " . json_encode($authResult));
             
             if (!$authResult['success']) {
                 // Manejar diferentes tipos de error
@@ -76,12 +87,14 @@ class AuthController extends AbstractBaseController
                     case 'USER_NOT_FOUND':
                     case 'INVALID_PASSWORD':
                         // Para errores de autenticación específicos, mostrar mensaje amigable
+                        CustomLogger::debug("🔐 [LOGIN DEBUG] Auth error (specific): " . $authResult['friendly_message']);
                         $_SESSION['login_error'] = $authResult['friendly_message'];
                         break;
                         
                     default:
                         // Para todos los demás errores, mostrar error crudo con mensaje de soporte
                         $rawError = $authResult['raw_error'] ?? 'Error desconocido';
+                        CustomLogger::debug("🔐 [LOGIN DEBUG] Auth error (raw): " . $rawError);
                         $_SESSION['login_error'] = "Error, informe a soporte: " . $rawError;
                         break;
                 }
@@ -91,9 +104,12 @@ class AuthController extends AbstractBaseController
             }
 
             // Iniciar sesión
+            CustomLogger::debug("🔐 [LOGIN DEBUG] Starting session for user: " . $authResult['user']['nombre_usuario']);
             if ($this->authService->login($authResult['user'])) {
+                CustomLogger::debug("🔐 [LOGIN DEBUG] Session started successfully, redirecting to home");
                 $this->redirectToHome();
             } else {
+                CustomLogger::debug("🔐 [LOGIN DEBUG] Failed to start session");
                 $_SESSION['login_error'] = 'Error al iniciar sesión';
                 $this->redirectToLogin();
             }
