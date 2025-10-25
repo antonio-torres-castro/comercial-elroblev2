@@ -51,3 +51,5 @@
 [2025-10-24 21:34:11] [IP:::1] Usuario creado desde debug: prueba (ID: 18)
 [2025-10-24 22:09:54] [IP:::1] [DEBUG_INDEX] Acceso al índice de debug
 [2025-10-24 22:10:09] [IP:::1] Acceso al panel de debug - IP: ::1
+[2025-10-25 11:31:47] [IP:::1] [DEBUG_INDEX] Acceso al índice de debug
+[2025-10-25 11:31:50] [IP:::1] Acceso al panel de debug - IP: ::1

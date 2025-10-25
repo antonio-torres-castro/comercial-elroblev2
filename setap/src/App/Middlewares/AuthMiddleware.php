@@ -60,13 +60,13 @@ class AuthMiddleware
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-cache, must-revalidate');
-        
+
         $response = array_merge([
             'success' => false,
             'error' => $message,
             'message' => $message
         ], $additionalData);
-        
+
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit;
     }

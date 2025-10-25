@@ -623,7 +623,7 @@ switch ($action) {
         if (empty($expandedPaths) || (!file_exists($actualPath ?? ''))) {
             $logTest .= "<p class='status-warning'>⚠️ No se encontraron archivos de log de Apache</p>";
             $logTest .= "<p><strong>Rutas buscadas:</strong></p><ul>";
-            foreach (array_slice($testPaths, 0, 3) as $path) {
+            foreach (array_slice($testPaths, 0, 6) as $path) {
                 $logTest .= "<li>$path</li>";
             }
             $logTest .= "</ul>";
@@ -800,22 +800,29 @@ function testAuthentication($username, $password, $mode = 'test')
         // Intentar autenticar
         try {
             $authResult = $authService->authenticate($username, $password);
+            $authUser = $authResult['user'] ?? null;
 
-            if ($authResult) {
+            if ($authUser) {
                 $result .= "<div class='success-box'>✅ <strong>Autenticación exitosa</strong></div>";
                 $result .= "<div class='info-box'>";
                 $result .= "<strong>Usuario encontrado:</strong><br>";
-                $result .= "- ID: " . ($authResult['id'] ?? 'N/A') . "<br>";
-                $result .= "- Usuario: " . ($authResult['nombre_usuario'] ?? 'N/A') . "<br>";
-                $result .= "- Email: " . ($authResult['email'] ?? 'N/A') . "<br>";
-                $result .= "- Estado: " . ($authResult['estado_tipo_id'] != '2' ? 'N/A' : 'Activo') . "<br>";
+                $result .= "- ID: " . ($authUser['id'] ?? 'N/A') . "<br>";
+                $result .= "- Usuario: " . ($authUser['nombre_usuario'] ?? 'N/A') . "<br>";
+                $result .= "- Email: " . ($authUser['email'] ?? 'N/A') . "<br>";
+                $result .= "- Estado: " . ($authUser['estado_tipo_id'] != '2' ? 'N/A' : 'Activo') . "<br>";
                 $result .= "</div>";
 
                 if ($mode === 'login') {
                     $result .= "<div class='info-box'>🔄 <strong>Modo Login:</strong> Se iniciaría sesión automáticamente</div>";
                     // Aquí se podría iniciar la sesión si se desea
-                    // session_start();
-                    // $_SESSION['user_id'] = $authResult['id'];
+                    session_start();
+                    $_SESSION['user_id'] = $authUser['id'];
+                    $_SESSION['username'] = $authUser['nombre_usuario'];
+                    $_SESSION['email'] = $authUser['email'];
+                    $_SESSION['nombre_completo'] = $authUser['nombre_completo'];
+                    $_SESSION['rol'] = $authUser['rol'];
+                    $_SESSION['usuario_tipo_id'] = $authUser['usuario_tipo_id'];
+                    $_SESSION['login_time'] = time();
                 }
             } else {
                 $result .= "<div class='error-box'>❌ <strong>Autenticación fallida</strong></div>";
