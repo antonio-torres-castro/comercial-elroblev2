@@ -18,8 +18,6 @@ use App\Constants\AppConstants;
 use PDO;
 use Exception;
 
-use function MyNamespace\empty1;
-
 class UserController extends BaseController
 {
     private $userModel;

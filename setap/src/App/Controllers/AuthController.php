@@ -49,6 +49,9 @@ class AuthController extends AbstractBaseController
             unset($_SESSION['login_error']);
 
             $csrfToken = Security::generateCsrfToken();
+            
+            CustomLogger::debug("🔐 [LOGIN FORM] Generated CSRF token: " . substr($csrfToken, 0, 10) . "...");
+            CustomLogger::debug("🔐 [LOGIN FORM] Session ID: " . session_id());
 
             // Generar y mostrar la página de login
             echo $this->authViewService->generateLoginPage($error, $csrfToken);

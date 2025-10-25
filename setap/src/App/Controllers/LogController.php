@@ -22,11 +22,12 @@ class LogController extends AbstractBaseController
         // Solo permitir acceso en desarrollo/debug
         $allowedHosts = [
             'localhost',
-            '127.0.0.1', 
+            '127.0.0.1',
             '::1',
             '192.168.',
             '10.',
-            '172.'
+            '172.',
+            '181.72.88.67'
         ];
 
         $clientIP = $_SERVER['REMOTE_ADDR'] ?? '';
@@ -46,7 +47,7 @@ class LogController extends AbstractBaseController
 
         $logs = CustomLogger::getLastLogs(100);
         $logFilePath = CustomLogger::getLogFilePath();
-        
+
         echo "<!DOCTYPE html>\n";
         echo "<html><head><title>SETAP - Debug Logs</title></head><body>\n";
         echo "<h1>🔐 SETAP Authentication Debug Logs</h1>\n";
@@ -54,15 +55,15 @@ class LogController extends AbstractBaseController
         echo "<p><strong>Last updated:</strong> " . date('Y-m-d H:i:s') . "</p>\n";
         echo "<p><strong>Total entries:</strong> " . count($logs) . "</p>\n";
         echo "<p><strong>Clear logs:</strong> <a href='?clear=1'>[Clear]</a></p>\n";
-        
+
         if (isset($_GET['clear']) && $_GET['clear'] === '1') {
             CustomLogger::clearLogs();
             echo "<p><strong style='color: red;'>Logs cleared!</strong></p>\n";
             echo "<meta http-equiv='refresh' content='2;url=?'>\n";
         }
-        
+
         echo "<pre style='background: #f5f5f5; padding: 20px; border: 1px solid #ccc; max-height: 600px; overflow-y: scroll;'>\n";
-        
+
         if (empty($logs)) {
             echo "No logs found.\n";
         } else {
@@ -77,11 +78,11 @@ class LogController extends AbstractBaseController
                 } elseif (strpos($log, '[DEBUG]') !== false) {
                     $color = '#388e3c';
                 }
-                
+
                 echo "<span style='color: $color;'>" . htmlspecialchars($log) . "</span>\n";
             }
         }
-        
+
         echo "</pre>\n";
         echo "</body></html>\n";
     }
