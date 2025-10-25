@@ -4,22 +4,28 @@ namespace App\Middlewares;
 
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+use Buggregator\Trap\Test\Proto\Metadata\Message;
+use Exception;
 
 class AuthMiddleware
 {
     public function handle(): void
     {
-        // Verificar si hay sesión activa
-        if (!Security::isAuthenticated()) {
-            $this->redirectToLogin();
-            return;
-        }
+        try {
+            // Verificar si hay sesión activa
+            if (!Security::isAuthenticated()) {
+                $this->redirectToLogin();
+                return;
+            }
 
-        // Verificar si la sesión ha expirado (opcional)
-        if ($this->isSessionExpired()) {
-            session_destroy();
-            $this->redirectToLogin();
-            return;
+            // Verificar si la sesión ha expirado (opcional)
+            if ($this->isSessionExpired()) {
+                session_destroy();
+                $this->redirectToLogin();
+                return;
+            }
+        } catch (Exception $ex) {
+            error_log($ex);
         }
     }
 
