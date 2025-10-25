@@ -30,7 +30,7 @@ class ClientValidationService extends BaseController
      * @param int|null $excludeId ID del cliente a excluir (para ediciones)
      * @return array Lista de errores encontrados
      */
-    public function validateClientData(array $data, int $excludeId = null): array
+    public function validateClientData(array $data, ?int $excludeId = null): array
     {
         $errors = [];
 
@@ -102,7 +102,7 @@ class ClientValidationService extends BaseController
      * @param int|null $excludeId ID de la contraparte a excluir (para ediciones)
      * @return array Lista de errores encontrados
      */
-    public function validateCounterpartieData(array $data, int $excludeId = null): array
+    public function validateCounterpartieData(array $data, ?int $excludeId = null): array
     {
         $errors = [];
 

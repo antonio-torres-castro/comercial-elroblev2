@@ -279,7 +279,7 @@ class Menu
     /**
      * Verificar si el nombre del menú ya existe
      */
-    public function nameExists(string $nombre, int $excludeId = null): bool
+    public function nameExists(string $nombre, ?int $excludeId = null): bool
     {
         try {
             $query = "SELECT COUNT(*) FROM {$this->table} WHERE nombre = ? AND estado_tipo_id != 4";
@@ -303,7 +303,7 @@ class Menu
     /**
      * Verificar si la URL del menú ya existe
      */
-    public function urlExists(string $url, int $excludeId = null): bool
+    public function urlExists(string $url, ?int $excludeId = null): bool
     {
         try {
             $query = "SELECT COUNT(*) FROM {$this->table} WHERE url = ? AND estado_tipo_id != 4";

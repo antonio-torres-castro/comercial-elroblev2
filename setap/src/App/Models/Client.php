@@ -204,7 +204,7 @@ class Client
     /**
      * Verificar si el RUT ya existe
      */
-    public function rutExists(string $rut, int $excludeId = null): bool
+    public function rutExists(string $rut, ?int $excludeId = null): bool
     {
         try {
             $query = "SELECT id FROM {$this->table} WHERE rut = ? AND estado_tipo_id != 3";
@@ -458,7 +458,7 @@ class Client
     /**
      * Verificar si ya existe una contraparte para el cliente y persona
      */
-    public function counterpartieExists(int $clientId, int $personaId, int $excludeId = null): bool
+    public function counterpartieExists(int $clientId, int $personaId, ?int $excludeId = null): bool
     {
         try {
             $query = "SELECT id FROM cliente_contrapartes WHERE cliente_id = ? AND persona_id = ? AND estado_tipo_id != 4";

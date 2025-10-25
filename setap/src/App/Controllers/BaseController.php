@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Helpers\Security;
 use App\Constants\AppConstants;
 use DateTime;
@@ -15,7 +17,7 @@ abstract class BaseController
         if (!Security::isAuthenticated()) {
             return null;
         }
-        
+
         return [
             'id' => $_SESSION['user_id'],
             'username' => $_SESSION['username'],
@@ -150,14 +152,14 @@ abstract class BaseController
     {
         $keys = explode('.', $path);
         $current = $data;
-        
+
         foreach ($keys as $key) {
             if (!is_array($current) || !array_key_exists($key, $current)) {
                 return $default;
             }
             $current = $current[$key];
         }
-        
+
         return $current;
     }
 
@@ -209,15 +211,15 @@ abstract class BaseController
     {
         $errors = [];
         $length = strlen($value);
-        
+
         if ($minLength > 0 && $length < $minLength) {
             $errors[] = "El {$fieldName} debe tener al menos {$minLength} caracteres";
         }
-        
+
         if ($length > $maxLength) {
             $errors[] = "El {$fieldName} no puede exceder {$maxLength} caracteres";
         }
-        
+
         return $errors;
     }
 
@@ -267,13 +269,13 @@ abstract class BaseController
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-cache, must-revalidate');
-        
+
         // Preparar opciones de JSON
         $options = JSON_UNESCAPED_UNICODE;
         if ($prettyPrint) {
             $options |= JSON_PRETTY_PRINT;
         }
-        
+
         // Enviar respuesta y terminar
         echo json_encode($data, $options);
         exit;
@@ -291,7 +293,7 @@ abstract class BaseController
             'success' => true,
             'message' => $message
         ], $additionalData);
-        
+
         $this->jsonResponse($data, $statusCode);
     }
 
@@ -307,7 +309,7 @@ abstract class BaseController
             'success' => false,
             'message' => $message
         ], $additionalData);
-        
+
         $this->jsonResponse($data, $statusCode);
     }
 
@@ -326,7 +328,7 @@ abstract class BaseController
      * Envía una respuesta JSON de no autorizado
      * @param string $message Mensaje personalizado (opcional)
      */
-    protected function jsonUnauthorized(string $message = null): void
+    protected function jsonUnauthorized(?string $message = null): void
     {
         $message = $message ?? AppConstants::ERROR_USER_NOT_AUTHORIZED;
         $this->jsonError($message, [], 401);

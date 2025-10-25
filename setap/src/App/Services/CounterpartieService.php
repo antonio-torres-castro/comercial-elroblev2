@@ -133,7 +133,7 @@ class CounterpartieService
      * @param int|null $excludeId ID a excluir (para ediciones)
      * @return bool True si la combinación ya existe
      */
-    public function counterpartieExists(int $clientId, int $personaId, int $excludeId = null): bool
+    public function counterpartieExists(int $clientId, int $personaId, ?int $excludeId = null): bool
     {
         return $this->clientModel->counterpartieExists($clientId, $personaId, $excludeId);
     }

@@ -224,7 +224,7 @@ class MenuGrupo
     /**
      * Verificar si el nombre del grupo ya existe
      */
-    public function nameExists(string $nombre, int $excludeId = null): bool
+    public function nameExists(string $nombre, ?int $excludeId = null): bool
     {
         try {
             $query = "SELECT COUNT(*) FROM {$this->table} WHERE nombre = ? AND estado_tipo_id != 4";
