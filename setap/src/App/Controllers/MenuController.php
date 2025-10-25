@@ -7,7 +7,7 @@ use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Constants\AppConstants;
-use app\Config\Database;
+use App\Config\Database;
 use Exception;
 
 class MenuController extends BaseController

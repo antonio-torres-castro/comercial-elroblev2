@@ -126,7 +126,7 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $message = "Feriados creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
-            
+
             // Si hay conflictos con tareas, incluirlos en el mensaje
             if (!empty($result['conflicts'])) {
                 $message .= '. Se detectaron conflictos con tareas existentes.';
@@ -192,7 +192,7 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $message = $result['action'] === 'created' ? AppConstants::SUCCESS_HOLIDAY_CREATED : AppConstants::SUCCESS_HOLIDAY_UPDATED;
-            
+
             // Si hay conflictos con tareas, incluirlos en el mensaje
             if (!empty($result['task_conflicts'])) {
                 $message .= '. Se detectaron conflictos con tareas existentes.';
@@ -265,7 +265,7 @@ class ProyectoFeriadoController extends BaseController
             }
 
             $message = "Feriados en rango creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
-            
+
             // Si hay conflictos con tareas, incluirlos en el mensaje
             if (!empty($result['conflicts'])) {
                 $message .= '. Se detectaron conflictos con tareas existentes.';
@@ -315,7 +315,7 @@ class ProyectoFeriadoController extends BaseController
 
             $id = (int)($_POST['id'] ?? 0);
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            
+
             if (!$id) {
                 $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
                 $this->redirectWithError($returnUrl, 'ID de feriado requerido');
@@ -364,7 +364,7 @@ class ProyectoFeriadoController extends BaseController
 
             $id = (int)($_POST['id'] ?? 0);
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            
+
             if (!$id) {
                 $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
                 $this->redirectWithError($returnUrl, 'ID de feriado requerido');
