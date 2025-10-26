@@ -66,7 +66,7 @@ if (session_status() === PHP_SESSION_NONE) {
     $sessionPath = __DIR__ . '/../../storage/sessions';
     // Verificar que la carpeta exista
     if (!is_dir($sessionPath)) {
-        mkdir($sessionPath, 0750, true);
+        mkdir($sessionPath, 0775, true);
     }
     // Asignar la ruta de almacenamiento de sesiones
     session_save_path($sessionPath);
