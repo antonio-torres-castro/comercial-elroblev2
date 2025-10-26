@@ -93,6 +93,7 @@ class AuthService
      */
     public function login(array $userData): bool
     {
+        $controllerName = get_class($this);
         try {
             // Regenerar ID de sesión por seguridad
             session_regenerate_id(true);
@@ -108,7 +109,7 @@ class AuthService
 
             return true;
         } catch (Exception $e) {
-            Logger::error("login: " . $e->getMessage());
+            Logger::error($controllerName . "::login:" . $e->getMessage());
             return false;
         }
     }

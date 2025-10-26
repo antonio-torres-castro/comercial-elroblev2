@@ -2,6 +2,7 @@
 
 namespace App\Config;
 
+use App\Helpers\Logger;
 use PDO;
 use PDOException;
 use RuntimeException;
@@ -19,6 +20,7 @@ class Database
             // Verificar si estamos en desarrollo o testing para usar SQLite
             $env = AppConfig::get('app_env', '');
             if ($env === 'development' || $env === 'testing') {
+                Logger::debug("Entre en modo: " . $env);
                 // Usar SQLite para desarrollo o testing
                 if ($env === 'testing' && ($_ENV['DB_DATABASE'] ?? '') === ':memory:') {
                     // Base de datos en memoria para testing
@@ -52,6 +54,7 @@ class Database
                     throw new RuntimeException('Error de conexión a SQLite: ' . $e->getMessage());
                 }
             } else {
+                Logger::debug("Entre en modo: " . $env);
                 // Usar MySQL para producción
                 $host = AppConfig::get('db_host', '');
                 $db   = AppConfig::get('db_database', '');

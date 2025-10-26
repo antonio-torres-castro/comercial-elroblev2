@@ -5,11 +5,12 @@ namespace App\Controllers;
 use App\Services\AuthService;
 use App\Services\AuthViewService;
 use App\Services\AuthValidationService;
-use App\Services\CustomLogger;
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+use App\Helpers\Logger;
 use App\Traits\CommonValidationsTrait;
 use Exception;
+use PhpParser\Node\Name;
 
 /**
  * AuthController - Refactorizado
@@ -57,7 +58,10 @@ class AuthController extends AbstractBaseController
 
     public function login()
     {
+
         return $this->executeWithErrorHandling(function () {
+            $errorType = "NA";
+            $controllerName = get_class($this);
             // Validar datos de entrada
             $validation = $this->authValidationService->validateLoginCredentials($_POST);
 
@@ -65,6 +69,8 @@ class AuthController extends AbstractBaseController
                 $validationError = $this->authValidationService->formatErrorsForDisplay($validation['errors']);
 
                 $_SESSION['login_error'] = $validationError;
+
+                Logger::debug("validateLoginCredentials=NotValid: " . $controllerName . "::login:" . $validationError);
                 $this->redirectToLogin();
                 return;
             }
@@ -73,34 +79,41 @@ class AuthController extends AbstractBaseController
 
             // Intentar autenticar
             $authResult = $this->authService->authenticate($credentials['identifier'], $credentials['password']);
+            $rawError = $authResult['raw_error'] ?? 'Error desconocido';
+
+            if (array_key_exists('error_type', $authResult)) {
+                $errorType = $authResult['error_type'] ?? "debia tener";
+            }
 
             if (!$authResult['success']) {
                 // Manejar diferentes tipos de error
                 switch ($authResult['error_type']) {
                     case 'USER_NOT_FOUND':
+                        $_SESSION['login_error'] = "Usuario no encontrado";
+                        break;
+
                     case 'INVALID_PASSWORD':
                         // Para errores de autenticación específicos, mostrar mensaje amigable
-
                         $_SESSION['login_error'] = $authResult['friendly_message'];
                         break;
 
                     default:
                         // Para todos los demás errores, mostrar error crudo con mensaje de soporte
-                        $rawError = $authResult['raw_error'] ?? 'Error desconocido';
-
                         $_SESSION['login_error'] = "Error, informe a soporte: " . $rawError;
                         break;
                 }
-
+                Logger::debug("authenticate=false al login " . $controllerName . "::login:" . $errorType . ":" . $rawError);
                 $this->redirectToLogin();
                 return;
             }
 
             // Iniciar sesión
             if ($this->authService->login($authResult['user'])) {
+                Logger::debug("Voy al home se ha iniciado sesion " . $controllerName . "::login:");
                 $this->redirectToHome();
             } else {
                 $_SESSION['login_error'] = 'Error al iniciar sesión';
+                Logger::debug("authService->login fallo" . $controllerName . "::login:");
                 $this->redirectToLogin();
             }
         }, 'login');

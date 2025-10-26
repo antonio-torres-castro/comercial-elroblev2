@@ -14,6 +14,7 @@ class AuthMiddleware
         try {
             // Verificar si hay sesión activa
             if (!Security::isAuthenticated()) {
+                Logger::debug("AuthMiddleware::handle: !Security::isAuthenticated()");
                 $this->redirectToLogin();
                 return;
             }
@@ -21,6 +22,7 @@ class AuthMiddleware
             // Verificar si la sesión ha expirado (opcional)
             if ($this->isSessionExpired()) {
                 session_destroy();
+                Logger::debug("AuthMiddleware::handle: isSessionExpired");
                 $this->redirectToLogin();
                 return;
             }

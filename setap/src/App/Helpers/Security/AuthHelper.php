@@ -5,6 +5,9 @@ namespace App\Helpers\Security;
 use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use App\Services\PermissionService;
+use Exception;
+
+use function PHPUnit\Framework\throwException;
 
 /**
  * Helper de autenticación
@@ -249,12 +252,18 @@ class AuthHelper
      */
     public static function redirect(string $url): void
     {
-        // Agregar el base path si no está presente
-        if (strpos($url, '/setap/') !== 0) {
-            $url = '/setap' . $url;
+        try {
+            // Agregar el base path si no está presente
+            if (strpos($url, '/setap/') !== 0) {
+                $url = '/setap' . $url;
+            }
+            header("Location: $url");
+        } catch (Exception $e) {
+            Logger::error($e->getMessage());
+            throwException($e);
+        } finally {
+            exit;
         }
-        header("Location: $url");
-        exit;
     }
 
     /**
