@@ -5,6 +5,9 @@ namespace App\Helpers\Security;
 use App\Constants\AppConstants;
 use App\Helpers\Logger;
 use App\Services\CustomLogger;
+use Exception;
+
+use function PHPUnit\Framework\throwException;
 
 /**
  * Gestor de tokens CSRF
@@ -20,18 +23,24 @@ class CsrfManager
      */
     public static function generateToken(): string
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        $token = "";
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $token = bin2hex(random_bytes(32));
+            $keyToken = self::$tokenKey;
+            $_SESSION[$keyToken] = [
+                'token' => $token,
+                'expires' => time() + self::$tokenExpiry
+            ];
+            Logger::debug("El token entregado a sesion en " . $keyToken . ":" . $token);
+        } catch (Exception $e) {
+            Logger::error("CsrfManager::generateToken:" . $e->getMessage());
+            throwException($e);
+        } finally {
+            return $token;
         }
-
-        $token = bin2hex(random_bytes(32));
-
-        $_SESSION[self::$tokenKey] = [
-            'token' => $token,
-            'expires' => time() + self::$tokenExpiry
-        ];
-
-        return $token;
     }
 
     /**
