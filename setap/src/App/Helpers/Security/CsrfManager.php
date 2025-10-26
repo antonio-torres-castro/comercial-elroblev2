@@ -34,7 +34,11 @@ class CsrfManager
                 'token' => $token,
                 'expires' => time() + self::$tokenExpiry
             ];
-            Logger::debug("El token entregado a sesion en " . $keyToken . ":" . $token);
+            if (isset($_SESSION[$keyToken])) {
+                Logger::debug("El token entregado a sesion en " . $keyToken . ":" . $token);
+            } else {
+                Logger::error("El token no lo sostuvo la sesion");
+            }
         } catch (Exception $e) {
             Logger::error("CsrfManager::generateToken:" . $e->getMessage());
             throwException($e);

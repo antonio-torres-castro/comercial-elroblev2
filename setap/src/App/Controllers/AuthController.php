@@ -53,6 +53,11 @@ class AuthController extends AbstractBaseController
 
             // Generar y mostrar la página de login
             echo $this->authViewService->generateLoginPage($error, $csrfToken);
+            if (isset($_SESSION["csrf_token"])) {
+                Logger::debug("El token esta en array de sesion");
+            } else {
+                Logger::error("El token no esta en array de sesion");
+            }
         }, 'showLoginForm');
     }
 
@@ -63,6 +68,11 @@ class AuthController extends AbstractBaseController
             $errorType = "NA";
             $controllerName = get_class($this);
             // Validar datos de entrada
+            if (isset($_SESSION["csrf_token"])) {
+                Logger::debug("Tengo el token en la sesion al llegar al login");
+            } else {
+                Logger::error("No hay token en sesion al llegar al login");
+            }
             $validation = $this->authValidationService->validateLoginCredentials($_POST);
 
             if (!$validation['isValid']) {
