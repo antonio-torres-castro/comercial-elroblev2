@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+use App\Helpers\Logger;
 use App\Services\CustomLogger;
 
 class AuthValidationService
@@ -18,7 +19,7 @@ class AuthValidationService
 
         // Validar CSRF token
         $csrfToken = $postData['csrf_token'] ?? '';
-
+        Logger::debug("lei csrfToken: " . $csrfToken);
         // Validación normal de CSRF
         if (!Security::validateCsrfToken($csrfToken)) {
             $error = AppConstants::ERROR_INVALID_SECURITY_TOKEN;
@@ -29,15 +30,12 @@ class AuthValidationService
         // Obtener y validar credenciales
         $identifier = Security::sanitizeInput($postData['identifier'] ?? '');
         $password = $postData['password'] ?? '';
-
         if (empty($identifier)) {
             $errors[] = 'El usuario o email es requerido';
         }
-
         if (empty($password)) {
             $errors[] = 'La contraseña es requerida';
         }
-
         if (empty($errors)) {
             $data['identifier'] = $identifier;
             $data['password'] = $password;

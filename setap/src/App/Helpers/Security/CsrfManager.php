@@ -3,6 +3,7 @@
 namespace App\Helpers\Security;
 
 use App\Constants\AppConstants;
+use App\Helpers\Logger;
 use App\Services\CustomLogger;
 
 /**
@@ -61,6 +62,7 @@ class CsrfManager
 
         // Verificar que existe el token en sesión
         if (!isset($_SESSION[self::$tokenKey])) {
+            Logger::debug("No encontro token");
             return false;
         }
 
@@ -73,7 +75,11 @@ class CsrfManager
         }
 
         // Comparar tokens usando hash_equals para evitar timing attacks
-        $isValid = hash_equals($sessionToken['token'], $token);
+        $isValid = true;
+        if (!hash_equals($sessionToken['token'], $token)) {
+            Logger::debug("Token recibido y token sesion diferentes");
+            $isValid = false;
+        }
 
         return $isValid;
     }
@@ -84,6 +90,7 @@ class CsrfManager
     private static function isTokenExpired(): bool
     {
         if (!isset($_SESSION[self::$tokenKey]['expires'])) {
+            Logger::debug("Token expiro");
             return true;
         }
 
