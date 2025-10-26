@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Helpers;
 
 class Logger
@@ -30,7 +32,7 @@ class Logger
     {
         if (empty(self::$logFile)) {
             // Si no se inicializó, usa el error_log por defecto del sistema
-            Logger::error("Logger no inicializado: $message");
+            error_log("Logger no inicializado: $message");
             return;
         }
 
@@ -38,7 +40,7 @@ class Logger
         $formatted = sprintf("[%s] [%s] %s%s", $timestamp, strtoupper($level), $message, PHP_EOL);
 
         // Usa error_log con flag 3 (append a archivo)
-        Logger::error($formatted, 3, self::$logFile);
+        error_log($formatted, 3, self::$logFile);
     }
 
     /** Métodos auxiliares */

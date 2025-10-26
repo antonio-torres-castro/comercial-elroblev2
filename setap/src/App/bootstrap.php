@@ -6,7 +6,7 @@ use App\Helpers\Logger; // ajusta el namespace según donde guardes la clase
 
 // Inicializa una sola vez (por ejemplo en tu bootstrap o config global)
 //storage\logs\setap_auth_debug.log
-Logger::init(__DIR__ . '/storage/logs/error.log');
+Logger::init(__DIR__ . '\storage\logs\error.log');
 
 // 2️⃣ Registrar el manejador global de errores
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
