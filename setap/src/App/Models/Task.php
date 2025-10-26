@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use PDOException;
 use Exception;
@@ -79,7 +81,7 @@ class Task
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error en Task::getAll: " . $e->getMessage());
+            Logger::error("Task::getAll: " . $e->getMessage());
             return [];
         }
     }
@@ -119,7 +121,7 @@ class Task
             $stmt->execute([$id]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } catch (PDOException $e) {
-            error_log("Error en Task::getById: " . $e->getMessage());
+            Logger::error("Task::getById: " . $e->getMessage());
             return null;
         }
     }
@@ -183,7 +185,7 @@ class Task
             }
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log("Error en Task::create: " . $e->getMessage());
+            Logger::error("Task::create: " . $e->getMessage());
             return null;
         }
     }
@@ -222,7 +224,7 @@ class Task
                 $id
             ]);
         } catch (PDOException $e) {
-            error_log("Error en Task::update: " . $e->getMessage());
+            Logger::error("Task::update: " . $e->getMessage());
             return false;
         }
     }
@@ -237,7 +239,7 @@ class Task
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$id]);
         } catch (PDOException $e) {
-            error_log("Error en Task::delete: " . $e->getMessage());
+            Logger::error("Task::delete: " . $e->getMessage());
             return false;
         }
     }
@@ -253,7 +255,7 @@ class Task
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error en Task::getTaskTypes: " . $e->getMessage());
+            Logger::error("Task::getTaskTypes: " . $e->getMessage());
             return [];
         }
     }
@@ -275,7 +277,7 @@ class Task
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error en Task::getProjects: " . $e->getMessage());
+            Logger::error("Task::getProjects: " . $e->getMessage());
             return [];
         }
     }
@@ -297,7 +299,7 @@ class Task
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error en Task::getUsers: " . $e->getMessage());
+            Logger::error("Task::getUsers: " . $e->getMessage());
             return [];
         }
     }
@@ -318,7 +320,7 @@ class Task
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error en Task::getTaskStates: " . $e->getMessage());
+            Logger::error("Task::getTaskStates: " . $e->getMessage());
             return [];
         }
     }
@@ -341,13 +343,19 @@ class Task
         ];
 
         $isValid = isset($validTransitions[$currentState]) &&
-                   in_array($newState, $validTransitions[$currentState]);
+            in_array($newState, $validTransitions[$currentState]);
 
         $message = '';
         if (!$isValid) {
             $stateNames = [
-                1 => 'Creado', 2 => 'Activo', 3 => 'Inactivo', 4 => 'Eliminado',
-                5 => 'Iniciado', 6 => 'Terminado', 7 => 'Rechazado', 8 => 'Aprobado'
+                1 => 'Creado',
+                2 => 'Activo',
+                3 => 'Inactivo',
+                4 => 'Eliminado',
+                5 => 'Iniciado',
+                6 => 'Terminado',
+                7 => 'Rechazado',
+                8 => 'Aprobado'
             ];
 
             $currentName = $stateNames[$currentState] ?? 'Desconocido';
@@ -394,8 +402,10 @@ class Task
         if (isset($restrictions[$userRole])) {
             $restriction = $restrictions[$userRole];
 
-            if (!in_array($currentState, $restriction['allowed_from']) ||
-                !in_array($newState, $restriction['allowed_to'])) {
+            if (
+                !in_array($currentState, $restriction['allowed_from']) ||
+                !in_array($newState, $restriction['allowed_to'])
+            ) {
                 return [
                     'valid' => false,
                     'message' => $restriction['message']
@@ -431,9 +441,8 @@ class Task
             }
 
             return ['valid' => true, 'message' => ''];
-
         } catch (PDOException $e) {
-            error_log("Error en Task::canExecuteTask: " . $e->getMessage());
+            Logger::error("Task::canExecuteTask: " . $e->getMessage());
             return [
                 'valid' => false,
                 'message' => 'Error al verificar el estado de la tarea'
@@ -503,10 +512,9 @@ class Task
                 'success' => true,
                 'message' => 'Estado de la tarea actualizado correctamente'
             ];
-
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log("Error en Task::changeState: " . $e->getMessage());
+            Logger::error("Task::changeState: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Error interno al cambiar el estado de la tarea'
@@ -541,7 +549,7 @@ class Task
             }
         } catch (PDOException $e) {
             // Solo logear el error, no interrumpir el proceso principal
-            error_log("Error al registrar historial de tarea: " . $e->getMessage());
+            Logger::error("registrar historial de tarea: " . $e->getMessage());
         }
     }
 
@@ -582,9 +590,8 @@ class Task
             if ($currentState == 8 && !in_array($userRole, ['admin', 'planner'])) {
                 $errors[] = 'Solo usuarios Admin y Planner pueden modificar tareas aprobadas';
             }
-
         } catch (Exception $e) {
-            error_log("Error en Task::validateUpdateData: " . $e->getMessage());
+            Logger::error("Task::validateUpdateData: " . $e->getMessage());
             $errors[] = 'Error al validar los datos de actualización';
         }
 
@@ -627,9 +634,8 @@ class Task
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return ($result['holiday_count'] > 0);
-
         } catch (PDOException $e) {
-            error_log('Task::isTaskOnHoliday error: ' . $e->getMessage());
+            Logger::error('Task::isTaskOnHoliday error: ' . $e->getMessage());
             return false;
         }
     }
@@ -662,9 +668,8 @@ class Task
 
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
-            error_log('Task::getTasksOnHolidays error: ' . $e->getMessage());
+            Logger::error('Task::getTasksOnHolidays error: ' . $e->getMessage());
             return [];
         }
     }
@@ -714,9 +719,8 @@ class Task
                     ];
                 }
             }
-
         } catch (PDOException $e) {
-            error_log('Task::validateTaskDatesWithHolidays error: ' . $e->getMessage());
+            Logger::error('Task::validateTaskDatesWithHolidays error: ' . $e->getMessage());
         }
 
         return $warnings;
@@ -754,9 +758,8 @@ class Task
 
             // Si no encontramos día hábil en 30 días, retornar fecha original
             return $date;
-
         } catch (\Exception $e) {
-            error_log('Task::getNextWorkingDay error: ' . $e->getMessage());
+            Logger::error('Task::getNextWorkingDay error: ' . $e->getMessage());
             return $date;
         }
     }
@@ -793,9 +796,8 @@ class Task
             }
 
             return $workingDays;
-
         } catch (\Exception $e) {
-            error_log('Task::getWorkingDaysBetween error: ' . $e->getMessage());
+            Logger::error('Task::getWorkingDaysBetween error: ' . $e->getMessage());
             return 0;
         }
     }

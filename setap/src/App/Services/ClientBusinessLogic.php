@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -113,7 +115,7 @@ class ClientBusinessLogic
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo clientes: " . $e->getMessage());
+            Logger::error("obteniendo clientes: " . $e->getMessage());
             return [];
         }
     }
@@ -133,7 +135,7 @@ class ClientBusinessLogic
             $stmt->execute([$clientId]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } catch (Exception $e) {
-            error_log("Error obteniendo información del cliente: " . $e->getMessage());
+            Logger::error("obteniendo información del cliente: " . $e->getMessage());
             return null;
         }
     }
@@ -155,7 +157,7 @@ class ClientBusinessLogic
             // Solo clientes activos (1) o en proceso (2) pueden tener usuarios
             return in_array($status, [1, 2]);
         } catch (Exception $e) {
-            error_log("Error verificando estado del cliente: " . $e->getMessage());
+            Logger::error("verificando estado del cliente: " . $e->getMessage());
             return false;
         }
     }
@@ -181,7 +183,7 @@ class ClientBusinessLogic
             $stmt->execute([$clientId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo usuarios del cliente: " . $e->getMessage());
+            Logger::error("obteniendo usuarios del cliente: " . $e->getMessage());
             return [];
         }
     }
@@ -237,7 +239,7 @@ class ClientBusinessLogic
                 }
             }
         } catch (Exception $e) {
-            error_log("Error validando cambio de cliente: " . $e->getMessage());
+            Logger::error("validando cambio de cliente: " . $e->getMessage());
             $errors['sistema'] = 'Error interno del sistema';
         }
 
@@ -254,7 +256,7 @@ class ClientBusinessLogic
             $stmt->execute([$userTypeId]);
             return $stmt->fetchColumn() ?: '';
         } catch (Exception $e) {
-            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipo de usuario: " . $e->getMessage());
             return '';
         }
     }
@@ -269,7 +271,7 @@ class ClientBusinessLogic
             $stmt->execute([$clientId]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error verificando cliente: " . $e->getMessage());
+            Logger::error("verificando cliente: " . $e->getMessage());
             return false;
         }
     }
@@ -296,7 +298,7 @@ class ClientBusinessLogic
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error generando reporte: " . $e->getMessage());
+            Logger::error("generando reporte: " . $e->getMessage());
             return [];
         }
     }

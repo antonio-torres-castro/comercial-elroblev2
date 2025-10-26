@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Config\Database;
-use App\Services\CustomLogger;
+use App\Helpers\Logger;
+
 use PDO;
 use PDOException;
 use Exception;
@@ -107,7 +108,7 @@ class AuthService
 
             return true;
         } catch (Exception $e) {
-            error_log("Error en login: " . $e->getMessage());
+            Logger::error("login: " . $e->getMessage());
             return false;
         }
     }
@@ -128,7 +129,7 @@ class AuthService
 
             return true;
         } catch (Exception $e) {
-            error_log("Error en logout: " . $e->getMessage());
+            Logger::error("logout: " . $e->getMessage());
             return false;
         }
     }
@@ -178,7 +179,7 @@ class AuthService
 
             return $stmt->execute([$hashedPassword, $userId]);
         } catch (PDOException $e) {
-            error_log("Error cambiando contraseña: " . $e->getMessage());
+            Logger::error("cambiando contraseña: " . $e->getMessage());
             return false;
         }
     }

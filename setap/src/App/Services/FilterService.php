@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -102,7 +104,7 @@ class FilterService
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error filtrando usuarios: " . $e->getMessage());
+            Logger::error("filtrando usuarios: " . $e->getMessage());
             return [];
         }
     }
@@ -165,7 +167,7 @@ class FilterService
             $stmt->execute($params);
             return (int)$stmt->fetchColumn();
         } catch (Exception $e) {
-            error_log("Error contando usuarios filtrados: " . $e->getMessage());
+            Logger::error("contando usuarios filtrados: " . $e->getMessage());
             return 0;
         }
     }
@@ -197,7 +199,7 @@ class FilterService
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo clientes: " . $e->getMessage());
+            Logger::error("obteniendo clientes: " . $e->getMessage());
             return [];
         }
     }
@@ -216,7 +218,7 @@ class FilterService
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo tipos de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipos de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -236,7 +238,7 @@ class FilterService
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo estados: " . $e->getMessage());
+            Logger::error("obteniendo estados: " . $e->getMessage());
             return [];
         }
     }
@@ -262,7 +264,7 @@ class FilterService
      */
     public function cleanFilters(array $filters): array
     {
-        return array_filter($filters, function($value) {
+        return array_filter($filters, function ($value) {
             return !empty($value) && $value !== '';
         });
     }
@@ -315,7 +317,7 @@ class FilterService
 
             return $stats;
         } catch (Exception $e) {
-            error_log("Error obteniendo estadísticas: " . $e->getMessage());
+            Logger::error("obteniendo estadísticas: " . $e->getMessage());
             return [];
         }
     }

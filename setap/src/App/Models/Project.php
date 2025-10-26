@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use PDOException;
 
@@ -76,7 +78,7 @@ class Project
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('Project::getAll error: ' . $e->getMessage());
+            Logger::error('Project::getAll error: ' . $e->getMessage());
             return [];
         }
     }
@@ -109,7 +111,7 @@ class Project
             $stmt->execute([$id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('Project::find error: ' . $e->getMessage());
+            Logger::error('Project::find error: ' . $e->getMessage());
             return false;
         }
     }
@@ -155,7 +157,7 @@ class Project
             return false;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log('Project::create error: ' . $e->getMessage());
+            Logger::error('Project::create error: ' . $e->getMessage());
             return false;
         }
     }
@@ -199,7 +201,7 @@ class Project
             return $result;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log('Project::update error: ' . $e->getMessage());
+            Logger::error('Project::update error: ' . $e->getMessage());
             return false;
         }
     }
@@ -242,7 +244,7 @@ class Project
             return true;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log('Project::delete error: ' . $e->getMessage());
+            Logger::error('Project::delete error: ' . $e->getMessage());
             return false;
         }
     }
@@ -276,7 +278,7 @@ class Project
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('Project::getProjectTasks error: ' . $e->getMessage());
+            Logger::error('Project::getProjectTasks error: ' . $e->getMessage());
             return [];
         }
     }
@@ -312,7 +314,7 @@ class Project
 
             return $stats;
         } catch (PDOException $e) {
-            error_log('Project::getProjectStats error: ' . $e->getMessage());
+            Logger::error('Project::getProjectStats error: ' . $e->getMessage());
             return [];
         }
     }
@@ -333,7 +335,7 @@ class Project
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
         } catch (PDOException $e) {
-            error_log('Project::getProjectHolidays error: ' . $e->getMessage());
+            Logger::error('Project::getProjectHolidays error: ' . $e->getMessage());
             return [];
         }
     }
@@ -353,7 +355,7 @@ class Project
 
             return $stmt->execute([$newStatusId, $projectId]);
         } catch (PDOException $e) {
-            error_log('Project::changeStatus error: ' . $e->getMessage());
+            Logger::error('Project::changeStatus error: ' . $e->getMessage());
             return false;
         }
     }
@@ -415,7 +417,7 @@ class Project
             $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('Project::search error: ' . $e->getMessage());
+            Logger::error('Project::search error: ' . $e->getMessage());
             return [];
         }
     }
@@ -439,7 +441,7 @@ class Project
 
             return true;
         } catch (PDOException $e) {
-            error_log('Project::addHolidays error: ' . $e->getMessage());
+            Logger::error('Project::addHolidays error: ' . $e->getMessage());
             return false;
         }
     }
@@ -457,7 +459,7 @@ class Project
 
             return $stmt->execute([$projectId]);
         } catch (PDOException $e) {
-            error_log('Project::removeAllHolidays error: ' . $e->getMessage());
+            Logger::error('Project::removeAllHolidays error: ' . $e->getMessage());
             return false;
         }
     }

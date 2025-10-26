@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Config\Database;
 use App\Constants\AppConstants;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -65,7 +67,7 @@ class MenuGrupo
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error al obtener grupos de menús: " . $e->getMessage());
+            Logger::error("obtener grupos de menús: " . $e->getMessage());
             return [];
         }
     }
@@ -97,7 +99,7 @@ class MenuGrupo
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (Exception $e) {
-            error_log("Error al obtener grupo por ID: " . $e->getMessage());
+            Logger::error("obtener grupo por ID: " . $e->getMessage());
             return null;
         }
     }
@@ -132,7 +134,7 @@ class MenuGrupo
 
             return (int)$this->db->lastInsertId();
         } catch (Exception $e) {
-            error_log("Error al crear grupo de menús: " . $e->getMessage());
+            Logger::error("crear grupo de menús: " . $e->getMessage());
             throw new Exception("Error al crear el grupo de menús: " . $e->getMessage());
         }
     }
@@ -167,7 +169,7 @@ class MenuGrupo
                 $id
             ]);
         } catch (Exception $e) {
-            error_log("Error al actualizar grupo de menús: " . $e->getMessage());
+            Logger::error("actualizar grupo de menús: " . $e->getMessage());
             throw new Exception("Error al actualizar el grupo de menús: " . $e->getMessage());
         }
     }
@@ -187,7 +189,7 @@ class MenuGrupo
             $stmt = $this->db->prepare($query);
             return $stmt->execute([$id]);
         } catch (Exception $e) {
-            error_log("Error al eliminar grupo de menús: " . $e->getMessage());
+            Logger::error("eliminar grupo de menús: " . $e->getMessage());
             throw new Exception("Error al eliminar el grupo de menús: " . $e->getMessage());
         }
     }
@@ -216,7 +218,7 @@ class MenuGrupo
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error al obtener grupos activos: " . $e->getMessage());
+            Logger::error("obtener grupos activos: " . $e->getMessage());
             return [];
         }
     }
@@ -240,7 +242,7 @@ class MenuGrupo
 
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error al verificar nombre de grupo: " . $e->getMessage());
+            Logger::error("verificar nombre de grupo: " . $e->getMessage());
             return false;
         }
     }
@@ -257,7 +259,7 @@ class MenuGrupo
 
             return (int)$stmt->fetchColumn();
         } catch (Exception $e) {
-            error_log("Error al obtener siguiente orden: " . $e->getMessage());
+            Logger::error("obtener siguiente orden: " . $e->getMessage());
             return 999;
         }
     }
@@ -291,7 +293,7 @@ class MenuGrupo
 
             return $estados;
         } catch (Exception $e) {
-            error_log("Error al obtener estados: " . $e->getMessage());
+            Logger::error("obtener estados: " . $e->getMessage());
             return [
                 ['id' => 1, 'nombre' => 'Creado'],
                 ['id' => 2, 'nombre' => 'Activo'],
@@ -324,7 +326,7 @@ class MenuGrupo
             $stmt = $this->db->prepare($query);
             return $stmt->execute([$newStatus, $id]);
         } catch (Exception $e) {
-            error_log("Error al cambiar estado del grupo: " . $e->getMessage());
+            Logger::error("cambiar estado del grupo: " . $e->getMessage());
             throw new Exception("Error al cambiar el estado del grupo: " . $e->getMessage());
         }
     }

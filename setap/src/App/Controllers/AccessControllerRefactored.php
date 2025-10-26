@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Constants\AppConstants;
+use App\Helpers\Logger;
 use Exception;
 
 /**
@@ -143,7 +144,7 @@ class AccessControllerRefactored extends AbstractBaseController
             return true;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log("Error actualizando accesos: " . $e->getMessage());
+            Logger::error("actualizando accesos: " . $e->getMessage());
             return false;
         }
     }

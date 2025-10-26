@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Constants\AppConstants;
 use App\Traits\CommonValidationsTrait;
+use App\Helpers\Logger;
 use Exception;
 
 /**
@@ -100,7 +101,7 @@ class AccessController extends AbstractBaseController
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo menús: " . $e->getMessage());
+            Logger::error("obteniendo menús: " . $e->getMessage());
             return [];
         }
     }
@@ -124,7 +125,7 @@ class AccessController extends AbstractBaseController
 
             return $accessByUserType;
         } catch (Exception $e) {
-            error_log("Error obteniendo accesos por tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo accesos por tipo de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -206,7 +207,7 @@ class AccessController extends AbstractBaseController
             return true;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log("Error actualizando accesos: " . $e->getMessage());
+            Logger::error("actualizando accesos: " . $e->getMessage());
             return false;
         }
     }

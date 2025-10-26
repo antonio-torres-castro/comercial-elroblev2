@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Config\Database;
 use App\Constants\AppConstants;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -72,7 +74,7 @@ class Menu
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error al obtener menús: " . $e->getMessage());
+            Logger::error("obtener menús: " . $e->getMessage());
             return [];
         }
     }
@@ -106,7 +108,7 @@ class Menu
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (Exception $e) {
-            error_log("Error al obtener menú por ID: " . $e->getMessage());
+            Logger::error("obtener menú por ID: " . $e->getMessage());
             return null;
         }
     }
@@ -145,7 +147,7 @@ class Menu
 
             return (int)$this->db->lastInsertId();
         } catch (Exception $e) {
-            error_log("Error al crear menú: " . $e->getMessage());
+            Logger::error("crear menú: " . $e->getMessage());
             throw new Exception("Error al crear el menú: " . $e->getMessage());
         }
     }
@@ -184,7 +186,7 @@ class Menu
                 $id
             ]);
         } catch (Exception $e) {
-            error_log("Error al actualizar menú: " . $e->getMessage());
+            Logger::error("actualizar menú: " . $e->getMessage());
             throw new Exception("Error al actualizar el menú: " . $e->getMessage());
         }
     }
@@ -204,7 +206,7 @@ class Menu
             $stmt = $this->db->prepare($query);
             return $stmt->execute([$id]);
         } catch (Exception $e) {
-            error_log("Error al eliminar menú: " . $e->getMessage());
+            Logger::error("eliminar menú: " . $e->getMessage());
             throw new Exception("Error al eliminar el menú: " . $e->getMessage());
         }
     }
@@ -233,7 +235,7 @@ class Menu
             $stmt = $this->db->prepare($query);
             return $stmt->execute([$newStatus, $id]);
         } catch (Exception $e) {
-            error_log("Error al cambiar estado del menú: " . $e->getMessage());
+            Logger::error("cambiar estado del menú: " . $e->getMessage());
             throw new Exception("Error al cambiar el estado del menú: " . $e->getMessage());
         }
     }
@@ -267,7 +269,7 @@ class Menu
 
             return $estados;
         } catch (Exception $e) {
-            error_log("Error al obtener estados: " . $e->getMessage());
+            Logger::error("obtener estados: " . $e->getMessage());
             return [
                 ['id' => 1, 'nombre' => 'Creado'],
                 ['id' => 2, 'nombre' => 'Activo'],
@@ -295,7 +297,7 @@ class Menu
 
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error al verificar nombre de menú: " . $e->getMessage());
+            Logger::error("verificar nombre de menú: " . $e->getMessage());
             return false;
         }
     }
@@ -319,7 +321,7 @@ class Menu
 
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error al verificar URL de menú: " . $e->getMessage());
+            Logger::error("verificar URL de menú: " . $e->getMessage());
             return false;
         }
     }
@@ -336,7 +338,7 @@ class Menu
 
             return (int)$stmt->fetchColumn();
         } catch (Exception $e) {
-            error_log("Error al obtener siguiente orden: " . $e->getMessage());
+            Logger::error("obtener siguiente orden: " . $e->getMessage());
             return 1;
         }
     }
@@ -367,7 +369,7 @@ class Menu
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error al obtener menús de navegación: " . $e->getMessage());
+            Logger::error("obtener menús de navegación: " . $e->getMessage());
             return [];
         }
     }
@@ -395,7 +397,7 @@ class Menu
 
             return $userMenus;
         } catch (Exception $e) {
-            error_log("Error al obtener menús de usuario: " . $e->getMessage());
+            Logger::error("obtener menús de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -424,7 +426,7 @@ class Menu
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error al obtener grupos de menús: " . $e->getMessage());
+            Logger::error("obtener grupos de menús: " . $e->getMessage());
             return [];
         }
     }
@@ -483,7 +485,7 @@ class Menu
 
             return $groupedMenus;
         } catch (Exception $e) {
-            error_log("Error al obtener menús agrupados de usuario: " . $e->getMessage());
+            Logger::error("obtener menús agrupados de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -526,7 +528,7 @@ class Menu
 
             return $userUngroupedMenus;
         } catch (Exception $e) {
-            error_log("Error al obtener menús sin grupo de usuario: " . $e->getMessage());
+            Logger::error("obtener menús sin grupo de usuario: " . $e->getMessage());
             return [];
         }
     }

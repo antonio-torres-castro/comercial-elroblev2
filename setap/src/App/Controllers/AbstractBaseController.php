@@ -7,6 +7,7 @@ use App\Services\CommonDataService;
 use App\Core\ViewRenderer;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use App\Config\Database;
 use PDO;
@@ -100,7 +101,7 @@ abstract class AbstractBaseController extends BaseController
         // Verificar token CSRF (con logging detallado para debug)
         $csrfTokenReceived = $_POST['csrf_token'] ?? '';
         $csrfValidationResult = Security::validateCsrfToken($csrfTokenReceived);
-        
+
         if (!$csrfValidationResult) {
             $errors[] = 'Token de seguridad inválido';
             http_response_code(403);
@@ -120,7 +121,7 @@ abstract class AbstractBaseController extends BaseController
             return $operation();
         } catch (Exception $e) {
             $controllerName = get_class($this);
-            error_log("Error en {$controllerName}::{$context}: " . $e->getMessage());
+            Logger::error("{$controllerName}::{$context}: " . $e->getMessage());
 
             // Si es petición AJAX, devolver JSON
             if ($this->isAjaxRequest()) {
@@ -187,7 +188,7 @@ abstract class AbstractBaseController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo tipos de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipos de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -205,7 +206,7 @@ abstract class AbstractBaseController extends BaseController
             $stmt->execute($includeIds);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo estados: " . $e->getMessage());
+            Logger::error("obteniendo estados: " . $e->getMessage());
             return [];
         }
     }

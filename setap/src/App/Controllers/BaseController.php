@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use DateTime;
 
@@ -360,7 +361,7 @@ abstract class BaseController
     protected function jsonInternalError(string $message = 'Error interno del servidor', bool $logError = true): void
     {
         if ($logError) {
-            error_log("JSON Internal Error: {$message}");
+            Logger::error("JSON Internal: {$message}");
         }
         $this->jsonError($message, [], 500);
     }

@@ -2,6 +2,8 @@
 
 namespace App\Helpers\Security;
 
+use App\Helpers\Logger;
+
 /**
  * Validador de seguridad especializado
  * Responsabilidad única: Validaciones de seguridad
@@ -326,6 +328,6 @@ class SecurityValidator
             'data' => $data
         ];
 
-        error_log("SECURITY_EVENT: " . json_encode($logData));
+        Logger::error("SECURITY_EVENT: " . json_encode($logData));
     }
 }

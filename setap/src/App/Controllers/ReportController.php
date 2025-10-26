@@ -6,6 +6,7 @@ use App\Services\ReportService;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use App\Config\Database;
 use PDO;
@@ -55,7 +56,7 @@ class ReportController extends BaseController
 
             require_once __DIR__ . '/../Views/reports/create.php';
         } catch (Exception $e) {
-            error_log("Error en ReportController::create: " . $e->getMessage());
+            Logger::error("ReportController::create: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -126,7 +127,7 @@ class ReportController extends BaseController
 
             require_once __DIR__ . '/../Views/reports/view.php';
         } catch (Exception $e) {
-            error_log("Error en ReportController::generate: " . $e->getMessage());
+            Logger::error("ReportController::generate: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_REPORTS . '/create', 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
@@ -178,7 +179,7 @@ class ReportController extends BaseController
             readfile($reportPath);
             exit;
         } catch (Exception $e) {
-            error_log("Error en ReportController::download: " . $e->getMessage());
+            Logger::error("ReportController::download: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -217,7 +218,7 @@ class ReportController extends BaseController
 
             require_once __DIR__ . '/../Views/reports/index.php';
         } catch (Exception $e) {
-            error_log("Error en ReportController::index: " . $e->getMessage());
+            Logger::error("ReportController::index: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -265,7 +266,7 @@ class ReportController extends BaseController
                 throw new Exception('Error al generar el archivo del reporte');
             }
         } catch (Exception $e) {
-            error_log("Error en ReportController::usersReport: " . $e->getMessage());
+            Logger::error("ReportController::usersReport: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
@@ -315,7 +316,7 @@ class ReportController extends BaseController
                 throw new Exception('Error al generar el archivo del reporte');
             }
         } catch (Exception $e) {
-            error_log("Error en ReportController::projectsReport: " . $e->getMessage());
+            Logger::error("ReportController::projectsReport: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
@@ -375,7 +376,7 @@ class ReportController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo datos de usuarios: " . $e->getMessage());
+            Logger::error("obteniendo datos de usuarios: " . $e->getMessage());
             return [];
         }
     }
@@ -414,7 +415,7 @@ class ReportController extends BaseController
             $stmt->execute($params);
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo datos de proyectos: " . $e->getMessage());
+            Logger::error("obteniendo datos de proyectos: " . $e->getMessage());
             return [];
         }
     }

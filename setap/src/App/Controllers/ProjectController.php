@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Config\Database;
 use App\Constants\AppConstants;
 use PDO;
@@ -179,7 +180,7 @@ class ProjectController extends BaseController
                 $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_CREATE_PROJECT);
             }
         } catch (\Exception $e) {
-            error_log('ProjectController::store error: ' . $e->getMessage());
+            Logger::error('ProjectController::store error: ' . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS_CREATE, AppConstants::ERROR_INTERNAL_SYSTEM);
         }
     }
@@ -277,7 +278,7 @@ class ProjectController extends BaseController
                 Security::redirect("/projects/edit?id={$id}&error=Error al actualizar proyecto");
             }
         } catch (\Exception $e) {
-            error_log('ProjectController::update error: ' . $e->getMessage());
+            Logger::error('ProjectController::update error: ' . $e->getMessage());
             Security::redirect("/projects/edit?id={$id}&error=Error interno del sistema");
         }
     }
@@ -324,7 +325,7 @@ class ProjectController extends BaseController
                 $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_DELETE_PROJECT);
             }
         } catch (\Exception $e) {
-            error_log('ProjectController::delete error: ' . $e->getMessage());
+            Logger::error('ProjectController::delete error: ' . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INTERNAL_SYSTEM);
         }
     }
@@ -368,7 +369,7 @@ class ProjectController extends BaseController
                 Security::redirect("/projects/show?id={$projectId}&error=Error al cambiar estado");
             }
         } catch (\Exception $e) {
-            error_log('ProjectController::changeStatus error: ' . $e->getMessage());
+            Logger::error('ProjectController::changeStatus error: ' . $e->getMessage());
             Security::redirect("/projects/show?id={$projectId}&error=Error interno del sistema");
         }
     }
@@ -471,7 +472,7 @@ class ProjectController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
-            error_log('ProjectController::getClients error: ' . $e->getMessage());
+            Logger::error('ProjectController::getClients error: ' . $e->getMessage());
             return [];
         }
     }
@@ -483,7 +484,7 @@ class ProjectController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
-            error_log('ProjectController::getTaskTypes error: ' . $e->getMessage());
+            Logger::error('ProjectController::getTaskTypes error: ' . $e->getMessage());
             return [];
         }
     }
@@ -507,7 +508,7 @@ class ProjectController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
-            error_log('ProjectController::getCounterparts error: ' . $e->getMessage());
+            Logger::error('ProjectController::getCounterparts error: ' . $e->getMessage());
             return [];
         }
     }
@@ -524,7 +525,7 @@ class ProjectController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
-            error_log('ProjectController::getProjectStates error: ' . $e->getMessage());
+            Logger::error('ProjectController::getProjectStates error: ' . $e->getMessage());
             return [];
         }
     }
@@ -549,7 +550,7 @@ class ProjectController extends BaseController
             // Por ahora, redirigir con mensaje temporal
             $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, "Generando reporte para el proyecto ID: " . $projectId);
         } catch (Exception $e) {
-            error_log("Error en ProjectController::report: " . $e->getMessage());
+            Logger::error("ProjectController::report: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }

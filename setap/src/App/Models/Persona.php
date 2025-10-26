@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Config\Database;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use PDO;
 use Exception;
 
@@ -51,7 +52,7 @@ class Persona
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log('Persona::getAll error: ' . $e->getMessage());
+            Logger::error('Persona::getAll error: ' . $e->getMessage());
             return [];
         }
     }
@@ -76,7 +77,7 @@ class Persona
 
             return $result ?: null;
         } catch (Exception $e) {
-            error_log('Persona::find error: ' . $e->getMessage());
+            Logger::error('Persona::find error: ' . $e->getMessage());
             return null;
         }
     }
@@ -112,7 +113,7 @@ class Persona
             return null;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log('Persona::create error: ' . $e->getMessage());
+            Logger::error('Persona::create error: ' . $e->getMessage());
             return null;
         }
     }
@@ -150,7 +151,7 @@ class Persona
             return false;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log('Persona::update error: ' . $e->getMessage());
+            Logger::error('Persona::update error: ' . $e->getMessage());
             return false;
         }
     }
@@ -185,7 +186,7 @@ class Persona
             return false;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log('Persona::delete error: ' . $e->getMessage());
+            Logger::error('Persona::delete error: ' . $e->getMessage());
             return false;
         }
     }
@@ -209,7 +210,7 @@ class Persona
 
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log('Persona::rutExists error: ' . $e->getMessage());
+            Logger::error('Persona::rutExists error: ' . $e->getMessage());
             return false;
         }
     }
@@ -236,7 +237,7 @@ class Persona
 
             return false;
         } catch (Exception $e) {
-            error_log('Persona::isPersonaInUse error: ' . $e->getMessage());
+            Logger::error('Persona::isPersonaInUse error: ' . $e->getMessage());
             return true; // Por seguridad, asumimos que está en uso si hay error
         }
     }
@@ -260,7 +261,7 @@ class Persona
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
         } catch (Exception $e) {
-            error_log('Persona::getStats error: ' . $e->getMessage());
+            Logger::error('Persona::getStats error: ' . $e->getMessage());
             return [];
         }
     }
@@ -286,7 +287,7 @@ class Persona
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log('Persona::search error: ' . $e->getMessage());
+            Logger::error('Persona::search error: ' . $e->getMessage());
             return [];
         }
     }

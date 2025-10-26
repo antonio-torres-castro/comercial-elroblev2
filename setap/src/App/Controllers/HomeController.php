@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use Exception;
 
@@ -41,7 +42,7 @@ class HomeController extends BaseController
 
             require_once __DIR__ . '/../Views/home.php';
         } catch (Exception $e) {
-            error_log("Error en HomeController::index: " . $e->getMessage());
+            Logger::error("HomeController::index: " . $e->getMessage());
             http_response_code(500);
             echo AppConstants::ERROR_INTERNAL_SERVER;
         }
@@ -63,7 +64,7 @@ class HomeController extends BaseController
                 $stats = $this->calculateStats();
             }
         } catch (Exception $e) {
-            error_log("Error calculando estadísticas: " . $e->getMessage());
+            Logger::error("calculando estadísticas: " . $e->getMessage());
         }
 
         return $stats;
@@ -103,7 +104,7 @@ class HomeController extends BaseController
                 'tareas_pendientes' => (int)$tareasPendientes
             ];
         } catch (\Exception $e) {
-            error_log("Error calculando estadísticas del dashboard: " . $e->getMessage());
+            Logger::error("calculando estadísticas del dashboard: " . $e->getMessage());
 
             // Retornar valores por defecto en caso de error
             return [

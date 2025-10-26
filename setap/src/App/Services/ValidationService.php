@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Config\Database;
 use App\Helpers\Security;
 use App\Services\ClientBusinessLogic;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -242,7 +244,7 @@ class ValidationService
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
-            error_log("Error verificando username: " . $e->getMessage());
+            Logger::error("verificando username: " . $e->getMessage());
             return false;
         }
     }
@@ -265,7 +267,7 @@ class ValidationService
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
-            error_log("Error verificando email: " . $e->getMessage());
+            Logger::error("verificando email: " . $e->getMessage());
             return false;
         }
     }
@@ -289,7 +291,7 @@ class ValidationService
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
-            error_log("Error verificando RUT: " . $e->getMessage());
+            Logger::error("verificando RUT: " . $e->getMessage());
             return false;
         }
     }
@@ -437,7 +439,7 @@ class ValidationService
             $stmt->execute([$personaId]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error verificando persona_id: " . $e->getMessage());
+            Logger::error("verificando persona_id: " . $e->getMessage());
             return false;
         }
     }
@@ -453,7 +455,7 @@ class ValidationService
             $stmt->execute([$userTypeId]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error verificando usuario_tipo_id: " . $e->getMessage());
+            Logger::error("verificando usuario_tipo_id: " . $e->getMessage());
             return false;
         }
     }
@@ -469,7 +471,7 @@ class ValidationService
             $stmt->execute([$clienteId]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error verificando cliente_id: " . $e->getMessage());
+            Logger::error("verificando cliente_id: " . $e->getMessage());
             return false;
         }
     }
@@ -485,7 +487,7 @@ class ValidationService
             $stmt->execute([$estadoTipoId]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error verificando estado_tipo_id: " . $e->getMessage());
+            Logger::error("verificando estado_tipo_id: " . $e->getMessage());
             return false;
         }
     }

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -33,7 +35,7 @@ class CommonDataService
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo tipos de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipos de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -54,7 +56,7 @@ class CommonDataService
             $stmt->execute($includeIds);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo estados: " . $e->getMessage());
+            Logger::error("obteniendo estados: " . $e->getMessage());
             return [];
         }
     }
@@ -74,7 +76,7 @@ class CommonDataService
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo clientes: " . $e->getMessage());
+            Logger::error("obteniendo clientes: " . $e->getMessage());
             return [];
         }
     }
@@ -96,7 +98,7 @@ class CommonDataService
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo usuarios: " . $e->getMessage());
+            Logger::error("obteniendo usuarios: " . $e->getMessage());
             return [];
         }
     }
@@ -116,7 +118,7 @@ class CommonDataService
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo tipos de tarea: " . $e->getMessage());
+            Logger::error("obteniendo tipos de tarea: " . $e->getMessage());
             return [];
         }
     }
@@ -138,7 +140,7 @@ class CommonDataService
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo proyectos: " . $e->getMessage());
+            Logger::error("obteniendo proyectos: " . $e->getMessage());
             return [];
         }
     }
@@ -169,7 +171,7 @@ class CommonDataService
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo personas disponibles: " . $e->getMessage());
+            Logger::error("obteniendo personas disponibles: " . $e->getMessage());
             return [];
         }
     }
@@ -203,7 +205,7 @@ class CommonDataService
 
             return $grouped;
         } catch (Exception $e) {
-            error_log("Error obteniendo menús por grupo: " . $e->getMessage());
+            Logger::error("obteniendo menús por grupo: " . $e->getMessage());
             return [];
         }
     }
@@ -223,7 +225,7 @@ class CommonDataService
             $stmt->execute([$id]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error validando existencia en {$table}: " . $e->getMessage());
+            Logger::error("validando existencia en {$table}: " . $e->getMessage());
             return false;
         }
     }
@@ -245,7 +247,7 @@ class CommonDataService
                 'tareas_pendientes' => $this->getCount('proyecto_tareas', 'estado_tipo_id IN (2, 5, 6)')
             ];
         } catch (Exception $e) {
-            error_log("Error obteniendo estadísticas básicas: " . $e->getMessage());
+            Logger::error("obteniendo estadísticas básicas: " . $e->getMessage());
             return [];
         }
     }

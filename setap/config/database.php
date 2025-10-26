@@ -1,27 +1,30 @@
 <?php
+
 /**
  * Configuración de Base de Datos
  * Carga las constantes necesarias para la aplicación
  */
 
+use App\Helpers\Logger;
 // Cargar variables de entorno desde el archivo _env
-function loadEnv($path) {
+function loadEnv($path)
+{
     if (!file_exists($path)) {
         return false;
     }
-    
+
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
         // Ignorar comentarios
         if (strpos(trim($line), '#') === 0) {
             continue;
         }
-        
+
         // Parsear línea KEY=VALUE
         list($key, $value) = explode('=', $line, 2);
         $key = trim($key);
         $value = trim($value);
-        
+
         if (!empty($key) && !empty($value)) {
             $_ENV[$key] = $value;
             putenv("$key=$value");
@@ -81,12 +84,12 @@ class DatabaseConnection
     private $connectionTime = null;
     private $queryCount = 0;
     private $slowQueries = [];
-    
+
     private function __construct()
     {
         $this->connect();
     }
-    
+
     public static function getInstance()
     {
         if (self::$instance === null) {
@@ -94,55 +97,54 @@ class DatabaseConnection
         }
         return self::$instance;
     }
-    
+
     private function connect()
     {
         $startTime = microtime(true);
-        
+
         try {
             $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-            
+
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
             ];
-            
+
             // Agregar timeout de conexión
             if (defined('DB_CONNECTION_TIMEOUT')) {
                 $options[PDO::ATTR_TIMEOUT] = DB_CONNECTION_TIMEOUT;
             }
-            
+
             $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
             $this->connectionTime = microtime(true) - $startTime;
-            
+
             if (DEBUG_MODE) {
                 $this->logConnectionInfo();
             }
-            
         } catch (PDOException $e) {
             $this->logConnectionError($e);
             throw $e;
         }
     }
-    
+
     public function getConnection()
     {
         return $this->pdo;
     }
-    
+
     public function executeQuery($query, $params = [])
     {
         $startTime = microtime(true);
         $this->queryCount++;
-        
+
         try {
             $stmt = $this->pdo->prepare($query);
             $stmt->execute($params);
-            
+
             $executionTime = (microtime(true) - $startTime) * 1000; // en milisegundos
-            
+
             if ($executionTime > DB_SLOW_QUERY_THRESHOLD) {
                 $this->slowQueries[] = [
                     'query' => $query,
@@ -150,19 +152,18 @@ class DatabaseConnection
                     'timestamp' => date('Y-m-d H:i:s')
                 ];
             }
-            
+
             if (DEBUG_MODE) {
                 $this->logQuery($query, $executionTime, count($params));
             }
-            
+
             return $stmt;
-            
         } catch (PDOException $e) {
             $this->logQueryError($query, $e);
             throw $e;
         }
     }
-    
+
     public function getConnectionStats()
     {
         return [
@@ -172,32 +173,32 @@ class DatabaseConnection
             'is_connected' => $this->pdo !== null
         ];
     }
-    
+
     private function logConnectionInfo()
     {
         if (function_exists('error_log')) {
-            error_log("[DEBUG] DB Connection successful in " . round($this->connectionTime * 1000, 2) . "ms");
+            Logger::debug("DB Conn ok:" . round($this->connectionTime * 1000, 2) . "ms");
         }
     }
-    
+
     private function logConnectionError($e)
     {
         if (function_exists('error_log')) {
-            error_log("[ERROR] DB Connection failed: " . $e->getMessage());
+            Logger::error("DB Conn nok:" . $e->getMessage());
         }
     }
-    
+
     private function logQuery($query, $time, $paramCount)
     {
         if (function_exists('error_log')) {
-            error_log("[DEBUG] Query executed in " . round($time, 2) . "ms (params: $paramCount): " . substr($query, 0, 100));
+            Logger::debug("Query ok:" . round($time, 2) . "ms (params: $paramCount): " . substr($query, 0, 100));
         }
     }
-    
+
     private function logQueryError($query, $e)
     {
         if (function_exists('error_log')) {
-            error_log("[ERROR] Query failed: " . $e->getMessage() . " | Query: " . substr($query, 0, 100));
+            Logger::error("Query nok:" . $e->getMessage() . " | Query: " . substr($query, 0, 100));
         }
     }
 }
@@ -221,13 +222,12 @@ function checkDatabaseHealth()
         $db = DatabaseConnection::getInstance();
         $stmt = $db->executeQuery("SELECT 1 as test");
         $result = $stmt->fetch();
-        
+
         return [
             'status' => 'OK',
             'test_result' => $result['test'],
             'stats' => $db->getConnectionStats()
         ];
-        
     } catch (Exception $e) {
         return [
             'status' => 'ERROR',
@@ -238,5 +238,5 @@ function checkDatabaseHealth()
 
 // Log de carga de configuración
 if (DEBUG_MODE && function_exists('error_log')) {
-    error_log("[DEBUG] Database configuration loaded for environment: " . APP_ENV);
+    Logger::debug("DB config loaded: " . APP_ENV);
 }

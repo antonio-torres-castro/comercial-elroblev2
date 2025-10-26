@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ProyectoFeriado;
 use App\Models\Project;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use PDO;
 
@@ -134,7 +135,7 @@ class ProyectoFeriadoController extends BaseController
 
             $this->redirectWithSuccess($returnUrl, $message);
         } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::createMasivo error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriadoController::createMasivo error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
             $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
@@ -200,7 +201,7 @@ class ProyectoFeriadoController extends BaseController
 
             $this->redirectWithSuccess($returnUrl, $message);
         } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::createEspecifico error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriadoController::createEspecifico error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
             $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
@@ -273,7 +274,7 @@ class ProyectoFeriadoController extends BaseController
 
             $this->redirectWithSuccess($returnUrl, $message);
         } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::createRango error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriadoController::createRango error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
             $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
@@ -338,7 +339,7 @@ class ProyectoFeriadoController extends BaseController
                 $this->redirectWithError($returnUrl, 'Error al actualizar feriado');
             }
         } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::update error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriadoController::update error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
             $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
@@ -380,7 +381,7 @@ class ProyectoFeriadoController extends BaseController
                 $this->redirectWithError($returnUrl, 'Error al eliminar feriado');
             }
         } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::delete error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriadoController::delete error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
             $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
@@ -451,7 +452,7 @@ class ProyectoFeriadoController extends BaseController
                 $this->redirectWithError($returnUrl, 'Error al mover tareas');
             }
         } catch (\Exception $e) {
-            error_log('ProyectoFeriadoController::moveTasks error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriadoController::moveTasks error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
             $returnUrl = $projectId ? "/proyecto-feriados?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');

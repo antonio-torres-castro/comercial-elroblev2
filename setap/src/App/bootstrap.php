@@ -2,6 +2,34 @@
 
 declare(strict_types=1);
 
+use App\Helpers\Logger; // ajusta el namespace según donde guardes la clase
+
+// Inicializa una sola vez (por ejemplo en tu bootstrap o config global)
+//storage\logs\setap_auth_debug.log
+Logger::init(__DIR__ . '/storage/logs/error.log');
+
+// 2️⃣ Registrar el manejador global de errores
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    $message = "[$errno] $errstr en $errfile:$errline";
+    Logger::error($message);
+    return true; // Evita el logeo duplicado de PHP
+});
+
+// 3️⃣ Registrar el manejador global de excepciones no capturadas
+set_exception_handler(function (Throwable $exception) {
+    Logger::error("Excepción no capturada: " . $exception->getMessage() .
+        " en " . $exception->getFile() . ":" . $exception->getLine());
+});
+
+// 4️⃣ (Opcional) Registrar cierre para capturar errores fatales
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error !== null) {
+        $message = "[SHUTDOWN] {$error['message']} en {$error['file']}:{$error['line']}";
+        Logger::error($message);
+    }
+});
+
 // Cargar configuración
 App\Config\AppConfig::load();
 
@@ -55,7 +83,7 @@ register_shutdown_function(function () {
             echo "<pre>" . print_r($error, true) . "</pre>";
         } else {
             echo "<h1>Error interno del servidor</h1>";
-            error_log("Error crítico: " . print_r($error, true));
+            Logger::error(print_r($error, true));
         }
     }
 });

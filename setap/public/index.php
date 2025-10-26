@@ -18,8 +18,8 @@ use App\Controllers\ReportController;
 use App\Controllers\ProyectoFeriadoController;
 use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
-use App\Controllers\LogController;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 
 // Configurar headers de seguridad básicos
@@ -804,7 +804,7 @@ try {
     }
 } catch (Throwable $e) {
     // Manejo de errores global
-    error_log("Error en router: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
+    Logger::error("router: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine());
 
     http_response_code(500);
 

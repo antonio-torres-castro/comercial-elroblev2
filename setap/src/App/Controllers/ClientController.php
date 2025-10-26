@@ -10,6 +10,7 @@ use App\Services\CounterpartieService;
 use App\Core\ViewRenderer;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use Exception;
 
@@ -74,7 +75,7 @@ class ClientController extends BaseController
                 'filters' => $filters
             ]);
         } catch (Exception $e) {
-            error_log("Error en ClientController::index: " . $e->getMessage());
+            Logger::error("ClientController::index: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -111,7 +112,7 @@ class ClientController extends BaseController
                 'action' => 'create'
             ]);
         } catch (Exception $e) {
-            error_log("Error en ClientController::create: " . $e->getMessage());
+            Logger::error("ClientController::create: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -167,7 +168,7 @@ class ClientController extends BaseController
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_CREATED);
         } catch (Exception $e) {
-            error_log("Error en ClientController::store: " . $e->getMessage());
+            Logger::error("ClientController::store: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_SAVE_CLIENT . ': ' . $e->getMessage());
         }
@@ -215,7 +216,7 @@ class ClientController extends BaseController
                 'action' => 'edit'
             ]);
         } catch (Exception $e) {
-            error_log("Error en ClientController::edit: " . $e->getMessage());
+            Logger::error("ClientController::edit: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -283,7 +284,7 @@ class ClientController extends BaseController
                 throw new Exception('No se pudo actualizar el cliente');
             }
         } catch (Exception $e) {
-            error_log("Error en ClientController::update: " . $e->getMessage());
+            Logger::error("ClientController::update: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_UPDATE_CLIENT . ': ' . $e->getMessage());
         }
@@ -330,7 +331,7 @@ class ClientController extends BaseController
                 throw new Exception('No se pudo eliminar el cliente');
             }
         } catch (Exception $e) {
-            error_log("Error en ClientController::delete: " . $e->getMessage());
+            Logger::error("ClientController::delete: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_CLIENTS, $e->getMessage());
         }
     }
@@ -390,7 +391,7 @@ class ClientController extends BaseController
                 'filters' => $filters
             ]);
         } catch (Exception $e) {
-            error_log("Error en ClientController::counterparties: " . $e->getMessage());
+            Logger::error("ClientController::counterparties: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -445,7 +446,7 @@ class ClientController extends BaseController
                 'action' => $action
             ]);
         } catch (Exception $e) {
-            error_log("Error en ClientController::counterpartie: " . $e->getMessage());
+            Logger::error("ClientController::counterpartie: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -505,7 +506,7 @@ class ClientController extends BaseController
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_CREATED);
         } catch (Exception $e) {
-            error_log("Error en ClientController::storeCounterpartie: " . $e->getMessage());
+            Logger::error("ClientController::storeCounterpartie: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError('Error al guardar la contraparte: ' . $e->getMessage());
         }
@@ -573,7 +574,7 @@ class ClientController extends BaseController
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_UPDATED);
             }
         } catch (Exception $e) {
-            error_log("Error en ClientController::updateCounterpartie: " . $e->getMessage());
+            Logger::error("ClientController::updateCounterpartie: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError('Error al actualizar la contraparte: ' . $e->getMessage());
         }
@@ -618,7 +619,7 @@ class ClientController extends BaseController
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_DELETED);
             }
         } catch (Exception $e) {
-            error_log("Error en ClientController::deleteCounterpartie: " . $e->getMessage());
+            Logger::error("ClientController::deleteCounterpartie: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, $e->getMessage());
         }
     }

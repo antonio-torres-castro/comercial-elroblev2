@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -40,7 +42,7 @@ class ReportService
 
             return $stats;
         } catch (Exception $e) {
-            error_log("Error en ReportService::getBasicStats: " . $e->getMessage());
+            Logger::error("ReportService::getBasicStats: " . $e->getMessage());
             return [
                 'total_projects' => 0,
                 'total_tasks' => 0,
@@ -76,7 +78,7 @@ class ReportService
                     throw new Exception("Tipo de reporte no válido: $reportType");
             }
         } catch (Exception $e) {
-            error_log("Error en ReportService::generateReport: " . $e->getMessage());
+            Logger::error("ReportService::generateReport: " . $e->getMessage());
             throw $e;
         }
     }
@@ -137,8 +139,10 @@ class ReportService
             if (strpos(strtolower($project['estado']), 'activo') !== false) {
                 $summary['active_projects']++;
             }
-            if (strpos(strtolower($project['estado']), 'terminado') !== false || 
-                strpos(strtolower($project['estado']), 'completado') !== false) {
+            if (
+                strpos(strtolower($project['estado']), 'terminado') !== false ||
+                strpos(strtolower($project['estado']), 'completado') !== false
+            ) {
                 $summary['completed_projects']++;
             }
         }
@@ -272,11 +276,11 @@ class ReportService
             if ($user['activo']) {
                 $summary['active_users']++;
             }
-            
+
             if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $weekAgo) {
                 $summary['recent_logins']++;
             }
-            
+
             if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $monthAgo) {
                 $summary['new_users']++;
             }
@@ -364,7 +368,7 @@ class ReportService
     {
         // Implementación básica para reporte personalizado
         // En una implementación real, esto podría ser mucho más complejo
-        
+
         return [
             'summary' => [
                 'message' => 'Reporte personalizado',

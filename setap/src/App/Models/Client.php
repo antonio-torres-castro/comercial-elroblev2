@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -60,7 +62,7 @@ class Client
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error en Client::getAll: " . $e->getMessage());
+            Logger::error("Client::getAll: " . $e->getMessage());
             throw new Exception("Error al obtener la lista de clientes");
         }
     }
@@ -86,7 +88,7 @@ class Client
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (Exception $e) {
-            error_log("Error en Client::find: " . $e->getMessage());
+            Logger::error("Client::find: " . $e->getMessage());
             throw new Exception("Error al obtener el cliente");
         }
     }
@@ -120,7 +122,7 @@ class Client
 
             return (int) $this->db->lastInsertId();
         } catch (Exception $e) {
-            error_log("Error en Client::create: " . $e->getMessage());
+            Logger::error("Client::create: " . $e->getMessage());
             throw new Exception("Error al crear el cliente");
         }
     }
@@ -162,7 +164,7 @@ class Client
 
             return $result && $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::update: " . $e->getMessage());
+            Logger::error("Client::update: " . $e->getMessage());
             throw new Exception("Error al actualizar el cliente");
         }
     }
@@ -196,7 +198,7 @@ class Client
 
             return $result && $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::delete: " . $e->getMessage());
+            Logger::error("Client::delete: " . $e->getMessage());
             throw $e;
         }
     }
@@ -220,7 +222,7 @@ class Client
 
             return $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::rutExists: " . $e->getMessage());
+            Logger::error("Client::rutExists: " . $e->getMessage());
             return false;
         }
     }
@@ -250,7 +252,7 @@ class Client
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error en Client::getCounterparties: " . $e->getMessage());
+            Logger::error("Client::getCounterparties: " . $e->getMessage());
             throw new Exception("Error al obtener las contrapartes del cliente");
         }
     }
@@ -279,7 +281,7 @@ class Client
 
             return (int) $this->db->lastInsertId();
         } catch (Exception $e) {
-            error_log("Error en Client::addCounterpartie: " . $e->getMessage());
+            Logger::error("Client::addCounterpartie: " . $e->getMessage());
             throw new Exception("Error al agregar la contraparte");
         }
     }
@@ -296,7 +298,7 @@ class Client
 
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::hasAssociatedProjects: " . $e->getMessage());
+            Logger::error("Client::hasAssociatedProjects: " . $e->getMessage());
             return false;
         }
     }
@@ -332,7 +334,7 @@ class Client
 
             return $result && $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::updateCounterpartie: " . $e->getMessage());
+            Logger::error("Client::updateCounterpartie: " . $e->getMessage());
             throw new Exception("Error al actualizar la contraparte");
         }
     }
@@ -361,7 +363,7 @@ class Client
 
             return $result && $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::deleteCounterpartie: " . $e->getMessage());
+            Logger::error("Client::deleteCounterpartie: " . $e->getMessage());
             throw $e;
         }
     }
@@ -394,7 +396,7 @@ class Client
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (Exception $e) {
-            error_log("Error en Client::findCounterpartie: " . $e->getMessage());
+            Logger::error("Client::findCounterpartie: " . $e->getMessage());
             throw new Exception("Error al obtener la contraparte");
         }
     }
@@ -450,7 +452,7 @@ class Client
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error en Client::getAllCounterparties: " . $e->getMessage());
+            Logger::error("Client::getAllCounterparties: " . $e->getMessage());
             throw new Exception("Error al obtener la lista de contrapartes");
         }
     }
@@ -474,7 +476,7 @@ class Client
 
             return $stmt->rowCount() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::counterpartieExists: " . $e->getMessage());
+            Logger::error("Client::counterpartieExists: " . $e->getMessage());
             return false;
         }
     }
@@ -492,7 +494,7 @@ class Client
 
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error en Client::counterpartieHasActiveProjects: " . $e->getMessage());
+            Logger::error("Client::counterpartieHasActiveProjects: " . $e->getMessage());
             return false;
         }
     }
@@ -513,7 +515,7 @@ class Client
             $stmt = $this->db->prepare($query);
             $stmt->execute([$clientId]);
         } catch (Exception $e) {
-            error_log("Error en Client::deactivateCounterparties: " . $e->getMessage());
+            Logger::error("Client::deactivateCounterparties: " . $e->getMessage());
         }
     }
 
@@ -529,7 +531,7 @@ class Client
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error en Client::getStatusTypes: " . $e->getMessage());
+            Logger::error("Client::getStatusTypes: " . $e->getMessage());
             return [];
         }
     }

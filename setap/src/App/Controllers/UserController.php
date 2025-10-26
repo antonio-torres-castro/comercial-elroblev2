@@ -13,6 +13,7 @@ use App\Core\ViewRenderer;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Helpers\Security\AuthHelper;
+use App\Helpers\Logger;
 use App\Config\Database;
 use App\Constants\AppConstants;
 use PDO;
@@ -75,7 +76,7 @@ class UserController extends BaseController
 
             require_once __DIR__ . '/../Views/users/list.php';
         } catch (Exception $e) {
-            error_log("Error en UserController::index: " . $e->getMessage());
+            Logger::error("UserController::index: " . $e->getMessage());
             http_response_code(500);
             echo AppConstants::ERROR_INTERNAL_SERVER;
         }
@@ -119,7 +120,7 @@ class UserController extends BaseController
 
             require_once __DIR__ . '/../Views/users/create.php';
         } catch (Exception $e) {
-            error_log("Error en UserController::create: " . $e->getMessage());
+            Logger::error("UserController::create: " . $e->getMessage());
             http_response_code(500);
             echo AppConstants::ERROR_INTERNAL_SERVER;
         }
@@ -151,7 +152,7 @@ class UserController extends BaseController
             // Manejar búsqueda de persona
             $this->handlePersonaSearch();
         } catch (Exception $e) {
-            error_log("Error en UserController::seekPersonas: " . $e->getMessage());
+            Logger::error("UserController::seekPersonas: " . $e->getMessage());
             $_SESSION['errors'] = ['Error al buscar personas'];
             $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
         }
@@ -211,7 +212,7 @@ class UserController extends BaseController
                 throw new Exception('Error al crear el usuario');
             }
         } catch (Exception $e) {
-            error_log("Error en UserController::store: " . $e->getMessage());
+            Logger::error("UserController::store: " . $e->getMessage());
             $_SESSION['errors'] = [AppConstants::ERROR_INTERNAL_SERVER];
             $_SESSION['old_input'] = $_POST;
             $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
@@ -268,7 +269,7 @@ class UserController extends BaseController
 
             $this->jsonSuccess('Personas obtenidas correctamente', ['personas' => $personas]);
         } catch (Exception $e) {
-            error_log("Error en UserController::searchPersonas: " . $e->getMessage());
+            Logger::error("UserController::searchPersonas: " . $e->getMessage());
             $this->jsonError('Error en búsqueda', [], 500);
         }
     }
@@ -303,7 +304,7 @@ class UserController extends BaseController
 
             $this->jsonSuccess('Contrapartes obtenidas correctamente', ['counterparties' => $counterparties]);
         } catch (Exception $e) {
-            error_log("Error en UserController::getClientCounterparties: " . $e->getMessage());
+            Logger::error("UserController::getClientCounterparties: " . $e->getMessage());
             $this->jsonError('Error obteniendo contrapartes', [], 500);
         }
     }
@@ -342,7 +343,7 @@ class UserController extends BaseController
 
             $this->jsonSuccess('Información de persona obtenida', ['persona' => $persona]);
         } catch (Exception $e) {
-            error_log("Error en UserController::getPersonaInfo: " . $e->getMessage());
+            Logger::error("UserController::getPersonaInfo: " . $e->getMessage());
             $this->jsonError('Error obteniendo información', [], 500);
         }
     }
@@ -354,7 +355,7 @@ class UserController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {
-            error_log("Error obteniendo tipos de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipos de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -366,7 +367,7 @@ class UserController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {
-            error_log("Error obteniendo estados: " . $e->getMessage());
+            Logger::error("obteniendo estados: " . $e->getMessage());
             return [];
         }
     }
@@ -429,7 +430,7 @@ class UserController extends BaseController
 
             echo $this->viewRenderer->render('users/edit', $data);
         } catch (Exception $e) {
-            error_log("Error en UserController::edit: " . $e->getMessage());
+            Logger::error("UserController::edit: " . $e->getMessage());
             http_response_code(500);
             echo AppConstants::ERROR_INTERNAL_SERVER;
         }
@@ -505,7 +506,7 @@ class UserController extends BaseController
                 Security::redirect("/users/edit?id={$id}&error=Error al actualizar el usuario");
             }
         } catch (Exception $e) {
-            error_log("Error en UserController::update: " . $e->getMessage());
+            Logger::error("UserController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
             Security::redirect("/users/edit?id={$id}&error=Error interno del servidor");
         }
@@ -558,7 +559,7 @@ class UserController extends BaseController
                 $this->jsonError('Error al eliminar el usuario', [], 500);
             }
         } catch (Exception $e) {
-            error_log("Error en UserController::delete: " . $e->getMessage());
+            Logger::error("UserController::delete: " . $e->getMessage());
             $this->jsonInternalError();
         }
     }
@@ -597,7 +598,7 @@ class UserController extends BaseController
 
             $this->jsonSuccess('Detalles del usuario obtenidos', ['user' => $user]);
         } catch (Exception $e) {
-            error_log("Error en UserController::getUserDetails: " . $e->getMessage());
+            Logger::error("UserController::getUserDetails: " . $e->getMessage());
             $this->jsonInternalError();
         }
     }
@@ -655,7 +656,7 @@ class UserController extends BaseController
                 $this->jsonError('Error al actualizar el estado', [], 500);
             }
         } catch (Exception $e) {
-            error_log("Error en UserController::toggleStatus: " . $e->getMessage());
+            Logger::error("UserController::toggleStatus: " . $e->getMessage());
             $this->jsonInternalError();
         }
     }
@@ -709,7 +710,7 @@ class UserController extends BaseController
                 $this->jsonError('Error al actualizar la contraseña', [], 500);
             }
         } catch (Exception $e) {
-            error_log("Error en UserController::changePassword: " . $e->getMessage());
+            Logger::error("UserController::changePassword: " . $e->getMessage());
             $this->jsonInternalError();
         }
     }
@@ -738,7 +739,7 @@ class UserController extends BaseController
             $stmt->execute([$userTypeId]);
             return $stmt->fetchColumn() ?: '';
         } catch (Exception $e) {
-            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipo de usuario: " . $e->getMessage());
             return '';
         }
     }
@@ -812,7 +813,7 @@ class UserController extends BaseController
                 }
             }
         } catch (Exception $e) {
-            error_log("Error en validación específica de usuario: " . $e->getMessage());
+            Logger::error("validación específica de usuario: " . $e->getMessage());
             $errors[] = 'Error en validación del usuario';
         }
 
@@ -829,7 +830,7 @@ class UserController extends BaseController
             $stmt->execute([$userTypeId]);
             return strtolower($stmt->fetchColumn() ?: '');
         } catch (Exception $e) {
-            error_log("Error obteniendo nombre de tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo nombre de tipo de usuario: " . $e->getMessage());
             return '';
         }
     }
@@ -885,7 +886,7 @@ class UserController extends BaseController
 
             $this->jsonSuccess('Personas obtenidas correctamente', ['personas' => $personas]);
         } catch (Exception $e) {
-            error_log("Error en UserController::getAvailablePersonas: " . $e->getMessage());
+            Logger::error("UserController::getAvailablePersonas: " . $e->getMessage());
             $this->jsonInternalError('Error interno del servidor');
         }
     }
@@ -966,7 +967,7 @@ class UserController extends BaseController
                 $this->redirectToRoute(AppConstants::ROUTE_USERS_CREATE);
             }
         } catch (Exception $e) {
-            error_log("Error en búsqueda de personas: " . $e->getMessage());
+            Logger::error("búsqueda de personas: " . $e->getMessage());
             $_SESSION['errors'] = ['Error al buscar personas'];
             $_SESSION['old_input'] = $_POST;
 
@@ -1087,7 +1088,7 @@ class UserController extends BaseController
                 'currentUser' => $currentUser
             ]);
         } catch (Exception $e) {
-            error_log("Error en UserController::permissions: " . $e->getMessage());
+            Logger::error("UserController::permissions: " . $e->getMessage());
             http_response_code(500);
             echo AppConstants::ERROR_INTERNAL_SERVER;
         }
@@ -1110,7 +1111,7 @@ class UserController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo permisos del usuario: " . $e->getMessage());
+            Logger::error("obteniendo permisos del usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -1132,7 +1133,7 @@ class UserController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo menús del usuario: " . $e->getMessage());
+            Logger::error("obteniendo menús del usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -1151,7 +1152,7 @@ class UserController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo todos los permisos: " . $e->getMessage());
+            Logger::error("obteniendo todos los permisos: " . $e->getMessage());
             return [];
         }
     }
@@ -1171,7 +1172,7 @@ class UserController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo todos los menús: " . $e->getMessage());
+            Logger::error("obteniendo todos los menús: " . $e->getMessage());
             return [];
         }
     }

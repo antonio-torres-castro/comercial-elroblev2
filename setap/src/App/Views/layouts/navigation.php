@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Models\Menu;
 use App\Constants\AppConstants;
 
@@ -19,7 +20,7 @@ try {
         $ungroupedMenus = $menuModel->getUngroupedMenusForUser($userId);
     }
 } catch (Exception $e) {
-    error_log("Error obteniendo menús de navegación: " . $e->getMessage());
+    Logger::error("obteniendo menús de navegación: " . $e->getMessage());
     $groupedMenus = [];
     $ungroupedMenus = [];
 }

@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use Exception;
 
@@ -75,7 +76,7 @@ class TaskController extends BaseController
 
             require_once __DIR__ . '/../Views/tasks/list.php';
         } catch (Exception $e) {
-            error_log("Error en TaskController::index: " . $e->getMessage());
+            Logger::error("TaskController::index: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -116,7 +117,7 @@ class TaskController extends BaseController
 
             require_once __DIR__ . '/../Views/tasks/form.php';
         } catch (Exception $e) {
-            error_log("Error en TaskController::show: " . $e->getMessage());
+            Logger::error("TaskController::show: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -156,7 +157,7 @@ class TaskController extends BaseController
 
             require_once __DIR__ . '/../Views/tasks/create.php';
         } catch (Exception $e) {
-            error_log("Error en TaskController::create: " . $e->getMessage());
+            Logger::error("TaskController::create: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -228,7 +229,7 @@ class TaskController extends BaseController
                 Security::redirect("/tasks/create?error=Error al asignar la tarea al proyecto");
             }
         } catch (Exception $e) {
-            error_log("Error en TaskController::store: " . $e->getMessage());
+            Logger::error("TaskController::store: " . $e->getMessage());
             Security::redirect("/tasks/create?error=Error interno del servidor");
         }
     }
@@ -281,7 +282,7 @@ class TaskController extends BaseController
 
             require_once __DIR__ . '/../Views/tasks/edit.php';
         } catch (Exception $e) {
-            error_log("Error en TaskController::edit: " . $e->getMessage());
+            Logger::error("TaskController::edit: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -354,7 +355,7 @@ class TaskController extends BaseController
                 Security::redirect("/tasks/edit?id={$id}&error=Error al actualizar la tarea");
             }
         } catch (Exception $e) {
-            error_log("Error en TaskController::update: " . $e->getMessage());
+            Logger::error("TaskController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
             Security::redirect("/tasks/edit?id={$id}&error=Error interno del servidor");
         }
@@ -426,7 +427,7 @@ class TaskController extends BaseController
                 }
             }
         } catch (Exception $e) {
-            error_log("Error en TaskController::delete: " . $e->getMessage());
+            Logger::error("TaskController::delete: " . $e->getMessage());
             // Si es petición AJAX, devolver JSON
             if (
                 !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
@@ -494,7 +495,7 @@ class TaskController extends BaseController
                 $this->redirectWithError(AppConstants::ROUTE_TASKS, $result['message'] ?? 'Error al cambiar estado de la tarea');
             }
         } catch (Exception $e) {
-            error_log("Error en TaskController::changeState: " . $e->getMessage());
+            Logger::error("TaskController::changeState: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Error interno del servidor');
         }
     }

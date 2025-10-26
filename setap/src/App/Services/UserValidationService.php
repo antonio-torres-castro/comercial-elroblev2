@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Config\Database;
 use App\Helpers\Security;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -165,7 +167,7 @@ class UserValidationService
 
         // Crear array temporal para validaciones
         $tempData = array_merge($data, ['persona_id' => $personaId]);
-        
+
         return $this->validateBusinessLogic($tempData);
     }
 
@@ -183,7 +185,7 @@ class UserValidationService
             $stmt->execute([$personaId]);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
-            error_log("Error verificando disponibilidad de persona: " . $e->getMessage());
+            Logger::error("verificando disponibilidad de persona: " . $e->getMessage());
             return false;
         }
     }
@@ -196,17 +198,17 @@ class UserValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
             $params = [$email];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
-            error_log("Error verificando email: " . $e->getMessage());
+            Logger::error("verificando email: " . $e->getMessage());
             return false;
         }
     }
@@ -219,17 +221,17 @@ class UserValidationService
         try {
             $sql = "SELECT COUNT(*) FROM usuarios WHERE nombre_usuario = ?";
             $params = [$username];
-            
+
             if ($excludeUserId > 0) {
                 $sql .= " AND id != ?";
                 $params[] = $excludeUserId;
             }
-            
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (Exception $e) {
-            error_log("Error verificando username: " . $e->getMessage());
+            Logger::error("verificando username: " . $e->getMessage());
             return false;
         }
     }
@@ -282,7 +284,7 @@ class UserValidationService
             $stmt->execute([$userTypeId]);
             return $stmt->fetchColumn() ?: '';
         } catch (Exception $e) {
-            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipo de usuario: " . $e->getMessage());
             return '';
         }
     }
@@ -301,7 +303,7 @@ class UserValidationService
             $stmt->execute([$personaId, $clientId]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error verificando contraparte: " . $e->getMessage());
+            Logger::error("verificando contraparte: " . $e->getMessage());
             return false;
         }
     }
@@ -319,18 +321,18 @@ class UserValidationService
             ");
             $stmt->execute([$personaId, $clientId]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if (!$result) {
                 return false;
             }
-            
+
             // Limpiar y comparar RUTs
             $personaRut = preg_replace('/[^0-9kK]/', '', strtolower($result['persona_rut']));
             $clienteRut = preg_replace('/[^0-9kK]/', '', strtolower($result['cliente_rut']));
-            
+
             return $personaRut === $clienteRut;
         } catch (Exception $e) {
-            error_log("Error validando RUT cliente: " . $e->getMessage());
+            Logger::error("validando RUT cliente: " . $e->getMessage());
             return false;
         }
     }
@@ -345,7 +347,7 @@ class UserValidationService
             $stmt->execute([$userId]);
             return $stmt->fetchColumn() ?: null;
         } catch (Exception $e) {
-            error_log("Error obteniendo persona_id: " . $e->getMessage());
+            Logger::error("obteniendo persona_id: " . $e->getMessage());
             return null;
         }
     }

@@ -1,6 +1,7 @@
 # 🔧 Guía Completa para Depurar PHP en Producción
 
 ## 📋 Tabla de Contenidos
+
 1. [Preparativos Previos](#preparativos-previos)
 2. [Logging y Monitoreo](#logging-y-monitoreo)
 3. [Debugging de Errores](#debugging-de-errores)
@@ -17,6 +18,7 @@
 ### ✅ Configuración Recomendada
 
 #### 1. Habilitar Logging en PHP
+
 ```apache
 # En tu .htaccess o httpd.conf
 php_flag display_errors Off
@@ -25,6 +27,7 @@ php_value error_log /var/log/php/error.log
 ```
 
 #### 2. Configurar Apache para Log Detallado
+
 ```apache
 # En httpd.conf o virtual host
 LogLevel info:error
@@ -33,6 +36,7 @@ CustomLog /var/log/apache2/comercial-elroble.log detailed
 ```
 
 #### 3. Habilitar Error Logging Personalizado
+
 ```php
 // En tu bootstrap.php o configuración inicial
 ini_set('log_errors', 1);
@@ -47,6 +51,7 @@ ini_set('display_errors', 0); // En producción
 ### 1. Sistema de Logs Personalizado
 
 #### 📝 Crear sistema de logging
+
 ```php
 <?php
 // src/App/Utils/Logger.php
@@ -97,10 +102,11 @@ Logger::init(__DIR__ . '/../../logs/app.log');
 ```
 
 #### 📝 Uso del Logger
+
 ```php
 // En tus controladores
 Logger::info('Usuario iniciando sesión', ['user_id' => $userId]);
-Logger::error('Error al procesar solicitud', ['error' => $e->getMessage()]);
+Logger::error('al procesar solicitud', ['error' => $e->getMessage()]);
 Logger::debug('Variables recibidas', $_POST);
 
 // En bootstrap.php
@@ -116,6 +122,7 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
 ### 2. Monitoreo de Apache
 
 #### 🔍 Logs de Apache útiles
+
 ```bash
 # Ver errores de Apache
 tail -f /var/log/apache2/error.log
@@ -137,6 +144,7 @@ tail -f /ruta/a/tu/proyecto/logs/app.log
 ### 1. Análisis de Errores PHP
 
 #### 📋 Script para analizar errores
+
 ```php
 <?php
 // debug/errors_analyzer.php
@@ -200,6 +208,7 @@ echo $report;
 ### 2. Debug de Excepciones
 
 #### 📝 Manejo personalizado de excepciones
+
 ```php
 <?php
 // debug/ExceptionHandler.php
@@ -248,6 +257,7 @@ set_exception_handler(['ExceptionHandler', 'handle']);
 ### 1. Profiling Básico
 
 #### 📊 Script de análisis de rendimiento
+
 ```php
 <?php
 // debug/performance_analyzer.php
@@ -301,6 +311,7 @@ $GLOBALS['perf_analyzer']->start();
 ### 2. Análisis de Slow Queries
 
 #### 🐌 Detectar queries lentas
+
 ```php
 <?php
 // debug/SlowQueryAnalyzer.php
@@ -331,6 +342,7 @@ class SlowQueryAnalyzer
 ### 1. Logging de Consultas SQL
 
 #### 📝 Wrapper para PDO con logging
+
 ```php
 <?php
 // src/App/Database/DebugPDO.php
@@ -411,6 +423,7 @@ class DebugPDOStatement
 ### 1. Script de Análisis Completo
 
 #### 🔍 Analizador de estado completo
+
 ```php
 <?php
 // debug/complete_diagnostics.php
@@ -490,6 +503,7 @@ echo $report;
 ### 2. Panel de Monitoreo Simple
 
 #### 📊 Panel web de estado
+
 ```php
 <?php
 // debug/status_panel.php
@@ -586,6 +600,7 @@ if (in_array($_SERVER['REMOTE_ADDR'], $allowedIPs)) {
 ### 1. Debugging en Producción (Sin Xdebug)
 
 #### 🔍 Técnicas seguras para producción
+
 ```php
 <?php
 // debug/production_debug.php
@@ -651,6 +666,7 @@ class ProductionDebug
 ### 2. Monitor de Salud de la Aplicación
 
 #### 🏥 Health check automático
+
 ```php
 <?php
 // debug/health_monitor.php
@@ -757,6 +773,7 @@ class HealthMonitor
 ### 1. Error 500 - Internal Server Error
 
 #### 🔍 Pasos para diagnosticar
+
 ```bash
 # 1. Verificar logs de Apache
 tail -f /var/log/apache2/error.log
@@ -779,6 +796,7 @@ apache2ctl configtest
 ### 2. Problemas de Conexión a Base de Datos
 
 #### 🗄️ Debugging de DB
+
 ```php
 <?php
 // debug/db_debug.php
@@ -812,6 +830,7 @@ function debugDatabaseConnection()
 ### 3. Problemas de Memoria
 
 #### 💾 Analizar uso de memoria
+
 ```php
 <?php
 // debug/memory_debug.php
@@ -837,6 +856,7 @@ function debugMemory()
 ## 📱 Comandos Útiles para Production Debugging
 
 ### 🖥️ Comandos de Linux para debugging
+
 ```bash
 # Monitoreo en tiempo real
 tail -f /var/log/apache2/error.log

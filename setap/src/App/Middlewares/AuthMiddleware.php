@@ -3,8 +3,8 @@
 namespace App\Middlewares;
 
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
-use Buggregator\Trap\Test\Proto\Metadata\Message;
 use Exception;
 
 class AuthMiddleware
@@ -24,8 +24,8 @@ class AuthMiddleware
                 $this->redirectToLogin();
                 return;
             }
-        } catch (Exception $ex) {
-            error_log($ex);
+        } catch (Exception $e) {
+            Logger::error('AuthMiddleware::handle error: ' . $e->getMessage());
         }
     }
 

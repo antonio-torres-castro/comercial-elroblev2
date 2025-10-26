@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use Exception;
 
@@ -40,7 +42,7 @@ class PersonaService
 
             return $this->db->lastInsertId();
         } catch (Exception $e) {
-            error_log("Error creando persona: " . $e->getMessage());
+            Logger::error("creando persona: " . $e->getMessage());
             return null;
         }
     }
@@ -65,7 +67,7 @@ class PersonaService
                 $personaId
             ]);
         } catch (Exception $e) {
-            error_log("Error actualizando persona: " . $e->getMessage());
+            Logger::error("actualizando persona: " . $e->getMessage());
             return false;
         }
     }
@@ -81,7 +83,7 @@ class PersonaService
             $stmt->execute([$id]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } catch (Exception $e) {
-            error_log("Error obteniendo persona: " . $e->getMessage());
+            Logger::error("obteniendo persona: " . $e->getMessage());
             return null;
         }
     }
@@ -98,7 +100,7 @@ class PersonaService
             $stmt->execute([$cleanRut]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } catch (Exception $e) {
-            error_log("Error obteniendo persona por RUT: " . $e->getMessage());
+            Logger::error("obteniendo persona por RUT: " . $e->getMessage());
             return null;
         }
     }
@@ -123,7 +125,7 @@ class PersonaService
 
             return $cleanPersonRut === $cleanClientRut;
         } catch (Exception $e) {
-            error_log("Error validando RUT de cliente: " . $e->getMessage());
+            Logger::error("validando RUT de cliente: " . $e->getMessage());
             return false;
         }
     }
@@ -142,7 +144,7 @@ class PersonaService
             $stmt->execute([$personaId, $clientId]);
             return $stmt->fetchColumn() > 0;
         } catch (Exception $e) {
-            error_log("Error validando contraparte: " . $e->getMessage());
+            Logger::error("validando contraparte: " . $e->getMessage());
             return false;
         }
     }
@@ -157,7 +159,7 @@ class PersonaService
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$userId, $personaId]);
         } catch (Exception $e) {
-            error_log("Error vinculando persona a usuario: " . $e->getMessage());
+            Logger::error("vinculando persona a usuario: " . $e->getMessage());
             return false;
         }
     }
@@ -178,7 +180,7 @@ class PersonaService
             $stmt->execute([$clientId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo contrapartes: " . $e->getMessage());
+            Logger::error("obteniendo contrapartes: " . $e->getMessage());
             return [];
         }
     }

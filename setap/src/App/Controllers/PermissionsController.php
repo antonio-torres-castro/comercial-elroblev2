@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Constants\AppConstants;
 use App\Traits\CommonValidationsTrait;
+use App\Helpers\Logger;
 use Exception;
 
 /**
@@ -98,7 +99,7 @@ class PermissionsController extends AbstractBaseController
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo permisos: " . $e->getMessage());
+            Logger::error("obteniendo permisos: " . $e->getMessage());
             return [];
         }
     }
@@ -122,7 +123,7 @@ class PermissionsController extends AbstractBaseController
 
             return $permissionsByUserType;
         } catch (Exception $e) {
-            error_log("Error obteniendo permisos por tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo permisos por tipo de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -204,7 +205,7 @@ class PermissionsController extends AbstractBaseController
             return true;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log("Error actualizando permisos: " . $e->getMessage());
+            Logger::error("actualizando permisos: " . $e->getMessage());
             return false;
         }
     }

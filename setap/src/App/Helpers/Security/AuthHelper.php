@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Security;
 
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use App\Services\PermissionService;
 
@@ -276,28 +277,32 @@ class AuthHelper
     public static function isAjaxRequest(): bool
     {
         // Verificar header X-Requested-With (XMLHttpRequest y fetch con header manual)
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        if (
+            !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+        ) {
             return true;
         }
-        
+
         // Verificar Content-Type para requests fetch que esperan JSON
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
         $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
-        
+
         // Si el cliente espera JSON, probablemente es AJAX
         if (strpos($accept, 'application/json') !== false) {
             return true;
         }
-        
+
         // Si es una request POST/PUT/DELETE sin redirect, probablemente es AJAX
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        if (in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH']) && 
-            !isset($_POST['_redirect']) && 
-            strpos($accept, 'text/html') === false) {
+        if (
+            in_array($method, ['POST', 'PUT', 'DELETE', 'PATCH']) &&
+            !isset($_POST['_redirect']) &&
+            strpos($accept, 'text/html') === false
+        ) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -356,7 +361,7 @@ class AuthHelper
             'timestamp' => date('Y-m-d H:i:s')
         ];
 
-        error_log("USER_ACTIVITY: " . json_encode($logData));
+        Logger::error("USER_ACTIVITY: " . json_encode($logData));
     }
 
     /**
@@ -370,7 +375,7 @@ class AuthHelper
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-cache, must-revalidate');
-        
+
         echo json_encode([
             'success' => false,
             'error' => $message,

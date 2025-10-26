@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use PDOException;
 
@@ -42,7 +44,7 @@ class ProyectoFeriado
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::getByProject error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::getByProject error: ' . $e->getMessage());
             return [];
         }
     }
@@ -102,7 +104,7 @@ class ProyectoFeriado
             return $result;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log('ProyectoFeriado::createRecurrentHolidays error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::createRecurrentHolidays error: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
         }
     }
@@ -119,7 +121,7 @@ class ProyectoFeriado
                 'observaciones' => $observaciones
             ]);
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::createSpecificHoliday error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::createSpecificHoliday error: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
         }
     }
@@ -170,7 +172,7 @@ class ProyectoFeriado
             return $result;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log('ProyectoFeriado::createRangeHolidays error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::createRangeHolidays error: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
         }
     }
@@ -241,7 +243,7 @@ class ProyectoFeriado
                 ];
             }
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::upsertHoliday error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::upsertHoliday error: ' . $e->getMessage());
             throw $e;
         }
     }
@@ -285,9 +287,11 @@ class ProyectoFeriado
             foreach ($fechas as $fecha) {
                 $result[$fecha] = [];
                 foreach ($conflicts as $conflict) {
-                    if ($conflict['fecha_inicio'] === $fecha ||
+                    if (
+                        $conflict['fecha_inicio'] === $fecha ||
                         $conflict['fecha_fin'] === $fecha ||
-                        ($conflict['fecha_inicio'] <= $fecha && $conflict['fecha_fin'] >= $fecha)) {
+                        ($conflict['fecha_inicio'] <= $fecha && $conflict['fecha_fin'] >= $fecha)
+                    ) {
                         $result[$fecha][] = $conflict;
                     }
                 }
@@ -295,7 +299,7 @@ class ProyectoFeriado
 
             return $result;
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::detectTaskConflicts error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::detectTaskConflicts error: ' . $e->getMessage());
             return [];
         }
     }
@@ -339,7 +343,7 @@ class ProyectoFeriado
             return true;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log('ProyectoFeriado::moveTasksForward error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::moveTasksForward error: ' . $e->getMessage());
             return false;
         }
     }
@@ -364,7 +368,7 @@ class ProyectoFeriado
 
             return $date->format('Y-m-d');
         } catch (\Exception $e) {
-            error_log('ProyectoFeriado::addWorkingDays error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::addWorkingDays error: ' . $e->getMessage());
             return $startDate;
         }
     }
@@ -382,7 +386,7 @@ class ProyectoFeriado
             $stmt->execute([$projectId, $fecha]);
             return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::isHoliday error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::isHoliday error: ' . $e->getMessage());
             return false;
         }
     }
@@ -407,7 +411,7 @@ class ProyectoFeriado
 
             return $workingDays;
         } catch (\Exception $e) {
-            error_log('ProyectoFeriado::getWorkingDays error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::getWorkingDays error: ' . $e->getMessage());
             return [];
         }
     }
@@ -436,7 +440,7 @@ class ProyectoFeriado
                 $id
             ]);
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::update error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::update error: ' . $e->getMessage());
             return false;
         }
     }
@@ -456,7 +460,7 @@ class ProyectoFeriado
 
             return $stmt->execute([$id]);
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::delete error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::delete error: ' . $e->getMessage());
             return false;
         }
     }
@@ -477,7 +481,7 @@ class ProyectoFeriado
             $stmt->execute([$id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::find error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::find error: ' . $e->getMessage());
             return false;
         }
     }
@@ -503,7 +507,7 @@ class ProyectoFeriado
             $stmt->execute([$projectId]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
         } catch (PDOException $e) {
-            error_log('ProyectoFeriado::getProjectHolidayStats error: ' . $e->getMessage());
+            Logger::error('ProyectoFeriado::getProjectHolidayStats error: ' . $e->getMessage());
             return [];
         }
     }

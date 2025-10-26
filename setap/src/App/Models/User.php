@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use PDOException;
 use Exception;
@@ -41,7 +43,7 @@ class User
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (PDOException $e) {
-            error_log("Error en User::getAll: " . $e->getMessage());
+            Logger::error("User::getAll: " . $e->getMessage());
             return [];
         }
     }
@@ -72,7 +74,7 @@ class User
             return $userId;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log("Error en User::create: " . $e->getMessage());
+            Logger::error("User::create: " . $e->getMessage());
             throw $e; // Re-lanzar para manejo específico en controlador
         }
     }
@@ -117,7 +119,7 @@ class User
 
             return $this->db->lastInsertId();
         } catch (PDOException $e) {
-            error_log("Error creando usuario: " . $e->getMessage());
+            Logger::error("creando usuario: " . $e->getMessage());
             return null;
         }
     }
@@ -145,7 +147,7 @@ class User
             $stmt->execute([$id]);
             return $stmt->fetch() ?: null;
         } catch (PDOException $e) {
-            error_log("Error en User::getById: " . $e->getMessage());
+            Logger::error("User::getById: " . $e->getMessage());
             return null;
         }
     }
@@ -196,11 +198,11 @@ class User
             return true;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log("Error en User::update: " . $e->getMessage());
+            Logger::error("User::update: " . $e->getMessage());
             return false;
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log("Error en User::update: " . $e->getMessage());
+            Logger::error("User::update: " . $e->getMessage());
             return false;
         }
     }
@@ -215,7 +217,7 @@ class User
             $stmt->execute([$userId]);
             return $stmt->fetchColumn() ?: null;
         } catch (PDOException $e) {
-            error_log("Error obteniendo persona_id actual: " . $e->getMessage());
+            Logger::error("obteniendo persona_id actual: " . $e->getMessage());
             return null;
         }
     }
@@ -230,7 +232,7 @@ class User
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$id]);
         } catch (PDOException $e) {
-            error_log("Error en User::delete: " . $e->getMessage());
+            Logger::error("User::delete: " . $e->getMessage());
             return false;
         }
     }
@@ -245,7 +247,7 @@ class User
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$status, $id]);
         } catch (PDOException $e) {
-            error_log("Error en User::updateStatus: " . $e->getMessage());
+            Logger::error("User::updateStatus: " . $e->getMessage());
             return false;
         }
     }
@@ -269,7 +271,7 @@ class User
             }
             return true;
         } catch (PDOException $e) {
-            error_log("Error en autenticación: " . $e->getMessage());
+            Logger::error("autenticación: " . $e->getMessage());
             return false;
         }
     }
@@ -284,7 +286,7 @@ class User
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$hashedPassword, $id]);
         } catch (PDOException $e) {
-            error_log("Error en User::updatePassword: " . $e->getMessage());
+            Logger::error("User::updatePassword: " . $e->getMessage());
             return false;
         }
     }
@@ -329,7 +331,7 @@ class User
             return true;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log("Error en User::updateProfile: " . $e->getMessage());
+            Logger::error("User::updateProfile: " . $e->getMessage());
             return false;
         }
     }
@@ -360,7 +362,7 @@ class User
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ?: null;
         } catch (PDOException $e) {
-            error_log("Error en User::findComplete: " . $e->getMessage());
+            Logger::error("User::findComplete: " . $e->getMessage());
             return null;
         }
     }
@@ -399,7 +401,7 @@ class User
             $stmt->execute([$userTypeId]);
             return $stmt->fetchColumn() ?: '';
         } catch (PDOException $e) {
-            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipo de usuario: " . $e->getMessage());
             return '';
         }
     }
@@ -425,7 +427,7 @@ class User
 
             return $cleanPersonRut === $cleanClientRut;
         } catch (PDOException $e) {
-            error_log("Error validando RUT de cliente: " . $e->getMessage());
+            Logger::error("validando RUT de cliente: " . $e->getMessage());
             return false;
         }
     }
@@ -445,7 +447,7 @@ class User
             $stmt->execute([$personaId, $clientId]);
             return $stmt->fetchColumn() > 0;
         } catch (PDOException $e) {
-            error_log("Error validando contraparte: " . $e->getMessage());
+            Logger::error("validando contraparte: " . $e->getMessage());
             return false;
         }
     }
@@ -465,7 +467,7 @@ class User
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error obteniendo clientes: " . $e->getMessage());
+            Logger::error("obteniendo clientes: " . $e->getMessage());
             return [];
         }
     }
@@ -486,7 +488,7 @@ class User
             $stmt->execute([$clientId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error obteniendo contrapartes: " . $e->getMessage());
+            Logger::error("obteniendo contrapartes: " . $e->getMessage());
             return [];
         }
     }
@@ -519,7 +521,7 @@ class User
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error obteniendo personas disponibles: " . $e->getMessage());
+            Logger::error("obteniendo personas disponibles: " . $e->getMessage());
             return [];
         }
     }
@@ -594,7 +596,7 @@ class User
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error en búsqueda avanzada de personas: " . $e->getMessage());
+            Logger::error("búsqueda avanzada de personas: " . $e->getMessage());
             return [];
         }
     }
@@ -659,7 +661,7 @@ class User
             $stmt->execute($params);
             return $stmt->fetchColumn() == 0;
         } catch (PDOException $e) {
-            error_log("Error verificando disponibilidad de persona: " . $e->getMessage());
+            Logger::error("verificando disponibilidad de persona: " . $e->getMessage());
             return false;
         }
     }
@@ -678,7 +680,7 @@ class User
             $stmt->execute([$personaId]);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } catch (PDOException $e) {
-            error_log("Error obteniendo persona: " . $e->getMessage());
+            Logger::error("obteniendo persona: " . $e->getMessage());
             return null;
         }
     }
@@ -739,7 +741,7 @@ class User
             $stmt->execute([$clientId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Error obteniendo contrapartes disponibles: " . $e->getMessage());
+            Logger::error("obteniendo contrapartes disponibles: " . $e->getMessage());
             return [];
         }
     }

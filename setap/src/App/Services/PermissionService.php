@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Config\Database;
+use App\Helpers\Logger;
+
 use PDO;
 use PDOException;
 
@@ -40,7 +42,7 @@ class PermissionService
             // Verificar si tiene el permiso específico (genérico de la BD)
             return in_array($permissionName, $userPermissions);
         } catch (PDOException $e) {
-            error_log("Error verificando permisos: " . $e->getMessage());
+            Logger::error("verificando permisos: " . $e->getMessage());
             return false;
         }
     }
@@ -65,7 +67,7 @@ class PermissionService
 
             return in_array($menuName, $menus);
         } catch (PDOException $e) {
-            error_log("Error verificando acceso a menú: " . $e->getMessage());
+            Logger::error("verificando acceso a menú: " . $e->getMessage());
             return false;
         }
     }
@@ -93,7 +95,7 @@ class PermissionService
             $stmt->execute([$userType['id']]);
             return $stmt->fetchAll();
         } catch (PDOException $e) {
-            error_log("Error obteniendo menús de usuario: " . $e->getMessage());
+            Logger::error("obteniendo menús de usuario: " . $e->getMessage());
             return [];
         }
     }
@@ -115,7 +117,7 @@ class PermissionService
             $stmt->execute([$userId]);
             return $stmt->fetch();
         } catch (PDOException $e) {
-            error_log("Error obteniendo tipo de usuario: " . $e->getMessage());
+            Logger::error("obteniendo tipo de usuario: " . $e->getMessage());
             return null;
         }
     }
@@ -136,7 +138,7 @@ class PermissionService
             $stmt->execute([$userTypeId]);
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
         } catch (PDOException $e) {
-            error_log("Error cargando permisos: " . $e->getMessage());
+            Logger::error("cargando permisos: " . $e->getMessage());
             return [];
         }
     }
@@ -157,7 +159,7 @@ class PermissionService
             $stmt->execute([$userTypeId]);
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
         } catch (PDOException $e) {
-            error_log("Error cargando menús: " . $e->getMessage());
+            Logger::error("cargando menús: " . $e->getMessage());
             return [];
         }
     }

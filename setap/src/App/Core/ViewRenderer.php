@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Helpers\Logger;
 use Exception;
 
 /**
@@ -47,7 +48,7 @@ class ViewRenderer
         try {
             // Combinar datos pasados como parámetro con los datos existentes
             $allData = array_merge($this->data, $data);
-            
+
             // Extraer datos para que estén disponibles en la vista
             extract($allData);
 
@@ -58,13 +59,13 @@ class ViewRenderer
             if (!str_ends_with($fullViewPath, '.php')) {
                 $fullViewPath .= '.php';
             }
-            
+
             if (file_exists($fullViewPath)) {
                 include $fullViewPath;
             } else {
                 throw new Exception("Vista no encontrada: {$fullViewPath}");
             }
-            
+
             $content = ob_get_clean();
 
             // Si no se especifica layout, devolver solo el contenido
@@ -81,9 +82,8 @@ class ViewRenderer
             } else {
                 throw new Exception("Layout no encontrado: {$layoutFile}");
             }
-
         } catch (Exception $e) {
-            error_log("Error renderizando vista: " . $e->getMessage());
+            Logger::error("renderizando vista: " . $e->getMessage());
             return $this->renderError("Error al cargar la vista");
         }
     }
@@ -119,16 +119,16 @@ class ViewRenderer
             // Intentar usar el sistema de templates
             $viewPath = __DIR__ . '/../Views/errors/generic.php';
             $layoutPath = __DIR__ . '/../Views/layouts/error.php';
-            
+
             if (file_exists($viewPath) && file_exists($layoutPath)) {
                 // Extraer variables para las vistas
                 extract($errorData);
-                
+
                 // Capturar contenido de la vista de error
                 ob_start();
                 include $viewPath;
                 $content = ob_get_clean();
-                
+
                 // Renderizar con layout de error
                 ob_start();
                 include $layoutPath;
@@ -136,9 +136,9 @@ class ViewRenderer
             }
         } catch (Exception $e) {
             // Si todo falla, HTML básico para evitar recursión infinita
-            error_log("Error en renderError: " . $e->getMessage());
+            Logger::error("renderError: " . $e->getMessage());
         }
-        
+
         // Fallback HTML simple sin dependencias externas
         $timestamp = date('Y-m-d H:i:s');
         return "<!DOCTYPE html>

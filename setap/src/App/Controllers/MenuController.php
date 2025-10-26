@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
+use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use App\Config\Database;
 use Exception;
@@ -67,7 +68,7 @@ class MenuController extends BaseController
 
             require_once __DIR__ . '/../Views/menus/list.php';
         } catch (Exception $e) {
-            error_log("Error en MenuController::index: " . $e->getMessage());
+            Logger::error("MenuController::index: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -119,7 +120,7 @@ class MenuController extends BaseController
 
             require_once __DIR__ . '/../Views/menus/create.php';
         } catch (Exception $e) {
-            error_log("Error en MenuController::show: " . $e->getMessage());
+            Logger::error("MenuController::show: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -158,7 +159,7 @@ class MenuController extends BaseController
 
             require_once __DIR__ . '/../Views/menus/create.php';
         } catch (Exception $e) {
-            error_log("Error en MenuController::create: " . $e->getMessage());
+            Logger::error("MenuController::create: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -232,7 +233,7 @@ class MenuController extends BaseController
                 throw new Exception('Error al crear el menú');
             }
         } catch (Exception $e) {
-            error_log("Error en MenuController::store: " . $e->getMessage());
+            Logger::error("MenuController::store: " . $e->getMessage());
             $_SESSION['errors'] = ['Error interno del servidor'];
             $_SESSION['old_input'] = $_POST;
             $this->redirectTo(AppConstants::ROUTE_MENUS . '/create');
@@ -293,7 +294,7 @@ class MenuController extends BaseController
 
             require_once __DIR__ . '/../Views/menus/edit.php';
         } catch (Exception $e) {
-            error_log("Error en MenuController::edit: " . $e->getMessage());
+            Logger::error("MenuController::edit: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
@@ -374,7 +375,7 @@ class MenuController extends BaseController
                 throw new Exception('Error al actualizar el menú');
             }
         } catch (Exception $e) {
-            error_log("Error en MenuController::update: " . $e->getMessage());
+            Logger::error("MenuController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
             $_SESSION['errors'] = ['Error interno del servidor'];
             $_SESSION['old_input'] = $_POST;
@@ -424,7 +425,7 @@ class MenuController extends BaseController
                 $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Error al eliminar el menú');
             }
         } catch (Exception $e) {
-            error_log("Error en MenuController::delete: " . $e->getMessage());
+            Logger::error("MenuController::delete: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_MENUS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
@@ -475,7 +476,7 @@ class MenuController extends BaseController
                 $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Error al actualizar el estado del menú');
             }
         } catch (Exception $e) {
-            error_log("Error en MenuController::toggleStatus: " . $e->getMessage());
+            Logger::error("MenuController::toggleStatus: " . $e->getMessage());
             $this->redirectWithError(AppConstants::ROUTE_MENUS, AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
@@ -559,7 +560,7 @@ class MenuController extends BaseController
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error obteniendo grupos de menú: " . $e->getMessage());
+            Logger::error("obteniendo grupos de menú: " . $e->getMessage());
             return [];
         }
     }
