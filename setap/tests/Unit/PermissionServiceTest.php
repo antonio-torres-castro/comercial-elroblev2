@@ -45,7 +45,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $permissionName = 'test_permission';
-        
+
         $result = $this->permissionService->hasPermission($userId, $permissionName);
         $this->assertIsBool($result, 'hasPermission debe retornar un boolean');
     }
@@ -54,7 +54,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $menuName = 'test_menu';
-        
+
         $result = $this->permissionService->hasMenuAccess($userId, $menuName);
         $this->assertIsBool($result, 'hasMenuAccess debe retornar un boolean');
     }
@@ -62,7 +62,7 @@ class PermissionServiceTest extends TestCase
     public function testGetUserMenusReturnsArray()
     {
         $userId = 1;
-        
+
         $result = $this->permissionService->getUserMenus($userId);
         $this->assertIsArray($result, 'getUserMenus debe retornar un array');
     }
@@ -71,7 +71,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $permissions = ['permission1', 'permission2'];
-        
+
         $result = $this->permissionService->hasAnyPermission($userId, $permissions);
         $this->assertIsBool($result, 'hasAnyPermission debe retornar un boolean');
     }
@@ -80,7 +80,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $permissions = ['permission1', 'permission2'];
-        
+
         $result = $this->permissionService->hasAllPermissions($userId, $permissions);
         $this->assertIsBool($result, 'hasAllPermissions debe retornar un boolean');
     }
@@ -90,7 +90,7 @@ class PermissionServiceTest extends TestCase
         // Verificar que acepta int y string
         $userId = 1;
         $permissionName = 'test_permission';
-        
+
         // No debe lanzar excepción de tipo
         $result = $this->permissionService->hasPermission($userId, $permissionName);
         $this->assertIsBool($result, 'hasPermission debe aceptar int y string');
@@ -101,7 +101,7 @@ class PermissionServiceTest extends TestCase
         // Verificar que acepta int y string
         $userId = 1;
         $menuName = 'test_menu';
-        
+
         // No debe lanzar excepción de tipo
         $result = $this->permissionService->hasMenuAccess($userId, $menuName);
         $this->assertIsBool($result, 'hasMenuAccess debe aceptar int y string');
@@ -111,7 +111,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $permissions = ['permission1', 'permission2', 'permission3'];
-        
+
         // No debe lanzar excepción de tipo
         $result = $this->permissionService->hasAnyPermission($userId, $permissions);
         $this->assertIsBool($result, 'hasAnyPermission debe aceptar array');
@@ -121,7 +121,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $permissions = ['permission1', 'permission2', 'permission3'];
-        
+
         // No debe lanzar excepción de tipo
         $result = $this->permissionService->hasAllPermissions($userId, $permissions);
         $this->assertIsBool($result, 'hasAllPermissions debe aceptar array');
@@ -131,7 +131,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $permissions = [];
-        
+
         $result = $this->permissionService->hasAnyPermission($userId, $permissions);
         $this->assertIsBool($result, 'hasAnyPermission debe manejar array vacío');
     }
@@ -140,7 +140,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 1;
         $permissions = [];
-        
+
         $result = $this->permissionService->hasAllPermissions($userId, $permissions);
         $this->assertIsBool($result, 'hasAllPermissions debe manejar array vacío');
     }
@@ -151,14 +151,14 @@ class PermissionServiceTest extends TestCase
         $dbProperty = $reflection->getProperty('db');
         $dbProperty->setAccessible(true);
         $dbValue = $dbProperty->getValue($this->permissionService);
-        
-        $this->assertNotNull($dbValue, 'PermissionService debe tener una conexión a la base de datos');
+
+        $this->assertNotNull($dbValue, 'PermissionService debe tener una conexión a la BD');
     }
 
     public function testGetUserMenusWithNonExistentUser()
     {
         $userId = 999999; // ID que probablemente no existe
-        
+
         $result = $this->permissionService->getUserMenus($userId);
         $this->assertIsArray($result, 'getUserMenus debe retornar array incluso para usuarios inexistentes');
     }
@@ -167,7 +167,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 999999; // ID que probablemente no existe
         $permissionName = 'test_permission';
-        
+
         $result = $this->permissionService->hasPermission($userId, $permissionName);
         $this->assertFalse($result, 'hasPermission debe retornar false para usuarios inexistentes');
     }
@@ -176,7 +176,7 @@ class PermissionServiceTest extends TestCase
     {
         $userId = 999999; // ID que probablemente no existe
         $menuName = 'test_menu';
-        
+
         $result = $this->permissionService->hasMenuAccess($userId, $menuName);
         $this->assertFalse($result, 'hasMenuAccess debe retornar false para usuarios inexistentes');
     }

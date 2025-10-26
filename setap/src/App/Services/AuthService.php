@@ -69,7 +69,7 @@ class AuthService
                 'raw_error' => null
             ];
         } catch (PDOException $e) {
-            $rawError = "Error de conexión a la base de datos: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine();
+            $rawError = "conexión BD: " . $e->getMessage() . " en " . $e->getFile() . ":" . $e->getLine();
 
             return [
                 'success' => false,

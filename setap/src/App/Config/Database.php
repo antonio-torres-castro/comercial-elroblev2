@@ -26,18 +26,18 @@ class Database
                 } else {
                     // Archivo SQLite para desarrollo
                     $dbPath = __DIR__ . '/../../../storage/database.sqlite';
-                    
+
                     // Crear el directorio storage si no existe
                     $storageDir = dirname($dbPath);
                     if (!is_dir($storageDir)) {
                         mkdir($storageDir, 0755, true);
                     }
-                    
+
                     // Crear archivo de base de datos si no existe
                     if (!file_exists($dbPath)) {
                         touch($dbPath);
                     }
-                    
+
                     $dsn = "sqlite:$dbPath";
                 }
                 $options = [
@@ -45,7 +45,7 @@ class Database
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES   => false,
                 ];
-                
+
                 try {
                     self::$instance = new PDO($dsn, null, null, $options);
                 } catch (PDOException $e) {
@@ -72,7 +72,7 @@ class Database
                 try {
                     self::$instance = new PDO($dsn, $user, $pass, $options);
                 } catch (PDOException $e) {
-                    throw new RuntimeException('Error de conexión a la base de datos: ' . $e->getMessage());
+                    throw new RuntimeException('conexión BD: ' . $e->getMessage());
                 }
             }
         }

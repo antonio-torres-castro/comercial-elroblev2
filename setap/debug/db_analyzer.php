@@ -57,7 +57,7 @@ try {
         $errorMessage = "No se encontró el archivo de configuración de base de datos";
     }
 } catch (Exception $e) {
-    $errorMessage = "Error de conexión: " . $e->getMessage();
+    $errorMessage = "Conexión: " . $e->getMessage();
 }
 
 // Obtener información de las tablas

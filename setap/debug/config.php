@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Configuración Centralizada para Herramientas de Debug
  * Incluye todas las configuraciones necesarias para el sistema de depuración
@@ -52,8 +53,17 @@ define('DEBUG_FILE_ACCESS_LIMIT', 50 * 1024 * 1024); // 50MB
 
 // Configuración de extensiones PHP críticas
 define('DEBUG_CRITICAL_EXTENSIONS', [
-    'pdo', 'pdo_mysql', 'curl', 'openssl', 'mbstring',
-    'json', 'filter', 'session', 'gd', 'zip', 'dom'
+    'pdo',
+    'pdo_mysql',
+    'curl',
+    'openssl',
+    'mbstring',
+    'json',
+    'filter',
+    'session',
+    'gd',
+    'zip',
+    'dom'
 ]);
 
 // Configuración de archivos críticos del sistema
@@ -75,29 +85,32 @@ define('DEBUG_CRITICAL_DIRS', [
 ]);
 
 // Función para verificar si una IP está autorizada
-function isDebugAccessAllowed() {
+function isDebugAccessAllowed()
+{
     $clientIP = $_SERVER['REMOTE_ADDR'] ?? '';
-    
+
     // Verificar en lista de IPs permitidas
     if (in_array($clientIP, DEBUG_ALLOWED_IPS)) {
         return true;
     }
-    
+
     // Verificar si es localhost o loopback
     if (in_array($clientIP, ['127.0.0.1', '::1', 'localhost'])) {
         return true;
     }
-    
+
     return false;
 }
 
 // Función para verificar configuración de debug
-function isDebugEnabled() {
+function isDebugEnabled()
+{
     return DEBUG_TOOL_ENABLED && isDebugAccessAllowed();
 }
 
 // Función para obtener configuración de entorno
-function getEnvironmentConfig() {
+function getEnvironmentConfig()
+{
     $config = [
         'development' => [
             'debug_enabled' => true,
@@ -110,20 +123,21 @@ function getEnvironmentConfig() {
             'display_errors' => false
         ]
     ];
-    
+
     $env = $_ENV['APP_ENV'] ?? 'production';
     return $config[$env] ?? $config['production'];
 }
 
 // Función para verificar estado de herramientas críticas
-function checkDebugHealth() {
+function checkDebugHealth()
+{
     $health = [
         'status' => 'OK',
         'checks' => [],
         'warnings' => [],
         'errors' => []
     ];
-    
+
     // Verificar directorio de logs
     if (!is_dir(DEBUG_LOG_DIR)) {
         if (!mkdir(DEBUG_LOG_DIR, 0755, true)) {
@@ -131,25 +145,25 @@ function checkDebugHealth() {
             $health['status'] = 'ERROR';
         }
     }
-    
+
     if (!is_writable(DEBUG_LOG_DIR)) {
         $health['warnings'][] = 'Directorio de logs no tiene permisos de escritura';
     }
-    
+
     // Verificar archivos de configuración
     foreach (DEBUG_CRITICAL_FILES as $file => $description) {
         if (!file_exists($file)) {
             $health['warnings'][] = "Archivo crítico no encontrado: $description";
         }
     }
-    
+
     // Verificar extensiones PHP
     foreach (DEBUG_CRITICAL_EXTENSIONS as $ext) {
         if (!extension_loaded($ext)) {
             $health['warnings'][] = "Extensión PHP no cargada: $ext";
         }
     }
-    
+
     // Verificar conexión a base de datos
     if (DEBUG_DB_CHECK_ENABLED) {
         try {
@@ -166,23 +180,24 @@ function checkDebugHealth() {
                 }
             }
         } catch (Exception $e) {
-            $health['errors'][] = 'Error de conexión a base de datos: ' . $e->getMessage();
+            $health['errors'][] = 'conexión a BD: ' . $e->getMessage();
             $health['status'] = 'ERROR';
         }
     }
-    
+
     return $health;
 }
 
 // Función para limpiar logs antiguos
-function cleanupOldLogs($daysToKeep = 30) {
+function cleanupOldLogs($daysToKeep = 30)
+{
     if (!DEBUG_LOG_ROTATION) {
         return false;
     }
-    
+
     $cleaned = 0;
     $cutoffDate = time() - ($daysToKeep * 24 * 60 * 60);
-    
+
     $logFiles = glob(DEBUG_LOG_DIR . '/*.log*');
     foreach ($logFiles as $file) {
         if (filemtime($file) < $cutoffDate) {
@@ -191,95 +206,106 @@ function cleanupOldLogs($daysToKeep = 30) {
             }
         }
     }
-    
+
     return $cleaned;
 }
 
 // Función para rotación de logs
-function rotateLogFile($logFile) {
+function rotateLogFile($logFile)
+{
     if (!DEBUG_LOG_ROTATION || !file_exists($logFile)) {
         return false;
     }
-    
+
     $fileSize = filesize($logFile);
     if ($fileSize < DEBUG_MAX_LOG_SIZE) {
         return false;
     }
-    
+
     $timestamp = date('Y-m-d_H-i-s');
     $rotatedFile = $logFile . '.' . $timestamp;
-    
+
     return rename($logFile, $rotatedFile);
 }
 
 // Clase para manejo avanzado de logging
-class AdvancedLogger {
+class AdvancedLogger
+{
     private static $instance = null;
     private $logFile;
     private $logLevel;
-    
-    private function __construct() {
+
+    private function __construct()
+    {
         $this->logFile = DEBUG_LOG_DIR . '/debug_system.log';
         $this->logLevel = DEBUG_LOG_LEVEL;
     }
-    
-    public static function getInstance() {
+
+    public static function getInstance()
+    {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
-    
-    public function log($level, $message, $context = []) {
+
+    public function log($level, $message, $context = [])
+    {
         if (!DEBUG_LOG_ENABLED) {
             return false;
         }
-        
+
         if (!$this->shouldLog($level)) {
             return false;
         }
-        
+
         // Verificar rotación de log
         rotateLogFile($this->logFile);
-        
+
         $timestamp = date('Y-m-d H:i:s');
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $contextStr = !empty($context) ? ' ' . json_encode($context) : '';
         $logEntry = "[$timestamp] [$level] [IP:$ip] $message$contextStr" . PHP_EOL;
-        
+
         return file_put_contents($this->logFile, $logEntry, FILE_APPEND | LOCK_EX);
     }
-    
-    private function shouldLog($level) {
+
+    private function shouldLog($level)
+    {
         $levels = ['DEBUG' => 0, 'INFO' => 1, 'WARNING' => 2, 'ERROR' => 3];
         $currentLevel = $levels[$this->logLevel] ?? 0;
         $messageLevel = $levels[$level] ?? 0;
-        
+
         return $messageLevel >= $currentLevel;
     }
-    
-    public function debug($message, $context = []) {
+
+    public function debug($message, $context = [])
+    {
         return $this->log('DEBUG', $message, $context);
     }
-    
-    public function info($message, $context = []) {
+
+    public function info($message, $context = [])
+    {
         return $this->log('INFO', $message, $context);
     }
-    
-    public function warning($message, $context = []) {
+
+    public function warning($message, $context = [])
+    {
         return $this->log('WARNING', $message, $context);
     }
-    
-    public function error($message, $context = []) {
+
+    public function error($message, $context = [])
+    {
         return $this->log('ERROR', $message, $context);
     }
 }
 
 // Función para inicializar configuración de debug
-function initDebugConfig() {
+function initDebugConfig()
+{
     // Configurar zona horaria
     date_default_timezone_set('America/Santiago');
-    
+
     // Configurar manejo de errores
     if (isDebugEnabled()) {
         error_reporting(E_ALL);
@@ -290,7 +316,7 @@ function initDebugConfig() {
         ini_set('display_errors', 0);
         ini_set('log_errors', 1);
     }
-    
+
     // Inicializar logger
     if (DEBUG_LOG_ENABLED) {
         AdvancedLogger::getInstance()->info('Sistema de debug inicializado', [
@@ -302,4 +328,3 @@ function initDebugConfig() {
 
 // Inicializar configuración al cargar el archivo
 initDebugConfig();
-?>

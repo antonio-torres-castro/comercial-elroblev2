@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Helpers;
 
+use Exception;
+use SebastianBergmann\Environment\Console;
+
 class Logger
 {
     /** @var string */
@@ -38,9 +41,12 @@ class Logger
 
         $timestamp = date('Y-m-d H:i:s');
         $formatted = sprintf("[%s] [%s] %s%s", $timestamp, strtoupper($level), $message, PHP_EOL);
-
-        // Usa error_log con flag 3 (append a archivo)
-        error_log($formatted, 3, self::$logFile);
+        try {
+            // Usa error_log con flag 3 (append a archivo)
+            error_log($formatted, 3, self::$logFile);
+        } catch (Exception $e) {
+            echo "Error escribiendo log: " . $e->getMessage() . "\n";
+        }
     }
 
     /** Métodos auxiliares */

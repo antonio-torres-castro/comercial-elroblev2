@@ -87,9 +87,9 @@ class AuthServiceTest extends TestCase
         // Simular usuario autenticado
         $_SESSION['user_id'] = 1;
         $_SESSION['user_name'] = 'test_user';
-        
+
         $this->authService->logout();
-        
+
         $this->assertEmpty($_SESSION, 'logout debe limpiar la sesión');
     }
 
@@ -97,7 +97,7 @@ class AuthServiceTest extends TestCase
     {
         // Test con credenciales que no existen
         $result = $this->authService->authenticate('nonexistent_user', 'wrong_password');
-        
+
         // Con la nueva implementación, debe retornar array con success => false
         $this->assertIsArray($result, 'authenticate debe retornar array');
         $this->assertFalse($result['success'], 'authenticate debe retornar success=false con credenciales inválidas');
@@ -124,7 +124,7 @@ class AuthServiceTest extends TestCase
             'rol' => 'admin',
             'usuario_tipo_id' => 1
         ];
-        
+
         $result = $this->authService->login($userData);
         $this->assertIsBool($result, 'login debe retornar un boolean');
     }
@@ -140,7 +140,7 @@ class AuthServiceTest extends TestCase
     {
         $userId = 999999; // ID que probablemente no existe
         $newPassword = 'new_secure_password';
-        
+
         $result = $this->authService->changePassword($userId, $newPassword);
         $this->assertIsBool($result, 'changePassword debe retornar un boolean');
     }
@@ -151,8 +151,8 @@ class AuthServiceTest extends TestCase
         $dbProperty = $reflection->getProperty('db');
         $dbProperty->setAccessible(true);
         $dbValue = $dbProperty->getValue($this->authService);
-        
-        $this->assertNotNull($dbValue, 'AuthService debe tener una conexión a la base de datos');
+
+        $this->assertNotNull($dbValue, 'AuthService debe tener una conexión a la BD');
     }
 
     public function testAuthenticateAcceptsStringParameters()
@@ -160,7 +160,7 @@ class AuthServiceTest extends TestCase
         // Verificar que authenticate acepta strings
         $identifier = 'test_user';
         $password = 'test_password';
-        
+
         // No debe lanzar excepción de tipo
         $result = $this->authService->authenticate($identifier, $password);
         $this->assertIsArray($result, 'authenticate debe retornar array');
@@ -173,9 +173,9 @@ class AuthServiceTest extends TestCase
         // Test de estructura completa de respuesta
         $identifier = 'test_user';
         $password = 'test_password';
-        
+
         $result = $this->authService->authenticate($identifier, $password);
-        
+
         if ($result['success']) {
             // Si es exitoso, debe tener user
             $this->assertArrayHasKey('user', $result, 'Resultado exitoso debe incluir user');
@@ -185,7 +185,7 @@ class AuthServiceTest extends TestCase
             $this->assertArrayHasKey('error_type', $result, 'Resultado fallido debe incluir error_type');
             $this->assertArrayHasKey('friendly_message', $result, 'Resultado fallido debe incluir friendly_message');
         }
-        
+
         // raw_error debe estar presente en todos los casos
         $this->assertArrayHasKey('raw_error', $result, 'Resultado siempre debe incluir raw_error');
     }
@@ -197,7 +197,7 @@ class AuthServiceTest extends TestCase
         $_SESSION['user_name'] = 'test_user';
         $_SESSION['user_email'] = 'test@example.com';
         $_SESSION['login_time'] = time();
-        
+
         $result = $this->authService->isAuthenticated();
         $this->assertTrue($result, 'isAuthenticated debe retornar true después de login');
     }
@@ -209,7 +209,7 @@ class AuthServiceTest extends TestCase
         $_SESSION['user_name'] = 'test_user';
         $_SESSION['user_email'] = 'test@example.com';
         $_SESSION['login_time'] = time();
-        
+
         $result = $this->authService->getCurrentUser();
         $this->assertIsArray($result, 'getCurrentUser debe retornar array después de login');
         $this->assertArrayHasKey('id', $result, 'getCurrentUser debe incluir id');

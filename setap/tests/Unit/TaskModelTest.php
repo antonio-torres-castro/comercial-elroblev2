@@ -162,7 +162,7 @@ class TaskModelTest extends TestCase
         $date = '2025-01-01';
         $result = $this->taskModel->getNextWorkingDay($projectId, $date);
         $this->assertIsString($result, 'getNextWorkingDay debe retornar un string');
-        
+
         // Verificar que el formato de fecha sea válido
         $dateTime = \DateTime::createFromFormat('Y-m-d', $result);
         $this->assertNotFalse($dateTime, 'getNextWorkingDay debe retornar una fecha válida');
@@ -184,7 +184,7 @@ class TaskModelTest extends TestCase
         $tableProperty = $reflection->getProperty('table');
         $tableProperty->setAccessible(true);
         $tableValue = $tableProperty->getValue($this->taskModel);
-        
+
         $this->assertEquals(
             'tareas',
             $tableValue,
@@ -198,8 +198,8 @@ class TaskModelTest extends TestCase
         $dbProperty = $reflection->getProperty('db');
         $dbProperty->setAccessible(true);
         $dbValue = $dbProperty->getValue($this->taskModel);
-        
-        $this->assertNotNull($dbValue, 'El modelo debe tener una conexión a la base de datos');
+
+        $this->assertNotNull($dbValue, 'El modelo debe tener una conexión a la BD');
     }
 
     public function testValidateUpdateDataStructure()
@@ -207,7 +207,7 @@ class TaskModelTest extends TestCase
         $taskId = 1;
         $data = ['tarea_nombre' => 'Test Task'];
         $userRole = 'admin';
-        
+
         $result = $this->taskModel->validateUpdateData($taskId, $data, $userRole);
         $this->assertIsArray($result, 'validateUpdateData debe retornar un array');
         $this->assertArrayHasKey('valid', $result, 'El resultado debe tener la clave "valid"');
@@ -221,7 +221,7 @@ class TaskModelTest extends TestCase
         $newState = 2;
         $userId = 1;
         $userRole = 'admin';
-        
+
         $result = $this->taskModel->changeState($taskId, $newState, $userId, $userRole);
         $this->assertIsArray($result, 'changeState debe retornar un array');
         $this->assertArrayHasKey('success', $result, 'El resultado debe tener la clave "success"');
