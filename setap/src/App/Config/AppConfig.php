@@ -31,6 +31,9 @@ class AppConfig
         self::loadAppEnv();
         self::loadDebug();
         self::loadAppName();
+        self::loadScheme();
+        self::loadHost();
+        self::loadPath();
         self::loadAppUrl();
         self::loadDatabaseConfig();
         self::loadSecurityConfig();
@@ -59,6 +62,25 @@ class AppConfig
     private static function loadAppName(): void
     {
         self::$config['app_name'] = $_ENV['APP_NAME'] ?? '';
+    }
+    private static function loadScheme(): void
+    {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        self::$config['app_scheme'] = $scheme;
+    }
+
+    private static function loadHost(): void
+    {
+        $sH = $_SERVER['HTTP_HOST'];
+        $host = parse_url($sH ?? 'localhost', PHP_URL_HOST);
+        self::$config['app_host'] = $host;
+    }
+
+    private static function loadPath(): void
+    {
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/';
+        $path = rtrim(dirname($scriptName), '/') ?: '/';
+        self::$config['app_path'] = $path;
     }
 
     private static function loadAppUrl(): void

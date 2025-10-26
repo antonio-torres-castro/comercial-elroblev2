@@ -5,7 +5,10 @@
  * Carga las constantes necesarias para la aplicación
  */
 
+require __DIR__ . '/../src/App/Helpers/Logger.php';
+
 use App\Helpers\Logger;
+
 // Cargar variables de entorno desde el archivo _env
 function loadEnv($path)
 {

@@ -75,7 +75,7 @@ class CsrfManager
 
         // Verificar que existe el token en sesión
         if (!isset($_SESSION[self::$tokenKey])) {
-            Logger::debug("No encontro token");
+            Logger::debug("No encontro token en session en validatetoken");
             return false;
         }
 

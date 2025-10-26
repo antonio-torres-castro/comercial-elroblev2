@@ -1,7 +1,9 @@
 <?php
-
+//#public_html\setap\src\App\bootstrap.php
 declare(strict_types=1);
 
+use App\Config\AppConfig;
+use App\Constants\AppConstants;
 use App\Helpers\Logger; // ajusta el namespace según donde guardes la clase
 
 // Inicializa una sola vez (por ejemplo en tu bootstrap o config global)
@@ -31,37 +33,62 @@ register_shutdown_function(function () {
 });
 
 // Cargar configuración
-App\Config\AppConfig::load();
+AppConfig::load();
+
+$scheme = AppConfig::get('app_scheme');
+$host = AppConfig::get('app_host');
+// $path = AppConfig::get('app_path'); // No se puede usar la estandar por que esta index en public, fuera de src\App
+$appUrl = AppConfig::get('app_url');
+
+$path = AppConstants::APP_FOLDER;
 
 // Configurar base path
-define('BASE_PATH', '/setap/');
+define('BASE_PATH', $path);
 
 // No necesitamos requires manuales - Composer los maneja automáticamente
 // La sesión debe iniciarse antes de cualquier output
 if (session_status() === PHP_SESSION_NONE) {
     // Configuración básica de sesión por defecto
     $sessionLifetime = 3600;
-    $appUrl = 'http://localhost:8080/setap';
+    // $appUrl = 'http://localhost:8080/setap';
 
     // Intentar cargar configuración desde variables de entorno si están disponibles
     if (class_exists('Dotenv\Dotenv')) {
-        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
+        $paths = __DIR__ . '/../../';
+        $dotenv = Dotenv\Dotenv::createImmutable($paths);
         $dotenv->safeLoad();
 
         $sessionLifetime = $_ENV['SESSION_LIFETIME'] ?? $sessionLifetime;
-        $appUrl = $_ENV['APP_URL'] ?? $appUrl;
     }
+
+    Logger::debug("path:" . $path . " host:" . $host . " secure:" . $scheme);
+
+    $sessionPath = __DIR__ . '/../../storage/sessions';
+    // Verificar que la carpeta exista
+    if (!is_dir($sessionPath)) {
+        mkdir($sessionPath, 0750, true);
+    }
+    // Asignar la ruta de almacenamiento de sesiones
+    session_save_path($sessionPath);
 
     session_set_cookie_params([
         'lifetime' => (int)$sessionLifetime,
-        'path' => '/setap/',
-        'domain' => parse_url($appUrl, PHP_URL_HOST),
-        'secure' => parse_url($appUrl, PHP_URL_SCHEME) === 'https',
+        'path' => $path,
+        'domain' => $host,
+        'secure' => isset($_SERVER['HTTPS']),
         'httponly' => true,
         'samesite' => 'Lax'
     ]);
 
     session_start();
+    Logger::debug('Ruta de sesiones: ' . session_save_path());
+    Logger::debug('Session ID actual: ' . session_id());
+
+    foreach (glob($sessionPath . '/sess_*') as $file) {
+        if (filemtime($file) < time() - $sessionLifetime) {
+            @unlink($file);
+        }
+    }
 }
 
 // Registrar shut down function para manejo de errores

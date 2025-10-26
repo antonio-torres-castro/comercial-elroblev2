@@ -73,7 +73,13 @@ AddDefaultCharset UTF-8
 # ===== PHP ERROR LOGGING =====
 <IfModule mod_php.c>
     php_flag log_errors on
-    php_value error_log /home/comerci3/public_html/error_log
+    #php_value error_log /home/comerci3/public_html/error_log
+    php_value error_log /setap/storage/logs/error_log
     php_flag display_errors off
 </IfModule>
 
+<IfModule mod_php.c>
+    #php_value session.save_path "/home/usuario/public_html/setap/storage/sessions"
+    php_value session.save_path "/setap/storage/sessions"
+    php_value session.cookie_path "/setap"
+</IfModule>

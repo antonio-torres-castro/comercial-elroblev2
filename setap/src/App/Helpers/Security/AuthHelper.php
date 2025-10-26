@@ -254,8 +254,8 @@ class AuthHelper
     {
         try {
             // Agregar el base path si no está presente
-            if (strpos($url, '/setap/') !== 0) {
-                $url = '/setap' . $url;
+            if (strpos($url, AppConstants::APP_FOLDER) !== 0) {
+                $url = rtrim(AppConstants::APP_FOLDER,  '/') . $url;
             }
             header("Location: $url");
         } catch (Exception $e) {

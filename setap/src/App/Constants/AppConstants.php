@@ -8,6 +8,7 @@ namespace App\Constants;
  */
 class AppConstants
 {
+    const APP_FOLDER = '/setap/';
 
     // ===== RUTAS DE REDIRECCIÓN =====
 
