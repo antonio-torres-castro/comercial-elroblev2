@@ -31,7 +31,6 @@ register_shutdown_function(function () {
         Logger::error($message);
     }
 });
-
 // Cargar configuración
 AppConfig::load();
 

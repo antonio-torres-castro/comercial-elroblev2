@@ -5,24 +5,28 @@ declare(strict_types=1);
 namespace App\Helpers;
 
 use Exception;
-use SebastianBergmann\Environment\Console;
+use App\Config\AppConfig;
 
 class Logger
 {
     /** @var string */
     private static string $logFile;
-
+    private static bool $debuggear;
     /**
      * Inicializa el logger indicando la ruta y nombre del archivo de log.
      */
     public static function init(string $logPath): void
     {
+        self::$debuggear = false;
         self::$logFile = $logPath;
         // Crea el directorio si no existe
         $dir = dirname($logPath);
         if (!is_dir($dir)) {
             mkdir($dir, 0775, true);
         }
+        // Cargar configuración
+        AppConfig::load();
+        self::$debuggear = AppConfig::get('debug');
     }
 
     /**
@@ -34,11 +38,10 @@ class Logger
     public static function log(string $level, string $message): void
     {
         if (empty(self::$logFile)) {
-            // Si no se inicializó, usa el error_log por defecto del sistema
+            // No se inicializó $logFile:usa error_log por defecto de php
             error_log("Logger no inicializado: $message");
             return;
         }
-
         $timestamp = date('Y-m-d H:i:s');
         $formatted = sprintf("[%s] [%s] %s%s", $timestamp, strtoupper($level), $message, PHP_EOL);
         try {
@@ -52,11 +55,11 @@ class Logger
     /** Métodos auxiliares */
     public static function info(string $message): void
     {
-        self::log('INFO', $message);
+        if (self::$debuggear) self::log('INFO', $message);
     }
     public static function warning(string $message): void
     {
-        self::log('WARNING', $message);
+        if (self::$debuggear) self::log('WARNING', $message);
     }
     public static function error(string $message): void
     {
@@ -64,6 +67,6 @@ class Logger
     }
     public static function debug(string $message): void
     {
-        self::log('DEBUG', $message);
+        if (self::$debuggear) self::log('DEBUG', $message);
     }
 }
