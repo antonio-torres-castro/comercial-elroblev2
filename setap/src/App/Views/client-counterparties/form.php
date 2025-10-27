@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Security;
 use App\Constants\AppConstants;
 ?>
 <!DOCTYPE html>
@@ -28,8 +29,8 @@ use App\Constants\AppConstants;
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIES ?>" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Volver a Lista
+                        <a href="javascript:history.back()" class="btn btn-sm btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Ir a Lista Contrapartes
                         </a>
                     </div>
                 </div>
@@ -57,7 +58,7 @@ use App\Constants\AppConstants;
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="<?php echo $data['action'] === 'edit' ? AppConstants::ROUTE_CLIENT_COUNTERPARTIE . '/update' : AppConstants::ROUTE_CLIENT_COUNTERPARTIE . '/store'; ?>">
-                                    <?= \App\Helpers\Security::renderCsrfField() ?>
+                                    <?= Security::renderCsrfField() ?>
 
                                     <?php if (safe($data, 'action') === 'edit' && safe($data, 'counterpartie')): ?>
                                         <input type="hidden" name="id" value="<?php echo safeHtml($data, 'counterpartie.id'); ?>">
@@ -195,7 +196,7 @@ use App\Constants\AppConstants;
                                         <div class="col-12">
                                             <hr>
                                             <div class="d-flex justify-content-end gap-2">
-                                                <a href="/client-counterparties" class="btn btn-secondary">
+                                                <a href="javascript:history.back()" class="btn btn-secondary">
                                                     <i class="bi bi-x-lg"></i> Cancelar
                                                 </a>
                                                 <button type="submit" class="btn btn-setap-primary">

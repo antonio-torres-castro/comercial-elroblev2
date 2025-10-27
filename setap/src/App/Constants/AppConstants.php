@@ -24,6 +24,9 @@ class AppConstants
     /** Ruta base de usuarios */
     const ROUTE_USERS = '/setap/users';
 
+    /** Ruta base de cliente */
+    const ROUTE_CLIENT = '/setap/client';
+
     /** Ruta base de clientes */
     const ROUTE_CLIENTS = '/setap/clients';
 

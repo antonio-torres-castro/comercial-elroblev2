@@ -186,8 +186,8 @@
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm" role="group">
-                                                        <a href="/client/<?php echo $client['id']; ?>"
-                                                            class="btn btn-outline-setap-primary" title="Editar">
+                                                        <a href="<?= AppConstants::ROUTE_CLIENTS_EDIT . '/' ?><?php echo $client['id'] ?>"
+                                                            class="btn btn-outline-setap-primary" title="Editar" id="edit<?php echo $client['id']; ?>">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
                                                         <button type="button" class="btn btn-outline-danger"

@@ -1,9 +1,11 @@
 <?php
 
+use App\Helpers\Security;
 use App\Constants\AppConstants;
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +18,7 @@ use App\Constants\AppConstants;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -53,7 +56,7 @@ use App\Constants\AppConstants;
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="<?= AppConstants::ROUTE_CLIENTS ?>/update" id="clientForm">
-                                    <?= \App\Helpers\Security::renderCsrfField() ?>
+                                    <?= Security::renderCsrfField() ?>
                                     <input type="hidden" name="id" value="<?php echo $data['client']['id']; ?>">
 
                                     <!-- Información Básica -->
@@ -65,16 +68,16 @@ use App\Constants\AppConstants;
                                                 Razón Social <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" class="form-control" id="razon_social" name="razon_social"
-                                                   value="<?php echo htmlspecialchars($data['client']['razon_social'] ?? ''); ?>"
-                                                   required maxlength="150">
+                                                value="<?php echo htmlspecialchars($data['client']['razon_social'] ?? ''); ?>"
+                                                required maxlength="150">
                                             <div class="form-text">Nombre oficial de la empresa</div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="rut" class="form-label">RUT</label>
                                             <input type="text" class="form-control" id="rut" name="rut"
-                                                   value="<?php echo htmlspecialchars($data['client']['rut'] ?? ''); ?>"
-                                                   maxlength="20" placeholder="12.345.678-9">
+                                                value="<?php echo htmlspecialchars($data['client']['rut'] ?? ''); ?>"
+                                                maxlength="20" placeholder="12.345.678-9">
                                             <div class="form-text">RUT de la empresa (opcional)</div>
                                             <div id="rutError" class="text-danger" style="display: none;"></div>
                                         </div>
@@ -87,15 +90,15 @@ use App\Constants\AppConstants;
                                         <div class="col-md-6">
                                             <label for="email" class="form-label">Email</label>
                                             <input type="email" class="form-control" id="email" name="email"
-                                                   value="<?php echo htmlspecialchars($data['client']['email'] ?? ''); ?>"
-                                                   maxlength="150">
+                                                value="<?php echo htmlspecialchars($data['client']['email'] ?? ''); ?>"
+                                                maxlength="150">
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="telefono" class="form-label">Teléfono</label>
                                             <input type="text" class="form-control" id="telefono" name="telefono"
-                                                   value="<?php echo htmlspecialchars($data['client']['telefono'] ?? ''); ?>"
-                                                   maxlength="20">
+                                                value="<?php echo htmlspecialchars($data['client']['telefono'] ?? ''); ?>"
+                                                maxlength="20">
                                         </div>
                                     </div>
 
@@ -103,7 +106,7 @@ use App\Constants\AppConstants;
                                         <div class="col-12">
                                             <label for="direccion" class="form-label">Dirección</label>
                                             <textarea class="form-control" id="direccion" name="direccion"
-                                                      rows="2" maxlength="255"><?php echo htmlspecialchars($data['client']['direccion'] ?? ''); ?></textarea>
+                                                rows="2" maxlength="255"><?php echo htmlspecialchars($data['client']['direccion'] ?? ''); ?></textarea>
                                         </div>
                                     </div>
 
@@ -114,22 +117,22 @@ use App\Constants\AppConstants;
                                         <div class="col-md-4">
                                             <label for="fecha_inicio_contrato" class="form-label">Fecha Inicio Contrato</label>
                                             <input type="date" class="form-control" id="fecha_inicio_contrato"
-                                                   name="fecha_inicio_contrato"
-                                                   value="<?php echo htmlspecialchars($data['client']['fecha_inicio_contrato'] ?? ''); ?>">
+                                                name="fecha_inicio_contrato"
+                                                value="<?php echo htmlspecialchars($data['client']['fecha_inicio_contrato'] ?? ''); ?>">
                                         </div>
 
                                         <div class="col-md-4">
                                             <label for="fecha_facturacion" class="form-label">Fecha Facturación</label>
                                             <input type="date" class="form-control" id="fecha_facturacion"
-                                                   name="fecha_facturacion"
-                                                   value="<?php echo htmlspecialchars($data['client']['fecha_facturacion'] ?? ''); ?>">
+                                                name="fecha_facturacion"
+                                                value="<?php echo htmlspecialchars($data['client']['fecha_facturacion'] ?? ''); ?>">
                                         </div>
 
                                         <div class="col-md-4">
                                             <label for="fecha_termino_contrato" class="form-label">Fecha Término Contrato</label>
                                             <input type="date" class="form-control" id="fecha_termino_contrato"
-                                                   name="fecha_termino_contrato"
-                                                   value="<?php echo htmlspecialchars($data['client']['fecha_termino_contrato'] ?? ''); ?>">
+                                                name="fecha_termino_contrato"
+                                                value="<?php echo htmlspecialchars($data['client']['fecha_termino_contrato'] ?? ''); ?>">
                                         </div>
                                     </div>
 
@@ -140,7 +143,7 @@ use App\Constants\AppConstants;
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                                 <?php foreach ($data['statusTypes'] as $status): ?>
                                                     <option value="<?php echo $status['id']; ?>"
-                                                            <?php echo $data['client']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
+                                                        <?php echo $data['client']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($status['nombre']); ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -150,7 +153,7 @@ use App\Constants\AppConstants;
 
                                     <!-- Botones -->
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                        <a href="/clients" class="btn btn-secondary">
+                                        <a href="<?= AppConstants::ROUTE_CLIENTS ?>" class="btn btn-secondary">
                                             <i class="bi bi-x-circle"></i> Cancelar
                                         </a>
                                         <button type="submit" class="btn btn-setap-primary">
@@ -229,13 +232,13 @@ use App\Constants\AppConstants;
                                                         <td>
                                                             <div class="btn-group btn-group-sm">
                                                                 <button type="button" class="btn btn-outline-setap-primary"
-                                                                        onclick="editCounterpartie(<?php echo $cp['id']; ?>)"
-                                                                        title="Editar">
+                                                                    onclick="editCounterpartie(<?php echo $cp['id']; ?>)"
+                                                                    title="Editar">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </button>
                                                                 <button type="button" class="btn btn-outline-danger"
-                                                                        onclick="removeCounterpartie(<?php echo $cp['id']; ?>, '<?php echo addslashes($cp['persona_nombre']); ?>')"
-                                                                        title="Eliminar">
+                                                                    onclick="removeCounterpartie(<?php echo $cp['id']; ?>, '<?php echo addslashes($cp['persona_nombre']); ?>')"
+                                                                    title="Eliminar">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </div>
@@ -296,7 +299,7 @@ use App\Constants\AppConstants;
                             </div>
                             <div class="card-body">
                                 <button type="button" class="btn btn-outline-danger btn-sm w-100"
-                                        onclick="confirmDeleteClient(<?php echo $data['client']['id']; ?>, '<?php echo addslashes($data['client']['razon_social']); ?>')">
+                                    onclick="confirmDeleteClient(<?php echo $data['client']['id']; ?>, '<?php echo addslashes($data['client']['razon_social']); ?>')">
                                     <i class="bi bi-trash"></i> Eliminar Cliente
                                 </button>
                                 <div class="form-text">
@@ -329,7 +332,7 @@ use App\Constants\AppConstants;
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <form method="POST" action="<?= AppConstants::ROUTE_CLIENTS ?>/delete" style="display: inline;" id="deleteClientForm">
-                        <?= \App\Helpers\Security::renderCsrfField() ?>
+                        <?= Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="deleteClientId">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Eliminar
@@ -437,12 +440,12 @@ use App\Constants\AppConstants;
 
         function addCounterpartie() {
             // Redirigir a página de agregar contraparte con el ID del cliente
-            window.location.href = '<?php AppConstants::ROUTE_CLIENT_COUNTERPARTIE; ?>?client_id=<?php echo $data['client']['id']; ?>';
+            window.location.href = '<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE; ?>?client_id=<?php echo $data['client']['id']; ?>';
         }
 
         function editCounterpartie(id) {
             // Redirigir a página de editar contraparte
-            window.location.href = '<?php AppConstants::ROUTE_CLIENT_COUNTERPARTIE; ?>/' + id;
+            window.location.href = '<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE; ?>/' + id;
         }
 
         function removeCounterpartie(id, name) {
@@ -454,4 +457,5 @@ use App\Constants\AppConstants;
         }
     </script>
 </body>
+
 </html>
