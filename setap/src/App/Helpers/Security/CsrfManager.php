@@ -132,7 +132,8 @@ class CsrfManager
     public static function renderField(): string
     {
         $token = self::getToken();
-        return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+        $tag = '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+        return $tag;
     }
 
     /**

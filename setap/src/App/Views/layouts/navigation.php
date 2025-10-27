@@ -163,8 +163,6 @@ try {
             var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
                 return new bootstrap.Dropdown(dropdownToggleEl);
             });
-
-            console.log('Dropdowns de navegación inicializados:', dropdownList.length);
         } else {
             console.error('Bootstrap no está disponible para inicializar dropdowns');
         }

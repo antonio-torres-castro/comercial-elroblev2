@@ -121,7 +121,7 @@ use App\Constants\AppConstants; ?>
                         <?php endif; ?>
 
                         <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/update" id="userEditForm">
-                            <?= \App\Helpers\Security::renderCsrfField() ?>
+                            <?= Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$userToEdit['id'] ?>">
                             <input type="hidden" name="current_persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
 

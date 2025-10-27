@@ -62,6 +62,9 @@ use App\Constants\AppConstants;
 <body class="bg-light">
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
+    <?php $success = $_SESSION['success_message'] ?? '';
+    $_SESSION['success_message'] = "";
+    ?>
 
     <div class="container-fluid mt-4">
         <main class="main-content">

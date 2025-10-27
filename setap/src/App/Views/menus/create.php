@@ -57,7 +57,7 @@ use App\Constants\AppConstants;
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/store">
-                                    <?php \App\Helpers\Security::renderCsrfField(); ?>
+                                    <?= \App\Helpers\Security::renderCsrfField(); ?>
 
                                     <div class="row">
                                         <div class="col-md-6">

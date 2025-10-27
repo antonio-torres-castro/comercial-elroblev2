@@ -50,7 +50,7 @@ abstract class BaseController
     <div class="error">
         <h2>Error</h2>
         <p>' . htmlspecialchars($message) . '</p>
-        <a href="/">Volver al inicio</a>
+        <a href="/setap/">Volver al inicio</a>
     </div>
 </body>
 </html>';

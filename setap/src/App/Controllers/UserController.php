@@ -495,15 +495,19 @@ class UserController extends BaseController
             $userData['estado_tipo_id'] = (int)($_POST['estado_tipo_id'] ?? 1);
             $userData['fecha_inicio'] = !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null;
             $userData['fecha_termino'] = !empty($_POST['fecha_termino']) ? $_POST['fecha_termino'] : null;
+            $success = $this->userModel->update($id, $userData);
 
-            if ($this->userModel->update($id, $userData)) {
+            if ($success) {
                 Security::logSecurityEvent('user_updated', [
                     'user_id' => $id,
                     'updated_by' => $_SESSION['username']
                 ]);
-                Security::redirect("/users?success=Usuario actualizado correctamente");
+                // Redirigir con mensaje de éxito
+                $_SESSION['success_message'] = 'Datos ' . $userData['nombre_usuario'] .  ' actualizados';
+                header('Location: ' . AppConstants::ROUTE_USERS);
+                exit;
             } else {
-                Security::redirect("/users/edit?id={$id}&error=Error al actualizar el usuario");
+                throw new Exception('Error al actualizar contraseña');
             }
         } catch (Exception $e) {
             Logger::error("UserController::update: " . $e->getMessage());
@@ -695,6 +699,7 @@ class UserController extends BaseController
 
             $userId = (int)($_POST['user_id'] ?? 0);
             $newPassword = $_POST['new_password'] ?? '';
+            $nombre_usuario = $_SESSION['nombre_completo'] ?? '';
 
             if (!$userId || strlen($newPassword) < 6) {
                 $this->jsonError('Datos inválidos o contraseña muy corta', [], 400);
@@ -703,15 +708,18 @@ class UserController extends BaseController
 
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             $success = $this->userModel->updatePassword($userId, $hashedPassword);
-
             if ($success) {
-                $this->jsonSuccess('Contraseña actualizada correctamente');
+                // Redirigir con mensaje de éxito
+                $_SESSION['success_message'] = 'Contraseña de ' . $nombre_usuario .  ' actualizada';
+                header('Location: ' . AppConstants::ROUTE_USERS);
+                exit;
             } else {
-                $this->jsonError('Error al actualizar la contraseña', [], 500);
+                throw new Exception('Error al actualizar contraseña');
             }
         } catch (Exception $e) {
             Logger::error("UserController::changePassword: " . $e->getMessage());
-            $this->jsonInternalError();
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }
     }
 

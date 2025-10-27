@@ -44,11 +44,7 @@ use App\Constants\AppConstants;
                 <?php endif; ?>
 
                 <form method="POST" class="row g-3" id="profileForm">
-                    <?php
-
-                    use App\Helpers\Security;
-
-                    \App\Helpers\Security::renderCsrfField(); ?>
+                    <?= \App\Helpers\Security::renderCsrfField(); ?>
 
                     <div class="col-md-6">
                         <label for="nombre" class="form-label">Nombre Completo *</label>
@@ -92,7 +88,7 @@ use App\Constants\AppConstants;
                     <div class="col-12">
                         <hr>
                         <div class="d-flex justify-content-between">
-                            <a href="/perfil" class="btn btn-secondary">
+                            <a href="<?= AppConstants::ROUTE_PERFIL ?>" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary">

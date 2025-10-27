@@ -57,7 +57,7 @@ use App\Constants\AppConstants;
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/update">
-                                    <?php \App\Helpers\Security::renderCsrfField(); ?>
+                                    <?= \App\Helpers\Security::renderCsrfField(); ?>
                                     <input type="hidden" name="id" value="<?php echo $data['menu']['id']; ?>">
 
                                     <div class="row">
@@ -184,7 +184,7 @@ use App\Constants\AppConstants;
 
                                 <!-- Formulario oculto para eliminar -->
                                 <form id="formEliminar" method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/delete" style="display: none;">
-                                    <?php \App\Helpers\Security::renderCsrfField(); ?>
+                                    <?= \App\Helpers\Security::renderCsrfField(); ?>
                                     <input type="hidden" name="id" value="<?php echo $data['menu']['id']; ?>">
                                 </form>
                             </div>
