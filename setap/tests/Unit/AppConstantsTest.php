@@ -29,7 +29,7 @@ class AppConstantsTest extends TestCase
         $this->assertNotEmpty(AppConstants::ROUTE_PERFIL);
         $this->assertNotEmpty(AppConstants::ROUTE_REPORTS);
         $this->assertNotEmpty(AppConstants::ROUTE_PROJECTS);
-        
+
         // Rutas con acciones
         $this->assertNotEmpty(AppConstants::ROUTE_USERS_CREATE);
         $this->assertNotEmpty(AppConstants::ROUTE_PERSONAS_CREATE);
@@ -47,7 +47,7 @@ class AppConstantsTest extends TestCase
         $this->assertStringStartsWith('/', AppConstants::ROUTE_USERS);
         $this->assertStringStartsWith('/', AppConstants::ROUTE_TASKS);
         $this->assertStringStartsWith('/', AppConstants::ROUTE_PROJECTS);
-        
+
         // Rutas específicas deben tener el formato correcto
         $this->assertEquals('/setap/login', AppConstants::ROUTE_LOGIN);
         $this->assertEquals('/setap/home', AppConstants::ROUTE_HOME);
@@ -68,13 +68,13 @@ class AppConstantsTest extends TestCase
         $this->assertNotEmpty(AppConstants::ERROR_USER_NOT_FOUND);
         $this->assertNotEmpty(AppConstants::ERROR_TASK_NOT_FOUND);
         $this->assertNotEmpty(AppConstants::ERROR_INTERNAL_SERVER);
-        
+
         // Errores de acceso
         $this->assertNotEmpty(AppConstants::ERROR_ACCESS_DENIED);
         $this->assertNotEmpty(AppConstants::ERROR_NO_PERMISSIONS);
         $this->assertNotEmpty(AppConstants::ERROR_USER_NOT_AUTHENTICATED);
         $this->assertNotEmpty(AppConstants::ERROR_USER_NOT_AUTHORIZED);
-        
+
         // Errores de validación
         $this->assertNotEmpty(AppConstants::ERROR_LOGIN_REQUIRED);
         $this->assertNotEmpty(AppConstants::ERROR_REQUIRED_FIELDS);
@@ -91,7 +91,7 @@ class AppConstantsTest extends TestCase
         $this->assertNotEmpty(AppConstants::SUCCESS_CREATED);
         $this->assertNotEmpty(AppConstants::SUCCESS_UPDATED);
         $this->assertNotEmpty(AppConstants::SUCCESS_DELETED);
-        
+
         // Éxitos específicos
         $this->assertNotEmpty(AppConstants::SUCCESS_USER_CREATED);
         $this->assertNotEmpty(AppConstants::SUCCESS_USER_DELETED);
@@ -112,18 +112,18 @@ class AppConstantsTest extends TestCase
         $this->assertNotEmpty(AppConstants::UI_BTN_CANCEL);
         $this->assertNotEmpty(AppConstants::UI_BTN_DELETE);
         $this->assertNotEmpty(AppConstants::UI_BTN_BACK);
-        
+
         // Títulos de gestión
         $this->assertNotEmpty(AppConstants::UI_TASK_MANAGEMENT);
         $this->assertNotEmpty(AppConstants::UI_PROJECT_MANAGEMENT);
         $this->assertNotEmpty(AppConstants::UI_PERSONA_MANAGEMENT);
         $this->assertNotEmpty(AppConstants::UI_SYSTEM_REPORTS);
-        
+
         // Acciones de navegación
-        $this->assertNotEmpty(AppConstants::UI_BACK_TO_TASKS);
-        $this->assertNotEmpty(AppConstants::UI_BACK_TO_PROJECTS);
-        $this->assertNotEmpty(AppConstants::UI_BACK_TO_PERSONAS);
-        $this->assertNotEmpty(AppConstants::UI_BACK_TO_REPORTS);
+        $this->assertNotEmpty(AppConstants::UI_BACK);
+        $this->assertNotEmpty(AppConstants::UI_BACK);
+        $this->assertNotEmpty(AppConstants::UI_BACK);
+        $this->assertNotEmpty(AppConstants::UI_BACK);
     }
 
     /**
@@ -138,7 +138,7 @@ class AppConstantsTest extends TestCase
         $this->assertEquals('Cancelar', AppConstants::UI_BTN_CANCEL);
         $this->assertEquals('Eliminar', AppConstants::UI_BTN_DELETE);
         $this->assertEquals('Volver', AppConstants::UI_BTN_BACK);
-        
+
         // Validar títulos de gestión
         $this->assertEquals('Gestión de Tareas', AppConstants::UI_TASK_MANAGEMENT);
         $this->assertEquals('Gestión de Proyectos', AppConstants::UI_PROJECT_MANAGEMENT);
@@ -155,14 +155,14 @@ class AppConstantsTest extends TestCase
         $baseRoute = '/setap/users';
         $message = 'created';
         $expectedUrl = '/setap/users?success=created';
-        
+
         $result = AppConstants::buildSuccessUrl($baseRoute, $message);
         $this->assertEquals($expectedUrl, $result);
-        
+
         // Test buildErrorUrl
         $errorMessage = 'Error de validación';
         $expectedErrorUrl = '/setap/users?error=' . urlencode($errorMessage);
-        
+
         $result = AppConstants::buildErrorUrl($baseRoute, $errorMessage);
         $this->assertEquals($expectedErrorUrl, $result);
     }
@@ -174,15 +174,15 @@ class AppConstantsTest extends TestCase
     {
         $reflection = new \ReflectionClass(AppConstants::class);
         $constants = $reflection->getConstants();
-        
+
         // Verificar que no hay valores duplicados que podrían causar confusión
         $values = array_values($constants);
         $uniqueValues = array_unique($values);
-        
+
         // Nota: Algunos valores pueden ser legítimamente duplicados (ej: 'Crear' puede aparecer en múltiples contextos)
         // Este test verifica que no hay una duplicación excesiva
         $duplicateRatio = (count($values) - count($uniqueValues)) / count($values);
-        
+
         // Debe haber menos del 30% de duplicación
         $this->assertLessThan(0.3, $duplicateRatio, 'Demasiadas constantes duplicadas detectadas');
     }
@@ -194,15 +194,21 @@ class AppConstantsTest extends TestCase
     {
         $reflection = new \ReflectionClass(AppConstants::class);
         $constants = array_keys($reflection->getConstants());
-        
+
         foreach ($constants as $constantName) {
             // Todas las constantes deben estar en mayúsculas
-            $this->assertEquals(strtoupper($constantName), $constantName, 
-                "La constante '{$constantName}' no está en mayúsculas");
-            
+            $this->assertEquals(
+                strtoupper($constantName),
+                $constantName,
+                "La constante '{$constantName}' no está en mayúsculas"
+            );
+
             // Todas las constantes deben usar underscore como separador
-            $this->assertDoesNotMatchRegularExpression('/[a-z][A-Z]/', $constantName, 
-                "La constante '{$constantName}' no usa la convención underscore");
+            $this->assertDoesNotMatchRegularExpression(
+                '/[a-z][A-Z]/',
+                $constantName,
+                "La constante '{$constantName}' no usa la convención underscore"
+            );
         }
     }
 
@@ -214,13 +220,10 @@ class AppConstantsTest extends TestCase
         // Constantes específicas agregadas en la extensión de la Fase 4
         $fase4Constants = [
             'UI_TASK_MANAGEMENT',
-            'UI_PROJECT_MANAGEMENT', 
+            'UI_PROJECT_MANAGEMENT',
             'UI_PERSONA_MANAGEMENT',
             'UI_SYSTEM_REPORTS',
-            'UI_BACK_TO_TASKS',
-            'UI_BACK_TO_PROJECTS',
-            'UI_BACK_TO_PERSONAS',
-            'UI_BACK_TO_REPORTS',
+            'UI_BACK',
             'UI_NEW_TASK',
             'UI_NEW_PERSONA',
             'UI_CREATE_PROJECT_TITLE',
@@ -228,18 +231,23 @@ class AppConstantsTest extends TestCase
             'UI_BASIC_INFORMATION',
             'UI_TASK_INFORMATION'
         ];
-        
+
         $reflection = new \ReflectionClass(AppConstants::class);
         $allConstants = array_keys($reflection->getConstants());
-        
+
         foreach ($fase4Constants as $constantName) {
-            $this->assertContains($constantName, $allConstants, 
-                "La constante de Fase 4 '{$constantName}' no está definida");
-            
+            $this->assertContains(
+                $constantName,
+                $allConstants,
+                "La constante de Fase 4 '{$constantName}' no está definida"
+            );
+
             // Verificar que la constante tiene un valor no vacío
             $constantValue = constant("App\\Constants\\AppConstants::{$constantName}");
-            $this->assertNotEmpty($constantValue, 
-                "La constante '{$constantName}' está vacía");
+            $this->assertNotEmpty(
+                $constantValue,
+                "La constante '{$constantName}' está vacía"
+            );
         }
     }
 
@@ -250,11 +258,11 @@ class AppConstantsTest extends TestCase
     {
         $this->assertEquals('success', AppConstants::PARAM_SUCCESS);
         $this->assertEquals('error', AppConstants::PARAM_ERROR);
-        
+
         // Test de uso en URLs
         $url1 = '/setap/test?' . AppConstants::PARAM_SUCCESS . '=created';
         $this->assertEquals('/setap/test?success=created', $url1);
-        
+
         $url2 = '/setap/test?' . AppConstants::PARAM_ERROR . '=failed';
         $this->assertEquals('/setap/test?error=failed', $url2);
     }
@@ -265,7 +273,7 @@ class AppConstantsTest extends TestCase
     public function testConstantsPerformance()
     {
         $startTime = microtime(true);
-        
+
         // Acceder a múltiples constantes
         for ($i = 0; $i < 1000; $i++) {
             $route = AppConstants::ROUTE_LOGIN;
@@ -273,10 +281,10 @@ class AppConstantsTest extends TestCase
             $success = AppConstants::SUCCESS_CREATED;
             $ui = AppConstants::UI_BTN_CREATE;
         }
-        
+
         $endTime = microtime(true);
         $executionTime = ($endTime - $startTime) * 1000; // en millisegundos
-        
+
         // El acceso a constantes debe ser muy rápido (menos de 50ms para 1000 accesos)
         $this->assertLessThan(50, $executionTime, 'El acceso a constantes es demasiado lento');
     }
@@ -288,17 +296,17 @@ class AppConstantsTest extends TestCase
     {
         // Verificar que la clase existe y es accesible
         $this->assertTrue(class_exists('App\\Constants\\AppConstants'));
-        
+
         // Verificar que es una clase y no un trait o interface
         $reflection = new \ReflectionClass(AppConstants::class);
         $this->assertTrue($reflection->isInstantiable()); // Clase instanciable
         $this->assertFalse($reflection->isInterface());
         $this->assertFalse($reflection->isTrait());
-        
+
         // Verificar que los métodos estáticos funcionan
         $this->assertTrue(method_exists(AppConstants::class, 'buildSuccessUrl'));
         $this->assertTrue(method_exists(AppConstants::class, 'buildErrorUrl'));
-        
+
         // Verificar que los métodos son estáticos
         $method1 = $reflection->getMethod('buildSuccessUrl');
         $method2 = $reflection->getMethod('buildErrorUrl');

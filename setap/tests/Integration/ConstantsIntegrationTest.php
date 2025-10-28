@@ -14,7 +14,7 @@ use App\Constants\AppConstants;
 class ConstantsIntegrationTest extends TestCase
 {
     private $testFilesPath;
-    
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -38,39 +38,39 @@ class ConstantsIntegrationTest extends TestCase
             '/Views/personas/list.php',
             '/Views/personas/create.php'
         ];
-        
+
         foreach ($viewFiles as $viewFile) {
             $fullPath = $this->testFilesPath . $viewFile;
-            
+
             if (file_exists($fullPath)) {
                 $content = file_get_contents($fullPath);
-                
+
                 // Verificar que el archivo use la declaración use
                 $this->assertStringContainsString(
                     'use App\Constants\AppConstants',
                     $content,
                     "El archivo {$viewFile} no importa AppConstants"
                 );
-                
+
                 // Verificar que no contenga strings hardcodeados comunes que deberían ser constantes
                 $this->assertStringNotContainsString(
                     '"Gestión de Tareas"',
                     $content,
                     "El archivo {$viewFile} contiene string hardcodeado 'Gestión de Tareas'"
                 );
-                
+
                 $this->assertStringNotContainsString(
                     '"Gestión de Proyectos"',
                     $content,
                     "El archivo {$viewFile} contiene string hardcodeado 'Gestión de Proyectos'"
                 );
-                
+
                 $this->assertStringNotContainsString(
                     '"Nueva Tarea"',
                     $content,
                     "El archivo {$viewFile} contiene string hardcodeado 'Nueva Tarea'"
                 );
-                
+
                 $this->assertStringNotContainsString(
                     '"Volver a Tareas"',
                     $content,
@@ -90,13 +90,13 @@ class ConstantsIntegrationTest extends TestCase
             '/Controllers/UserController.php',
             '/Controllers/ProjectController.php'
         ];
-        
+
         foreach ($controllerFiles as $controllerFile) {
             $fullPath = $this->testFilesPath . $controllerFile;
-            
+
             if (file_exists($fullPath)) {
                 $content = file_get_contents($fullPath);
-                
+
                 // Verificar que el archivo use la declaración use si maneja mensajes
                 if (strpos($content, 'AppConstants::') !== false) {
                     $this->assertStringContainsString(
@@ -105,14 +105,14 @@ class ConstantsIntegrationTest extends TestCase
                         "El archivo {$controllerFile} usa constantes pero no las importa"
                     );
                 }
-                
+
                 // Verificar que no contenga rutas hardcodeadas
                 $this->assertStringNotContainsString(
                     'header("Location: /tasks"',
                     $content,
                     "El archivo {$controllerFile} contiene ruta hardcodeada"
                 );
-                
+
                 $this->assertStringNotContainsString(
                     'header("Location: /users"',
                     $content,
@@ -136,7 +136,7 @@ class ConstantsIntegrationTest extends TestCase
             AppConstants::ROUTE_REPORTS,
             AppConstants::ROUTE_PERSONAS
         ];
-        
+
         foreach ($routes as $route) {
             // Verificar que la ruta tiene el formato correcto
             $this->assertStringStartsWith('/', $route, "La ruta '{$route}' no empieza con '/'");
@@ -168,18 +168,18 @@ class ConstantsIntegrationTest extends TestCase
                 'expected' => AppConstants::ROUTE_PROJECTS . '?success=deleted'
             ]
         ];
-        
+
         foreach ($testCases as $case) {
             $result = AppConstants::buildSuccessUrl($case['route'], $case['message']);
             $this->assertEquals($case['expected'], $result);
         }
-        
+
         // Test buildErrorUrl con caracteres especiales
         $errorUrl = AppConstants::buildErrorUrl(
             AppConstants::ROUTE_USERS,
             'Error con espacios y símbolos &'
         );
-        
+
         $this->assertStringContainsString('error=', $errorUrl);
         $this->assertStringContainsString(urlencode('Error con espacios y símbolos &'), $errorUrl);
     }
@@ -191,24 +191,24 @@ class ConstantsIntegrationTest extends TestCase
     {
         // Simular el uso en una vista
         ob_start();
-        
+
         // Código que simula lo que haría una vista real
         echo AppConstants::UI_TASK_MANAGEMENT;
         echo ' - ';
         echo AppConstants::UI_NEW_TASK;
-        
+
         $output = ob_get_clean();
-        
+
         $this->assertEquals('Gestión de Tareas - Nueva Tarea', $output);
-        
+
         // Test con botones
         ob_start();
         echo '<button>' . AppConstants::UI_BTN_CREATE . '</button>';
         echo '<button>' . AppConstants::UI_BTN_SAVE . '</button>';
         echo '<button>' . AppConstants::UI_BTN_CANCEL . '</button>';
-        
+
         $buttonOutput = ob_get_clean();
-        
+
         $this->assertStringContainsString('<button>Crear</button>', $buttonOutput);
         $this->assertStringContainsString('<button>Guardar</button>', $buttonOutput);
         $this->assertStringContainsString('<button>Cancelar</button>', $buttonOutput);
@@ -224,35 +224,43 @@ class ConstantsIntegrationTest extends TestCase
             'tasks' => [
                 'route' => AppConstants::ROUTE_TASKS,
                 'management' => AppConstants::UI_TASK_MANAGEMENT,
-                'back_to' => AppConstants::UI_BACK_TO_TASKS,
+                'back_to' => AppConstants::UI_BACK,
                 'new_item' => AppConstants::UI_NEW_TASK
             ],
             'projects' => [
                 'route' => AppConstants::ROUTE_PROJECTS,
                 'management' => AppConstants::UI_PROJECT_MANAGEMENT,
-                'back_to' => AppConstants::UI_BACK_TO_PROJECTS,
+                'back_to' => AppConstants::UI_BACK,
                 'new_item' => AppConstants::UI_NEW_PROJECT
             ],
             'personas' => [
                 'route' => AppConstants::ROUTE_PERSONAS,
                 'management' => AppConstants::UI_PERSONA_MANAGEMENT,
-                'back_to' => AppConstants::UI_BACK_TO_PERSONAS,
+                'back_to' => AppConstants::UI_BACK,
                 'new_item' => AppConstants::UI_NEW_PERSONA
             ]
         ];
-        
+
         foreach ($consistencyTests as $module => $constants) {
             // Verificar que la ruta corresponde al módulo
-            $this->assertStringContainsString($module, $constants['route'], 
-                "La ruta del módulo {$module} no contiene el nombre del módulo");
-            
+            $this->assertStringContainsString(
+                $module,
+                $constants['route'],
+                "La ruta del módulo {$module} no contiene el nombre del módulo"
+            );
+
             // Verificar que el título de gestión contiene referencia al módulo
-            $this->assertNotEmpty($constants['management'], 
-                "El título de gestión del módulo {$module} está vacío");
-            
+            $this->assertNotEmpty(
+                $constants['management'],
+                "El título de gestión del módulo {$module} está vacío"
+            );
+
             // Verificar que el botón de volver hace referencia al módulo
-            $this->assertStringContainsString('Volver', $constants['back_to'], 
-                "El botón de volver del módulo {$module} no contiene 'Volver'");
+            $this->assertStringContainsString(
+                'Volver',
+                $constants['back_to'],
+                "El botón de volver del módulo {$module} no contiene 'Volver'"
+            );
         }
     }
 
@@ -283,13 +291,17 @@ class ConstantsIntegrationTest extends TestCase
                 AppConstants::ERROR_INTERNAL_SYSTEM
             ]
         ];
-        
+
         foreach ($criticalErrors as $category => $errors) {
             foreach ($errors as $error) {
-                $this->assertNotEmpty($error, 
-                    "Error de categoría {$category} está vacío: {$error}");
-                $this->assertIsString($error, 
-                    "Error de categoría {$category} no es string: {$error}");
+                $this->assertNotEmpty(
+                    $error,
+                    "Error de categoría {$category} está vacío: {$error}"
+                );
+                $this->assertIsString(
+                    $error,
+                    "Error de categoría {$category} no es string: {$error}"
+                );
             }
         }
     }
@@ -300,20 +312,20 @@ class ConstantsIntegrationTest extends TestCase
     public function testRealWorldPerformance()
     {
         $startTime = microtime(true);
-        
+
         // Simular uso real de constantes en una página típica
         for ($i = 0; $i < 100; $i++) {
             // Simular carga de una vista de tareas
             $title = AppConstants::UI_TASK_MANAGEMENT;
             $newButton = AppConstants::UI_NEW_TASK;
-            $backButton = AppConstants::UI_BACK_TO_TASKS;
+            $backButton = AppConstants::UI_BACK;
             $createButton = AppConstants::UI_BTN_CREATE;
             $editButton = AppConstants::UI_BTN_EDIT;
             $deleteButton = AppConstants::UI_BTN_DELETE;
-            
+
             // Simular construcción de URLs
             $successUrl = AppConstants::buildSuccessUrl(
-                AppConstants::ROUTE_TASKS, 
+                AppConstants::ROUTE_TASKS,
                 AppConstants::SUCCESS_CREATED
             );
             $errorUrl = AppConstants::buildErrorUrl(
@@ -321,13 +333,16 @@ class ConstantsIntegrationTest extends TestCase
                 AppConstants::ERROR_INVALID_ID
             );
         }
-        
+
         $endTime = microtime(true);
         $executionTime = ($endTime - $startTime) * 1000; // en millisegundos
-        
+
         // En un contexto real, debe ser muy rápido (menos de 100ms para 100 simulaciones)
-        $this->assertLessThan(100, $executionTime, 
-            'El rendimiento de constantes en contexto real es demasiado lento');
+        $this->assertLessThan(
+            100,
+            $executionTime,
+            'El rendimiento de constantes en contexto real es demasiado lento'
+        );
     }
 
     /**
@@ -346,11 +361,14 @@ class ConstantsIntegrationTest extends TestCase
             'UI_BTN_SAVE' => 'Guardar',
             'UI_BTN_DELETE' => 'Eliminar'
         ];
-        
+
         foreach ($criticalConstants as $constantName => $expectedValue) {
             $actualValue = constant("App\\Constants\\AppConstants::{$constantName}");
-            $this->assertEquals($expectedValue, $actualValue, 
-                "La constante {$constantName} cambió de valor inesperadamente");
+            $this->assertEquals(
+                $expectedValue,
+                $actualValue,
+                "La constante {$constantName} cambió de valor inesperadamente"
+            );
         }
     }
 
@@ -365,13 +383,13 @@ class ConstantsIntegrationTest extends TestCase
             '/Views/personas/list.php' => ['UI_PERSONA_MANAGEMENT', 'UI_NEW_PERSONA'],
             '/Views/reports/list.php' => ['UI_SYSTEM_REPORTS']
         ];
-        
+
         foreach ($fase4Files as $filePath => $expectedConstants) {
             $fullPath = $this->testFilesPath . $filePath;
-            
+
             if (file_exists($fullPath)) {
                 $content = file_get_contents($fullPath);
-                
+
                 foreach ($expectedConstants as $constant) {
                     $this->assertStringContainsString(
                         "AppConstants::{$constant}",

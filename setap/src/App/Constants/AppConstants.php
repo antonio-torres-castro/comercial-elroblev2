@@ -495,18 +495,6 @@ class AppConstants
 
     // ===== ACCIONES DE NAVEGACIÓN ESPECÍFICAS =====
 
-    /** Volver a Tareas */
-    const UI_BACK_TO_TASKS = 'Volver a Tareas';
-
-    /** Volver a Proyectos */
-    const UI_BACK_TO_PROJECTS = 'Volver a Proyectos';
-
-    /** Volver a Personas */
-    const UI_BACK_TO_PERSONAS = 'Volver a Personas';
-
-    /** Volver a Reportes */
-    const UI_BACK_TO_REPORTS = 'Volver a Reportes';
-
     /** Búsqueda Avanzada */
     const UI_ADVANCED_SEARCH_BTN = 'Búsqueda Avanzada';
 

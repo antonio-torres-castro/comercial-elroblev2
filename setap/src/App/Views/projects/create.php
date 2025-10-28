@@ -60,7 +60,7 @@ use App\Constants\AppConstants; ?>
                 </div>
                 <div class="col-md-4 text-end">
                     <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_PROJECTS ?>
+                        <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                     </a>
                 </div>
             </div>

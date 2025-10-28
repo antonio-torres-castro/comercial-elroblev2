@@ -28,7 +28,7 @@ use App\Constants\AppConstants; ?>
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_TASKS ?>
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                     </div>
                 </div>
