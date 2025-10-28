@@ -20,32 +20,36 @@ class Persona
     /**
      * Obtener todas las personas con filtros opcionales
      */
+    /**
+     * Obtener todas las personas con filtros opcionales
+     */
     public function getAll(array $filters = []): array
     {
         try {
-            $sql = "
-                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion,
-                       et.nombre as estado, p.estado_tipo_id,
-                       p.fecha_Creado, p.fecha_modificacion
+            $sql = "SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion,
+                       et.nombre AS estado, p.estado_tipo_id,
+                       p.fecha_creado, p.fecha_modificacion
                 FROM personas p
                 LEFT JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                WHERE p.estado_tipo_id != 4
-            ";
+                WHERE p.estado_tipo_id != 4";
 
             $params = [];
 
-            // Aplicar filtros
+            // Filtro por estado
             if (!empty($filters['estado_tipo_id'])) {
                 $sql .= " AND p.estado_tipo_id = :estado_tipo_id";
                 $params[':estado_tipo_id'] = $filters['estado_tipo_id'];
             }
 
+            // Filtro por búsqueda general
             if (!empty($filters['search'])) {
-                $sql .= " AND (p.nombre LIKE :search OR p.rut LIKE :search OR p.telefono LIKE :search)";
-                $params[':search'] = '%' . $filters['search'] . '%';
+                $sql .= " AND (p.nombre LIKE :search1 OR p.rut LIKE :search2 OR p.telefono LIKE :search3)";
+                $params[':search1'] = '%' . $filters['search'] . '%';
+                $params[':search2'] = '%' . $filters['search'] . '%';
+                $params[':search3'] = '%' . $filters['search'] . '%';
             }
 
-            $sql .= " ORDER BY p.fecha_Creado DESC";
+            $sql .= " ORDER BY p.fecha_creado DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);

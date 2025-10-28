@@ -54,6 +54,7 @@ class MenuController extends BaseController
 
             // Obtener menús y estados usando el modelo
             $menus = $this->menuModel->getAll($filters);
+            $menuGroups = $this->menuModel->getMenuGroups();
             $statusTypes = $this->menuModel->getStatusTypes();
 
             // Datos para la vista
@@ -62,6 +63,7 @@ class MenuController extends BaseController
                 'title' => 'Gestión de Menús',
                 'subtitle' => 'Lista de todos los menús del sistema',
                 'menus' => $menus,
+                'menuGroups' => $menuGroups,
                 'statusTypes' => $statusTypes,
                 'filters' => $filters
             ];
@@ -145,6 +147,9 @@ class MenuController extends BaseController
                 return;
             }
 
+            // Obtener grupos de menú
+            $menuGroups = $this->menuModel->getMenuGroups();
+
             // Obtener tipos de estado disponibles
             $statusTypes = $this->menuModel->getStatusTypes();
 
@@ -154,7 +159,10 @@ class MenuController extends BaseController
                 'title' => 'Crear Menú',
                 'subtitle' => 'Agregar nuevo menú al sistema',
                 'menu' => null, // Para nuevo menú
-                'statusTypes' => $statusTypes
+                'menuGroups' => $menuGroups,
+                'statusTypes' => $statusTypes,
+                'action' => 'create',
+                'next_order' => $this->menuModel->getNextOrder()
             ];
 
             require_once __DIR__ . '/../Views/menus/create.php';

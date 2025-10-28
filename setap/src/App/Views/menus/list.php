@@ -103,14 +103,6 @@
                                 </span>
                             </div>
                             <div class="card-body">
-                                <?php if (isset($_SESSION['success_message'])): ?>
-                                    <div class="alert alert-success alert-dismissible fade show">
-                                        <?= htmlspecialchars($_SESSION['success_message']) ?>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                    </div>
-                                    <?php unset($_SESSION['success_message']); ?>
-                                <?php endif; ?>
-
                                 <?php if (!empty($data['menus'])): ?>
                                     <div class="table-responsive">
                                         <table class="table table-hover table-striped">
@@ -307,6 +299,30 @@
                 texto: 'Desconocido'
             };
 
+            const grupoInfo = {
+                1: {
+                    badge: 'warning',
+                    texto: 'Menus'
+                },
+                2: {
+                    badge: 'success',
+                    texto: 'Personas'
+                },
+                3: {
+                    badge: 'secondary',
+                    texto: 'Clientes'
+                },
+                4: {
+                    badge: 'danger',
+                    texto: 'Proyectos'
+                }
+            }
+
+            const grupo = grupoInfo[menu.menu_grupo_id] || {
+                badge: 'dark',
+                texto: 'Desconocido'
+            };
+
             const content = `
                 <div class="row">
                     <div class="col-md-6">
@@ -318,6 +334,7 @@
                     </div>
                     <div class="col-md-6">
                         <strong>Icono:</strong> <i class="bi bi-${menu.icono}"></i> ${menu.icono}<br>
+                        <strong>Grupo:</strong> <span class="badge bg-${grupo.badge}">${grupo.texto}</span><br>
                         <strong>Estado:</strong> <span class="badge bg-${estado.badge}">${estado.texto}</span><br>
                         <strong>Creado:</strong> ${new Date(menu.fecha_creacion).toLocaleDateString('es-ES')}<br>
                         <strong>Actualizado:</strong> ${menu.fecha_modificacion ? new Date(menu.fecha_modificacion).toLocaleDateString('es-ES') : 'N/A'}

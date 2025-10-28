@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Security;
 use App\Constants\AppConstants;
 ?>
 <!DOCTYPE html>
@@ -19,9 +20,6 @@ use App\Constants\AppConstants;
 </head>
 
 <body>
-    <?php
-
-    use App\Helpers\Security; ?>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
@@ -57,7 +55,7 @@ use App\Constants\AppConstants;
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/update">
-                                    <?= \App\Helpers\Security::renderCsrfField(); ?>
+                                    <?= Security::renderCsrfField(); ?>
                                     <input type="hidden" name="id" value="<?php echo $data['menu']['id']; ?>">
 
                                     <div class="row">
@@ -132,13 +130,33 @@ use App\Constants\AppConstants;
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label for="descripcion" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                                            placeholder="Descripción opcional del menú"><?php echo htmlspecialchars($data['menu']['descripcion'] ?? ''); ?></textarea>
-                                        <div class="form-text">Descripción opcional para documentación interna.</div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="descripcion" class="form-label">Descripción</label>
+                                                <textarea class="form-control" id="descripcion" name="descripcion" rows="1"
+                                                    placeholder="Descripción opcional del menú"><?php echo htmlspecialchars($data['menu']['descripcion'] ?? ''); ?></textarea>
+                                                <div class="form-text">Descripción opcional para documentación interna.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="menu_grupo_id" class="form-label">Menu Grupo</label>
+                                                <select class="form-select" id="menu_grupo_id" name="menu_grupo_id">
+                                                    <?php
+                                                    $selectedGroup = $data['menu']['menu_grupo_id'] ?? 1;
+                                                    foreach ($data['menuGroups'] as $group):
+                                                    ?>
+                                                        <option value="<?php echo $group['id']; ?>"
+                                                            <?php echo ($group['id'] == $selectedGroup) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($group['descripcion']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
+
 
                                     <!-- Información adicional -->
                                     <?php if (!empty($data['menu']['fecha_creacion'])): ?>
@@ -184,7 +202,7 @@ use App\Constants\AppConstants;
 
                                 <!-- Formulario oculto para eliminar -->
                                 <form id="formEliminar" method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/delete" style="display: none;">
-                                    <?= \App\Helpers\Security::renderCsrfField(); ?>
+                                    <?= Security::renderCsrfField(); ?>
                                     <input type="hidden" name="id" value="<?php echo $data['menu']['id']; ?>">
                                 </form>
                             </div>

@@ -131,13 +131,33 @@ use App\Constants\AppConstants;
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label for="descripcion" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                                            placeholder="Descripción opcional del menú"><?php echo htmlspecialchars($data['menu']['descripcion'] ?? ''); ?></textarea>
-                                        <div class="form-text">Descripción opcional para documentación interna.</div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="descripcion" class="form-label">Descripción</label>
+                                                <textarea class="form-control" id="descripcion" name="descripcion" rows="1"
+                                                    placeholder="Descripción opcional del menú"><?php echo htmlspecialchars($data['menu']['descripcion'] ?? ''); ?></textarea>
+                                                <div class="form-text">Descripción opcional para documentación interna.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="menu_grupo_id" class="form-label">Grupo</label>
+                                                <select class="form-select" id="menu_grupo_id" name="menu_grupo_id">
+                                                    <?php
+                                                    $selectedGroup = $data['menu']['menu_grupo_id'] ?? 1;
+                                                    foreach ($data['menuGroups'] as $group):
+                                                    ?>
+                                                        <option value="<?php echo $group['id']; ?>"
+                                                            <?php echo ($group['id'] == $selectedGroup) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($group['descripcion']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
+
 
                                     <div class="d-flex justify-content-between">
                                         <a href="<?= AppConstants::ROUTE_MENUS ?>" class="btn btn-secondary">

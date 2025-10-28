@@ -56,6 +56,9 @@
 
     use App\Helpers\Security;
     use App\Constants\AppConstants;
+
+    use function PHPUnit\Framework\isEmpty;
+
     ?>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -89,7 +92,7 @@
                         <?php endif; ?>
 
                         <!-- Mostrar mensaje de éxito si existe -->
-                        <?php if (isset($_SESSION['success_message'])): ?>
+                        <?php if (!empty($_SESSION['success_message']) && isset($_SESSION['success_message'])): ?>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="bi bi-check-circle"></i> <?= htmlspecialchars($_SESSION['success_message']) ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
