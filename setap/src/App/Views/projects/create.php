@@ -166,7 +166,6 @@ use App\Constants\AppConstants; ?>
                                         <option value="<?= (int)$counterpart['id'] ?>" data-cliente-id="<?= (int)$counterpart['cliente_id'] ?>">
                                             <?= htmlspecialchars($counterpart['nombre']) ?>
                                             - <?= htmlspecialchars($counterpart['cargo']) ?>
-                                            (<?= htmlspecialchars($counterpart['cliente_nombre']) ?>)
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
