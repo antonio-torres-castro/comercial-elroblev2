@@ -328,6 +328,6 @@ class SecurityValidator
             'data' => $data
         ];
 
-        Logger::error("SECURITY_EVENT: " . json_encode($logData));
+        Logger::info("SECURITY_EVENT: " . json_encode($logData));
     }
 }

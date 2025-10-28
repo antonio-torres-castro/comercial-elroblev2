@@ -207,11 +207,14 @@ try {
         case 'project':
             $controller = new ProjectController();
 
-            if ($action) {
-                $controller->show((int)$action);
-            } else {
-                // Redirigir a nuevo proyecto
-                $controller->show();
+            switch ($action) {
+                case 'show':
+                    if ($id) {
+                        $controller->show((int)$id);
+                    } else {
+                        $controller->show();
+                    }
+                    break;
             }
             break;
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Security;
 use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -41,10 +42,6 @@ use App\Constants\AppConstants; ?>
 </head>
 
 <body class="bg-light">
-    <?php
-
-    use App\Helpers\Security; ?>
-
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -74,45 +71,29 @@ use App\Constants\AppConstants; ?>
             <?php endif; ?>
 
             <!-- Formulario de Creación -->
-            <form method="POST" action="<?= AppConstants::ROUTE_PROJECTS ?>/store" id="createProjectForm">
-                <?= \App\Helpers\Security::renderCsrfField() ?>
+            <form method="POST" action="<?= AppConstants::ROUTE_PROJECTS_CREATE ?>" id="createProjectForm">
+                <?= Security::renderCsrfField() ?>
 
                 <div class="row justify-content-center">
                     <div class="col-lg-8">
-                        <!-- <?= AppConstants::UI_BASIC_INFORMATION ?> -->
+                        <!-- Informacion Basica -->
                         <div class="form-section">
                             <h5><i class="bi bi-info-circle"></i> <?= AppConstants::UI_BASIC_INFORMATION ?></h5>
 
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="cliente_id" class="form-label">Cliente <span class="required">*</span></label>
-                                        <select class="form-select" id="cliente_id" name="cliente_id" required>
-                                            <option value="">Seleccionar Cliente</option>
-                                            <?php foreach ($clients as $client): ?>
-                                                <option value="<?= (int)$client['id'] ?>">
-                                                    <?= htmlspecialchars($client['nombre']) ?>
-                                                    <?php if (!empty($client['rut'])): ?>
-                                                        - RUT: <?= htmlspecialchars($client['rut']) ?>
-                                                    <?php endif; ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
-                                        <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
-                                            <option value="">Seleccionar Tipo de Tarea</option>
-                                            <?php foreach ($taskTypes as $taskType): ?>
-                                                <option value="<?= (int)$taskType['id'] ?>">
-                                                    <?= htmlspecialchars($taskType['nombre']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                                <div class="mb-3">
+                                    <label for="cliente_id" class="form-label">Cliente <span class="required">*</span></label>
+                                    <select class="form-select" id="cliente_id" name="cliente_id" required>
+                                        <option value="">Seleccionar Cliente</option>
+                                        <?php foreach ($clients as $client): ?>
+                                            <option value="<?= (int)$client['id'] ?>">
+                                                <?= htmlspecialchars($client['nombre']) ?>
+                                                <?php if (!empty($client['rut'])): ?>
+                                                    - RUT: <?= htmlspecialchars($client['rut']) ?>
+                                                <?php endif; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                             </div>
 
@@ -133,16 +114,49 @@ use App\Constants\AppConstants; ?>
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="direccion" class="form-label">Dirección del Proyecto</label>
-                                <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                    placeholder="Ingresa la dirección donde se desarrollará el proyecto..."></textarea>
+                            <div class="row">
+                                <div class="mb-3">
+                                    <label for="direccion" class="form-label">Dirección</label>
+                                    <textarea class="form-control" id="direccion" name="direccion" rows="1"
+                                        placeholder="Ingresa la dirección donde se desarrollará el proyecto..."></textarea>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Configuración del Proyecto -->
                         <div class="form-section">
                             <h5><i class="bi bi-people"></i> Configuración del Proyecto</h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
+                                        <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
+                                            <option value="">Seleccionar Tipo de Tarea</option>
+                                            <?php foreach ($taskTypes as $taskType): ?>
+                                                <option value="<?= (int)$taskType['id'] ?>">
+                                                    <?= htmlspecialchars($taskType['nombre']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
+                                        <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
+                                            <?php foreach ($projectStates as $state): ?>
+                                                <option value="<?= (int)$state['id'] ?>">
+                                                    <?= htmlspecialchars($state['nombre']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
 
                             <div class="mb-3">
                                 <label for="contraparte_id" class="form-label">Contraparte del Cliente <span class="required">*</span></label>
@@ -156,13 +170,7 @@ use App\Constants\AppConstants; ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <div class="form-text">
-                                    Persona de contacto del cliente para este proyecto.
-                                    <span id="contraparte-filter-info" class="text-muted"></span>
-                                </div>
                             </div>
-
-
                         </div>
 
                         <!-- Botones de Acción -->

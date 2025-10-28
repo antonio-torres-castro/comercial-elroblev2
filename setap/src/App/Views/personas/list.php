@@ -240,7 +240,7 @@ use App\Constants\AppConstants; ?>
                                             </span>
                                         </td>
                                         <td>
-                                            <small><?= date('d/m/Y H:i', strtotime($persona['fecha_Creado'])) ?></small>
+                                            <small><?= date('d/m/Y H:i', strtotime($persona['fecha_creado'])) ?></small>
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">

@@ -121,11 +121,13 @@ class ProjectController extends BaseController
         // Obtener datos necesarios para el formulario
         $clients = $this->getClients();
         $taskTypes = $this->getTaskTypes();
+        $projectStates = $this->getProjectStates();
         $counterparts = $this->getCounterparts();
 
         $this->view('projects/create', [
             'clients' => $clients,
             'taskTypes' => $taskTypes,
+            'projectStates' => $projectStates,
             'counterparts' => $counterparts,
             'error' => $_GET['error'] ?? ''
         ]);

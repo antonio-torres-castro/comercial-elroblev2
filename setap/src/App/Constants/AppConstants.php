@@ -86,8 +86,14 @@ class AppConstants
     /** Ruta de vista de proyecto */
     const ROUTE_PROJECTS_SHOW = '/setap/projects/show';
 
+    /** Ruta de vista de proyecto */
+    const ROUTE_PROJECT_SHOW = '/setap/project/show';
+
     /** Ruta de edición de proyecto */
     const ROUTE_PROJECTS_EDIT = '/setap/projects/edit';
+
+    /** Ruta de creación de proyectos */
+    const ROUTE_PROJECTS_UPDATE = '/setap/projects/update';
 
     /** Ruta de reporte de proyecto */
     const ROUTE_PROJECTS_REPORT = '/setap/projects/report';
