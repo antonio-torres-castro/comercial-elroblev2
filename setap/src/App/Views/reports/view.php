@@ -92,7 +92,7 @@ use App\Constants\AppConstants; ?>
                 <div class="col-12">
                     <div class="d-flex justify-content-between">
                         <a href="<?= AppConstants::ROUTE_REPORTS ?>" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left"></i> Volver a Reportes
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                         <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Nuevo Reporte

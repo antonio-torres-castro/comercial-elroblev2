@@ -105,7 +105,7 @@ use App\Constants\AppConstants;
                     </div>
                     <div class="col-auto">
                         <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-light">
-                            <i class="bi bi-arrow-left"></i> Volver a Usuarios
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                     </div>
                 </div>

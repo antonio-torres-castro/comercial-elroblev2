@@ -28,8 +28,8 @@ use App\Constants\AppConstants;
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= \App\Constants\AppConstants::ROUTE_CLIENTS ?>" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Volver a Lista
+                        <a href="<?= AppConstants::ROUTE_CLIENTS ?>" class="btn btn-sm btn-secondary">
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                     </div>
                 </div>
@@ -151,7 +151,7 @@ use App\Constants\AppConstants;
                                     <!-- Botones -->
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                         <a href="<?= AppConstants::ROUTE_CLIENTS ?>" class="btn btn-secondary">
-                                            <i class="bi bi-x-circle"></i> Cancelar
+                                            <i class="bi bi-x-circle"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                         </a>
                                         <button type="submit" class="btn btn-setap-primary">
                                             <i class="bi bi-floppy"></i> Guardar Cliente

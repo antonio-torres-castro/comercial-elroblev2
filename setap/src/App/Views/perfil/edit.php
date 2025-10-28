@@ -27,7 +27,7 @@ use App\Constants\AppConstants;
                 <h1><?php echo $data['title']; ?></h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <a href="<?= AppConstants::ROUTE_PERFIL ?>" class="btn btn-sm btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver
+                        <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                     </a>
                 </div>
             </div>
@@ -89,7 +89,7 @@ use App\Constants\AppConstants;
                         <hr>
                         <div class="d-flex justify-content-between">
                             <a href="<?= AppConstants::ROUTE_PERFIL ?>" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Cancelar
+                                <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                             </a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save"></i> Guardar Cambios

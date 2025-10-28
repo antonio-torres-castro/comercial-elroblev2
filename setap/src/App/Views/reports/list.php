@@ -1,6 +1,9 @@
-<?php use App\Constants\AppConstants; ?>
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,21 +20,26 @@
             transition: transform 0.2s;
             cursor: pointer;
         }
+
         .report-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .stats-card {
             transition: transform 0.2s;
         }
+
         .stats-card:hover {
             transform: translateY(-2px);
         }
+
         .main-content {
             margin-top: 2rem;
         }
     </style>
 </head>
+
 <body class="bg-light">
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
@@ -63,55 +71,55 @@
 
             <!-- Estadísticas Rápidas -->
             <?php if (isset($stats)): ?>
-            <div class="row mb-4">
-                <div class="col-md-3 mb-3">
-                    <div class="card stats-card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="text-setap-primary mb-2">
-                                <i class="bi bi-folder" style="font-size: 2rem;"></i>
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="text-setap-primary mb-2">
+                                    <i class="bi bi-folder" style="font-size: 2rem;"></i>
+                                </div>
+                                <h3 class="mb-0"><?= $stats['total_projects'] ?? 0 ?></h3>
+                                <p class="text-muted mb-0">Total Proyectos</p>
                             </div>
-                            <h3 class="mb-0"><?= $stats['total_projects'] ?? 0 ?></h3>
-                            <p class="text-muted mb-0">Total Proyectos</p>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-3 mb-3">
-                    <div class="card stats-card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="text-success mb-2">
-                                <i class="bi bi-list-task" style="font-size: 2rem;"></i>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="text-success mb-2">
+                                    <i class="bi bi-list-task" style="font-size: 2rem;"></i>
+                                </div>
+                                <h3 class="mb-0"><?= $stats['total_tasks'] ?? 0 ?></h3>
+                                <p class="text-muted mb-0">Total Tareas</p>
                             </div>
-                            <h3 class="mb-0"><?= $stats['total_tasks'] ?? 0 ?></h3>
-                            <p class="text-muted mb-0">Total Tareas</p>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-3 mb-3">
-                    <div class="card stats-card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="text-info mb-2">
-                                <i class="bi bi-people" style="font-size: 2rem;"></i>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="text-info mb-2">
+                                    <i class="bi bi-people" style="font-size: 2rem;"></i>
+                                </div>
+                                <h3 class="mb-0"><?= $stats['total_users'] ?? 0 ?></h3>
+                                <p class="text-muted mb-0">Total Usuarios</p>
                             </div>
-                            <h3 class="mb-0"><?= $stats['total_users'] ?? 0 ?></h3>
-                            <p class="text-muted mb-0">Total Usuarios</p>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-3 mb-3">
-                    <div class="card stats-card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="text-warning mb-2">
-                                <i class="bi bi-building" style="font-size: 2rem;"></i>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="text-warning mb-2">
+                                    <i class="bi bi-building" style="font-size: 2rem;"></i>
+                                </div>
+                                <h3 class="mb-0"><?= $stats['total_clients'] ?? 0 ?></h3>
+                                <p class="text-muted mb-0">Total Clientes</p>
                             </div>
-                            <h3 class="mb-0"><?= $stats['total_clients'] ?? 0 ?></h3>
-                            <p class="text-muted mb-0">Total Clientes</p>
                         </div>
                     </div>
                 </div>
-            </div>
             <?php endif; ?>
 
             <!-- Tipos de Reportes Disponibles -->
@@ -274,22 +282,22 @@
             // Crear formulario temporal para enviar datos
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '<?php AppConstants::ROUTE_REPORTS; ?>/generate';
-            
+            form.action = '<?= AppConstants::ROUTE_REPORTS; ?>/generate';
+
             // Agregar token CSRF
             const csrfToken = document.createElement('input');
             csrfToken.type = 'hidden';
             csrfToken.name = 'csrf_token';
             csrfToken.value = '<?= \App\Helpers\Security::getCsrfToken() ?>';
             form.appendChild(csrfToken);
-            
+
             // Agregar tipo de reporte
             const reportTypeInput = document.createElement('input');
             reportTypeInput.type = 'hidden';
             reportTypeInput.name = 'report_type';
             reportTypeInput.value = reportType;
             form.appendChild(reportTypeInput);
-            
+
             // Agregar fechas por defecto (último mes)
             const dateFrom = document.createElement('input');
             dateFrom.type = 'hidden';
@@ -298,17 +306,18 @@
             lastMonth.setMonth(lastMonth.getMonth() - 1);
             dateFrom.value = lastMonth.toISOString().split('T')[0];
             form.appendChild(dateFrom);
-            
+
             const dateTo = document.createElement('input');
             dateTo.type = 'hidden';
             dateTo.name = 'date_to';
             dateTo.value = new Date().toISOString().split('T')[0];
             form.appendChild(dateTo);
-            
+
             // Enviar formulario
             document.body.appendChild(form);
             form.submit();
         }
     </script>
 </body>
+
 </html>

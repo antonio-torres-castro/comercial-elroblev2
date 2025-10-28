@@ -69,7 +69,7 @@ use App\Constants\AppConstants; ?>
                 </div>
                 <div class="col-md-4 text-end">
                     <a href="<?= AppConstants::ROUTE_REPORTS ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver a Reportes
+                        <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                     </a>
                 </div>
             </div>
@@ -223,8 +223,8 @@ use App\Constants\AppConstants; ?>
 
                         <!-- Botones de Acción -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="/reports" class="btn btn-secondary">
-                                <i class="bi bi-x-lg"></i> Cancelar
+                            <a href="<?= AppConstants::ROUTE_REPORTS ?>" class="btn btn-secondary">
+                                <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                             </a>
                             <button type="button" class="btn btn-outline-setap-primary" id="previewBtn">
                                 <i class="bi bi-eye"></i> Vista Previa

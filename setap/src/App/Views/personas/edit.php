@@ -54,7 +54,7 @@ use App\Constants\AppConstants; ?>
             </div>
             <div class="col-md-4 text-end">
                 <a href="<?= AppConstants::ROUTE_PERSONAS ?>" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver a Personas
+                    <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                 </a>
             </div>
         </div>
@@ -197,8 +197,8 @@ use App\Constants\AppConstants; ?>
                                 <button type="submit" class="btn btn-success" id="saveBtn">
                                     <i class="bi bi-check-lg"></i> Guardar Cambios
                                 </button>
-                                <a href="<?php AppConstants::ROUTE_PERSONAS; ?>" class="btn btn-secondary">
-                                    <i class="bi bi-x-lg"></i> Cancelar
+                                <a href="<?= AppConstants::ROUTE_PERSONAS; ?>" class="btn btn-secondary">
+                                    <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                 </a>
                             </div>
                         </div>

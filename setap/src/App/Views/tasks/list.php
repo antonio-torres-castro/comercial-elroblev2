@@ -1,6 +1,9 @@
-<?php use App\Constants\AppConstants; ?>
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -143,14 +147,36 @@
                                                             $badgeClass = 'bg-secondary';
                                                             $statusText = '';
                                                             switch ($task['estado_tipo_id']) {
-                                                                case 1: $badgeClass = 'bg-warning text-dark'; $statusText = 'Creado'; break;
-                                                                case 2: $badgeClass = 'bg-success'; $statusText = 'Activo'; break;
-                                                                case 3: $badgeClass = 'bg-secondary'; $statusText = 'Inactivo'; break;
-                                                                case 5: $badgeClass = 'bg-primary'; $statusText = 'Iniciado'; break;
-                                                                case 6: $badgeClass = 'bg-info text-dark'; $statusText = 'Terminado'; break;
-                                                                case 7: $badgeClass = 'bg-danger'; $statusText = 'Rechazado'; break;
-                                                                case 8: $badgeClass = 'bg-dark'; $statusText = 'Aprobado'; break;
-                                                                default: $statusText = htmlspecialchars($task['estado']);
+                                                                case 1:
+                                                                    $badgeClass = 'bg-warning text-dark';
+                                                                    $statusText = 'Creado';
+                                                                    break;
+                                                                case 2:
+                                                                    $badgeClass = 'bg-success';
+                                                                    $statusText = 'Activo';
+                                                                    break;
+                                                                case 3:
+                                                                    $badgeClass = 'bg-secondary';
+                                                                    $statusText = 'Inactivo';
+                                                                    break;
+                                                                case 5:
+                                                                    $badgeClass = 'bg-primary';
+                                                                    $statusText = 'Iniciado';
+                                                                    break;
+                                                                case 6:
+                                                                    $badgeClass = 'bg-info text-dark';
+                                                                    $statusText = 'Terminado';
+                                                                    break;
+                                                                case 7:
+                                                                    $badgeClass = 'bg-danger';
+                                                                    $statusText = 'Rechazado';
+                                                                    break;
+                                                                case 8:
+                                                                    $badgeClass = 'bg-dark';
+                                                                    $statusText = 'Aprobado';
+                                                                    break;
+                                                                default:
+                                                                    $statusText = htmlspecialchars($task['estado']);
                                                             }
                                                             ?>
                                                             <div class="d-flex align-items-center">
@@ -341,31 +367,31 @@
                     document.getElementById('confirmChangeState').addEventListener('click', function() {
                         const formData = new FormData(document.getElementById('changeStateForm'));
 
-                        fetch('<?php AppConstants::ROUTE_TASKS; ?>/change-state', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Actualizar badge de estado en la tabla
-                                const taskId = formData.get('task_id');
-                                const newStateId = formData.get('new_state');
-                                updateStatusBadge(taskId, newStateId);
+                        fetch('<?= AppConstants::ROUTE_TASKS; ?>/change-state', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Actualizar badge de estado en la tabla
+                                    const taskId = formData.get('task_id');
+                                    const newStateId = formData.get('new_state');
+                                    updateStatusBadge(taskId, newStateId);
 
-                                // Mostrar mensaje de éxito
-                                showAlert('success', data.message);
+                                    // Mostrar mensaje de éxito
+                                    showAlert('success', data.message);
 
-                                // Cerrar modal
-                                bootstrap.Modal.getInstance(document.getElementById('changeStateModal')).hide();
-                            } else {
-                                showAlert('danger', 'Error: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showAlert('danger', 'Error de conexión al servidor');
-                        });
+                                    // Cerrar modal
+                                    bootstrap.Modal.getInstance(document.getElementById('changeStateModal')).hide();
+                                } else {
+                                    showAlert('danger', 'Error: ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                showAlert('danger', 'Error de conexión al servidor');
+                            });
                     });
 
                     // GAP 5: Actualizar badge de estado
@@ -375,13 +401,34 @@
                         let statusText = '';
 
                         switch (parseInt(stateId)) {
-                            case 1: badgeClass = 'bg-warning text-dark'; statusText = 'Creado'; break;
-                            case 2: badgeClass = 'bg-success'; statusText = 'Activo'; break;
-                            case 3: badgeClass = 'bg-secondary'; statusText = 'Inactivo'; break;
-                            case 5: badgeClass = 'bg-primary'; statusText = 'Iniciado'; break;
-                            case 6: badgeClass = 'bg-info text-dark'; statusText = 'Terminado'; break;
-                            case 7: badgeClass = 'bg-danger'; statusText = 'Rechazado'; break;
-                            case 8: badgeClass = 'bg-dark'; statusText = 'Aprobado'; break;
+                            case 1:
+                                badgeClass = 'bg-warning text-dark';
+                                statusText = 'Creado';
+                                break;
+                            case 2:
+                                badgeClass = 'bg-success';
+                                statusText = 'Activo';
+                                break;
+                            case 3:
+                                badgeClass = 'bg-secondary';
+                                statusText = 'Inactivo';
+                                break;
+                            case 5:
+                                badgeClass = 'bg-primary';
+                                statusText = 'Iniciado';
+                                break;
+                            case 6:
+                                badgeClass = 'bg-info text-dark';
+                                statusText = 'Terminado';
+                                break;
+                            case 7:
+                                badgeClass = 'bg-danger';
+                                statusText = 'Rechazado';
+                                break;
+                            case 8:
+                                badgeClass = 'bg-dark';
+                                statusText = 'Aprobado';
+                                break;
                         }
 
                         badge.className = `badge ${badgeClass}`;
@@ -411,24 +458,24 @@
                             const formData = new FormData();
                             formData.append('id', taskToDelete);
 
-                            fetch('<?php AppConstants::ROUTE_TASKS; ?>/delete', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // Remover fila de la tabla
-                                    document.getElementById(`task-row-${taskToDelete}`).remove();
-                                    showAlert('success', data.message);
-                                } else {
-                                    showAlert('danger', 'Error: ' + data.message);
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                showAlert('danger', 'Error de conexión al servidor');
-                            });
+                            fetch('<?= AppConstants::ROUTE_TASKS; ?>/delete', {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        // Remover fila de la tabla
+                                        document.getElementById(`task-row-${taskToDelete}`).remove();
+                                        showAlert('success', data.message);
+                                    } else {
+                                        showAlert('danger', 'Error: ' + data.message);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    showAlert('danger', 'Error de conexión al servidor');
+                                });
                         }
                         bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
                     });
@@ -447,4 +494,5 @@
     <!-- GAP 5: Task State Validation Utilities -->
     <script src="/js/task-state-utils.js"></script>
 </body>
+
 </html>

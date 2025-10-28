@@ -60,7 +60,7 @@ use App\Constants\AppConstants; ?>
                 </div>
                 <div class="col-md-4 text-end">
                     <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= (int)$project['id'] ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver al Proyecto
+                        <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                     </a>
                 </div>
             </div>
@@ -193,7 +193,7 @@ use App\Constants\AppConstants; ?>
                         <!-- Botones de Acción -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= (int)$project['id'] ?>" class="btn btn-secondary">
-                                <i class="bi bi-x-lg"></i> Cancelar
+                                <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                             </a>
                             <button type="submit" class="btn btn-success" id="saveBtn">
                                 <i class="bi bi-check-lg"></i> Guardar Cambios

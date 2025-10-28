@@ -66,7 +66,7 @@
                     <h1 class="h2"><?= AppConstants::UI_CREATE_NEW ?> Usuario</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_LIST ?>
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                     </div>
                 </div>
@@ -344,7 +344,7 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="d-flex justify-content-between">
-                                        <a href="/users" class="btn btn-secondary">
+                                        <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-secondary">
                                             <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                         </a>
                                         <button type="submit" name="create_user" class="btn btn-primary">

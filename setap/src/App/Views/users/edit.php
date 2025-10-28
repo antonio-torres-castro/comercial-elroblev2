@@ -414,7 +414,7 @@ use App\Constants\AppConstants; ?>
                                 <div class="col-12">
                                     <div class="d-flex gap-2 justify-content-end">
                                         <a href="<?= AppConstants::ROUTE_USERS ?>" class="btn btn-secondary">
-                                            <i class="bi bi-arrow-left"></i> Cancelar
+                                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                         </a>
                                         <button type="submit" class="btn btn-warning" id="updateBtn">
                                             <i class="bi bi-check-lg"></i> Actualizar Usuario

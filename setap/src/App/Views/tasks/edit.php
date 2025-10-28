@@ -1,6 +1,9 @@
-<?php use App\Constants\AppConstants; ?>
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,12 +22,14 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-color);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
@@ -32,7 +37,9 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -186,7 +193,7 @@
                                     <!-- Botones de Acción -->
                                     <div class="mt-4 text-end">
                                         <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary me-2">
-                                            <i class="bi bi-arrow-left"></i> Volver a Tareas
+                                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                                         </a>
                                         <button type="submit" class="btn btn-warning" id="updateBtn">
                                             <i class="bi bi-check-lg"></i> Actualizar Tarea
@@ -349,4 +356,5 @@
     <!-- GAP 5: Task State Validation Utilities -->
     <script src="/js/task-state-utils.js"></script>
 </body>
+
 </html>

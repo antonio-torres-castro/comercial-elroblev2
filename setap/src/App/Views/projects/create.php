@@ -1,6 +1,9 @@
-<?php use App\Constants\AppConstants; ?>
+<?php
+
+use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,15 +22,18 @@
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .form-section h5 {
             color: var(--setap-text-muted);
             border-bottom: 2px solid var(--setap-border-light);
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .required {
             color: #dc3545;
         }
+
         .main-content {
             margin-top: 2rem;
         }
@@ -35,140 +41,142 @@
 </head>
 
 <body class="bg-light">
-    <?php use App\Helpers\Security; ?>
+    <?php
+
+    use App\Helpers\Security; ?>
 
     <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container mt-4">
         <main class="main-content">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <h2>
-                    <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_CREATE_NEW_PROJECT ?>
-                </h2>
-                <p class="text-muted">Complete los datos para crear un nuevo proyecto en el sistema.</p>
-            </div>
-            <div class="col-md-4 text-end">
-                <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_PROJECTS ?>
-                </a>
-            </div>
-        </div>
-
-        <!-- Mensajes de Error -->
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-
-        <!-- Formulario de Creación -->
-        <form method="POST" action="<?= AppConstants::ROUTE_PROJECTS ?>/store" id="createProjectForm">
-            <?= \App\Helpers\Security::renderCsrfField() ?>
-
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <!-- <?= AppConstants::UI_BASIC_INFORMATION ?> -->
-                    <div class="form-section">
-                        <h5><i class="bi bi-info-circle"></i> <?= AppConstants::UI_BASIC_INFORMATION ?></h5>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="cliente_id" class="form-label">Cliente <span class="required">*</span></label>
-                                    <select class="form-select" id="cliente_id" name="cliente_id" required>
-                                        <option value="">Seleccionar Cliente</option>
-                                        <?php foreach ($clients as $client): ?>
-                                            <option value="<?= (int)$client['id'] ?>">
-                                                <?= htmlspecialchars($client['nombre']) ?>
-                                                <?php if (!empty($client['rut'])): ?>
-                                                    - RUT: <?= htmlspecialchars($client['rut']) ?>
-                                                <?php endif; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
-                                    <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
-                                        <option value="">Seleccionar Tipo de Tarea</option>
-                                        <?php foreach ($taskTypes as $taskType): ?>
-                                            <option value="<?= (int)$taskType['id'] ?>">
-                                                <?= htmlspecialchars($taskType['nombre']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
-                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="fecha_fin" class="form-label">Fecha Fin</label>
-                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
-                                    <div class="form-text">Campo opcional. Deja en blanco si no se define aún.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="direccion" class="form-label">Dirección del Proyecto</label>
-                            <textarea class="form-control" id="direccion" name="direccion" rows="2"
-                                placeholder="Ingresa la dirección donde se desarrollará el proyecto..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Configuración del Proyecto -->
-                    <div class="form-section">
-                        <h5><i class="bi bi-people"></i> Configuración del Proyecto</h5>
-
-                        <div class="mb-3">
-                            <label for="contraparte_id" class="form-label">Contraparte del Cliente <span class="required">*</span></label>
-                            <select class="form-select" id="contraparte_id" name="contraparte_id" required>
-                                <option value="">Seleccionar Contraparte</option>
-                                <?php foreach ($counterparts as $counterpart): ?>
-                                    <option value="<?= (int)$counterpart['id'] ?>" data-cliente-id="<?= (int)$counterpart['cliente_id'] ?>">
-                                        <?= htmlspecialchars($counterpart['nombre']) ?>
-                                        - <?= htmlspecialchars($counterpart['cargo']) ?>
-                                        (<?= htmlspecialchars($counterpart['cliente_nombre']) ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="form-text">
-                                Persona de contacto del cliente para este proyecto.
-                                <span id="contraparte-filter-info" class="text-muted"></span>
-                            </div>
-                        </div>
-
-
-                    </div>
-
-                    <!-- Botones de Acción -->
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-secondary">
-                            <i class="bi bi-x-lg"></i> Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-success" id="createBtn">
-                            <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_CREATE_PROJECT ?>
-                        </button>
-                    </div>
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>
+                        <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_CREATE_NEW_PROJECT ?>
+                    </h2>
+                    <p class="text-muted">Complete los datos para crear un nuevo proyecto en el sistema.</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK_TO_PROJECTS ?>
+                    </a>
                 </div>
             </div>
-        </form>
+
+            <!-- Mensajes de Error -->
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
+            <!-- Formulario de Creación -->
+            <form method="POST" action="<?= AppConstants::ROUTE_PROJECTS ?>/store" id="createProjectForm">
+                <?= \App\Helpers\Security::renderCsrfField() ?>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <!-- <?= AppConstants::UI_BASIC_INFORMATION ?> -->
+                        <div class="form-section">
+                            <h5><i class="bi bi-info-circle"></i> <?= AppConstants::UI_BASIC_INFORMATION ?></h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="cliente_id" class="form-label">Cliente <span class="required">*</span></label>
+                                        <select class="form-select" id="cliente_id" name="cliente_id" required>
+                                            <option value="">Seleccionar Cliente</option>
+                                            <?php foreach ($clients as $client): ?>
+                                                <option value="<?= (int)$client['id'] ?>">
+                                                    <?= htmlspecialchars($client['nombre']) ?>
+                                                    <?php if (!empty($client['rut'])): ?>
+                                                        - RUT: <?= htmlspecialchars($client['rut']) ?>
+                                                    <?php endif; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
+                                        <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
+                                            <option value="">Seleccionar Tipo de Tarea</option>
+                                            <?php foreach ($taskTypes as $taskType): ?>
+                                                <option value="<?= (int)$taskType['id'] ?>">
+                                                    <?= htmlspecialchars($taskType['nombre']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
+                                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
+                                        <div class="form-text">Campo opcional. Deja en blanco si no se define aún.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="direccion" class="form-label">Dirección del Proyecto</label>
+                                <textarea class="form-control" id="direccion" name="direccion" rows="2"
+                                    placeholder="Ingresa la dirección donde se desarrollará el proyecto..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Configuración del Proyecto -->
+                        <div class="form-section">
+                            <h5><i class="bi bi-people"></i> Configuración del Proyecto</h5>
+
+                            <div class="mb-3">
+                                <label for="contraparte_id" class="form-label">Contraparte del Cliente <span class="required">*</span></label>
+                                <select class="form-select" id="contraparte_id" name="contraparte_id" required>
+                                    <option value="">Seleccionar Contraparte</option>
+                                    <?php foreach ($counterparts as $counterpart): ?>
+                                        <option value="<?= (int)$counterpart['id'] ?>" data-cliente-id="<?= (int)$counterpart['cliente_id'] ?>">
+                                            <?= htmlspecialchars($counterpart['nombre']) ?>
+                                            - <?= htmlspecialchars($counterpart['cargo']) ?>
+                                            (<?= htmlspecialchars($counterpart['cliente_nombre']) ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">
+                                    Persona de contacto del cliente para este proyecto.
+                                    <span id="contraparte-filter-info" class="text-muted"></span>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="<?= AppConstants::ROUTE_PROJECTS ?>" class="btn btn-secondary">
+                                <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
+                            </a>
+                            <button type="submit" class="btn btn-success" id="createBtn">
+                                <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_CREATE_PROJECT ?>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </main>
     </div>
 
@@ -221,7 +229,7 @@
             clienteSelect.addEventListener('change', function() {
                 const clienteId = this.value;
                 const filterInfo = document.getElementById('contraparte-filter-info');
-                
+
                 // Resetear selección de contraparte
                 contraparteSelect.value = '';
 
@@ -239,7 +247,7 @@
 
                     totalCount++;
                     const contraparteClienteId = option.getAttribute('data-cliente-id');
-                    
+
                     if (!clienteId) {
                         // Sin cliente seleccionado: mostrar todas las contrapartes
                         option.style.display = '';
@@ -262,7 +270,7 @@
                 if (clienteId) {
                     const clienteNombre = clienteSelect.options[clienteSelect.selectedIndex].text;
                     firstOption.textContent = `Seleccionar Contraparte de ${clienteNombre}`;
-                    
+
                     // Mostrar información del filtrado
                     if (visibleCount === 0) {
                         filterInfo.innerHTML = '<br><small class="text-warning"><i class="bi bi-exclamation-triangle"></i> Este cliente no tiene contrapartes disponibles.</small>';
@@ -326,4 +334,5 @@
         });
     </script>
 </body>
+
 </html>

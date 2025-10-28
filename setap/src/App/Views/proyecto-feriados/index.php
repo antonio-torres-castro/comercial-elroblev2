@@ -20,7 +20,7 @@ use App\Constants\AppConstants;
                     </nav>
                 </div>
                 <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= $project['id'] ?>" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver al Proyecto
+                    <i class="fas fa-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                 </a>
             </div>
         </div>

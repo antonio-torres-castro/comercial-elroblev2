@@ -113,7 +113,7 @@ use App\Constants\AppConstants; ?>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-lg"></i> Cancelar
+                            <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                         </button>
                         <button type="button" class="btn btn-success" id="confirmCreateBtn">
                             <i class="bi bi-check-lg"></i> Sí, Crear Persona
@@ -187,8 +187,8 @@ use App\Constants\AppConstants; ?>
 
                         <!-- Botones de Acción -->
                         <div class="mt-4 text-end">
-                            <a href="<?php AppConstants::ROUTE_PERSONAS; ?>" class="btn btn-secondary me-2">
-                                <i class="bi bi-x-lg"></i> Cancelar
+                            <a href="<?= AppConstants::ROUTE_PERSONAS; ?>" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                             </a>
                             <button type="submit" class="btn btn-success" id="createBtn">
                                 <i class="bi bi-check-lg"></i> Crear Persona

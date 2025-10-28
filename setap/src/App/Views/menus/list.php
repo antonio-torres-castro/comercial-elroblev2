@@ -49,10 +49,7 @@
 <body>
     <?php
 
-    use App\Helpers\Security; ?>
-
-    <?php
-
+    use App\Helpers\Security;
     use App\Constants\AppConstants;
 
     include __DIR__ . '/../layouts/navigation.php';
@@ -65,8 +62,8 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <?php if (\App\Helpers\Security::hasPermission('Create') || \App\Helpers\Security::hasPermission('All')): ?>
-                            <a href="/menu" class="btn btn-sm btn-setap-primary">
+                        <?php if (Security::hasPermission('Create') || Security::hasPermission('All')): ?>
+                            <a href="<?= AppConstants::ROUTE_MENU ?>" class="btn btn-sm btn-setap-primary">
                                 <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_MENU ?>
                             </a>
                         <?php endif; ?>
@@ -78,10 +75,10 @@
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php
                         $messages = [
-                            'created' => \App\Constants\AppConstants::SUCCESS_MENU_CREATED,
-                            'updated' => \App\Constants\AppConstants::SUCCESS_MENU_UPDATED,
-                            'deleted' => \App\Constants\AppConstants::SUCCESS_MENU_DELETED,
-                            'status_changed' => \App\Constants\AppConstants::SUCCESS_MENU_STATUS_UPDATED
+                            'created' => AppConstants::SUCCESS_MENU_CREATED,
+                            'updated' => AppConstants::SUCCESS_MENU_UPDATED,
+                            'deleted' => AppConstants::SUCCESS_MENU_DELETED,
+                            'status_changed' => AppConstants::SUCCESS_MENU_STATUS_UPDATED
                         ];
                         echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
                         ?>
@@ -183,15 +180,15 @@
                                                         </td>
                                                         <td>
                                                             <div class="btn-group btn-group-sm" role="group">
-                                                                <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
-                                                                    <a href="/menu/<?php echo $menu['id']; ?>"
+                                                                <?php if (Security::hasPermission('Modify') || Security::hasPermission('All')): ?>
+                                                                    <a href="<?= AppConstants::ROUTE_MENU ?>/<?php echo $menu['id']; ?>"
                                                                         class="btn btn-outline-setap-primary btn-sm"
                                                                         title="Editar">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
                                                                 <?php endif; ?>
 
-                                                                <?php if (\App\Helpers\Security::hasPermission('Read') || \App\Helpers\Security::hasPermission('All')): ?>
+                                                                <?php if (Security::hasPermission('Read') || Security::hasPermission('All')): ?>
                                                                     <button type="button"
                                                                         class="btn btn-outline-setap-primary-light btn-sm"
                                                                         title="Ver detalles"
@@ -200,9 +197,9 @@
                                                                     </button>
                                                                 <?php endif; ?>
 
-                                                                <?php if (\App\Helpers\Security::hasPermission('Modify') || \App\Helpers\Security::hasPermission('All')): ?>
+                                                                <?php if (Security::hasPermission('Modify') || Security::hasPermission('All')): ?>
                                                                     <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/toggle-status" style="display: inline-block;" class="toggle-status-form" onsubmit="return confirmToggleStatus(this, '<?php echo ($menu['estado_tipo_id'] == 2) ? 'desactivar' : 'activar'; ?>')">
-                                                                        <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
+                                                                        <input type="hidden" name="csrf_token" value="<?= Security::getCsrfToken() ?>">
                                                                         <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
                                                                         <input type="hidden" name="status" value="<?php echo ($menu['estado_tipo_id'] == 2) ? '3' : '2'; ?>">
                                                                         <button type="submit"
@@ -213,9 +210,9 @@
                                                                     </form>
                                                                 <?php endif; ?>
 
-                                                                <?php if (\App\Helpers\Security::hasPermission('Delete') || \App\Helpers\Security::hasPermission('All')): ?>
+                                                                <?php if (Security::hasPermission('Delete') || Security::hasPermission('All')): ?>
                                                                     <form method="POST" action="<?= AppConstants::ROUTE_MENUS ?>/delete" style="display: inline-block;" class="delete-menu-form" onsubmit="return confirmDeleteMenu(this, '<?php echo htmlspecialchars($menu['nombre']); ?>')">
-                                                                        <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
+                                                                        <input type="hidden" name="csrf_token" value="<?= Security::getCsrfToken() ?>">
                                                                         <input type="hidden" name="id" value="<?php echo $menu['id']; ?>">
                                                                         <button type="submit"
                                                                             class="btn btn-outline-danger btn-sm"

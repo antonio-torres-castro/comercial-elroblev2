@@ -30,7 +30,7 @@ use App\Constants\AppConstants;
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="javascript:history.back()" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Ir a Lista Contrapartes
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                     </div>
                 </div>
@@ -197,7 +197,7 @@ use App\Constants\AppConstants;
                                             <hr>
                                             <div class="d-flex justify-content-end gap-2">
                                                 <a href="javascript:history.back()" class="btn btn-secondary">
-                                                    <i class="bi bi-x-lg"></i> Cancelar
+                                                    <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                                 </a>
                                                 <button type="submit" class="btn btn-setap-primary">
                                                     <i class="bi bi-<?php echo $data['action'] === 'edit' ? 'pencil' : 'plus-circle'; ?>"></i>

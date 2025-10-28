@@ -29,7 +29,7 @@ use App\Constants\AppConstants;
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="<?= AppConstants::ROUTE_MENUS ?>" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Volver
+                            <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                     </div>
                 </div>
@@ -156,8 +156,8 @@ use App\Constants\AppConstants;
                                     <div class="row">
                                         <div class="col-12">
                                             <div class="d-flex justify-content-between">
-                                                <a href="/menus" class="btn btn-secondary">
-                                                    <i class="bi bi-arrow-left"></i> Cancelar
+                                                <a href="<?= AppConstants::ROUTE_MENUS ?>" class="btn btn-secondary">
+                                                    <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                                 </a>
                                                 <button type="submit" class="btn btn-setap-primary">
                                                     <i class="bi bi-save"></i>

@@ -52,6 +52,9 @@ class AppConstants
     const ROUTE_PERSONAS = '/setap/personas';
 
     /** Ruta base de menús */
+    const ROUTE_MENU = '/setap/menu';
+
+    /** Ruta base de menús */
     const ROUTE_MENUS = '/setap/menus';
 
     /** Ruta base de perfil */
@@ -396,8 +399,8 @@ class AppConstants
     /** Texto Lista */
     const UI_LIST = 'Lista';
 
-    /** Texto Volver a Lista */
-    const UI_BACK_TO_LIST = 'Volver a Lista';
+    /** Texto Volver */
+    const UI_BACK = 'Volver';
 
     // ===== TEXTOS DE ACCIONES ESPECÍFICAS =====
 
