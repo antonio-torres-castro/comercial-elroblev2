@@ -55,7 +55,7 @@ use App\Constants\AppConstants; ?>
                     </h2>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="<?= \App\Constants\AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
+                    <a href="<?= AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
                         <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PROJECT ?>
                     </a>
                     <a href="<?= AppConstants::ROUTE_PROJECTS_SEARCH ?>" class="btn btn-outline-secondary">

@@ -147,9 +147,11 @@ class TaskController extends BaseController
                 'title' => AppConstants::UI_NEW_TASK,
                 'subtitle' => 'Asignar tarea a proyecto',
                 'projects' => $this->taskModel->getProjects(),
+                'tasks' => $this->taskModel->getTasksForCreate(),
                 'taskTypes' => $this->taskModel->getTaskTypes(), // Catálogo de tareas existentes
-                'users' => $this->taskModel->getUsers(),
-                'taskStates' => $this->taskModel->getTaskStates(),
+                'executor_users' => $this->taskModel->getExecutorUsers(),
+                'supervisor_users' => $this->taskModel->getSupervisorUsers(),
+                'taskStates' => $this->taskModel->getTaskStatesForCreate(),
                 'task' => null,
                 'task_id' => null,
                 'error' => $_GET['error'] ?? ''

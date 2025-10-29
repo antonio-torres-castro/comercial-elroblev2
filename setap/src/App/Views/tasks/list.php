@@ -18,21 +18,13 @@ use App\Constants\AppConstants; ?>
 </head>
 
 <body>
+    <!-- Navegación Unificada -->
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
         <div class="row">
             <!-- Main content -->
             <main class="col-12 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><?php echo AppConstants::UI_TASK_MANAGEMENT; ?></h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-sm btn-setap-primary">
-                            <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_TASK ?>
-                        </a>
-                    </div>
-                </div>
-
                 <!-- Filtros y Búsqueda -->
                 <div class="row mb-4">
                     <div class="col-md-6">

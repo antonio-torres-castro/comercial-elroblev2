@@ -207,6 +207,10 @@ CREATE TABLE `proyecto_feriados` (
   CONSTRAINT `proyecto_feriados_ibfk_2` FOREIGN KEY (`estado_tipo_id`) REFERENCES `estado_tipos` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Agrego campo fecha_fin, por que es mas facil calcular al crear o modificar la tarea cuando debiera terminar.
+drop table if exists `tarea_fotos`;
+drop table if exists `historial_tareas`;
+drop table if exists `proyecto_tareas`;
 CREATE TABLE `proyecto_tareas` (
   `id` int NOT NULL AUTO_INCREMENT,
   `proyecto_id` int NOT NULL,
@@ -216,6 +220,7 @@ CREATE TABLE `proyecto_tareas` (
   `supervisor_id` int DEFAULT NULL,
   `fecha_inicio` datetime NOT NULL,
   `duracion_horas` decimal(4,2) NOT NULL,
+  `fecha_fin` datetime NOT NULL,
   `prioridad` int DEFAULT '0',
   `estado_tipo_id` int NOT NULL,
   `fecha_Creado` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

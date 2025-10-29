@@ -250,7 +250,39 @@ class Task
     public function getTaskTypes(): array
     {
         try {
-            $sql = "SELECT id, nombre, descripcion FROM tareas WHERE estado_tipo_id != 4 ORDER BY nombre";
+            $sql = "SELECT id, nombre FROM tarea_tipos ORDER BY nombre";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskTypes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener tipos de tareas (catálogo general)
+     */
+    public function getTasks(): array
+    {
+        try {
+            $sql = "SELECT id, nombre, descripcion, estado_tipo_id, fecha_Creado, fecha_modificacion FROM tareas WHERE estado_tipo_id = 2 ORDER BY nombre";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskTypes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener tareas activas (catálogo general)
+     */
+    public function getTasksForCreate(): array
+    {
+        try {
+            $sql = "SELECT id, nombre, descripcion FROM tareas WHERE estado_tipo_id = 2 ORDER BY nombre";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -305,6 +337,50 @@ class Task
     }
 
     /**
+     * Obtener usuarios disponibles para asignación
+     */
+    public function getExecutorUsers(): array
+    {
+        try {
+            $sql = "
+                SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
+                WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 4
+                ORDER BY p.nombre
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getUsers: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener usuarios disponibles para asignación
+     */
+    public function getSupervisorUsers(): array
+    {
+        try {
+            $sql = "
+                SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
+                FROM usuarios u
+                INNER JOIN personas p ON u.persona_id = p.id
+                WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 3
+                ORDER BY p.nombre
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getUsers: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtener estados de tareas
      */
     public function getTaskStates(): array
@@ -313,7 +389,28 @@ class Task
             $sql = "
                 SELECT id, nombre, descripcion
                 FROM estado_tipos
-                WHERE id IN (1, 2, 5, 6, 7, 8)
+                ORDER BY id
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskStates: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener estados de tareas
+     */
+    public function getTaskStatesForCreate(): array
+    {
+        // Todos los estados excepto eliminado
+        try {
+            $sql = "
+                SELECT id, nombre, descripcion
+                FROM estado_tipos
+                WHERE id != 4
                 ORDER BY id
             ";
             $stmt = $this->db->prepare($sql);
