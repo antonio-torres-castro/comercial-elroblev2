@@ -167,7 +167,7 @@ class ProjectController extends BaseController
                 'fecha_inicio' => $_POST['fecha_inicio'],
                 'fecha_fin' => !empty($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null,
                 'tarea_tipo_id' => (int)$_POST['tarea_tipo_id'],
-                'estado_tipo_id' => 1, // Activo por defecto
+                'estado_tipo_id' => !empty($_POST['estado_tipo_id']) ? (int)$_POST['estado_tipo_id'] : 1, // Creado por defecto
                 'contraparte_id' => (int)$_POST['contraparte_id']
             ];
 

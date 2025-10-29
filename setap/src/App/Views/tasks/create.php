@@ -191,14 +191,14 @@ use App\Constants\AppConstants; ?>
                                         <!-- Fecha de inicio -->
                                         <div class="col-md-3">
                                             <label for="fecha_inicio" class="form-label">Inicio<span class="text-danger">*</span></label>
-                                            <input type="datetime-local" class="form-control" id="fecha_inicio" name="fecha_inicio" required
-                                                value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d\TH:i')); ?>">
+                                            <input type="date-local" class="form-control" id="fecha_inicio" name="fecha_inicio" required
+                                                value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>">
                                         </div>
 
                                         <div class="col-md-3">
                                             <label for="fecha_fin" class="form-label">Fin<span class="text-danger">*</span></label>
-                                            <input type="datetime-local" class="form-control" id="fecha_fin" name="fecha_fin" required
-                                                value="<?= htmlspecialchars($_POST['fecha_fin'] ?? ''); ?>">
+                                            <input type="date-local" class="form-control" id="fecha_fin" name="fecha_fin" required
+                                                value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>">
                                         </div>
 
                                         <!-- Duración -->
@@ -276,7 +276,7 @@ use App\Constants\AppConstants; ?>
                     const inicio = new Date(fechaInicio.value);
                     const fin = new Date(fechaFin.value);
                     if (fin < inicio) {
-                        fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
+                        fechaFin.setCustomValidity('Fecha fin menor que fecha de inicio');
                         return false;
                     } else {
                         fechaFin.setCustomValidity('');
@@ -312,7 +312,7 @@ use App\Constants\AppConstants; ?>
     </script>
 
     <!-- GAP 5: Task State Validation Utilities -->
-    <script src="/js/task-state-utils.js"></script>
+    <script src="/setap/public/js/task-state-utils.js"></script>
 </body>
 
 </html>

@@ -26,7 +26,7 @@ window.SETAP.TaskStates = {
      */
     async loadValidTransitions(taskId) {
         try {
-            const response = await fetch(`/tasks/valid-transitions?task_id=${taskId}`);
+            const response = await fetch(`/setap/tasks/valid-transitions?task_id=${taskId}`);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }

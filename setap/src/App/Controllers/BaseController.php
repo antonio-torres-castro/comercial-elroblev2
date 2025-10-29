@@ -18,7 +18,6 @@ abstract class BaseController
         if (!Security::isAuthenticated()) {
             return null;
         }
-
         return [
             'id' => $_SESSION['user_id'],
             'username' => $_SESSION['username'],
@@ -37,23 +36,23 @@ abstract class BaseController
     protected function renderError(string $message): string
     {
         return '<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Error - SETAP</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        .error { color: #d32f2f; background: #ffebee; padding: 20px; border-radius: 5px; max-width: 600px; margin: 0 auto; }
-    </style>
-</head>
-<body>
-    <div class="error">
-        <h2>Error</h2>
-        <p>' . htmlspecialchars($message) . '</p>
-        <a href="/setap/">Volver al inicio</a>
-    </div>
-</body>
-</html>';
+                <html lang="es">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Error - SETAP</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                            .error { color: #d32f2f; background: #ffebee; padding: 20px; border-radius: 5px; max-width: 600px; margin: 0 auto; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="error">
+                            <h2>Error</h2>
+                            <p>' . htmlspecialchars($message) . '</p>
+                            <a href="/setap/">Volver al inicio</a>
+                        </div>
+                    </body>
+                </html>';
     }
 
     /**
@@ -69,7 +68,6 @@ abstract class BaseController
     }
 
     // ===== MÉTODOS DE REDIRECCIÓN CON CONSTANTES =====
-
     /**
      * Redirige a la página de login
      */
@@ -77,7 +75,6 @@ abstract class BaseController
     {
         Security::redirect(AppConstants::ROUTE_LOGIN);
     }
-
     /**
      * Redirige a la página de home
      */
@@ -85,7 +82,6 @@ abstract class BaseController
     {
         Security::redirect(AppConstants::ROUTE_HOME);
     }
-
     /**
      * Redirige con mensaje de éxito
      */
@@ -93,7 +89,6 @@ abstract class BaseController
     {
         Security::redirect(AppConstants::buildSuccessUrl($route, $message));
     }
-
     /**
      * Redirige con mensaje de error
      */
@@ -101,7 +96,6 @@ abstract class BaseController
     {
         Security::redirect(AppConstants::buildErrorUrl($route, $message));
     }
-
     /**
      * Redirige a una ruta específica usando constantes
      */
@@ -109,9 +103,7 @@ abstract class BaseController
     {
         Security::redirect($route);
     }
-
     // ===== MÉTODOS DE VALIDACIÓN DE DATOS - FASE 3 =====
-
     /**
      * Valida y obtiene datos de $_POST con valores por defecto
      * @param array $fields Array de campos con valores por defecto ['campo' => 'valor_defecto']
@@ -126,7 +118,6 @@ abstract class BaseController
         }
         return $validated;
     }
-
     /**
      * Valida y obtiene datos de $_GET con valores por defecto
      * @param array $fields Array de campos con valores por defecto ['campo' => 'valor_defecto']
@@ -141,7 +132,6 @@ abstract class BaseController
         }
         return $validated;
     }
-
     /**
      * Verifica si existe un valor anidado en un array de forma segura
      * @param array $data Array a verificar
@@ -163,7 +153,6 @@ abstract class BaseController
 
         return $current;
     }
-
     /**
      * Valida que campos requeridos estén presentes en un array
      * @param array $data Datos a validar
@@ -180,9 +169,7 @@ abstract class BaseController
         }
         return $errors;
     }
-
     // ===== VALIDACIONES COMUNES - FASE 3.3 OPTIMIZACIÓN =====
-
     /**
      * Valida un email
      * @param string $email Email a validar
@@ -199,7 +186,6 @@ abstract class BaseController
         }
         return $errors;
     }
-
     /**
      * Valida longitud de un campo
      * @param string $value Valor a validar
@@ -212,18 +198,14 @@ abstract class BaseController
     {
         $errors = [];
         $length = strlen($value);
-
         if ($minLength > 0 && $length < $minLength) {
             $errors[] = "El {$fieldName} debe tener al menos {$minLength} caracteres";
         }
-
         if ($length > $maxLength) {
             $errors[] = "El {$fieldName} no puede exceder {$maxLength} caracteres";
         }
-
         return $errors;
     }
-
     /**
      * Valida que un valor esté en una lista de opciones válidas
      * @param mixed $value Valor a validar
@@ -239,7 +221,6 @@ abstract class BaseController
         }
         return $errors;
     }
-
     /**
      * Manejo estandarizado de errores de validación - FASE 3.3
      * @param array $errors Lista de errores
@@ -254,9 +235,7 @@ abstract class BaseController
             $this->redirectToRoute($redirectUrl);
         }
     }
-
     // ===== MÉTODOS PARA RESPUESTAS JSON ELEGANTES - SISTEMA DE ALERTAS =====
-
     /**
      * Envía una respuesta JSON estandarizada y termina la ejecución
      * Reemplaza el uso crudo de echo json_encode()
@@ -270,18 +249,15 @@ abstract class BaseController
         http_response_code($statusCode);
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-cache, must-revalidate');
-
         // Preparar opciones de JSON
         $options = JSON_UNESCAPED_UNICODE;
         if ($prettyPrint) {
             $options |= JSON_PRETTY_PRINT;
         }
-
         // Enviar respuesta y terminar
         echo json_encode($data, $options);
         exit;
     }
-
     /**
      * Envía una respuesta JSON de éxito estandarizada
      * @param string $message Mensaje de éxito
@@ -297,7 +273,6 @@ abstract class BaseController
 
         $this->jsonResponse($data, $statusCode);
     }
-
     /**
      * Envía una respuesta JSON de error estandarizada
      * @param string $message Mensaje de error
@@ -310,10 +285,8 @@ abstract class BaseController
             'success' => false,
             'message' => $message
         ], $additionalData);
-
         $this->jsonResponse($data, $statusCode);
     }
-
     /**
      * Envía una respuesta JSON de validación fallida
      * @param array $errors Lista de errores de validación
@@ -324,7 +297,6 @@ abstract class BaseController
     {
         $this->jsonError($message, ['errors' => $errors], $statusCode);
     }
-
     /**
      * Envía una respuesta JSON de no autorizado
      * @param string $message Mensaje personalizado (opcional)
@@ -334,7 +306,6 @@ abstract class BaseController
         $message = $message ?? AppConstants::ERROR_USER_NOT_AUTHORIZED;
         $this->jsonError($message, [], 401);
     }
-
     /**
      * Envía una respuesta JSON de prohibido/sin permisos
      * @param string $message Mensaje personalizado (opcional)
@@ -343,7 +314,6 @@ abstract class BaseController
     {
         $this->jsonError($message, [], 403);
     }
-
     /**
      * Envía una respuesta JSON de recurso no encontrado
      * @param string $message Mensaje personalizado (opcional)
@@ -352,7 +322,6 @@ abstract class BaseController
     {
         $this->jsonError($message, [], 404);
     }
-
     /**
      * Envía una respuesta JSON para errores internos del servidor
      * @param string $message Mensaje personalizado (opcional)

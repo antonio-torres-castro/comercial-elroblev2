@@ -318,7 +318,7 @@ use App\Constants\AppConstants; ?>
 
                     // GAP 5: Cargar transiciones válidas para una tarea
                     function loadValidTransitions(taskId) {
-                        fetch(`/tasks/valid-transitions?task_id=${taskId}`)
+                        fetch(`/setap/tasks/valid-transitions?task_id=${taskId}`)
                             .then(response => response.json())
                             .then(data => {
                                 const menu = document.getElementById(`stateMenu${taskId}`);
@@ -484,7 +484,7 @@ use App\Constants\AppConstants; ?>
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 
     <!-- GAP 5: Task State Validation Utilities -->
-    <script src="/js/task-state-utils.js"></script>
+    <script src="/setap/public/js/task-state-utils.js"></script>
 </body>
 
 </html>

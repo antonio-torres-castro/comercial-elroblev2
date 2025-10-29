@@ -211,6 +211,7 @@ class TaskController extends BaseController
                 'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
                 'fecha_inicio' => $_POST['fecha_inicio'],
                 'duracion_horas' => (float)($_POST['duracion_horas'] ?? 1.0),
+                'fecha_fin' => $_POST['fecha_fin'],
                 'prioridad' => (int)($_POST['prioridad'] ?? 0),
                 'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1)
             ];

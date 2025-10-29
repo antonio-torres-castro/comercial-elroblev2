@@ -137,7 +137,7 @@ class Project
                 $data['fecha_inicio'],
                 $data['fecha_fin'] ?? null,
                 $data['tarea_tipo_id'],
-                $data['estado_tipo_id'] ?? 1, // Activo por defecto
+                $data['estado_tipo_id'] ?? 1, // Creado por defecto
                 $data['contraparte_id']
             ]);
 

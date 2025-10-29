@@ -281,7 +281,7 @@ use App\Constants\AppConstants; ?>
             const currentStateId = <?= $task['estado_tipo_id'] ?>;
             const estadoSelect = document.getElementById('estado_tipo_id');
 
-            fetch(`/tasks/valid-transitions?task_id=${taskId}`)
+            fetch(`/setap/tasks/valid-transitions?task_id=${taskId}`)
                 .then(response => response.json())
                 .then(data => {
                     // Limpiar opciones actuales (excepto la primera que es el estado actual)
@@ -354,7 +354,7 @@ use App\Constants\AppConstants; ?>
     </script>
 
     <!-- GAP 5: Task State Validation Utilities -->
-    <script src="/js/task-state-utils.js"></script>
+    <script src="/setap/public/js/task-state-utils.js"></script>
 </body>
 
 </html>

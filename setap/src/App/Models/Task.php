@@ -9,6 +9,9 @@ use PDO;
 use PDOException;
 use Exception;
 
+use function PHPUnit\Framework\isEmpty;
+use function PHPUnit\Framework\isNull;
+
 class Task
 {
     private $db;
@@ -135,16 +138,25 @@ class Task
             $this->db->beginTransaction();
 
             // Primero crear la tarea en el catálogo general si no existe
-            if (!empty($data['nueva_tarea_nombre'])) {
+            // La tarea se esta creando junto con asignarla a un proyecto
+            // por lo que se crea con el estado de activa
+
+            $tareaId = "";
+            if (isset($data['nueva_tarea_nombre']) && !empty($data['nueva_tarea_nombre'])) {
                 $stmt = $this->db->prepare("
-                    INSERT INTO tareas (nombre, descripcion, estado_tipo_id)
-                    VALUES (?, ?, 1)
-                ");
-                $stmt->execute([
-                    $data['nueva_tarea_nombre'],
-                    $data['nueva_tarea_descripcion'] ?? '',
-                ]);
-                $tareaId = $this->db->lastInsertId();
+                    SELECT id FROM tareas WHERE nombre = ?");
+                $stmt->execute([$data['nueva_tarea_nombre']]);
+                $arrayTareaId = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (empty($arrayTareaId)) {
+                    $stmt = $this->db->prepare("INSERT INTO tareas (nombre, descripcion, estado_tipo_id) VALUES (?, ?, 2)");
+                    $stmt->execute([
+                        $data['nueva_tarea_nombre'],
+                        $data['nueva_tarea_descripcion'] ?? '',
+                    ]);
+                    $tareaId = $this->db->lastInsertId();
+                } else {
+                    $tareaId = $arrayTareaId[0];
+                }
             } else {
                 $tareaId = $data['tarea_id'];
             }
@@ -159,9 +171,10 @@ class Task
                     supervisor_id,
                     fecha_inicio,
                     duracion_horas,
+                    fecha_fin,
                     prioridad,
                     estado_tipo_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $result = $stmt->execute([
@@ -172,13 +185,15 @@ class Task
                 $data['supervisor_id'] ?? null,
                 $data['fecha_inicio'],
                 $data['duracion_horas'] ?? 1.0,
+                $data['fecha_fin'],
                 $data['prioridad'] ?? 0,
                 $data['estado_tipo_id'] ?? 1 // Estado "Creado" por defecto
             ]);
 
             if ($result) {
+                $proyectoTareasId = $this->db->lastInsertId();
                 $this->db->commit();
-                return $this->db->lastInsertId();
+                return $proyectoTareasId;
             } else {
                 $this->db->rollBack();
                 return null;
@@ -405,12 +420,12 @@ class Task
      */
     public function getTaskStatesForCreate(): array
     {
-        // Todos los estados excepto eliminado
+        // Solo el estado de activo y creado 
         try {
             $sql = "
                 SELECT id, nombre, descripcion
                 FROM estado_tipos
-                WHERE id != 4
+                WHERE id in (1, 2)
                 ORDER BY id
             ";
             $stmt = $this->db->prepare($sql);
