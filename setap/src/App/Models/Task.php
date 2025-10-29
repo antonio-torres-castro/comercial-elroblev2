@@ -438,6 +438,23 @@ class Task
     }
 
     /**
+     * Obtener estado_tipo_id de id en proyecto_tareas
+     */
+    public function getProjectTaskState($Id): int
+    {
+        try {
+            $sql = "SELECT estado_tipo_id FROM proyecto_tareas WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$Id]);
+            $proyecto_tarea_estado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $proyecto_tarea_estado[0]['estado_tipo_id'];
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskTypes: " . $e->getMessage());
+            return -1;
+        }
+    }
+
+    /**
      * Validar si una transición de estado es válida
      */
     public function isValidStateTransition(int $currentState, int $newState): array

@@ -49,7 +49,7 @@ use App\Constants\AppConstants; ?>
                 <div class="card shadow">
                     <div class="card-header bg-warning text-dark">
                         <h4 class="card-title mb-0">
-                            <i class="bi bi-pencil-square"></i> <?= AppConstants::UI_EDIT_TASK_TITLE ?>: <?= htmlspecialchars($task['nombre']) ?>
+                            <i class="bi bi-pencil-square"></i> <?= AppConstants::UI_EDIT_TASK_TITLE ?>: <?= htmlspecialchars($task['tarea_nombre']) ?>
                         </h4>
                     </div>
                     <div class="card-body">
@@ -112,7 +112,7 @@ use App\Constants\AppConstants; ?>
                                         <div class="mb-3">
                                             <label for="nombre" class="form-label">Nombre de la Tarea <span class="required">*</span></label>
                                             <input type="text" class="form-control" id="nombre" name="nombre"
-                                                value="<?= htmlspecialchars($task['nombre']) ?>"
+                                                value="<?= htmlspecialchars($task['tarea_descripcion']) ?>"
                                                 placeholder="Describe brevemente la tarea" minlength="3" required>
                                         </div>
 

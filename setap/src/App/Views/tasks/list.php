@@ -184,7 +184,7 @@ use App\Constants\AppConstants; ?>
                                                                         <i class="bi bi-arrow-repeat"></i>
                                                                     </button>
                                                                     <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
-                                                                        <li><span class="dropdown-item-text text-muted"><?php echo \App\Constants\AppConstants::UI_LOADING; ?></span></li>
+                                                                        <li><span class="dropdown-item-text text-muted"><?php echo AppConstants::UI_LOADING; ?></span></li>
                                                                     </ul>
                                                                 </div>
                                                             </div>
@@ -214,7 +214,7 @@ use App\Constants\AppConstants; ?>
                                                         </td>
                                                         <td>
                                                             <div class="btn-group btn-group-sm">
-                                                                <a href="<?= \App\Constants\AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
+                                                                <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
                                                                 <a href="<?= AppConstants::ROUTE_TASKS_EDIT ?>?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
@@ -317,7 +317,7 @@ use App\Constants\AppConstants; ?>
                     let taskToChangeState = null;
 
                     // GAP 5: Cargar transiciones válidas para una tarea
-                    function loadValidTransitions(taskId) {
+                    function loadValidTransitions(taskId, proyectoId) {
                         fetch(`/setap/tasks/valid-transitions?task_id=${taskId}`)
                             .then(response => response.json())
                             .then(data => {

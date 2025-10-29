@@ -273,7 +273,7 @@ class TaskController extends BaseController
                 'task' => $task,
                 'task_id' => $id,  // Mantener para compatibilidad
                 'title' => AppConstants::UI_EDIT_TASK_TITLE,
-                'subtitle' => "Editando: {$task['nombre']}",
+                'subtitle' => "Editando: {$task['tarea_nombre']}",
                 'projects' => $this->taskModel->getProjects(),
                 'taskTypes' => $this->taskModel->getTaskTypes(),
                 'users' => $this->taskModel->getUsers(),
@@ -542,9 +542,46 @@ class TaskController extends BaseController
             $this->redirectWithError(AppConstants::ROUTE_TASKS, 'ID de tarea inválido');
             return;
         }
+        // Obtener estado_tipo_id
+        $projectTaskState = $this->taskModel->getProjectTaskState($taskId);
+        if ($projectTaskState == 1) { // creado
+            $transitions = [['id' => 2, 'nombre' => 'activo'], ['id' => 4, 'nombre' => 'eliminado']];
+        }
+        if ($projectTaskState == 2) { // activo
+            $transitions = [['id' => 5, 'nombre' => 'iniciado'], ['id' => 3, 'nombre' => 'inactivo']];
+        }
+        if ($projectTaskState == 3) { // inactivo
+            $transitions = [['id' => 2, 'nombre' => 'activo']];
+        }
+        if ($projectTaskState == 4) { // eliminado
+            $transitions = [['id' => 1, 'nombre' => 'creado']];
+        }
+        if ($projectTaskState == 5) { // iniciado
+            $transitions = [['id' => 6, 'nombre' => 'terminado']];
+        }
+        if ($projectTaskState == 6) { // terminado
+            $transitions = [['id' => 7, 'nombre' => 'aprobado'], ['id' => 8, 'nombre' => 'rechazado']];
+        }
+        if ($projectTaskState == 7) { // rechazado
+            $transitions = [['id' => 6, 'nombre' => 'terminado']];
+        }
+        if ($projectTaskState == 8) { // rechazado
+            $transitions = [['id' => 7, 'nombre' => 'rechazado']];
+        }
 
-        // Redirigir a la vista de tareas donde se pueden manejar transiciones sin Ajax
-        $this->redirectToRoute(AppConstants::ROUTE_TASKS . "?task_id={$taskId}");
+        // Datos para la vista
+        $data = [
+            'transitions' => $transitions
+        ];
+
+        // 2. Set the Content-Type header
+        header('Content-Type: application/json');
+
+        // 3. Encode the PHP array to JSON
+        $jsonOutput = json_encode($data);
+
+        // 4. Output the JSON string
+        echo $jsonOutput;
     }
 
     /**
