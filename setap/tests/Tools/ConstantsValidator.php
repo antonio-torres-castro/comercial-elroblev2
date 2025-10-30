@@ -83,7 +83,7 @@ class ConstantsValidator
             '/src/App/Views/tasks/list.php',
             '/src/App/Views/tasks/create.php',
             '/src/App/Views/tasks/edit.php',
-            '/src/App/Views/tasks/form.php',
+            '/src/App/Views/tasks/porjectTaskView.php',
             '/src/App/Views/projects/list.php',
             '/src/App/Views/projects/create.php',
             '/src/App/Views/reports/list.php',

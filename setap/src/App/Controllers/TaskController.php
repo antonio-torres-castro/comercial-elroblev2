@@ -100,22 +100,18 @@ class TaskController extends BaseController
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
-
+            $task = $id ? $this->taskModel->getById($id) : null;
             // Datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,
-                'title' => 'Gestión de Tarea',
-                'subtitle' => $id ? AppConstants::UI_EDITING_TASK . " #$id" : AppConstants::UI_NEW_TASK,
+                'title' => 'Tarea',
+                'subtitle' => $task['tarea_nombre'],
                 'task_id' => $id,
-                'task' => $id ? $this->taskModel->getById($id) : null,
-                'projects' => $this->taskModel->getProjects(),
-                'taskTypes' => $this->taskModel->getTaskTypes(),
-                'users' => $this->taskModel->getUsers(),
-                'taskStates' => $this->taskModel->getTaskStates(),
-                'action' => $id ? 'edit' : 'create'
+                'task' => $task,
+                'action' => 'view'
             ];
 
-            require_once __DIR__ . '/../Views/tasks/form.php';
+            require_once __DIR__ . '/../Views/tasks/porjectTaskView.php';
         } catch (Exception $e) {
             Logger::error("TaskController::show: " . $e->getMessage());
             http_response_code(500);

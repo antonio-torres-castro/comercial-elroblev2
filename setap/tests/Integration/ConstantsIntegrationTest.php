@@ -31,7 +31,7 @@ class ConstantsIntegrationTest extends TestCase
             '/Views/tasks/list.php',
             '/Views/tasks/create.php',
             '/Views/tasks/edit.php',
-            '/Views/tasks/form.php',
+            '/Views/tasks/porjectTaskView.php',
             '/Views/projects/list.php',
             '/Views/projects/create.php',
             '/Views/reports/list.php',
