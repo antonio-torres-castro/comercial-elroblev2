@@ -97,26 +97,31 @@ class Task
         try {
             $sql = "
                 SELECT
-                    pt.*,
-                    t.nombre as tarea_nombre,
-                    t.descripcion as tarea_descripcion,
-                    p.id as proyecto_id,
+                    pt.id, pt.proyecto_id, pt.tarea_id, 
+                    pt.planificador_id, pt.ejecutor_id, pt.supervisor_id, 
+                    pt.fecha_inicio, pt.duracion_horas, pt.fecha_fin,
+                    pt.prioridad, pt.estado_tipo_id, 
+                    pt.fecha_Creado, pt.fecha_modificacion,
+                    t.nombre             as tarea_nombre,
+                    t.descripcion        as tarea_descripcion,
+                    p.id                 as proyecto_id,
                     CONCAT('Proyecto para ', c.razon_social) as proyecto_nombre,
-                    c.razon_social as cliente_nombre,
-                    tt.nombre as tipo_tarea,
-                    et.nombre as estado,
-                    plan.nombre_usuario as planificador_nombre,
-                    exec.nombre_usuario as ejecutor_nombre,
-                    super.nombre_usuario as supervisor_nombre
+                    c.razon_social       as cliente_nombre,
+                    tt.nombre            as tipo_tarea,
+                    et.nombre            as estado,
+                    plan.nombre_usuario  as planificador_nombre,
+                    exec.nombre_usuario  as ejecutor_nombre,
+                    super.nombre_usuario as supervisor_nombre,
+                    p.tarea_tipo_id
                 FROM proyecto_tareas pt
-                INNER JOIN tareas t ON pt.tarea_id = t.id
-                INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
-                INNER JOIN usuarios plan ON pt.planificador_id = plan.id
-                LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id
+                INNER JOIN tareas        t   ON pt.tarea_id = t.id
+                INNER JOIN proyectos     p   ON pt.proyecto_id = p.id
+                INNER JOIN clientes      c   ON p.cliente_id = c.id
+                INNER JOIN tarea_tipos  tt   ON p.tarea_tipo_id = tt.id
+                INNER JOIN estado_tipos et   ON pt.estado_tipo_id = et.id
+                INNER JOIN usuarios     plan ON pt.planificador_id = plan.id
+                LEFT JOIN usuarios      exec ON pt.ejecutor_id = exec.id
+                LEFT JOIN usuarios      super ON pt.supervisor_id = super.id
                 WHERE pt.id = ?
             ";
 
@@ -314,7 +319,9 @@ class Task
     {
         try {
             $sql = "
-                SELECT p.id, CONCAT('Proyecto para ', c.razon_social) as nombre, c.razon_social as cliente_nombre
+                SELECT p.id, 
+                CONCAT('Proyecto para ', c.razon_social) as nombre, 
+                c.razon_social as cliente_nombre
                 FROM proyectos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 WHERE p.estado_tipo_id IN (1, 2, 5)
@@ -461,14 +468,14 @@ class Task
     {
         // Definir transiciones válidas según reglas de negocio
         $validTransitions = [
-            1 => [2, 3, 4], // creado -> activo, inactivo, eliminado
-            2 => [1, 3, 4, 5], // activo -> creado, inactivo, eliminado, iniciado
-            3 => [1, 2, 4], // inactivo -> creado, activo, eliminado
-            4 => [], // eliminado -> no se puede cambiar
-            5 => [2, 6, 7], // iniciado -> activo, terminado, rechazado
-            6 => [5, 7, 8], // terminado -> iniciado, rechazado, aprobado
-            7 => [2, 5], // rechazado -> activo, iniciado
-            8 => [6] // aprobado -> solo a terminado (para re-trabajo)
+            1 => [2, 4], // creado -> activo, eliminado
+            2 => [3, 5], // activo -> inactivo, iniciado
+            3 => [2], // inactivo -> activo
+            4 => [1], // eliminado -> creado
+            5 => [6], // iniciado -> terminado
+            6 => [7, 8], // terminado -> rechazado, aprobado
+            7 => [2, 5], // rechazado -> terminado
+            8 => [8] // aprobado -> aprobado
         ];
 
         $isValid = isset($validTransitions[$currentState]) &&

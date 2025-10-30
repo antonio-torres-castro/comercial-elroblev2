@@ -134,7 +134,6 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
-
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
@@ -248,7 +247,6 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
-
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
@@ -270,14 +268,15 @@ class TaskController extends BaseController
 
             $data = [
                 'user' => $currentUser,
-                'task' => $task,
-                'task_id' => $id,  // Mantener para compatibilidad
                 'title' => AppConstants::UI_EDIT_TASK_TITLE,
                 'subtitle' => "Editando: {$task['tarea_nombre']}",
                 'projects' => $this->taskModel->getProjects(),
                 'taskTypes' => $this->taskModel->getTaskTypes(),
-                'users' => $this->taskModel->getUsers(),
-                'taskStates' => $this->taskModel->getTaskStates(),
+                'executor_users' => $this->taskModel->getExecutorUsers(),
+                'supervisor_users' => $this->taskModel->getSupervisorUsers(),
+                'taskStates' => $this->taskModel->getTasksForCreate(),
+                'task' => $task,
+                'task_id' => $id,  // Mantener para compatibilidad
                 'action' => 'edit',  // Estandarizar
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
@@ -543,7 +542,7 @@ class TaskController extends BaseController
             return;
         }
         // Obtener estado_tipo_id
-        $projectTaskState = $this->taskModel->getProjectTaskState($taskId);
+        $projectTaskState = $this->taskModel->getProjectTaskState($taskId) ?? -1;
         if ($projectTaskState == 1) { // creado
             $transitions = [['id' => 2, 'nombre' => 'activo'], ['id' => 4, 'nombre' => 'eliminado']];
         }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Security;
 use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -37,10 +38,6 @@ use App\Constants\AppConstants; ?>
 </head>
 
 <body class="bg-light">
-    <?php
-
-    use App\Helpers\Security; ?>
-
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container mt-4">
@@ -49,27 +46,27 @@ use App\Constants\AppConstants; ?>
                 <div class="card shadow">
                     <div class="card-header bg-warning text-dark">
                         <h4 class="card-title mb-0">
-                            <i class="bi bi-pencil-square"></i> <?= AppConstants::UI_EDIT_TASK_TITLE ?>: <?= htmlspecialchars($task['tarea_nombre']) ?>
+                            <i class="bi bi-pencil-square"></i> <?= AppConstants::UI_EDIT_TASK_TITLE ?>: <?= htmlspecialchars($data['task']['tarea_nombre']) ?>
                         </h4>
                     </div>
                     <div class="card-body">
-                        <?php if (!empty($error)): ?>
+                        <?php if (!empty($data['error'])): ?>
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
 
-                        <?php if (!empty($success)): ?>
+                        <?php if (!empty($data['success'])): ?>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
+                                <i class="bi bi-check-circle"></i> <?= htmlspecialchars($data['success']) ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
 
                         <form method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/update" id="taskEditForm">
-                            <?= \App\Helpers\Security::renderCsrfField() ?>
-                            <input type="hidden" name="id" value="<?= (int)$task['id'] ?>">
+                            <?= Security::renderCsrfField() ?>
+                            <input type="hidden" name="id" value="<?= (int)$data['task']['id'] ?>">
 
                             <div class="row">
                                 <div class="col-12">
@@ -83,9 +80,9 @@ use App\Constants\AppConstants; ?>
                                                     <label for="proyecto_id" class="form-label">Proyecto <span class="required">*</span></label>
                                                     <select class="form-select" id="proyecto_id" name="proyecto_id" required>
                                                         <option value="">Seleccionar Proyecto</option>
-                                                        <?php foreach ($projects as $project): ?>
+                                                        <?php foreach ($data['projects'] as $project): ?>
                                                             <option value="<?= (int)$project['id'] ?>"
-                                                                <?= $project['id'] == $task['proyecto_id'] ? 'selected' : '' ?>>
+                                                                <?= $project['id'] == $data['task']['proyecto_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($project['cliente_nombre']) ?>
                                                             </option>
                                                         <?php endforeach; ?>
@@ -98,9 +95,9 @@ use App\Constants\AppConstants; ?>
                                                     <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="required">*</span></label>
                                                     <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
                                                         <option value="">Seleccionar Tipo</option>
-                                                        <?php foreach ($taskTypes as $type): ?>
+                                                        <?php foreach ($data['taskTypes'] as $type): ?>
                                                             <option value="<?= (int)$type['id'] ?>"
-                                                                <?= $type['id'] == $task['tarea_tipo_id'] ? 'selected' : '' ?>>
+                                                                <?= $type['id'] == $data['task']['tarea_tipo_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($type['nombre']) ?>
                                                             </option>
                                                         <?php endforeach; ?>
@@ -112,14 +109,14 @@ use App\Constants\AppConstants; ?>
                                         <div class="mb-3">
                                             <label for="nombre" class="form-label">Nombre de la Tarea <span class="required">*</span></label>
                                             <input type="text" class="form-control" id="nombre" name="nombre"
-                                                value="<?= htmlspecialchars($task['tarea_descripcion']) ?>"
-                                                placeholder="Describe brevemente la tarea" minlength="3" required>
+                                                value="<?= htmlspecialchars($data['task']['tarea_nombre']) ?>"
+                                                placeholder="Nombre de la tarea" minlength="3" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label for="descripcion" class="form-label">Descripción</label>
                                             <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                                                placeholder="Descripción detallada de la tarea (opcional)"><?= htmlspecialchars($task['descripcion'] ?? '') ?></textarea>
+                                                placeholder="Descripción detallada de la tarea"><?= htmlspecialchars($data['task']['tarea_descripcion'] ?? '') ?></textarea>
                                         </div>
                                     </div>
 
@@ -132,7 +129,7 @@ use App\Constants\AppConstants; ?>
                                                 <div class="mb-3">
                                                     <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
                                                     <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
-                                                        value="<?= date('Y-m-d', strtotime($task['fecha_inicio'])) ?>" required>
+                                                        value="<?= date('Y-m-d', strtotime($data['task']['fecha_inicio'])) ?>" required>
                                                 </div>
                                             </div>
 
@@ -140,7 +137,7 @@ use App\Constants\AppConstants; ?>
                                                 <div class="mb-3">
                                                     <label for="fecha_fin" class="form-label">Fecha Fin <span class="required">*</span></label>
                                                     <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
-                                                        value="<?= date('Y-m-d', strtotime($task['fecha_fin'])) ?>" required>
+                                                        value="<?= date('Y-m-d', strtotime($data['task']['fecha_fin'])) ?>" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -153,12 +150,12 @@ use App\Constants\AppConstants; ?>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="usuario_id" class="form-label">Asignar a Usuario</label>
+                                                    <label for="usuario_id" class="form-label">Ejecutor</label>
                                                     <select class="form-select" id="usuario_id" name="usuario_id">
                                                         <option value="">Sin asignar</option>
-                                                        <?php foreach ($users as $user): ?>
+                                                        <?php foreach ($data['executor_users'] as $user): ?>
                                                             <option value="<?= (int)$user['id'] ?>"
-                                                                <?= $user['id'] == $task['usuario_id'] ? 'selected' : '' ?>>
+                                                                <?= $user['id'] == $data['task']['ejecutor_id'] ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($user['nombre_completo']) ?> (<?= htmlspecialchars($user['nombre_usuario']) ?>)
                                                             </option>
                                                         <?php endforeach; ?>
@@ -170,8 +167,8 @@ use App\Constants\AppConstants; ?>
                                                 <div class="mb-3">
                                                     <label for="estado_tipo_id" class="form-label">Estado <span class="required">*</span></label>
                                                     <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
-                                                        <option value="<?= $task['estado_tipo_id'] ?>" selected>
-                                                            <?= htmlspecialchars($task['estado']) ?> (Actual)
+                                                        <option value="<?= $data['task']['estado_tipo_id'] ?>" selected>
+                                                            <?= htmlspecialchars($data['task']['estado']) ?> (Actual)
                                                         </option>
                                                     </select>
                                                     <div class="form-text">
@@ -179,7 +176,7 @@ use App\Constants\AppConstants; ?>
                                                         Solo se muestran transiciones válidas según el estado actual y tu rol.
                                                     </div>
                                                     <!-- GAP 5: Warning si es tarea aprobada -->
-                                                    <?php if ($task['estado_tipo_id'] == 8): ?>
+                                                    <?php if ($data['task']['estado_tipo_id'] == 8): ?>
                                                         <div class="alert alert-warning mt-2 mb-0">
                                                             <i class="bi bi-exclamation-triangle"></i>
                                                             <strong>Tarea Aprobada:</strong> Solo Admin y Planner pueden modificar tareas aprobadas.
@@ -226,7 +223,7 @@ use App\Constants\AppConstants; ?>
                     const fin = new Date(fechaFin.value);
 
                     if (fin < inicio) {
-                        fechaFin.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
+                        fechaFin.setCustomValidity('La fecha de fin no puede ser menor a la fecha de inicio');
                         return false;
                     } else {
                         fechaFin.setCustomValidity('');
@@ -247,7 +244,7 @@ use App\Constants\AppConstants; ?>
             form.addEventListener('submit', function(e) {
                 if (!validateDates()) {
                     e.preventDefault();
-                    alert('<?= \App\Constants\AppConstants::ERROR_INVALID_DATES ?>');
+                    alert('<?= AppConstants::ERROR_INVALID_DATES ?>');
                     return;
                 }
 
@@ -257,7 +254,7 @@ use App\Constants\AppConstants; ?>
 
                 if (!nombre || !proyecto_id || !tarea_tipo_id) {
                     e.preventDefault();
-                    alert('<?= \App\Constants\AppConstants::ERROR_REQUIRED_FIELDS ?>');
+                    alert('<?= AppConstants::ERROR_REQUIRED_FIELDS ?>');
                     return;
                 }
 
@@ -277,8 +274,8 @@ use App\Constants\AppConstants; ?>
 
         // GAP 5: Función para cargar transiciones válidas
         function loadValidTransitions() {
-            const taskId = <?= $task['id'] ?>;
-            const currentStateId = <?= $task['estado_tipo_id'] ?>;
+            const taskId = <?= $data['task']['id'] ?>;
+            const currentStateId = <?= $data['task']['estado_tipo_id'] ?>;
             const estadoSelect = document.getElementById('estado_tipo_id');
 
             fetch(`/setap/tasks/valid-transitions?task_id=${taskId}`)
