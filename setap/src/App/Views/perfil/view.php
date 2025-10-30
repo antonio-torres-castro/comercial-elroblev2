@@ -32,7 +32,7 @@ use App\Constants\AppConstants;
                 </div>
             </div>
             <div class="card-body">
-                <?php if (isset($_SESSION['success_message'])): ?>
+                <?php if (isset($_SESSION['success_message']) && !empty($_SESSION['success_message'])): ?>
                     <div class="alert alert-success alert-dismissible fade show">
                         <i class="bi bi-check-circle"></i>
                         <?php echo $_SESSION['success_message'];
