@@ -108,7 +108,7 @@ use App\Constants\AppConstants; ?>
                         <?php if (!empty($data['tasks'])): ?>
                             <div class="card">
                                 <div class="card-body">
-                                    <div class="table-responsive">
+                                    <div class="table-responsive-xl">
                                         <table class="table table-hover">
                                             <thead>
                                                 <tr>
@@ -123,18 +123,18 @@ use App\Constants\AppConstants; ?>
                                             <tbody>
                                                 <?php foreach ($data['tasks'] as $task): ?>
                                                     <tr id="task-row-<?= $task['id'] ?>">
-                                                        <td>
+                                                        <td><!-- Tarea -->
                                                             <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
                                                             <?php if (!empty($task['descripcion'])): ?>
                                                                 <small class="text-muted"><?= htmlspecialchars(substr($task['descripcion'], 0, 100)) ?>...</small>
                                                             <?php endif; ?>
-                                                        </td>
-                                                        <td>
+                                                        </td><!-- fin Tarea -->
+                                                        <td><!-- Proyecto -->
                                                             <span class="badge bg-info text-dark">
                                                                 <?= htmlspecialchars($task['cliente_nombre']) ?>
                                                             </span>
-                                                        </td>
-                                                        <td>
+                                                        </td><!-- fin Proyecto -->
+                                                        <td><!-- Estado -->
                                                             <?php
                                                             $badgeClass = 'bg-secondary';
                                                             $statusText = '';
@@ -188,8 +188,8 @@ use App\Constants\AppConstants; ?>
                                                                     </ul>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                        <td>
+                                                        </td><!-- fin Estado -->
+                                                        <td><!-- Asignado -->
                                                             <?php if (!empty($task['ejecutor_nombre'])): ?>
                                                                 <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
                                                             <?php elseif (!empty($task['supervisor_nombre'])): ?>
@@ -199,8 +199,8 @@ use App\Constants\AppConstants; ?>
                                                             <?php else: ?>
                                                                 <span class="text-muted">Sin asignar</span>
                                                             <?php endif; ?>
-                                                        </td>
-                                                        <td>
+                                                        </td><!-- fin Asignado -->
+                                                        <td><!-- Fechas -->
                                                             <?php if (!empty($task['fecha_inicio'])): ?>
                                                                 <small>
                                                                     <strong>Inicio:</strong> <?= date('d/m/Y', strtotime($task['fecha_inicio'])) ?><br>
@@ -211,8 +211,8 @@ use App\Constants\AppConstants; ?>
                                                             <?php else: ?>
                                                                 <span class="text-muted">Sin fechas</span>
                                                             <?php endif; ?>
-                                                        </td>
-                                                        <td>
+                                                        </td><!-- fin Fechass -->
+                                                        <td><!-- Acciones -->
                                                             <div class="btn-group btn-group-sm">
                                                                 <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
@@ -227,7 +227,7 @@ use App\Constants\AppConstants; ?>
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </div>
-                                                        </td>
+                                                        </td><!-- fin Acciones -->
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
