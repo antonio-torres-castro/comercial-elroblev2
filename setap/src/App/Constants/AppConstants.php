@@ -98,6 +98,9 @@ class AppConstants
     /** Ruta de reporte de proyecto */
     const ROUTE_PROJECTS_REPORT = '/setap/projects/report';
 
+    /** Ruta de reporte de proyecto */
+    const ROUTE_PROJECT_HOLIDAYS = "/setap/proyecto-feriados";
+
     // ===== RUTAS CON ACCIONES =====
 
     /** Ruta de creación de usuarios */
