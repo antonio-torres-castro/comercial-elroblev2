@@ -222,7 +222,7 @@ use App\Constants\AppConstants; ?>
                                                 onclick="event.stopPropagation()" title="Editar Proyecto">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>"
+                                            <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>"
                                                 class="btn btn-outline-info"
                                                 onclick="event.stopPropagation()" title="Gestionar Feriados">
                                                 <i class="bi bi-calendar-x"></i>

@@ -97,7 +97,7 @@ use App\Constants\AppConstants; ?>
                 <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning">
                     <i class="bi bi-pencil"></i> Editar Proyecto
                 </a>
-                <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>" class="btn btn-info">
+                <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>" class="btn btn-info">
                     <i class="bi bi-calendar-x"></i> Gestionar Feriados
                 </a>
                 <button type="button" class="btn btn-setap-primary" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
