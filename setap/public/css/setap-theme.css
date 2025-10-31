@@ -186,6 +186,13 @@ Actualizada: Colores 5% más oscuros para mayor alineación con comercial-elrobl
 .pagination .page-item.active .page-link {
     background-color: var(--setap-primary);
     border-color: var(--setap-primary);
+    color: var(--setap-text-light); /* ← texto blanco */
+}
+
+.pagination .page-item.active .page-link:hover {
+    background-color: var(--setap-primary-dark);
+    border-color: var(--setap-primary-dark);
+    color: var(--setap-text-light);
 }
 
 .pagination .page-link:hover {

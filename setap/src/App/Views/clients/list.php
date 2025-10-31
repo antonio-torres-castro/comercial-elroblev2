@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+<?php
+
+use App\Helpers\Security;
+use App\Constants\AppConstants;
+?>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($data['title']); ?> - SETAP</title>
+    <title><?= htmlspecialchars($data['title']); ?> - SETAP</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/setap/public/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/setap/public/favicon.svg">
@@ -16,20 +21,14 @@
 </head>
 
 <body>
-    <?php
-
-    use App\Helpers\Security;
-    use App\Constants\AppConstants;
-
-    include __DIR__ . '/../layouts/navigation.php';
-    ?>
+    <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
     <div class="container-fluid mt-4">
         <div class="row">
             <!-- Main content -->
             <main class="col-12 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><?php echo htmlspecialchars($data['title']); ?></h1>
+                    <h1 class="h2"><?= htmlspecialchars($data['title']); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="<?= AppConstants::ROUTE_CLIENTS_CREATE ?>" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_CLIENT ?>
@@ -38,23 +37,22 @@
                 </div>
 
                 <!-- Alertas de mensajes -->
-                <?php if (isset($_GET['success'])): ?>
+                <?php if (isset($_GET['success']) && !empty($_GET['success'])): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php
                         $messages = [
                             'created' => AppConstants::SUCCESS_CLIENT_CREATED,
                             'updated' => AppConstants::SUCCESS_CLIENT_UPDATED,
                             'deleted' => AppConstants::SUCCESS_CLIENT_DELETED
-                        ];
-                        echo $messages[$_GET['success']] ?? 'Operación realizada exitosamente';
-                        ?>
+                        ]; ?>
+                        <?= $messages[$_GET['success']]; ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
 
-                <?php if (isset($_GET['error'])): ?>
+                <?php if (isset($_GET['error']) && !empty($_GET['error'])): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <?php echo htmlspecialchars($_GET['error']); ?>
+                        <?= htmlspecialchars($_GET['error']); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
@@ -69,13 +67,13 @@
                             <div class="col-md-3">
                                 <label for="rut" class="form-label">RUT</label>
                                 <input type="text" class="form-control" id="rut" name="rut"
-                                    value="<?php echo htmlspecialchars($data['filters']['rut']); ?>"
+                                    value="<?= htmlspecialchars($data['filters']['rut']); ?>"
                                     placeholder="Buscar por RUT">
                             </div>
                             <div class="col-md-4">
                                 <label for="razon_social" class="form-label">Razón Social</label>
                                 <input type="text" class="form-control" id="razon_social" name="razon_social"
-                                    value="<?php echo htmlspecialchars($data['filters']['razon_social']); ?>"
+                                    value="<?= htmlspecialchars($data['filters']['razon_social']); ?>"
                                     placeholder="Buscar por razón social">
                             </div>
                             <div class="col-md-3">
@@ -83,9 +81,9 @@
                                 <select class="form-select" id="estado_tipo_id" name="estado_tipo_id">
                                     <option value="">Todos los estados</option>
                                     <?php foreach ($data['statusTypes'] as $status): ?>
-                                        <option value="<?php echo $status['id']; ?>"
-                                            <?php echo $data['filters']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($status['nombre']); ?>
+                                        <option value="<?= $status['id']; ?>"
+                                            <?= $data['filters']['estado_tipo_id'] == $status['id'] ? 'selected' : ''; ?>>
+                                            <?= htmlspecialchars($status['nombre']); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -108,7 +106,7 @@
                 <!-- Lista de clientes -->
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0"><?php echo htmlspecialchars($data['subtitle']); ?></h5>
+                        <h5 class="mb-0"><?= htmlspecialchars($data['subtitle']); ?></h5>
                     </div>
                     <div class="card-body">
                         <?php if (empty($data['clients'])): ?>
@@ -136,18 +134,18 @@
                                             <tr>
                                                 <td>
                                                     <?php if ($client['rut']): ?>
-                                                        <code><?php echo htmlspecialchars($client['rut']); ?></code>
+                                                        <code><?= htmlspecialchars($client['rut']); ?></code>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <strong><?php echo htmlspecialchars($client['razon_social']); ?></strong>
+                                                    <strong><?= htmlspecialchars($client['razon_social']); ?></strong>
                                                 </td>
                                                 <td>
                                                     <?php if ($client['email']): ?>
-                                                        <a href="mailto:<?php echo htmlspecialchars($client['email']); ?>">
-                                                            <?php echo htmlspecialchars($client['email']); ?>
+                                                        <a href="mailto:<?= htmlspecialchars($client['email']); ?>">
+                                                            <?= htmlspecialchars($client['email']); ?>
                                                         </a>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
@@ -155,8 +153,8 @@
                                                 </td>
                                                 <td>
                                                     <?php if ($client['telefono']): ?>
-                                                        <a href="tel:<?php echo htmlspecialchars($client['telefono']); ?>">
-                                                            <?php echo htmlspecialchars($client['telefono']); ?>
+                                                        <a href="tel:<?= htmlspecialchars($client['telefono']); ?>">
+                                                            <?= htmlspecialchars($client['telefono']); ?>
                                                         </a>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
@@ -164,7 +162,7 @@
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-info">
-                                                        <?php echo $client['total_contrapartes']; ?> contacto(s)
+                                                        <?= $client['total_contrapartes']; ?> contacto(s)
                                                     </span>
                                                 </td>
                                                 <td>
@@ -176,23 +174,23 @@
                                                     ];
                                                     $statusClass = $statusClasses[$client['estado_tipo_id']] ?? 'bg-dark';
                                                     ?>
-                                                    <span class="badge <?php echo $statusClass; ?>">
-                                                        <?php echo htmlspecialchars($client['estado_nombre']); ?>
+                                                    <span class="badge <?= $statusClass; ?>">
+                                                        <?= htmlspecialchars($client['estado_nombre']); ?>
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <small class="text-muted">
-                                                        <?php echo date('d/m/Y', strtotime($client['fecha_Creado'])); ?>
+                                                        <?= date('d/m/Y', strtotime($client['fecha_Creado'])); ?>
                                                     </small>
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm" role="group">
-                                                        <a href="<?= AppConstants::ROUTE_CLIENTS_EDIT . '/' ?><?php echo $client['id'] ?>"
-                                                            class="btn btn-outline-setap-primary" title="Editar" id="edit<?php echo $client['id']; ?>">
+                                                        <a href="<?= AppConstants::ROUTE_CLIENTS_EDIT . '/' ?><?= $client['id'] ?>"
+                                                            class="btn btn-outline-setap-primary" title="Editar" id="edit<?= $client['id']; ?>">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
                                                         <button type="button" class="btn btn-outline-danger"
-                                                            onclick="confirmDelete(<?php echo $client['id']; ?>, '<?php echo addslashes($client['razon_social']); ?>')"
+                                                            onclick="confirmDelete(<?= $client['id']; ?>, '<?= addslashes($client['razon_social']); ?>')"
                                                             title="Eliminar">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
@@ -242,8 +240,8 @@
 
     <!-- Scripts Optimizados de SETAP -->
     <?php $scripts = ['jquery', 'datatables'];
-    include __DIR__ . '/../layouts/scripts-advanced.php'; ?>
-    <?php include __DIR__ . '/../layouts/scripts-base.php'; ?>
+    include __DIR__ . '/../layouts/scripts-advanced.php';
+    include __DIR__ . '/../layouts/scripts-base.php'; ?>
 
     <script>
         $(document).ready(function() {

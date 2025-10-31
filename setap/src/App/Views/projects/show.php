@@ -94,7 +94,7 @@ use App\Constants\AppConstants; ?>
                 </p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="<?= \App\Constants\AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning">
+                <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning">
                     <i class="bi bi-pencil"></i> Editar Proyecto
                 </a>
                 <a href="/proyecto-feriados?proyecto_id=<?= $project['id'] ?>" class="btn btn-info">
@@ -210,7 +210,7 @@ use App\Constants\AppConstants; ?>
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><i class="bi bi-list-task"></i> Tareas del Proyecto</h5>
-                        <a href="<?= \App\Constants\AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-setap-primary">
                             <i class="bi bi-plus"></i> Nueva Tarea
                         </a>
                     </div>
@@ -239,19 +239,18 @@ use App\Constants\AppConstants; ?>
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
                                             <h6 class="mb-2"><?= htmlspecialchars($task['tarea_nombre']) ?></h6>
-                                            <p class="text-muted mb-2"><?= htmlspecialchars($task['tarea_descripcion']) ?></p>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <small class="text-muted">
-                                                        <strong>Planificador:</strong> <?= htmlspecialchars($task['planificador_nombre']) ?><br>
-                                                        <strong>Ejecutor:</strong> <?= htmlspecialchars($task['ejecutor_nombre'] ?: 'No asignado') ?><br>
-                                                        <strong>Supervisor:</strong> <?= htmlspecialchars($task['supervisor_nombre'] ?: 'No asignado') ?>
+                                                        <strong>Ejecuta:</strong> <?= htmlspecialchars($task['ejecutor_nombre'] ?: 'No asignado') ?><br>
+                                                        <strong>Supervisa:</strong> <?= htmlspecialchars($task['supervisor_nombre'] ?: 'No asignado') ?><br>
+                                                        <strong>Inicio:</strong> <?= date('Y/m/d', strtotime($task['fecha_inicio'])) ?>
                                                     </small>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <small class="text-muted">
-                                                        <strong>Fecha Inicio:</strong> <?= date('d/m/Y H:i', strtotime($task['fecha_inicio'])) ?><br>
-                                                        <strong>Duración:</strong> <?= $task['duracion_horas'] ?> horas<br>
+                                                        <strong>Fin:</strong> <?= date('Y/m/d', strtotime($task['fecha_fin'])) ?><br>
+                                                        <strong>Dura:</strong> <?= $task['duracion_horas'] ?> <?= $task['duracion_horas'] > 1 ? 'horas' : 'hora'  ?><br>
                                                         <strong>Prioridad:</strong> <?= $task['prioridad'] ?>
                                                     </small>
                                                 </div>
