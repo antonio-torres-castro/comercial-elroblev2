@@ -63,6 +63,36 @@ class ProyectoFeriadoController extends BaseController
     }
 
     /**
+     * Tabla Feriados Vista principal del mantenedor de feriados
+     */
+    public function refreshHolidaysTable()
+    {
+        $projectId = $_GET['proyecto_id'] ?? null;
+        if (!$projectId) {
+            $this->redirectToRoute(AppConstants::ROUTE_PROJECTS);
+            return;
+        }
+        // Obtener información del proyecto
+        $project = $this->projectModel->find((int)$projectId);
+        if (!$project) {
+            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_PROJECT_NOT_FOUND);
+            return;
+        }
+        // Obtener feriados del proyecto
+        $feriados = $this->proyectoFeriadoModel->getByProject((int)$projectId);
+        // Obtener estadísticas
+        $stats = $this->proyectoFeriadoModel->getProjectHolidayStats((int)$projectId);
+
+        // Respuesta en formato JSON
+        echo json_encode([
+            'success' => true,
+            'feriados' => $feriados,
+            'stats' => $stats,
+            'message' => 'Datos cargados correctamente.'
+        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    }
+
+    /**
      * Crear feriados masivamente por días de la semana
      */
     public function createMasivo()
@@ -93,7 +123,7 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
-            $returnUrl = "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}";
+            $returnUrl = AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}";
 
             // Validaciones
             if (empty($diasSemana) || !$fechaInicio || !$fechaFin) {
@@ -119,11 +149,6 @@ class ProyectoFeriadoController extends BaseController
                 $observaciones
             );
 
-            if (isset($result['error'])) {
-                $this->redirectWithError($returnUrl, $result['error']);
-                return;
-            }
-
             $message = "Feriados creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
 
             // Si hay conflictos con tareas, incluirlos en el mensaje
@@ -131,11 +156,17 @@ class ProyectoFeriadoController extends BaseController
                 $message .= '. Se detectaron conflictos con tareas existentes.';
             }
 
-            $this->redirectWithSuccess($returnUrl, $message);
+            // Respuesta en formato JSON
+            echo json_encode([
+                'success' => true,
+                'conflicts' => $result['conflicts'],
+                'Error' => $result['error'],
+                'message' => $message
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::createMasivo error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
@@ -169,7 +200,7 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
-            $returnUrl = "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}";
+            $returnUrl = AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}";
 
             // Validaciones
             if (!$fecha) {
@@ -201,7 +232,7 @@ class ProyectoFeriadoController extends BaseController
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::createEspecifico error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
@@ -236,7 +267,7 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
-            $returnUrl = "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}";
+            $returnUrl = AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}";
 
             // Validaciones
             if (!$fechaInicio || !$fechaFin) {
@@ -274,7 +305,7 @@ class ProyectoFeriadoController extends BaseController
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::createRango error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
@@ -292,7 +323,7 @@ class ProyectoFeriadoController extends BaseController
         }
 
         // Redirigir a la vista principal de feriados del proyecto
-        $this->redirectToRoute("<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}");
+        $this->redirectToRoute(AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}");
     }
 
     /**
@@ -316,12 +347,12 @@ class ProyectoFeriadoController extends BaseController
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
 
             if (!$id) {
-                $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+                $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
                 $this->redirectWithError($returnUrl, 'ID de feriado requerido');
                 return;
             }
 
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
 
             $data = [
                 'tipo_feriado' => $_POST['tipo_feriado'] ?? 'especifico',
@@ -339,7 +370,7 @@ class ProyectoFeriadoController extends BaseController
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::update error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
@@ -365,12 +396,12 @@ class ProyectoFeriadoController extends BaseController
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
 
             if (!$id) {
-                $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+                $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
                 $this->redirectWithError($returnUrl, 'ID de feriado requerido');
                 return;
             }
 
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
 
             $success = $this->proyectoFeriadoModel->delete($id);
             if ($success) {
@@ -381,7 +412,7 @@ class ProyectoFeriadoController extends BaseController
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::delete error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
@@ -400,7 +431,7 @@ class ProyectoFeriadoController extends BaseController
 
         // Redirigir a la vista principal de feriados del proyecto
         // La detección de conflictos debería manejarse en la vista sin Ajax
-        $this->redirectToRoute("<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}");
+        $this->redirectToRoute(AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}");
     }
 
     /**
@@ -429,7 +460,7 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
-            $returnUrl = "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}";
+            $returnUrl = AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}";
 
             if (empty($taskIds)) {
                 $this->redirectWithError($returnUrl, 'Parámetros incompletos');
@@ -452,7 +483,7 @@ class ProyectoFeriadoController extends BaseController
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::moveTasks error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
-            $returnUrl = $projectId ? "<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
@@ -471,6 +502,6 @@ class ProyectoFeriadoController extends BaseController
 
         // Redirigir a la vista principal de feriados del proyecto
         // El cálculo de días laborables debería manejarse en la vista sin Ajax
-        $this->redirectToRoute("<?= App\Constants\AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id={$projectId}");
+        $this->redirectToRoute(AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}");
     }
 }

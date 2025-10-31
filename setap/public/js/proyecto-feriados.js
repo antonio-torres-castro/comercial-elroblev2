@@ -279,7 +279,7 @@ async function handleMoveTasksClick() {
  */
 async function refreshHolidaysTable() {
     try {
-        const response = await fetch(`/setap/proyecto-feriados/list?proyecto_id=${currentProjectId}`);
+        const response = await fetch(`/setap/proyecto-feriados/refreshHolidaysTable?proyecto_id=${currentProjectId}`);
         const data = await response.json();
         
         if (data.success) {

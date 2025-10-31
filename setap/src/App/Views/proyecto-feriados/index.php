@@ -192,7 +192,7 @@ use App\Constants\AppConstants;
                                                 placeholder="Ej: Fines de semana regulares" maxlength="100">
                                         </div>
                                     </div>
-
+                                    <!-- ********Boton Submit *********************-->
                                     <button type="submit" class="btn btn-primary" id="btn-create-masivo">
                                         <i class="fas fa-plus"></i> Crear Feriados Masivamente
                                     </button>
@@ -232,7 +232,7 @@ use App\Constants\AppConstants;
                                                 placeholder="Ej: Feriado Nacional" maxlength="100">
                                         </div>
                                     </div>
-
+                                    <!-- ********Boton Submit *********************-->
                                     <button type="submit" class="btn btn-primary" id="btn-create-especifico">
                                         <i class="fas fa-plus"></i> Crear Feriado
                                     </button>
@@ -276,7 +276,7 @@ use App\Constants\AppConstants;
                                                 placeholder="Ej: Vacaciones de verano" maxlength="100">
                                         </div>
                                     </div>
-
+                                    <!-- ********Boton Submit *********************-->
                                     <button type="submit" class="btn btn-primary" id="btn-create-rango">
                                         <i class="fas fa-plus"></i> Crear Feriados en Rango
                                     </button>
@@ -386,7 +386,7 @@ use App\Constants\AppConstants;
                 </div>
                 <form id="edit-holiday-form">
                     <div class="modal-body">
-                        <?= \App\Helpers\Security::renderCsrfField() ?>
+                        <?= Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="edit-holiday-id">
 
                         <div class="mb-3">
@@ -410,7 +410,8 @@ use App\Constants\AppConstants;
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                        <!-- ********Boton Submit *********************-->
+                        <button type="submit" class="btn btn-primary" id="btn-actualizar-editHolidayModal">Actualizar</button>
                     </div>
                 </form>
             </div>

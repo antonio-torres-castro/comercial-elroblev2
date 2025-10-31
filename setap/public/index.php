@@ -579,6 +579,15 @@ try {
                     }
                     break;
 
+                case 'refreshHolidaysTable':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshHolidaysTable();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'update':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->update();
