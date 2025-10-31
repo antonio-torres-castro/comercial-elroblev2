@@ -85,7 +85,7 @@ class TaskController extends BaseController
     /**
      * Mostrar/editar tarea individual (singular)
      */
-    public function show($id = null)
+    public function show(?int $id = 0)
     {
         try {
             $currentUser = $this->getCurrentUser();
@@ -137,11 +137,19 @@ class TaskController extends BaseController
                 return;
             }
 
+            $project_id = isset($_POST['proyecto_id']) && !empty($_POST['proyecto_id']) ? (int)$_POST['proyecto_id'] : 0;
+            $project_id = isset($_GET['project_id']) && !empty($_GET['project_id']) ? (int)$_GET['project_id'] : $project_id;
+            if ($project_id > 0) {
+                $projects = $this->taskModel->getProjectById($project_id);
+            } else {
+                $projects = $this->taskModel->getProjects();
+            }
+
             $data = [
                 'user' => $currentUser,
                 'title' => AppConstants::UI_NEW_TASK,
                 'subtitle' => 'Asignar tarea a proyecto',
-                'projects' => $this->taskModel->getProjects(),
+                'projects' => $projects,
                 'tasks' => $this->taskModel->getTasksForCreate(),
                 'taskTypes' => $this->taskModel->getTaskTypes(), // Catálogo de tareas existentes
                 'executor_users' => $this->taskModel->getExecutorUsers(),
@@ -149,6 +157,7 @@ class TaskController extends BaseController
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
                 'task' => null,
                 'task_id' => null,
+                'project_id' => $project_id,
                 'error' => $_GET['error'] ?? ''
             ];
 

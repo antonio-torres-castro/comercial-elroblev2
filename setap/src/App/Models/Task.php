@@ -337,6 +337,30 @@ class Task
     }
 
     /**
+     * Obtener proyectos disponibles
+     */
+    public function getProjectById(?int $id = 0): array
+    {
+        try {
+            $sql = "
+                SELECT p.id, 
+                CONCAT('Proyecto para ', c.razon_social) as nombre, 
+                c.razon_social as cliente_nombre
+                FROM proyectos p
+                INNER JOIN clientes c ON p.cliente_id = c.id
+                WHERE p.estado_tipo_id IN (1, 2, 5) and p.id = ?
+                ORDER BY c.razon_social
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getProjects: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtener usuarios disponibles para asignación
      */
     public function getUsers(): array

@@ -267,7 +267,7 @@ use App\Constants\AppConstants; ?>
                                                 <?= htmlspecialchars($task['estado_nombre']) ?>
                                             </span>
                                             <div class="mt-2">
-                                                <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline-setap-primary">
+                                                <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-sm btn-outline-setap-primary">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                             </div>
@@ -335,7 +335,7 @@ use App\Constants\AppConstants; ?>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="/tasks/create?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
+                            <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
                                 <i class="bi bi-plus-circle"></i> Agregar Tarea
                             </a>
                             <a href="<?= AppConstants::ROUTE_PROJECTS_REPORT ?>?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
