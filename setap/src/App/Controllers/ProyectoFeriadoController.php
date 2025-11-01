@@ -165,7 +165,7 @@ class ProyectoFeriadoController extends BaseController
             echo json_encode([
                 'success' => $success,
                 'conflicts' => $result['conflicts'],
-                'Error' => $result['error'],
+                'Error' => $result['error'] ?? null,
                 'message' => $message
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
@@ -236,8 +236,8 @@ class ProyectoFeriadoController extends BaseController
             // Respuesta en formato JSON
             echo json_encode([
                 'success' => $success,
-                'conflicts' => $result['conflicts'],
-                'Error' => $result['error'],
+                'conflicts' => $result['conflicts'] ?? null,
+                'Error' => $result['error'] ?? null,
                 'message' => $message
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
@@ -315,8 +315,8 @@ class ProyectoFeriadoController extends BaseController
             // Respuesta en formato JSON
             echo json_encode([
                 'success' => $success,
-                'conflicts' => $result['conflicts'],
-                'Error' => $result['error'],
+                'conflicts' => $result['conflicts'] ?? null,
+                'Error' => $result['error'] ?? null,
                 'message' => $message
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
