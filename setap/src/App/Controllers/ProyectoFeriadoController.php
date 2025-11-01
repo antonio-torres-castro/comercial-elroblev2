@@ -216,19 +216,20 @@ class ProyectoFeriadoController extends BaseController
                 $observaciones
             );
 
-            if (isset($result['error'])) {
-                $this->redirectWithError($returnUrl, $result['error']);
-                return;
-            }
-
             $message = $result['action'] === 'created' ? AppConstants::SUCCESS_HOLIDAY_CREATED : AppConstants::SUCCESS_HOLIDAY_UPDATED;
 
             // Si hay conflictos con tareas, incluirlos en el mensaje
-            if (!empty($result['task_conflicts'])) {
+            if (!empty($result['conflicts'])) {
                 $message .= '. Se detectaron conflictos con tareas existentes.';
             }
 
-            $this->redirectWithSuccess($returnUrl, $message);
+            // Respuesta en formato JSON
+            echo json_encode([
+                'success' => true,
+                'conflicts' => $result['conflicts'],
+                'Error' => $result['error'],
+                'message' => $message
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::createEspecifico error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
@@ -401,14 +402,25 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
-            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
-
             $success = $this->proyectoFeriadoModel->delete($id);
+            $result = [
+                'success' => $success,
+                'conflicts' => [],
+                'error' => []
+            ];
             if ($success) {
-                $this->redirectWithSuccess($returnUrl, AppConstants::SUCCESS_HOLIDAY_DELETED);
+                $message = AppConstants::SUCCESS_HOLIDAY_DELETED;
             } else {
-                $this->redirectWithError($returnUrl, 'Error al eliminar feriado');
+                $message = 'Error al eliminar feriado';
             }
+
+            // Respuesta en formato JSON
+            echo json_encode([
+                'success' => true,
+                'conflicts' => $result['conflicts'],
+                'error' => $result['error'],
+                'message' => $message
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::delete error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);

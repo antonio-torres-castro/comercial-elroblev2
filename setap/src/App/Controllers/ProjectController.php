@@ -69,7 +69,7 @@ class ProjectController extends BaseController
         ]);
     }
 
-    public function show()
+    public function show(?int $id = 0)
     {
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
@@ -78,7 +78,7 @@ class ProjectController extends BaseController
             return;
         }
 
-        $id = (int)($_GET['id'] ?? 0);
+        $id = $id == 0 ? (int)($_GET['id'] ?? 0) : $id;
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
             return;
@@ -97,7 +97,7 @@ class ProjectController extends BaseController
         $stats = $this->projectModel->getProjectStats($id);
 
         // Obtener feriados del proyecto
-        $holidays = $this->projectModel->getProjectHolidays($id);
+        $holidays = $this->projectModel->getProjectHolidaysForViewManager($id);
 
         $this->view('projects/show', [
             'project' => $project,

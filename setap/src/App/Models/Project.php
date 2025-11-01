@@ -344,6 +344,36 @@ class Project
     }
 
     /**
+     * Obtener feriados de un proyecto
+     */
+    public function getProjectHolidaysForViewManager(int $projectId): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT fecha, CASE DAYOFWEEK(fecha)
+                           WHEN 1 THEN 'Domingo'
+                           WHEN 2 THEN 'Lunes'
+                           WHEN 3 THEN 'Martes'
+                           WHEN 4 THEN 'Miércoles'
+                           WHEN 5 THEN 'Jueves'
+                           WHEN 6 THEN 'Viernes'
+                           WHEN 7 THEN 'Sábado'
+                       END as dia_semana
+                FROM proyecto_feriados
+                WHERE proyecto_id = ? AND estado_tipo_id != 4
+                AND DAYOFWEEK(fecha) in (2, 3, 4, 5, 6)
+                ORDER BY fecha
+            ");
+
+            $stmt->execute([$projectId]);
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } catch (PDOException $e) {
+            Logger::error('Project::getProjectHolidays error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Cambiar estado de un proyecto
      */
     public function changeStatus(int $projectId, int $newStatusId): bool

@@ -50,6 +50,40 @@ class ProyectoFeriado
     }
 
     /**
+     * Obtener todos los feriados de un proyecto para index gestion proyecto
+     * No despliega los sabados y domingos, que por defecto no son laborales en chile
+     */
+    public function getByProjectForProjectIndex(int $projectId): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT pf.*,
+                       et.nombre as estado_nombre,
+                       CASE DAYOFWEEK(pf.fecha)
+                           WHEN 1 THEN 'Domingo'
+                           WHEN 2 THEN 'Lunes'
+                           WHEN 3 THEN 'Martes'
+                           WHEN 4 THEN 'Miércoles'
+                           WHEN 5 THEN 'Jueves'
+                           WHEN 6 THEN 'Viernes'
+                           WHEN 7 THEN 'Sábado'
+                       END as dia_semana
+                FROM proyecto_feriados pf
+                INNER JOIN estado_tipos et ON pf.estado_tipo_id = et.id
+                WHERE pf.proyecto_id = ? AND pf.estado_tipo_id != 4
+                AND DAYOFWEEK(pf.fecha) in (2, 3, 4, 5, 6)
+                ORDER BY pf.fecha ASC
+            ");
+
+            $stmt->execute([$projectId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error('ProyectoFeriado::getByProject error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Crear feriados masivamente por días de la semana
      */
     public function createRecurrentHolidays(int $projectId, array $diasSemana, string $fechaInicio, string $fechaFin, int $indIrrenunciable = 0, string $observaciones = ''): array
@@ -239,7 +273,7 @@ class ProyectoFeriado
                 return [
                     'action' => 'created',
                     'id' => $this->db->lastInsertId(),
-                    'task_conflicts' => $taskConflicts[$fecha] ?? []
+                    'conflicts' => $taskConflicts[$fecha] ?? []
                 ];
             }
         } catch (PDOException $e) {
