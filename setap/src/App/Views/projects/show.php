@@ -94,14 +94,14 @@ use App\Constants\AppConstants; ?>
                 </p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning">
-                    <i class="bi bi-pencil"></i> Editar Proyecto
+                <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning mr-2">
+                    <i class="bi bi-pencil"></i> Editar
                 </a>
-                <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>" class="btn btn-info">
-                    <i class="bi bi-calendar-x"></i> Gestionar Feriados
+                <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>" class="btn btn-info mr-2">
+                    <i class="bi bi-calendar-x"></i> Feriados
                 </a>
                 <button type="button" class="btn btn-setap-primary" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
-                    <i class="bi bi-arrow-repeat"></i> Cambiar Estado
+                    <i class="bi bi-arrow-repeat"></i> Estado
                 </button>
             </div>
         </div>
@@ -321,7 +321,7 @@ use App\Constants\AppConstants; ?>
                             <?php foreach ($holidays as $holiday): ?>
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="bi bi-calendar-x text-danger me-2"></i>
-                                    <?= date('d/m/Y', strtotime($holiday)) ?>
+                                    <?= $holiday['dia_semana'] . ' ' . date('d/m/Y', strtotime($holiday['fecha'])) ?>
                                 </div>
                             <?php endforeach; ?>
                         </div>

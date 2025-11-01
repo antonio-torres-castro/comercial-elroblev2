@@ -366,7 +366,7 @@ class Project
             ");
 
             $stmt->execute([$projectId]);
-            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error('Project::getProjectHolidays error: ' . $e->getMessage());
             return [];

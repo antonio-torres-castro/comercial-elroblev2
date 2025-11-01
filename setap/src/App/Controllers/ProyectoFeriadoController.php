@@ -139,6 +139,7 @@ class ProyectoFeriadoController extends BaseController
             // Convertir días a array de enteros
             $diasSemana = array_map('intval', $diasSemana);
 
+            $success = true;
             // Crear feriados
             $result = $this->proyectoFeriadoModel->createRecurrentHolidays(
                 $projectId,
@@ -149,6 +150,10 @@ class ProyectoFeriadoController extends BaseController
                 $observaciones
             );
 
+            if (!empty($result['error'])) {
+                $success = false;
+            }
+
             $message = "Feriados creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
 
             // Si hay conflictos con tareas, incluirlos en el mensaje
@@ -158,7 +163,7 @@ class ProyectoFeriadoController extends BaseController
 
             // Respuesta en formato JSON
             echo json_encode([
-                'success' => true,
+                'success' => $success,
                 'conflicts' => $result['conflicts'],
                 'Error' => $result['error'],
                 'message' => $message
@@ -208,6 +213,7 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
+            $success = true;
             // Crear feriado
             $result = $this->proyectoFeriadoModel->createSpecificHoliday(
                 $projectId,
@@ -215,6 +221,10 @@ class ProyectoFeriadoController extends BaseController
                 $indIrrenunciable,
                 $observaciones
             );
+
+            if (!empty($result['error'])) {
+                $success = false;
+            }
 
             $message = $result['action'] === 'created' ? AppConstants::SUCCESS_HOLIDAY_CREATED : AppConstants::SUCCESS_HOLIDAY_UPDATED;
 
@@ -225,7 +235,7 @@ class ProyectoFeriadoController extends BaseController
 
             // Respuesta en formato JSON
             echo json_encode([
-                'success' => true,
+                'success' => $success,
                 'conflicts' => $result['conflicts'],
                 'Error' => $result['error'],
                 'message' => $message
@@ -281,6 +291,7 @@ class ProyectoFeriadoController extends BaseController
                 return;
             }
 
+            $success = true;
             // Crear feriados
             $result = $this->proyectoFeriadoModel->createRangeHolidays(
                 $projectId,
@@ -291,8 +302,7 @@ class ProyectoFeriadoController extends BaseController
             );
 
             if (isset($result['error'])) {
-                $this->redirectWithError($returnUrl, $result['error']);
-                return;
+                $success = false;
             }
 
             $message = "Feriados en rango creados exitosamente: {$result['created']} nuevos, {$result['updated']} actualizados";
@@ -302,7 +312,13 @@ class ProyectoFeriadoController extends BaseController
                 $message .= '. Se detectaron conflictos con tareas existentes.';
             }
 
-            $this->redirectWithSuccess($returnUrl, $message);
+            // Respuesta en formato JSON
+            echo json_encode([
+                'success' => $success,
+                'conflicts' => $result['conflicts'],
+                'Error' => $result['error'],
+                'message' => $message
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::createRango error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
