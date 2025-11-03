@@ -327,6 +327,22 @@ class Task
     }
 
     /**
+     * Obtener tipos de tareas (catálogo general)
+     */
+    public function getAllTasks(): array
+    {
+        try {
+            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id ORDER BY t.nombre";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskTypes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtener tareas activas (catálogo general)
      */
     public function getTasksForCreate(): array

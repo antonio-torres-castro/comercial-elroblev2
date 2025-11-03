@@ -122,6 +122,50 @@ class TaskController extends BaseController
     /**
      * Mostrar formulario de creación
      */
+    public function newTask()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $project_id = isset($_POST['proyecto_id']) && !empty($_POST['proyecto_id']) ? (int)$_POST['proyecto_id'] : 0;
+            $project_id = isset($_GET['project_id']) && !empty($_GET['project_id']) ? (int)$_GET['project_id'] : $project_id;
+            if ($project_id > 0) {
+                $projects = $this->taskModel->getProjectById($project_id);
+            } else {
+                $projects = $this->taskModel->getProjects();
+            }
+
+            $data = [
+                'user' => $currentUser,
+                'title' => AppConstants::UI_NEW_TASK_TYPE,
+                'subtitle' => 'Definición',
+                'taskTypes' => $this->taskModel->getTasks(), // Catálogo de tareas existentes
+                'taskStates' => $this->taskModel->getTaskStates(),
+                'error' => $_GET['error'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/tasks/newTask.php';
+        } catch (Exception $e) {
+            Logger::error("TaskController::newTask: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+
+    /**
+     * Mostrar formulario de creación
+     */
     public function create()
     {
         try {
@@ -235,6 +279,48 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             Logger::error("TaskController::store: " . $e->getMessage());
             Security::redirect("/tasks/create?error=Error interno del servidor");
+        }
+    }
+
+    /**
+     * Guardar nueva tarea tipo
+     */
+    public function storeT()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
+                return;
+            }
+            // Verificar CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                Security::redirect("/tasks/create?error=" . urlencode('Token de seguridad inválido'));
+                return;
+            }
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $nueva_tarea_nombre = trim($_POST['nueva_tarea_nombre']);
+            $nueva_tarea_descripcion = trim($_POST['nueva_tarea_descripcion'] ?? '');
+            // Crear tarea
+            $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion);
+            if ($taskId) {
+                Security::redirect("/tasks/newTask?success=Tarea tipo creada");
+            } else {
+                Security::redirect("/tasks/newTask?error=Error creando tarea tipo");
+            }
+        } catch (Exception $e) {
+            Logger::error("TaskController::storeT: " . $e->getMessage());
+            Security::redirect("/tasks/storeT?error=Error interno del servidor");
         }
     }
 

@@ -478,6 +478,14 @@ try {
                     }
                     break;
 
+                case 'storett':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->storeT();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_TASKS);
+                    }
+                    break;
+
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();
@@ -535,7 +543,7 @@ try {
             if ($action) {
                 $controller->show((int)$action);
             } else {
-                $controller->show();
+                $controller->newTask();
             }
             break;
 

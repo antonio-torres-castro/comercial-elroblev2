@@ -520,6 +520,9 @@ class AppConstants
     /** Nueva Tarea */
     const UI_NEW_TASK = 'Nueva Tarea';
 
+    /** Nueva Tarea */
+    const UI_NEW_TASK_TYPE = 'Nueva Tarea Tipo';
+
     /** Nueva Persona */
     const UI_NEW_PERSONA = 'Nueva Persona';
 
