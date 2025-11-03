@@ -43,7 +43,7 @@ use App\Constants\AppConstants; ?>
                     </div>
                 <?php endif; ?>
 
-                <?php if (!empty($data['success'])): ?>
+                <?php if (isset($data['success']) && !empty($data['success'])): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="bi bi-check-circle"></i> <?= htmlspecialchars($data['success']) ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -141,19 +141,19 @@ use App\Constants\AppConstants; ?>
                                         <tbody id="tasks-tbody">
                                             <?php foreach ($data['tasks'] as $tarea): ?>
                                                 <tr>
-                                                    <td id="tdNombre" <?= $tarea['id'] ?>><?= $tarea['nombre'] ?></td>
-                                                    <td id="tdDescripcion" <?= $tarea['id'] ?>><?= $tarea['descripcion'] ?></td>
-                                                    <td id="tdEstadoTipoId" <?= $tarea['id'] ?> hidden><?= $tarea['estado_tipo_id'] ?></td>
-                                                    <td id="tdEstado" <?= $tarea['id'] ?>>
+                                                    <td id="tdNombre<?= $tarea['id'] ?>"><?= $tarea['nombre'] ?></td>
+                                                    <td id="tdDescripcion<?= $tarea['id'] ?>"><?= $tarea['descripcion'] ?></td>
+                                                    <td id="tdEstadoTipoId<?= $tarea['id'] ?>" hidden><?= $tarea['estado_tipo_id'] ?></td>
+                                                    <td id="tdEstado<?= $tarea['id'] ?>">
                                                         <span class="badge bg-<?= $tarea['estado_tipo_id'] == 2 ? 'success' : 'secondary' ?>">
                                                             <?= htmlspecialchars($tarea['estado']) ?>
                                                         </span>
                                                     </td>
-                                                    <td id="tdAccionId" <?= $tarea['id'] ?>>
-                                                        <button id="tdBtnEdit" <?= $tarea['id'] ?> class="btn btn-sm btn-outline-primary" onclick="editTask(<?= $tarea['id'] ?>)" title="Editar">
+                                                    <td id="tdAccionId<?= $tarea['id'] ?>">
+                                                        <button id="tdBtnEdit<?= $tarea['id'] ?>" class="btn btn-sm btn-outline-primary" onclick="editTask(<?= $tarea['id'] ?>)" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button id="tdBtnDel" <?= $tarea['id'] ?> class="btn btn-sm btn-outline-danger" onclick="deleteTask(<?= $tarea['id'] ?>)" title="Eliminar">
+                                                        <button id="tdBtnDel<?= $tarea['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="deleteTask(<?= $tarea['id'] ?>)" title="Eliminar">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -273,7 +273,7 @@ use App\Constants\AppConstants; ?>
          * Actualizar contenido de la tabla de feriados
          */
         function updateTasksTable(tareas) {
-            const tbody = document.getElementById('holidays-tbody');
+            const tbody = document.getElementById('tasks-tbody');
             let html = '';
 
             tareas.forEach(tarea => {
@@ -311,9 +311,9 @@ use App\Constants\AppConstants; ?>
 
                 // Configurar el formulario modal
                 document.getElementById('edit-task-id').value = id;
-                document.getElementById('editTareaNombre').value = document.getElementById('tdNombre' + id).value;
-                document.getElementById('editTareaDescripcion').value = document.getElementById('tdDescripcion' + id).value;
-                document.getElementById('editEstadoTipoId').value = document.getElementById('tdEstadoTipoId' + id).value;
+                document.getElementById('editTareaNombre').value = document.getElementById('tdNombre' + id).textContent;
+                document.getElementById('editTareaDescripcion').value = document.getElementById('tdDescripcion' + id).textContent;
+                document.getElementById('editEstadoTipoId').value = document.getElementById('tdEstadoTipoId' + id).textContent;
 
                 modal.show();
             } catch (error) {
