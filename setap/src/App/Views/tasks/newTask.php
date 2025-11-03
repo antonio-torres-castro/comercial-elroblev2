@@ -132,11 +132,10 @@ use App\Constants\AppConstants; ?>
                                             </tr>
                                         </thead>
                                         <tbody id="tareas-tbody">
-                                            <?php foreach ($data['tareas'] as $tarea): ?>
+                                            <?php foreach ($data['tasks'] as $tarea): ?>
                                                 <tr>
                                                     <td><?= $tarea['nombre'] ?></td>
                                                     <td><?= $tarea['descripcion'] ?></td>
-                                                    <td><?= $tarea['estado'] ?></td>
                                                     <td>
                                                         <span class="badge bg-<?= $tarea['estado_tipo_id'] == 2 ? 'success' : 'secondary' ?>">
                                                             <?= htmlspecialchars($tarea['estado']) ?>

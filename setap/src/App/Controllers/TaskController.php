@@ -137,20 +137,12 @@ class TaskController extends BaseController
                 return;
             }
 
-            $project_id = isset($_POST['proyecto_id']) && !empty($_POST['proyecto_id']) ? (int)$_POST['proyecto_id'] : 0;
-            $project_id = isset($_GET['project_id']) && !empty($_GET['project_id']) ? (int)$_GET['project_id'] : $project_id;
-            if ($project_id > 0) {
-                $projects = $this->taskModel->getProjectById($project_id);
-            } else {
-                $projects = $this->taskModel->getProjects();
-            }
-
             $data = [
                 'user' => $currentUser,
                 'title' => AppConstants::UI_NEW_TASK_TYPE,
                 'subtitle' => 'Definición',
-                'taskTypes' => $this->taskModel->getTasks(), // Catálogo de tareas existentes
-                'taskStates' => $this->taskModel->getTaskStates(),
+                'tasks' => $this->taskModel->getAllTasks(), // Catálogo de tareas existentes
+                'taskStates' => $this->taskModel->getTaskStatesForCreate(),
                 'error' => $_GET['error'] ?? ''
             ];
 
