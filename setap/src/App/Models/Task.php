@@ -295,6 +295,21 @@ class Task
     }
 
     /**
+     * Eliminar tarea (soft delete)
+     */
+    public function deleteT(int $id): bool
+    {
+        try {
+            $sql = "UPDATE tareas SET estado_tipo_id = 4, fecha_modificacion = NOW() WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$id]);
+        } catch (PDOException $e) {
+            Logger::error("Task::delete: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Obtener tipos de tareas disponibles (catálogo general)
      */
     public function getTaskTypes(): array

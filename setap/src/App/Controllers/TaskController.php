@@ -579,6 +579,72 @@ class TaskController extends BaseController
     }
 
     /**
+     * Eliminar tarea
+     */
+    public function deleteT()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
+                return;
+            }
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INVALID_TASK_ID);
+                return;
+            }
+
+            // Validar si la tarea puede ser eliminada (GAP 5)
+            $task = $this->taskModel->getById($id);
+            if (!$task) {
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_TASK_NOT_FOUND);
+                return;
+            }
+            // Solo admin y planner pueden eliminar tareas aprobadas
+            if ($task['estado_tipo_id'] == 8 && !in_array($currentUser['rol'], ['admin', 'planner'])) {
+                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_CANNOT_DELETE_APPROVED_TASK);
+                return;
+            }
+
+            // Eliminar tarea
+            if ($this->taskModel->deleteT($id)) {
+                $this->jsonSuccess('Tarea eliminada');
+            } else {
+                $this->jsonError('Error al eliminar la tarea', [], 500);
+            }
+        } catch (Exception $e) {
+            Logger::error("TaskController::deleteT: " . $e->getMessage());
+            http_response_code(500);
+            $this->jsonInternalError();
+        }
+    }
+
+    /**
+     * Tabla Feriados Vista principal del mantenedor de feriados
+     */
+    public function refreshTasksTable()
+    {
+        try {
+            $tasks = $this->taskModel->getAllTasks();
+            $this->jsonSuccess('Tareas cargadas correctamente', ['tareas' => $tasks]);
+        } catch (Exception $e) {
+            Logger::error("UserController::refreshTasksTable: " . $e->getMessage());
+            $this->jsonError('Error al actualizar lista de tareas', [], 500);
+        }
+    }
+
+    /**
      * Cambiar estado de una tarea (GAP 5)
      */
     public function changeState()

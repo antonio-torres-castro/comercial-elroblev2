@@ -494,6 +494,23 @@ try {
                     }
                     break;
 
+                case 'deleteT':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->deleteT();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_TASKS);
+                    }
+                    break;
+
+                case 'refreshTasksTable':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshTasksTable();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'show':
                     if ($id) {
                         $controller->show((int)$id);
