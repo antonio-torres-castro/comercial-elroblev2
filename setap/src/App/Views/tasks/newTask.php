@@ -43,6 +43,13 @@ use App\Constants\AppConstants; ?>
                     </div>
                 <?php endif; ?>
 
+                <?php if (!empty($data['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle"></i> <?= htmlspecialchars($data['success']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
@@ -52,7 +59,7 @@ use App\Constants\AppConstants; ?>
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <form id="createTaskForm" method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/store">
+                                <form id="createTaskForm" method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/storet">
                                     <?= Security::renderCsrfField() ?>
 
                                     <div class="row g-3">
@@ -223,7 +230,7 @@ use App\Constants\AppConstants; ?>
 
             // Envío del formulario
             form.addEventListener('submit', function(e) {
-                if (!confirm('¿Deseas crear esta tarea?')) {
+                if (!confirm('¿Crear esta tarea?')) {
                     e.preventDefault();
                     return;
                 }
@@ -265,7 +272,7 @@ use App\Constants\AppConstants; ?>
         /**
          * Actualizar contenido de la tabla de feriados
          */
-        function updateHolidaysTable(tareas) {
+        function updateTasksTable(tareas) {
             const tbody = document.getElementById('holidays-tbody');
             let html = '';
 

@@ -143,6 +143,7 @@ class TaskController extends BaseController
                 'subtitle' => 'Definición',
                 'tasks' => $this->taskModel->getAllTasks(), // Catálogo de tareas existentes
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
+                'success' => $_GET['success'] ?? '',
                 'error' => $_GET['error'] ?? ''
             ];
 
@@ -306,9 +307,9 @@ class TaskController extends BaseController
             // Crear tarea
             $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion);
             if ($taskId) {
-                Security::redirect("/tasks/newTask?success=Tarea tipo creada");
+                Security::redirect("/task/newTask?success=Tarea tipo creada");
             } else {
-                Security::redirect("/tasks/newTask?error=Error creando tarea tipo");
+                Security::redirect("/task/newTask?error=Error creando tarea tipo");
             }
         } catch (Exception $e) {
             Logger::error("TaskController::storeT: " . $e->getMessage());

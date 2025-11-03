@@ -478,7 +478,7 @@ try {
                     }
                     break;
 
-                case 'storett':
+                case 'storet':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->storeT();
                     } else {
@@ -557,7 +557,7 @@ try {
         case 'task':
             $controller = new TaskController();
 
-            if ($action) {
+            if ($action && is_numeric($action)) {
                 $controller->show((int)$action);
             } else {
                 $controller->newTask();
