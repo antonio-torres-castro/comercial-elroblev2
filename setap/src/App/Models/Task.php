@@ -135,37 +135,44 @@ class Task
     }
 
     /**
-     * Crear nueva tarea en proyecto
+     * Crear nueva tarea
      */
-    public function create(array $data): ?int
+    public function taskCreate(?string $tareaNombre, ?string $tareaDescripcion): ?int
     {
         try {
             $this->db->beginTransaction();
-
-            // Primero crear la tarea en el catálogo general si no existe
-            // La tarea se esta creando junto con asignarla a un proyecto
-            // por lo que se crea con el estado de activa
-
-            $tareaId = "";
-            if (isset($data['nueva_tarea_nombre']) && !empty($data['nueva_tarea_nombre'])) {
-                $stmt = $this->db->prepare("
-                    SELECT id FROM tareas WHERE nombre = ?");
-                $stmt->execute([$data['nueva_tarea_nombre']]);
+            $tareaId = 0;
+            if (!empty($tareaNombre)) {
+                $stmt = $this->db->prepare("SELECT id FROM tareas WHERE nombre = ?");
+                $stmt->execute([$tareaNombre]);
                 $arrayTareaId = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if (empty($arrayTareaId)) {
                     $stmt = $this->db->prepare("INSERT INTO tareas (nombre, descripcion, estado_tipo_id) VALUES (?, ?, 2)");
-                    $stmt->execute([
-                        $data['nueva_tarea_nombre'],
-                        $data['nueva_tarea_descripcion'] ?? '',
-                    ]);
+                    $stmt->execute([$tareaNombre, $tareaDescripcion ?? '']);
                     $tareaId = $this->db->lastInsertId();
                 } else {
                     $tareaId = $arrayTareaId[0];
                 }
             } else {
-                $tareaId = $data['tarea_id'];
+                $this->db->rollBack();
+                Logger::error("Task::create: no se puede crear tarea sin nombre");
             }
+            $this->db->commit();
+            return $tareaId;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            Logger::error("Task::create: " . $e->getMessage());
+            return null;
+        }
+    }
 
+    /**
+     * Crear nueva tarea en proyecto
+     */
+    public function projectTaskCreate(array $data): ?int
+    {
+        try {
+            $this->db->beginTransaction();
             // Luego crear la asignación proyecto-tarea
             $stmt = $this->db->prepare("
                 INSERT INTO proyecto_tareas (
@@ -184,7 +191,7 @@ class Task
 
             $result = $stmt->execute([
                 $data['proyecto_id'],
-                $tareaId,
+                $data['tarea_id'],
                 $data['planificador_id'],
                 $data['ejecutor_id'] ?? null,
                 $data['supervisor_id'] ?? null,
@@ -205,6 +212,29 @@ class Task
             }
         } catch (PDOException $e) {
             $this->db->rollBack();
+            Logger::error("Task::create: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Crear nueva tarea en proyecto
+     */
+    public function create(array $data): ?int
+    {
+        try {
+            $tareaId = 0;
+            if (
+                (!isset($data['tarea_id']) || empty($data['tarea_id']) ||
+                    (is_numeric($data['tarea_id']) && (int)$data['tarea_id'] <= 0)) &&
+                isset($data['nueva_tarea_nombre']) && !empty($data['nueva_tarea_nombre'])
+            ) {
+                $tareaId = $this->taskCreate($data['nueva_tarea_nombre'], $data['nueva_tarea_descripcion']);
+                $data['tarea_id'] = $tareaId;
+            }
+            $proyectoTareasId = $this->projectTaskCreate($data);
+            return $proyectoTareasId;
+        } catch (PDOException $e) {
             Logger::error("Task::create: " . $e->getMessage());
             return null;
         }

@@ -102,7 +102,6 @@ class ProyectoFeriadoController extends BaseController
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
-
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
