@@ -301,7 +301,7 @@ use App\Constants\AppConstants; ?>
         }
 
         /**
-         * Editar feriado
+         * Editar task
          */
         async function editTask(id) {
             try {
@@ -319,6 +319,38 @@ use App\Constants\AppConstants; ?>
             } catch (error) {
                 console.error('Error:', error);
                 showAlert('error', 'Error al cargar datos de tarea');
+            }
+        }
+
+        /**
+         * Manejar envío del formulario de edición
+         */
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+
+            try {
+                const formData = new FormData(e.target);
+                const response = await fetch('/setap/tasks/updatet', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('success', data.message);
+
+                    // Cerrar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+                    modal.hide();
+
+                    refreshTasksTable();
+                } else {
+                    showAlert('error', data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'Error al actualizar feriado');
             }
         }
 
@@ -352,6 +384,14 @@ use App\Constants\AppConstants; ?>
                 console.error('Error:', error);
                 showAlert('error', 'Error al eliminar tarea');
             }
+        }
+
+        /**
+         * Obtener token CSRF
+         */
+        function getCsrfToken() {
+            const tokenInput = document.querySelector('input[name="csrf_token"]');
+            return tokenInput ? tokenInput.value : '';
         }
     </script>
     <!-- GAP 5: Task State Validation Utilities -->

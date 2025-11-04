@@ -470,6 +470,14 @@ try {
                     }
                     break;
 
+                case 'updatet':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->updateT();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_TASKS);
+                    }
+                    break;
+
                 case 'store':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();

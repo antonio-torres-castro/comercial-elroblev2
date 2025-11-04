@@ -142,7 +142,7 @@ class TaskController extends BaseController
                 'title' => AppConstants::UI_NEW_TASK_TYPE,
                 'subtitle' => 'Definición',
                 'tasks' => $this->taskModel->getAllTasks(), // Catálogo de tareas existentes
-                'taskStates' => $this->taskModel->getTaskStatesForCreate(),
+                'taskStates' => $this->taskModel->getTaskStatesForNewTask(),
                 'success' => $_GET['success'] ?? '',
                 'error' => $_GET['error'] ?? ''
             ];
@@ -427,7 +427,7 @@ class TaskController extends BaseController
     }
 
     /**
-     * Actualizar tarea
+     * Actualizar tarea proyecto
      */
     public function update()
     {
@@ -491,6 +491,63 @@ class TaskController extends BaseController
                 Security::redirect("/tasks?success=Tarea actualizada correctamente");
             } else {
                 Security::redirect("/tasks/edit?id={$id}&error=Error al actualizar la tarea");
+            }
+        } catch (Exception $e) {
+            Logger::error("TaskController::update: " . $e->getMessage());
+            $id = (int)($_POST['id'] ?? 0);
+            Security::redirect("/tasks/edit?id={$id}&error=Error interno del servidor");
+        }
+    }
+
+    /**
+     * Actualizar tarea
+     */
+    public function updateT()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
+                return;
+            }
+            // Verificar CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->jsonError('CsrfToken invalido', [], 500);
+                return;
+            }
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                $this->jsonError('Id invalido', [], 500);
+                return;
+            }
+            //Si el nombre de tarea existe y tiene un id diferente no se puede modificar esta ultima tarea
+            $tareaByName = $this->taskModel->getTaskByName($_POST['name']);
+            if (!empty($tareaByName) && $tareaByName['id'] != $_POST['id']) {
+                $this->jsonError('El nombre de tarea ya existe en otra tarea', [], 500);
+            }
+            // Preparar datos para actualización
+            $taskData = [
+                'id' => (int)$_POST['id'],
+                'nombre' => $_POST['nombre'],
+                'descripcion' => !empty($_POST['descripcion']) ? $_POST['descripcion'] : '',
+                'estado_tipo_id' => (int)$_POST['estado_tipo_id']
+            ];
+
+            // Actualizar tarea
+            if ($this->taskModel->updateT($id, $taskData)) {
+                $this->jsonSuccess('Tarea actualizada');
+            } else {
+                $this->jsonError('Error al actualizar tarea', [], 500);
             }
         } catch (Exception $e) {
             Logger::error("TaskController::update: " . $e->getMessage());
@@ -607,13 +664,13 @@ class TaskController extends BaseController
             }
 
             // Validar si la tarea puede ser eliminada (GAP 5)
-            $task = $this->taskModel->getById($id);
+            $task = $this->taskModel->getTaskById($id);
             if (!$task) {
                 $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_TASK_NOT_FOUND);
                 return;
             }
             // Solo admin y planner pueden eliminar tareas aprobadas
-            if ($task['estado_tipo_id'] == 8 && !in_array($currentUser['rol'], ['admin', 'planner'])) {
+            if ($task[0]['estado_tipo_id'] == 8 && !in_array($currentUser['rol'], ['admin', 'planner'])) {
                 $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_CANNOT_DELETE_APPROVED_TASK);
                 return;
             }

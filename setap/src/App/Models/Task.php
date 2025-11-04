@@ -280,6 +280,35 @@ class Task
     }
 
     /**
+     * Actualizar tarea en proyecto
+     */
+    public function updateT(int $id, array $data): bool
+    {
+        try {
+            $sql = "
+                UPDATE tareas
+                SET
+                    nombre = ?,
+                    descripcion = ?,
+                    estado_tipo_id = ?,
+                    fecha_modificacion = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                $data['nombre'],
+                $data['descripcion'],
+                $data['estado_tipo_id'],
+                $id
+            ]);
+        } catch (PDOException $e) {
+            Logger::error("Task::update: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Eliminar tarea (soft delete)
      */
     public function delete(int $id): bool
@@ -353,6 +382,38 @@ class Task
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getTaskTypes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener tarea por id 
+     */
+    public function getTaskById(?int $id): array
+    {
+        try {
+            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskById: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener tarea por id 
+     */
+    public function getTaskByName(?string $name): array
+    {
+        try {
+            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.name = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$name]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskByName: " . $e->getMessage());
             return [];
         }
     }
@@ -518,6 +579,28 @@ class Task
                 SELECT id, nombre, descripcion
                 FROM estado_tipos
                 WHERE id in (1, 2)
+                ORDER BY id
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskStates: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener estados de tareas
+     */
+    public function getTaskStatesForNewTask(): array
+    {
+        // Solo el estado de activo y creado 
+        try {
+            $sql = "
+                SELECT id, nombre, descripcion
+                FROM estado_tipos
+                WHERE id in (1, 2, 4)
                 ORDER BY id
             ";
             $stmt = $this->db->prepare($sql);
