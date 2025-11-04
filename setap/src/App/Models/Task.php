@@ -408,7 +408,7 @@ class Task
     public function getTaskByName(?string $name): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.name = ?";
+            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.nombre = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$name]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

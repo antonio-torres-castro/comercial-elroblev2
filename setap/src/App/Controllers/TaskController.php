@@ -531,16 +531,16 @@ class TaskController extends BaseController
                 return;
             }
             //Si el nombre de tarea existe y tiene un id diferente no se puede modificar esta ultima tarea
-            $tareaByName = $this->taskModel->getTaskByName($_POST['name']);
-            if (!empty($tareaByName) && $tareaByName['id'] != $_POST['id']) {
+            $tareaByName = $this->taskModel->getTaskByName($_POST['editTareaNombre']);
+            if (!empty($tareaByName) && $tareaByName[0]['id'] != $_POST['id']) {
                 $this->jsonError('El nombre de tarea ya existe en otra tarea', [], 500);
             }
             // Preparar datos para actualización
             $taskData = [
                 'id' => (int)$_POST['id'],
-                'nombre' => $_POST['nombre'],
-                'descripcion' => !empty($_POST['descripcion']) ? $_POST['descripcion'] : '',
-                'estado_tipo_id' => (int)$_POST['estado_tipo_id']
+                'nombre' => $_POST['editTareaNombre'],
+                'descripcion' => !empty($_POST['editTareaDescripcion']) ? $_POST['editTareaDescripcion'] : '',
+                'estado_tipo_id' => (int)$_POST['editEstadoTipoId']
             ];
 
             // Actualizar tarea

@@ -36,7 +36,7 @@ use App\Constants\AppConstants; ?>
 
                 <!-- Mensajes de error -->
                 <?php if (isset($data['error']) && !empty($data['error'])): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div id="errorAlert" class="alert alert-danger alert-dismissible fade show" role="alert">
                         <h6><i class="bi bi-exclamation-triangle"></i> Se encontraron los siguientes errores:</h6>
                         <p class="mb-0"><?= htmlspecialchars($data['error']); ?></p>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -44,7 +44,7 @@ use App\Constants\AppConstants; ?>
                 <?php endif; ?>
 
                 <?php if (isset($data['success']) && !empty($data['success'])): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div id="successAlert" class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="bi bi-check-circle"></i> <?= htmlspecialchars($data['success']) ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -172,7 +172,6 @@ use App\Constants\AppConstants; ?>
         </div>
     </div>
 
-
     <!-- Edit Task Modal -->
     <div class="modal fade" id="editTaskModal" tabindex="-1">
         <div class="modal-dialog">
@@ -207,6 +206,7 @@ use App\Constants\AppConstants; ?>
                             </select>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <!-- ********Boton Submit *********************-->
@@ -216,8 +216,6 @@ use App\Constants\AppConstants; ?>
             </div>
         </div>
     </div>
-
-
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . '/../layouts/scripts-base.php'; ?>
@@ -238,6 +236,8 @@ use App\Constants\AppConstants; ?>
                 createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Enviando...';
                 createBtn.disabled = true;
             });
+
+            initializeFormHandlers();
         });
 
         /**
@@ -279,18 +279,19 @@ use App\Constants\AppConstants; ?>
             tareas.forEach(tarea => {
                 html += `
         <tr>
-            <td>${tarea.nombre}</td>
-            <td>${tarea.descripcion}</td>
-            <td>
+            <td id="tdNombre${tarea.id}">${tarea.nombre}</td>
+            <td id="tdDescripcion${tarea.id}">${tarea.descripcion}</td>
+            <td id="tdEstadoTipoId${tarea.id}" hidden>${tarea.estado_tipo_id}</td>
+            <td id="tdEstado${tarea.id}">
                 <span class="badge bg-${tarea.estado_tipo_id == 2 ? 'success' : 'secondary'}">
                     ${tarea.estado}
                 </span>
             </td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="editTask(${tarea.id})" title="Editar">
+            <td id="tdAccionId${tarea.id}">
+                <button id="tdBtnEdit${tarea.id}}" class="btn btn-sm btn-outline-primary" onclick="editTask(${tarea.id})" title="Editar">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${tarea.id})" title="Eliminar">
+                <button id="tdBtnDel${tarea.id}" class="btn btn-sm btn-outline-danger" onclick="deleteTask(${tarea.id})" title="Eliminar">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -339,14 +340,12 @@ use App\Constants\AppConstants; ?>
 
                 if (data.success) {
                     showAlert('success', data.message);
-
                     // Cerrar modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
                     modal.hide();
-
                     refreshTasksTable();
                 } else {
-                    showAlert('error', data.message);
+                    showErrorModalAlert('error', data.message);
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -355,7 +354,7 @@ use App\Constants\AppConstants; ?>
         }
 
         /**
-         * Eliminar feriado
+         * Eliminar tarea
          */
         async function deleteTask(id) {
             if (!confirm('¿Está seguro de que desea eliminar esta tarea?')) {
@@ -384,6 +383,58 @@ use App\Constants\AppConstants; ?>
                 console.error('Error:', error);
                 showAlert('error', 'Error al eliminar tarea');
             }
+        }
+
+        /**
+         * Utilidades
+         */
+
+        /**
+         * Mostrar alerta
+         */
+        function showAlert(type, message) {
+            // Crear elemento de alerta
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+            // Insertar al inicio del container
+            const container = document.querySelector('.container-fluid');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        /**
+         * Mostrar alerta en modal
+         */
+        function showErrorModalAlert(type, message) {
+            // Crear elemento de alerta
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+            // Insertar al inicio del container
+            const container = document.querySelector('.modal-footer');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
         }
 
         /**
