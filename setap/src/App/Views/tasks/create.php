@@ -45,15 +45,59 @@ use App\Constants\AppConstants; ?>
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-list-task"></i> <?= $data['subtitle']; ?>
-                                </h5>
+
+                        <form id="createTaskForm" method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/store">
+                            <?= Security::renderCsrfField() ?>
+                            <!-- Definicion tarea catalogo:inicio-->
+                            <!-- Tarea Catálogo -->
+                            <div class="col-md-12">
+                                <select class="form-select" id="tarea_id" name="tarea_id" required>
+                                    <option value="">Seleccionar tarea existente...</option>
+                                    <?php foreach ($data['tasks'] as $taskType): ?>
+                                        <option value="<?= $taskType['id']; ?>"
+                                            <?= (isset($_POST['tarea_id']) && $_POST['tarea_id'] == $taskType['id']) ? 'selected' : ''; ?>>
+                                            <?= htmlspecialchars($taskType['nombre']); ?> - <?= htmlspecialchars($taskType['descripcion']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                    <option value="nueva" <?= (isset($_POST['tarea_id']) && $_POST['tarea_id'] == 'nueva') ? 'selected' : ''; ?>>
+                                        ➕ Crear nueva tarea
+                                    </option>
+                                </select>
+                                <div class="form-text mb-3">Seleccione del catálogo o cree una nueva.</div>
                             </div>
-                            <div class="card-body">
-                                <form id="createTaskForm" method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/store">
-                                    <?= Security::renderCsrfField() ?>
+                            <!-- Campos para nueva tarea (ocultos por defecto) -->
+                            <div class="col-12" id="nueva-tarea-fields" style="display: none;">
+                                <div class="card border-primary mb-2">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="bi bi-plus-circle"></i> Nueva tarea en estado activo</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="nueva_tarea_nombre" class="form-label">
+                                                    Nombre llave <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre"
+                                                    placeholder="Nombre descriptivo de la tarea"
+                                                    value="<?= htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>"
+                                                    maxlength="150">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="nueva_tarea_descripcion" class="form-label">Descripción</label>
+                                                <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
+                                                    placeholder="Descripción detallada de la tarea" rows="3"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Definicion tarea catalogo:fin-->
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-list-task"></i> <?= $data['subtitle']; ?></h5>
+                                </div>
+                                <div class="card-body">
 
                                     <div class="row g-3">
                                         <!-- Proyecto -->
@@ -72,54 +116,7 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
 
-                                        <!-- Tarea Catálogo -->
-                                        <div class="col-md-12">
-                                            <label for="tarea_id" class="form-label">
-                                                Tarea <span class="text-danger">*</span>
-                                            </label>
-                                            <select class="form-select" id="tarea_id" name="tarea_id" required>
-                                                <option value="">Seleccionar tarea existente...</option>
-                                                <?php foreach ($data['tasks'] as $taskType): ?>
-                                                    <option value="<?= $taskType['id']; ?>"
-                                                        <?= (isset($_POST['tarea_id']) && $_POST['tarea_id'] == $taskType['id']) ? 'selected' : ''; ?>>
-                                                        <?= htmlspecialchars($taskType['nombre']); ?> - <?= htmlspecialchars($taskType['descripcion']); ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                                <option value="nueva" <?= (isset($_POST['tarea_id']) && $_POST['tarea_id'] == 'nueva') ? 'selected' : ''; ?>>
-                                                    ➕ Crear nueva tarea
-                                                </option>
-                                            </select>
-                                            <div class="form-text">Seleccione del catálogo o cree una nueva.</div>
-                                        </div>
-
-                                        <!-- Campos para nueva tarea (ocultos por defecto) -->
-                                        <div class="col-12" id="nueva-tarea-fields" style="display: none;">
-                                            <div class="card border-primary">
-                                                <div class="card-header bg-primary text-white">
-                                                    <h6 class="mb-0"><i class="bi bi-plus-circle"></i> Nueva Tarea - estado=activo</h6>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="row g-3">
-                                                        <div class="col-md-6">
-                                                            <label for="nueva_tarea_nombre" class="form-label">
-                                                                Nombre llave <span class="text-danger">*</span>
-                                                            </label>
-                                                            <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre"
-                                                                placeholder="Nombre descriptivo de la tarea"
-                                                                value="<?= htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>"
-                                                                maxlength="150">
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label for="nueva_tarea_descripcion" class="form-label">Descripción</label>
-                                                            <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
-                                                                placeholder="Descripción detallada de la tarea" rows="3"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Asignaciones -->
+                                        <!-- Asignaciones usuario:inicio -->
                                         <div class="col-12">
                                             <hr>
                                             <h6 class="text-muted"><i class="bi bi-people"></i> Asignación de Usuarios</h6>
@@ -154,6 +151,7 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                             <div class="form-text">Aprueba/Rechaza tarea.</div>
                                         </div>
+                                        <!-- Asignaciones usuario:fin -->
 
                                         <!-- Programación -->
                                         <div class="col-12">
@@ -162,8 +160,8 @@ use App\Constants\AppConstants; ?>
                                         </div>
 
                                         <!-- Tarea Tipo -->
-                                        <div class="col-md-6">
-                                            <label for="tarea_tipo_id" class="form-label">Tipo de Tarea <span class="text-danger">*</span></label>
+                                        <div class="col-md-2">
+                                            <label for="tarea_tipo_id" class="form-label">Tipo<span class="text-danger">*</span></label>
                                             <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
                                                 <option value="">Seleccionar tipo</option>
                                                 <?php foreach ($data['taskTypes'] as $type): ?>
@@ -176,8 +174,8 @@ use App\Constants\AppConstants; ?>
                                         </div>
 
                                         <!-- Estado -->
-                                        <div class="col-md-6">
-                                            <label for="estado_tipo_id" class="form-label">Estado Inicial en proyecto<span class="text-danger">*</span></label>
+                                        <div class="col-md-2">
+                                            <label for="estado_tipo_id" class="form-label">Estado<span class="text-danger">*</span></label>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                                 <?php foreach ($data['taskStates'] as $state): ?>
                                                     <option value="<?= $state['id']; ?>"
@@ -189,27 +187,27 @@ use App\Constants\AppConstants; ?>
                                         </div>
 
                                         <!-- Fecha de inicio -->
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label for="fecha_inicio" class="form-label">Inicio<span class="text-danger">*</span></label>
-                                            <input type="date-local" class="form-control" id="fecha_inicio" name="fecha_inicio" required
+                                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required
                                                 value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>">
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label for="fecha_fin" class="form-label">Fin<span class="text-danger">*</span></label>
-                                            <input type="date-local" class="form-control" id="fecha_fin" name="fecha_fin" required
+                                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required
                                                 value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>">
                                         </div>
 
                                         <!-- Duración -->
-                                        <div class="col-md-3">
-                                            <label for="duracion_horas" class="form-label">Duración (horas)</label>
+                                        <div class="col-md-2">
+                                            <label for="duracion_horas" class="form-label">Duración(horas)</label>
                                             <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" step="0.5" min="0.5" max="24" required
                                                 value="<?= htmlspecialchars($_POST['duracion_horas'] ?? '1.0'); ?>">
                                         </div>
 
                                         <!-- Prioridad -->
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label for="prioridad" class="form-label">Prioridad</label>
                                             <select class="form-select" id="prioridad" name="prioridad" required>
                                                 <option value="0" <?= ($_POST['prioridad'] ?? '') === '0' ? 'selected' : ''; ?>>0 - Baja</option>
@@ -233,9 +231,13 @@ use App\Constants\AppConstants; ?>
                                             </div>
                                         </div>
                                     </div>
-                                </form>
+
+                                </div>
                             </div>
-                        </div>
+
+
+                        </form>
+
                     </div>
                 </div>
 

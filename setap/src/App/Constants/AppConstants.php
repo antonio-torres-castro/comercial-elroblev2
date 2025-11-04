@@ -517,10 +517,13 @@ class AppConstants
 
     // ===== TÍTULOS DE CREACIÓN ESPECÍFICOS =====
 
+    /** Tarea */
+    const UI_PROJECT_TASK = 'Proyecto Tarea';
+
     /** Nueva Tarea */
     const UI_NEW_TASK = 'Nueva Tarea';
 
-    /** Nueva Tarea */
+    /** Nueva Tarea Tipo */
     const UI_NEW_TASK_TYPE = 'Nueva Tarea Tipo';
 
     /** Nueva Persona */
