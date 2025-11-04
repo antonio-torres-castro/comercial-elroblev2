@@ -95,7 +95,7 @@ use App\Constants\AppConstants; ?>
 
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="mb-0"><i class="bi bi-list-task"></i> <?= $data['subtitle']; ?></h5>
+                                    <h5 class="mb-0"><i class="bi bi-person-lines-fill"></i> <?= $data['subtitle']; ?></h5>
                                 </div>
                                 <div class="card-body">
 
@@ -186,19 +186,6 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
 
-                                        <!-- Fecha de inicio -->
-                                        <div class="col-md-2">
-                                            <label for="fecha_inicio" class="form-label">Inicio<span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required
-                                                value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>">
-                                        </div>
-
-                                        <div class="col-md-2">
-                                            <label for="fecha_fin" class="form-label">Fin<span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required
-                                                value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>">
-                                        </div>
-
                                         <!-- Duración -->
                                         <div class="col-md-2">
                                             <label for="duracion_horas" class="form-label">Duración(horas)</label>
@@ -218,23 +205,182 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
 
-                                        <!-- Botones -->
-                                        <div class="col-12">
-                                            <hr>
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary">
-                                                    <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
-                                                </a>
-                                                <button id="createBtn" type="submit" class="btn btn-setap-primary">
-                                                    <i class="bi bi-plus-circle"></i> Asignar Tarea
-                                                </button>
+                                        <div class="col-md-4">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" onclick="selOpt(event, 'masivo')"
+                                                    name="optionOcurrencia" id="iorMasivo" value="1" checked>
+                                                <label class="form-check-label" for="iorMasivo">Masivo</label>
                                             </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" onclick="selOpt(event, 'especifico')"
+                                                    name="optionOcurrencia" id="iorEspecifico" value="2">
+                                                <label class="form-check-label" for="iorEspecifico">Especifico</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" onclick="selOpt(event, 'rango')"
+                                                    name="optionOcurrencia" id="iorRango" value="3">
+                                                <label class="form-check-label" for="iorRango">Rango</label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-list-task"></i> Cuando ocurre</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Tabs for different creation methods -->
+                                    <ul class="nav nav-tabs" id="ocurrenciaTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="masivo-tab" onclick="openTab(event, 'Masivo')"
+                                                data-bs-toggle="tab" data-bs-target="#masivo" type="button" role="tab" name="button-tab">
+                                                <i class="fas fa-calendar-week"></i> Todos los...
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="especifico-tab" onclick="openTab(event, 'Especifico')"
+                                                data-bs-toggle="tab" data-bs-target="#especifico" type="button" role="tab" name="button-tab">
+                                                <i class="fas fa-calendar-day"></i> Solo el...
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="rango-tab" onclick="openTab(event, 'Rango')"
+                                                data-bs-toggle="tab" data-bs-target="#rango" type="button" role="tab" name="button-tab">
+                                                <i class="fas fa-calendar-alt"></i> Todos los dias entre...
+                                            </button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content" id="ocurrenciaTabContent">
+                                        <!-- Creación Masiva Tab -->
+                                        <div class="tab-pane fade show active" id="masivo" role="tabpanel" name="tabpane">
+
+                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="fecha_inicio_masivo" class="form-label">Inicio *</label>
+                                                    <input type="date" class="form-control" id="fecha_inicio_masivo" name="fecha_inicio"
+                                                        value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="fecha_fin_masivo" class="form-label">Fin *</label>
+                                                    <input type="date" class="form-control" id="fecha_fin_masivo" name="fecha_fin"
+                                                        value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-12">
+                                                    <label class="form-label">Días de la semana *</label>
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias[]" value="1" id="lunes">
+                                                                <label class="form-check-label" for="lunes">Lunes</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias[]" value="2" id="martes">
+                                                                <label class="form-check-label" for="martes">Martes</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias[]" value="3" id="miercoles">
+                                                                <label class="form-check-label" for="miercoles">Miércoles</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias[]" value="4" id="jueves">
+                                                                <label class="form-check-label" for="jueves">Jueves</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias[]" value="5" id="viernes">
+                                                                <label class="form-check-label" for="viernes">Viernes</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias[]" value="6" id="sabado">
+                                                                <label class="form-check-label" for="sabado">Sábado</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias[]" value="0" id="domingo">
+                                                                <label class="form-check-label" for="domingo">Domingo</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- Fecha Específica Tab -->
+                                        <div class="tab-pane fade" id="especifico" role="tabpanel" name="tabpane">
+                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="fecha_especifica_inicio" class="form-label">Inicio *</label>
+                                                    <input type="date" class="form-control" id="fecha_especifica_inicio" name="fecha_especifica_inicio"
+                                                        value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="fecha_especifica_fin" class="form-label">Fin *</label>
+                                                    <input type="date" class="form-control" id="fecha_especifica_fin" name="fecha_especifica_fin"
+                                                        value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>" required disabled>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- Rango de Fechas Tab -->
+                                        <div class="tab-pane fade" id="rango" role="tabpanel" name="tabpane">
+                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="fecha_inicio_rango" class="form-label">Inicio *</label>
+                                                    <input type="date" class="form-control" id="fecha_inicio_rango" name="fecha_inicio_rango"
+                                                        value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="fecha_fin_rango" class="form-label">Fin *</label>
+                                                    <input type="date" class="form-control" id="fecha_fin_rango" name="fecha_fin_rango"
+                                                        value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>" required>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
 
                                 </div>
                             </div>
 
+                            <!-- Botones -->
+                            <div class="col-12 mt-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary">
+                                        <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
+                                    </a>
+                                    <button id="createBtn" type="submit" class="btn btn-setap-primary">
+                                        <i class="bi bi-plus-circle"></i> Asignar
+                                    </button>
+                                </div>
+                                <br>
+                                <br>
+                            </div>
 
                         </form>
 
@@ -273,26 +419,26 @@ use App\Constants\AppConstants; ?>
             const fechaInicio = document.getElementById('fecha_inicio');
             const fechaFin = document.getElementById('fecha_fin');
 
-            function validateDates() {
-                if (fechaInicio.value && fechaFin.value) {
-                    const inicio = new Date(fechaInicio.value);
-                    const fin = new Date(fechaFin.value);
-                    if (fin < inicio) {
-                        fechaFin.setCustomValidity('Fecha fin menor que fecha de inicio');
-                        return false;
-                    } else {
-                        fechaFin.setCustomValidity('');
-                    }
-                }
-                return true;
-            }
+            // function validateDates() {
+            //     if (fechaInicio.value && fechaFin.value) {
+            //         const inicio = new Date(fechaInicio.value);
+            //         const fin = new Date(fechaFin.value);
+            //         if (fin < inicio) {
+            //             fechaFin.setCustomValidity('Fecha fin menor que fecha de inicio');
+            //             return false;
+            //         } else {
+            //             fechaFin.setCustomValidity('');
+            //         }
+            //     }
+            //     return true;
+            // }
 
-            fechaInicio.addEventListener('change', () => {
-                fechaFin.min = fechaInicio.value;
-                validateDates();
-            });
+            // fechaInicio.addEventListener('change', () => {
+            //     fechaFin.min = fechaInicio.value;
+            //     validateDates();
+            // });
 
-            fechaFin.addEventListener('change', validateDates);
+            // fechaFin.addEventListener('change', validateDates);
 
             // Envío del formulario
             form.addEventListener('submit', function(e) {
@@ -311,6 +457,41 @@ use App\Constants\AppConstants; ?>
                 createBtn.disabled = true;
             });
         });
+
+        function selOpt(evt, nameIor) {
+            var i, tablinks;
+            tabpane = document.getElementsByName("tabpane");
+            for (i = 0; i < tabpane.length; i++) {
+                tabpane[i].style.display = "none";
+                tabpane[i].className = tabpane[i].className.replace(" show active", "");
+            }
+            tablinks = document.getElementsByName("button-tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            document.getElementById(nameIor + '-tab').className += " active";
+
+            document.getElementById(nameIor).style.display = "";
+            document.getElementById(nameIor).className += " show active";
+        }
+
+        function openTab(evt, nameTab) {
+            var i, iors;
+            iors = document.getElementsByName("optionOcurrencia");
+            for (i = 0; i < iors.length; i++) {
+                iors[i].checked = false;
+                if (iors[i].id == 'ior' + nameTab) {
+                    iors[i].checked = true;
+                }
+            }
+            evt.currentTarget.className.replace(" active", "");
+            evt.currentTarget.className += " active";
+
+            document.getElementById(nameTab.toLowerCase()).style.display = "";
+            document.getElementById(nameTab.toLowerCase()).className.replace(" show active", "");
+            document.getElementById(nameTab.toLowerCase()).className += " show active";
+        }
     </script>
 
     <!-- GAP 5: Task State Validation Utilities -->
