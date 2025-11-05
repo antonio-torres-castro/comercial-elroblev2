@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Security;
 use App\Constants\AppConstants; ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -284,6 +285,7 @@ use App\Constants\AppConstants; ?>
                             </div>
                             <div class="modal-body">
                                 <form id="changeStateForm">
+                                    <?= Security::renderCsrfField() ?>
                                     <input type="hidden" id="changeStateTaskId" name="task_id">
                                     <input type="hidden" id="changeStateNewState" name="new_state">
 

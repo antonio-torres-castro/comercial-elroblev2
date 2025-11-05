@@ -751,9 +751,9 @@ class TaskController extends BaseController
             );
 
             if ($result['success']) {
-                $this->redirectWithSuccess(AppConstants::ROUTE_TASKS, $result['message'] ?? 'Estado de tarea actualizado correctamente');
+                $this->jsonSuccess($result['message'] ?? 'Estado de tarea actualizado correctamente');
             } else {
-                $this->redirectWithError(AppConstants::ROUTE_TASKS, $result['message'] ?? 'Error al cambiar estado de la tarea');
+                $this->jsonError($result['message'] ?? 'Error al cambiar estado de la tarea');
             }
         } catch (Exception $e) {
             Logger::error("TaskController::changeState: " . $e->getMessage());
