@@ -168,14 +168,45 @@ class Task
     }
 
     /**
-     * Crear nueva tarea en proyecto
+     * Crear tarea en proyecto
      */
-    public function projectTaskCreate(array $data): ?int
+    public function projectTaskCreate(array $data): ?bool
     {
         try {
+            $proyectoTareasId = 0;
             $this->db->beginTransaction();
-            // Luego crear la asignación proyecto-tarea
+            // Verificar si existe
             $stmt = $this->db->prepare("
+                SELECT id FROM proyecto_tareas
+                WHERE proyecto_id = ? and tarea_id = ? and ejecutor_id = ?  and fecha_inicio = ?
+            ");
+            $stmt->execute([$data['proyecto_id'], $data['tarea_id'], $data['ejecutor_id'] ?? null, $data['fecha_inicio']]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($existing) {
+                $proyectoTareasId = $existing['id'];
+                // Actualizar registro existente
+                $stmt = $this->db->prepare("
+                    UPDATE proyecto_tareas SET
+                        planificador_id = ?,
+                        supervisor_id = ?,
+                        duracion_horas = ?,
+                        prioridad = ?,
+                        estado_tipo_id = ?,
+                        fecha_modificacion = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                ");
+
+                $result = $stmt->execute([
+                    $data['planificador_id'],
+                    $data['supervisor_id'] ?? null,
+                    $data['duracion_horas'] ?? 1.0,
+                    $data['prioridad'] ?? 0,
+                    $data['estado_tipo_id'] ?? 1,
+                    $existing['id']
+                ]);
+            } else {
+                // Luego crear la asignación proyecto-tarea
+                $stmt = $this->db->prepare("
                 INSERT INTO proyecto_tareas (
                     proyecto_id,
                     tarea_id,
@@ -190,51 +221,114 @@ class Task
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
-            $result = $stmt->execute([
-                $data['proyecto_id'],
-                $data['tarea_id'],
-                $data['planificador_id'],
-                $data['ejecutor_id'] ?? null,
-                $data['supervisor_id'] ?? null,
-                $data['fecha_inicio'],
-                $data['duracion_horas'] ?? 1.0,
-                $data['fecha_fin'],
-                $data['prioridad'] ?? 0,
-                $data['estado_tipo_id'] ?? 1 // Estado "Creado" por defecto
-            ]);
+                $result = $stmt->execute([
+                    $data['proyecto_id'],
+                    $data['tarea_id'],
+                    $data['planificador_id'],
+                    $data['ejecutor_id'] ?? null,
+                    $data['supervisor_id'] ?? null,
+                    $data['fecha_inicio'],
+                    $data['duracion_horas'] ?? 1.0,
+                    $data['fecha_fin'],
+                    $data['prioridad'] ?? 0,
+                    $data['estado_tipo_id'] ?? 1 // Estado "Creado" por defecto
+                ]);
+            }
 
             if ($result) {
                 $proyectoTareasId = $this->db->lastInsertId();
                 $this->db->commit();
-                return $proyectoTareasId;
             } else {
                 $this->db->rollBack();
-                return null;
             }
+            return ($proyectoTareasId ?? 0) > 0;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            Logger::error("Task::create: " . $e->getMessage());
-            return null;
+            Logger::error("Task::projectTaskCreate: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Crear tarea en proyecto masivamente
+     */
+    public function projectTaskCreateMasivo(array $data): ?bool
+    {
+        try {
+            $result = false;
+
+            $diasSemana = $data['dias'] ?? [];
+            // Convertir días a array de enteros
+            $diasSemana = array_map('intval', $diasSemana);
+            // Generar todas las fechas
+            $start = new \DateTime($data['fecha_inicio']);
+            $end = new \DateTime($data['fecha_fin']);
+            while ($start <= $end) {
+                $dayOfWeek = (int)$start->format('w'); // 0=domingo, 1=lunes, etc.
+                if (in_array($dayOfWeek, $diasSemana)) {
+                    $data['fecha_inicio'] = $start->format('Y-m-d');
+                    $data['fecha_fin'] = $data['fecha_inicio'];
+                    $result = $this->projectTaskCreate($data);
+                }
+                $start->add(new \DateInterval('P1D'));
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            Logger::error("Task::projectTaskCreateMasivo: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Crear tarea en proyecto rango de fechas
+     */
+    public function projectTaskCreateRango(array $data): ?bool
+    {
+        try {
+            $result = false;
+            // Generar todas las fechas
+            $start = new \DateTime($data['fecha_inicio']);
+            $end = new \DateTime($data['fecha_fin']);
+            while ($start <= $end) {
+                $data['fecha_inicio'] = $start->format('Y-m-d');
+                $data['fecha_fin'] = $data['fecha_inicio'];
+                $result = $this->projectTaskCreate($data);
+
+                $start->add(new \DateInterval('P1D'));
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            Logger::error("Task::projectTaskCreateRango: " . $e->getMessage());
+            return false;
         }
     }
 
     /**
      * Crear nueva tarea en proyecto
      */
-    public function create(array $data): ?int
+    public function create(array $data): ?bool
     {
         try {
-            $tareaId = 0;
-            if (
-                (!isset($data['tarea_id']) || empty($data['tarea_id']) ||
-                    (is_numeric($data['tarea_id']) && (int)$data['tarea_id'] <= 0)) &&
-                isset($data['nueva_tarea_nombre']) && !empty($data['nueva_tarea_nombre'])
-            ) {
-                $tareaId = $this->taskCreate($data['nueva_tarea_nombre'], $data['nueva_tarea_descripcion']);
-                $data['tarea_id'] = $tareaId;
+            $result = false;
+            $tipoO = $data['tipo_ocurrencia'];
+            //Determinar a cual create llamamos
+            if ($tipoO == 1) {
+                $result = $this->projectTaskCreateMasivo($data);
             }
-            $proyectoTareasId = $this->projectTaskCreate($data);
-            return $proyectoTareasId;
+            //Fecha especifica
+            if ($tipoO == 2) {
+                $result = $this->projectTaskCreate($data);
+            }
+            //Rango de fechas todos los dias
+            if ($tipoO == 3) {
+                // $result = $this->taskModel->createRango($taskData);             
+            }
+
+            return $result;
         } catch (PDOException $e) {
             Logger::error("Task::create: " . $e->getMessage());
             return null;

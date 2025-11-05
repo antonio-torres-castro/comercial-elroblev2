@@ -189,7 +189,7 @@ use App\Constants\AppConstants; ?>
                                         <!-- Duración -->
                                         <div class="col-md-2">
                                             <label for="duracion_horas" class="form-label">Duración(horas)</label>
-                                            <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" step="0.5" min="0.5" max="24" required
+                                            <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" step="0.5" min="0.5" max="9" required
                                                 value="<?= htmlspecialchars($_POST['duracion_horas'] ?? '1.0'); ?>">
                                         </div>
 
@@ -206,8 +206,6 @@ use App\Constants\AppConstants; ?>
                                         </div>
 
                                         <div class="col-md-4">
-                                            <input class="text" id="idTipoOcurrencia" value="masivo" name="idTipoOcurrencia" hidden>
-
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio" onclick="selOpt(event, 'masivo')"
                                                     name="optionOcurrencia" id="iorMasivo" value="1" checked>

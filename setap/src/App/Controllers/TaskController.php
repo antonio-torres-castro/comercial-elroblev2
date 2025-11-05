@@ -233,7 +233,6 @@ class TaskController extends BaseController
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
-
             // Validar datos
             $errors = $this->validateTaskData($_POST);
             if (!empty($errors)) {
@@ -242,24 +241,56 @@ class TaskController extends BaseController
                 return;
             }
 
+            // $_POST["csrf_token"]
+            // $_POST["tarea_id"] //puede ser "nueva" o un numero cuando es una tarea existente
+            // $_POST["nueva_tarea_nombre"]
+            // $_POST["nueva_tarea_descripcion"]
+            // $_POST["proyecto_id"]
+            // $_POST["ejecutor_id"]
+            // $_POST["supervisor_id"]
+            // $_POST["tarea_tipo_id"]
+            // $_POST["estado_tipo_id"]
+            // $_POST["duracion_horas"]
+            // $_POST["prioridad"]
+            // $_POST["optionOcurrencia"] // identado a masivo=1, especifico=2, rango=3
+            // $_POST["fecha_inicio_masivo"]
+            // $_POST["fecha_fin_masivo"]
+            // $_POST["dias"] //array, indice de 0 a 6, los valores son de 1=lunes a 7=domingo
+            // $_POST["fecha_especifica_inicio"]
+            // $_POST["fecha_inicio_rango"]
+            // $_POST["fecha_fin_rango"]
+
+            $tipoOcurr = $_POST['optionOcurrencia'];
+
             $fechaInicio = "";
             $fechaFin = "";
-            if ($_POST['idTipoOcurrencia'] == 'masivo') {
+            if ($tipoOcurr == '1') {
                 $fechaInicio = $_POST['fecha_inicio_masivo'];
                 $fechaFin = $_POST['fecha_fin_masivo'];
             }
-            if ($_POST['idTipoOcurrencia'] == 'especifico') {
+            if ($tipoOcurr == '2') {
                 $fechaInicio = $_POST['fecha_especifica_inicio'];
                 $fechaFin = $_POST['fecha_especifica_fin'];
             }
-            if ($_POST['idTipoOcurrencia'] == 'rango') {
+            if ($tipoOcurr == '3') {
                 $fechaInicio = $_POST['fecha_inicio_rango'];
                 $fechaFin = $_POST['fecha_fin_rango'];
             }
-
+            // Determinar si usar tarea existente o crear nueva
+            $tareaId = 0;
+            if (!empty($_POST['tarea_id']) && $_POST['tarea_id'] !== 'nueva') {
+                $tareaId = (int)$_POST['tarea_id'];
+            } else {
+                $tareaId = $this->taskModel->taskCreate(trim($_POST['nueva_tarea_nombre']), trim($_POST['nueva_tarea_descripcion'] ?? ''));
+                if ($tareaId == null) {
+                    Security::redirect("/tasks/create?error=" . urlencode('Error al crear la nueva tarea'));
+                    return;
+                }
+            }
             // Preparar datos para creación
             $taskData = [
                 'proyecto_id' => (int)$_POST['proyecto_id'],
+                'tarea_id' => $tareaId,
                 'planificador_id' => $currentUser['id'], // El usuario actual es quien planifica
                 'ejecutor_id' => !empty($_POST['ejecutor_id']) ? (int)$_POST['ejecutor_id'] : null,
                 'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
@@ -267,20 +298,14 @@ class TaskController extends BaseController
                 'duracion_horas' => (float)($_POST['duracion_horas'] ?? 1.0),
                 'fecha_fin' => $fechaFin,
                 'prioridad' => (int)($_POST['prioridad'] ?? 0),
-                'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1)
+                'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1),
+                'tipo_ocurrencia' => $tipoOcurr,
+                'dias_semana' => $_POST['dias']
             ];
 
-            // Determinar si usar tarea existente o crear nueva
-            if (!empty($_POST['tarea_id']) && $_POST['tarea_id'] !== 'nueva') {
-                $taskData['tarea_id'] = (int)$_POST['tarea_id'];
-            } else {
-                $taskData['nueva_tarea_nombre'] = trim($_POST['nueva_tarea_nombre']);
-                $taskData['nueva_tarea_descripcion'] = trim($_POST['nueva_tarea_descripcion'] ?? '');
-            }
-
-            // Crear tarea
-            $taskId = $this->taskModel->create($taskData);
-            if ($taskId) {
+            $result = false;
+            $result = $this->taskModel->create($taskData);
+            if ($result) {
                 Security::redirect("/tasks?success=Tarea asignada al proyecto correctamente");
             } else {
                 Security::redirect("/tasks/create?error=Error al asignar la tarea al proyecto");
@@ -881,17 +906,23 @@ class TaskController extends BaseController
                 }
             }
         }
+
+        $tipoOcurrencia = $data['optionOcurrencia'];
+
+        $diasSemana = $data['dias'] ?? [];
+        $diasSemana = array_map('intval', $diasSemana); // Convertir días a array de enteros
+
         $fechaInicio = "";
         $fechaFin = "";
-        if ($data['idTipoOcurrencia'] == 'masivo') {
+        if ($tipoOcurrencia == '1') {
             $fechaInicio = $data['fecha_inicio_masivo'];
             $fechaFin = $data['fecha_fin_masivo'];
         }
-        if ($data['idTipoOcurrencia'] == 'especifico') {
+        if ($tipoOcurrencia == '2') {
             $fechaInicio = $data['fecha_especifica_inicio'];
             $fechaFin = $data['fecha_especifica_fin'];
         }
-        if ($data['idTipoOcurrencia'] == 'rango') {
+        if ($tipoOcurrencia == '3') {
             $fechaInicio = $data['fecha_inicio_rango'];
             $fechaFin = $data['fecha_fin_rango'];
         }
@@ -902,23 +933,40 @@ class TaskController extends BaseController
         } elseif (!$this->isValidDate($fechaInicio)) {
             $errors[] = 'La fecha de inicio debe tener un formato válido (YYYY-MM-DD)';
         }
+        $start = new \DateTime($fechaInicio);
+        $end = new \DateTime($fechaFin);
+        if ($end < $start) {
+            $errors[] = 'Fecha fin es menor a fecha inicio';
+        }
+        if ($tipoOcurrencia == '1') {
+            $fechasGeneradas = [];
+            while ($start <= $end) {
+                $dayOfWeek = (int)$start->format('w'); // 0=domingo, 1=lunes, etc.
+                if (in_array($dayOfWeek, $diasSemana)) {
+                    $fechasGeneradas[] = $start->format('Y-m-d');
+                }
+                $start->add(new \DateInterval('P1D'));
+            }
+            if (empty($fechasGeneradas)) {
+                $errors[] = 'La configuracion masiva entregda no genera fechas para tarea';
+            }
+        }
 
+        $maximoHoras = 9; //siempre son nueve por la cantidad de horas laborales y las tareas son diarias, no hay tareas que duren mas de un dia
         // Validar duración en horas
         if (!empty($data['duracion_horas'])) {
             if (!is_numeric($data['duracion_horas']) || (float)$data['duracion_horas'] <= 0) {
                 $errors[] = 'La duración debe ser un número positivo';
-            } elseif ((float)$data['duracion_horas'] > 24) {
-                $errors[] = 'La duración no puede exceder 24 horas por tarea';
+            } elseif ((float)$data['duracion_horas'] > $maximoHoras) {
+                $errors[] = 'Duración excede ' . strval($maximoHoras) . ' horas por tarea';
             }
         }
-
         // Validar prioridad
         if (!empty($data['prioridad'])) {
             if (!is_numeric($data['prioridad']) || (int)$data['prioridad'] < 0 || (int)$data['prioridad'] > 10) {
                 $errors[] = 'La prioridad debe ser un número entre 0 y 10';
             }
         }
-
         // Validar estado (GAP 5) - Solo para actualizaciones
         if ($isUpdate && !empty($data['estado_tipo_id'])) {
             if (!is_numeric($data['estado_tipo_id'])) {
@@ -926,17 +974,15 @@ class TaskController extends BaseController
             } else {
                 $estadoId = (int)$data['estado_tipo_id'];
                 // Estados válidos para proyecto_tareas: 1, 2, 3, 4, 5, 6, 7, 8
-                if (!in_array($estadoId, [1, 2, 3, 4, 5, 6, 7, 8])) {
+                if (!in_array($estadoId, [1, 2])) {
                     $errors[] = 'El estado seleccionado no es válido para tareas';
                 }
             }
         }
-
         // Validar asignaciones de usuarios
         if (!empty($data['ejecutor_id']) && !is_numeric($data['ejecutor_id'])) {
             $errors[] = 'Ejecutor seleccionado inválido';
         }
-
         if (!empty($data['supervisor_id']) && !is_numeric($data['supervisor_id'])) {
             $errors[] = 'Supervisor seleccionado inválido';
         }

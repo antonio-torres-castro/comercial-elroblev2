@@ -19,6 +19,7 @@
 
 
             const form = document.getElementById('createTaskForm');
+            const formData = new FormData(form);
             const createBtn = document.getElementById('createBtn');
 
             const fechaInicioMasivo = document.getElementById('fecha_inicio_masivo');
@@ -44,14 +45,14 @@
 
             function validateDatesGetway() {
                 var i, iors, tipoOcurrencia, retorno;
-                tipoOcurrencia = document.getElementsByName("idTipoOcurrencia")[0].value;
-                if (tipoOcurrencia == 'masivo') {
+                tipoOcurrencia = formData.get('optionOcurrencia');
+                if (tipoOcurrencia == '1') {
                     retorno = validateDates(fechaInicioMasivo, fechaFinMasivo);
                 }
-                if (tipoOcurrencia == 'especifico') {
+                if (tipoOcurrencia == '2') {
                     retorno = validateDates(fechaEspecificaInicio, fechaEspecificaFin);
                 }
-                if (tipoOcurrencia == 'rango') {
+                if (tipoOcurrencia == '3') {
                     retorno = validateDates(fechaInicioRango, fechaFinRango);
                 }
                 return retorno;
@@ -115,8 +116,6 @@
 
             document.getElementById(nameIor).style.display = "";
             document.getElementById(nameIor).className += " show active";
-
-            document.getElementById("idTipoOcurrencia").value = nameIor.toLowerCase().replace('ior', '');
         }
 
         function openTab(evt, nameTab) {
@@ -134,6 +133,4 @@
             document.getElementById(nameTab.toLowerCase()).style.display = "";
             document.getElementById(nameTab.toLowerCase()).className.replace(" show active", "");
             document.getElementById(nameTab.toLowerCase()).className += " show active";
-
-            document.getElementById("idTipoOcurrencia").value = nameTab.toLowerCase();
         }

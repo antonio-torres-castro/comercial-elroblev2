@@ -101,7 +101,6 @@ class ProyectoFeriado
             $start = new \DateTime($fechaInicio);
             $end = new \DateTime($fechaFin);
             $fechasGeneradas = [];
-
             while ($start <= $end) {
                 $dayOfWeek = (int)$start->format('w'); // 0=domingo, 1=lunes, etc.
 
