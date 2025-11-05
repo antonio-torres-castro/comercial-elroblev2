@@ -8,6 +8,7 @@ use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Helpers\Logger;
 use App\Constants\AppConstants;
+use DateTime;
 use Exception;
 
 class TaskController extends BaseController
@@ -241,15 +242,30 @@ class TaskController extends BaseController
                 return;
             }
 
+            $fechaInicio = "";
+            $fechaFin = "";
+            if ($_POST['idTipoOcurrencia'] == 'masivo') {
+                $fechaInicio = $_POST['fecha_inicio_masivo'];
+                $fechaFin = $_POST['fecha_fin_masivo'];
+            }
+            if ($_POST['idTipoOcurrencia'] == 'especifico') {
+                $fechaInicio = $_POST['fecha_especifica_inicio'];
+                $fechaFin = $_POST['fecha_especifica_fin'];
+            }
+            if ($_POST['idTipoOcurrencia'] == 'rango') {
+                $fechaInicio = $_POST['fecha_inicio_rango'];
+                $fechaFin = $_POST['fecha_fin_rango'];
+            }
+
             // Preparar datos para creación
             $taskData = [
                 'proyecto_id' => (int)$_POST['proyecto_id'],
                 'planificador_id' => $currentUser['id'], // El usuario actual es quien planifica
                 'ejecutor_id' => !empty($_POST['ejecutor_id']) ? (int)$_POST['ejecutor_id'] : null,
                 'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
-                'fecha_inicio' => $_POST['fecha_inicio'],
+                'fecha_inicio' => $fechaInicio,
                 'duracion_horas' => (float)($_POST['duracion_horas'] ?? 1.0),
-                'fecha_fin' => $_POST['fecha_fin'],
+                'fecha_fin' => $fechaFin,
                 'prioridad' => (int)($_POST['prioridad'] ?? 0),
                 'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1)
             ];
@@ -713,34 +729,29 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
-
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
-                $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Sin permisos suficientes');
+                $this->jsonError('Sin permisos suficientes');
                 return;
             }
-
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_METHOD_NOT_ALLOWED);
+                $this->jsonError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
-
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Token CSRF inválido');
+                $this->jsonError('Token CSRF inválido');
                 return;
             }
-
             // Obtener datos
             $taskId = (int)($_POST['task_id'] ?? 0);
             $newState = (int)($_POST['new_state'] ?? 0);
             $reason = trim($_POST['reason'] ?? '');
 
             if ($taskId <= 0 || $newState <= 0) {
-                $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Datos inválidos');
+                $this->jsonError('Error al cambiar estado de la tarea');
                 return;
             }
-
             // Cambiar estado usando el modelo con validaciones
             $result = $this->taskModel->changeState(
                 $taskId,
@@ -757,7 +768,7 @@ class TaskController extends BaseController
             }
         } catch (Exception $e) {
             Logger::error("TaskController::changeState: " . $e->getMessage());
-            $this->redirectWithError(AppConstants::ROUTE_TASKS, 'Error interno del servidor');
+            $this->jsonError('Error interno del servidor');
         }
     }
 
@@ -870,11 +881,25 @@ class TaskController extends BaseController
                 }
             }
         }
+        $fechaInicio = "";
+        $fechaFin = "";
+        if ($data['idTipoOcurrencia'] == 'masivo') {
+            $fechaInicio = $data['fecha_inicio_masivo'];
+            $fechaFin = $data['fecha_fin_masivo'];
+        }
+        if ($data['idTipoOcurrencia'] == 'especifico') {
+            $fechaInicio = $data['fecha_especifica_inicio'];
+            $fechaFin = $data['fecha_especifica_fin'];
+        }
+        if ($data['idTipoOcurrencia'] == 'rango') {
+            $fechaInicio = $data['fecha_inicio_rango'];
+            $fechaFin = $data['fecha_fin_rango'];
+        }
 
         // Validar fecha de inicio
-        if (empty($data['fecha_inicio'])) {
+        if (empty($fechaInicio)) {
             $errors[] = 'La fecha de inicio es obligatoria';
-        } elseif (!$this->isValidDate($data['fecha_inicio'])) {
+        } elseif (!$this->isValidDate($fechaInicio)) {
             $errors[] = 'La fecha de inicio debe tener un formato válido (YYYY-MM-DD)';
         }
 

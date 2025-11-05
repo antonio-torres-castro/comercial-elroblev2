@@ -268,12 +268,12 @@ use App\Constants\AppConstants; ?>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label for="fecha_inicio_masivo" class="form-label">Inicio *</label>
-                                                    <input type="date" class="form-control" id="fecha_inicio_masivo" name="fecha_inicio"
+                                                    <input type="date" class="form-control" id="fecha_inicio_masivo" name="fecha_inicio_masivo"
                                                         value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>" required>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="fecha_fin_masivo" class="form-label">Fin *</label>
-                                                    <input type="date" class="form-control" id="fecha_fin_masivo" name="fecha_fin"
+                                                    <input type="date" class="form-control" id="fecha_fin_masivo" name="fecha_fin_masivo"
                                                         value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>" required>
                                                 </div>
                                             </div>
@@ -450,13 +450,13 @@ use App\Constants\AppConstants; ?>
                         tipoOcurrencia = iors[i].id;
                     }
                 }
-                if (tipoOcurrencia == 'iorMasivo') {
+                if (tipoOcurrencia == 'masivo') {
                     retorno = validateDates(fechaInicioMasivo, fechaFinMasivo);
                 }
-                if (tipoOcurrencia == 'iorEspecifico') {
+                if (tipoOcurrencia == 'especifico') {
                     retorno = validateDates(fechaEspecificaInicio, fechaEspecificaFin);
                 }
-                if (tipoOcurrencia == 'iorRango') {
+                if (tipoOcurrencia == 'rango') {
                     retorno = validateDates(fechaInicioRango, fechaFinRango);
                 }
                 return retorno;
@@ -521,7 +521,7 @@ use App\Constants\AppConstants; ?>
             document.getElementById(nameIor).style.display = "";
             document.getElementById(nameIor).className += " show active";
 
-            document.getElementById("idTipoOcurrencia").value = nameIor;
+            document.getElementById("idTipoOcurrencia").value = nameIor.toLowerCase().replace('ior', '');
         }
 
         function openTab(evt, nameTab) {

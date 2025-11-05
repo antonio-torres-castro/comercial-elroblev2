@@ -112,7 +112,8 @@ class Task
                     plan.nombre_usuario  as planificador_nombre,
                     exec.nombre_usuario  as ejecutor_nombre,
                     super.nombre_usuario as supervisor_nombre,
-                    p.tarea_tipo_id
+                    p.tarea_tipo_id,
+                    p.contraparte_id
                 FROM proyecto_tareas pt
                 INNER JOIN tareas        t   ON pt.tarea_id = t.id
                 INNER JOIN proyectos     p   ON pt.proyecto_id = p.id
@@ -773,6 +774,8 @@ class Task
             }
 
             $currentState = (int)$task['estado_tipo_id'];
+            $supervisor_id = (int)$task['supervisor_id'];
+            $contraparte_id = (int)$task['contraparte_id'];
 
             // Validar transición de estado
             $transitionValidation = $this->isValidStateTransition($currentState, $newState);
@@ -808,7 +811,7 @@ class Task
             }
 
             // Registrar en historial si la tabla existe
-            $this->registerStateHistory($taskId, $currentState, $newState, $userId, $reason);
+            $this->registerStateHistory($taskId, $currentState, $newState, $userId, $reason, $supervisor_id, $contraparte_id);
 
             $this->db->commit();
 
@@ -829,7 +832,7 @@ class Task
     /**
      * Registrar cambio de estado en historial
      */
-    private function registerStateHistory(int $taskId, int $oldState, int $newState, int $userId, string $reason): void
+    private function registerStateHistory(int $taskId, int $oldState, int $newState, int $userId, string $reason, $supervisor_id, $contraparte_id): void
     {
         try {
             // Verificar si la tabla historial_tareas existe
@@ -840,16 +843,18 @@ class Task
                 $sql = "
                     INSERT INTO historial_tareas (
                         proyecto_tarea_id,
-                        estado_anterior_id,
-                        estado_nuevo_id,
                         usuario_id,
-                        motivo,
-                        fecha_cambio
-                    ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                        supervisor_id,
+                        contraparte_id,
+                        fecha_evento,
+                        comentario,
+                        estado_tipo_anterior,
+                        estado_tipo_nuevo
+                    ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)
                 ";
 
                 $stmt = $this->db->prepare($sql);
-                $stmt->execute([$taskId, $oldState, $newState, $userId, $reason]);
+                $stmt->execute([$taskId, $userId, $supervisor_id, $contraparte_id, $reason, $oldState, $newState]);
             }
         } catch (PDOException $e) {
             // Solo logear el error, no interrumpir el proceso principal
