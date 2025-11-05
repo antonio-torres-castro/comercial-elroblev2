@@ -206,7 +206,7 @@ use App\Constants\AppConstants; ?>
                                         </div>
 
                                         <div class="col-md-4">
-                                            <input class="text" id="idTipoOcurrencia" value="masivo" hidden>
+                                            <input class="text" id="idTipoOcurrencia" value="masivo" name="idTipoOcurrencia" hidden>
 
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio" onclick="selOpt(event, 'masivo')"
@@ -444,12 +444,7 @@ use App\Constants\AppConstants; ?>
 
             function validateDatesGetway() {
                 var i, iors, tipoOcurrencia, retorno;
-                iors = document.getElementsByName("optionOcurrencia");
-                for (i = 0; i < iors.length; i++) {
-                    if (iors[i].checked == true) {
-                        tipoOcurrencia = iors[i].id;
-                    }
-                }
+                tipoOcurrencia = document.getElementsByName("idTipoOcurrencia")[0].value;
                 if (tipoOcurrencia == 'masivo') {
                     retorno = validateDates(fechaInicioMasivo, fechaFinMasivo);
                 }
