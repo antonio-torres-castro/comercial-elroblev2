@@ -206,6 +206,8 @@ use App\Constants\AppConstants; ?>
                                         </div>
 
                                         <div class="col-md-4">
+                                            <input class="text" id="idTipoOcurrencia" value="masivo" hidden>
+
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio" onclick="selOpt(event, 'masivo')"
                                                     name="optionOcurrencia" id="iorMasivo" value="1" checked>
@@ -222,6 +224,8 @@ use App\Constants\AppConstants; ?>
                                                 <label class="form-check-label" for="iorRango">Rango</label>
                                             </div>
                                         </div>
+
+
 
                                     </div>
 
@@ -416,33 +420,75 @@ use App\Constants\AppConstants; ?>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('createTaskForm');
             const createBtn = document.getElementById('createBtn');
-            const fechaInicio = document.getElementById('fecha_inicio');
-            const fechaFin = document.getElementById('fecha_fin');
 
-            // function validateDates() {
-            //     if (fechaInicio.value && fechaFin.value) {
-            //         const inicio = new Date(fechaInicio.value);
-            //         const fin = new Date(fechaFin.value);
-            //         if (fin < inicio) {
-            //             fechaFin.setCustomValidity('Fecha fin menor que fecha de inicio');
-            //             return false;
-            //         } else {
-            //             fechaFin.setCustomValidity('');
-            //         }
-            //     }
-            //     return true;
-            // }
+            const fechaInicioMasivo = document.getElementById('fecha_inicio_masivo');
+            const fechaFinMasivo = document.getElementById('fecha_fin_masivo');
+            const fechaEspecificaInicio = document.getElementById('fecha_especifica_inicio');
+            const fechaEspecificaFin = document.getElementById('fecha_especifica_fin');
+            const fechaInicioRango = document.getElementById('fecha_inicio_rango');
+            const fechaFinRango = document.getElementById('fecha_fin_rango');
 
-            // fechaInicio.addEventListener('change', () => {
-            //     fechaFin.min = fechaInicio.value;
-            //     validateDates();
-            // });
+            function validateDates(fechaInicio, fechaFin) {
+                if (fechaInicio.value && fechaFin.value) {
+                    const inicio = new Date(fechaInicio.value);
+                    const fin = new Date(fechaFin.value);
+                    if (fin < inicio) {
+                        fechaFin.setCustomValidity('Fecha fin menor que fecha de inicio');
+                        return false;
+                    } else {
+                        fechaFin.setCustomValidity('');
+                    }
+                }
+                return true;
+            }
 
-            // fechaFin.addEventListener('change', validateDates);
+            function validateDatesGetway() {
+                var i, iors, tipoOcurrencia, retorno;
+                iors = document.getElementsByName("optionOcurrencia");
+                for (i = 0; i < iors.length; i++) {
+                    if (iors[i].checked == true) {
+                        tipoOcurrencia = iors[i].id;
+                    }
+                }
+                if (tipoOcurrencia == 'iorMasivo') {
+                    retorno = validateDates(fechaInicioMasivo, fechaFinMasivo);
+                }
+                if (tipoOcurrencia == 'iorEspecifico') {
+                    retorno = validateDates(fechaEspecificaInicio, fechaEspecificaFin);
+                }
+                if (tipoOcurrencia == 'iorRango') {
+                    retorno = validateDates(fechaInicioRango, fechaFinRango);
+                }
+                return retorno;
+            }
 
+            ///Fecha recurrente
+            fechaInicioMasivo.addEventListener('change', () => {
+                fechaFinMasivo.min = fechaInicioMasivo.value;
+                validateDates(fechaInicioMasivo, fechaFinMasivo);
+            });
+            fechaFinMasivo.addEventListener('change', () => {
+                validateDates(fechaInicioMasivo, fechaFinMasivo);
+            });
+            ///Fecha Especifica
+            fechaEspecificaInicio.addEventListener('change', () => {
+                fechaEspecificaFin.min = fechaEspecificaInicio.value;
+                validateDates(fechaEspecificaInicio, fechaEspecificaFin);
+            });
+            fechaEspecificaFin.addEventListener('change', () => {
+                validateDates(fechaEspecificaInicio, fechaEspecificaFin);
+            });
+            ///Rango Fechas
+            fechaInicioRango.addEventListener('change', () => {
+                fechaFinRango.min = fechaInicioRango.value;
+                validateDates(fechaInicioRango, fechaFinRango);
+            });
+            fechaFinRango.addEventListener('change', () => {
+                validateDates(fechaInicioRango, fechaFinRango);
+            });
             // Envío del formulario
             form.addEventListener('submit', function(e) {
-                if (!validateDates()) {
+                if (!validateDatesGetway()) {
                     e.preventDefault();
                     alert('Corrige las fechas antes de enviar.');
                     return;
@@ -474,6 +520,8 @@ use App\Constants\AppConstants; ?>
 
             document.getElementById(nameIor).style.display = "";
             document.getElementById(nameIor).className += " show active";
+
+            document.getElementById("idTipoOcurrencia").value = nameIor;
         }
 
         function openTab(evt, nameTab) {
@@ -491,6 +539,8 @@ use App\Constants\AppConstants; ?>
             document.getElementById(nameTab.toLowerCase()).style.display = "";
             document.getElementById(nameTab.toLowerCase()).className.replace(" show active", "");
             document.getElementById(nameTab.toLowerCase()).className += " show active";
+
+            document.getElementById("idTipoOcurrencia").value = nameTab.toLowerCase();
         }
     </script>
 
