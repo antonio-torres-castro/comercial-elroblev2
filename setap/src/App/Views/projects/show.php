@@ -237,19 +237,23 @@ use App\Constants\AppConstants; ?>
                                 ?>
                                 <div class="task-item <?= $taskBorderClass ?> p-3 mb-3 rounded">
                                     <div class="d-flex justify-content-between align-items-start">
-                                        <div>
+                                        <div class="col-md-10">
                                             <h6 class="mb-2"><?= htmlspecialchars($task['tarea_nombre']) ?></h6>
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <small class="text-muted">
                                                         <strong>Ejecuta:</strong> <?= htmlspecialchars($task['ejecutor_nombre'] ?: 'No asignado') ?><br>
-                                                        <strong>Supervisa:</strong> <?= htmlspecialchars($task['supervisor_nombre'] ?: 'No asignado') ?><br>
-                                                        <strong>Inicio:</strong> <?= date('Y/m/d', strtotime($task['fecha_inicio'])) ?>
+                                                        <strong>Supervisa:</strong> <?= htmlspecialchars($task['supervisor_nombre'] ?: 'No asignado') ?>
                                                     </small>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <small class="text-muted">
-                                                        <strong>Fin:</strong> <?= date('Y/m/d', strtotime($task['fecha_fin'])) ?><br>
+                                                        <strong>Inicio:</strong> <?= date('Y/m/d', strtotime($task['fecha_inicio'])) ?><br>
+                                                        <strong>Fin:</strong> <?= date('Y/m/d', strtotime($task['fecha_fin'])) ?>
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <small class="text-muted">
                                                         <strong>Dura:</strong> <?= $task['duracion_horas'] ?> <?= $task['duracion_horas'] > 1 ? 'horas' : 'hora'  ?><br>
                                                         <strong>Prioridad:</strong> <?= $task['prioridad'] ?>
                                                     </small>
