@@ -714,28 +714,6 @@ use App\Constants\AppConstants;
             const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
             if (modal) modal.hide();
         });
-
-        // Función para mostrar alertas Bootstrap
-        function showAlert(message, type = 'info') {
-            const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            <strong>${type === 'success' ? '✔️' : '⚠️'}</strong> ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>`;
-            // Desaparece automáticamente después de 3 segundos
-            setTimeout(() => {
-                const alert = bootstrap.Alert.getOrCreateInstance(document.querySelector('.alert'));
-                if (alert) alert.close();
-            }, 3000);
-        }
-        // Auto-hide alerts after 5 seconds (excepto los que están dentro de modales)
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert:not(.modal .alert)');
-            alerts.forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
     </script>
 </body>
 

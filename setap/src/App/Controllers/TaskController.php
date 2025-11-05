@@ -241,25 +241,6 @@ class TaskController extends BaseController
                 return;
             }
 
-            // $_POST["csrf_token"]
-            // $_POST["tarea_id"] //puede ser "nueva" o un numero cuando es una tarea existente
-            // $_POST["nueva_tarea_nombre"]
-            // $_POST["nueva_tarea_descripcion"]
-            // $_POST["proyecto_id"]
-            // $_POST["ejecutor_id"]
-            // $_POST["supervisor_id"]
-            // $_POST["tarea_tipo_id"]
-            // $_POST["estado_tipo_id"]
-            // $_POST["duracion_horas"]
-            // $_POST["prioridad"]
-            // $_POST["optionOcurrencia"] // identado a masivo=1, especifico=2, rango=3
-            // $_POST["fecha_inicio_masivo"]
-            // $_POST["fecha_fin_masivo"]
-            // $_POST["dias"] //array, indice de 0 a 6, los valores son de 1=lunes a 7=domingo
-            // $_POST["fecha_especifica_inicio"]
-            // $_POST["fecha_inicio_rango"]
-            // $_POST["fecha_fin_rango"]
-
             $tipoOcurr = $_POST['optionOcurrencia'];
 
             $fechaInicio = "";
@@ -270,7 +251,7 @@ class TaskController extends BaseController
             }
             if ($tipoOcurr == '2') {
                 $fechaInicio = $_POST['fecha_especifica_inicio'];
-                $fechaFin = $_POST['fecha_especifica_fin'];
+                $fechaFin = $_POST['fecha_especifica_fin'] ?? $_POST['fecha_especifica_inicio'];
             }
             if ($tipoOcurr == '3') {
                 $fechaInicio = $_POST['fecha_inicio_rango'];
@@ -920,7 +901,7 @@ class TaskController extends BaseController
         }
         if ($tipoOcurrencia == '2') {
             $fechaInicio = $data['fecha_especifica_inicio'];
-            $fechaFin = $data['fecha_especifica_fin'];
+            $fechaFin = $data['fecha_especifica_fin'] ?? $data['fecha_especifica_inicio'];
         }
         if ($tipoOcurrencia == '3') {
             $fechaInicio = $data['fecha_inicio_rango'];

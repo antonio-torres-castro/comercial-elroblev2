@@ -208,6 +208,8 @@ use App\Constants\AppConstants; ?>
     <!-- Scripts -->
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
+    <!-- GAP 5: Task State Validation Utilities -->
+    <script src="/setap/public/js/task-state-utils.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -350,8 +352,7 @@ use App\Constants\AppConstants; ?>
         });
     </script>
 
-    <!-- GAP 5: Task State Validation Utilities -->
-    <script src="/setap/public/js/task-state-utils.js"></script>
+
 </body>
 
 </html>

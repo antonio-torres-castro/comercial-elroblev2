@@ -837,7 +837,7 @@ try {
                                 </div>
                                 <div class="card-body text-center">
                                     <p class="mb-3">La página solicitada no existe.</p>
-                                    <a href="/home" class="btn btn-primary">Volver al Home</a>
+                                    <a href="/setap/home" class="btn btn-primary">Volver al Home</a>
                                 </div>
                             </div>
                         </div>
@@ -876,7 +876,7 @@ try {
                             </div>
                             <div class="card-body">
                                 <p class="mb-3">Ha ocurrido un error interno. Por favor, intente más tarde.</p>
-                                <a href="/home" class="btn btn-primary">Volver al Home</a>
+                                <a href="/setap/home" class="btn btn-primary">Volver al Home</a>
                             </div>
                         </div>
                     </div>

@@ -75,7 +75,7 @@ async function handleMasivoSubmit(e) {
         // Validar que al menos un día esté seleccionado
         const dias = document.querySelectorAll('input[name="dias[]"]:checked');
         if (dias.length === 0) {
-            showAlert('error', 'Debe seleccionar al menos un día de la semana');
+            showAlert('Debe seleccionar al menos un día de la semana', 'error');
             return;
         }
 
@@ -92,7 +92,7 @@ async function handleMasivoSubmit(e) {
                 // Mostrar modal de conflictos
                 showConflictModal(data.conflicts);
             } else {
-                showAlert('success', data.message);
+                showAlert(data.message, 'success');
                 refreshHolidaysTable();
                 e.target.reset();
                 // Marcar sábado y domingo por defecto
@@ -100,11 +100,11 @@ async function handleMasivoSubmit(e) {
                 document.getElementById('domingo').checked = true;
             }
         } else {
-            showAlert('error', data.message);
+            showAlert(data.message, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('error', 'Error de conexión. Intente nuevamente.');
+        showAlert('Error de conexión. Intente nuevamente.', 'error');
     } finally {
         button.innerHTML = originalText;
         button.disabled = false;
@@ -136,16 +136,16 @@ async function handleEspecificoSubmit(e) {
             if (data.conflicts && data.conflicts.length > 0) {
                 showConflictModal(data.conflicts);
             } else {
-                showAlert('success', data.message);
+                showAlert(data.message, 'success');
                 refreshHolidaysTable();
                 e.target.reset();
             }
         } else {
-            showAlert('error', data.message);
+            showAlert(data.message, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('error', 'Error de conexión. Intente nuevamente.');
+        showAlert('Error de conexión. Intente nuevamente.', 'error');
     } finally {
         button.innerHTML = originalText;
         button.disabled = false;
@@ -177,16 +177,16 @@ async function handleRangoSubmit(e) {
             if (data.conflicts && data.conflicts.length > 0) {
                 showConflictModal(data.conflicts);
             } else {
-                showAlert('success', data.message);
+                showAlert(data.message, 'success');
                 refreshHolidaysTable();
                 e.target.reset();
             }
         } else {
-            showAlert('error', data.message);
+            showAlert(data.message, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('error', 'Error de conexión. Intente nuevamente.');
+        showAlert('Error de conexión. Intente nuevamente.', 'error');
     } finally {
         button.innerHTML = originalText;
         button.disabled = false;
@@ -255,7 +255,7 @@ async function handleMoveTasksClick() {
         const data = await response.json();
         
         if (data.success) {
-            showAlert('success', `Tareas movidas exitosamente. ${data.moved_tasks} tareas han sido reprogramadas.`);
+            showAlert(`Tareas movidas exitosamente. ${data.moved_tasks} tareas han sido reprogramadas.`, 'success');
             
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('conflictModal'));
@@ -263,11 +263,11 @@ async function handleMoveTasksClick() {
             
             refreshHolidaysTable();
         } else {
-            showAlert('error', data.message);
+            showAlert(data.message, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('error', 'Error al mover tareas. Intente nuevamente.');
+        showAlert('Error al mover tareas. Intente nuevamente.', 'error');
     } finally {
         button.innerHTML = originalText;
         button.disabled = false;
@@ -358,7 +358,7 @@ async function editHoliday(id) {
         modal.show();
     } catch (error) {
         console.error('Error:', error);
-        showAlert('error', 'Error al cargar datos del feriado');
+        showAlert('Error al cargar datos del feriado', 'error');
     }
 }
 
@@ -378,7 +378,7 @@ async function handleEditSubmit(e) {
         const data = await response.json();
         
         if (data.success) {
-            showAlert('success', data.message);
+            showAlert(data.message, 'success');
             
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('editHolidayModal'));
@@ -386,11 +386,11 @@ async function handleEditSubmit(e) {
             
             refreshHolidaysTable();
         } else {
-            showAlert('error', data.message);
+            showAlert(data.message, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('error', 'Error al actualizar feriado');
+        showAlert('Error al actualizar feriado', 'error');
     }
 }
 
@@ -415,44 +415,20 @@ async function deleteHoliday(id) {
         const data = await response.json();
         
         if (data.success) {
-            showAlert('success', data.message);
+            showAlert(data.message, 'success');
             refreshHolidaysTable();
         } else {
-            showAlert('error', data.message);
+            showAlert(data.message, 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('error', 'Error al eliminar feriado');
+        showAlert('Error al eliminar feriado', 'error');
     }
 }
 
 /**
  * Utilidades
  */
-
-/**
- * Mostrar alerta
- */
-function showAlert(type, message) {
-    // Crear elemento de alerta
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    // Insertar al inicio del container
-    const container = document.querySelector('.container-fluid');
-    container.insertBefore(alertDiv, container.firstChild);
-    
-    // Auto-remover después de 5 segundos
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
 
 /**
  * Formatear fecha para mostrar
@@ -485,7 +461,7 @@ function validateDates(startDate, endDate) {
     const end = new Date(endDate);
     
     if (start > end) {
-        showAlert('error', 'La fecha de inicio debe ser menor o igual a la fecha fin');
+        showAlert('La fecha de inicio debe ser menor o igual a la fecha fin', 'error');
         return false;
     }
     

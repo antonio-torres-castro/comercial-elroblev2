@@ -226,8 +226,6 @@ use App\Constants\AppConstants;
                 });
             });
 
-            // Los formularios usan submit tradicional (sin AJAX)
-            // Las alertas se muestran mediante el sistema de mensajes flash de sesión
         });
     </script>
 </body>

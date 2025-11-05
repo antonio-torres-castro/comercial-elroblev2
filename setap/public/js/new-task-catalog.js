@@ -96,7 +96,7 @@
                 modal.show();
             } catch (error) {
                 console.error('Error:', error);
-                showAlert('error', 'Error al cargar datos de tarea');
+                showAlert('Error al cargar datos de tarea', 'error');
             }
         }
 
@@ -116,17 +116,17 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showAlert('success', data.message);
+                    showAlert(data.message, 'success');
                     // Cerrar modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
                     modal.hide();
                     refreshTasksTable();
                 } else {
-                    showErrorModalAlert('error', data.message);
+                    showAlert(data.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showAlert('error', 'Error al actualizar feriado');
+                showAlert('Error al actualizar feriado', 'error');
             }
         }
 
@@ -151,68 +151,20 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showAlert('success', data.message);
+                    showAlert(data.message, 'success');
                     refreshTasksTable();
                 } else {
-                    showAlert('error', data.message);
+                    showAlert(data.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showAlert('error', 'Error al eliminar tarea');
+                showAlert('Error al eliminar tarea', 'error');
             }
         }
 
         /**
          * Utilidades
          */
-
-        /**
-         * Mostrar alerta
-         */
-        function showAlert(type, message) {
-            // Crear elemento de alerta
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-            alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-            // Insertar al inicio del container
-            const container = document.querySelector('.container-fluid');
-            container.insertBefore(alertDiv, container.firstChild);
-
-            // Auto-remover después de 5 segundos
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
-
-        /**
-         * Mostrar alerta en modal
-         */
-        function showErrorModalAlert(type, message) {
-            // Crear elemento de alerta
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-            alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-            // Insertar al inicio del container
-            const container = document.querySelector('.modal-footer');
-            container.insertBefore(alertDiv, container.firstChild);
-
-            // Auto-remover después de 5 segundos
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
 
         /**
          * Obtener token CSRF

@@ -320,32 +320,6 @@ window.SETAP.TaskStates = {
     },
 
     /**
-     * Mostrar alerta temporal
-     * @param {string} type - Tipo de alerta (success, danger, warning, info)
-     * @param {string} message - Mensaje a mostrar
-     */
-    showAlert(type, message) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alertDiv.style.top = '20px';
-        alertDiv.style.right = '20px';
-        alertDiv.style.zIndex = '9999';
-        alertDiv.style.maxWidth = '400px';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(alertDiv);
-        
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
-        }, 5000);
-    },
-
-    /**
      * Validar permisos para eliminación según estado
      * @param {number} stateId - Estado de la tarea
      * @param {string} userRole - Rol del usuario
