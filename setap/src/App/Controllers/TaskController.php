@@ -948,7 +948,7 @@ class TaskController extends BaseController
                 $start->add(new \DateInterval('P1D'));
             }
             if (empty($fechasGeneradas)) {
-                $errors[] = 'La configuracion masiva entregda no genera fechas para tarea';
+                $errors[] = 'La configuracion masiva entregada no genera fechas para tarea';
             }
         }
 

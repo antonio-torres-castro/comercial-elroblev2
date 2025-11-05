@@ -233,10 +233,13 @@ class Task
                     $data['prioridad'] ?? 0,
                     $data['estado_tipo_id'] ?? 1 // Estado "Creado" por defecto
                 ]);
+
+                if ($result) {
+                    $proyectoTareasId = $this->db->lastInsertId();
+                }
             }
 
             if ($result) {
-                $proyectoTareasId = $this->db->lastInsertId();
                 $this->db->commit();
             } else {
                 $this->db->rollBack();
@@ -257,7 +260,7 @@ class Task
         try {
             $result = false;
 
-            $diasSemana = $data['dias'] ?? [];
+            $diasSemana = $data['dias_semana'] ?? [];
             // Convertir días a array de enteros
             $diasSemana = array_map('intval', $diasSemana);
             // Generar todas las fechas
@@ -325,7 +328,7 @@ class Task
             }
             //Rango de fechas todos los dias
             if ($tipoO == 3) {
-                // $result = $this->taskModel->createRango($taskData);             
+                $result = $this->projectTaskCreateRango($data);
             }
 
             return $result;
