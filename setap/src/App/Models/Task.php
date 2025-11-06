@@ -965,7 +965,7 @@ class Task
             $contraparte_id = (int)$task['contraparte_id'];
 
             // Validar transición de estado
-            $transitionValidation = $this->isValidStateTransition($currentState, $newState);
+            $transitionValidation = $userRole == 'admin' ? ['valid' => true] : $this->isValidStateTransition($currentState, $newState);
             if (!$transitionValidation['valid']) {
                 $this->db->rollBack();
                 return [

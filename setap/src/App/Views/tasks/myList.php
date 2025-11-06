@@ -30,11 +30,11 @@ use App\Constants\AppConstants; ?>
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <h2>
-                            <i class="bi bi-list-check"></i> <?php echo AppConstants::UI_TASK_MANAGEMENT; ?>
+                            <i class="bi bi-list-check"></i> <?= AppConstants::UI_MY_TASK_MANAGEMENT; ?>
                             <span class="badge bg-secondary ms-2"><?= count($data['tasks'] ?? []) ?> tareas</span>
                         </h2>
                     </div>
-                    <div class="col-md-6 text-end">
+                    <div class="col-md-6 text-end" hidden>
                         <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
                             <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
                         </a>

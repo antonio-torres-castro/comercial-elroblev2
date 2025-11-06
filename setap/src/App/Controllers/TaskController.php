@@ -124,7 +124,7 @@ class TaskController extends BaseController
             if (!empty($_GET['usuario_id'])) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
-            if (empty($_GET['usuario_id'])) {
+            if (empty($_GET['usuario_id']) && $currentUser['usuario_tipo_id'] != '1') {
                 $filters['usuario_id'] = $currentUser['id'];
                 $_GET['usuario_id'] = $filters['usuario_id'];
             }
@@ -152,7 +152,7 @@ class TaskController extends BaseController
                 'taskStates' => $taskStates,
                 'users' => $users,
                 'filters' => $filters,
-                'title' => AppConstants::UI_TASK_MANAGEMENT,
+                'title' => AppConstants::UI_MY_TASK_MANAGEMENT,
                 'subtitle' => 'Lista de todas las tareas',
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
@@ -818,8 +818,16 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
-            // Verificar permisos
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+            // Verificar accesos
+            if (
+                !$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task') &&
+                !$this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks')
+            ) {
+                $this->jsonError('Sin permisos suficientes');
+                return;
+            }
+
+            if (!$this->permissionService->hasPermission($currentUser['id'], 'Register activity')) {
                 $this->jsonError('Sin permisos suficientes');
                 return;
             }
@@ -895,6 +903,8 @@ class TaskController extends BaseController
             return;
         }
 
+        $uti = $currentUser['usuario_tipo_id'];
+
         $taskId = (int)($_GET['task_id'] ?? 0);
         if ($taskId <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_TASKS, 'ID de tarea inválido');
@@ -905,25 +915,30 @@ class TaskController extends BaseController
         if ($projectTaskState == 1) { // creado
             $transitions = [['id' => 2, 'nombre' => 'activo'], ['id' => 4, 'nombre' => 'eliminado']];
         }
-        if ($projectTaskState == 2) { // activo
+        if ($projectTaskState == 2 && ($uti == '1' || $uti == '2')) { // activo
             $transitions = [['id' => 5, 'nombre' => 'iniciado'], ['id' => 3, 'nombre' => 'inactivo']];
+        } elseif ($projectTaskState == 2) { // activo
+            $transitions = [['id' => 5, 'nombre' => 'iniciado']];
         }
+
         if ($projectTaskState == 3) { // inactivo
             $transitions = [['id' => 2, 'nombre' => 'activo']];
         }
         if ($projectTaskState == 4) { // eliminado
             $transitions = [['id' => 1, 'nombre' => 'creado']];
         }
-        if ($projectTaskState == 5) { // iniciado
+        if ($projectTaskState == 5 && ($uti == '1' || $uti == '2')) { // iniciado
+            $transitions = [['id' => 2, 'nombre' => 'activo'], ['id' => 6, 'nombre' => 'terminado']];
+        } elseif ($projectTaskState == 5) {
             $transitions = [['id' => 6, 'nombre' => 'terminado']];
         }
-        if ($projectTaskState == 6) { // terminado
+        if ($projectTaskState == 6 && ($uti == '1' || $uti == '2')) { // terminado
             $transitions = [['id' => 7, 'nombre' => 'aprobado'], ['id' => 8, 'nombre' => 'rechazado']];
         }
         if ($projectTaskState == 7) { // rechazado
             $transitions = [['id' => 6, 'nombre' => 'terminado']];
         }
-        if ($projectTaskState == 8) { // rechazado
+        if ($projectTaskState == 8 && ($uti == '1' || $uti == '2')) { // aprobado
             $transitions = [['id' => 7, 'nombre' => 'rechazado']];
         }
 

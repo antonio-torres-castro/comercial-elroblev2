@@ -475,6 +475,9 @@ class AppConstants
     /** Gestión de Tareas */
     const UI_TASK_MANAGEMENT = 'Gestión de Tareas';
 
+    /** Gestión de Tareas */
+    const UI_MY_TASK_MANAGEMENT = 'Mis de Tareas';
+
     /** Gestión de Proyectos */
     const UI_PROJECT_MANAGEMENT = 'Gestión de Proyectos';
 
