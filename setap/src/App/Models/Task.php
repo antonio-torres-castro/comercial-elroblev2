@@ -55,29 +55,65 @@ class Task
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 LEFT JOIN usuarios super ON pt.supervisor_id = super.id
-                WHERE pt.estado_tipo_id != 4
-            ";
+               ";
+            $strWhere = " WHERE";
 
             $params = [];
-
             // Filtros
             if (!empty($filters['proyecto_id'])) {
-                $sql .= " AND pt.proyecto_id = ?";
+                $strWhere .= " pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (!empty($filters['estado_tipo_id'])) {
-                $sql .= " AND pt.estado_tipo_id = ?";
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.estado_tipo_id = ?";
+                } else {
+                    $strWhere .= " AND pt.estado_tipo_id = ?";
+                }
                 $params[] = $filters['estado_tipo_id'];
             }
 
             if (!empty($filters['usuario_id'])) {
-                $sql .= " AND (pt.ejecutor_id = ? OR pt.planificador_id = ? OR pt.supervisor_id = ?)";
-                $params[] = $filters['usuario_id'];
-                $params[] = $filters['usuario_id'];
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.ejecutor_id = ?";
+                } else {
+                    $strWhere .= " AND pt.ejecutor_id = ?";
+                }
                 $params[] = $filters['usuario_id'];
             }
 
+            if (!empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.fecha_inicio between ? and ?";
+                } else {
+                    $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                }
+                $params[] = $filters['fecha_inicio'];
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if (!empty($filters['fecha_inicio']) && empty($filters['fecha_fin'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.fecha_inicio >= ?";
+                } else {
+                    $strWhere .= " AND pt.fecha_inicio >= ?";
+                }
+                $params[] = $filters['fecha_inicio'];
+            }
+
+            if (empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.fecha_inicio <= ?";
+                } else {
+                    $strWhere .= " AND pt.fecha_inicio <= ?";
+                }
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if ($strWhere != " WHERE") {
+                $sql .= $strWhere;
+            }
             $sql .= " ORDER BY pt.fecha_inicio DESC";
 
             $stmt = $this->db->prepare($sql);

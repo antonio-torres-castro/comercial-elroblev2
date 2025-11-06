@@ -54,6 +54,12 @@ class TaskController extends BaseController
             if (!empty($_GET['usuario_id'])) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
+            if (!empty($_GET['fecha_inicio'])) {
+                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            }
+            if (!empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = $_GET['fecha_fin'];
+            }
 
             // Obtener datos
             $tasks = $this->taskModel->getAll($filters);

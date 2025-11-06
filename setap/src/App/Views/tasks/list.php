@@ -46,8 +46,8 @@ use App\Constants\AppConstants; ?>
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
-                                <form method="GET" class="row g-3">
-                                    <div class="col-md-3">
+                                <form method="GET" id="getFormFilter" class="row g-3">
+                                    <div class="col-md-2">
                                         <label class="form-label">Proyecto</label>
                                         <select class="form-select" name="proyecto_id">
                                             <option value="">Todos los proyectos</option>
@@ -61,7 +61,7 @@ use App\Constants\AppConstants; ?>
                                             <?php endif; ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label class="form-label">Estado</label>
                                         <select class="form-select" name="estado_tipo_id">
                                             <option value="">Todos los estados</option>
@@ -75,7 +75,7 @@ use App\Constants\AppConstants; ?>
                                             <?php endif; ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label class="form-label">Ejecuta</label>
                                         <select class="form-select" name="usuario_id">
                                             <option value="">Todos los usuarios</option>
@@ -89,12 +89,24 @@ use App\Constants\AppConstants; ?>
                                             <?php endif; ?>
                                         </select>
                                     </div>
-                                    <div class="col-md-3 d-flex align-items-end">
+
+                                    <div class="col-md-2">
+                                        <label for="fecha_inicio" class="form-label">Inicio</label>
+                                        <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
+                                            value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="fecha_fin" class="form-label">Fin</label>
+                                        <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
+                                            value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+                                    </div>
+
+                                    <div class="col-md-2 d-flex align-items-end">
                                         <button type="submit" class="btn btn-outline-setap-primary me-2">
                                             <i class="bi bi-search"></i> Filtrar
                                         </button>
                                         <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-outline-secondary">
-                                            <i class="bi bi-x-lg"></i> Limpiar
+                                            <i class="bi bi-x-lg"></i>
                                         </a>
                                     </div>
                                 </form>
