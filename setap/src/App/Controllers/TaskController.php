@@ -59,7 +59,7 @@ class TaskController extends BaseController
             $tasks = $this->taskModel->getAll($filters);
             $projects = $this->taskModel->getProjects();
             $taskStates = $this->taskModel->getTaskStates();
-            $users = $this->taskModel->getUsers();
+            $users = $this->taskModel->getExecutorUsers();
 
             // Datos para la vista
             $data = [

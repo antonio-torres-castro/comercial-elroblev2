@@ -76,7 +76,7 @@ use App\Constants\AppConstants; ?>
                                         </select>
                                     </div>
                                     <div class="col-md-3">
-                                        <label class="form-label">Asignado a</label>
+                                        <label class="form-label">Ejecuta</label>
                                         <select class="form-select" name="usuario_id">
                                             <option value="">Todos los usuarios</option>
                                             <?php if (!empty($data['users'])): ?>
@@ -116,8 +116,8 @@ use App\Constants\AppConstants; ?>
                                                     <th>Tarea</th>
                                                     <th>Proyecto</th>
                                                     <th>Estado</th>
-                                                    <th>Asignado a</th>
-                                                    <th>Fechas</th>
+                                                    <th>Ejecuta</th>
+                                                    <th>Fecha</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -131,86 +131,90 @@ use App\Constants\AppConstants; ?>
                                                             <?php endif; ?>
                                                         </td><!-- fin Tarea -->
                                                         <td><!-- Proyecto -->
-                                                            <span class="badge bg-info text-dark">
+                                                            <small>
                                                                 <?= htmlspecialchars($task['cliente_nombre']) ?>
-                                                            </span>
+                                                            </small>
                                                         </td><!-- fin Proyecto -->
                                                         <td><!-- Estado -->
-                                                            <?php
-                                                            $badgeClass = 'bg-secondary';
-                                                            $statusText = '';
-                                                            switch ($task['estado_tipo_id']) {
-                                                                case 1:
-                                                                    $badgeClass = 'bg-warning text-dark';
-                                                                    $statusText = 'Creado';
-                                                                    break;
-                                                                case 2:
-                                                                    $badgeClass = 'bg-success';
-                                                                    $statusText = 'Activo';
-                                                                    break;
-                                                                case 3:
-                                                                    $badgeClass = 'bg-secondary';
-                                                                    $statusText = 'Inactivo';
-                                                                    break;
-                                                                case 5:
-                                                                    $badgeClass = 'bg-primary';
-                                                                    $statusText = 'Iniciado';
-                                                                    break;
-                                                                case 6:
-                                                                    $badgeClass = 'bg-info text-dark';
-                                                                    $statusText = 'Terminado';
-                                                                    break;
-                                                                case 7:
-                                                                    $badgeClass = 'bg-danger';
-                                                                    $statusText = 'Rechazado';
-                                                                    break;
-                                                                case 8:
-                                                                    $badgeClass = 'bg-dark';
-                                                                    $statusText = 'Aprobado';
-                                                                    break;
-                                                                default:
-                                                                    $statusText = htmlspecialchars($task['estado']);
-                                                            }
-                                                            ?>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="badge <?= $badgeClass ?>" id="status-badge-<?= $task['id'] ?>">
-                                                                    <?= $statusText ?>
-                                                                </span>
+                                                            <small>
+                                                                <?php
+                                                                $badgeClass = 'bg-secondary';
+                                                                $statusText = '';
+                                                                switch ($task['estado_tipo_id']) {
+                                                                    case 1:
+                                                                        $badgeClass = 'bg-warning text-dark';
+                                                                        $statusText = 'Creado';
+                                                                        break;
+                                                                    case 2:
+                                                                        $badgeClass = 'bg-success';
+                                                                        $statusText = 'Activo';
+                                                                        break;
+                                                                    case 3:
+                                                                        $badgeClass = 'bg-secondary';
+                                                                        $statusText = 'Inactivo';
+                                                                        break;
+                                                                    case 5:
+                                                                        $badgeClass = 'bg-primary';
+                                                                        $statusText = 'Iniciado';
+                                                                        break;
+                                                                    case 6:
+                                                                        $badgeClass = 'bg-info text-dark';
+                                                                        $statusText = 'Terminado';
+                                                                        break;
+                                                                    case 7:
+                                                                        $badgeClass = 'bg-danger';
+                                                                        $statusText = 'Rechazado';
+                                                                        break;
+                                                                    case 8:
+                                                                        $badgeClass = 'bg-dark';
+                                                                        $statusText = 'Aprobado';
+                                                                        break;
+                                                                    default:
+                                                                        $statusText = htmlspecialchars($task['estado']);
+                                                                }
+                                                                ?>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge <?= $badgeClass ?>" id="status-badge-<?= $task['id'] ?>">
+                                                                        <?= $statusText ?>
+                                                                    </span>
 
-                                                                <!-- GAP 5: Botón para cambiar estado -->
-                                                                <div class="dropdown ms-2">
-                                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                                                        id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false"
-                                                                        onclick="loadValidTransitions(<?= $task['id'] ?>)">
-                                                                        <i class="bi bi-arrow-repeat"></i>
-                                                                    </button>
-                                                                    <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
-                                                                        <li><span class="dropdown-item-text text-muted"><?php echo AppConstants::UI_LOADING; ?></span></li>
-                                                                    </ul>
+                                                                    <!-- GAP 5: Botón para cambiar estado -->
+                                                                    <div class="dropdown ms-2">
+                                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                                            id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false"
+                                                                            onclick="loadValidTransitions(<?= $task['id'] ?>)">
+                                                                            <i class="bi bi-arrow-repeat"></i>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
+                                                                            <li><span class="dropdown-item-text text-muted"><?php echo AppConstants::UI_LOADING; ?></span></li>
+                                                                        </ul>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            </small>
                                                         </td><!-- fin Estado -->
                                                         <td><!-- Asignado -->
-                                                            <?php if (!empty($task['ejecutor_nombre'])): ?>
-                                                                <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
-                                                            <?php elseif (!empty($task['supervisor_nombre'])): ?>
-                                                                <i class="bi bi-person-check"></i> <?= htmlspecialchars($task['supervisor_nombre']) ?>
-                                                            <?php elseif (!empty($task['planificador_nombre'])): ?>
-                                                                <i class="bi bi-person-gear"></i> <?= htmlspecialchars($task['planificador_nombre']) ?>
-                                                            <?php else: ?>
-                                                                <span class="text-muted">Sin asignar</span>
-                                                            <?php endif; ?>
+                                                            <small>
+                                                                <?php if (!empty($task['ejecutor_nombre'])): ?>
+                                                                    <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
+                                                                <?php elseif (!empty($task['supervisor_nombre'])): ?>
+                                                                    <i class="bi bi-person-check"></i> <?= htmlspecialchars($task['supervisor_nombre']) ?>
+                                                                <?php elseif (!empty($task['planificador_nombre'])): ?>
+                                                                    <i class="bi bi-person-gear"></i> <?= htmlspecialchars($task['planificador_nombre']) ?>
+                                                                <?php else: ?>
+                                                                    Sin asignar
+                                                                <?php endif; ?>
+                                                            </small>
                                                         </td><!-- fin Asignado -->
                                                         <td><!-- Fechas -->
                                                             <?php if (!empty($task['fecha_inicio'])): ?>
                                                                 <small>
-                                                                    <strong>Inicio:</strong> <?= date('d/m/Y', strtotime($task['fecha_inicio'])) ?><br>
+                                                                    <?= date('d/m/Y', strtotime($task['fecha_inicio'])) ?><br>
                                                                     <?php if (!empty($task['duracion_horas'])): ?>
-                                                                        <strong>Duración:</strong> <?= $task['duracion_horas'] ?>h
+                                                                        <strong>HH:</strong> <?= $task['duracion_horas'] ?>
                                                                     <?php endif; ?>
                                                                 </small>
                                                             <?php else: ?>
-                                                                <span class="text-muted">Sin fechas</span>
+                                                                <small class="text-muted">Error</small>
                                                             <?php endif; ?>
                                                         </td><!-- fin Fechass -->
                                                         <td><!-- Acciones -->
