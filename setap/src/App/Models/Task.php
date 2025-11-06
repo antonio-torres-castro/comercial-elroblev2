@@ -595,6 +595,39 @@ class Task
     /**
      * Obtener proyectos disponibles
      */
+    public function getProjectsActivos(?string $ejecutor_id): array
+    {
+        try {
+            $sql = "
+                SELECT DISTINCT p.id, 
+                CONCAT('Proyecto para ', c.razon_social) as nombre, 
+                c.razon_social as cliente_nombre,
+                p.estado_tipo_id
+                FROM proyectos p
+                INNER JOIN clientes c ON p.cliente_id = c.id
+                INNER JOIN proyecto_tareas pt ON pt.proyecto_id = p.id
+                WHERE p.estado_tipo_id = 2";
+
+            $params = [];
+            if (!empty($ejecutor_id)) {
+                $sql .= " and pt.ejecutor_id = ?";
+                $params[] = $ejecutor_id;
+            }
+            $sql .= " ORDER BY c.razon_social";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getProjects: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener proyectos disponibles
+     */
     public function getProjectById(?int $id = 0): array
     {
         try {
@@ -703,7 +736,28 @@ class Task
     }
 
     /**
-     * Obtener estados de tareas
+     * Obtener estados de tareas para filtro de mis tareas
+     */
+    public function getTaskStatesMyListFilter(): array
+    {
+        try {
+            $sql = "
+                SELECT id, nombre, descripcion
+                FROM estado_tipos
+                WHERE id in (2, 5, 7) 
+                ORDER BY id
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskStates: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener estados de tareas para creacion
      */
     public function getTaskStatesForCreate(): array
     {
@@ -725,7 +779,7 @@ class Task
     }
 
     /**
-     * Obtener estados de tareas
+     * Obtener estados de tareas para nueva tarea
      */
     public function getTaskStatesForNewTask(): array
     {

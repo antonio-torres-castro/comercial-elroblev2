@@ -90,6 +90,83 @@ class TaskController extends BaseController
     }
 
     /**
+     * Lista de tareas (plural) - Para Ejecutor
+     */
+    public function myIndex()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            // Verificar permisos para gestión de tareas
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            // Obtener filtros
+            $filters = [];
+            if (!empty($_GET['proyecto_id'])) {
+                $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
+            }
+            $projects = $this->taskModel->getProjectsActivos($currentUser['id']);
+            if (count($projects) == 1) {
+                $_GET['proyecto_id'] = $projects[0]['id'];
+            }
+
+            if (!empty($_GET['estado_tipo_id'])) {
+                $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
+            }
+            if (!empty($_GET['usuario_id'])) {
+                $filters['usuario_id'] = (int)$_GET['usuario_id'];
+            }
+            if (empty($_GET['usuario_id'])) {
+                $filters['usuario_id'] = $currentUser['id'];
+                $_GET['usuario_id'] = $filters['usuario_id'];
+            }
+            if (!empty($_GET['fecha_inicio'])) {
+                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            }
+            if (!empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = $_GET['fecha_fin'];
+            }
+            if (empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = date('Y-m-d');
+                $_GET['fecha_fin'] = $filters['fecha_fin'];
+            }
+
+            // Obtener datos
+            $tasks = $this->taskModel->getAll($filters);
+            $taskStates = $this->taskModel->getTaskStatesMyListFilter();
+            $users = $this->taskModel->getUsers();
+
+            // Datos para la vista
+            $data = [
+                'user' => $currentUser,
+                'tasks' => $tasks,
+                'projects' => $projects,
+                'taskStates' => $taskStates,
+                'users' => $users,
+                'filters' => $filters,
+                'title' => AppConstants::UI_TASK_MANAGEMENT,
+                'subtitle' => 'Lista de todas las tareas',
+                'error' => $_GET['error'] ?? '',
+                'success' => $_GET['success'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/tasks/myList.php';
+        } catch (Exception $e) {
+            Logger::error("TaskController::index: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    /**
      * Mostrar/editar tarea individual (singular)
      */
     public function show(?int $id = 0)

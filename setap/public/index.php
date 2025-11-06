@@ -554,6 +554,11 @@ try {
                     }
                     break;
 
+                case 'my':
+                    $controller->myIndex();
+
+                    break;
+
                 case '':
                 case null:
                 default:

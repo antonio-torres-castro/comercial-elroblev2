@@ -153,7 +153,7 @@ class PermissionService
                 SELECT m.nombre
                 FROM usuario_tipo_menus utm
                 INNER JOIN menu m ON utm.menu_id = m.id
-                WHERE utm.usuario_tipo_id = ? AND (m.estado_tipo_id = 2)
+                WHERE utm.usuario_tipo_id = ? AND (m.estado_tipo_id = 2 and utm.estado_tipo_id = 2)
             ");
 
             $stmt->execute([$userTypeId]);
