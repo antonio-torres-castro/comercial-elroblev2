@@ -39,6 +39,9 @@ class AppConstants
     /** Ruta base de tareas */
     const ROUTE_TASKS = '/setap/tasks';
 
+    /** Ruta base de tareas */
+    const ROUTE_MY_TASKS = '/setap/tasks/my';
+
     /** Ruta de creación de tareas */
     const ROUTE_TASKS_CREATE = '/setap/tasks/create';
 

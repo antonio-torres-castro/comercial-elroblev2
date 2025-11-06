@@ -105,7 +105,7 @@ use App\Constants\AppConstants; ?>
                                         <button type="submit" class="btn btn-outline-setap-primary me-2">
                                             <i class="bi bi-search"></i> Filtrar
                                         </button>
-                                        <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-outline-secondary">
+                                        <a href="<?= AppConstants::ROUTE_MY_TASKS ?>" class="btn btn-outline-secondary">
                                             <i class="bi bi-x-lg"></i>
                                         </a>
                                     </div>
