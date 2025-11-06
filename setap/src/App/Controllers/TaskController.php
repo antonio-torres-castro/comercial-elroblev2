@@ -179,7 +179,7 @@ class TaskController extends BaseController
             }
 
             // Verificar permisos para gestión de tarea individual
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+            if (!$this->permissionService->hasPermission($currentUser['id'], 'Read')) {
                 http_response_code(403);
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
@@ -419,61 +419,6 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             Logger::error("TaskController::storeT: " . $e->getMessage());
             Security::redirect("/tasks/storeT?error=Error interno del servidor");
-        }
-    }
-
-    public function createRecurringTask()
-    {
-        try {
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
-                return;
-            }
-            // Verificar CSRF
-            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
-                Security::redirect("/tasks/create?error=" . urlencode('Token de seguridad inválido'));
-                return;
-            }
-            $currentUser = $this->getCurrentUser();
-            if (!$currentUser) {
-                $this->redirectToLogin();
-                return;
-            }
-            // Verificar permisos
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
-                http_response_code(403);
-                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
-                return;
-            }
-            // Validar datos
-            $errors = $this->validateTaskData($_POST);
-            if (!empty($errors)) {
-                $errorMsg = implode(', ', $errors);
-                Security::redirect("/tasks/create?error=" . urlencode($errorMsg));
-                return;
-            }
-            // Preparar datos para creación
-            $taskData = [
-                'proyecto_id' => (int)$_POST['proyecto_id'],
-                'planificador_id' => $currentUser['id'], // El usuario actual es quien planifica
-                'ejecutor_id' => !empty($_POST['ejecutor_id']) ? (int)$_POST['ejecutor_id'] : null,
-                'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
-                'fecha_inicio' => $_POST['fecha_inicio'],
-                'duracion_horas' => (float)($_POST['duracion_horas'] ?? 1.0),
-                'fecha_fin' => $_POST['fecha_fin'],
-                'prioridad' => (int)($_POST['prioridad'] ?? 0),
-                'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1)
-            ];
-            // Determinar si usar tarea existente o crear nueva
-            if (!empty($_POST['tarea_id']) && $_POST['tarea_id'] !== 'nueva') {
-                $taskData['tarea_id'] = (int)$_POST['tarea_id'];
-            } else {
-                $taskData['nueva_tarea_nombre'] = trim($_POST['nueva_tarea_nombre']);
-                $taskData['nueva_tarea_descripcion'] = trim($_POST['nueva_tarea_descripcion'] ?? '');
-            }
-        } catch (Exception $e) {
-            Logger::error("TaskController::store: " . $e->getMessage());
-            Security::redirect("/tasks/create?error=Error interno del servidor");
         }
     }
 
@@ -818,11 +763,10 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+            $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
+            $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
             // Verificar accesos
-            if (
-                !$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task') &&
-                !$this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks')
-            ) {
+            if (!$aManageTask && !$aMyTasks) {
                 $this->jsonError('Sin permisos suficientes');
                 return;
             }
@@ -932,13 +876,13 @@ class TaskController extends BaseController
         } elseif ($projectTaskState == 5) {
             $transitions = [['id' => 6, 'nombre' => 'terminado']];
         }
-        if ($projectTaskState == 6 && ($uti == '1' || $uti == '2')) { // terminado
-            $transitions = [['id' => 7, 'nombre' => 'aprobado'], ['id' => 8, 'nombre' => 'rechazado']];
+        if ($projectTaskState == 6 && ($uti == '1' || $uti == '2' || $uti == '3')) { // terminado
+            $transitions = [['id' => 8, 'nombre' => 'aprobado'], ['id' => 7, 'nombre' => 'rechazado']];
         }
         if ($projectTaskState == 7) { // rechazado
             $transitions = [['id' => 6, 'nombre' => 'terminado']];
         }
-        if ($projectTaskState == 8 && ($uti == '1' || $uti == '2')) { // aprobado
+        if ($projectTaskState == 8 && ($uti == '1' || $uti == '2' || $uti == '3')) { // aprobado
             $transitions = [['id' => 7, 'nombre' => 'rechazado']];
         }
 

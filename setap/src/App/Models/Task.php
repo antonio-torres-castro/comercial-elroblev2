@@ -830,8 +830,8 @@ class Task
             4 => [1], // eliminado -> creado
             5 => [6], // iniciado -> terminado
             6 => [7, 8], // terminado -> rechazado, aprobado
-            7 => [2, 5], // rechazado -> terminado
-            8 => [8] // aprobado -> aprobado
+            7 => [2, 5, 6], // rechazado -> activo, iniciado, terminado
+            8 => [6, 7] // aprobado -> terminado, rechazado
         ];
 
         $isValid = isset($validTransitions[$currentState]) &&
@@ -869,10 +869,10 @@ class Task
     {
         // Estados que solo admin y planner pueden modificar cuando están aprobados
         if ($currentState == 8) { // aprobado
-            if (!in_array($userRole, ['admin', 'planner'])) {
+            if (!in_array($userRole, ['admin', 'planner', 'supervisor'])) {
                 return [
                     'valid' => false,
-                    'message' => 'Solo usuarios Admin y Planner pueden modificar tareas aprobadas'
+                    'message' => 'Admin, Planner y Supervisor pueden modificar tareas aprobadas'
                 ];
             }
         }
@@ -885,8 +885,8 @@ class Task
                 'message' => 'Los ejecutores solo pueden iniciar tareas activas o marcarlas como terminadas'
             ],
             'supervisor' => [
-                'allowed_from' => [5, 6], // Solo desde iniciado y terminado
-                'allowed_to' => [7, 8], // Solo a rechazado y aprobado
+                'allowed_from' => [5, 6, 8, 7], // Desde iniciado, terminado, aprobado, rechazada
+                'allowed_to' => [6, 7, 8], // A terminado, rechazado y aprobado
                 'message' => 'Los supervisores solo pueden aprobar o rechazar tareas iniciadas o terminadas'
             ]
         ];

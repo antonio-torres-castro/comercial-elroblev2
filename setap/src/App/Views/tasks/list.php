@@ -34,11 +34,14 @@ use App\Constants\AppConstants; ?>
                             <span class="badge bg-secondary ms-2"><?= count($data['tasks'] ?? []) ?> tareas</span>
                         </h2>
                     </div>
-                    <div class="col-md-6 text-end">
-                        <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
-                            <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
-                        </a>
-                    </div>
+
+                    <?php if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2): ?>
+                        <div class="col-md-6 text-end">
+                            <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
+                                <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Filtros -->
@@ -130,7 +133,11 @@ use App\Constants\AppConstants; ?>
                                                     <th>Estado</th>
                                                     <th>Ejecuta</th>
                                                     <th>Fecha</th>
-                                                    <th>Acciones</th>
+                                                    <?php if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2): ?>
+                                                        <th>Acciones</th>
+                                                    <?php else: ?>
+                                                        <th>Acción</th>
+                                                    <?php endif; ?>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -234,15 +241,17 @@ use App\Constants\AppConstants; ?>
                                                                 <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
-                                                                <a href="<?= AppConstants::ROUTE_TASKS_EDIT ?>?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </a>
-                                                                <!-- GAP 5: Validar si puede eliminar según estado -->
-                                                                <button type="button" class="btn btn-outline-danger"
-                                                                    onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>', <?= $task['estado_tipo_id'] ?>)"
-                                                                    title="Eliminar" id="delete-btn-<?= $task['id'] ?>">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
+                                                                <?php if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2): ?>
+                                                                    <a href="<?= AppConstants::ROUTE_TASKS_EDIT ?>?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </a>
+                                                                    <!-- GAP 5: Validar si puede eliminar según estado -->
+                                                                    <button type="button" class="btn btn-outline-danger"
+                                                                        onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>', <?= $task['estado_tipo_id'] ?>)"
+                                                                        title="Eliminar" id="delete-btn-<?= $task['id'] ?>">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </td><!-- fin Acciones -->
                                                     </tr>
