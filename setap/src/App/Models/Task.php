@@ -65,6 +65,14 @@ class Task
                 $params[] = $filters['proyecto_id'];
             }
 
+            if ($filters['current_usuario_tipo_id'] == 3) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                } else {
+                    $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                }
+            }
+
             if (!empty($filters['estado_tipo_id'])) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.estado_tipo_id = ?";
@@ -571,20 +579,34 @@ class Task
     /**
      * Obtener proyectos disponibles
      */
-    public function getProjects(): array
+    public function getProjects(?array $filters = []): array
     {
+        $uti = $filters['current_usuario_tipo_id'];
+        $myFilters = [];
+
         try {
-            $sql = "
-                SELECT p.id, 
-                CONCAT('Proyecto para ', c.razon_social) as nombre, 
-                c.razon_social as cliente_nombre
-                FROM proyectos p
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                WHERE p.estado_tipo_id IN (1, 2, 5)
-                ORDER BY c.razon_social
-            ";
+            $sql = "Select DISTINCT p.id, 
+                                CONCAT('Proyecto para ', c.razon_social) as nombre, 
+                                c.razon_social as cliente_nombre, pt.supervisor_id, pt.planificador_id
+                From comerci3_bdsetap.proyectos p 
+                Inner Join clientes c on p.cliente_id = c.id
+                Inner Join proyecto_tareas pt on pt.proyecto_id = p.id";
+
+            if ($uti == 1 || $uti == 2) {
+                $sql .= " Where p.estado_tipo_id IN (1, 2, 5)";
+                if ($uti == 2) {
+                    $sql .= " and pt.planificador_id = ?";
+                    $myFilters[] = $filters['current_usuario_id'];
+                }
+            } else {
+                $sql .= " Where p.estado_tipo_id = 2";
+                $sql .= " and pt.supervisor_id = ?";
+                $myFilters[] = $filters['current_usuario_id'];
+            }
+            $sql .= " ORDER BY c.razon_social";
+
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute($myFilters);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getProjects: " . $e->getMessage());
@@ -718,14 +740,17 @@ class Task
     /**
      * Obtener estados de tareas
      */
-    public function getTaskStates(): array
+    public function getTaskStates(?array $filters = []): array
     {
         try {
-            $sql = "
-                SELECT id, nombre, descripcion
-                FROM estado_tipos
-                ORDER BY id
-            ";
+            $uti = $filters['usuario_tipo_id'];
+
+            $sql = "Select id, nombre, descripcion From estado_tipos";
+            if ($uti == 3) {
+                $sql .= " Where id In (2, 5, 6, 7, 8)";
+            }
+            $sql .= " Order By id";
+
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

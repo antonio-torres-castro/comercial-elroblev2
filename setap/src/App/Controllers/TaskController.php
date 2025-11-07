@@ -54,18 +54,46 @@ class TaskController extends BaseController
             if (!empty($_GET['usuario_id'])) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
+
+            $filters['current_usuario_id'] = $currentUser['id'];
+
             if (!empty($_GET['fecha_inicio'])) {
                 $filters['fecha_inicio'] = $_GET['fecha_inicio'];
             }
             if (!empty($_GET['fecha_fin'])) {
                 $filters['fecha_fin'] = $_GET['fecha_fin'];
             }
+            if (empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = date('Y-m-d');
+                $_GET['fecha_fin'] = $filters['fecha_fin'];
+            }
+            if (!empty($currentUser['usuario_tipo_id'])) {
+                $filters['current_usuario_tipo_id'] = $currentUser['usuario_tipo_id'];
+                if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2) {
+                    $_GET['show_col_acciones'] = true;
+                }
+            }
 
+            $projects = $this->taskModel->getProjects($filters);
+            if (count($projects) == 1) {
+                $_GET['proyecto_id'] = $projects[0]['id'];
+                $_GET['show_col_proyecto'] = false;
+            } else {
+                $_GET['show_col_proyecto'] = true;
+            }
+
+            $users = $this->taskModel->getExecutorUsers();
+            if (count($users) == 1) {
+                $_GET['usuario_id'] = $users[0]['id'];
+                $_GET['show_col_ejecuta'] = false;
+            } else {
+                $_GET['show_col_ejecuta'] = true;
+            }
             // Obtener datos
             $tasks = $this->taskModel->getAll($filters);
-            $projects = $this->taskModel->getProjects();
-            $taskStates = $this->taskModel->getTaskStates();
-            $users = $this->taskModel->getExecutorUsers();
+
+            $taskStates = $this->taskModel->getTaskStates($filters);
+
 
             // Datos para la vista
             $data = [

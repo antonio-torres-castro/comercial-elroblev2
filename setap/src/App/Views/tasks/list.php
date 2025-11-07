@@ -129,11 +129,15 @@ use App\Constants\AppConstants; ?>
                                             <thead>
                                                 <tr>
                                                     <th>Tarea</th>
-                                                    <th>Proyecto</th>
+                                                    <?php if ($_GET['show_col_proyecto']): ?>
+                                                        <th>Proyecto</th>
+                                                    <?php endif; ?>
                                                     <th>Estado</th>
-                                                    <th>Ejecuta</th>
+                                                    <?php if ($_GET['show_col_ejecuta']): ?>
+                                                        <th>Ejecuta</th>
+                                                    <?php endif; ?>
                                                     <th>Fecha</th>
-                                                    <?php if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2): ?>
+                                                    <?php if ($_GET['show_col_acciones']): ?>
                                                         <th>Acciones</th>
                                                     <?php else: ?>
                                                         <th>Acción</th>
@@ -149,7 +153,7 @@ use App\Constants\AppConstants; ?>
                                                                 <small class="text-muted"><?= htmlspecialchars(substr($task['descripcion'], 0, 100)) ?>...</small>
                                                             <?php endif; ?>
                                                         </td><!-- fin Tarea -->
-                                                        <td><!-- Proyecto -->
+                                                        <td <?= $_GET['show_col_proyecto'] ? '' : 'hidden' ?>><!-- Proyecto -->
                                                             <small>
                                                                 <?= htmlspecialchars($task['cliente_nombre']) ?>
                                                             </small>
@@ -211,7 +215,7 @@ use App\Constants\AppConstants; ?>
                                                                 </div>
                                                             </small>
                                                         </td><!-- fin Estado -->
-                                                        <td><!-- Asignado -->
+                                                        <td <?= $_GET['show_col_ejecuta'] ? '' : 'hidden' ?>><!-- Asignado -->
                                                             <small>
                                                                 <?php if (!empty($task['ejecutor_nombre'])): ?>
                                                                     <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
