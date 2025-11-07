@@ -71,6 +71,8 @@ class TaskController extends BaseController
                 $filters['current_usuario_tipo_id'] = $currentUser['usuario_tipo_id'];
                 if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2) {
                     $_GET['show_col_acciones'] = true;
+                } else {
+                    $_GET['show_col_acciones'] = false;
                 }
             }
 

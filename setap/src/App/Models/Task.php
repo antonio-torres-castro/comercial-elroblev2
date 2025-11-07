@@ -743,7 +743,7 @@ class Task
     public function getTaskStates(?array $filters = []): array
     {
         try {
-            $uti = $filters['usuario_tipo_id'];
+            $uti = isset($filters['current_usuario_tipo_id']) ? $filters['current_usuario_tipo_id'] : 0;
 
             $sql = "Select id, nombre, descripcion From estado_tipos";
             if ($uti == 3) {
