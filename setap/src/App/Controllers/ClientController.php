@@ -377,12 +377,12 @@ class ClientController extends BaseController
                 'estado_tipo_id' => $_GET['estado_tipo_id'] ?? ''
             ];
 
-            if ($uti == 3) {
-                $_GET['show_btn_nuevo'] = false;
-                $_GET['show_col_acciones'] = false;
-            } else {
+            if ($uti == 1 || $uti == 2) {
                 $_GET['show_btn_nuevo'] = true;
                 $_GET['show_col_acciones'] = true;
+            } else {
+                $_GET['show_btn_nuevo'] = false;
+                $_GET['show_col_acciones'] = false;
             }
 
             // Obtener contrapartes usando el servicio y datos necesarios para filtros

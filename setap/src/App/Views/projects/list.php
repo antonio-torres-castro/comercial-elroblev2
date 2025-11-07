@@ -135,7 +135,7 @@ use App\Constants\AppConstants; ?>
                         <i class="bi bi-folder-x display-1 text-muted"></i>
                         <h4 class="mt-3">No hay proyectos</h4>
                         <p class="text-muted">No se encontraron proyectos con los filtros seleccionados.</p>
-                        <a href="<?= \App\Constants\AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
+                        <a href="<?= AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
                             <i class="bi bi-plus-circle"></i> Crear Primer Proyecto
                         </a>
                     </div>

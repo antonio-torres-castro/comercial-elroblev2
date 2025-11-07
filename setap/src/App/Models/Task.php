@@ -60,12 +60,12 @@ class Task
 
             $params = [];
             // Filtros
-            if (!empty($filters['proyecto_id'])) {
+            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
                 $strWhere .= " pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
-            if ($filters['current_usuario_tipo_id'] == 3) {
+            if (isset($filters['current_usuario_tipo_id']) && $filters['current_usuario_tipo_id'] == 3) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.estado_tipo_id in (2, 5, 6, 7, 8)";
                 } else {
@@ -73,7 +73,7 @@ class Task
                 }
             }
 
-            if (!empty($filters['estado_tipo_id'])) {
+            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.estado_tipo_id = ?";
                 } else {
@@ -82,16 +82,34 @@ class Task
                 $params[] = $filters['estado_tipo_id'];
             }
 
-            if (!empty($filters['usuario_id'])) {
+            if (isset($filters['ejecutor_id']) && !empty($filters['ejecutor_id'])) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.ejecutor_id = ?";
                 } else {
                     $strWhere .= " AND pt.ejecutor_id = ?";
                 }
-                $params[] = $filters['usuario_id'];
+                $params[] = $filters['ejecutor_id'];
             }
 
-            if (!empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+            if (isset($filters['supervisor_id']) && !empty($filters['supervisor_id'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.supervisor_id = ?";
+                } else {
+                    $strWhere .= " AND pt.supervisor_id = ?";
+                }
+                $params[] = $filters['supervisor_id'];
+            }
+
+            if (isset($filters['planificador_id']) && !empty($filters['planificador_id'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.planificador_id = ?";
+                } else {
+                    $strWhere .= " AND pt.planificador_id = ?";
+                }
+                $params[] = $filters['planificador_id'];
+            }
+
+            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.fecha_inicio between ? and ?";
                 } else {
@@ -101,7 +119,7 @@ class Task
                 $params[] = $filters['fecha_fin'];
             }
 
-            if (!empty($filters['fecha_inicio']) && empty($filters['fecha_fin'])) {
+            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.fecha_inicio >= ?";
                 } else {
@@ -110,7 +128,7 @@ class Task
                 $params[] = $filters['fecha_inicio'];
             }
 
-            if (empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.fecha_inicio <= ?";
                 } else {
@@ -746,7 +764,7 @@ class Task
             $uti = isset($filters['current_usuario_tipo_id']) ? $filters['current_usuario_tipo_id'] : 0;
 
             $sql = "Select id, nombre, descripcion From estado_tipos";
-            if ($uti == 3) {
+            if ($uti > 2) {
                 $sql .= " Where id In (2, 5, 6, 7, 8)";
             }
             $sql .= " Order By id";

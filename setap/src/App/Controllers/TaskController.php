@@ -36,6 +36,8 @@ class TaskController extends BaseController
                 return;
             }
 
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Verificar permisos para gestión de tareas
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
                 http_response_code(403);
@@ -67,13 +69,13 @@ class TaskController extends BaseController
                 $filters['fecha_fin'] = date('Y-m-d');
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
-            if (!empty($currentUser['usuario_tipo_id'])) {
-                $filters['current_usuario_tipo_id'] = $currentUser['usuario_tipo_id'];
-                if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2) {
-                    $_GET['show_col_acciones'] = true;
-                } else {
-                    $_GET['show_col_acciones'] = false;
-                }
+
+            $filters['current_usuario_tipo_id'] = $uti;
+
+            if ($uti == 1 || $uti == 2) {
+                $_GET['show_col_acciones'] = true;
+            } else {
+                $_GET['show_col_acciones'] = false;
             }
 
             $projects = $this->taskModel->getProjects($filters);
@@ -138,6 +140,8 @@ class TaskController extends BaseController
                 return;
             }
 
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Verificar permisos para gestión de tareas
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks')) {
                 http_response_code(403);
@@ -161,9 +165,17 @@ class TaskController extends BaseController
             if (!empty($_GET['usuario_id'])) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
-            if (empty($_GET['usuario_id']) && $currentUser['usuario_tipo_id'] != '1') {
-                $filters['usuario_id'] = $currentUser['id'];
-                $_GET['usuario_id'] = $filters['usuario_id'];
+            if (empty($_GET['usuario_id'])) {
+                if ($uti == 4) {
+                    $filters['ejecutor_id'] = $currentUser['id'];
+                    $_GET['usuario_id'] = $filters['ejecutor_id'];
+                }
+                if ($uti == 3) {
+                    $filters['supervisor_id'] = $currentUser['id'];
+                }
+                if ($uti == 2) {
+                    $filters['planificador_id'] = $currentUser['id'];
+                }
             }
             if (!empty($_GET['fecha_inicio'])) {
                 $filters['fecha_inicio'] = $_GET['fecha_inicio'];
@@ -176,13 +188,11 @@ class TaskController extends BaseController
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
 
-            if (!empty($currentUser['usuario_tipo_id'])) {
-                $filters['current_usuario_tipo_id'] = $currentUser['usuario_tipo_id'];
-                if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2) {
-                    $_GET['show_col_acciones'] = true;
-                } else {
-                    $_GET['show_col_acciones'] = false;
-                }
+            $filters['current_usuario_tipo_id'] = $uti;
+            if ($uti == 1 || $uti == 2) {
+                $_GET['show_col_acciones'] = true;
+            } else {
+                $_GET['show_col_acciones'] = false;
             }
 
             // Obtener datos
@@ -811,11 +821,15 @@ class TaskController extends BaseController
             }
             $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
             $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
+            $rActivity = $this->permissionService->hasPermission($currentUser['id'], 'Register activity');
+            $rApruve = $this->permissionService->hasPermission($currentUser['id'], 'Apruve');
             // Verificar accesos
             if (!$aManageTask && !$aMyTasks) {
-                $this->jsonError('Sin permisos suficientes');
+                $this->jsonError('Sin acceso suficiente');
                 return;
             }
+
+
 
             if (!$this->permissionService->hasPermission($currentUser['id'], 'Register activity')) {
                 $this->jsonError('Sin permisos suficientes');
@@ -833,6 +847,12 @@ class TaskController extends BaseController
             // Obtener datos
             $taskId = (int)($_POST['task_id'] ?? 0);
             $newState = (int)($_POST['new_state'] ?? 0);
+
+            if ($newState == 8 && !$rApruve) {
+                $this->jsonError('Sin permisos para aprobar');
+                return;
+            }
+
             $reason = trim($_POST['reason'] ?? '');
 
             if ($taskId <= 0 || $newState <= 0) {

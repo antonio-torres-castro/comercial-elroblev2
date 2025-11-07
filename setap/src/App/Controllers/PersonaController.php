@@ -41,12 +41,12 @@ class PersonaController extends AbstractBaseController
             // Aplicar filtros si están presentes
             $filters = $this->extractFilters(['estado_tipo_id', 'search']);
 
-            if ($uti == 3) {
-                $_GET['show_btn_nuevo'] = false;
-                $_GET['show_col_acciones'] = false;
-            } else {
+            if ($uti == 1 || $uti == 2) {
                 $_GET['show_btn_nuevo'] = true;
                 $_GET['show_col_acciones'] = true;
+            } else {
+                $_GET['show_btn_nuevo'] = false;
+                $_GET['show_col_acciones'] = false;
             }
 
             $personas = $this->personaModel->getAll($filters);

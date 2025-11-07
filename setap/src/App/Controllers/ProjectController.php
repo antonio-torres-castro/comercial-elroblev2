@@ -57,16 +57,16 @@ class ProjectController extends BaseController
             $filters['fecha_hasta'] = $_GET['fecha_hasta'];
         }
         $uti = $currentUser['usuario_tipo_id'];
-        if ($uti == 3) {
-            $_GET['show_btn_nuevo'] = false;
-            $_GET['show_btn_editar'] = false;
-            $_GET['show_btn_gestionar_feriados'] = false;
-            $_GET['show_btn_ver'] = false;
-        } else {
+        if ($uti == 1 || $uti == 2) {
             $_GET['show_btn_nuevo'] = true;
             $_GET['show_btn_editar'] = true;
             $_GET['show_btn_gestionar_feriados'] = true;
             $_GET['show_btn_ver'] = true;
+        } else {
+            $_GET['show_btn_nuevo'] = false;
+            $_GET['show_btn_editar'] = false;
+            $_GET['show_btn_gestionar_feriados'] = false;
+            $_GET['show_btn_ver'] = false;
         }
         $projects = $this->projectModel->getAll($filters);
 
