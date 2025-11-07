@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\Persona;
@@ -23,15 +24,31 @@ class PersonaController extends AbstractBaseController
      */
     public function index()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             // Verificar autenticación y permisos
             if (!$this->requireAuthAndPermission('manage_personas')) {
                 return;
             }
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Aplicar filtros si están presentes
             $filters = $this->extractFilters(['estado_tipo_id', 'search']);
-            
+
+            if ($uti == 3) {
+                $_GET['show_btn_nuevo'] = false;
+                $_GET['show_col_acciones'] = false;
+            } else {
+                $_GET['show_btn_nuevo'] = true;
+                $_GET['show_col_acciones'] = true;
+            }
+
             $personas = $this->personaModel->getAll($filters);
             $estadosTipo = $this->getEstadosTipo();
             $stats = $this->personaModel->getStats();
@@ -52,7 +69,7 @@ class PersonaController extends AbstractBaseController
      */
     public function create()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             // Verificar autenticación y permisos
             if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
@@ -72,7 +89,7 @@ class PersonaController extends AbstractBaseController
      */
     public function store()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             // Verificar autenticación y permisos
             if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
@@ -119,7 +136,7 @@ class PersonaController extends AbstractBaseController
      */
     public function edit()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             // Verificar autenticación y permisos
             if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
@@ -148,7 +165,7 @@ class PersonaController extends AbstractBaseController
      */
     public function update()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             // Verificar autenticación y permisos
             if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
@@ -195,7 +212,7 @@ class PersonaController extends AbstractBaseController
      */
     public function delete()
     {
-        return $this->executeWithErrorHandling(function() {
+        return $this->executeWithErrorHandling(function () {
             if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;
             }
@@ -225,7 +242,7 @@ class PersonaController extends AbstractBaseController
      */
     public function show($id = null)
     {
-        return $this->executeWithErrorHandling(function() use ($id) {
+        return $this->executeWithErrorHandling(function () use ($id) {
             // Verificar autenticación y permisos
             if (!$this->requireAuthAndPermission('manage_persona')) {
                 return;

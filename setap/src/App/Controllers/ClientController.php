@@ -367,6 +367,8 @@ class ClientController extends BaseController
                 return;
             }
 
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Obtener filtros de búsqueda
             $filters = [
                 'cliente_id' => $_GET['cliente_id'] ?? '',
@@ -374,6 +376,14 @@ class ClientController extends BaseController
                 'cargo' => $_GET['cargo'] ?? '',
                 'estado_tipo_id' => $_GET['estado_tipo_id'] ?? ''
             ];
+
+            if ($uti == 3) {
+                $_GET['show_btn_nuevo'] = false;
+                $_GET['show_col_acciones'] = false;
+            } else {
+                $_GET['show_btn_nuevo'] = true;
+                $_GET['show_col_acciones'] = true;
+            }
 
             // Obtener contrapartes usando el servicio y datos necesarios para filtros
             $counterparties = $this->counterpartieService->getAllCounterparties($filters);

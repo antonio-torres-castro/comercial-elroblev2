@@ -50,11 +50,13 @@ use App\Constants\AppConstants; ?>
                     <span class="badge bg-secondary ms-2"><?= count($personas) ?> personas</span>
                 </h2>
             </div>
-            <div class="col-md-6 text-end">
-                <a href="<?= AppConstants::ROUTE_PERSONAS_CREATE ?>" class="btn btn-setap-primary">
-                    <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PERSONA ?>
-                </a>
-            </div>
+            <?php if ($_GET['show_btn_nuevo']): ?>
+                <div class="col-md-6 text-end">
+                    <a href="<?= AppConstants::ROUTE_PERSONAS_CREATE ?>" class="btn btn-setap-primary">
+                        <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PERSONA ?>
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Alertas -->
@@ -199,7 +201,9 @@ use App\Constants\AppConstants; ?>
                                     <th>Teléfono</th>
                                     <th>Estado</th>
                                     <th>Creado</th>
-                                    <th>Acciones</th>
+                                    <?php if ($_GET['show_col_acciones']): ?>
+                                        <th>Acciones</th>
+                                    <?php endif; ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -242,19 +246,22 @@ use App\Constants\AppConstants; ?>
                                         <td>
                                             <small><?= date('d/m/Y H:i', strtotime($persona['fecha_creado'])) ?></small>
                                         </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="<?= AppConstants::ROUTE_PERSONAS ?>/edit?id=<?= (int)$persona['id'] ?>"
-                                                    class="btn btn-outline-setap-primary" title="Editar">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-outline-danger"
-                                                    onclick="confirmDelete(<?= (int)$persona['id'] ?>, '<?= htmlspecialchars($persona['nombre']) ?>')"
-                                                    title="Eliminar">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
+                                        <?php if ($_GET['show_col_acciones']): ?>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="<?= AppConstants::ROUTE_PERSONAS ?>/edit?id=<?= (int)$persona['id'] ?>"
+                                                        class="btn btn-outline-setap-primary" title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-danger"
+                                                        onclick="confirmDelete(<?= (int)$persona['id'] ?>, '<?= htmlspecialchars($persona['nombre']) ?>')"
+                                                        title="Eliminar">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        <?php endif; ?>
+
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

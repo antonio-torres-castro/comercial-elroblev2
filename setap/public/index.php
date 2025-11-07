@@ -189,10 +189,6 @@ try {
                     $controller->changeStatus();
                     break;
 
-                // case 'search':
-                //     $controller->search();
-                //     break;
-
                 case 'report':
                     $controller->report();
                     break;

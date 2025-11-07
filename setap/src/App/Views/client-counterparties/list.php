@@ -27,11 +27,13 @@ use App\Constants\AppConstants;
             <main class="col-12 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/create" class="btn btn-sm btn-setap-primary">
-                            <i class="bi bi-plus-circle"></i> Nueva Contraparte
-                        </a>
-                    </div>
+                    <?php if ($_GET['show_btn_nuevo']): ?>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/create" class="btn btn-sm btn-setap-primary">
+                                <i class="bi bi-plus-circle"></i> Nueva Contraparte
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Mensajes de éxito/error -->
@@ -153,7 +155,10 @@ use App\Constants\AppConstants;
                                             <th>Email</th>
                                             <th>Estado</th>
                                             <th>Fecha Creación</th>
-                                            <th width="100">Acciones</th>
+                                            <?php if ($_GET['show_col_acciones']): ?>
+                                                <th width="100">Acciones</th>
+                                            <?php endif; ?>
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -202,19 +207,21 @@ use App\Constants\AppConstants;
                                                         <?php echo date('d/m/Y', strtotime($counterpartie['fecha_Creado'])); ?>
                                                     </small>
                                                 </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/<?php echo $counterpartie['id']; ?>"
-                                                            class="btn btn-outline-primary" title="Editar">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </a>
-                                                        <button type="button" class="btn btn-outline-danger"
-                                                            title="Eliminar" data-bs-toggle="modal"
-                                                            data-bs-target="#deleteModal<?php echo $counterpartie['id']; ?>">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
+                                                <?php if ($_GET['show_col_acciones']): ?>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="<?= AppConstants::ROUTE_CLIENT_COUNTERPARTIE ?>/<?php echo $counterpartie['id']; ?>"
+                                                                class="btn btn-outline-primary" title="Editar">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+                                                            <button type="button" class="btn btn-outline-danger"
+                                                                title="Eliminar" data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal<?php echo $counterpartie['id']; ?>">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                <?php endif; ?>
                                             </tr>
 
                                             <!-- Modal de eliminación -->
