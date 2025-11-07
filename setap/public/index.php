@@ -215,6 +215,10 @@ try {
                         $controller->show();
                     }
                     break;
+
+                case '':
+                    $controller->create();
+                    break;
             }
             break;
 

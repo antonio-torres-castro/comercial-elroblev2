@@ -176,6 +176,15 @@ class TaskController extends BaseController
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
 
+            if (!empty($currentUser['usuario_tipo_id'])) {
+                $filters['current_usuario_tipo_id'] = $currentUser['usuario_tipo_id'];
+                if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2) {
+                    $_GET['show_col_acciones'] = true;
+                } else {
+                    $_GET['show_col_acciones'] = false;
+                }
+            }
+
             // Obtener datos
             $tasks = $this->taskModel->getAll($filters);
             $taskStates = $this->taskModel->getTaskStatesMyListFilter();
