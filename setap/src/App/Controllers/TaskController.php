@@ -77,18 +77,25 @@ class TaskController extends BaseController
             $projects = $this->taskModel->getProjects($filters);
             if (count($projects) == 1) {
                 $_GET['proyecto_id'] = $projects[0]['id'];
-                $_GET['show_col_proyecto'] = false;
-            } else {
-                $_GET['show_col_proyecto'] = true;
             }
 
             $users = $this->taskModel->getExecutorUsers();
             if (count($users) == 1) {
                 $_GET['usuario_id'] = $users[0]['id'];
+            }
+
+            if (!empty($_GET['proyecto_id'])) {
+                $_GET['show_col_proyecto'] = false;
+            } else {
+                $_GET['show_col_proyecto'] = true;
+            }
+
+            if (!empty($_GET['usuario_id'])) {
                 $_GET['show_col_ejecuta'] = false;
             } else {
                 $_GET['show_col_ejecuta'] = true;
             }
+
             // Obtener datos
             $tasks = $this->taskModel->getAll($filters);
 
