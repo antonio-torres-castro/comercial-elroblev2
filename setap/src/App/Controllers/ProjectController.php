@@ -36,6 +36,12 @@ class ProjectController extends BaseController
             return;
         }
 
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
+        }
+
         // Aplicar filtros si están presentes
         $filters = [];
         if (!empty($_GET['cliente_id'])) {
@@ -50,7 +56,18 @@ class ProjectController extends BaseController
         if (!empty($_GET['fecha_hasta'])) {
             $filters['fecha_hasta'] = $_GET['fecha_hasta'];
         }
-
+        $uti = $currentUser['usuario_tipo_id'];
+        if ($uti == 3) {
+            $_GET['show_btn_nuevo'] = false;
+            $_GET['show_btn_editar'] = false;
+            $_GET['show_btn_gestionar_feriados'] = false;
+            $_GET['show_btn_ver'] = false;
+        } else {
+            $_GET['show_btn_nuevo'] = true;
+            $_GET['show_btn_editar'] = true;
+            $_GET['show_btn_gestionar_feriados'] = true;
+            $_GET['show_btn_ver'] = true;
+        }
         $projects = $this->projectModel->getAll($filters);
 
         // Obtener datos para filtros
@@ -376,30 +393,30 @@ class ProjectController extends BaseController
         }
     }
 
-    public function search()
-    {
-        // Verificar acceso al menú de gestión de proyectos
-        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
-            http_response_code(403);
-            echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
-            return;
-        }
+    // public function search()
+    // {
+    //     // Verificar acceso al menú de gestión de proyectos
+    //     if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
+    //         http_response_code(403);
+    //         echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
+    //         return;
+    //     }
 
-        $term = Security::sanitizeInput($_GET['q'] ?? '');
-        if (empty($term) || strlen($term) < 3) {
-            $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_SEARCH_TERM_TOO_SHORT);
-            return;
-        }
+    //     $term = Security::sanitizeInput($_GET['q'] ?? '');
+    //     if (empty($term) || strlen($term) < 3) {
+    //         $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_SEARCH_TERM_TOO_SHORT);
+    //         return;
+    //     }
 
-        $projects = $this->projectModel->search($term);
+    //     $projects = $this->projectModel->search($term);
 
-        $this->view('projects/search', [
-            'projects' => $projects,
-            'searchTerm' => $term,
-            'success' => $_GET['success'] ?? '',
-            'error' => $_GET['error'] ?? ''
-        ]);
-    }
+    //     $this->view('projects/search', [
+    //         'projects' => $projects,
+    //         'searchTerm' => $term,
+    //         'success' => $_GET['success'] ?? '',
+    //         'error' => $_GET['error'] ?? ''
+    //     ]);
+    // }
 
     // ============ MÉTODOS PRIVADOS ============
 

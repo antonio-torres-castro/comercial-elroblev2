@@ -54,14 +54,13 @@ use App\Constants\AppConstants; ?>
                         <span class="badge bg-secondary ms-2"><?= count($projects) ?> proyectos</span>
                     </h2>
                 </div>
-                <div class="col-md-6 text-end">
-                    <a href="<?= AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
-                        <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PROJECT ?>
-                    </a>
-                    <a href="<?= AppConstants::ROUTE_PROJECTS_SEARCH ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-search"></i> <?= AppConstants::UI_ADVANCED_SEARCH_BTN ?>
-                    </a>
-                </div>
+                <?php if ($_GET['show_btn_nuevo']): ?>
+                    <div class="col-md-6 text-end">
+                        <a href="<?= AppConstants::ROUTE_PROJECTS_CREATE ?>" class="btn btn-setap-primary">
+                            <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_PROJECT ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <!-- Alertas -->
@@ -145,7 +144,7 @@ use App\Constants\AppConstants; ?>
                 <div class="row">
                     <?php foreach ($projects as $project): ?>
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card project-card h-100" onclick="window.location.href='<?= AppConstants::ROUTE_PROJECT_SHOW ?>?id=<?= $project['id'] ?>'">
+                            <div class="card project-card h-100" onclick="window.location.href='<?= $_GET['show_btn_ver'] ? (AppConstants::ROUTE_PROJECT_SHOW . '?id=' . strval($project['id'])) : '' ?>'">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="card-title mb-0">
                                         <i class="bi bi-building"></i> <?= htmlspecialchars($project['cliente_nombre']) ?>
@@ -212,21 +211,27 @@ use App\Constants\AppConstants; ?>
                                             Tipo: <?= htmlspecialchars($project['tipo_tarea']) ?>
                                         </small>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="<?= AppConstants::ROUTE_PROJECT_SHOW ?>?id=<?= $project['id'] ?>"
-                                                class="btn btn-outline-setap-primary"
-                                                onclick="event.stopPropagation()" title="Ver Proyecto">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>"
-                                                class="btn btn-outline-secondary"
-                                                onclick="event.stopPropagation()" title="Editar Proyecto">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>"
-                                                class="btn btn-outline-info"
-                                                onclick="event.stopPropagation()" title="Gestionar Feriados">
-                                                <i class="bi bi-calendar-x"></i>
-                                            </a>
+                                            <?php if ($_GET['show_btn_ver']): ?>
+                                                <a href="<?= AppConstants::ROUTE_PROJECT_SHOW ?>?id=<?= $project['id'] ?>"
+                                                    class="btn btn-outline-setap-primary"
+                                                    onclick="event.stopPropagation()" title="Ver Proyecto">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            <?php endif; ?>
+                                            <?php if ($_GET['show_btn_editar']): ?>
+                                                <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>"
+                                                    class="btn btn-outline-secondary"
+                                                    onclick="event.stopPropagation()" title="Editar Proyecto">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            <?php endif; ?>
+                                            <?php if ($_GET['show_btn_gestionar_feriados']): ?>
+                                                <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>"
+                                                    class="btn btn-outline-info"
+                                                    onclick="event.stopPropagation()" title="Gestionar Feriados">
+                                                    <i class="bi bi-calendar-x"></i>
+                                                </a>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
