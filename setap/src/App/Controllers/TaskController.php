@@ -142,8 +142,13 @@ class TaskController extends BaseController
 
             $uti = $currentUser['usuario_tipo_id'];
 
+            $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
+            $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
+            $rActivity = $this->permissionService->hasPermission($currentUser['id'], 'Register activity');
+            $rApruve = $this->permissionService->hasPermission($currentUser['id'], 'Apruve');
+
             // Verificar permisos para gestión de tareas
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks')) {
+            if (!$aMyTasks) {
                 http_response_code(403);
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
@@ -189,11 +194,6 @@ class TaskController extends BaseController
             }
 
             $filters['current_usuario_tipo_id'] = $uti;
-            if ($uti == 1 || $uti == 2) {
-                $_GET['show_col_acciones'] = true;
-            } else {
-                $_GET['show_col_acciones'] = false;
-            }
 
             // Obtener datos
             $tasks = $this->taskModel->getAll($filters);
@@ -819,6 +819,7 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+
             $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
             $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
             $rActivity = $this->permissionService->hasPermission($currentUser['id'], 'Register activity');
@@ -828,10 +829,7 @@ class TaskController extends BaseController
                 $this->jsonError('Sin acceso suficiente');
                 return;
             }
-
-
-
-            if (!$this->permissionService->hasPermission($currentUser['id'], 'Register activity')) {
+            if (!$rActivity) {
                 $this->jsonError('Sin permisos suficientes');
                 return;
             }
@@ -844,6 +842,7 @@ class TaskController extends BaseController
                 $this->jsonError('Token CSRF inválido');
                 return;
             }
+
             // Obtener datos
             $taskId = (int)($_POST['task_id'] ?? 0);
             $newState = (int)($_POST['new_state'] ?? 0);

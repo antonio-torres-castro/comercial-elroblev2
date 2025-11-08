@@ -126,27 +126,20 @@ use App\Constants\AppConstants; ?>
                                             <thead>
                                                 <tr>
                                                     <th>Tarea</th>
-                                                    <th hidden>Proyecto</th>
                                                     <th>Estado</th>
-                                                    <th hidden>Ejecuta</th>
                                                     <th>Fecha</th>
-                                                    <th hidden>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($data['tasks'] as $task): ?>
                                                     <tr id="task-row-<?= $task['id'] ?>">
-                                                        <td><!-- Tarea -->
+                                                        <td onclick="viewDetail(<?= $task['id'] ?>)"><!-- Tarea -->
                                                             <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
                                                             <?php if (!empty($task['descripcion'])): ?>
-                                                                <small class="text-muted"><?= htmlspecialchars(substr($task['descripcion'], 0, 100)) ?>...</small>
+                                                                <small class="text-hide" hidden><?= htmlspecialchars($task['descripcion']) ?></small>
+                                                                <small class="text-muted"><?= htmlspecialchars(substr($task['descripcion'], 0, 50)) ?>...</small>
                                                             <?php endif; ?>
                                                         </td><!-- fin Tarea -->
-                                                        <td hidden><!-- Proyecto -->
-                                                            <small>
-                                                                <?= htmlspecialchars($task['cliente_nombre']) ?>
-                                                            </small>
-                                                        </td><!-- fin Proyecto -->
                                                         <td><!-- Estado -->
                                                             <small>
                                                                 <?php
@@ -204,22 +197,9 @@ use App\Constants\AppConstants; ?>
                                                                 </div>
                                                             </small>
                                                         </td><!-- fin Estado -->
-                                                        <td hidden><!-- Asignado -->
-                                                            <small>
-                                                                <?php if (!empty($task['ejecutor_nombre'])): ?>
-                                                                    <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
-                                                                <?php elseif (!empty($task['supervisor_nombre'])): ?>
-                                                                    <i class="bi bi-person-check"></i> <?= htmlspecialchars($task['supervisor_nombre']) ?>
-                                                                <?php elseif (!empty($task['planificador_nombre'])): ?>
-                                                                    <i class="bi bi-person-gear"></i> <?= htmlspecialchars($task['planificador_nombre']) ?>
-                                                                <?php else: ?>
-                                                                    Sin asignar
-                                                                <?php endif; ?>
-                                                            </small>
-                                                        </td><!-- fin Asignado -->
                                                         <td><!-- Fechas -->
                                                             <?php if (!empty($task['fecha_inicio'])): ?>
-                                                                <small>
+                                                                <small id="date-hh-<?= $task['id'] ?>">
                                                                     <?= date('d/m/Y', strtotime($task['fecha_inicio'])) ?><br>
                                                                     <?php if (!empty($task['duracion_horas'])): ?>
                                                                         <strong>HH:</strong> <?= $task['duracion_horas'] ?>
@@ -229,22 +209,6 @@ use App\Constants\AppConstants; ?>
                                                                 <small class="text-muted">Error</small>
                                                             <?php endif; ?>
                                                         </td><!-- fin Fechass -->
-                                                        <td hidden><!-- Acciones -->
-                                                            <div class="btn-group btn-group-sm">
-                                                                <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
-                                                                    <i class="bi bi-eye"></i>
-                                                                </a>
-                                                                <a href="<?= AppConstants::ROUTE_TASKS_EDIT ?>?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </a>
-                                                                <!-- GAP 5: Validar si puede eliminar según estado -->
-                                                                <button type="button" class="btn btn-outline-danger"
-                                                                    onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>', <?= $task['estado_tipo_id'] ?>)"
-                                                                    title="Eliminar" id="delete-btn-<?= $task['id'] ?>">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </div>
-                                                        </td><!-- fin Acciones -->
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
@@ -264,30 +228,6 @@ use App\Constants\AppConstants; ?>
                                 </div>
                             </div>
                         <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Modal para confirmar eliminación -->
-                <div class="modal fade" id="deleteModal" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Confirmar Eliminación</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>¿Estás seguro de que deseas eliminar la tarea <strong id="deleteTaskName"></strong>?</p>
-                                <p class="text-muted small">Esta acción no se puede deshacer.</p>
-                                <div id="deleteWarning" class="alert alert-warning d-none">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                    <span id="deleteWarningMessage"></span>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -330,6 +270,43 @@ use App\Constants\AppConstants; ?>
                     </div>
                 </div>
 
+                <!-- Modal para ver descripcion de tarea -->
+                <div class="modal fade" id="detailTaskModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Detalle</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tarea</label>
+                                    <div id="detailTaskName" class="fw-bold text-primary"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Descripción</label>
+                                    <div id="detailTaskDescripcion" class="text"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Fecha</label>
+                                    <div id="detailTaskFechaDuracion" class="text"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Estado</label>
+                                    <div id="detailTaskStateName" class="text-success"></div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </main>
         </div>

@@ -112,47 +112,17 @@ function updateStatusBadge(taskId, stateId) {
     badge.textContent = statusText;
 }
 
-// Función para eliminar tareas con validación GAP 5
-function deleteTask(id, name, stateId) {
-    taskToDelete = id;
-    document.getElementById('deleteTaskName').textContent = name;
+// GAP 5: Ver detalle de tarea
+function viewDetail(taskId) {
+    const taskName = document.querySelector(`#task-row-${taskId} .fw-bold`).textContent;
+    const taskDetail = document.querySelector(`#task-row-${taskId} .text-hide`).textContent;
+    const taskDateHH = document.getElementById(`date-hh-${taskId}`).textContent;
+    const taskState = document.getElementById(`status-badge-${taskId}`).textContent;
 
-    // GAP 5: Mostrar warning si es tarea aprobada
-    const warning = document.getElementById('deleteWarning');
-    if (stateId === 8) { // Estado aprobado
-        warning.classList.remove('d-none');
-        document.getElementById('deleteWarningMessage').textContent =
-            'Esta tarea está aprobada. Solo Admin y Planner pueden eliminarla.';
-    } else {
-        warning.classList.add('d-none');
-    }
+    document.getElementById('detailTaskName').textContent = taskName;
+    document.getElementById('detailTaskDescripcion').textContent = taskDetail;
+    document.getElementById('detailTaskFechaDuracion').textContent = taskDateHH;
+    document.getElementById('detailTaskStateName').textContent = taskState;
 
-    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    new bootstrap.Modal(document.getElementById('detailTaskModal')).show();
 }
-
-document.getElementById('confirmDelete').addEventListener('click', function() {
-    if (taskToDelete) {
-        const formData = new FormData();
-        formData.append('id', taskToDelete);
-
-        fetch('/setap/tasks/delete', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remover fila de la tabla
-                    document.getElementById(`task-row-${taskToDelete}`).remove();
-                    showAlert(data.message, 'success');
-                } else {
-                    showAlert('Error: ' + data.message, 'danger');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('Error de conexión al servidor', 'danger');
-            });
-    }
-    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-});
