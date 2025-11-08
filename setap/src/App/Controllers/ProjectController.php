@@ -30,7 +30,10 @@ class ProjectController extends BaseController
     public function index()
     {
         // Verificar acceso al menú de gestión de proyectos
-        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
+        $hUserId = isset($_SESSION['user_id']);
+        $aManageProjects = $hUserId ? $this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects') : false;
+        $aManageProject = $hUserId ? $this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project') : false;
+        if (!$aManageProjects) {
             http_response_code(403);
             echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
@@ -41,6 +44,11 @@ class ProjectController extends BaseController
             $this->redirectToLogin();
             return;
         }
+        $uti = $currentUser['usuario_tipo_id'];
+
+        $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
+        $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
+        $rRead = $this->permissionService->hasPermission($currentUser['id'], 'Read');
 
         // Aplicar filtros si están presentes
         $filters = [];
@@ -56,18 +64,13 @@ class ProjectController extends BaseController
         if (!empty($_GET['fecha_hasta'])) {
             $filters['fecha_hasta'] = $_GET['fecha_hasta'];
         }
-        $uti = $currentUser['usuario_tipo_id'];
-        if ($uti == 1 || $uti == 2) {
-            $_GET['show_btn_nuevo'] = true;
-            $_GET['show_btn_editar'] = true;
-            $_GET['show_btn_gestionar_feriados'] = true;
-            $_GET['show_btn_ver'] = true;
-        } else {
-            $_GET['show_btn_nuevo'] = false;
-            $_GET['show_btn_editar'] = false;
-            $_GET['show_btn_gestionar_feriados'] = false;
-            $_GET['show_btn_ver'] = false;
-        }
+
+        $_GET['acceso_proyecto'] = $aManageProject;
+        $_GET['show_btn_nuevo'] = $rCreate;
+        $_GET['show_btn_editar'] = $rModify;
+        $_GET['show_btn_gestionar_feriados'] = $rCreate && $rModify;
+        $_GET['show_btn_ver'] = $rRead;
+
         $projects = $this->projectModel->getAll($filters);
 
         // Obtener datos para filtros
@@ -89,11 +92,31 @@ class ProjectController extends BaseController
     public function show(?int $id = 0)
     {
         // Verificar acceso al menú de gestión de proyecto individual
-        if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
+        $hUserId = isset($_SESSION['user_id']);
+        $aManageProject = $hUserId ? $this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project') : false;
+        if (!$aManageProject) {
             http_response_code(403);
             echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
             return;
         }
+
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
+        }
+        $uti = $currentUser['usuario_tipo_id'];
+
+        $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
+        $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
+        $rRead = $this->permissionService->hasPermission($currentUser['id'], 'Read');
+        $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
+
+        $_GET['show_btn_nuevo'] = $rCreate;
+        $_GET['show_btn_editar'] = $rModify;
+        $_GET['show_btn_gestionar_feriados'] = $rCreate && $rModify;
+        $_GET['show_btn_cambiar_estado'] = $rEliminate;
+        $_GET['show_btn_ver'] = $rRead;
 
         $id = $id == 0 ? (int)($_GET['id'] ?? 0) : $id;
         if ($id <= 0) {

@@ -144,7 +144,7 @@ use App\Constants\AppConstants; ?>
                 <div class="row">
                     <?php foreach ($projects as $project): ?>
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card project-card h-100" onclick="window.location.href='<?= $_GET['show_btn_ver'] ? (AppConstants::ROUTE_PROJECT_SHOW . '?id=' . strval($project['id'])) : '' ?>'">
+                            <div class="card project-card h-100" onclick="window.location.href='<?= ($_GET['acceso_proyecto'] && $_GET['show_btn_ver']) ? (AppConstants::ROUTE_PROJECT_SHOW . '?id=' . strval($project['id'])) : '' ?>'">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="card-title mb-0">
                                         <i class="bi bi-building"></i> <?= htmlspecialchars($project['cliente_nombre']) ?>

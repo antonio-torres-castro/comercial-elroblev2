@@ -94,15 +94,23 @@ use App\Constants\AppConstants; ?>
                 </p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning mr-2">
-                    <i class="bi bi-pencil"></i> Editar
-                </a>
-                <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>" class="btn btn-info mr-2">
-                    <i class="bi bi-calendar-x"></i> Feriados
-                </a>
-                <button type="button" class="btn btn-setap-primary" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
-                    <i class="bi bi-arrow-repeat"></i> Estado
-                </button>
+                <?php if ($_GET['show_btn_editar']): ?>
+                    <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning mr-2">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($_GET['show_btn_gestionar_feriados']): ?>
+                    <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>" class="btn btn-info mr-2">
+                        <i class="bi bi-calendar-x"></i> Feriados
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($_GET['show_btn_cambiar_estado']): ?>
+                    <button type="button" class="btn btn-setap-primary" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
+                        <i class="bi bi-arrow-repeat"></i> Estado
+                    </button>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -210,9 +218,11 @@ use App\Constants\AppConstants; ?>
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><i class="bi bi-list-task"></i> Tareas del Proyecto</h5>
-                        <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-setap-primary">
-                            <i class="bi bi-plus"></i> Nueva Tarea
-                        </a>
+                        <?php if ($_GET['show_btn_nuevo']): ?>
+                            <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-sm btn-setap-primary">
+                                <i class="bi bi-plus"></i> Nueva Tarea
+                            </a>
+                        <?php endif; ?>
                     </div>
                     <div class="card-body">
                         <?php if (empty($tasks)): ?>
@@ -220,9 +230,11 @@ use App\Constants\AppConstants; ?>
                                 <i class="bi bi-list-task display-3 text-muted"></i>
                                 <h5 class="mt-3">No hay tareas asignadas</h5>
                                 <p class="text-muted">Comienza agregando tareas a este proyecto.</p>
-                                <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-setap-primary">
-                                    <i class="bi bi-plus"></i> Crear Primera Tarea
-                                </a>
+                                <?php if ($_GET['show_btn_nuevo']): ?>
+                                    <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-setap-primary">
+                                        <i class="bi bi-plus"></i> Crear Primera Tarea
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         <?php else: ?>
                             <?php foreach ($tasks as $task): ?>
@@ -270,11 +282,14 @@ use App\Constants\AppConstants; ?>
                                                                     } ?>">
                                                 <?= htmlspecialchars($task['estado_nombre']) ?>
                                             </span>
-                                            <div class="mt-2">
-                                                <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-sm btn-outline-setap-primary">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </div>
+
+                                            <?php if ($_GET['show_btn_ver']): ?>
+                                                <div class="mt-2">
+                                                    <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-sm btn-outline-setap-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -339,15 +354,21 @@ use App\Constants\AppConstants; ?>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
-                                <i class="bi bi-plus-circle"></i> Agregar Tarea
-                            </a>
-                            <a href="<?= AppConstants::ROUTE_PROJECTS_REPORT ?>?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
-                                <i class="bi bi-file-earmark-text"></i> Generar Reporte
-                            </a>
-                            <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
-                                <i class="bi bi-arrow-repeat"></i> Cambiar Estado
-                            </button>
+                            <?php if ($_GET['show_btn_nuevo']): ?>
+                                <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
+                                    <i class="bi bi-plus-circle"></i> Agregar Tarea
+                                </a>
+                            <?php endif; ?>
+                            <?php if ($_GET['show_btn_ver']): ?>
+                                <a href="<?= AppConstants::ROUTE_PROJECTS_REPORT ?>?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
+                                    <i class="bi bi-file-earmark-text"></i> Generar Reporte
+                                </a>
+                            <?php endif; ?>
+                            <?php if ($_GET['show_btn_cambiar_estado']): ?>
+                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
+                                    <i class="bi bi-arrow-repeat"></i> Cambiar Estado
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
