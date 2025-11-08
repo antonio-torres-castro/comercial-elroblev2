@@ -1,6 +1,9 @@
 <?php
 
-use App\Constants\AppConstants; ?>
+use App\Constants\AppConstants;
+use App\Helpers\Security;
+
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -211,7 +214,7 @@ use App\Constants\AppConstants; ?>
                                             Tipo: <?= htmlspecialchars($project['tipo_tarea']) ?>
                                         </small>
                                         <div class="btn-group btn-group-sm">
-                                            <?php if ($_GET['show_btn_ver']): ?>
+                                            <?php if ($_GET['show_btn_ver'] && Security::hasMenuAccess("manage_project")): ?>
                                                 <a href="<?= AppConstants::ROUTE_PROJECT_SHOW ?>?id=<?= $project['id'] ?>"
                                                     class="btn btn-outline-setap-primary"
                                                     onclick="event.stopPropagation()" title="Ver Proyecto">
