@@ -35,7 +35,7 @@ use App\Constants\AppConstants; ?>
                         </h2>
                     </div>
 
-                    <?php if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2): ?>
+                    <?php if ($_GET['show_btn_nuevo']): ?>
                         <div class="col-md-6 text-end">
                             <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
                                 <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
@@ -245,7 +245,7 @@ use App\Constants\AppConstants; ?>
                                                                 <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
-                                                                <?php if ($currentUser['usuario_tipo_id'] == 1 || $currentUser['usuario_tipo_id'] == 2): ?>
+                                                                <?php if ($_GET['show_col_acciones']): ?>
                                                                     <a href="<?= AppConstants::ROUTE_TASKS_EDIT ?>?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>

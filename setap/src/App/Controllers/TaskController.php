@@ -38,8 +38,13 @@ class TaskController extends BaseController
 
             $uti = $currentUser['usuario_tipo_id'];
 
+            $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
+            $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
+            $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
+            $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
+
             // Verificar permisos para gestión de tareas
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
+            if (!$aManageTask) {
                 http_response_code(403);
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
@@ -72,10 +77,16 @@ class TaskController extends BaseController
 
             $filters['current_usuario_tipo_id'] = $uti;
 
-            if ($uti == 1 || $uti == 2) {
+            if ($rModify && $rEliminate) {
                 $_GET['show_col_acciones'] = true;
             } else {
                 $_GET['show_col_acciones'] = false;
+            }
+
+            if ($rCreate) {
+                $_GET['show_btn_nuevo'] = true;
+            } else {
+                $_GET['show_btn_nuevo'] = false;
             }
 
             $projects = $this->taskModel->getProjects($filters);
@@ -142,13 +153,16 @@ class TaskController extends BaseController
 
             $uti = $currentUser['usuario_tipo_id'];
 
-            $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
             $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
-            $rActivity = $this->permissionService->hasPermission($currentUser['id'], 'Register activity');
-            $rApruve = $this->permissionService->hasPermission($currentUser['id'], 'Apruve');
+            $rRead = $this->permissionService->hasPermission($currentUser['id'], 'Read');
 
             // Verificar permisos para gestión de tareas
             if (!$aMyTasks) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
+                return;
+            }
+            if (!$rRead) {
                 http_response_code(403);
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
