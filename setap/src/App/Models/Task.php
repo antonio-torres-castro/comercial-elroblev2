@@ -599,7 +599,7 @@ class Task
      */
     public function getProjects(?array $filters = []): array
     {
-        $uti = $filters['current_usuario_tipo_id'];
+        $uti = $filters['current_usuario_tipo_id'] ?? 0;
         $myFilters = [];
 
         try {
@@ -616,10 +616,12 @@ class Task
                     $sql .= " and pt.planificador_id = ?";
                     $myFilters[] = $filters['current_usuario_id'];
                 }
-            } else {
+            } elseif ($uti == 3) {
                 $sql .= " Where p.estado_tipo_id = 2";
                 $sql .= " and pt.supervisor_id = ?";
                 $myFilters[] = $filters['current_usuario_id'];
+            } else {
+                $sql .= " Where p.estado_tipo_id = 2";
             }
             $sql .= " ORDER BY c.razon_social";
 
