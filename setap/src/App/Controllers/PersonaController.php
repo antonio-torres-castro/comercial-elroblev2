@@ -38,16 +38,15 @@ class PersonaController extends AbstractBaseController
 
             $uti = $currentUser['usuario_tipo_id'];
 
+            $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
+            $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
+            $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
+
             // Aplicar filtros si están presentes
             $filters = $this->extractFilters(['estado_tipo_id', 'search']);
 
-            if ($uti == 1 || $uti == 2) {
-                $_GET['show_btn_nuevo'] = true;
-                $_GET['show_col_acciones'] = true;
-            } else {
-                $_GET['show_btn_nuevo'] = false;
-                $_GET['show_col_acciones'] = false;
-            }
+            $_GET['show_btn_nuevo'] = $rCreate;
+            $_GET['show_col_acciones'] = $rModify && $rEliminate;
 
             $personas = $this->personaModel->getAll($filters);
             $estadosTipo = $this->getEstadosTipo();

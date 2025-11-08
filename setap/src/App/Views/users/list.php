@@ -77,7 +77,7 @@ use App\Constants\AppConstants;
                     </h2>
                 </div>
                 <div class="col-md-6 text-end">
-                    <?php if (\App\Helpers\Security::hasPermission('Create')): ?>
+                    <?php if (Security::hasPermission('Create')): ?>
                         <a href="<?= \App\Constants\AppConstants::ROUTE_USERS_CREATE ?>" class="btn btn-setap-primary">
                             <i class="bi bi-person-plus"></i> <?= AppConstants::UI_NEW_USER ?>
                         </a>
@@ -244,15 +244,15 @@ use App\Constants\AppConstants;
                                             </td>
                                             <td class="table-actions">
                                                 <div class="btn-group btn-group-sm" role="group">
-                                                    <?php if (\App\Helpers\Security::hasPermission('Read')): ?>
+                                                    <?php if (Security::hasPermission('Read')): ?>
                                                         <button type="button" class="btn btn-outline-info"
-                                                            onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>')"
+                                                            onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>', <?= Security::hasPermission('Modify') ?>)"
                                                             title="Ver detalles">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
                                                     <?php endif; ?>
 
-                                                    <?php if (\App\Helpers\Security::hasPermission('Modify')): ?>
+                                                    <?php if (Security::hasPermission('Modify')): ?>
                                                         <a href="<?= AppConstants::ROUTE_USERS_EDIT ?>?id=<?= $user['id'] ?>"
                                                             class="btn btn-outline-warning"
                                                             title="<?= AppConstants::UI_BTN_EDIT ?>">
@@ -287,7 +287,7 @@ use App\Constants\AppConstants;
                                                         <?php endif; ?>
                                                     <?php endif; ?>
 
-                                                    <?php if (\App\Helpers\Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
+                                                    <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
                                                         <button type="button" class="btn btn-outline-danger"
                                                             onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
                                                             title="<?= AppConstants::UI_BTN_DELETE ?>">
@@ -308,7 +308,7 @@ use App\Constants\AppConstants;
 
     <!-- Modal para Ver Usuario -->
     <div class="modal fade" id="userModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Detalles del Usuario</h5>
@@ -440,7 +440,7 @@ use App\Constants\AppConstants;
             });
         }
 
-        function showUserDetailsModal(userId, userName, email, statusId, fechaCreacion) {
+        function showUserDetailsModal(userId, userName, email, statusId, fechaCreacion, canModify) {
             const modal = new bootstrap.Modal(document.getElementById('userModal'));
             const modalBody = document.getElementById('userModalBody');
 
@@ -449,17 +449,7 @@ use App\Constants\AppConstants;
 
             modalBody.innerHTML = `
                 <div class="row">
-                    <div class="col-md-4 text-center">
-                        <div class="user-avatar-large mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                            ${userName.charAt(0).toUpperCase()}
-                        </div>
-                        <h5 class="mb-1">@${userName}</h5>
-                        <p class="text-muted mb-3">${email}</p>
-                        <span class="badge ${statusClass} role-badge">
-                            ${statusText}
-                        </span>
-                    </div>
-                    <div class="col-md-8">
+                    <div class="col-md-10">
                         <h6 class="fw-bold mb-3"><i class="bi bi-person-badge"></i> Información del Usuario</h6>
                         <div class="row mb-2">
                             <div class="col-sm-4"><strong>Usuario:</strong></div>
@@ -479,7 +469,8 @@ use App\Constants\AppConstants;
                         </div>
                     </div>
                 </div>
-                <hr>
+` +
+                (canModify == true ? `<hr>
                 <div class="d-flex justify-content-end gap-2">
                     <a href="<?= AppConstants::ROUTE_USERS_EDIT ?>?id=${userId}" class="btn btn-outline-setap-primary btn-sm">
                         <i class="bi bi-pencil"></i> <?= AppConstants::UI_BTN_EDIT ?>
@@ -488,8 +479,7 @@ use App\Constants\AppConstants;
                             onclick="bootstrap.Modal.getInstance(document.getElementById('userModal')).hide(); showChangePasswordModal(${userId}, '${userName}');">
                         <i class="bi bi-key"></i> Cambiar Contraseña
                     </button>
-                </div>
-            `;
+                </div>` : ``);
 
             modal.show();
         }
