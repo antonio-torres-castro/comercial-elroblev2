@@ -273,14 +273,14 @@ use App\Constants\AppConstants;
 
                                                         <!-- Toggle status form -->
                                                         <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                                            <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/toggle-status" style="display: inline-block;"
-                                                                onsubmit="return confirmToggleUserStatus(this, '<?= $user['estado_tipo_id'] == 1 ? 'desactivar' : 'activar' ?>')">
-                                                                <input type="hidden" name="csrf_token" value="<?= \App\Helpers\Security::getCsrfToken() ?>">
+                                                            <form method="POST" id="changeStateForm-<?= $user['id'] ?>" style="display: inline-block;"
+                                                                onsubmit="return toggleUserStatus(<?= $user['id'] ?>, <?= $user['estado_tipo_id'] ?>)">
+                                                                <input type="hidden" name="csrf_token" value="<?= Security::getCsrfToken() ?>">
                                                                 <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
                                                                 <input type="hidden" name="new_status" value="<?= $user['estado_tipo_id'] == 1 ? '2' : '1' ?>">
                                                                 <button type="submit"
-                                                                    class="btn btn-outline-<?= $user['estado_tipo_id'] == 1 ? 'secondary' : 'success' ?>"
-                                                                    title="<?= $user['estado_tipo_id'] == 1 ? 'Desactivar' : 'Activar' ?>">
+                                                                    class="btn btn-outline-<?= $user['estado_tipo_id'] == 2 ? 'secondary' : 'success' ?>"
+                                                                    title="<?= $user['estado_tipo_id'] == 2 ? 'Desactivar' : 'Activar' ?>">
                                                                     <i class="bi bi-power"></i>
                                                                 </button>
                                                             </form>
@@ -561,12 +561,10 @@ use App\Constants\AppConstants;
         }
 
         function toggleUserStatus(userId, currentStatus) {
-            const action = currentStatus == 1 ? 'desactivar' : 'activar';
+            const action = currentStatus == 2 ? 'desactivar' : 'activar';
 
             if (confirm(`¿Estás seguro de que deseas ${action} este usuario?`)) {
-                const formData = new FormData();
-                formData.append('user_id', userId);
-                formData.append('new_status', currentStatus == 1 ? 2 : 1);
+                const formData = new FormData(document.getElementById(`changeStateForm-${userId}`));
 
                 fetch('<?= AppConstants::ROUTE_USERS ?>/toggle-status', {
                         method: 'POST',

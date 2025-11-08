@@ -614,7 +614,6 @@ class UserController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-
             if (!$currentUser) {
                 http_response_code(401);
                 $this->jsonUnauthorized();
