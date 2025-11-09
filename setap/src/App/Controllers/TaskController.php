@@ -41,6 +41,7 @@ class TaskController extends BaseController
             $contraparteId = $currentUser['contraparte_id'];
 
             $aManageTask = $this->permissionService->hasMenuAccess($cu, 'manage_tasks');
+            $rActivity = $this->permissionService->hasPermission($cu, 'Register activity');
             $rModify = $this->permissionService->hasPermission($cu, 'Modify');
             $rCreate = $this->permissionService->hasPermission($cu, 'Create');
             $rEliminate = $this->permissionService->hasPermission($cu, 'Eliminate');
@@ -57,8 +58,8 @@ class TaskController extends BaseController
             if (!empty($_GET['proyecto_id'])) {
                 $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
             }
-            if (!empty($_GET['estado_tipo_id'])) {
-                $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
+            if (isset($_GET['estado_tipo_id']) && !empty($_GET['estado_tipo_id'])) {
+                $filters['estado_tipo_id'] = $_GET['estado_tipo_id'];
             }
             if (!empty($_GET['usuario_id'])) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
@@ -79,33 +80,26 @@ class TaskController extends BaseController
 
             $filters['current_usuario_tipo_id'] = $uti;
 
+            if ($uti == 6) {
+                $filters['contraparte_id'] = $contraparteId;
+            }
+            if ($uti == 3) {
+                $filters['supervisor_id'] = $cu;
+            }
+            if ($uti == 2) {
+                $filters['planificador_id'] = $cu;
+            }
+
             if (empty($_GET['usuario_id'])) {
-                if ($uti == 6) {
-                    $filters['contraparte_id'] = $contraparteId;
-                }
                 if ($uti == 4) {
                     $filters['ejecutor_id'] = $cu;
                     $_GET['usuario_id'] = $filters['ejecutor_id'];
                 }
-                if ($uti == 3) {
-                    $filters['supervisor_id'] = $cu;
-                }
-                if ($uti == 2) {
-                    $filters['planificador_id'] = $cu;
-                }
             }
 
-            if ($rModify && $rEliminate) {
-                $_GET['show_col_acciones'] = true;
-            } else {
-                $_GET['show_col_acciones'] = false;
-            }
-
-            if ($rCreate) {
-                $_GET['show_btn_nuevo'] = true;
-            } else {
-                $_GET['show_btn_nuevo'] = false;
-            }
+            $_GET['show_col_acciones'] = $rModify && $rEliminate;
+            $_GET['show_btn_nuevo'] = $rCreate;
+            $_GET['show_btn_activity'] = $rActivity;
 
             $projects = $this->taskModel->getProjects($filters);
             if (count($projects) == 1) {
@@ -117,17 +111,8 @@ class TaskController extends BaseController
                 $_GET['usuario_id'] = $users[0]['id'];
             }
 
-            if (!empty($_GET['proyecto_id'])) {
-                $_GET['show_col_proyecto'] = false;
-            } else {
-                $_GET['show_col_proyecto'] = true;
-            }
-
-            if (!empty($_GET['usuario_id'])) {
-                $_GET['show_col_ejecuta'] = false;
-            } else {
-                $_GET['show_col_ejecuta'] = true;
-            }
+            $_GET['show_col_proyecto'] = empty($_GET['proyecto_id']);
+            $_GET['show_col_ejecuta'] = empty($_GET['usuario_id']);
 
             // Obtener datos
             $tasks = $this->taskModel->getAll($filters);

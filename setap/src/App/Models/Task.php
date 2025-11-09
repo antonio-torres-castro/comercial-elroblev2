@@ -76,12 +76,28 @@ class Task
             }
 
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
-                if ($strWhere == " WHERE") {
-                    $strWhere .= " pt.estado_tipo_id = ?";
-                } else {
-                    $strWhere .= " AND pt.estado_tipo_id = ?";
+                // Aseguramos que sea un array
+                $estadoTipoIds = is_array($filters['estado_tipo_id'])
+                    ? $filters['estado_tipo_id']
+                    : [$filters['estado_tipo_id']];
+
+                // Eliminamos vacíos o nulos
+                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
+
+                if (!empty($estadoTipoIds)) {
+                    // Creamos placeholders (?, ?, ?, ...)
+                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
+
+                    // Agregamos la condición con el IN dinámico
+                    if ($strWhere === " WHERE") {
+                        $strWhere .= " pt.estado_tipo_id IN ($placeholders)";
+                    } else {
+                        $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    }
+
+                    // Agregamos todos los IDs al array de parámetros
+                    $params = array_merge($params, $estadoTipoIds);
                 }
-                $params[] = $filters['estado_tipo_id'];
             }
 
             if (isset($filters['ejecutor_id']) && !empty($filters['ejecutor_id'])) {

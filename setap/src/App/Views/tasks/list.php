@@ -15,6 +15,10 @@ use App\Constants\AppConstants; ?>
     <link rel="apple-touch-icon" href="/setap/public/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Choices.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
 
@@ -66,12 +70,11 @@ use App\Constants\AppConstants; ?>
                                     </div>
                                     <div class="col-md-2">
                                         <label class="form-label">Estado</label>
-                                        <select class="form-select" name="estado_tipo_id">
-                                            <option value="">Todos los estados</option>
+                                        <select class="form-select" id="estado_tipo_id" name="estado_tipo_id[]" multiple>
                                             <?php if (!empty($data['taskStates'])): ?>
                                                 <?php foreach ($data['taskStates'] as $state): ?>
                                                     <option value="<?= $state['id'] ?>"
-                                                        <?= (isset($_GET['estado_tipo_id']) && $_GET['estado_tipo_id'] == $state['id']) ? 'selected' : '' ?>>
+                                                        <?= (isset($_GET['estado_tipo_id']) && is_array($_GET['estado_tipo_id']) && in_array($state['id'], $_GET['estado_tipo_id'])) ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($state['nombre']) ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -200,18 +203,20 @@ use App\Constants\AppConstants; ?>
                                                                     <span class="badge <?= $badgeClass ?>" id="status-badge-<?= $task['id'] ?>">
                                                                         <?= $statusText ?>
                                                                     </span>
+                                                                    <?php if ($_GET['show_btn_activity']): ?>
+                                                                        <!-- GAP 5: Botón para cambiar estado -->
+                                                                        <div class="dropdown ms-2">
+                                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                                                id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false"
+                                                                                onclick="loadValidTransitions(<?= $task['id'] ?>)">
+                                                                                <i class="bi bi-arrow-repeat"></i>
+                                                                            </button>
+                                                                            <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
+                                                                                <li><span class="dropdown-item-text text-muted"><?php echo AppConstants::UI_LOADING; ?></span></li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    <?php endif; ?>
 
-                                                                    <!-- GAP 5: Botón para cambiar estado -->
-                                                                    <div class="dropdown ms-2">
-                                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                                                            id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false"
-                                                                            onclick="loadValidTransitions(<?= $task['id'] ?>)">
-                                                                            <i class="bi bi-arrow-repeat"></i>
-                                                                        </button>
-                                                                        <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
-                                                                            <li><span class="dropdown-item-text text-muted"><?php echo AppConstants::UI_LOADING; ?></span></li>
-                                                                        </ul>
-                                                                    </div>
                                                                 </div>
                                                             </small>
                                                         </td><!-- fin Estado -->
@@ -353,6 +358,9 @@ use App\Constants\AppConstants; ?>
     <!-- GAP 5: Task State Validation Utilities -->
     <script src="/setap/public/js/task-state-utils.js"></script>
     <script src="/setap/public/js/task-list.js"></script>
+
+    <!-- Choices.js JS -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 </body>
 

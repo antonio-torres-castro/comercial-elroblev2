@@ -1,6 +1,21 @@
 let taskToDelete = null;
 let taskToChangeState = null;
 
+
+document.addEventListener('DOMContentLoaded', function () {
+    const estadoTipoSelect = document.getElementById('estado_tipo_id');
+
+    const choices = new Choices(estadoTipoSelect, {
+        removeItemButton: true,
+        searchEnabled: true,
+        placeholderValue: 'Seleccionar estados...',
+        noResultsText: 'No se encontraron resultados',
+        itemSelectText: 'Seleccionar',
+        shouldSort: false,
+    });
+});
+
+
 // GAP 5: Cargar transiciones válidas para una tarea
 function loadValidTransitions(taskId) {
     fetch(`/setap/tasks/valid-transitions?task_id=${taskId}`)
