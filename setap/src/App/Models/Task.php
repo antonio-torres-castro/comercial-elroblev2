@@ -21,10 +21,151 @@ class Task
         $this->db = Database::getInstance();
     }
 
+
+    /**
+     * Contar total de tareas según los filtros
+     */
+    public function countAll(array $filters = []): int
+    {
+        try {
+            $sql = "SELECT Count(1) as total
+                FROM proyecto_tareas pt
+                INNER JOIN tareas t ON pt.tarea_id = t.id
+                INNER JOIN proyectos p ON pt.proyecto_id = p.id
+                INNER JOIN clientes c ON p.cliente_id = c.id
+                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
+                INNER JOIN usuarios plan ON pt.planificador_id = plan.id
+                LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
+                LEFT JOIN usuarios super ON pt.supervisor_id = super.id";
+            $strWhere = " WHERE";
+
+            $params = [];
+            // Filtros
+            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+                $strWhere .= " pt.proyecto_id = ?";
+                $params[] = $filters['proyecto_id'];
+            }
+
+            $uti = $filters['current_usuario_tipo_id'];
+
+            if (isset($uti) && $uti > 2) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                } else {
+                    $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                }
+            }
+
+            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
+                // Aseguramos que sea un array
+                $estadoTipoIds = is_array($filters['estado_tipo_id'])
+                    ? $filters['estado_tipo_id']
+                    : [$filters['estado_tipo_id']];
+
+                // Eliminamos vacíos o nulos
+                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
+
+                if (!empty($estadoTipoIds)) {
+                    // Creamos placeholders (?, ?, ?, ...)
+                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
+
+                    // Agregamos la condición con el IN dinámico
+                    if ($strWhere === " WHERE") {
+                        $strWhere .= " pt.estado_tipo_id IN ($placeholders)";
+                    } else {
+                        $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    }
+
+                    // Agregamos todos los IDs al array de parámetros
+                    $params = array_merge($params, $estadoTipoIds);
+                }
+            }
+
+            if (isset($filters['ejecutor_id']) && !empty($filters['ejecutor_id'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.ejecutor_id = ?";
+                } else {
+                    $strWhere .= " AND pt.ejecutor_id = ?";
+                }
+                $params[] = $filters['ejecutor_id'];
+            }
+
+            if (isset($filters['supervisor_id']) && !empty($filters['supervisor_id'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.supervisor_id = ?";
+                } else {
+                    $strWhere .= " AND pt.supervisor_id = ?";
+                }
+                $params[] = $filters['supervisor_id'];
+            }
+
+            if (isset($filters['planificador_id']) && !empty($filters['planificador_id'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.planificador_id = ?";
+                } else {
+                    $strWhere .= " AND pt.planificador_id = ?";
+                }
+                $params[] = $filters['planificador_id'];
+            }
+
+            if (isset($filters['contraparte_id']) && !empty($filters['contraparte_id'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " p.contraparte_id = ?";
+                } else {
+                    $strWhere .= " AND p.contraparte_id = ?";
+                }
+                $params[] = $filters['contraparte_id'];
+            }
+
+            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.fecha_inicio between ? and ?";
+                } else {
+                    $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                }
+                $params[] = $filters['fecha_inicio'];
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.fecha_inicio >= ?";
+                } else {
+                    $strWhere .= " AND pt.fecha_inicio >= ?";
+                }
+                $params[] = $filters['fecha_inicio'];
+            }
+
+            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " pt.fecha_inicio <= ?";
+                } else {
+                    $strWhere .= " AND pt.fecha_inicio <= ?";
+                }
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if ($strWhere != " WHERE") {
+                $sql .= $strWhere;
+            }
+            $sql .= " ORDER BY pt.fecha_inicio DESC";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            Logger::error("Task::countAll: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+
     /**
      * Obtener todas las tareas con información relacionada
      */
-    public function getAll(array $filters = []): array
+    public function getAll(array $filters = [], int $limit = 7, int $offset = 0): array
     {
         try {
             $sql = "
@@ -167,7 +308,9 @@ class Task
             if ($strWhere != " WHERE") {
                 $sql .= $strWhere;
             }
-            $sql .= " ORDER BY pt.fecha_inicio DESC";
+            $sql .= " ORDER BY pt.fecha_inicio ASC LIMIT ? OFFSET ?";
+            $params[] = $limit;
+            $params[] = $offset;
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);

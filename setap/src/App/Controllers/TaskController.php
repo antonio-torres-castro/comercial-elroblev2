@@ -114,16 +114,27 @@ class TaskController extends BaseController
             $_GET['show_col_proyecto'] = empty($_GET['proyecto_id']);
             $_GET['show_col_ejecuta'] = empty($_GET['usuario_id']);
 
-            // Obtener datos
-            $tasks = $this->taskModel->getAll($filters);
+
+            // Configuración de paginación
+            $perPage = 7;
+            $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+            $offset = ($currentPage - 1) * $perPage;
+            // Contar total de registros según filtros
+            $totalRows = $this->taskModel->countAll($filters);
+            $totalPages = max(1, ceil($totalRows / $perPage));
+
+            // Obtener registros paginados
+            $tasks = $this->taskModel->getAll($filters, $perPage, $offset);
 
             $taskStates = $this->taskModel->getTaskStates($filters);
-
 
             // Datos para la vista
             $data = [
                 'user' => $currentUser,
                 'tasks' => $tasks,
+                'totalRecords' => $totalRows,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
                 'projects' => $projects,
                 'taskStates' => $taskStates,
                 'users' => $users,
