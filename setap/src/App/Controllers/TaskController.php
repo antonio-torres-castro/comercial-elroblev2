@@ -198,16 +198,18 @@ class TaskController extends BaseController
             if (!empty($_GET['usuario_id'])) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
+
+            if ($uti == 3) {
+                $filters['supervisor_id'] = $currentUser['id'];
+            }
+            if ($uti == 2) {
+                $filters['planificador_id'] = $currentUser['id'];
+            }
+
             if (empty($_GET['usuario_id'])) {
                 if ($uti == 4) {
                     $filters['ejecutor_id'] = $currentUser['id'];
                     $_GET['usuario_id'] = $filters['ejecutor_id'];
-                }
-                if ($uti == 3) {
-                    $filters['supervisor_id'] = $currentUser['id'];
-                }
-                if ($uti == 2) {
-                    $filters['planificador_id'] = $currentUser['id'];
                 }
             }
             if (!empty($_GET['fecha_inicio'])) {
@@ -223,8 +225,17 @@ class TaskController extends BaseController
 
             $filters['current_usuario_tipo_id'] = $uti;
 
-            // Obtener datos
-            $tasks = $this->taskModel->getAll($filters);
+            // Configuración de paginación
+            $perPage = 7;
+            $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+            $offset = ($currentPage - 1) * $perPage;
+            // Contar total de registros según filtros
+            $totalRows = $this->taskModel->countAll($filters);
+            $totalPages = max(1, ceil($totalRows / $perPage));
+
+            // Obtener registros paginados
+            $tasks = $this->taskModel->getAll($filters, $perPage, $offset);
+
             $taskStates = $this->taskModel->getTaskStatesMyListFilter();
             $users = $this->taskModel->getUsers();
 
@@ -232,6 +243,9 @@ class TaskController extends BaseController
             $data = [
                 'user' => $currentUser,
                 'tasks' => $tasks,
+                'totalRecords' => $totalRows,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
                 'projects' => $projects,
                 'taskStates' => $taskStates,
                 'users' => $users,
