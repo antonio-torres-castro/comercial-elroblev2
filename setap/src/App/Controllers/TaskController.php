@@ -37,11 +37,13 @@ class TaskController extends BaseController
             }
 
             $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
 
-            $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
-            $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
-            $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
-            $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
+            $aManageTask = $this->permissionService->hasMenuAccess($cu, 'manage_tasks');
+            $rModify = $this->permissionService->hasPermission($cu, 'Modify');
+            $rCreate = $this->permissionService->hasPermission($cu, 'Create');
+            $rEliminate = $this->permissionService->hasPermission($cu, 'Eliminate');
 
             // Verificar permisos para gestión de tareas
             if (!$aManageTask) {
@@ -62,7 +64,7 @@ class TaskController extends BaseController
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
 
-            $filters['current_usuario_id'] = $currentUser['id'];
+            $filters['current_usuario_id'] = $cu;
 
             if (!empty($_GET['fecha_inicio'])) {
                 $filters['fecha_inicio'] = $_GET['fecha_inicio'];
@@ -76,6 +78,22 @@ class TaskController extends BaseController
             }
 
             $filters['current_usuario_tipo_id'] = $uti;
+
+            if (empty($_GET['usuario_id'])) {
+                if ($uti == 6) {
+                    $filters['contraparte_id'] = $contraparteId;
+                }
+                if ($uti == 4) {
+                    $filters['ejecutor_id'] = $cu;
+                    $_GET['usuario_id'] = $filters['ejecutor_id'];
+                }
+                if ($uti == 3) {
+                    $filters['supervisor_id'] = $cu;
+                }
+                if ($uti == 2) {
+                    $filters['planificador_id'] = $cu;
+                }
+            }
 
             if ($rModify && $rEliminate) {
                 $_GET['show_col_acciones'] = true;
@@ -934,6 +952,7 @@ class TaskController extends BaseController
             return;
         }
         // Obtener estado_tipo_id
+        $transitions = [];
         $projectTaskState = $this->taskModel->getProjectTaskState($taskId) ?? -1;
         if ($projectTaskState == 1) { // creado
             $transitions = [['id' => 2, 'nombre' => 'activo'], ['id' => 4, 'nombre' => 'eliminado']];

@@ -24,7 +24,9 @@ abstract class BaseController
             'email' => $_SESSION['email'],
             'nombre_completo' => $_SESSION['nombre_completo'],
             'rol' => $_SESSION['rol'],
-            'usuario_tipo_id' => $_SESSION['usuario_tipo_id']
+            'usuario_tipo_id' => $_SESSION['usuario_tipo_id'],
+            'cliente_id' => $_SESSION['cliente_id'],
+            'contraparte_id' => $_SESSION['contraparte_id']
         ];
     }
 

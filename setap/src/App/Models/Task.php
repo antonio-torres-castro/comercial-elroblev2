@@ -65,7 +65,9 @@ class Task
                 $params[] = $filters['proyecto_id'];
             }
 
-            if (isset($filters['current_usuario_tipo_id']) && $filters['current_usuario_tipo_id'] == 3) {
+            $uti = $filters['current_usuario_tipo_id'];
+
+            if (isset($uti) && $uti > 2) {
                 if ($strWhere == " WHERE") {
                     $strWhere .= " pt.estado_tipo_id in (2, 5, 6, 7, 8)";
                 } else {
@@ -107,6 +109,15 @@ class Task
                     $strWhere .= " AND pt.planificador_id = ?";
                 }
                 $params[] = $filters['planificador_id'];
+            }
+
+            if (isset($filters['contraparte_id']) && !empty($filters['contraparte_id'])) {
+                if ($strWhere == " WHERE") {
+                    $strWhere .= " p.contraparte_id = ?";
+                } else {
+                    $strWhere .= " AND p.contraparte_id = ?";
+                }
+                $params[] = $filters['contraparte_id'];
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
@@ -606,9 +617,9 @@ class Task
             $sql = "Select DISTINCT p.id, 
                                 CONCAT('Proyecto para ', c.razon_social) as nombre, 
                                 c.razon_social as cliente_nombre, pt.supervisor_id, pt.planificador_id
-                From comerci3_bdsetap.proyectos p 
-                Inner Join clientes c on p.cliente_id = c.id
-                Inner Join proyecto_tareas pt on pt.proyecto_id = p.id";
+                    From comerci3_bdsetap.proyectos p 
+                    Inner Join clientes c on p.cliente_id = c.id
+                    Inner Join proyecto_tareas pt on pt.proyecto_id = p.id";
 
             if ($uti == 1 || $uti == 2) {
                 $sql .= " Where p.estado_tipo_id IN (1, 2, 5)";
@@ -620,6 +631,10 @@ class Task
                 $sql .= " Where p.estado_tipo_id = 2";
                 $sql .= " and pt.supervisor_id = ?";
                 $myFilters[] = $filters['current_usuario_id'];
+            } elseif ($uti == 6) {
+                $sql .= " Where p.estado_tipo_id = 2";
+                $sql .= " and p.contraparte_id = ?";
+                $myFilters[] = $filters['contraparte_id'];
             } else {
                 $sql .= " Where p.estado_tipo_id = 2";
             }
