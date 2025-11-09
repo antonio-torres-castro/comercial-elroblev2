@@ -9,20 +9,16 @@ use App\Constants\AppConstants;
 $groupedMenus = [];
 $ungroupedMenus = [];
 try {
-    if (\App\Helpers\Security::isAuthenticated()) {
+    if (Security::isAuthenticated()) {
         $menuModel = new Menu();
         $userId = $_SESSION['user_id'] ?? 0;
 
         // Obtener menús agrupados (con desplegables)
         $groupedMenus = $menuModel->getGroupedMenusForUser($userId);
-
-        // Obtener menús sin grupo (individuales)
-        $ungroupedMenus = $menuModel->getUngroupedMenusForUser($userId);
     }
 } catch (Exception $e) {
     Logger::error("obteniendo menús de navegación: " . $e->getMessage());
     $groupedMenus = [];
-    $ungroupedMenus = [];
 }
 ?>
 
@@ -71,21 +67,9 @@ try {
                     <?php endforeach; ?>
                 <?php endif; ?>
 
-                <!-- Menús individuales (sin grupo) -->
-                <?php if (!empty($ungroupedMenus)): ?>
-                    <?php foreach ($ungroupedMenus as $menu): ?>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" href="<?php echo htmlspecialchars($menu['url']); ?>">
-                                <i class="bi bi-<?php echo htmlspecialchars($menu['icono'] ?? 'circle'); ?>"></i>
-                                <?php echo htmlspecialchars($menu['display']); ?>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-
                 <!-- Menús por defecto si no hay configuración dinámica -->
-                <?php if (empty($groupedMenus) && empty($ungroupedMenus)): ?>
-                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_users')): ?>
+                <?php if (empty($groupedMenus)): ?>
+                    <?php if (Security::hasMenuAccess('manage_users')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="<?= AppConstants::ROUTE_USERS ?>">
                                 <i class="bi bi-people"></i> Usuarios
@@ -93,7 +77,7 @@ try {
                         </li>
                     <?php endif; ?>
 
-                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_clients')): ?>
+                    <?php if (Security::hasMenuAccess('manage_clients')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="<?= AppConstants::ROUTE_CLIENTS ?>">
                                 <i class="bi bi-building"></i> Clientes

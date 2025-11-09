@@ -489,47 +489,4 @@ class Menu
             return [];
         }
     }
-
-    /**
-     * Obtener menús sin grupo (individuales) para navegación
-     */
-    public function getUngroupedMenusForUser(int $userId): array
-    {
-        try {
-            $permissionService = new \App\Services\PermissionService();
-
-            $query = "
-                SELECT
-                    m.id,
-                    m.nombre,
-                    m.display,
-                    m.url,
-                    m.icono,
-                    m.orden
-                FROM {$this->table} m
-                WHERE (m.menu_grupo_id IS NULL OR m.menu_grupo_id = 0)
-                AND m.estado_tipo_id = 2
-                AND m.display IS NOT NULL
-                AND m.display != ''
-                ORDER BY m.orden ASC, m.nombre ASC
-            ";
-
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
-            $ungroupedMenus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // Filtrar menús según permisos del usuario
-            $userUngroupedMenus = [];
-            foreach ($ungroupedMenus as $menu) {
-                if ($permissionService->hasMenuAccess($userId, $menu['nombre'])) {
-                    $userUngroupedMenus[] = $menu;
-                }
-            }
-
-            return $userUngroupedMenus;
-        } catch (Exception $e) {
-            Logger::error("obtener menús sin grupo de usuario: " . $e->getMessage());
-            return [];
-        }
-    }
 }
