@@ -1,33 +1,37 @@
-<div class="card-header justify-content-between">
-
-    <h5><i class="bi bi-list-task"></i> Tareas</h5>
-
-    <div class="col-md-3">
-        <div class="input-group">
-            <label for="fecha_inicio" class="input-group-text">Inicio</label>
-            <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio_filtro"
-                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+<div class="card-header">
+    <div class="row">
+        <div class="col-md-2">
+            <h5><i class="bi bi-list-task"></i> Tareas</h5>
         </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="input-group">
-            <label for="fecha_fin" class="input-group-text">Fin</label>
-            <input type="date" class="form-control" name="fecha_fin" id="fecha_fin_filtro"
-                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+        <div class="col-md-4">
+            <div class="input-group">
+                <label for="fecha_inicio" class="input-group-text">Inicio</label>
+                <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio_filtro"
+                    value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+            </div>
         </div>
-    </div>
 
-    <div class="d-grid gap-2 d-md-block">
-        <button class="btn btn-outline-setap-primary" id="btn-filtrar-tasks" onclick="refreshCardTasks()">
-            <i class="bi bi-search"></i> Filtrar
-        </button>
-        <button class="btn btn-outline-secondary" id="btn-clean-filters" onclick="filterClear()">
-            <i class="bi bi-x-lg"></i>
-        </button>
+        <div class="col-md-3">
+            <div class="input-group">
+                <label for="fecha_fin" class="input-group-text">Fin</label>
+                <input type="date" class="form-control" name="fecha_fin" id="fecha_fin_filtro"
+                    value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-outline-setap-primary" id="btn-filtrar-tasks" onclick="refreshCardTasks()">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+            <button class="btn btn-outline-secondary" id="btn-clean-filters" onclick="filterClear()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
     </div>
 
 </div>
+
 <div class="card-body">
     <?php if (!empty($error)): ?>
         <div class="text-center py-4">

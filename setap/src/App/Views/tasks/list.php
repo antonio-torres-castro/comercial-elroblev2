@@ -30,7 +30,7 @@ use App\Constants\AppConstants; ?>
         <div class="row">
             <!-- Main content -->
             <main class="col-12 px-md-4">
-                <!-- Filtros y Búsqueda -->
+                <!-- Titulo y boton nuevo -->
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <h2>
