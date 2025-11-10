@@ -130,17 +130,6 @@ class ProjectController extends BaseController
             return;
         }
 
-        // Configuración de paginación
-        $perPage = 7;
-        $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
-        $offset = ($page - 1) * $perPage;
-        // Contar total de registros según filtros
-        $totalTareas = $this->projectModel->countProjectTasks($id, $perPage, $offset);
-        $totalPages = max(1, ceil($totalTareas / $perPage));
-
-        // Obtener tareas del proyecto paginadas
-        $tasks = $this->projectModel->getProjectTasks($id, $perPage, $offset);
-
         // Obtener estadísticas del proyecto
         $stats = $this->projectModel->getProjectStats($id);
 
@@ -149,15 +138,74 @@ class ProjectController extends BaseController
 
         $this->view('projects/show', [
             'project' => $project,
-            'tasks' => $tasks,
-            'totalRecords' => $totalTareas,
-            'page' => $page,
-            'totalPages' => $totalPages,
             'stats' => $stats,
             'holidays' => $holidays,
             'success' => $_GET['success'] ?? '',
             'error' => $_GET['error'] ?? ''
         ]);
+    }
+
+    public function refreshCardTasks(?int $id = 0)
+    {
+        try {
+            $error = "";
+            // Verificar acceso al menú de gestión de proyecto individual
+            $hUserId = isset($_SESSION['user_id']);
+            $aManageProject = $hUserId ? $this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project') : false;
+            if (!$aManageProject) {
+                http_response_code(403);
+                $error .= "<br> " . AppConstants::ERROR_ACCESS_DENIED;
+            }
+
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $error .= "<br> No se encontro el usuario";
+            }
+            $uti = $currentUser['usuario_tipo_id'];
+
+            $rModify = $this->permissionService->hasPermission($uti, 'Modify');
+            $rCreate = $this->permissionService->hasPermission($uti, 'Create');
+            $rRead = $this->permissionService->hasPermission($uti, 'Read');
+            $rEliminate = $this->permissionService->hasPermission($uti, 'Eliminate');
+
+            $_GET['show_btn_nuevo'] = $rCreate;
+            $_GET['show_btn_editar'] = $rModify;
+            $_GET['show_btn_gestionar_feriados'] = $rCreate && $rModify;
+            $_GET['show_btn_cambiar_estado'] = $rEliminate;
+            $_GET['show_btn_ver'] = $rRead;
+
+            $id = $id == 0 ? (int)($_POST['proyecto_id'] ?? 0) : $id;
+            if ($id <= 0) {
+                $error .= "<br> " . AppConstants::ERROR_INVALID_PROJECT_ID;
+            }
+
+            $project = $this->projectModel->find($id);
+            if (!$project) {
+                $error .= "<br> " . AppConstants::ERROR_PROJECT_NOT_FOUND;
+            }
+
+            // Configuración de paginación
+            $perPage = 7;
+            $page = isset($_POST['page']) && is_numeric($_POST['page']) && $_POST['page'] > 0 ? (int)$_POST['page'] : 1;
+            $offset = ($page - 1) * $perPage;
+            // Contar total de registros según filtros
+            $totalTareas = $this->projectModel->countProjectTasks($id, $perPage, $offset);
+            $totalPages = max(1, ceil($totalTareas / $perPage));
+
+            // Obtener tareas del proyecto paginadas
+            $tasks = $this->projectModel->getProjectTasks($id, $perPage, $offset);
+
+            ob_start();
+            include __DIR__ . '/../Views/projects/partials/card_tasks.php';
+            $html = ob_get_clean();
+            $this->jsonSuccess('Tarea actualizada', [
+                'html' => $html,
+                'page' => $page,
+                'totalPages' => $totalPages,
+            ]);
+        } catch (Exception $e) {
+            $this->jsonError('Error al actualizar tareas', [], 500);
+        }
     }
 
     public function create()
@@ -427,33 +475,7 @@ class ProjectController extends BaseController
         }
     }
 
-    // public function search()
-    // {
-    //     // Verificar acceso al menú de gestión de proyectos
-    //     if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_projects')) {
-    //         http_response_code(403);
-    //         echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
-    //         return;
-    //     }
-
-    //     $term = Security::sanitizeInput($_GET['q'] ?? '');
-    //     if (empty($term) || strlen($term) < 3) {
-    //         $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_SEARCH_TERM_TOO_SHORT);
-    //         return;
-    //     }
-
-    //     $projects = $this->projectModel->search($term);
-
-    //     $this->view('projects/search', [
-    //         'projects' => $projects,
-    //         'searchTerm' => $term,
-    //         'success' => $_GET['success'] ?? '',
-    //         'error' => $_GET['error'] ?? ''
-    //     ]);
-    // }
-
     // ============ MÉTODOS PRIVADOS ============
-
     private function validateProjectData(array $data): array
     {
         $errors = [];

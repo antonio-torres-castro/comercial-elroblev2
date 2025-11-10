@@ -354,16 +354,17 @@ use App\Constants\AppConstants;
                         <?php if ($totalPages > 1): ?>
                             <nav aria-label="Navegación de páginas" class="mt-3">
                                 <ul class="pagination justify-content-center">
+                                    <!-- Botón Anterior -->
                                     <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
                                         <a class="page-link ajax-page" href="#" data-page="<?= $currentPage - 1 ?>">Anterior</a>
                                     </li>
-
+                                    <!-- Números -->
                                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                                         <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
                                             <a class="page-link ajax-page" href="#" data-page="<?= $i ?>"><?= $i ?></a>
                                         </li>
                                     <?php endfor; ?>
-
+                                    <!-- Botón Siguiente -->
                                     <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
                                         <a class="page-link ajax-page" href="#" data-page="<?= $currentPage + 1 ?>">Siguiente</a>
                                     </li>

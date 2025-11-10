@@ -218,21 +218,21 @@ use App\Helpers\Security;
                                                 <a href="<?= AppConstants::ROUTE_PROJECT_SHOW ?>?id=<?= $project['id'] ?>"
                                                     class="btn btn-outline-setap-primary"
                                                     onclick="event.stopPropagation()" title="Ver Proyecto">
-                                                    <i class="bi bi-eye"></i>
+                                                    <i class="bi bi-eye fs-2"></i>
                                                 </a>
                                             <?php endif; ?>
                                             <?php if ($_GET['show_btn_editar']): ?>
                                                 <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>"
                                                     class="btn btn-outline-secondary"
                                                     onclick="event.stopPropagation()" title="Editar Proyecto">
-                                                    <i class="bi bi-pencil"></i>
+                                                    <i class="bi bi-pencil fs-2"></i>
                                                 </a>
                                             <?php endif; ?>
                                             <?php if ($_GET['show_btn_gestionar_feriados']): ?>
                                                 <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>"
                                                     class="btn btn-outline-info"
                                                     onclick="event.stopPropagation()" title="Gestionar Feriados">
-                                                    <i class="bi bi-calendar-x"></i>
+                                                    <i class="bi bi-calendar-x fs-2"></i>
                                                 </a>
                                             <?php endif; ?>
                                         </div>

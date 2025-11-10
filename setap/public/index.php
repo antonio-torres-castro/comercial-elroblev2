@@ -212,6 +212,10 @@ try {
                     }
                     break;
 
+                case 'refreshCardTasks':
+                    $controller->refreshCardTasks();
+                    break;
+
                 case '':
                     $controller->create();
                     break;
