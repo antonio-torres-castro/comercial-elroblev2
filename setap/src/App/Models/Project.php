@@ -293,7 +293,7 @@ class Project
     /**
      * Obtener todas las tareas de un proyecto
      */
-    public function getProjectTasks(int $projectId, int $limit = 7, int $offset = 0, ?string $fechaInicio, ?string $fechaFin): array
+    public function getProjectTasks(int $projectId, int $limit = 7, int $offset = 0, ?string $fechaInicio = null, ?string $fechaFin = null): array
     {
         try {
             $sql = "SELECT pt.id, pt.proyecto_id, pt.tarea_id, 

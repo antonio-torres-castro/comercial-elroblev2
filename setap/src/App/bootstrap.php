@@ -6,6 +6,8 @@ use App\Config\AppConfig;
 use App\Constants\AppConstants;
 use App\Helpers\Logger; // ajusta el namespace según donde guardes la clase
 
+
+date_default_timezone_set('America/Santiago');
 // Inicializa una sola vez (por ejemplo en tu bootstrap o config global)
 //storage\logs\setap_auth_debug.log
 Logger::init(__DIR__ . '/../../storage/logs/error.log');

@@ -74,6 +74,6 @@ function attachPaginationHandlers() {
 
 function filterClear(){
     document.getElementById('fecha_inicio_filtro').value = '';
-    document.getElementById('fecha_fin_filtro').reset = '';
+    document.getElementById('fecha_fin_filtro').value = '';
     refreshCardTasks();
 }
