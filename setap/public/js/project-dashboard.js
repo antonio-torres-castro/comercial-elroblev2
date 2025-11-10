@@ -73,7 +73,7 @@ function attachPaginationHandlers() {
 }
 
 function filterClear(){
-    document.getElementById('fecha_inicio_filtro').value = undefined;
-    document.getElementById('fecha_fin_filtro').value = undefined;
+    document.getElementById('fecha_inicio_filtro').value = '';
+    document.getElementById('fecha_fin_filtro').reset = '';
     refreshCardTasks();
 }
