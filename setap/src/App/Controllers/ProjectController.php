@@ -130,8 +130,16 @@ class ProjectController extends BaseController
             return;
         }
 
-        // Obtener tareas del proyecto
-        $tasks = $this->projectModel->getProjectTasks($id);
+        // Configuración de paginación
+        $perPage = 7;
+        $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+        $offset = ($page - 1) * $perPage;
+        // Contar total de registros según filtros
+        $totalTareas = $this->projectModel->countProjectTasks($id, $perPage, $offset);
+        $totalPages = max(1, ceil($totalTareas / $perPage));
+
+        // Obtener tareas del proyecto paginadas
+        $tasks = $this->projectModel->getProjectTasks($id, $perPage, $offset);
 
         // Obtener estadísticas del proyecto
         $stats = $this->projectModel->getProjectStats($id);
@@ -142,6 +150,9 @@ class ProjectController extends BaseController
         $this->view('projects/show', [
             'project' => $project,
             'tasks' => $tasks,
+            'totalRecords' => $totalTareas,
+            'page' => $page,
+            'totalPages' => $totalPages,
             'stats' => $stats,
             'holidays' => $holidays,
             'success' => $_GET['success'] ?? '',

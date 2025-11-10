@@ -20,7 +20,30 @@ class ProyectoFeriado
     /**
      * Obtener todos los feriados de un proyecto
      */
-    public function getByProject(int $projectId): array
+    public function countByProject(int $projectId): int
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT Count(1) as total
+                FROM proyecto_feriados pf
+                INNER JOIN estado_tipos et ON pf.estado_tipo_id = et.id
+                WHERE pf.proyecto_id = ? AND pf.estado_tipo_id != 4
+                ORDER BY pf.fecha ASC
+            ");
+
+            $stmt->execute([$projectId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            Logger::error('ProyectoFeriado::countByProject error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Obtener todos los feriados de un proyecto
+     */
+    public function getByProject(int $projectId, int $limit = 7, int $offset = 0): array
     {
         try {
             $stmt = $this->db->prepare("
@@ -38,10 +61,13 @@ class ProyectoFeriado
                 FROM proyecto_feriados pf
                 INNER JOIN estado_tipos et ON pf.estado_tipo_id = et.id
                 WHERE pf.proyecto_id = ? AND pf.estado_tipo_id != 4
-                ORDER BY pf.fecha ASC
+                ORDER BY pf.fecha ASC LIMIT ? OFFSET ?
             ");
-
-            $stmt->execute([$projectId]);
+            $params = [];
+            $params[] = $projectId;
+            $params[] = $limit;
+            $params[] = $offset;
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error('ProyectoFeriado::getByProject error: ' . $e->getMessage());

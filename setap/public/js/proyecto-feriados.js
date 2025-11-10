@@ -9,6 +9,7 @@ let pendingConflicts = [];
 // Inicialización cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
     initializeFormHandlers();
+    attachPaginationHandlers();
     initializeModals();
     
     // Obtener ID del proyecto desde el input hidden
@@ -277,13 +278,14 @@ async function handleMoveTasksClick() {
 /**
  * Actualizar tabla de feriados
  */
-async function refreshHolidaysTable() {
+async function refreshHolidaysTable(page = 1) {
     try {
-        const response = await fetch(`/setap/proyecto-feriados/refreshHolidaysTable?proyecto_id=${currentProjectId}`);
+        const response = await fetch(`/setap/proyecto-feriados/refreshHolidaysTable?proyecto_id=${currentProjectId}&page=${page}`);
         const data = await response.json();
         
         if (data.success) {
             updateHolidaysTable(data.feriados);
+            updatePaginationNav(data.currentPage, data.totalPages);
             updateStats(data.stats);
         } else {
             console.error('Error al cargar feriados:', data.message);
@@ -291,6 +293,19 @@ async function refreshHolidaysTable() {
     } catch (error) {
         console.error('Error:', error);
     }
+}
+
+/**
+ * Asocia los eventos click de paginación AJAX
+ */
+function attachPaginationHandlers() {
+    document.querySelectorAll('.ajax-page').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = e.target.getAttribute('data-page');
+            if (page) refreshHolidaysTable(page);
+        });
+    });
 }
 
 /**
@@ -334,6 +349,47 @@ function updateHolidaysTable(feriados) {
     
     tbody.innerHTML = html;
 }
+
+/**
+ * Regenera el componente de paginación dinámicamente.
+ * @param {number} currentPage - Página actual
+ * @param {number} totalPages - Total de páginas disponibles
+ */
+function updatePaginationNav(currentPage, totalPages) {
+    const pagination = document.querySelector('.pagination.justify-content-center');
+    if (!pagination) return;
+
+    let html = '';
+
+    // Botón "Anterior"
+    html += `
+        <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+            <a class="page-link ajax-page" href="#" data-page="${currentPage - 1}">Anterior</a>
+        </li>
+    `;
+
+    // Números de página
+    for (let i = 1; i <= totalPages; i++) {
+        html += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link ajax-page" href="#" data-page="${i}">${i}</a>
+            </li>
+        `;
+    }
+
+    // Botón "Siguiente"
+    html += `
+        <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+            <a class="page-link ajax-page" href="#" data-page="${currentPage + 1}">Siguiente</a>
+        </li>
+    `;
+
+    pagination.innerHTML = html;
+
+    // Volver a enlazar eventos AJAX
+    attachPaginationHandlers();
+}
+
 
 /**
  * Actualizar estadísticas

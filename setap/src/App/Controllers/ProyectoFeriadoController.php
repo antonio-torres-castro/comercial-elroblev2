@@ -44,8 +44,16 @@ class ProyectoFeriadoController extends BaseController
             return;
         }
 
+        // Configuración de paginación
+        $perPage = 7;
+        $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+        $offset = ($currentPage - 1) * $perPage;
+        // Contar total de registros según filtros
+        $totalRows = $this->proyectoFeriadoModel->countByProject((int)$projectId);
+        $totalPages = max(1, ceil($totalRows / $perPage));
+
         // Obtener feriados del proyecto
-        $feriados = $this->proyectoFeriadoModel->getByProject((int)$projectId);
+        $feriados = $this->proyectoFeriadoModel->getByProject((int)$projectId, $perPage, $offset);
 
         // Obtener estadísticas
         $stats = $this->proyectoFeriadoModel->getProjectHolidayStats((int)$projectId);
@@ -55,6 +63,9 @@ class ProyectoFeriadoController extends BaseController
         $data = [
             'project' => $project,
             'feriados' => $feriados,
+            'totalRecords' => $totalRows,
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
             'stats' => $stats,
             'title' => $title
         ];
@@ -78,8 +89,17 @@ class ProyectoFeriadoController extends BaseController
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_PROJECT_NOT_FOUND);
             return;
         }
+
+        // Configuración de paginación
+        $perPage = 7;
+        $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+        $offset = ($currentPage - 1) * $perPage;
+        // Contar total de registros según filtros
+        $totalRows = $this->proyectoFeriadoModel->countByProject((int)$projectId);
+        $totalPages = max(1, ceil($totalRows / $perPage));
+
         // Obtener feriados del proyecto
-        $feriados = $this->proyectoFeriadoModel->getByProject((int)$projectId);
+        $feriados = $this->proyectoFeriadoModel->getByProject((int)$projectId, $perPage, $offset);
         // Obtener estadísticas
         $stats = $this->proyectoFeriadoModel->getProjectHolidayStats((int)$projectId);
 
@@ -87,6 +107,9 @@ class ProyectoFeriadoController extends BaseController
         echo json_encode([
             'success' => true,
             'feriados' => $feriados,
+            'totalRecords' => $totalRows,
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
             'stats' => $stats,
             'message' => 'Datos cargados correctamente.'
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

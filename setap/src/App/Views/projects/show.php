@@ -297,6 +297,37 @@ use App\Constants\AppConstants; ?>
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <!-- Paginación -->
+                <?php if ($totalPages > 1): ?>
+                    <nav aria-label="Navegación de páginas" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            <?php
+                            $queryString = $_GET;
+                            unset($queryString['page']);
+                            $baseUrl = '?' . http_build_query($queryString);
+                            ?>
+
+                            <!-- Botón Anterior -->
+                            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link" href="<?= $baseUrl . '&page=' . ($page - 1) ?>">Anterior</a>
+                            </li>
+
+                            <!-- Números -->
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                    <a class="page-link" href="<?= $baseUrl . '&page=' . $i ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <!-- Botón Siguiente -->
+                            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                                <a class="page-link" href="<?= $baseUrl . '&page=' . ($page + 1) ?>">Siguiente</a>
+                            </li>
+                        </ul>
+                    </nav>
+                <?php endif; ?>
+
             </div>
 
             <!-- Sidebar con información adicional -->

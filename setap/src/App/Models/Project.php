@@ -252,7 +252,36 @@ class Project
     /**
      * Obtener todas las tareas de un proyecto
      */
-    public function getProjectTasks(int $projectId): array
+    public function countProjectTasks(int $projectId): int
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT Count(1) as total
+                FROM proyecto_tareas pt
+                INNER JOIN tareas t ON pt.tarea_id = t.id
+                INNER JOIN usuarios p ON pt.planificador_id = p.id
+                LEFT JOIN usuarios e ON pt.ejecutor_id = e.id
+                LEFT JOIN usuarios s ON pt.supervisor_id = s.id
+                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
+                LEFT JOIN historial_tareas ht ON pt.id = ht.proyecto_tarea_id
+                    AND ht.id = (SELECT MAX(id) FROM historial_tareas WHERE proyecto_tarea_id = pt.id)
+                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4
+                ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC
+            ");
+
+            $stmt->execute([$projectId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            Logger::error('Project::getProjectTasks error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Obtener todas las tareas de un proyecto
+     */
+    public function getProjectTasks(int $projectId, int $limit = 7, int $offset = 0): array
     {
         try {
             $stmt = $this->db->prepare("
@@ -275,10 +304,13 @@ class Project
                 LEFT JOIN historial_tareas ht ON pt.id = ht.proyecto_tarea_id
                     AND ht.id = (SELECT MAX(id) FROM historial_tareas WHERE proyecto_tarea_id = pt.id)
                 WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4
-                ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC
+                ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC LIMIT ? OFFSET ?
             ");
-
-            $stmt->execute([$projectId]);
+            $params = [];
+            $params[] = $projectId;
+            $params[] = $limit;
+            $params[] = $offset;
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error('Project::getProjectTasks error: ' . $e->getMessage());
