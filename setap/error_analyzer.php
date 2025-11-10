@@ -3,7 +3,7 @@
 /**
  * Analizador de errores en tests - SETAP
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 
@@ -25,7 +25,7 @@ $isInError = false;
 
 foreach ($lines as $line) {
     $line = trim($line);
-    
+
     // Detectar inicio de error/failure
     if (strpos($line, '✘') !== false) {
         if ($isInError && !empty($currentError)) {
@@ -146,8 +146,10 @@ $major = 0;    // Failures que afectan lógica
 $minor = 0;    // Issues menores
 
 foreach ($errors as $error) {
-    if (strpos($error, 'Undefined constant') !== false || 
-        strpos($error, 'Call to undefined method') !== false) {
+    if (
+        strpos($error, 'Undefined constant') !== false ||
+        strpos($error, 'Call to undefined method') !== false
+    ) {
         $critical++;
     } else {
         $major++;
@@ -155,8 +157,10 @@ foreach ($errors as $error) {
 }
 
 foreach ($failures as $failure) {
-    if (strpos($failure, 'preg_match') !== false || 
-        strpos($failure, 'asserting that false is true') !== false) {
+    if (
+        strpos($failure, 'preg_match') !== false ||
+        strpos($failure, 'asserting that false is true') !== false
+    ) {
         $major++;
     } else {
         $minor++;

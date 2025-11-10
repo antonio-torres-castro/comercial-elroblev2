@@ -3,7 +3,7 @@
 /**
  * Acciones AJAX para el Panel Web de Debug
  * Maneja todas las peticiones de diagnóstico y herramientas
- * Autor: MiniMax Agent
+ * 
  */
 
 // Configuración de seguridad - Solo IPs autorizadas

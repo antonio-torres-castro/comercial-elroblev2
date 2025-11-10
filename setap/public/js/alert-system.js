@@ -1,7 +1,7 @@
 /**
  * Sistema Estandarizado de Alertas Bootstrap para SETAP
  * Basado en la implementación mejorada de users/list.php
- * Autor: MiniMax Agent
+ * 
  * Fecha: 2025-10-13
  */
 

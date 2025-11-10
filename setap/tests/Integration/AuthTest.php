@@ -12,7 +12,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 /**
  * Tests de integración para funcionalidades de autenticación
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 class AuthTest extends TestCase
@@ -23,11 +23,11 @@ class AuthTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Mock de dependencias
         $this->authServiceMock = $this->createMock(AuthService::class);
         $this->userModelMock = $this->createMock(User::class);
-        
+
         // Limpiar sesión antes de cada test
         $_SESSION = [];
     }
@@ -60,7 +60,7 @@ class AuthTest extends TestCase
         $this->assertArrayHasKey('password', $credentials);
         $this->assertNotEmpty($credentials['nombre_usuario']);
         $this->assertNotEmpty($credentials['password']);
-        
+
         // Validaciones de usuario autenticado
         $this->assertIsArray($expectedUser);
         $this->assertArrayHasKey('id', $expectedUser);
@@ -192,7 +192,7 @@ class AuthTest extends TestCase
     {
         $currentTime = time();
         $sessionTimeout = 3600; // 1 hora
-        
+
         // Sesión reciente (válida)
         $recentSession = [
             'login_time' => $currentTime - 1800, // 30 minutos atrás
@@ -277,7 +277,7 @@ class AuthTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Limpiar sesión después de cada test
         $_SESSION = [];
     }

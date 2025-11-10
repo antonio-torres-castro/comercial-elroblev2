@@ -201,7 +201,7 @@ Antes de considerar el deployment exitoso:
 
 **Versión**: 1.0  
 **Fecha**: 2025-10-22  
-**Autor**: MiniMax Agent  
+  
 **Sistema**: SETAP - Sistema de Gestión  
 
 ---

@@ -9,7 +9,7 @@ use App\Models\Persona;
 /**
  * Tests unitarios para PersonaController - Actualizado para AbstractBaseController
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-21
  */
 class PersonaControllerTest extends TestCase
@@ -19,7 +19,7 @@ class PersonaControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Mock de sesión para simular usuario autenticado
         $_SESSION = [
             'user_id' => 1,
@@ -30,12 +30,12 @@ class PersonaControllerTest extends TestCase
             'usuario_tipo_id' => 1,
             'authenticated' => true
         ];
-        
+
         // Limpiar superglobals
         $_POST = [];
         $_GET = [];
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // Instanciar controlador - ahora funciona con AbstractBaseController
         $this->controller = new PersonaController();
     }
@@ -55,7 +55,7 @@ class PersonaControllerTest extends TestCase
     public function testAllPublicMethodsExist()
     {
         $expectedMethods = ['index', 'create', 'store', 'edit', 'update', 'delete', 'show'];
-        
+
         foreach ($expectedMethods as $method) {
             $this->assertTrue(
                 method_exists($this->controller, $method),
@@ -70,7 +70,7 @@ class PersonaControllerTest extends TestCase
     public function testExtendsAbstractBaseController()
     {
         $this->assertInstanceOf(
-            \App\Controllers\AbstractBaseController::class, 
+            \App\Controllers\AbstractBaseController::class,
             $this->controller,
             'PersonaController debe extender AbstractBaseController'
         );
@@ -83,15 +83,15 @@ class PersonaControllerTest extends TestCase
     {
         // Verificar que tiene acceso a métodos de validación heredados
         $reflection = new \ReflectionClass($this->controller);
-        
+
         // Métodos que debería tener heredados
         $inheritedMethods = [
             'executeWithErrorHandling',
-            'requireAuthAndPermission', 
+            'requireAuthAndPermission',
             'validatePostRequest',
             'render'
         ];
-        
+
         foreach ($inheritedMethods as $method) {
             $this->assertTrue(
                 $reflection->hasMethod($method),
@@ -126,10 +126,10 @@ class PersonaControllerTest extends TestCase
         $this->assertIsArray($validData);
         $this->assertArrayHasKey('rut', $validData);
         $this->assertArrayHasKey('nombre', $validData);
-        
+
         // Test de RUT válido
         $this->assertMatchesRegularExpression('/^\d{7,8}-[\dkK]$/', $validData['rut']);
-        
+
         // Test de nombre no vacío
         $this->assertNotEmpty($validData['nombre']);
     }
@@ -223,7 +223,7 @@ class PersonaControllerTest extends TestCase
     public function testUsesNewArchitecturalPattern()
     {
         $reflection = new \ReflectionClass($this->controller);
-        
+
         // Verificar que NO tiene las propiedades del patrón antiguo
         $oldProperties = ['permissionService', 'db'];
         foreach ($oldProperties as $property) {
@@ -232,7 +232,7 @@ class PersonaControllerTest extends TestCase
                 "No debe tener la propiedad obsoleta '{$property}'"
             );
         }
-        
+
         // Verificar que tiene la propiedad del nuevo patrón
         $this->assertTrue(
             $reflection->hasProperty('personaModel'),
@@ -243,7 +243,7 @@ class PersonaControllerTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Limpiar sesión y superglobals
         $_SESSION = [];
         $_POST = [];

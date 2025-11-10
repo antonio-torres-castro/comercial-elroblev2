@@ -3,7 +3,7 @@
 /**
  * Visor de Logs Web-Only para Producción
  * Lee logs del servidor sin necesidad de consola
- * Autor: MiniMax Agent
+ * 
  */
 
 // Configuración de seguridad

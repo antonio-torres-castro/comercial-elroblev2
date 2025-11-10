@@ -11,7 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 /**
  * Tests unitarios para ProjectController
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 class ProjectControllerTest extends TestCase
@@ -23,11 +23,11 @@ class ProjectControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Mock de dependencias
         $this->projectModelMock = $this->createMock(Project::class);
         $this->permissionServiceMock = $this->createMock(PermissionService::class);
-        
+
         // Mock de sesión para simular usuario autenticado
         $_SESSION = [
             'user_id' => 1,
@@ -68,7 +68,7 @@ class ProjectControllerTest extends TestCase
                 'estado' => 'Planificado'
             ]
         ];
-        
+
         $this->projectModelMock
             ->method('getAll')
             ->willReturn($expectedProjects);
@@ -117,7 +117,7 @@ class ProjectControllerTest extends TestCase
         $this->assertArrayHasKey('cliente_id', $validProjectData);
         $this->assertArrayHasKey('fecha_inicio', $validProjectData);
         $this->assertArrayHasKey('fecha_termino', $validProjectData);
-        
+
         $this->assertIsString($validProjectData['nombre']);
         $this->assertNotEmpty($validProjectData['nombre']);
         $this->assertIsNumeric($validProjectData['cliente_id']);
@@ -143,9 +143,9 @@ class ProjectControllerTest extends TestCase
         // Validar que fecha_termino > fecha_inicio
         $inicioTimestamp = strtotime($projectDates['fecha_inicio']);
         $terminoTimestamp = strtotime($projectDates['fecha_termino']);
-        
+
         $this->assertGreaterThan($inicioTimestamp, $terminoTimestamp, 'Fecha término posterior a fecha inicio');
-        
+
         // Validar que las fechas son futuras (para nuevos proyectos)
         $currentTimestamp = strtotime('2025-10-11'); // Fecha base de referencia
         $this->assertGreaterThanOrEqual($currentTimestamp, $inicioTimestamp, 'Fecha inicio no es anterior a hoy');
@@ -158,7 +158,7 @@ class ProjectControllerTest extends TestCase
     {
         // Presupuestos válidos
         $validBudgets = [100000, 500000.50, 1000000, 2500000.75];
-        
+
         // Presupuestos inválidos
         $invalidBudgets = [0, -100000, 'invalid', '', null];
 
@@ -208,14 +208,14 @@ class ProjectControllerTest extends TestCase
         $this->assertArrayHasKey('responsable_id', $filters);
         $this->assertArrayHasKey('fecha_desde', $filters);
         $this->assertArrayHasKey('fecha_hasta', $filters);
-        
+
         // Validar tipos de filtros numéricos
         $numericFilters = ['cliente_id', 'estado_tipo_id', 'responsable_id'];
         foreach ($numericFilters as $filter) {
             $this->assertIsInt($filters[$filter], "Filtro {$filter} debe ser entero");
             $this->assertGreaterThan(0, $filters[$filter], "Filtro {$filter} debe ser positivo");
         }
-        
+
         // Validar filtros de fecha
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $filters['fecha_desde']);
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $filters['fecha_hasta']);
@@ -227,7 +227,7 @@ class ProjectControllerTest extends TestCase
     public function testEditExistingProject()
     {
         $projectId = 1;
-        
+
         // Mock de proyecto existente
         $existingProject = [
             'id' => $projectId,
@@ -240,7 +240,7 @@ class ProjectControllerTest extends TestCase
             'responsable_id' => 2,
             'estado_tipo_id' => 1
         ];
-        
+
         // Simulamos que el proyecto existe usando getAll con filtros
         $this->projectModelMock
             ->method('getAll')
@@ -271,13 +271,13 @@ class ProjectControllerTest extends TestCase
             ['id' => 2, 'nombre' => 'Usuario 2'],
             ['id' => 3, 'nombre' => 'Usuario 3']
         ];
-        
+
         // Mock eliminado - el método getAvailableUsers no existe en el modelo
 
         // Validar que el responsable asignado existe en la lista
         $responsableIds = array_column($availableUsers, 'id');
         $this->assertContains($projectData['responsable_id'], $responsableIds, 'Responsable válido asignado');
-        
+
         // Validar que responsable_id es entero positivo
         $this->assertIsInt($projectData['responsable_id']);
         $this->assertGreaterThan(0, $projectData['responsable_id']);
@@ -306,7 +306,7 @@ class ProjectControllerTest extends TestCase
             $this->assertIsString($state['nombre']);
             $this->assertNotEmpty($state['nombre']);
         }
-        
+
         // Validar que existen estados esenciales
         $stateNames = array_column($projectStates, 'nombre');
         $this->assertContains('En Progreso', $stateNames);
@@ -325,7 +325,7 @@ class ProjectControllerTest extends TestCase
 
         $inicioTimestamp = strtotime($projectData['fecha_inicio']);
         $terminoTimestamp = strtotime($projectData['fecha_termino']);
-        
+
         $duracionDias = ($terminoTimestamp - $inicioTimestamp) / (24 * 60 * 60);
         $duracionSemanas = $duracionDias / 7;
         $duracionMeses = $duracionDias / 30; // Aproximado
@@ -334,7 +334,7 @@ class ProjectControllerTest extends TestCase
         $this->assertGreaterThan(0, $duracionDias, 'Duración en días positiva');
         $this->assertGreaterThan(0, $duracionSemanas, 'Duración en semanas positiva');
         $this->assertGreaterThan(0, $duracionMeses, 'Duración en meses positiva');
-        
+
         // Validar rangos razonables (ejemplo: entre 1 semana y 2 años)
         $this->assertGreaterThanOrEqual(7, $duracionDias, 'Duración mínima 1 semana');
         $this->assertLessThanOrEqual(730, $duracionDias, 'Duración máxima 2 años');
@@ -346,7 +346,7 @@ class ProjectControllerTest extends TestCase
     public function testFindNonExistentProject()
     {
         $nonExistentId = 999;
-        
+
         // Simulamos que no se encuentra el proyecto
         $this->projectModelMock
             ->method('getAll')
@@ -366,15 +366,15 @@ class ProjectControllerTest extends TestCase
             ['id' => 2, 'nombre' => 'Cliente B'],
             ['id' => 3, 'nombre' => 'Cliente C']
         ];
-        
+
         // Mock eliminado - el método getClients no existe en el modelo Project
 
         $selectedClientId = 2;
-        
+
         // Validar que el cliente seleccionado existe
         $clientIds = array_column($availableClients, 'id');
         $this->assertContains($selectedClientId, $clientIds, 'Cliente seleccionado existe');
-        
+
         // Validar estructura de clientes
         foreach ($availableClients as $client) {
             $this->assertArrayHasKey('id', $client);
@@ -387,7 +387,7 @@ class ProjectControllerTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Limpiar sesión
         $_SESSION = [];
     }

@@ -12,7 +12,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 /**
  * Tests unitarios para funcionalidades de Usuario
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 class UserTest extends TestCase
@@ -24,12 +24,12 @@ class UserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Mock de dependencias
         $this->userModelMock = $this->createMock(User::class);
         $this->permissionServiceMock = $this->createMock(PermissionService::class);
         $this->validationServiceMock = $this->createMock(ValidationService::class);
-        
+
         // Mock de sesión para simular usuario autenticado
         $_SESSION = [
             'user_id' => 1,
@@ -61,13 +61,13 @@ class UserTest extends TestCase
         $this->assertArrayHasKey('email', $validUserData);
         $this->assertArrayHasKey('nombre_usuario', $validUserData);
         $this->assertArrayHasKey('password', $validUserData);
-        
+
         // Validación de email
         $this->assertNotFalse(filter_var($validUserData['email'], FILTER_VALIDATE_EMAIL));
-        
+
         // Validación de nombre de usuario (sin espacios, caracteres especiales)
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9_]+$/', $validUserData['nombre_usuario']);
-        
+
         // Validación de password (mónimo 8 caracteres)
         $this->assertGreaterThanOrEqual(8, strlen($validUserData['password']));
     }
@@ -78,13 +78,13 @@ class UserTest extends TestCase
     public function testEmailUniqueValidation()
     {
         $testEmail = 'usuario@test.com';
-        
+
         // Mock: Email ya existe
         $this->validationServiceMock
             ->method('isEmailAvailable')
             ->with($testEmail, 0)
             ->willReturn(false);
-        
+
         // Mock: Email disponible
         $this->validationServiceMock
             ->method('isEmailAvailable')
@@ -101,13 +101,13 @@ class UserTest extends TestCase
     public function testUsernameUniqueValidation()
     {
         $testUsername = 'usuario_existente';
-        
+
         // Mock: Username ya existe
         $this->validationServiceMock
             ->method('isUsernameAvailable')
             ->with($testUsername, 0)
             ->willReturn(false);
-        
+
         // Mock: Username disponible
         $this->validationServiceMock
             ->method('isUsernameAvailable')
@@ -155,7 +155,7 @@ class UserTest extends TestCase
             ['id' => 1, 'nombre' => 'Juan Perez', 'rut' => '12345678-9'],
             ['id' => 2, 'nombre' => 'Maria Gonzolez', 'rut' => '98765432-1']
         ];
-        
+
         $this->userModelMock
             ->method('getAllPersonas')
             ->willReturn($expectedPersonas);
@@ -202,7 +202,7 @@ class UserTest extends TestCase
         foreach ($validDates as $key => $date) {
             // Validar formato de fecha
             $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $date, "Fecha {$key} formato valido");
-            
+
             // Validar que la fecha es valida
             $timestamp = strtotime($date);
             $this->assertNotFalse($timestamp, "Fecha {$key} es valida");
@@ -239,20 +239,20 @@ class UserTest extends TestCase
         foreach ($securePasswords as $password) {
             // Mónimo 8 caracteres
             $this->assertGreaterThanOrEqual(8, strlen($password));
-            
+
             // Contiene al menos un número
             $this->assertMatchesRegularExpression('/\d/', $password);
-            
+
             // Contiene al menos una letra
             $this->assertMatchesRegularExpression('/[a-zA-Z]/', $password);
         }
 
         foreach ($insecurePasswords as $password) {
             // Passwords inseguros fallan validaciones básicas
-            $isSecure = strlen($password) >= 8 && 
-                       preg_match('/\d/', $password) && 
-                       preg_match('/[a-zA-Z]/', $password);
-            
+            $isSecure = strlen($password) >= 8 &&
+                preg_match('/\d/', $password) &&
+                preg_match('/[a-zA-Z]/', $password);
+
             $this->assertFalse($isSecure, "Password inseguro: {$password}");
         }
     }
@@ -276,7 +276,7 @@ class UserTest extends TestCase
             'nombre_usuario' => 'usuario_original',
             'usuario_tipo_id' => 1
         ];
-        
+
         $this->userModelMock
             ->method('getById')
             ->with($userId)
@@ -315,7 +315,7 @@ class UserTest extends TestCase
                 'activo' => true
             ]
         ];
-        
+
         $this->userModelMock
             ->method('getAll')
             ->with($filters)
@@ -330,7 +330,7 @@ class UserTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Limpiar sesión
         $_SESSION = [];
     }

@@ -305,5 +305,5 @@ Todos los archivos estan listos en:
 
 ---
 
-**Autor:** MiniMax Agent  
+
 **Fecha:** 2025-10-23

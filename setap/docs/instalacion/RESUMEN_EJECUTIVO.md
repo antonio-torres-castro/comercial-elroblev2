@@ -316,5 +316,5 @@ Usar `verificar_instalacion.php` para verificación completa:
 
 **Fecha de creación**: 2025-10-22  
 **Versión del documento**: 1.0  
-**Autor**: MiniMax Agent  
+  
 **Sistema**: SETAP - Sistema de Gestión

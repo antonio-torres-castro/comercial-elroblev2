@@ -1,6 +1,6 @@
 # 🚀 Instrucciones de Uso Rápido - Debug Web-Only
 
-**Autor:** MiniMax Agent  
+
 **Fecha:** 2025-10-24
 
 ## ⚡ Setup Rápido (5 minutos)

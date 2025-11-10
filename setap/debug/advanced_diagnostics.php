@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Herramientas Avanzadas de Diagnóstico
  * Complementa las herramientas básicas de debug con funcionalidades adicionales
- * Autor: MiniMax Agent
+ * 
  */
 
 require_once 'config.php';
@@ -10,54 +11,54 @@ require_once 'config.php';
 class AdvancedDiagnosticTools
 {
     private $logger;
-    
+
     public function __construct()
     {
         $this->logger = AdvancedLogger::getInstance();
     }
-    
+
     /**
      * Ejecutar análisis completo de seguridad
      */
     public function runSecurityAudit()
     {
         $this->logger->info('Iniciando auditoría de seguridad');
-        
+
         $audit = [
             'timestamp' => date('Y-m-d H:i:s'),
             'checks' => [],
             'score' => 0,
             'max_score' => 100
         ];
-        
+
         // Verificar permisos de archivos
         $filePerms = $this->checkFilePermissions();
         $audit['checks']['file_permissions'] = $filePerms;
         $audit['score'] += $filePerms['score'];
-        
+
         // Verificar configuración PHP
         $phpConfig = $this->checkPHPSecurityConfig();
         $audit['checks']['php_config'] = $phpConfig;
         $audit['score'] += $phpConfig['score'];
-        
+
         // Verificar exposición de información
         $infoExposure = $this->checkInfoExposure();
         $audit['checks']['info_exposure'] = $infoExposure;
         $audit['score'] += $infoExposure['score'];
-        
+
         // Verificar directorios sensibles
         $sensitiveDirs = $this->checkSensitiveDirectories();
         $audit['checks']['sensitive_directories'] = $sensitiveDirs;
         $audit['score'] += $sensitiveDirs['score'];
-        
+
         // Calcular porcentaje de seguridad
         $audit['security_percentage'] = round(($audit['score'] / $audit['max_score']) * 100, 1);
-        
+
         $this->logger->info('Auditoría de seguridad completada', ['score' => $audit['security_percentage']]);
-        
+
         return $audit;
     }
-    
+
     /**
      * Verificar permisos de archivos
      */
@@ -68,7 +69,7 @@ class AdvancedDiagnosticTools
             'max_score' => 25,
             'checks' => []
         ];
-        
+
         $criticalFiles = [
             '../config/database.php' => 600, // Solo owner read/write
             '../.env' => 600,
@@ -76,12 +77,12 @@ class AdvancedDiagnosticTools
             '../composer.json' => 644,
             '../vendor' => 755
         ];
-        
+
         foreach ($criticalFiles as $file => $expectedPerms) {
             if (file_exists($file)) {
                 $currentPerms = substr(sprintf('%o', fileperms($file)), -3);
                 $isSecure = (int)$currentPerms <= $expectedPerms;
-                
+
                 $results['checks'][] = [
                     'file' => $file,
                     'current_permissions' => $currentPerms,
@@ -89,7 +90,7 @@ class AdvancedDiagnosticTools
                     'secure' => $isSecure,
                     'status' => $isSecure ? 'OK' : 'WARNING'
                 ];
-                
+
                 if ($isSecure) {
                     $results['score'] += 5;
                 }
@@ -101,10 +102,10 @@ class AdvancedDiagnosticTools
                 ];
             }
         }
-        
+
         return $results;
     }
-    
+
     /**
      * Verificar configuración de seguridad de PHP
      */
@@ -115,7 +116,7 @@ class AdvancedDiagnosticTools
             'max_score' => 25,
             'checks' => []
         ];
-        
+
         $checks = [
             'expose_php' => [
                 'value' => ini_get('expose_php'),
@@ -148,7 +149,7 @@ class AdvancedDiagnosticTools
                 'score' => 5
             ]
         ];
-        
+
         foreach ($checks as $setting => $check) {
             $results['checks'][] = [
                 'setting' => $setting,
@@ -157,15 +158,15 @@ class AdvancedDiagnosticTools
                 'secure' => $check['secure'],
                 'status' => $check['secure'] ? 'OK' : 'WARNING'
             ];
-            
+
             if ($check['secure']) {
                 $results['score'] += $check['score'];
             }
         }
-        
+
         return $results;
     }
-    
+
     /**
      * Verificar exposición de información
      */
@@ -176,7 +177,7 @@ class AdvancedDiagnosticTools
             'max_score' => 25,
             'checks' => []
         ];
-        
+
         // Verificar headers de seguridad
         $securityHeaders = [
             'X-Frame-Options' => 'Debe estar presente para prevenir clickjacking',
@@ -184,7 +185,7 @@ class AdvancedDiagnosticTools
             'X-Content-Type-Options' => 'Prevenir MIME type sniffing',
             'Strict-Transport-Security' => 'Fuerza HTTPS'
         ];
-        
+
         foreach ($securityHeaders as $header => $description) {
             $isPresent = $this->checkSecurityHeader($header);
             $results['checks'][] = [
@@ -193,15 +194,15 @@ class AdvancedDiagnosticTools
                 'description' => $description,
                 'status' => $isPresent ? 'OK' : 'WARNING'
             ];
-            
+
             if ($isPresent) {
                 $results['score'] += 6;
             }
         }
-        
+
         return $results;
     }
-    
+
     /**
      * Verificar si un header de seguridad está presente
      */
@@ -211,7 +212,7 @@ class AdvancedDiagnosticTools
         // Por ahora retornamos false para indicar que no se puede verificar
         return false;
     }
-    
+
     /**
      * Verificar directorios sensibles
      */
@@ -222,7 +223,7 @@ class AdvancedDiagnosticTools
             'max_score' => 25,
             'checks' => []
         ];
-        
+
         $sensitiveDirs = [
             '../.git' => 'Control de versiones',
             '../.svn' => 'Control de versiones',
@@ -231,11 +232,11 @@ class AdvancedDiagnosticTools
             '../config' => 'Configuraciones',
             '../logs' => 'Logs del sistema'
         ];
-        
+
         foreach ($sensitiveDirs as $dir => $description) {
             $exists = is_dir($dir);
             $isProtected = !$exists || $this->isDirectoryProtected($dir);
-            
+
             $results['checks'][] = [
                 'directory' => $dir,
                 'exists' => $exists,
@@ -243,15 +244,15 @@ class AdvancedDiagnosticTools
                 'description' => $description,
                 'status' => $isProtected ? 'OK' : 'WARNING'
             ];
-            
+
             if ($isProtected) {
                 $results['score'] += 4;
             }
         }
-        
+
         return $results;
     }
-    
+
     /**
      * Verificar si un directorio está protegido
      */
@@ -261,45 +262,45 @@ class AdvancedDiagnosticTools
         if (!file_exists($htaccessFile)) {
             return false;
         }
-        
+
         $content = file_get_contents($htaccessFile);
-        return strpos($content, 'deny from all') !== false || 
-               strpos($content, 'Require all denied') !== false;
+        return strpos($content, 'deny from all') !== false ||
+            strpos($content, 'Require all denied') !== false;
     }
-    
+
     /**
      * Ejecutar análisis de rendimiento detallado
      */
     public function runPerformanceAnalysis()
     {
         $this->logger->info('Iniciando análisis de rendimiento');
-        
+
         $analysis = [
             'timestamp' => date('Y-m-d H:i:s'),
             'metrics' => [],
             'recommendations' => []
         ];
-        
+
         // Análisis de memoria
         $memoryAnalysis = $this->analyzeMemoryUsage();
         $analysis['metrics']['memory'] = $memoryAnalysis;
-        
+
         // Análisis de base de datos
         $dbAnalysis = $this->analyzeDatabasePerformance();
         $analysis['metrics']['database'] = $dbAnalysis;
-        
+
         // Análisis de disco
         $diskAnalysis = $this->analyzeDiskUsage();
         $analysis['metrics']['disk'] = $diskAnalysis;
-        
+
         // Generar recomendaciones
         $analysis['recommendations'] = $this->generatePerformanceRecommendations($analysis['metrics']);
-        
+
         $this->logger->info('Análisis de rendimiento completado');
-        
+
         return $analysis;
     }
-    
+
     /**
      * Analizar uso de memoria
      */
@@ -312,19 +313,19 @@ class AdvancedDiagnosticTools
             'usage_percentage' => 0,
             'status' => 'OK'
         ];
-        
+
         $limitBytes = $this->parseSize(ini_get('memory_limit'));
         $memory['usage_percentage'] = round(($memory['current_usage'] / $limitBytes) * 100, 1);
-        
+
         if ($memory['usage_percentage'] > 80) {
             $memory['status'] = 'WARNING';
         } elseif ($memory['usage_percentage'] > 90) {
             $memory['status'] = 'CRITICAL';
         }
-        
+
         return $memory;
     }
-    
+
     /**
      * Analizar rendimiento de base de datos
      */
@@ -336,7 +337,7 @@ class AdvancedDiagnosticTools
             'table_stats' => [],
             'status' => 'OK'
         ];
-        
+
         try {
             if (file_exists('../config/database.php')) {
                 include_once '../config/database.php';
@@ -346,7 +347,7 @@ class AdvancedDiagnosticTools
                     $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
                     $connectionTime = (microtime(true) - $startTime) * 1000;
                     $dbPerf['connection_time'] = round($connectionTime, 2);
-                    
+
                     // Analizar tablas críticas
                     $criticalTables = ['usuarios', 'clientes', 'proyectos', 'tareas'];
                     foreach ($criticalTables as $table) {
@@ -354,7 +355,7 @@ class AdvancedDiagnosticTools
                             $startTime = microtime(true);
                             $pdo->query("SELECT COUNT(*) FROM `$table`");
                             $queryTime = (microtime(true) - $startTime) * 1000;
-                            
+
                             $dbPerf['query_performance'][] = [
                                 'table' => $table,
                                 'query_time_ms' => round($queryTime, 2),
@@ -370,10 +371,10 @@ class AdvancedDiagnosticTools
             $dbPerf['status'] = 'ERROR';
             $dbPerf['error'] = $e->getMessage();
         }
-        
+
         return $dbPerf;
     }
-    
+
     /**
      * Analizar uso de disco
      */
@@ -386,30 +387,30 @@ class AdvancedDiagnosticTools
             'usage_percentage' => 0,
             'status' => 'OK'
         ];
-        
+
         if (function_exists('disk_total_space') && function_exists('disk_free_space')) {
             $diskUsage['total_space'] = disk_total_space(__DIR__);
             $diskUsage['free_space'] = disk_free_space(__DIR__);
             $diskUsage['used_space'] = $diskUsage['total_space'] - $diskUsage['free_space'];
             $diskUsage['usage_percentage'] = round(($diskUsage['used_space'] / $diskUsage['total_space']) * 100, 1);
-            
+
             if ($diskUsage['usage_percentage'] > 90) {
                 $diskUsage['status'] = 'CRITICAL';
             } elseif ($diskUsage['usage_percentage'] > 80) {
                 $diskUsage['status'] = 'WARNING';
             }
         }
-        
+
         return $diskUsage;
     }
-    
+
     /**
      * Generar recomendaciones de rendimiento
      */
     private function generatePerformanceRecommendations($metrics)
     {
         $recommendations = [];
-        
+
         // Recomendaciones de memoria
         if (isset($metrics['memory'])) {
             $mem = $metrics['memory'];
@@ -422,7 +423,7 @@ class AdvancedDiagnosticTools
                 ];
             }
         }
-        
+
         // Recomendaciones de base de datos
         if (isset($metrics['database'])) {
             $db = $metrics['database'];
@@ -434,7 +435,7 @@ class AdvancedDiagnosticTools
                     'impact' => 'Medio'
                 ];
             }
-            
+
             foreach ($db['query_performance'] as $query) {
                 if ($query['status'] === 'SLOW') {
                     $recommendations[] = [
@@ -446,7 +447,7 @@ class AdvancedDiagnosticTools
                 }
             }
         }
-        
+
         // Recomendaciones de disco
         if (isset($metrics['disk'])) {
             $disk = $metrics['disk'];
@@ -459,43 +460,43 @@ class AdvancedDiagnosticTools
                 ];
             }
         }
-        
+
         return $recommendations;
     }
-    
+
     /**
      * Analizar logs para detectar patrones de errores
      */
     public function analyzeErrorPatterns()
     {
         $this->logger->info('Iniciando análisis de patrones de error');
-        
+
         $patterns = [
             'timestamp' => date('Y-m-d H:i:s'),
             'error_frequencies' => [],
             'common_errors' => [],
             'recommendations' => []
         ];
-        
+
         // Analizar log de errores PHP
         $phpErrors = $this->analyzePHPErrors();
         $patterns['error_frequencies']['php'] = $phpErrors;
-        
+
         // Analizar logs de aplicación
         $appErrors = $this->analyzeApplicationErrors();
         $patterns['error_frequencies']['application'] = $appErrors;
-        
+
         // Identificar errores más comunes
         $patterns['common_errors'] = $this->identifyCommonErrors();
-        
+
         // Generar recomendaciones
         $patterns['recommendations'] = $this->generateErrorRecommendations($patterns);
-        
+
         $this->logger->info('Análisis de patrones de error completado');
-        
+
         return $patterns;
     }
-    
+
     /**
      * Analizar errores de PHP
      */
@@ -503,16 +504,16 @@ class AdvancedDiagnosticTools
     {
         $errorLog = ini_get('error_log');
         $errors = [];
-        
+
         if ($errorLog && file_exists($errorLog)) {
             $lines = file($errorLog);
             $recentLines = array_slice($lines, -100); // Últimas 100 líneas
-            
+
             foreach ($recentLines as $line) {
                 if (preg_match('/\[(.*?)\] (.*)/', $line, $matches)) {
                     $timestamp = $matches[1];
                     $message = $matches[2];
-                    
+
                     $errors[] = [
                         'timestamp' => $timestamp,
                         'message' => trim($message),
@@ -521,10 +522,10 @@ class AdvancedDiagnosticTools
                 }
             }
         }
-        
+
         return $errors;
     }
-    
+
     /**
      * Clasificar tipo de error
      */
@@ -542,7 +543,7 @@ class AdvancedDiagnosticTools
             return 'UNKNOWN';
         }
     }
-    
+
     /**
      * Analizar errores de aplicación
      */
@@ -550,37 +551,37 @@ class AdvancedDiagnosticTools
     {
         $appLogFile = DEBUG_LOG_DIR . '/debug_system.log';
         $errors = [];
-        
+
         if (file_exists($appLogFile)) {
             $lines = file($appLogFile);
             $recentLines = array_slice($lines, -50);
-            
+
             foreach ($recentLines as $line) {
                 if (strpos($line, '[ERROR]') !== false) {
                     $errors[] = trim($line);
                 }
             }
         }
-        
+
         return $errors;
     }
-    
+
     /**
      * Identificar errores comunes
      */
     private function identifyCommonErrors()
     {
         $commonErrors = [];
-        
+
         // Análisis básico de frecuencia
         $phpErrors = $this->analyzePHPErrors();
         $errorMessages = array_column($phpErrors, 'message');
         $messageCounts = array_count_values($errorMessages);
-        
+
         // Obtener los 5 errores más frecuentes
         arsort($messageCounts);
         $topErrors = array_slice($messageCounts, 0, 5, true);
-        
+
         foreach ($topErrors as $message => $count) {
             $commonErrors[] = [
                 'message' => $message,
@@ -588,17 +589,17 @@ class AdvancedDiagnosticTools
                 'percentage' => round(($count / count($errorMessages)) * 100, 1)
             ];
         }
-        
+
         return $commonErrors;
     }
-    
+
     /**
      * Generar recomendaciones basadas en errores
      */
     private function generateErrorRecommendations($patterns)
     {
         $recommendations = [];
-        
+
         foreach ($patterns['common_errors'] as $error) {
             if ($error['frequency'] > 5) {
                 $recommendations[] = [
@@ -608,10 +609,10 @@ class AdvancedDiagnosticTools
                 ];
             }
         }
-        
+
         return $recommendations;
     }
-    
+
     /**
      * Función auxiliar para convertir tamaños
      */
@@ -624,7 +625,7 @@ class AdvancedDiagnosticTools
         }
         return round($size);
     }
-    
+
     /**
      * Generar reporte técnico completo
      */
@@ -638,17 +639,17 @@ class AdvancedDiagnosticTools
             'error_patterns' => $this->analyzeErrorPatterns(),
             'recommendations' => []
         ];
-        
+
         // Consolidar recomendaciones
         $report['recommendations'] = array_merge(
             $report['security_audit']['recommendations'] ?? [],
             $report['performance_analysis']['recommendations'] ?? [],
             $report['error_patterns']['recommendations'] ?? []
         );
-        
+
         return $report;
     }
-    
+
     /**
      * Obtener información del sistema
      */
@@ -668,4 +669,3 @@ class AdvancedDiagnosticTools
         ];
     }
 }
-?>

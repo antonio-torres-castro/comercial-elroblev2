@@ -252,11 +252,10 @@ class Project
     /**
      * Obtener todas las tareas de un proyecto
      */
-    public function countProjectTasks(int $projectId): int
+    public function countProjectTasks(int $projectId, ?string $fechaInicio, ?string $fechaFin): int
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT Count(1) as total
+            $sql = "SELECT Count(1) as total
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN usuarios p ON pt.planificador_id = p.id
@@ -265,11 +264,24 @@ class Project
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 LEFT JOIN historial_tareas ht ON pt.id = ht.proyecto_tarea_id
                     AND ht.id = (SELECT MAX(id) FROM historial_tareas WHERE proyecto_tarea_id = pt.id)
-                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4
-                ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC
-            ");
+                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4 ";
 
-            $stmt->execute([$projectId]);
+            $params = [];
+            $params[] = $projectId;
+
+            if (!empty($fechaInicio)) {
+                $sql .= " and pt.fecha_inicio >= ? ";
+                $params[] = $fechaInicio;
+            }
+            if (!empty($fechaFin)) {
+                $sql .= " and pt.fecha_inicio <= ? ";
+                $params[] = $fechaFin;
+            }
+
+            $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return (int)($row['total'] ?? 0);
         } catch (PDOException $e) {
@@ -281,11 +293,10 @@ class Project
     /**
      * Obtener todas las tareas de un proyecto
      */
-    public function getProjectTasks(int $projectId, int $limit = 7, int $offset = 0): array
+    public function getProjectTasks(int $projectId, int $limit = 7, int $offset = 0, ?string $fechaInicio, ?string $fechaFin): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT pt.id, pt.proyecto_id, pt.tarea_id, 
+            $sql = "SELECT pt.id, pt.proyecto_id, pt.tarea_id, 
                 pt.planificador_id, pt.ejecutor_id, pt.supervisor_id, 
                 pt.fecha_inicio, pt.duracion_horas, pt.fecha_fin, pt.prioridad, 
                 pt.estado_tipo_id, pt.fecha_Creado, pt.fecha_modificacion,
@@ -303,13 +314,25 @@ class Project
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 LEFT JOIN historial_tareas ht ON pt.id = ht.proyecto_tarea_id
                     AND ht.id = (SELECT MAX(id) FROM historial_tareas WHERE proyecto_tarea_id = pt.id)
-                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4
-                ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC LIMIT ? OFFSET ?
-            ");
+                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4 ";
+
             $params = [];
             $params[] = $projectId;
+
+            if (!empty($fechaInicio)) {
+                $sql .= " and pt.fecha_inicio >= ? ";
+                $params[] = $fechaInicio;
+            }
+            if (!empty($fechaFin)) {
+                $sql .= " and pt.fecha_inicio <= ? ";
+                $params[] = $fechaFin;
+            }
+
+            $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC LIMIT ? OFFSET ? ";
             $params[] = $limit;
             $params[] = $offset;
+
+            $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

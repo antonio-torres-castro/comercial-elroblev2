@@ -3,7 +3,7 @@
 /**
  * Lista detallada de errores específicos en tests
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 
@@ -14,7 +14,7 @@ echo "================================================\n\n";
 $testFiles = [
     'tests/Unit/AppConstantsTest.php',
     'tests/Unit/PersonaControllerTest.php',
-    'tests/Unit/TaskControllerTest.php', 
+    'tests/Unit/TaskControllerTest.php',
     'tests/Unit/ProjectControllerTest.php',
     'tests/Unit/UserTest.php',
     'tests/Integration/AuthTest.php',
@@ -26,19 +26,19 @@ $errorCount = 1;
 
 foreach ($testFiles as $testFile) {
     echo "🔍 Analizando: $testFile\n";
-    
+
     $output = shell_exec("cd " . __DIR__ . " && php ./vendor/bin/phpunit $testFile --testdox 2>&1");
-    
+
     // Buscar errores en la salida
     if (strpos($output, '✘') !== false) {
         $lines = explode("\n", $output);
         $inError = false;
         $currentError = '';
         $testName = '';
-        
+
         foreach ($lines as $line) {
             $line = trim($line);
-            
+
             // Detectar nombre del test con error
             if (strpos($line, '✘') !== false) {
                 $testName = $line;
@@ -69,7 +69,7 @@ foreach ($testFiles as $testFile) {
                 }
             }
         }
-        
+
         // Capturar último error si existe
         if ($inError && !empty($currentError) && !empty($testName)) {
             $allErrors[] = [
@@ -97,11 +97,11 @@ if (empty($allErrors)) {
         echo "💥 Detalles:\n{$error['error']}\n";
         echo str_repeat("-", 70) . "\n\n";
     }
-    
+
     // Clasificación de errores
     echo "📊 CLASIFICACIÓN DE ERRORES:\n";
     echo "=============================\n\n";
-    
+
     $categories = [
         'constants' => ['pattern' => 'Undefined constant', 'count' => 0, 'errors' => []],
         'methods' => ['pattern' => 'Call to undefined method', 'count' => 0, 'errors' => []],
@@ -110,7 +110,7 @@ if (empty($allErrors)) {
         'assertions' => ['pattern' => 'Failed asserting', 'count' => 0, 'errors' => []],
         'other' => ['pattern' => '', 'count' => 0, 'errors' => []]
     ];
-    
+
     foreach ($allErrors as $error) {
         $categorized = false;
         foreach ($categories as $category => &$cat) {
@@ -127,20 +127,20 @@ if (empty($allErrors)) {
             $categories['other']['errors'][] = $error['number'];
         }
     }
-    
+
     foreach ($categories as $category => $data) {
         if ($data['count'] > 0) {
             $categoryName = ucfirst($category);
             echo "📌 $categoryName: {$data['count']} error(es) - #{" . implode(', #', $data['errors']) . "}\n";
         }
     }
-    
+
     echo "\n🎯 PRIORIDADES DE CORRECCIÓN:\n";
     echo "=============================\n";
     echo "1. 🔴 ALTA PRIORIDAD - Constants & Methods (impiden ejecución)\n";
     echo "2. 🟡 MEDIA PRIORIDAD - Mocks & Assertions (lógica incorrecta)\n";
     echo "3. 🟢 BAJA PRIORIDAD - Regex & Other (refinamientos)\n";
-    
+
     echo "\n📈 ESTADÍSTICAS:\n";
     echo "================\n";
     echo "Total errores encontrados: " . count($allErrors) . "\n";

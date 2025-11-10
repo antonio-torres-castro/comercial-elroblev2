@@ -174,6 +174,11 @@ class ProjectController extends BaseController
             $_GET['show_btn_cambiar_estado'] = $rEliminate;
             $_GET['show_btn_ver'] = $rRead;
 
+            $fecha_inicio = $_POST['fecha_inicio'] ?? null;
+            $fecha_fin = $_POST['fecha_fin'] ?? date("Y-m-d");
+            //siempre con una fecha de tope a hoy, en caso que no se haya indicado
+            $_GET['fecha_fin'] = $fecha_fin;
+
             $id = $id == 0 ? (int)($_POST['proyecto_id'] ?? 0) : $id;
             if ($id <= 0) {
                 $error .= "<br> " . AppConstants::ERROR_INVALID_PROJECT_ID;
@@ -189,11 +194,11 @@ class ProjectController extends BaseController
             $page = isset($_POST['page']) && is_numeric($_POST['page']) && $_POST['page'] > 0 ? (int)$_POST['page'] : 1;
             $offset = ($page - 1) * $perPage;
             // Contar total de registros según filtros
-            $totalTareas = $this->projectModel->countProjectTasks($id, $perPage, $offset);
+            $totalTareas = $this->projectModel->countProjectTasks($id, $fecha_inicio, $fecha_fin);
             $totalPages = max(1, ceil($totalTareas / $perPage));
 
             // Obtener tareas del proyecto paginadas
-            $tasks = $this->projectModel->getProjectTasks($id, $perPage, $offset);
+            $tasks = $this->projectModel->getProjectTasks($id, $perPage, $offset, $fecha_inicio, $fecha_fin);
 
             ob_start();
             include __DIR__ . '/../Views/projects/partials/card_tasks.php';

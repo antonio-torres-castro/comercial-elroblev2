@@ -8,7 +8,7 @@ use App\Constants\AppConstants;
 /**
  * Tests para validar el funcionamiento de las constantes de la aplicación
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-10
  */
 class AppConstantsTest extends TestCase

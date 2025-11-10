@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Script para limpiar vendor de archivos innecesarios para producción
- * Autor: MiniMax Agent
+ * 
  */
 
 echo "🧹 Iniciando limpieza de vendor para producción...\n";
@@ -10,13 +11,13 @@ echo "🧹 Iniciando limpieza de vendor para producción...\n";
 $patterns = [
     // Tests y archivos de prueba
     '/test\.php$/i',
-    '/Test\.php$/i', 
+    '/Test\.php$/i',
     '/_test\.php$/i',
     '/.*\/tests\//i',
     '/.*\/test\//i',
     '/.*\/Tests\//i',
     '/.*\/Test\//i',
-    
+
     // Documentación (mantener solo CHANGELOG y LICENSE)
     '/\.md$/i',
     '/\.rst$/i',
@@ -24,29 +25,29 @@ $patterns = [
     '!/CHANGELOG\.md$/i',
     '!/LICENSE.*$/i',
     '!/COPYING.*$/i',
-    
+
     // Archivos de desarrollo
     '/\.dev$/i',
     '/\.dist$/i',
     '/\.sample$/i',
     '/\.example$/i',
-    
+
     // Git y control de versiones
     '/\.gitignore$/i',
     '/\.gitattributes$/i',
     '/\.github\//i',
-    
+
     // Archivos temporales
     '/\.tmp$/i',
     '/\.temp$/i',
     '/\.log$/i',
     '/\.cache$/i',
-    
+
     // Archivos del sistema
     '/\.DS_Store$/i',
     '/Thumbs\.db$/i',
     '/desktop\.ini$/i',
-    
+
     // Archivos de编辑器
     '/\.vscode\//i',
     '/\.idea\//i',
@@ -70,20 +71,20 @@ foreach ($iterator as $file) {
     if ($file->isFile()) {
         $filePath = $file->getPathname();
         $relativePath = str_replace($vendorDir . '/', '', $filePath);
-        
+
         $shouldRemove = false;
-        
+
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $relativePath)) {
                 $shouldRemove = true;
                 break;
             }
         }
-        
+
         if ($shouldRemove) {
             $fileSize = $file->getSize();
             $totalSize += $fileSize;
-            
+
             if (unlink($filePath)) {
                 $removed++;
                 echo "🗑️  Eliminado: " . $relativePath . " (" . formatBytes($fileSize) . ")\n";
@@ -94,20 +95,21 @@ foreach ($iterator as $file) {
 
 // Eliminar directorios vacíos
 $emptyDirs = 0;
-function removeEmptyDirectories($dir) {
+function removeEmptyDirectories($dir)
+{
     global $emptyDirs;
-    
+
     if (!is_dir($dir)) return;
-    
+
     $files = array_diff(scandir($dir), ['.', '..']);
-    
+
     foreach ($files as $file) {
         $path = $dir . '/' . $file;
         if (is_dir($path)) {
             removeEmptyDirectories($path);
         }
     }
-    
+
     // Si el directorio está vacío, eliminarlo
     $files = array_diff(scandir($dir), ['.', '..']);
     if (empty($files)) {
@@ -126,9 +128,9 @@ echo "💾 Espacio liberado: " . formatBytes($totalSize) . "\n";
 echo "📁 Directorios vacíos eliminados: $emptyDirs\n";
 echo "\n🎉 Limpieza completada!\n";
 
-function formatBytes($size, $precision = 2) {
+function formatBytes($size, $precision = 2)
+{
     $units = ['B', 'KB', 'MB', 'GB'];
     $base = log($size, 1024);
     return round(pow(1024, $base - floor($base)), $precision) . ' ' . $units[floor($base)];
 }
-?>

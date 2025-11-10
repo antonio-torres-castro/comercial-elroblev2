@@ -1,6 +1,6 @@
 # 🛠️ Guía de Debug Web-Only para Producción
 
-**Autor:** MiniMax Agent  
+
 **Fecha:** 2025-10-24  
 **Entorno:** Producción sin acceso a consola (Solo web + phpMyAdmin)
 

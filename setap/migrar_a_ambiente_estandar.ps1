@@ -1,7 +1,7 @@
 # ============================================================================
 # MIGRACION DE AMBIENTE VIRTUAL A AMBIENTE ESTANDAR PHP
 # Script: migrar_a_ambiente_estandar.ps1
-# Autor: MiniMax Agent
+# 
 # Fecha: 2025-10-23
 # ============================================================================
 
@@ -76,7 +76,8 @@ if (Test-Path "venv\composer.json") {
     if (-not (Test-Path "composer.json")) {
         Copy-Item "venv\composer.json" "composer.json" -Force
         Write-Host "  composer.json copiado a raiz" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "  composer.json ya existe en raiz" -ForegroundColor Cyan
     }
 }
@@ -85,7 +86,8 @@ if (Test-Path "venv\composer.lock") {
     if (-not (Test-Path "composer.lock")) {
         Copy-Item "venv\composer.lock" "composer.lock" -Force
         Write-Host "  composer.lock copiado a raiz" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "  composer.lock ya existe en raiz" -ForegroundColor Cyan
     }
 }

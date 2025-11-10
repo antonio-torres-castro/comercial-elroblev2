@@ -147,4 +147,4 @@ Antes de crear el .zip, verifica:
 ---
 
 **Fecha de última actualización:** 2025-10-23  
-**Autor:** MiniMax Agent
+

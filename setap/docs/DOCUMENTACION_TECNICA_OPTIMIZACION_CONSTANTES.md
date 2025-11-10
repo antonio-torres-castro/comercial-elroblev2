@@ -5,7 +5,7 @@
 **Proyecto:** Sistema de Gestión de Tareas y Proyectos (SETAP)  
 **Fecha de Documentación:** 2025-10-10  
 **Versión:** 1.0  
-**Autor:** MiniMax Agent  
+
 
 ---
 
@@ -484,5 +484,5 @@ La aplicación está ahora preparada para un crecimiento sostenible y mantenible
 ---
 
 **Documentación generada:** 2025-10-10  
-**Autor:** MiniMax Agent  
+
 **Estado:** ✅ Completado

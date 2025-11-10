@@ -3,7 +3,7 @@
 /**
  * Script de ejecución de tests para validar la cobertura implementada
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 
@@ -16,7 +16,7 @@ echo "================================================\n\n";
 // Validar que las clases de test existen
 $testFiles = [
     'tests/Unit/AppConstantsTest.php',
-    'tests/Unit/PersonaControllerTest.php', 
+    'tests/Unit/PersonaControllerTest.php',
     'tests/Unit/TaskControllerTest.php',
     'tests/Unit/ProjectControllerTest.php',
     'tests/Unit/UserTest.php',
@@ -29,14 +29,14 @@ $totalTests = 0;
 
 foreach ($testFiles as $testFile) {
     $fullPath = __DIR__ . '/' . $testFile;
-    
+
     if (file_exists($fullPath)) {
         echo "✅ Test encontrado: $testFile\n";
-        
+
         // Contar métodos de test en el archivo
         $content = file_get_contents($fullPath);
         $testMethods = preg_match_all('/public function test\w+/', $content, $matches);
-        
+
         echo "   📊 Métodos de test: $testMethods\n";
         $totalTests += $testMethods;
         $validatedTests++;
@@ -56,37 +56,36 @@ echo "============================\n";
 
 try {
     require_once __DIR__ . '/src/App/Constants/AppConstants.php';
-    
+
     $reflection = new ReflectionClass('App\Constants\AppConstants');
     $constants = $reflection->getConstants();
-    
+
     echo "✅ AppConstants cargado correctamente\n";
     echo "📊 Total constantes definidas: " . count($constants) . "\n";
-    
+
     // Validar constantes críticas
     $criticalConstants = [
         'ROUTE_HOME',
-        'ROUTE_USERS', 
+        'ROUTE_USERS',
         'ROUTE_TASKS',
         'ROUTE_PROJECTS',
         'UI_TASK_MANAGEMENT',
         'ERROR_USER_NOT_FOUND',
         'SUCCESS_CREATED'
     ];
-    
+
     $missingConstants = [];
     foreach ($criticalConstants as $constant) {
         if (!array_key_exists($constant, $constants)) {
             $missingConstants[] = $constant;
         }
     }
-    
+
     if (empty($missingConstants)) {
         echo "✅ Todas las constantes críticas están definidas\n";
     } else {
         echo "⚠️  Constantes faltantes: " . implode(', ', $missingConstants) . "\n";
     }
-    
 } catch (Exception $e) {
     echo "❌ Error cargando AppConstants: " . $e->getMessage() . "\n";
 }
@@ -97,7 +96,7 @@ echo "===============================\n";
 
 $controllers = [
     'PersonaController',
-    'TaskController', 
+    'TaskController',
     'ProjectController',
     'UserController',
     'AuthController'
@@ -113,19 +112,19 @@ $controllerMethods = [
 
 foreach ($controllers as $controller) {
     $controllerFile = __DIR__ . "/src/App/Controllers/{$controller}.php";
-    
+
     if (file_exists($controllerFile)) {
         echo "✅ $controller encontrado\n";
-        
+
         $content = file_get_contents($controllerFile);
         $foundMethods = [];
-        
+
         foreach ($controllerMethods as $method => $description) {
             if (strpos($content, "function $method(") !== false) {
                 $foundMethods[] = $method;
             }
         }
-        
+
         echo "   📋 Métodos implementados: " . implode(', ', $foundMethods) . "\n";
     } else {
         echo "❌ $controller no encontrado\n";
@@ -164,5 +163,5 @@ if ($avgCoverage >= 70) {
 echo "\n🚀 Testing implementado exitosamente!\n";
 echo "=====================================\n";
 echo "Total archivos de test creados: $validatedTests\n";
-echo "Total métodos de test implementados: $totalTests\n"; 
+echo "Total métodos de test implementados: $totalTests\n";
 echo "Cobertura estimada: {$avgCoverage}%\n\n";

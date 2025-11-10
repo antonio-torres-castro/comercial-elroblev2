@@ -3,7 +3,7 @@
 /**
  * Analizador de Base de Datos Web-Only
  * Complementa phpMyAdmin con análisis específico para la aplicación
- * Autor: MiniMax Agent
+ * 
  */
 
 // Configuración de seguridad

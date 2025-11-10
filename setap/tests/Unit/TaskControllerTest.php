@@ -11,7 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 /**
  * Tests unitarios para TaskController
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 class TaskControllerTest extends TestCase
@@ -23,11 +23,11 @@ class TaskControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Mock de dependencias
         $this->taskModelMock = $this->createMock(Task::class);
         $this->permissionServiceMock = $this->createMock(PermissionService::class);
-        
+
         // Mock de sesión para simular usuario autenticado
         $_SESSION = [
             'user_id' => 1,
@@ -66,7 +66,7 @@ class TaskControllerTest extends TestCase
                 'planificador_nombre' => 'María González'
             ]
         ];
-        
+
         $this->taskModelMock
             ->method('getAll')
             ->willReturn($expectedTasks);
@@ -75,11 +75,11 @@ class TaskControllerTest extends TestCase
         $this->taskModelMock->method('getProjects')->willReturn([
             ['id' => 1, 'nombre' => 'Proyecto Test']
         ]);
-        
+
         $this->taskModelMock->method('getTaskStates')->willReturn([
             ['id' => 1, 'nombre' => 'En Progreso']
         ]);
-        
+
         $this->taskModelMock->method('getUsers')->willReturn([
             ['id' => 1, 'nombre' => 'Juan Pérez']
         ]);
@@ -145,7 +145,7 @@ class TaskControllerTest extends TestCase
         $invalidDates = [
             '2025-13-01', // Mes inválido
             '2025-02-30', // Día inválido
-	    '2025-02-31', // Día inválido
+            '2025-02-31', // Día inválido
             '2025-02-32', // Día inválido (32 no está en el rango)
             '25-10-11',   // Formato incorrecto
             'invalid',    // Completamente inválido
@@ -204,7 +204,7 @@ class TaskControllerTest extends TestCase
         $this->assertArrayHasKey('proyecto_id', $filters);
         $this->assertArrayHasKey('estado_tipo_id', $filters);
         $this->assertArrayHasKey('usuario_id', $filters);
-        
+
         foreach ($filters as $key => $value) {
             $this->assertIsInt($value, "Filtro {$key} debe ser entero");
             $this->assertGreaterThan(0, $value, "Filtro {$key} debe ser positivo");
@@ -217,7 +217,7 @@ class TaskControllerTest extends TestCase
     public function testEditExistingTask()
     {
         $taskId = 1;
-        
+
         // Mock de tarea existente
         $existingTask = [
             'id' => $taskId,
@@ -228,7 +228,7 @@ class TaskControllerTest extends TestCase
             'duracion_horas' => 4.0,
             'estado_tipo_id' => 1
         ];
-        
+
         $this->taskModelMock
             ->method('getById')
             ->with($taskId)
@@ -248,7 +248,7 @@ class TaskControllerTest extends TestCase
     {
         // Prioridades válidas (asumiendo rango 0-3)
         $validPriorities = [0, 1, 2, 3];
-        
+
         // Prioridades inválidas
         $invalidPriorities = [-1, 4, 10, 'alta', '', null];
 
@@ -295,7 +295,7 @@ class TaskControllerTest extends TestCase
     public function testFindNonExistentTask()
     {
         $nonExistentId = 999;
-        
+
         $this->taskModelMock
             ->method('getById')
             ->with($nonExistentId)
@@ -308,7 +308,7 @@ class TaskControllerTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Limpiar sesión
         $_SESSION = [];
     }

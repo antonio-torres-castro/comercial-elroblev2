@@ -3,7 +3,7 @@
 /**
  * Configuración Centralizada para Herramientas de Debug
  * Incluye todas las configuraciones necesarias para el sistema de depuración
- * Autor: MiniMax Agent
+ * 
  */
 
 // IPs autorizadas (configuración centralizada)

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (projectIdInput) {
         currentProjectId = projectIdInput.value;
     }
-    refreshCardTasks()
+    refreshCardTasks();
     attachPaginationHandlers();
 });
 
@@ -28,7 +28,13 @@ async function refreshCardTasks(page = 1) {
     try {
         const formData = new FormData();
         formData.append('proyecto_id', currentProjectId);
-        formData.append('page', page);
+        formData.append('page', page);        
+        if (document.getElementById('fecha_inicio_filtro') != null){
+            formData.append('fecha_inicio', document.getElementById('fecha_inicio_filtro').value)
+        }
+        if (document.getElementById('fecha_fin_filtro') != null){
+            formData.append('fecha_fin', document.getElementById('fecha_fin_filtro').value)
+        }
 
         const response = await fetch('/setap/project/refreshCardTasks', {
             method: 'POST',
@@ -64,4 +70,10 @@ function attachPaginationHandlers() {
             if (page) refreshCardTasks(page);
         });
     });
+}
+
+function filterClear(){
+    document.getElementById('fecha_inicio_filtro').value = undefined;
+    document.getElementById('fecha_fin_filtro').value = undefined;
+    refreshCardTasks();
 }

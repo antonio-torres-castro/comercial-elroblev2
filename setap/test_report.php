@@ -3,7 +3,7 @@
 /**
  * Generador de reporte detallado de testing
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-11
  */
 
@@ -15,7 +15,7 @@ echo "=====================================\n\n";
 // 1. Análisis de coverage por módulo
 $modules = [
     'PersonaController' => 'tests/Unit/PersonaControllerTest.php',
-    'TaskController' => 'tests/Unit/TaskControllerTest.php', 
+    'TaskController' => 'tests/Unit/TaskControllerTest.php',
     'ProjectController' => 'tests/Unit/ProjectControllerTest.php',
     'UserTest' => 'tests/Unit/UserTest.php',
     'AuthTest' => 'tests/Integration/AuthTest.php',
@@ -31,27 +31,27 @@ $totalAssertions = 0;
 
 foreach ($modules as $module => $testFile) {
     echo "\n📋 $module:\n";
-    
+
     if (file_exists(__DIR__ . '/' . $testFile)) {
         $content = file_get_contents(__DIR__ . '/' . $testFile);
-        
+
         // Contar métodos de test
         $testMethods = preg_match_all('/public function test\w+/', $content, $matches);
-        
+
         // Contar assertions
         $assertions = preg_match_all('/\$this->assert\w+\(/', $content, $assertMatches);
-        
+
         echo "   ✅ Archivo: $testFile\n";
         echo "   🧪 Métodos de test: $testMethods\n";
         echo "   🔍 Assertions: $assertions\n";
-        
+
         // Calcular cobertura estimada
         $coverage = min(90, ($assertions / max(1, $testMethods)) * 10);
         echo "   📊 Cobertura estimada: " . round($coverage) . "%\n";
-        
+
         $totalTests += $testMethods;
         $totalAssertions += $assertions;
-        
+
         // Identificar tipos de tests
         $testTypes = [];
         if (strpos($content, 'permissions') !== false) $testTypes[] = 'Permisos';
@@ -59,11 +59,10 @@ foreach ($modules as $module => $testFile) {
         if (strpos($content, 'CRUD') !== false || strpos($content, 'store') !== false) $testTypes[] = 'CRUD';
         if (strpos($content, 'filter') !== false) $testTypes[] = 'Filtros';
         if (strpos($content, 'session') !== false) $testTypes[] = 'Sesiones';
-        
+
         if (!empty($testTypes)) {
             echo "   🏷️  Tipos: " . implode(', ', $testTypes) . "\n";
         }
-        
     } else {
         echo "   ❌ Archivo no encontrado\n";
     }
@@ -82,7 +81,7 @@ echo "=======================\n";
 $sourceFiles = [
     'src/App/Controllers/PersonaController.php',
     'src/App/Controllers/TaskController.php',
-    'src/App/Controllers/ProjectController.php', 
+    'src/App/Controllers/ProjectController.php',
     'src/App/Controllers/UserController.php',
     'src/App/Controllers/AuthController.php',
     'src/App/Constants/AppConstants.php'
@@ -94,7 +93,7 @@ $untestedFiles = [];
 foreach ($sourceFiles as $sourceFile) {
     $basename = basename($sourceFile, '.php');
     $hasTest = false;
-    
+
     foreach ($modules as $module => $testFile) {
         if (stripos($module, $basename) !== false) {
             $hasTest = true;
@@ -102,7 +101,7 @@ foreach ($sourceFiles as $sourceFile) {
             break;
         }
     }
-    
+
     if (!$hasTest) {
         $untestedFiles[] = $sourceFile;
     }

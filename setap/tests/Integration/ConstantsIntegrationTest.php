@@ -8,7 +8,7 @@ use App\Constants\AppConstants;
 /**
  * Tests de integración para validar el uso correcto de constantes en los módulos optimizados
  * 
- * @author MiniMax Agent
+ * 
  * @date 2025-10-10
  */
 class ConstantsIntegrationTest extends TestCase

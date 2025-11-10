@@ -449,5 +449,5 @@ README_DEPLOYMENT.md
 
 **Creado**: 2025-10-22  
 **Versión**: 1.0  
-**Autor**: MiniMax Agent  
+  
 **Sistema**: SETAP - Sistema de Gestión
