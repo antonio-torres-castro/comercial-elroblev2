@@ -177,7 +177,12 @@ class ProjectController extends BaseController
             $fecha_inicio = $_POST['fecha_inicio'] ?? null;
             $fecha_fin = $_POST['fecha_fin'] ?? date("Y-m-d");
             //siempre con una fecha de tope a hoy, en caso que no se haya indicado
-            $_GET['fecha_fin'] = $fecha_fin;
+            if ($fecha_inicio != null) {
+                $_GET['fecha_inicio'] = $fecha_inicio;
+            }
+            if ($fecha_fin != null) {
+                $_GET['fecha_fin'] = $fecha_fin;
+            }
 
             $id = $id == 0 ? (int)($_POST['proyecto_id'] ?? 0) : $id;
             if ($id <= 0) {

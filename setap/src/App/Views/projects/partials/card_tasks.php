@@ -1,4 +1,4 @@
-<div class="card-header d-flex justify-content-between">
+<div class="card-header justify-content-between">
 
     <h5><i class="bi bi-list-task"></i> Tareas</h5>
 
