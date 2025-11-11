@@ -160,40 +160,41 @@ class ReportService
     private function generateTasksSummary($parameters)
     {
         $sql = "SELECT 
-                    t.id,
-                    t.nombre as tarea_nombre,
-                    p.id as proyecto_id,
-                    c.razon_social as nombre as cliente_nombre,
-                    tt.nombre as tipo_tarea,
-                    et.nombre as estado,
-                    t.fecha_creacion
-                FROM tareas t
-                LEFT JOIN proyectos p ON t.proyecto_id = p.id
-                LEFT JOIN clientes c ON p.cliente_id = c.id
-                LEFT JOIN tarea_tipos tt ON t.tarea_tipo_id = tt.id
-                LEFT JOIN estado_tipos et ON t.estado_tipo_id = et.id
-                WHERE 1=1";
+                    pt.id, -- id de instancia de la tarea en proyecto
+                    t.nombre       as tarea_nombre,
+                    p.id           as proyecto_id,
+                    c.razon_social as cliente_nombre,
+                    tt.nombre      as tipo_tarea,
+                    et.nombre      as estado,
+                    pt.fecha_inicio
+                      FROM proyectos       p
+                INNER JOIN proyecto_tareas pt ON pt.proyecto_id    = p.id
+                INNER JOIN tareas          t  on t.estado_tipo_id  = 2 and t.id = pt.tarea_id 
+                INNER JOIN clientes        c  ON p.cliente_id      = c.id
+                INNER JOIN tarea_tipos     tt ON tt.id             = p.tarea_tipo_id
+                INNER JOIN estado_tipos    et ON pt.estado_tipo_id = et.id
+                WHERE pt.estado_tipo_id != 4";
 
         $params = [];
 
         // Filtros de fecha
         if (!empty($parameters['date_from'])) {
-            $sql .= " AND t.fecha_creacion >= ?";
+            $sql .= " AND pt.fecha_inicio >= ?";
             $params[] = $parameters['date_from'];
         }
 
         if (!empty($parameters['date_to'])) {
-            $sql .= " AND t.fecha_creacion <= ?";
+            $sql .= " AND pt.fecha_inicio <= ?";
             $params[] = $parameters['date_to'];
         }
 
         // Filtro por proyecto
         if (!empty($parameters['project_id'])) {
-            $sql .= " AND t.proyecto_id = ?";
+            $sql .= " AND p.id = ?";
             $params[] = $parameters['project_id'];
         }
 
-        $sql .= " ORDER BY t.fecha_creacion DESC";
+        $sql .= " ORDER BY pt.fecha_inicio DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -296,7 +297,7 @@ class ReportService
     /**
      * Generar reporte de resumen de clientes
      */
-    private function generateClientsSummary($parameters)
+    private function generateClientsSummary(?array $parameters = [])
     {
         $sql = "SELECT 
                     c.id,
@@ -308,23 +309,17 @@ class ReportService
                     c.fecha_Creado as fecha_creacion,
                     COUNT(p.id) as total_proyectos
                 FROM clientes c
-                LEFT JOIN proyectos p ON c.id = p.cliente_id
-                WHERE 1=1";
+                LEFT JOIN proyectos p ON c.id = p.cliente_id and p.estado_tipo_id = 2";
 
         $params = [];
 
         // Filtros de fecha
-        if (!empty($parameters['date_from'])) {
-            $sql .= " AND c.fecha_Creado as fecha_creacion >= ?";
-            $params[] = $parameters['date_from'];
-        }
-
         if (!empty($parameters['date_to'])) {
-            $sql .= " AND c.fecha_Creado as fecha_creacion <= ?";
+            $sql .= " AND c.fecha_termino_contrato <= ?";
             $params[] = $parameters['date_to'];
         }
 
-        $sql .= " GROUP BY c.id ORDER BY c.razon_social as nombre";
+        $sql .= " GROUP BY c.id ORDER BY c.razon_social";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -364,16 +359,15 @@ class ReportService
     /**
      * Generar reporte personalizado
      */
-    private function generateCustomReport($parameters)
+    private function generateCustomReport(?array $parametros = [])
     {
         // Implementación básica para reporte personalizado
         // En una implementación real, esto podría ser mucho más complejo
-
         return [
             'summary' => [
                 'message' => 'Reporte personalizado',
                 'status' => 'En desarrollo',
-                'parameters' => count($parameters),
+                'parameters' => count($parametros),
                 'generated' => date('Y-m-d H:i:s')
             ],
             'data' => [

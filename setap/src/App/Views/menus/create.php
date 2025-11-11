@@ -164,7 +164,11 @@ use App\Constants\AppConstants;
                                             <i class="bi bi-check-circle"></i> Crear Menú
                                         </button>
                                     </div>
+
+                                    <br>
+                                    <br>
                                 </form>
+
                             </div>
                         </div>
                     </div>

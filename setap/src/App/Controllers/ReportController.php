@@ -128,7 +128,7 @@ class ReportController extends BaseController
             require_once __DIR__ . '/../Views/reports/view.php';
         } catch (Exception $e) {
             Logger::error("ReportController::generate: " . $e->getMessage());
-            $this->redirectWithError(AppConstants::ROUTE_REPORTS . '/create', 'Error al generar el reporte: ' . $e->getMessage());
+            $this->redirectWithError(AppConstants::ROUTE_REPORTS, 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 

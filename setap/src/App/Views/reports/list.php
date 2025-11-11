@@ -62,9 +62,9 @@ use App\Constants\AppConstants; ?>
             </div>
 
             <!-- Alertas -->
-            <?php if (!empty($error)): ?>
+            <?php if (!empty($error) || !empty($_GET['error'])): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error ?? $_GET['error'] ?? '') ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
