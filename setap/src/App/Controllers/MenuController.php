@@ -467,8 +467,8 @@ class MenuController extends BaseController
                 return;
             }
 
-            $menuId = (int)($_POST['menu_id'] ?? 0);
-            $newStatus = (int)($_POST['new_status'] ?? 0);
+            $menuId = (int)($_POST['id'] ?? 0);
+            $newStatus = (int)($_POST['status'] ?? 0);
 
             if (!$menuId || !in_array($newStatus, [1, 2])) {
                 $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Datos inválidos');

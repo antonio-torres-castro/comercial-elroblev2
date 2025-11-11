@@ -216,7 +216,7 @@ class ReportController extends BaseController
                 'action' => 'index'
             ];
 
-            require_once __DIR__ . '/../Views/reports/index.php';
+            require_once __DIR__ . '/../Views/reports/list.php';
         } catch (Exception $e) {
             Logger::error("ReportController::index: " . $e->getMessage());
             http_response_code(500);
