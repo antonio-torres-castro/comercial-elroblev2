@@ -189,8 +189,8 @@ try {
                     $controller->changeStatus();
                     break;
 
-                case 'report':
-                    $controller->report();
+                case 'reports':
+                    $controller->index();
                     break;
 
                 case '':
@@ -214,6 +214,10 @@ try {
 
                 case 'refreshCardTasks':
                     $controller->refreshCardTasks();
+                    break;
+
+                case 'report':
+                    $controller->report();
                     break;
 
                 case '':

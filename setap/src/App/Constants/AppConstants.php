@@ -99,7 +99,10 @@ class AppConstants
     const ROUTE_PROJECTS_UPDATE = '/setap/projects/update';
 
     /** Ruta de reporte de proyecto */
-    const ROUTE_PROJECTS_REPORT = '/setap/projects/report';
+    const ROUTE_PROJECT_REPORT = '/setap/project/report';
+
+    /** Ruta de reporte de proyecto */
+    const ROUTE_PROJECTS_REPORTS = '/setap/projects/reports';
 
     /** Ruta de reporte de proyecto */
     const ROUTE_PROJECT_HOLIDAYS = "/setap/proyecto-feriados";

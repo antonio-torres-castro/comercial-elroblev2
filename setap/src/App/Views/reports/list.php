@@ -238,7 +238,7 @@ use App\Constants\AppConstants; ?>
 
                 <!-- Reporte Personalizado -->
                 <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card report-card h-100 border-0 shadow-sm" onclick="window.location.href='/reports/create'">
+                    <div class="card report-card h-100 border-0 shadow-sm" onclick="window.location.href='<?= AppConstants::ROUTE_REPORTS ?>/create'">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="text-secondary me-3">

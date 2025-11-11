@@ -283,7 +283,7 @@ use App\Constants\AppConstants; ?>
                                 </a>
                             <?php endif; ?>
                             <?php if ($_GET['show_btn_ver']): ?>
-                                <a href="<?= AppConstants::ROUTE_PROJECTS_REPORT ?>?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
+                                <a href="<?= AppConstants::ROUTE_PROJECT_REPORT ?>?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
                                     <i class="bi bi-file-earmark-text"></i> Generar Reporte
                                 </a>
                             <?php endif; ?>

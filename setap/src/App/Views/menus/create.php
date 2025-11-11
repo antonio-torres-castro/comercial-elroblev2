@@ -144,12 +144,9 @@ use App\Constants\AppConstants;
                                             <div class="mb-3">
                                                 <label for="menu_grupo_id" class="form-label">Grupo</label>
                                                 <select class="form-select" id="menu_grupo_id" name="menu_grupo_id">
-                                                    <?php
-                                                    $selectedGroup = $data['menu']['menu_grupo_id'] ?? 1;
-                                                    foreach ($data['menuGroups'] as $group):
-                                                    ?>
-                                                        <option value="<?php echo $group['id']; ?>"
-                                                            <?php echo ($group['id'] == $selectedGroup) ? 'selected' : ''; ?>>
+                                                    <option value="">Sin grupo</option>
+                                                    <?php foreach ($data['menuGroups'] as $group): ?>
+                                                        <option value="<?php echo $group['id']; ?>">
                                                             <?php echo htmlspecialchars($group['descripcion']); ?>
                                                         </option>
                                                     <?php endforeach; ?>

@@ -40,7 +40,7 @@ class ReportController extends BaseController
             }
 
             // Verificar permisos - ESTANDARIZADO
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'create_reports')) {
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'create_report')) {
                 http_response_code(403);
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
@@ -198,7 +198,7 @@ class ReportController extends BaseController
             }
 
             // Verificar permisos
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'view_reports')) {
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_reports')) {
                 http_response_code(403);
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;

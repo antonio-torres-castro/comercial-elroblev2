@@ -90,7 +90,7 @@ class ReportService
     {
         $sql = "SELECT 
                     p.id,
-                    c.razon_social as nombre as cliente_nombre,
+                    c.razon_social as cliente_nombre,
                     p.fecha_inicio,
                     p.fecha_fin,
                     et.nombre as estado,
