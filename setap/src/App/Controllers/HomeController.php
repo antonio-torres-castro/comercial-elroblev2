@@ -48,7 +48,7 @@ class HomeController extends BaseController
         }
     }
 
-    private function getHomeStats(array $user): array
+    private function getHomeStats(?array $user = []): array
     {
         // Estadísticas básicas por defecto
         $stats = [
@@ -60,8 +60,8 @@ class HomeController extends BaseController
 
         try {
             // Solo mostrar estadísticas si el usuario tiene permisos
-            if (Security::hasPermission('Read') || Security::hasPermission('All')) {
-                $stats = $this->calculateStats();
+            if (Security::hasPermission('Read')) {
+                $stats = $this->calculateStats($user);
             }
         } catch (Exception $e) {
             Logger::error("calculando estadísticas: " . $e->getMessage());
@@ -70,31 +70,42 @@ class HomeController extends BaseController
         return $stats;
     }
 
-    private function calculateStats(): array
+    private function calculateStats(?array $cUser = []): array
     {
         try {
             $db = \App\Config\Database::getInstance();
+            $params = [];
 
-            // 1. Total usuarios (excluir eliminados: estado_tipo_id != 4)
-            $stmt = $db->prepare("SELECT COUNT(*) FROM usuarios WHERE estado_tipo_id != 4");
-            $stmt->execute();
+            $cliente_id = $cUser['cliente_id'] ?? 0;
+
+            $sqlAnd = $cliente_id > 0 ? " and cliente_id = ?" : "";
+            if ($cliente_id > 0) {
+                $params[] =  $cliente_id;
+            }
+
+            // 1. Total usuarios activos
+            $stmt = $db->prepare("SELECT COUNT(1) FROM usuarios WHERE estado_tipo_id = 2" . $sqlAnd);
+            $stmt->execute($params);
             $totalUsuarios = $stmt->fetchColumn();
 
-            // 2. Total proyectos (excluir eliminados: estado_tipo_id != 4)
-            $stmt = $db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id != 4");
-            $stmt->execute();
+            // 2. Total proyectos
+            $stmt = $db->prepare("SELECT COUNT(1) FROM proyectos WHERE estado_tipo_id != 4" . $sqlAnd);
+            $stmt->execute($params);
             $totalProyectos = $stmt->fetchColumn();
 
-            // 3. Proyectos activos (estado activo=2 o iniciado=5)
-            $stmt = $db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id IN (2, 5)");
-            $stmt->execute();
+            // 3. Proyectos activos (estado activo)
+            $stmt = $db->prepare("SELECT COUNT(1) FROM proyectos WHERE fecha_inicio < curdate() and fecha_fin > curdate() and estado_tipo_id IN (2, 5)" . $sqlAnd);
+            $stmt->execute($params);
             $proyectosActivos = $stmt->fetchColumn();
 
             // 4. Tareas pendientes (estado activo=2, o iniciado=5, rechazado=7).
-            //// ToDo: Esto debe ser consultado con la fecha actual (Now()),
-            ////       todas las tareas con los estados en (2, 5) que tengan fecha_inicio < = fecha actual
-            $stmt = $db->prepare("SELECT COUNT(*) FROM proyecto_tareas WHERE estado_tipo_id IN (2, 5, 7)");
-            $stmt->execute();
+            $sqlAnd = $cliente_id > 0 ? " and pt.cliente_id = ?" : "";
+            $stmt = $db->prepare("SELECT count(1) 
+                                  FROM proyecto_tareas pt 
+                                  Inner Join proyectos p on p.id = pt.proyecto_id 
+                                  WHERE p.fecha_inicio < curdate() and p.fecha_fin > curdate()
+                                  and pt.estado_tipo_id IN (2, 5, 6, 7)" . $sqlAnd);
+            $stmt->execute($params);
             $tareasPendientes = $stmt->fetchColumn();
 
             return [
