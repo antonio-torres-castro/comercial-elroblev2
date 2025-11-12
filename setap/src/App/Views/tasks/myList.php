@@ -31,7 +31,7 @@ use App\Constants\AppConstants; ?>
                     <div class="col-md-6">
                         <h2>
                             <i class="bi bi-list-check"></i> <?= AppConstants::UI_MY_TASK_MANAGEMENT; ?>
-                            <span class="badge bg-secondary ms-2"><?= count($data['tasks'] ?? []) ?> tareas</span>
+                            <span class="badge bg-secondary ms-2"><?= $totalRows ?> tareas</span>
                         </h2>
                     </div>
                     <div class="col-md-6 text-end" hidden>

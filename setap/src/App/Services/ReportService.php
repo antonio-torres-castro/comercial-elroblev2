@@ -138,7 +138,7 @@ class ReportService
             'completed_projects' => 0,
             'average_duration' => 0
         ];
-
+        $suma_duracion = 0;
         foreach ($data as $project) {
             if (strpos(strtolower($project['estado']), 'activo') !== false) {
                 $summary['active_projects']++;

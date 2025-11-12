@@ -35,8 +35,9 @@ use App\Constants\AppConstants; ?>
                     <div class="col-md-6">
                         <h2>
                             <i class="bi bi-list-check"></i> <?php echo AppConstants::UI_TASK_MANAGEMENT; ?>
-                            <span class="badge bg-secondary ms-2"><?= count($data['tasks'] ?? []) ?> tareas</span>
+                            <span class="badge bg-secondary ms-1"><?= $totalRows ?> tareas</span>
                         </h2>
+
                     </div>
 
                     <?php if ($_GET['show_btn_nuevo']): ?>
