@@ -111,16 +111,17 @@ class ReportController extends BaseController
                 'date_from' => $dateFrom,
                 'date_to' => $dateTo,
                 'client_id' => $clientId,
-                'project_id' => $projectId
+                'project_id' => $projectId,
+                'usuario_id' => $currentUser['id'],
+                'cliente_id' => $currentUser['cliente_id'],
+                'contraparte_id' => $currentUser['contraparte_id']
             ]);
+
+            $reportType = str_replace('_', ' ', $reportType);
 
             // Preparar datos para la vista - ESTANDARIZADO
             $data = [
-                'user' => $currentUser,
-                'title' => AppConstants::UI_REPORT_GENERATED,
-                'subtitle' => $this->getReportTitle($reportType),
-                'reportData' => $reportData,
-                'reportType' => $reportType,
+                'reportTitle' => $this->getReportTitle(explode(' ', $reportType)[0]),
                 'generatedAt' => date('Y-m-d H:i:s'),
                 'action' => 'view'
             ];

@@ -7,7 +7,7 @@ use App\Constants\AppConstants; ?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($reportTitle ?? 'Reporte') ?> - SETAP</title>
+    <title><?= htmlspecialchars($data['reportTitle'] ?? 'Reporte') ?> - SETAP</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/setap/public/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/setap/public/favicon.svg">
@@ -62,10 +62,10 @@ use App\Constants\AppConstants; ?>
                 <div class="col-md-8">
                     <h1 class="mb-1">
                         <i class="bi bi-file-earmark-text"></i>
-                        <?= htmlspecialchars($reportTitle ?? 'Reporte del Sistema') ?>
+                        <?= htmlspecialchars($data['reportTitle'] ?? 'Reporte del Sistema') ?>
                     </h1>
                     <p class="mb-0 opacity-75">
-                        Generado el <?= date('d/m/Y H:i', strtotime($generatedAt ?? 'now')) ?>
+                        Generado el <?= date('d/m/Y H:i', strtotime($data['generatedAt'] ?? 'now')) ?>
                     </p>
                 </div>
                 <div class="col-md-4 text-end no-print">
@@ -234,8 +234,8 @@ use App\Constants\AppConstants; ?>
                             </h6>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p class="mb-1"><strong>Tipo:</strong> <?= htmlspecialchars($reportTitle ?? 'N/A') ?></p>
-                                    <p class="mb-1"><strong>Generado:</strong> <?= date('d/m/Y H:i:s', strtotime($generatedAt ?? 'now')) ?></p>
+                                    <p class="mb-1"><strong>Tipo:</strong> <?= htmlspecialchars($reportType ?? 'N/A') ?></p>
+                                    <p class="mb-1"><strong>Generado:</strong> <?= date('d/m/Y H:i:s', strtotime($data['generatedAt'] ?? 'now')) ?></p>
                                 </div>
                                 <div class="col-md-6">
                                     <p class="mb-1"><strong>Usuario:</strong> <?= htmlspecialchars($_SESSION['nombre_completo'] ?? $_SESSION['username'] ?? 'Sistema') ?></p>
@@ -269,7 +269,7 @@ use App\Constants\AppConstants; ?>
 
         // Mejorar impresión
         window.addEventListener('beforeprint', function() {
-            document.title = '<?= htmlspecialchars($reportTitle ?? 'Reporte') ?> - <?= date('d-m-Y') ?>';
+            document.title = '<?= htmlspecialchars($data['reportTitle'] ?? 'Reporte') ?> - <?= date('d-m-Y') ?>';
         });
 
         // Configurar tabla responsiva para impresión

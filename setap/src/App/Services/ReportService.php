@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Helpers\Logger;
 
+use DateTime;
+use DateInterval;
+
 use PDO;
 use Exception;
 
@@ -25,19 +28,19 @@ class ReportService
             $stats = [];
 
             // Total de proyectos
-            $stmt = $this->db->query("SELECT COUNT(*) as total FROM proyectos");
+            $stmt = $this->db->query("SELECT COUNT(*) as total FROM proyectos Where estado_tipo_id != 4");
             $stats['total_projects'] = $stmt->fetchColumn();
 
             // Total de tareas
-            $stmt = $this->db->query("SELECT COUNT(*) as total FROM tareas");
+            $stmt = $this->db->query("SELECT COUNT(*) as total FROM tareas Where estado_tipo_id != 4");
             $stats['total_tasks'] = $stmt->fetchColumn();
 
             // Total de usuarios
-            $stmt = $this->db->query("SELECT COUNT(*) as total FROM usuarios WHERE activo = 1");
+            $stmt = $this->db->query("SELECT COUNT(*) as total FROM usuarios WHERE estado_tipo_id = 2");
             $stats['total_users'] = $stmt->fetchColumn();
 
             // Total de clientes
-            $stmt = $this->db->query("SELECT COUNT(*) as total FROM clientes WHERE activo = 1");
+            $stmt = $this->db->query("SELECT COUNT(*) as total FROM clientes WHERE estado_tipo_id = 2");
             $stats['total_clients'] = $stmt->fetchColumn();
 
             return $stats;
@@ -85,6 +88,7 @@ class ReportService
 
     /**
      * Generar reporte de resumen de proyectos
+     * Todo: Agregar recursos asignados al proyecto y progreso (revisar como se hace en la vista de proyecto)
      */
     private function generateProjectsSummary($parameters)
     {
@@ -139,15 +143,23 @@ class ReportService
             if (strpos(strtolower($project['estado']), 'activo') !== false) {
                 $summary['active_projects']++;
             }
+
             if (
                 strpos(strtolower($project['estado']), 'terminado') !== false ||
-                strpos(strtolower($project['estado']), 'completado') !== false
+                strpos(strtolower($project['estado']), 'aprobado') !== false
             ) {
                 $summary['completed_projects']++;
             }
+            $di = new DateTime($project['fecha_inicio']);
+            $df = new DateTime($project['fecha_fin']);
+            $intervalo = $di->diff($df);
+            $suma_duracion += $intervalo->days;
         }
 
+        $summary['average_duration'] = $suma_duracion / $summary['total_projects'];
+
         return [
+            'title' => 'Resumen Proyectos',
             'summary' => $summary,
             'data' => $data,
             'total_records' => count($data)
@@ -156,75 +168,117 @@ class ReportService
 
     /**
      * Generar reporte de resumen de tareas
+     * ToDo: se debe indicar el periodo del reporte fecha inicio y fin.
+     * ToDo: se agregar un filtro por proyecto
+     * ToDo: solo desplegar los proyectos relacionados al usuario
+     * ToDo: El detalle solo debe tener el proyecto y su estadistica a la fecha de hoy
+     * ToDo: Hacer un Query para el Summary
+     * ToDo: Hacer un Segundo Query para entregar las tareas pendientes y las tareas del dia
      */
     private function generateTasksSummary($parameters)
     {
-        $sql = "SELECT 
-                    pt.id, -- id de instancia de la tarea en proyecto
-                    t.nombre       as tarea_nombre,
-                    p.id           as proyecto_id,
-                    c.razon_social as cliente_nombre,
-                    tt.nombre      as tipo_tarea,
-                    et.nombre      as estado,
-                    pt.fecha_inicio
-                      FROM proyectos       p
-                INNER JOIN proyecto_tareas pt ON pt.proyecto_id    = p.id
-                INNER JOIN tareas          t  on t.estado_tipo_id  = 2 and t.id = pt.tarea_id 
-                INNER JOIN clientes        c  ON p.cliente_id      = c.id
-                INNER JOIN tarea_tipos     tt ON tt.id             = p.tarea_tipo_id
-                INNER JOIN estado_tipos    et ON pt.estado_tipo_id = et.id
-                WHERE pt.estado_tipo_id != 4";
+        $fecha = $parameters['date_to'] ?? date('Y-m-d');
+        $projectId = !empty($parameters['project_id']) ? (int)$parameters['project_id'] : 0;
 
-        $params = [];
+        try {
+            // --- 1) Resumen de totales (posicionales) ---
+            $sqlTotal = "
+            SELECT
+                COUNT(pt.id) AS total,
+                SUM(pt.estado_tipo_id IN (2,5,6,7)
+                    AND pt.fecha_inicio < ?
+                    AND (? = 0 OR pt.proyecto_id = ?)
+                ) AS pending,
+                SUM(pt.estado_tipo_id = 8
+                    AND pt.fecha_inicio <= ?
+                    AND (? = 0 OR pt.proyecto_id = ?)
+                ) AS complete,
+                SUM(pt.estado_tipo_id IN (2,5,6,7)
+                    AND pt.fecha_inicio = ?
+                    AND (? = 0 OR pt.proyecto_id = ?)
+                ) AS progress
+            FROM proyecto_tareas pt
+            WHERE pt.fecha_inicio <= ?
+              AND (? = 0 OR pt.proyecto_id = ?)
+              AND pt.estado_tipo_id IN (2,3,5,6,7,8);
+        ";
 
-        // Filtros de fecha
-        if (!empty($parameters['date_from'])) {
-            $sql .= " AND pt.fecha_inicio >= ?";
-            $params[] = $parameters['date_from'];
+            // Parámetros para sqlTotal (orden importa)
+            $paramsTotal = [
+                // pending: fecha, projectId, projectId
+                $fecha,
+                $projectId,
+                $projectId,
+                // complete: fecha, projectId, projectId
+                $fecha,
+                $projectId,
+                $projectId,
+                // progress: fecha, projectId, projectId
+                $fecha,
+                $projectId,
+                $projectId,
+                // WHERE: fecha, projectId, projectId
+                $fecha,
+                $projectId,
+                $projectId
+            ];
+
+            $stmt = $this->db->prepare($sqlTotal);
+            $stmt->execute($paramsTotal);
+            $summaryData = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+            // --- 2) Detalle de tareas (posicionales) ---
+            $sqlTasks = "
+            SELECT
+                pt.id, t.nombre, DATE_FORMAT(pt.fecha_inicio, '%Y-%m-%d') AS inicio, pt.duracion_horas AS dura,
+                pt.prioridad, e.nombre AS estado, c.razon_social,
+                p.fecha_inicio, p.fecha_fin, tt.nombre AS tipo_tarea
+            FROM proyecto_tareas pt
+            INNER JOIN estado_tipos e ON e.id = pt.estado_tipo_id
+            INNER JOIN proyectos p ON p.id = pt.proyecto_id
+            INNER JOIN clientes c ON c.id = p.cliente_id
+            INNER JOIN tareas t ON t.id = pt.tarea_id
+            INNER JOIN tarea_tipos tt ON tt.id = p.tarea_tipo_id
+            WHERE pt.estado_tipo_id IN (2,5,6,7)
+              AND (pt.fecha_inicio <= ?)
+              AND (? = 0 OR pt.proyecto_id = ?);
+        ";
+
+            $paramsTasks = [
+                $fecha,
+                $projectId,
+                $projectId
+            ];
+
+            $stmt = $this->db->prepare($sqlTasks);
+            $stmt->execute($paramsTasks);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // --- 3) Construcción de resultado ---
+            $summary = [
+                'total_tasks'       => (int)($summaryData['total'] ?? 0),
+                'pending_tasks'     => (int)($summaryData['pending'] ?? 0),
+                'completed_tasks'   => (int)($summaryData['complete'] ?? 0),
+                'in_progress_tasks' => (int)($summaryData['progress'] ?? 0),
+            ];
+
+            return [
+                'summary'       => $summary,
+                'data'          => $data,
+                'total_records' => $summary['total_tasks'],
+            ];
+        } catch (\PDOException $e) {
+            // Logging detallado de depuración
+            error_log('PDOException in generateTasksSummary: ' . $e->getMessage());
+            error_log('Last SQL: ' . ($stmt->queryString ?? 'n/a'));
+            // Si quieres, loggear también parámetros (cuidado con datos sensibles)
+            error_log('paramsTotal: ' . json_encode($paramsTotal ?? []));
+            error_log('paramsTasks: ' . json_encode($paramsTasks ?? []));
+            throw $e;
         }
-
-        if (!empty($parameters['date_to'])) {
-            $sql .= " AND pt.fecha_inicio <= ?";
-            $params[] = $parameters['date_to'];
-        }
-
-        // Filtro por proyecto
-        if (!empty($parameters['project_id'])) {
-            $sql .= " AND p.id = ?";
-            $params[] = $parameters['project_id'];
-        }
-
-        $sql .= " ORDER BY pt.fecha_inicio DESC";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Calcular resumen
-        $summary = [
-            'total_tasks' => count($data),
-            'pending_tasks' => 0,
-            'completed_tasks' => 0,
-            'in_progress_tasks' => 0
-        ];
-
-        foreach ($data as $task) {
-            $estado = strtolower($task['estado']);
-            if (strpos($estado, 'pendiente') !== false) {
-                $summary['pending_tasks']++;
-            } elseif (strpos($estado, 'progreso') !== false || strpos($estado, 'iniciado') !== false) {
-                $summary['in_progress_tasks']++;
-            } elseif (strpos($estado, 'terminado') !== false || strpos($estado, 'completado') !== false) {
-                $summary['completed_tasks']++;
-            }
-        }
-
-        return [
-            'summary' => $summary,
-            'data' => $data,
-            'total_records' => count($data)
-        ];
     }
+
+
 
     /**
      * Generar reporte de actividad de usuarios
