@@ -23,7 +23,6 @@ and pt.estado_tipo_id in (2, 5, 6, 7);
 Select @total as total, @pending as pending, @complete as complete, @progress as progress;
 
 -- Segundo Query Summary Tasks
-
 DROP TABLE IF EXISTS SummaryTasks;
 Create Temporary Table SummaryTasks
 Select pt.id, pt.tarea_id, pt.proyecto_id, pt.fecha_inicio as inicio, pt.duracion_horas as dura, pt.prioridad, pt.estado_tipo_id

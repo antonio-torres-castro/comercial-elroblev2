@@ -132,34 +132,50 @@ use App\Constants\AppConstants; ?>
 
         <!-- Estadísticas del Proyecto -->
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card stat-card border-setap-primary">
                     <div class="card-body text-center">
-                        <h3 class="text-setap-primary"><?= $stats['total_tareas'] ?? 0 ?></h3>
+                        <h6 class="text-setap-primary"><?= $stats['total_tareas'] ?? 0 ?></h6>
                         <p class="mb-0">Total Tareas</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card stat-card border-success">
                     <div class="card-body text-center">
-                        <h3 class="text-success"><?= $stats['tareas_aprobadas'] ?? 0 ?></h3>
+                        <h6 class="text-success"><?= $stats['tareas_aprobadas'] ?? 0 ?></h6>
                         <p class="mb-0">Completadas</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card stat-card border-warning">
                     <div class="card-body text-center">
-                        <h3 class="text-warning"><?= $stats['tareas_iniciadas'] ?? 0 ?></h3>
-                        <p class="mb-0">En Progreso</p>
+                        <h6 class="text-warning"><?= $stats['tareas_terminadas'] ?? 0 ?></h6>
+                        <p class="mb-0">Terminadas</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <div class="card stat-card border-secondary">
+                    <div class="card-body text-center">
+                        <h6 class="text-warning"><?= $stats['tareas_iniciadas'] ?? 0 ?></h6>
+                        <p class="mb-0">Iniciadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card border-danger">
+                    <div class="card-body text-center">
+                        <h6 class="text-warning"><?= $stats['tareas_rechazadas'] ?? 0 ?></h6>
+                        <p class="mb-0">Rechazadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
                 <div class="card stat-card border-setap-primary-light">
                     <div class="card-body text-center">
-                        <h3 class="text-setap-primary-light"><?= round($stats['horas_planificadas'] ?? 0, 1) ?></h3>
+                        <h6 class="text-setap-primary-light"><?= round($stats['horas_planificadas'] ?? 0, 1) ?></h6>
                         <p class="mb-0">Horas Planificadas</p>
                     </div>
                 </div>

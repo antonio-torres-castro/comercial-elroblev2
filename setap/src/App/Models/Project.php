@@ -23,55 +23,17 @@ class Project
     public function getAll(array $filters = []): array
     {
         try {
-            $sql = "
-                SELECT p.*,
-                       c.razon_social as cliente_nombre,
-                       tt.nombre as tipo_tarea,
-                       et.nombre as estado_nombre,
-                       CONCAT(per.nombre, ' (', per.rut, ')') as contraparte_nombre,
-                       cc.email as contraparte_email,
-                       cc.telefono as contraparte_telefono,
-                       COUNT(pt.id) as total_tareas,
-                       COUNT(CASE WHEN pt.estado_tipo_id = 8 THEN 1 END) as tareas_completadas
-                FROM proyectos p
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                INNER JOIN cliente_contrapartes cc ON p.contraparte_id = cc.id
-                INNER JOIN personas per ON cc.persona_id = per.id
-                LEFT JOIN proyecto_tareas pt ON p.id = pt.proyecto_id AND pt.estado_tipo_id != 4
-                WHERE p.estado_tipo_id != 4
-            ";
+            //dashboard_project_list (in clienteId int, in estadoTipoId int, in tareaTipoId int, in fechaDesde date, in fechaHasta date)
+            $sql = "CALL dashboard_project_list(?, ?, ?, ?, ?);";
 
             $params = [];
 
             // Aplicar filtros
-            if (!empty($filters['cliente_id'])) {
-                $sql .= " AND p.cliente_id = ?";
-                $params[] = $filters['cliente_id'];
-            }
-
-            if (!empty($filters['estado_tipo_id'])) {
-                $sql .= " AND p.estado_tipo_id = ?";
-                $params[] = $filters['estado_tipo_id'];
-            }
-
-            if (!empty($filters['tarea_tipo_id'])) {
-                $sql .= " AND p.tarea_tipo_id = ?";
-                $params[] = $filters['tarea_tipo_id'];
-            }
-
-            if (!empty($filters['fecha_desde'])) {
-                $sql .= " AND p.fecha_inicio >= ?";
-                $params[] = $filters['fecha_desde'];
-            }
-
-            if (!empty($filters['fecha_hasta'])) {
-                $sql .= " AND p.fecha_inicio <= ?";
-                $params[] = $filters['fecha_hasta'];
-            }
-
-            $sql .= " GROUP BY p.id ORDER BY p.fecha_inicio DESC";
+            $params[] = !empty($filters['cliente_id']) ? 0 : $filters['cliente_id'];
+            $params[] = !empty($filters['estado_tipo_id']) ? 0 : $filters['estado_tipo_id'];
+            $params[] = !empty($filters['tarea_tipo_id']) ? 0 : $filters['tarea_tipo_id'];
+            $params[] = !empty($filters['fecha_desde']) ? null : $filters['fecha_desde'];
+            $params[] = !empty($filters['fecha_hasta']) ? null : $filters['fecha_hasta'];
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -359,7 +321,7 @@ class Project
                     MIN(pt.fecha_inicio) as fecha_inicio_primera_tarea,
                     MAX(pt.fecha_inicio) as fecha_inicio_ultima_tarea
                 FROM proyecto_tareas pt
-                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id != 4
+                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id in (2, 5, 6, 7, 8)
             ");
 
             $stmt->execute([$projectId]);
