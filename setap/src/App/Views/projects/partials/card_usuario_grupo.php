@@ -3,13 +3,6 @@
 use App\Constants\AppConstants;
 use App\Helpers\Security;
 ?>
-<div class="card shadow mb-4" id="cardUsuarioGrupo" data-project-id="<?= (int)$project['id'] ?>">
-    <div class="card-header d-grid gap-2">
-        <button type="button" class="btn btn-outline-setap-primary" id="btnUsuarioGrupo" data-bs-toggle="modal" data-bs-target="#usuarioGrupoModal">
-            <i class="bi bi-pencil"></i> Usuario Grupo
-        </button>
-    </div>
-</div>
 
 <!-- Modal Mantenedor Proyecto-Usuarios-Grupo -->
 <div class="modal fade" id="usuarioGrupoModal" tabindex="-1" aria-labelledby="usuarioGrupoModalLabel" aria-hidden="true">

@@ -5,6 +5,21 @@ DROP TABLE IF EXISTS tarea_fotos;
 DROP TABLE IF EXISTS historial_tareas;
 DROP TABLE IF EXISTS proyecto_feriados;
 DROP TABLE IF EXISTS proyecto_tareas;
+DROP TABLE IF exists tareas;
+
+CREATE TABLE tareas (
+  id int NOT NULL AUTO_INCREMENT,
+  nombre varchar(150) NOT NULL,
+  descripcion text NOT NULL,
+  estado_tipo_id int NOT NULL DEFAULT '0',
+  fecha_Creado timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_modificacion timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY nombre (nombre),
+  KEY estado_tipo_id (estado_tipo_id),
+  CONSTRAINT tareas_ibfk_1 FOREIGN KEY (estado_tipo_id) REFERENCES estado_tipos (id)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 CREATE TABLE proyecto_tareas (
   id int NOT NULL AUTO_INCREMENT,
@@ -54,7 +69,6 @@ CREATE TABLE proyecto_feriados (
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-
 CREATE TABLE historial_tareas (
   id int NOT NULL AUTO_INCREMENT,
   proyecto_tarea_id int NOT NULL,
@@ -79,6 +93,7 @@ CREATE TABLE historial_tareas (
   CONSTRAINT historial_tareas_ibfk_5 FOREIGN KEY (estado_tipo_anterior) REFERENCES estado_tipos (id),
   CONSTRAINT historial_tareas_ibfk_6 FOREIGN KEY (estado_tipo_nuevo) REFERENCES estado_tipos (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 CREATE TABLE tarea_fotos (
   id int NOT NULL AUTO_INCREMENT,

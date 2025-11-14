@@ -74,7 +74,7 @@ use App\Constants\AppConstants; ?>
         <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
         <!-- Header del Proyecto -->
         <div class="row mb-4">
-            <div class="col-md-8">
+            <div class="col-md-7">
                 <h2>
                     <i class="bi bi-building"></i> <?= htmlspecialchars($project['cliente_nombre']) ?>
                     <?php
@@ -94,11 +94,17 @@ use App\Constants\AppConstants; ?>
                     <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($project['direccion'] ?: 'Ubicación no especificada') ?>
                 </p>
             </div>
-            <div class="col-md-4 text-end">
+            <div class="col-md-5 text-end">
                 <?php if ($_GET['show_btn_editar']): ?>
                     <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning mr-2">
                         <i class="bi bi-pencil"></i> Editar
                     </a>
+                <?php endif; ?>
+
+                <?php if ($_GET['show_btn_editar']): ?>
+                    <button type="button" class="btn btn-outline-setap-primary" id="btnUsuarioGrupo" data-bs-toggle="modal" data-bs-target="#usuarioGrupoModal">
+                        <i class="bi bi-pencil"></i> Usuarios
+                    </button>
                 <?php endif; ?>
 
                 <?php if ($_GET['show_btn_gestionar_feriados']): ?>
@@ -108,7 +114,10 @@ use App\Constants\AppConstants; ?>
                 <?php endif; ?>
 
                 <?php if ($_GET['show_btn_cambiar_estado']): ?>
-                    <button type="button" class="btn btn-setap-primary" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
+                    <button type="button" class="btn btn-setap-primary" id="cardUsuarioGrupo"
+                        data-project-id="<?= (int)$project['id'] ?>"
+                        data-bs-toggle="modal"
+                        data-bs-target="#changeStatusModal">
                         <i class="bi bi-arrow-repeat"></i> Estado
                     </button>
                 <?php endif; ?>
@@ -240,6 +249,40 @@ use App\Constants\AppConstants; ?>
 
             <!-- Sidebar con información adicional -->
             <div class="col-md-4">
+
+                <!-- Acciones Rápidas -->
+                <div class="card mb-1">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightning"></i> Acciones Rápidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <?php if ($_GET['show_btn_nuevo']): ?>
+                                <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
+                                    <i class="bi bi-plus-circle"></i> Agregar Tarea
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feriados del Proyecto -->
+                <?php if (!empty($holidays)): ?>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="bi bi-calendar-x"></i> Feriados del Proyecto</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php foreach ($holidays as $holiday): ?>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-calendar-x text-danger me-2"></i>
+                                    <?= $holiday['dia_semana'] . ' ' . date('d/m/Y', strtotime($holiday['fecha'])) ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Información de Contraparte -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -268,52 +311,6 @@ use App\Constants\AppConstants; ?>
                         <?php endif; ?>
                     </div>
                 </div>
-
-                <!-- Feriados del Proyecto -->
-                <?php if (!empty($holidays)): ?>
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5><i class="bi bi-calendar-x"></i> Feriados del Proyecto</h5>
-                        </div>
-                        <div class="card-body">
-                            <?php foreach ($holidays as $holiday): ?>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-calendar-x text-danger me-2"></i>
-                                    <?= $holiday['dia_semana'] . ' ' . date('d/m/Y', strtotime($holiday['fecha'])) ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Acciones Rápidas -->
-                <div class="card mb-1">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightning"></i> Acciones Rápidas</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <?php if ($_GET['show_btn_nuevo']): ?>
-                                <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
-                                    <i class="bi bi-plus-circle"></i> Agregar Tarea
-                                </a>
-                            <?php endif; ?>
-                            <?php if ($_GET['show_btn_ver']): ?>
-                                <a href="<?= AppConstants::ROUTE_PROJECT_REPORT ?>?id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
-                                    <i class="bi bi-file-earmark-text"></i> Generar Reporte
-                                </a>
-                            <?php endif; ?>
-                            <?php if ($_GET['show_btn_cambiar_estado']): ?>
-                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changeStatusModal">
-                                    <i class="bi bi-arrow-repeat"></i> Cambiar Estado
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-                <?php include __DIR__ . '/partials/card_usuario_grupo.php'; ?>
-
 
             </div>
         </div>
@@ -357,6 +354,7 @@ use App\Constants\AppConstants; ?>
     </div>
 
     <!-- Card Usuario Grupo (Modal) -->
+    <?php include __DIR__ . '/partials/card_usuario_grupo.php'; ?>
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>

@@ -58,7 +58,7 @@ use App\Constants\AppConstants; ?>
                                     <div class="col-md-2">
                                         <label class="form-label">Proyecto</label>
                                         <select class="form-select" name="proyecto_id">
-                                            <option value="">Todos los proyectos</option>
+                                            <option value="">Todos</option>
                                             <?php if (!empty($data['projects'])): ?>
                                                 <?php foreach ($data['projects'] as $project): ?>
                                                     <option value="<?= $project['id'] ?>"
@@ -85,7 +85,7 @@ use App\Constants\AppConstants; ?>
                                     <div class="col-md-2">
                                         <label class="form-label">Ejecuta</label>
                                         <select class="form-select" name="usuario_id">
-                                            <option value="">Todos los usuarios</option>
+                                            <option value="">Todos</option>
                                             <?php if (!empty($data['users'])): ?>
                                                 <?php foreach ($data['users'] as $user): ?>
                                                     <option value="<?= $user['id'] ?>"
@@ -108,7 +108,7 @@ use App\Constants\AppConstants; ?>
                                             value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
                                     </div>
 
-                                    <div class="col-md-2 d-flex align-items-end">
+                                    <div class="col-md-2 d-flex align-items-center">
                                         <button type="submit" class="btn btn-outline-setap-primary me-2">
                                             <i class="bi bi-search"></i> Filtrar
                                         </button>
@@ -307,10 +307,6 @@ use App\Constants\AppConstants; ?>
                                 <div class="card-body text-center">
                                     <i class="bi bi-inbox display-1 text-muted"></i>
                                     <h4 class="mt-3">No hay tareas registradas</h4>
-                                    <p class="text-muted">Comienza creando tu primera tarea.</p>
-                                    <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
-                                        <i class="bi bi-plus-lg"></i> Crear Primera Tarea
-                                    </a>
                                 </div>
                             </div>
                         <?php endif; ?>
