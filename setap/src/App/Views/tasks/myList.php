@@ -50,7 +50,7 @@ use App\Constants\AppConstants; ?>
                                     <div class="col-md-2">
                                         <label class="form-label">Proyecto</label>
                                         <select class="form-select" name="proyecto_id">
-                                            <option value="">Todos los proyectos</option>
+                                            <option value="">Todos</option>
                                             <?php if (!empty($data['projects'])): ?>
                                                 <?php foreach ($data['projects'] as $project): ?>
                                                     <option value="<?= $project['id'] ?>"
@@ -64,7 +64,7 @@ use App\Constants\AppConstants; ?>
                                     <div class="col-md-2">
                                         <label class="form-label">Estado</label>
                                         <select class="form-select" name="estado_tipo_id">
-                                            <option value="">Todos los estados</option>
+                                            <option value="">Todos</option>
                                             <?php if (!empty($data['taskStates'])): ?>
                                                 <?php foreach ($data['taskStates'] as $state): ?>
                                                     <option value="<?= $state['id'] ?>"
@@ -78,7 +78,7 @@ use App\Constants\AppConstants; ?>
                                     <div class="col-md-2" hidden>
                                         <label class="form-label">Ejecuta</label>
                                         <select class="form-select" name="usuario_id">
-                                            <option value="">Todos los usuarios</option>
+                                            <option value="">Todos</option>
                                             <?php if (!empty($data['users'])): ?>
                                                 <?php foreach ($data['users'] as $user): ?>
                                                     <option value="<?= $user['id'] ?>"

@@ -54,6 +54,11 @@ class Task
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
             }
 
+            if (isset($uti) && $uti == 4) {
+                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $params[] = $cu;
+            }
+
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
                 // Aseguramos que sea un array
                 $estadoTipoIds = is_array($filters['estado_tipo_id'])
@@ -153,6 +158,11 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            }
+
+            if (isset($uti) && $uti == 4) {
+                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $params[] = $cu;
             }
 
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
@@ -686,23 +696,22 @@ class Task
     /**
      * Obtener proyectos disponibles
      */
-    public function getProjectsActivos(?string $ejecutor_id): array
+    public function getProjectsActivos(?string $usuario_id): array
     {
         try {
-            $sql = "
-                SELECT DISTINCT p.id, 
-                CONCAT('Proyecto para ', c.razon_social) as nombre, 
-                c.razon_social as cliente_nombre,
-                p.estado_tipo_id
-                FROM proyectos p
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                INNER JOIN proyecto_tareas pt ON pt.proyecto_id = p.id
-                WHERE p.estado_tipo_id = 2";
+            $sql = "Select DISTINCT p.id, 
+                                    CONCAT(c.razon_social, ' (', p.fecha_inicio, '.', p.fecha_fin, ')') as nombre, 
+                                    c.razon_social as cliente_nombre
+                    From proyectos p 
+                    Inner Join clientes c on p.cliente_id = c.id
+                    Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
+                    Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
+                    WHERE p.estado_tipo_id = 2";
 
             $params = [];
-            if (!empty($ejecutor_id)) {
-                $sql .= " and pt.ejecutor_id = ?";
-                $params[] = $ejecutor_id;
+            if (!empty($usuario_id)) {
+                $sql .= " and pug.usuario_id = ?";
+                $params[] = $usuario_id;
             }
             $sql .= " ORDER BY c.razon_social";
 
@@ -1058,6 +1067,17 @@ class Task
             $supervisor_id = (int)$task['supervisor_id'];
             $contraparte_id = (int)$task['contraparte_id'];
 
+            $ejecutor_id = (int)$task['ejecutor_id'];
+
+            if (!empty($ejecutor_id)) {
+                if ($ejecutor_id != $userId) {
+                    $this->db->rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'Tarea asignada a otro usuario'
+                    ];
+                }
+            }
             // Validar transición de estado
             $transitionValidation = $userRole == 'admin' ? ['valid' => true] : $this->isValidStateTransition($currentState, $newState);
             if (!$transitionValidation['valid']) {
