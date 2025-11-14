@@ -55,6 +55,10 @@ class TaskController extends BaseController
 
             // Obtener filtros
             $filters = [];
+
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+
             if (!empty($_GET['proyecto_id'])) {
                 $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
             }
@@ -64,8 +68,6 @@ class TaskController extends BaseController
             if (!empty($_GET['usuario_id'])) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
-
-            $filters['current_usuario_id'] = $cu;
 
             if (!empty($_GET['fecha_inicio'])) {
                 $filters['fecha_inicio'] = $_GET['fecha_inicio'];
@@ -77,8 +79,6 @@ class TaskController extends BaseController
                 $filters['fecha_fin'] = date('Y-m-d');
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
-
-            $filters['current_usuario_tipo_id'] = $uti;
 
             if ($uti == 6) {
                 $filters['contraparte_id'] = $contraparteId;
@@ -166,6 +166,8 @@ class TaskController extends BaseController
             }
 
             $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
 
             $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
             $rRead = $this->permissionService->hasPermission($currentUser['id'], 'Read');
@@ -184,6 +186,10 @@ class TaskController extends BaseController
 
             // Obtener filtros
             $filters = [];
+
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+
             if (!empty($_GET['proyecto_id'])) {
                 $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
             }
@@ -222,8 +228,6 @@ class TaskController extends BaseController
                 $filters['fecha_fin'] = date('Y-m-d');
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
-
-            $filters['current_usuario_tipo_id'] = $uti;
 
             // Configuración de paginación
             $perPage = 7;

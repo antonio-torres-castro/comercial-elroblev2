@@ -151,7 +151,7 @@ use App\Constants\AppConstants; ?>
                                                                         $statusText = 'Creado';
                                                                         break;
                                                                     case 2:
-                                                                        $badgeClass = 'bg-success';
+                                                                        $badgeClass = 'bg-primary';
                                                                         $statusText = 'Activo';
                                                                         break;
                                                                     case 3:
@@ -159,11 +159,11 @@ use App\Constants\AppConstants; ?>
                                                                         $statusText = 'Inactivo';
                                                                         break;
                                                                     case 5:
-                                                                        $badgeClass = 'bg-primary';
+                                                                        $badgeClass = 'bg-info';
                                                                         $statusText = 'Iniciado';
                                                                         break;
                                                                     case 6:
-                                                                        $badgeClass = 'bg-info text-dark';
+                                                                        $badgeClass = 'bg-warning';
                                                                         $statusText = 'Terminado';
                                                                         break;
                                                                     case 7:
@@ -171,7 +171,7 @@ use App\Constants\AppConstants; ?>
                                                                         $statusText = 'Rechazado';
                                                                         break;
                                                                     case 8:
-                                                                        $badgeClass = 'bg-dark';
+                                                                        $badgeClass = 'bg-success';
                                                                         $statusText = 'Aprobado';
                                                                         break;
                                                                     default:

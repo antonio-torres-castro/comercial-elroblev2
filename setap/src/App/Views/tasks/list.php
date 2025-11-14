@@ -173,7 +173,7 @@ use App\Constants\AppConstants; ?>
                                                                         $statusText = 'Creado';
                                                                         break;
                                                                     case 2:
-                                                                        $badgeClass = 'bg-success';
+                                                                        $badgeClass = 'bg-primary';
                                                                         $statusText = 'Activo';
                                                                         break;
                                                                     case 3:
@@ -181,11 +181,11 @@ use App\Constants\AppConstants; ?>
                                                                         $statusText = 'Inactivo';
                                                                         break;
                                                                     case 5:
-                                                                        $badgeClass = 'bg-primary';
+                                                                        $badgeClass = 'bg-info';
                                                                         $statusText = 'Iniciado';
                                                                         break;
                                                                     case 6:
-                                                                        $badgeClass = 'bg-info text-dark';
+                                                                        $badgeClass = 'bg-warning';
                                                                         $statusText = 'Terminado';
                                                                         break;
                                                                     case 7:
@@ -193,7 +193,7 @@ use App\Constants\AppConstants; ?>
                                                                         $statusText = 'Rechazado';
                                                                         break;
                                                                     case 8:
-                                                                        $badgeClass = 'bg-dark';
+                                                                        $badgeClass = 'bg-success';
                                                                         $statusText = 'Aprobado';
                                                                         break;
                                                                     default:
@@ -225,10 +225,6 @@ use App\Constants\AppConstants; ?>
                                                             <small>
                                                                 <?php if (!empty($task['ejecutor_nombre'])): ?>
                                                                     <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
-                                                                <?php elseif (!empty($task['supervisor_nombre'])): ?>
-                                                                    <i class="bi bi-person-check"></i> <?= htmlspecialchars($task['supervisor_nombre']) ?>
-                                                                <?php elseif (!empty($task['planificador_nombre'])): ?>
-                                                                    <i class="bi bi-person-gear"></i> <?= htmlspecialchars($task['planificador_nombre']) ?>
                                                                 <?php else: ?>
                                                                     Sin asignar
                                                                 <?php endif; ?>

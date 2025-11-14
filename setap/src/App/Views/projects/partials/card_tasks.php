@@ -88,7 +88,8 @@
                     </div>
                     <div class="text-end">
                         <span class="badge bg-<?= match ($task['estado_tipo_id']) {
-                                                    5 => 'setap-primary-light',
+                                                    2 => 'primary',
+                                                    5 => 'info',
                                                     6 => 'warning',
                                                     7 => 'danger',
                                                     8 => 'success',
