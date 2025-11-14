@@ -7,6 +7,7 @@ use App\Helpers\Logger;
 
 use PDO;
 use PDOException;
+use Exception;
 
 class Project
 {
@@ -29,11 +30,11 @@ class Project
             $params = [];
 
             // Aplicar filtros
-            $params[] = !empty($filters['cliente_id']) ? 0 : $filters['cliente_id'];
-            $params[] = !empty($filters['estado_tipo_id']) ? 0 : $filters['estado_tipo_id'];
-            $params[] = !empty($filters['tarea_tipo_id']) ? 0 : $filters['tarea_tipo_id'];
-            $params[] = !empty($filters['fecha_desde']) ? null : $filters['fecha_desde'];
-            $params[] = !empty($filters['fecha_hasta']) ? null : $filters['fecha_hasta'];
+            $params[] = !isset($filters['cliente_id']) || !empty($filters['cliente_id']) ? 0 : $filters['cliente_id'];
+            $params[] = !isset($filters['estado_tipo_id']) || !empty($filters['estado_tipo_id']) ? 0 : $filters['estado_tipo_id'];
+            $params[] = !isset($filters['tarea_tipo_id']) || !empty($filters['tarea_tipo_id']) ? 0 : $filters['tarea_tipo_id'];
+            $params[] = !isset($filters['fecha_desde']) || !empty($filters['fecha_desde']) ? null : $filters['fecha_desde'];
+            $params[] = !isset($filters['fecha_hasta']) || !empty($filters['fecha_hasta']) ? null : $filters['fecha_hasta'];
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -424,6 +425,120 @@ class Project
     public function getActive(): array
     {
         return $this->getAll(['estado_tipo_id' => 2]); // 2 = activo
+    }
+
+    /**
+     * Obtener asignaciones usuario-grupo de un proyecto (excluye eliminados)
+     */
+    public function getUsuariosGrupo(int $projectId): array
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT pug.id,
+                        pug.proyecto_id,
+                        pug.usuario_id,
+                        u.nombre_usuario AS username,
+                        u.estado_tipo_id AS usuario_estado_tipo_id,
+                        pug.grupo_id,
+                        gt.nombre AS grupo_nombre,
+                        pug.estado_tipo_id
+                 FROM proyecto_usuarios_grupo pug
+                 INNER JOIN usuarios u ON pug.usuario_id = u.id
+                 INNER JOIN grupo_tipos gt ON pug.grupo_id = gt.id
+                 WHERE pug.proyecto_id = ? AND pug.estado_tipo_id != 4
+                 ORDER BY u.nombre_usuario"
+            );
+            $stmt->execute([$projectId]);
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::getUsuariosGrupo error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /** Comprobar si el proyecto está activo */
+    public function isActive(int $projectId): bool
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT estado_tipo_id FROM proyectos WHERE id = ?");
+            $stmt->execute([$projectId]);
+            return (int)$stmt->fetchColumn() === 2;
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::isActive error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /** Crear asignación usuario-grupo (evitando duplicados) */
+    public function addUsuarioGrupo(int $projectId, int $usuarioId, int $grupoId): array
+    {
+        try {
+            // validar duplicidad
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyecto_usuarios_grupo WHERE proyecto_id = ? AND usuario_id = ? AND grupo_id = ? AND estado_tipo_id != 4");
+            $stmt->execute([$projectId, $usuarioId, $grupoId]);
+            if ((int)$stmt->fetchColumn() > 0) {
+                return ['success' => false, 'message' => 'Ya existe la asociación'];
+            }
+
+            $stmt = $this->db->prepare("INSERT INTO proyecto_usuarios_grupo (proyecto_id, usuario_id, grupo_id, estado_tipo_id) VALUES (?, ?, ?, 2)");
+            $ok = $stmt->execute([$projectId, $usuarioId, $grupoId]);
+            return $ok ? ['success' => true] : ['success' => false, 'message' => 'Error al crear'];
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::addUsuarioGrupo error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Error interno'];
+        }
+    }
+
+    /** Actualizar grupo de una asignación */
+    public function updateUsuarioGrupo(int $id, int $grupoId): array
+    {
+        try {
+            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET grupo_id = ? WHERE id = ? AND estado_tipo_id != 4");
+            $ok = $stmt->execute([$grupoId, $id]);
+            return $ok ? ['success' => true] : ['success' => false, 'message' => 'Error al actualizar'];
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::updateUsuarioGrupo error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Error interno'];
+        }
+    }
+
+    /** Soft delete de una asignación */
+    public function deleteUsuarioGrupo(int $id): array
+    {
+        try {
+            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET estado_tipo_id = 4 WHERE id = ? AND estado_tipo_id != 4");
+            $ok = $stmt->execute([$id]);
+            return $ok ? ['success' => true] : ['success' => false, 'message' => 'Error al eliminar'];
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::deleteUsuarioGrupo error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Error interno'];
+        }
+    }
+
+    /** Obtener todos los tipos de grupo (para selector) */
+    public function getGrupoTipos(): array
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT id, nombre FROM grupo_tipos ORDER BY nombre");
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::getGrupoTipos error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /** Obtener todos los usuarios (para selector) */
+    public function getAllUsers(): array
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT id, nombre_usuario FROM usuarios WHERE estado_tipo_id != 4 ORDER BY nombre_usuario");
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::getAllUsers error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**

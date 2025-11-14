@@ -75,7 +75,7 @@ use App\Constants\AppConstants; ?>
                 <?= Security::renderCsrfField() ?>
                 <input type="hidden" name="id" value="<?= (int)$project['id'] ?>">
 
-                <div class="row justify-content-center">
+                <div class="row justify-content-center mb-3">
                     <div class="col-lg-8">
                         <!-- Información Básica -->
                         <div class="form-section">
@@ -158,7 +158,7 @@ use App\Constants\AppConstants; ?>
                                 </div>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="row mb-0">
                                 <label for="contraparte_id" class="form-label">Contraparte del Cliente <span class="required">*</span></label>
                                 <select class="form-select" id="contraparte_id" name="contraparte_id" required>
                                     <option value="">Seleccionar Contraparte</option>
@@ -181,9 +181,13 @@ use App\Constants\AppConstants; ?>
                                 <i class="bi bi-check-lg"></i> Guardar Cambios
                             </button>
                         </div>
+
+                        <br>
+                        <br>
                     </div>
                 </div>
             </form>
+
         </main>
     </div>
 

@@ -15,6 +15,7 @@ use App\Controllers\PerfilController;
 use App\Controllers\ClientController;
 use App\Controllers\TaskController;
 use App\Controllers\ReportController;
+use App\Controllers\GrupoTipoController;
 use App\Controllers\ProyectoFeriadoController;
 use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
@@ -216,12 +217,70 @@ try {
                     $controller->refreshCardTasks();
                     break;
 
+                // AJAX mantenedor proyecto-usuarios-grupo
+                case 'usuarios-grupo-list':
+                    $controller->usuariosGrupoList();
+                    break;
+                case 'usuarios-grupo-add':
+                    $controller->usuariosGrupoAdd();
+                    break;
+                case 'usuarios-grupo-update':
+                    $controller->usuariosGrupoUpdate();
+                    break;
+                case 'usuarios-grupo-delete':
+                    $controller->usuariosGrupoDelete();
+                    break;
+
                 case 'report':
                     $controller->report();
                     break;
 
                 case '':
                     $controller->create();
+                    break;
+            }
+            break;
+
+        case 'grupo-tipos':
+            $controller = new GrupoTipoController();
+
+            switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+
+                case 'edit':
+                    if ($id && is_numeric($id)) {
+                        $controller->edit((int)$id);
+                    } else {
+                        $controller->edit();
+                    }
+                    break;
+
+                case 'update':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->update();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_GRUPO_TIPOS);
+                    }
+                    break;
+
+                case 'store':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_GRUPO_TIPOS);
+                    }
+                    break;
+
+                case '':
+                case null:
+                default:
+                    $controller->index();
                     break;
             }
             break;

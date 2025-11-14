@@ -69,6 +69,21 @@ class AppConstants
     /** Ruta base de proyectos */
     const ROUTE_PROJECTS = '/setap/projects';
 
+    /** Ruta base de tipos de grupo */
+    const ROUTE_GRUPO_TIPOS = '/setap/grupo-tipos';
+
+    /** Ruta de creación de tipos de grupo */
+    const ROUTE_GRUPO_TIPOS_CREATE = '/setap/grupo-tipos/create';
+
+    /** Ruta de edición de tipos de grupo */
+    const ROUTE_GRUPO_TIPOS_EDIT = '/setap/grupo-tipos/edit';
+
+    /** Ruta de edición de tipos de grupo */
+    const ROUTE_GRUPO_TIPOS_UPDATE = '/setap/grupo-tipos/update';
+
+    /** Ruta de edición de tipos de grupo */
+    const ROUTE_GRUPO_TIPOS_STORE = '/setap/grupo-tipos/store';
+
     /** Ruta de contrapartes de clientes */
     const ROUTE_CLIENT_COUNTERPARTIES = '/setap/client-counterparties';
     /** Ruta de contraparte de cliente */

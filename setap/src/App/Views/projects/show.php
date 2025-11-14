@@ -287,7 +287,7 @@ use App\Constants\AppConstants; ?>
                 <?php endif; ?>
 
                 <!-- Acciones Rápidas -->
-                <div class="card">
+                <div class="card mb-1">
                     <div class="card-header">
                         <h5><i class="bi bi-lightning"></i> Acciones Rápidas</h5>
                     </div>
@@ -311,6 +311,10 @@ use App\Constants\AppConstants; ?>
                         </div>
                     </div>
                 </div>
+
+                <?php include __DIR__ . '/partials/card_usuario_grupo.php'; ?>
+
+
             </div>
         </div>
     </div>
@@ -352,9 +356,12 @@ use App\Constants\AppConstants; ?>
         </div>
     </div>
 
+    <!-- Card Usuario Grupo (Modal) -->
+
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
     <script src="/setap/public/js/project-dashboard.js"></script>
+
 
 </body>
 

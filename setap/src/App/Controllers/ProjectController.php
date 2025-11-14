@@ -640,6 +640,183 @@ class ProjectController extends BaseController
         }
     }
 
+    /**
+     * Endpoints AJAX para gestionar proyecto_usuarios_grupo
+     */
+    public function usuariosGrupoList(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) { $this->redirectToLogin(); return; }
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED]);
+                return;
+            }
+
+            $projectId = isset($_GET['project_id']) ? (int)$_GET['project_id'] : (int)($_GET['id'] ?? 0);
+            if ($projectId <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'ID de proyecto inválido']);
+                return;
+            }
+
+            $assigned = $this->projectModel->getUsuariosGrupo($projectId);
+            $users = $this->projectModel->getAllUsers();
+            $grupos = $this->projectModel->getGrupoTipos();
+            $projectActive = $this->projectModel->isActive($projectId);
+
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'assigned' => $assigned,
+                'users' => $users,
+                'grupos' => $grupos,
+                'projectActive' => $projectActive
+            ]);
+        } catch (Exception $e) {
+            Logger::error('ProjectController::usuariosGrupoList: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+        }
+    }
+
+    public function usuariosGrupoAdd(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) { $this->redirectToLogin(); return; }
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
+                !$this->permissionService->hasPermission($currentUser['id'], 'Create')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                return;
+            }
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                return;
+            }
+
+            $projectId = (int)($_POST['project_id'] ?? 0);
+            $usuarioId = (int)($_POST['usuario_id'] ?? 0);
+            $grupoId = (int)($_POST['grupo_id'] ?? 0);
+            if ($projectId <= 0 || $usuarioId <= 0 || $grupoId <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Parámetros incompletos']);
+                return;
+            }
+
+            // Si el proyecto no está activo, no permitir modificar
+            if (!$this->projectModel->isActive($projectId)) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Proyecto inactivo, no se puede modificar']);
+                return;
+            }
+
+            $res = $this->projectModel->addUsuarioGrupo($projectId, $usuarioId, $grupoId);
+            echo json_encode($res);
+        } catch (Exception $e) {
+            Logger::error('ProjectController::usuariosGrupoAdd: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+        }
+    }
+
+    public function usuariosGrupoUpdate(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) { $this->redirectToLogin(); return; }
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
+                !$this->permissionService->hasPermission($currentUser['id'], 'Modify')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                return;
+            }
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                return;
+            }
+
+            $id = (int)($_POST['id'] ?? 0);
+            $projectId = (int)($_POST['project_id'] ?? 0);
+            $grupoId = (int)($_POST['grupo_id'] ?? 0);
+            if ($id <= 0 || $projectId <= 0 || $grupoId <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Parámetros incompletos']);
+                return;
+            }
+
+            // Si el proyecto no está activo, no permitir modificar
+            if (!$this->projectModel->isActive($projectId)) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Proyecto inactivo, no se puede modificar']);
+                return;
+            }
+
+            $res = $this->projectModel->updateUsuarioGrupo($id, $grupoId);
+            echo json_encode($res);
+        } catch (Exception $e) {
+            Logger::error('ProjectController::usuariosGrupoUpdate: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+        }
+    }
+
+    public function usuariosGrupoDelete(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) { $this->redirectToLogin(); return; }
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
+                !$this->permissionService->hasPermission($currentUser['id'], 'Eliminate')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+                return;
+            }
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Token CSRF inválido']);
+                return;
+            }
+
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'ID inválido']);
+                return;
+            }
+
+            // Se permite eliminar incluso si el proyecto está inactivo
+            $res = $this->projectModel->deleteUsuarioGrupo($id);
+            echo json_encode($res);
+        } catch (Exception $e) {
+            Logger::error('ProjectController::usuariosGrupoDelete: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+        }
+    }
+
     private function view($view, $data = [])
     {
         extract($data);
