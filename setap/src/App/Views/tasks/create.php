@@ -125,7 +125,7 @@ use App\Constants\AppConstants; ?>
                                         <!-- Ejecutor -->
                                         <div class="col-md-6">
                                             <label for="ejecutor_id" class="form-label">Ejecutor</label>
-                                            <select class="form-select" id="ejecutor_id" name="ejecutor_id" required>
+                                            <select class="form-select" id="ejecutor_id" name="ejecutor_id">
                                                 <option value="">Sin asignar</option>
                                                 <?php foreach ($data['executor_users'] as $user): ?>
                                                     <option value="<?= $user['id']; ?>"

@@ -349,6 +349,15 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+            $filters['contraparte_id'] = $contraparteId;
+
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
@@ -361,7 +370,7 @@ class TaskController extends BaseController
             if ($project_id > 0) {
                 $projects = $this->taskModel->getProjectById($project_id);
             } else {
-                $projects = $this->taskModel->getProjects();
+                $projects = $this->taskModel->getProjects($filters);
             }
 
             $data = [
@@ -531,6 +540,15 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+            $filters['contraparte_id'] = $contraparteId;
+
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
@@ -554,7 +572,7 @@ class TaskController extends BaseController
                 'user' => $currentUser,
                 'title' => AppConstants::UI_EDIT_TASK_TITLE,
                 'subtitle' => "Editando: {$task['tarea_nombre']}",
-                'projects' => $this->taskModel->getProjects(),
+                'projects' => $this->taskModel->getProjects($filters),
                 'taskTypes' => $this->taskModel->getTaskTypes(),
                 'executor_users' => $this->taskModel->getExecutorUsers(),
                 'supervisor_users' => $this->taskModel->getSupervisorUsers(),
