@@ -129,7 +129,7 @@ use App\Constants\AppConstants; ?>
                             <div class="card">
                                 <div class="card-body">
                                     <div class="table-responsive-xl">
-                                        <table class="table table-hover">
+                                        <table class="table table-hover" id="tasksTable">
                                             <thead>
                                                 <tr>
                                                     <th>Tarea</th>
@@ -150,8 +150,8 @@ use App\Constants\AppConstants; ?>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($data['tasks'] as $task): ?>
-                                                    <tr id="task-row-<?= $task['id'] ?>">
-                                                        <td><!-- Tarea -->
+                                                    <tr class="clickable-row" id="task-row-<?= $task['id'] ?>">
+                                                        <td id="task-column"><!-- Tarea -->
                                                             <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
                                                             <?php if (!empty($task['descripcion'])): ?>
                                                                 <small class="text-muted"><?= htmlspecialchars(substr($task['descripcion'], 0, 100)) ?>...</small>

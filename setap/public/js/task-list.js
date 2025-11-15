@@ -15,6 +15,25 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+    const table = document.getElementById("tasksTable");
+    if (!table) return;
+
+    table.addEventListener("click", function (e) {
+
+        // Buscar si el clic ocurrió dentro de la columna task-column
+        const taskColumn = e.target.closest("#task-column");
+        if (!taskColumn) return;
+
+        // Obtener la fila
+        const row = taskColumn.closest(".clickable-row");
+        if (!row) return;
+
+        // Alternar selección
+        row.classList.toggle("table-active");
+    });
+});
+
 
 // GAP 5: Cargar transiciones válidas para una tarea
 function loadValidTransitions(taskId) {
