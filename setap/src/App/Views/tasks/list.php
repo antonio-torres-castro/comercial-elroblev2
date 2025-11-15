@@ -46,7 +46,7 @@ use App\Constants\AppConstants; ?>
 
                     <?php if ($_GET['show_btn_aprobar']): ?>
                         <div class="<?= $_GET['show_btn_nuevo'] ? "col-md-3" : "col-md-6" ?> text-end <?= $_GET['show_btn_nuevo'] ? "mb-2" : "" ?>">
-                            <a onclick="confirmStateChangeForSelectedRows()" class="btn btn-success">
+                            <a onclick="confirmStateChangeForSelectedRows()" class="btn btn-success" id="btnAprobar">
                                 <i class="bi bi-check2-square"></i> Aprobar
                             </a>
                         </div>
