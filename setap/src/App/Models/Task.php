@@ -1051,16 +1051,16 @@ class Task
     public function changeState(int $taskId, int $newState, int $userId, string $userRole, string $reason = ''): array
     {
         try {
+            $params = [];
+            $params[] = $newState;
+
             $this->db->beginTransaction();
 
             // Obtener tarea actual
             $task = $this->getById($taskId);
             if (!$task) {
                 $this->db->rollBack();
-                return [
-                    'success' => false,
-                    'message' => 'Tarea no encontrada'
-                ];
+                return ['success' => false, 'message' => 'Tarea no encontrada'];
             }
 
             $currentState = (int)$task['estado_tipo_id'];
@@ -1072,43 +1072,37 @@ class Task
             if (!empty($ejecutor_id)) {
                 if ($ejecutor_id != $userId) {
                     $this->db->rollBack();
-                    return [
-                        'success' => false,
-                        'message' => 'Tarea asignada a otro usuario'
-                    ];
+                    return ['success' => false, 'message' => 'Tarea asignada a otro usuario'];
                 }
             }
             // Validar transición de estado
             $transitionValidation = $userRole == 'admin' ? ['valid' => true] : $this->isValidStateTransition($currentState, $newState);
             if (!$transitionValidation['valid']) {
                 $this->db->rollBack();
-                return [
-                    'success' => false,
-                    'message' => $transitionValidation['message']
-                ];
+                return ['success' => false, 'message' => $transitionValidation['message']];
             }
 
             // Validar permisos del usuario
             $userValidation = $this->canUserChangeState($currentState, $newState, $userRole);
             if (!$userValidation['valid']) {
                 $this->db->rollBack();
-                return [
-                    'success' => false,
-                    'message' => $userValidation['message']
-                ];
+                return ['success' => false, 'message' => $userValidation['message']];
             }
 
             // Actualizar estado
-            $sql = "UPDATE proyecto_tareas SET estado_tipo_id = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id = ?";
+            if ($newState == 5 && $ejecutor_id == null) {
+                $sqlAutoAsignacion =  ", ejecutor_id = ?";
+                $params[] = $userId;
+            }
+            $params[] = $taskId;
+
+            $sql = "UPDATE proyecto_tareas SET estado_tipo_id = ?, fecha_modificacion = CURRENT_TIMESTAMP {$sqlAutoAsignacion} WHERE id = ?";
             $stmt = $this->db->prepare($sql);
-            $success = $stmt->execute([$newState, $taskId]);
+            $success = $stmt->execute($params);
 
             if (!$success) {
                 $this->db->rollBack();
-                return [
-                    'success' => false,
-                    'message' => 'Error al actualizar el estado de la tarea'
-                ];
+                return ['success' => false, 'message' => 'Error al actualizar el estado de la tarea'];
             }
 
             // Registrar en historial si la tabla existe
@@ -1116,17 +1110,11 @@ class Task
 
             $this->db->commit();
 
-            return [
-                'success' => true,
-                'message' => 'Estado de la tarea actualizado correctamente'
-            ];
+            return ['success' => true, 'message' => 'Estado de la tarea actualizado correctamente'];
         } catch (PDOException $e) {
             $this->db->rollBack();
             Logger::error("Task::changeState: " . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Error interno al cambiar el estado de la tarea'
-            ];
+            return ['success' => false, 'message' => 'Error interno al cambiar el estado de la tarea'];
         }
     }
 

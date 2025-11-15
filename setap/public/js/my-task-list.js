@@ -83,7 +83,7 @@ function updateStatusBadge(taskId, stateId) {
             statusText = 'Creado';
             break;
         case 2:
-            badgeClass = 'bg-success';
+            badgeClass = 'bg-primary';
             statusText = 'Activo';
             break;
         case 3:
@@ -91,11 +91,11 @@ function updateStatusBadge(taskId, stateId) {
             statusText = 'Inactivo';
             break;
         case 5:
-            badgeClass = 'bg-primary';
+            badgeClass = 'bg-info';
             statusText = 'Iniciado';
             break;
         case 6:
-            badgeClass = 'bg-info text-dark';
+            badgeClass = 'bg-warning';
             statusText = 'Terminado';
             break;
         case 7:
@@ -103,7 +103,7 @@ function updateStatusBadge(taskId, stateId) {
             statusText = 'Rechazado';
             break;
         case 8:
-            badgeClass = 'bg-dark';
+            badgeClass = 'bg-success';
             statusText = 'Aprobado';
             break;
     }
