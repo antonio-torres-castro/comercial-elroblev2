@@ -195,3 +195,57 @@ function getSelectedTasks() {
     return [...document.querySelectorAll(".clickable-row.table-active")]
         .map(row => row.id.replace("task-row-", ""));
 }
+
+// GAP 5: Confirmar cambio de estado a grupo
+function confirmStateChangeForSelectedRows() {
+    const nStateId = 8;
+    const nStateName = 'aprobado';
+    const taskName = 'Grupo de tareas';
+    
+    var tasksId = [];
+    
+    tasksRows = getSelectedTasks();
+    //si tasksRows no encontro filas
+    shwAlert('No se encontraron filas seleccionadas')
+    //sino iterar con un for y recuperar los id de cada tarea acumulandolo en tasksId
+    
+
+    document.getElementById('changeStateTaskId').value = tasksId;
+    document.getElementById('changeStateNewState').value = nStateId;
+    document.getElementById('changeStateNewStateName').textContent = nStateName;
+    document.getElementById('changeStateTaskName').textContent = taskName;
+    document.getElementById('changeStateReason').value = 'Tareas revisadas por el supervisor';
+
+    new bootstrap.Modal(document.getElementById('changeStateModalFSR')).show();
+}
+
+// GAP 5: Ejecutar cambio de estado
+document.getElementById('confirmChangeStateFSR').addEventListener('click', function() {
+    const formData = new FormData(document.getElementById('changeStateFormFSR'));
+
+    fetch('/setap/tasks/change-stateFSR', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Actualizar badge de estado en la tabla
+                const taskId = formData.get('task_id');
+                const newStateId = formData.get('new_state');
+                updateStatusBadge(taskId, newStateId);
+
+                // Mostrar mensaje de éxito
+                showAlert(data.message, 'success');
+
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('changeStateModal')).hide();
+            } else {
+                showAlert('Error: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error de conexión al servidor', 'danger');
+        });
+});

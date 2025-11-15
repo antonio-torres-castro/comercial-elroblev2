@@ -42,13 +42,11 @@ use App\Constants\AppConstants; ?>
                             </button>
                         </h2>
 
-
-
                     </div>
 
                     <?php if ($_GET['show_btn_aprobar']): ?>
                         <div class="<?= $_GET['show_btn_nuevo'] ? "col-md-3" : "col-md-6" ?> text-end <?= $_GET['show_btn_nuevo'] ? "mb-2" : "" ?>">
-                            <a onclick="" class="btn btn-success">
+                            <a onclick="confirmStateChangeForSelectedRows()" class="btn btn-success">
                                 <i class="bi bi-check2-square"></i> Aprobar
                             </a>
                         </div>
@@ -384,6 +382,45 @@ use App\Constants\AppConstants; ?>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                 <button type="button" class="btn btn-primary" id="confirmChangeState">Cambiar Estado</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para cambiar estado -->
+                <div class="modal fade" id="changeStateFSRModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Cambiar Estado de Tarea</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="changeStateFormFSR">
+                                    <?= Security::renderCsrfField() ?>
+                                    <input type="hidden" id="changeStateTaskIdFSR" name="task_id">
+                                    <input type="hidden" id="changeStateNewStateFSR" name="new_state">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Tarea:</label>
+                                        <div id="changeStateTaskNameFSR" class="fw-bold text-primary"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Nuevo Estado:</label>
+                                        <div id="changeStateNewStateNameFSR" class="fw-bold text-success"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="changeStateReason" class="form-label">Motivo del cambio:</label>
+                                        <textarea class="form-control" id="changeStateReasonFSR" name="reason" rows="3"
+                                            placeholder="Describe el motivo del cambio de estado..."></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="confirmChangeStateFSR">Cambiar Estado</button>
                             </div>
                         </div>
                     </div>

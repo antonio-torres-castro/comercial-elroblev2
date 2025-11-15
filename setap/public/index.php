@@ -603,6 +603,15 @@ try {
                     }
                     break;
 
+                case 'change-stateFSR':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->changeStateFSR();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'check-executable':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->checkExecutable();

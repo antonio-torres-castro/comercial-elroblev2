@@ -945,6 +945,76 @@ class TaskController extends BaseController
     }
 
     /**
+     * Cambiar estado de una tarea (GAP 5)
+     */
+    public function changeStateFSR()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $aManageTask = $this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks');
+            $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
+            $rActivity = $this->permissionService->hasPermission($currentUser['id'], 'Register activity');
+            $rApruve = $this->permissionService->hasPermission($currentUser['id'], 'Apruve');
+            // Verificar accesos
+            if (!$aManageTask && !$aMyTasks) {
+                $this->jsonError('Sin acceso suficiente');
+                return;
+            }
+            if (!$rActivity) {
+                $this->jsonError('Sin permisos suficientes');
+                return;
+            }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->jsonError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
+                return;
+            }
+            // Validar CSRF token
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->jsonError('Token CSRF inválido');
+                return;
+            }
+
+            // Obtener datos
+            $taskId = (int)($_POST['task_id'] ?? 0);
+            $newState = (int)($_POST['new_state'] ?? 0);
+
+            if ($newState == 8 && !$rApruve) {
+                $this->jsonError('Sin permisos para aprobar');
+                return;
+            }
+
+            $reason = trim($_POST['reason'] ?? '');
+
+            if ($taskId <= 0 || $newState <= 0) {
+                $this->jsonError('Error al cambiar estado de la tarea');
+                return;
+            }
+            // Cambiar estado usando el modelo con validaciones
+            $result = $this->taskModel->changeState(
+                $taskId,
+                $newState,
+                $currentUser['id'],
+                $currentUser['rol'],
+                $reason
+            );
+
+            if ($result['success']) {
+                $this->jsonSuccess($result['message'] ?? 'Estado de tarea actualizado correctamente');
+            } else {
+                $this->jsonError($result['message'] ?? 'Error al cambiar estado de la tarea');
+            }
+        } catch (Exception $e) {
+            Logger::error("TaskController::changeState: " . $e->getMessage());
+            $this->jsonError('Error interno del servidor');
+        }
+    }
+
+    /**
      * Redireccionar a la vista de tareas - verificación ejecutable se maneja en frontend
      * (Convertido desde método API para cumplir con reglas de no-Ajax)
      */
