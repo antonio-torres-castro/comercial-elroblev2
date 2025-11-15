@@ -31,92 +31,109 @@ use App\Constants\AppConstants; ?>
             <!-- Main content -->
             <main class="col-12 px-md-4">
                 <!-- Titulo y boton nuevo -->
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-md-6">
                         <h2>
                             <i class="bi bi-list-check"></i> <?php echo AppConstants::UI_TASK_MANAGEMENT; ?>
                             <span class="badge bg-secondary ms-1"><?= $totalRows ?> tareas</span>
+
+                            <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiltros" aria-expanded="false" aria-controls="collapseFiltros">
+                                <i class="bi bi-eye"></i> Filtros
+                            </button>
                         </h2>
+
+
 
                     </div>
 
+                    <?php if ($_GET['show_btn_aprobar']): ?>
+                        <div class="<?= $_GET['show_btn_nuevo'] ? "col-md-3" : "col-md-6" ?> text-end <?= $_GET['show_btn_nuevo'] ? "mb-2" : "" ?>">
+                            <a onclick="" class="btn btn-success">
+                                <i class="bi bi-check2-square"></i> Aprobar
+                            </a>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if ($_GET['show_btn_nuevo']): ?>
-                        <div class="col-md-6 text-end">
+                        <div class="<?= $_GET['show_btn_aprobar'] ? "col-md-3" : "col-md-6" ?> text-end">
                             <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
                                 <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
                             </a>
                         </div>
                     <?php endif; ?>
+
                 </div>
 
-                <!-- Filtros -->
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <form method="GET" id="getFormFilter" class="row g-3">
-                                    <div class="col-md-2">
-                                        <label class="form-label">Proyecto</label>
-                                        <select class="form-select" name="proyecto_id">
-                                            <option value="">Todos</option>
-                                            <?php if (!empty($data['projects'])): ?>
-                                                <?php foreach ($data['projects'] as $project): ?>
-                                                    <option value="<?= $project['id'] ?>"
-                                                        <?= (isset($_GET['proyecto_id']) && $_GET['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
-                                                        <?= htmlspecialchars($project['cliente_nombre']) ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Estado</label>
-                                        <select class="form-select" id="estado_tipo_id" name="estado_tipo_id[]" multiple>
-                                            <?php if (!empty($data['taskStates'])): ?>
-                                                <?php foreach ($data['taskStates'] as $state): ?>
-                                                    <option value="<?= $state['id'] ?>"
-                                                        <?= (isset($_GET['estado_tipo_id']) && is_array($_GET['estado_tipo_id']) && in_array($state['id'], $_GET['estado_tipo_id'])) ? 'selected' : '' ?>>
-                                                        <?= htmlspecialchars($state['nombre']) ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Ejecuta</label>
-                                        <select class="form-select" name="usuario_id">
-                                            <option value="">Todos</option>
-                                            <?php if (!empty($data['users'])): ?>
-                                                <?php foreach ($data['users'] as $user): ?>
-                                                    <option value="<?= $user['id'] ?>"
-                                                        <?= (isset($_GET['usuario_id']) && $_GET['usuario_id'] == $user['id']) ? 'selected' : '' ?>>
-                                                        <?= htmlspecialchars($user['nombre_usuario']) ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
+                <div class="collapse show" id="collapseFiltros">
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="GET" id="getFormFilter" class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="form-label">Proyecto</label>
+                                            <select class="form-select" name="proyecto_id">
+                                                <option value="">Todos</option>
+                                                <?php if (!empty($data['projects'])): ?>
+                                                    <?php foreach ($data['projects'] as $project): ?>
+                                                        <option value="<?= $project['id'] ?>"
+                                                            <?= (isset($_GET['proyecto_id']) && $_GET['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($project['cliente_nombre']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Estado</label>
+                                            <select class="form-select" id="estado_tipo_id" name="estado_tipo_id[]" multiple>
+                                                <?php if (!empty($data['taskStates'])): ?>
+                                                    <?php foreach ($data['taskStates'] as $state): ?>
+                                                        <option value="<?= $state['id'] ?>"
+                                                            <?= (isset($_GET['estado_tipo_id']) && is_array($_GET['estado_tipo_id']) && in_array($state['id'], $_GET['estado_tipo_id'])) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($state['nombre']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Ejecuta</label>
+                                            <select class="form-select" name="usuario_id">
+                                                <option value="">Todos</option>
+                                                <?php if (!empty($data['users'])): ?>
+                                                    <?php foreach ($data['users'] as $user): ?>
+                                                        <option value="<?= $user['id'] ?>"
+                                                            <?= (isset($_GET['usuario_id']) && $_GET['usuario_id'] == $user['id']) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($user['nombre_usuario']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
 
-                                    <div class="col-md-2">
-                                        <label for="fecha_inicio" class="form-label">Inicio</label>
-                                        <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
-                                            value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label for="fecha_fin" class="form-label">Fin</label>
-                                        <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
-                                            value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
-                                    </div>
+                                        <div class="col-md-2">
+                                            <label for="fecha_inicio" class="form-label">Inicio</label>
+                                            <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
+                                                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="fecha_fin" class="form-label">Fin</label>
+                                            <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
+                                                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+                                        </div>
 
-                                    <div class="col-md-2 d-flex align-items-center">
-                                        <button type="submit" class="btn btn-outline-setap-primary me-2">
-                                            <i class="bi bi-search"></i> Filtrar
-                                        </button>
-                                        <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-outline-secondary">
-                                            <i class="bi bi-x-lg"></i>
-                                        </a>
-                                    </div>
-                                </form>
+                                        <div class="col-md-2 d-flex align-items-center">
+                                            <button type="submit" class="btn btn-outline-setap-primary me-2">
+                                                <i class="bi bi-search"></i> Filtrar
+                                            </button>
+                                            <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-outline-secondary">
+                                                <i class="bi bi-x-lg"></i>
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

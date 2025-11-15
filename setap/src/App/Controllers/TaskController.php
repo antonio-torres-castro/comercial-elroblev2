@@ -45,6 +45,7 @@ class TaskController extends BaseController
             $rModify = $this->permissionService->hasPermission($cu, 'Modify');
             $rCreate = $this->permissionService->hasPermission($cu, 'Create');
             $rEliminate = $this->permissionService->hasPermission($cu, 'Eliminate');
+            $rApruve = $this->permissionService->hasPermission($cu, 'Apruve');
 
             // Verificar permisos para gestión de tareas
             if (!$aManageTask) {
@@ -98,6 +99,7 @@ class TaskController extends BaseController
             }
 
             $_GET['show_col_acciones'] = $rModify && $rEliminate;
+            $_GET['show_btn_aprobar'] = $rApruve;
             $_GET['show_btn_nuevo'] = $rCreate;
             $_GET['show_btn_activity'] = $rActivity;
 

@@ -190,3 +190,8 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
     }
     bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
 });
+
+function getSelectedTasks() {
+    return [...document.querySelectorAll(".clickable-row.table-active")]
+        .map(row => row.id.replace("task-row-", ""));
+}
