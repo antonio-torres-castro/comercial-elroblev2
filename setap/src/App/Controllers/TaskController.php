@@ -945,7 +945,7 @@ class TaskController extends BaseController
     }
 
     /**
-     * Cambiar estado de una tarea (GAP 5)
+     * Cambiar estado de un grupo de tareas (GAP 5)
      */
     public function changeStateFSR()
     {

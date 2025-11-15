@@ -214,7 +214,7 @@ function confirmStateChangeForSelectedRows() {
     document.getElementById('changeStateNewState').value = nStateId;
     document.getElementById('changeStateNewStateName').textContent = nStateName;
     document.getElementById('changeStateTaskName').textContent = taskName;
-    document.getElementById('changeStateReason').value = 'Tareas revisadas por el supervisor';
+    document.getElementById('changeStateReason').value = tasksId.length + ' tareas revisadas por el supervisor';
 
     new bootstrap.Modal(document.getElementById('changeStateModalFSR')).show();
 }
