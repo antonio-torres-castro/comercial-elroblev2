@@ -183,17 +183,38 @@ use App\Constants\AppConstants; ?>
                                                                         <?= $statusText ?>
                                                                     </span>
 
-                                                                    <!-- GAP 5: Botón para cambiar estado -->
-                                                                    <div class="dropdown ms-2">
-                                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                                                            id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false"
-                                                                            onclick="loadValidTransitions(<?= $task['id'] ?>)">
-                                                                            <i class="bi bi-arrow-repeat"></i>
+                                                                    <?php
+                                                                    $nextStateId = null;
+                                                                    $buttonLabel = '';
+                                                                    $nextStateName = '';
+                                                                    $nextStateTypeButton = '';
+                                                                    switch ((int)$task['estado_tipo_id']) {
+                                                                        case 2:
+                                                                            $nextStateId = 5;
+                                                                            $buttonLabel = 'Iniciar';
+                                                                            $nextStateName = 'iniciado';
+                                                                            $nextStateTypeButton = 'info';
+                                                                            break;
+                                                                        case 5:
+                                                                            $nextStateId = 6;
+                                                                            $buttonLabel = 'Terminar';
+                                                                            $nextStateName = 'terminado';
+                                                                            $nextStateTypeButton = 'warning';
+                                                                            break;
+                                                                        case 7:
+                                                                            $nextStateId = 6;
+                                                                            $buttonLabel = 'Terminar';
+                                                                            $nextStateName = 'terminado';
+                                                                            $nextStateTypeButton = 'warning';
+                                                                            break;
+                                                                    }
+                                                                    ?>
+                                                                    <?php if (!empty($nextStateId)): ?>
+                                                                        <button class="btn btn-sm btn-outline-<?= $nextStateTypeButton ?> ms-2" type="button"
+                                                                            onclick="confirmStateChange(<?= $task['id'] ?>, <?= $nextStateId ?>, '<?= $nextStateName ?>')">
+                                                                            <?= $buttonLabel ?>
                                                                         </button>
-                                                                        <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
-                                                                            <li><span class="dropdown-item-text text-muted"><?php echo AppConstants::UI_LOADING; ?></span></li>
-                                                                        </ul>
-                                                                    </div>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </small>
                                                         </td><!-- fin Estado -->
