@@ -193,59 +193,70 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
 
 function getSelectedTasks() {
     return [...document.querySelectorAll(".clickable-row.table-active")]
-        .map(row => row.id.replace("task-row-", ""));
+        .map(row => ({ id: row.id.replace("task-row-", ""), stateId: parseInt(row.dataset.stateId, 10) }))
+        .filter(item => !isNaN(item.stateId));
 }
 
 // GAP 5: Confirmar cambio de estado a grupo
 function confirmStateChangeForSelectedRows() {
     const nStateId = 8;
-    const nStateName = 'aprobado';
+    const nStateName = 'Aprobado';
     const taskName = 'Grupo de tareas';
-    
-    var tasksId = [];
-    
-    tasksRows = getSelectedTasks();
-    //si tasksRows no encontro filas
-    shwAlert('No se encontraron filas seleccionadas')
-    //sino iterar con un for y recuperar los id de cada tarea acumulandolo en tasksId
-    
 
-    document.getElementById('changeStateTaskId').value = tasksId;
-    document.getElementById('changeStateNewState').value = nStateId;
-    document.getElementById('changeStateNewStateName').textContent = nStateName;
-    document.getElementById('changeStateTaskName').textContent = taskName;
-    document.getElementById('changeStateReason').value = tasksId.length + ' tareas revisadas por el supervisor';
+    const selected = getSelectedTasks();
+    if (!selected || selected.length === 0) {
+        showAlert('No se encontraron filas seleccionadas', 'warning');
+        return;
+    }
 
-    new bootstrap.Modal(document.getElementById('changeStateModalFSR')).show();
+    const allowedStates = [5, 6, 7];
+    const eligible = selected.filter(item => allowedStates.includes(item.stateId)).map(item => item.id);
+
+    if (eligible.length === 0) {
+        showAlert('Las tareas seleccionadas no son elegibles para aprobación', 'warning');
+        return;
+    }
+
+    document.getElementById('changeStateTaskIdsFSR').value = JSON.stringify(eligible);
+    document.getElementById('changeStateNewStateFSR').value = nStateId;
+    document.getElementById('changeStateNewStateNameFSR').textContent = nStateName;
+    document.getElementById('changeStateTaskNameFSR').textContent = taskName + ' (' + eligible.length + ')';
+    document.getElementById('changeStateReasonFSR').value = eligible.length + ' tareas revisadas por el supervisor';
+
+    new bootstrap.Modal(document.getElementById('changeStateFSRModal')).show();
 }
 
 // GAP 5: Ejecutar cambio de estado
 document.getElementById('confirmChangeStateFSR').addEventListener('click', function() {
-    const formData = new FormData(document.getElementById('changeStateFormFSR'));
+    const form = document.getElementById('changeStateFormFSR');
+    const formData = new FormData(form);
 
     fetch('/setap/tasks/change-stateFSR', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Actualizar badge de estado en la tabla
-                const taskId = formData.get('task_id');
-                const newStateId = formData.get('new_state');
-                updateStatusBadge(taskId, newStateId);
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const newStateId = formData.get('new_state');
+            const updatedIds = Array.isArray(data.updated_ids) ? data.updated_ids : [];
+            updatedIds.forEach(id => {
+                updateStatusBadge(id, newStateId);
+                const row = document.getElementById(`task-row-${id}`);
+                if (row) row.classList.remove('table-active');
+            });
 
-                // Mostrar mensaje de éxito
-                showAlert(data.message, 'success');
-
-                // Cerrar modal
-                bootstrap.Modal.getInstance(document.getElementById('changeStateModal')).hide();
-            } else {
-                showAlert('Error: ' + data.message, 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('Error de conexión al servidor', 'danger');
-        });
+            showAlert(data.message || 'Tareas aprobadas', 'success');
+            const modalEl = document.getElementById('changeStateFSRModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            form.reset();
+        } else {
+            showAlert('Error: ' + (data.message || 'No fue posible aprobar las tareas'), 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error de conexión al servidor', 'danger');
+    });
 });

@@ -165,7 +165,7 @@ use App\Constants\AppConstants; ?>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($data['tasks'] as $task): ?>
-                                                    <tr class="clickable-row" id="task-row-<?= $task['id'] ?>">
+                                                    <tr class="clickable-row" id="task-row-<?= $task['id'] ?>" data-state-id="<?= (int)$task['estado_tipo_id'] ?>">
                                                         <td id="task-column"><!-- Tarea -->
                                                             <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
                                                             <?php if (!empty($task['descripcion'])): ?>
@@ -398,7 +398,7 @@ use App\Constants\AppConstants; ?>
                             <div class="modal-body">
                                 <form id="changeStateFormFSR">
                                     <?= Security::renderCsrfField() ?>
-                                    <input type="hidden" id="changeStateTaskIdFSR" name="task_id">
+                                    <input type="hidden" id="changeStateTaskIdsFSR" name="task_ids">
                                     <input type="hidden" id="changeStateNewStateFSR" name="new_state">
 
                                     <div class="mb-3">

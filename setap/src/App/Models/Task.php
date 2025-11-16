@@ -1070,7 +1070,7 @@ class Task
             $ejecutor_id = (int)$task['ejecutor_id'];
 
             if (!empty($ejecutor_id)) {
-                if ($ejecutor_id != $userId) {
+                if ($ejecutor_id != $userId && ($newState == 5)) {
                     $this->db->rollBack();
                     return ['success' => false, 'message' => 'Tarea asignada a otro usuario'];
                 }

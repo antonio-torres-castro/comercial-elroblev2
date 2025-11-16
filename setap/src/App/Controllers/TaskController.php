@@ -950,6 +950,7 @@ class TaskController extends BaseController
     public function changeStateFSR()
     {
         try {
+            $errorMsg = "";
             $currentUser = $this->getCurrentUser();
             if (!$currentUser) {
                 $this->redirectToLogin();
@@ -980,33 +981,84 @@ class TaskController extends BaseController
             }
 
             // Obtener datos
-            $taskId = (int)($_POST['task_id'] ?? 0);
             $newState = (int)($_POST['new_state'] ?? 0);
+            $reason = trim($_POST['reason'] ?? '');
 
+            if ($newState !== 8) {
+                $this->jsonError('Solo se admite cambiar a estado Aprobado');
+                return;
+            }
             if ($newState == 8 && !$rApruve) {
                 $this->jsonError('Sin permisos para aprobar');
                 return;
             }
 
-            $reason = trim($_POST['reason'] ?? '');
+            $taskIdsRaw = $_POST['task_ids'] ?? null;
+            $taskIdSingle = (int)($_POST['task_id'] ?? 0);
+            $taskIds = [];
 
-            if ($taskId <= 0 || $newState <= 0) {
-                $this->jsonError('Error al cambiar estado de la tarea');
+            if (!empty($taskIdsRaw)) {
+                if (is_array($taskIdsRaw)) {
+                    $taskIds = array_map('intval', $taskIdsRaw);
+                } else {
+                    $decoded = json_decode($taskIdsRaw, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        $taskIds = array_map('intval', $decoded);
+                    } else {
+                        $taskIds = array_map('intval', explode(',', (string)$taskIdsRaw));
+                    }
+                }
+            } elseif ($taskIdSingle > 0) {
+                $taskIds = [$taskIdSingle];
+            }
+
+            if (empty($taskIds)) {
+                $this->jsonError('No se recibieron tareas válidas para aprobar');
                 return;
             }
-            // Cambiar estado usando el modelo con validaciones
-            $result = $this->taskModel->changeState(
-                $taskId,
-                $newState,
-                $currentUser['id'],
-                $currentUser['rol'],
-                $reason
-            );
 
-            if ($result['success']) {
-                $this->jsonSuccess($result['message'] ?? 'Estado de tarea actualizado correctamente');
+            $allowedStates = [5, 6, 7];
+            $approved = 0;
+            $skipped = 0;
+            $updatedIds = [];
+
+            foreach ($taskIds as $tid) {
+                if ($tid <= 0) {
+                    $skipped++;
+                    continue;
+                }
+
+                $currentState = (int)$this->taskModel->getProjectTaskState($tid);
+                if (!in_array($currentState, $allowedStates)) {
+                    $skipped++;
+                    continue;
+                }
+
+                $result = $this->taskModel->changeState(
+                    $tid,
+                    $newState,
+                    $currentUser['id'],
+                    $currentUser['rol'],
+                    $reason
+                );
+
+                if (!empty($result['success'])) {
+                    $approved++;
+                    $updatedIds[] = $tid;
+                } else {
+                    $skipped++;
+                    $errorMsg .= ";" . $result['message'];
+                }
+            }
+
+            if ($approved > 0) {
+                $message = "Aprobadas {$approved} tareas";
+                if ($skipped > 0) {
+                    $message .= "; omitidas {$skipped}";
+                }
+                $this->jsonSuccess($message, ['updated_ids' => $updatedIds]);
             } else {
-                $this->jsonError($result['message'] ?? 'Error al cambiar estado de la tarea');
+                $this->jsonError($errorMsg);
             }
         } catch (Exception $e) {
             Logger::error("TaskController::changeState: " . $e->getMessage());
