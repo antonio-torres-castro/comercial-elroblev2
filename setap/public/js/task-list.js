@@ -260,3 +260,58 @@ document.getElementById('confirmChangeStateFSR').addEventListener('click', funct
         showAlert('Error de conexión al servidor', 'danger');
     });
 });
+
+function refreshTasksTableAjax() {
+    const url = window.location.href;
+    return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTbody = doc.querySelector('#tasksTable tbody');
+            const currentTbody = document.querySelector('#tasksTable tbody');
+            if (newTbody && currentTbody) {
+                currentTbody.innerHTML = newTbody.innerHTML;
+            }
+            const newNav = doc.querySelector('nav[aria-label="Navegación de páginas"]');
+            const currentNav = document.querySelector('nav[aria-label="Navegación de páginas"]');
+            if (newNav) {
+                if (currentNav) {
+                    currentNav.innerHTML = newNav.innerHTML;
+                } else {
+                    const tableContainer = document.getElementById('tasksTable')?.parentElement;
+                    if (tableContainer) tableContainer.insertAdjacentElement('afterend', newNav);
+                }
+            } else if (currentNav) {
+                currentNav.remove();
+            }
+        })
+        .then(() => {
+            showAlert('Datos de tareas actualizados', 'info');
+        })
+        .catch(() => {
+            showAlert('Error al actualizar tareas', 'danger');
+        });
+}
+
+let __lastActivityTsList = Date.now();
+let __inactiveList = false;
+const __INACTIVITY_MS_LIST = 30000;
+
+function __markActivityList() {
+    if (__inactiveList) {
+        refreshTasksTableAjax();
+        __inactiveList = false;
+    }
+    __lastActivityTsList = Date.now();
+}
+
+['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(ev => {
+    window.addEventListener(ev, __markActivityList);
+});
+
+setInterval(() => {
+    if (Date.now() - __lastActivityTsList > __INACTIVITY_MS_LIST) {
+        __inactiveList = true;
+    }
+}, 5000);
