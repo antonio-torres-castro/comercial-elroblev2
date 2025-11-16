@@ -198,9 +198,8 @@ function getSelectedTasks() {
 }
 
 // GAP 5: Confirmar cambio de estado a grupo
-function confirmStateChangeForSelectedRows() {
-    const nStateId = 8;
-    const nStateName = 'Aprobado';
+function confirmStateChangeForSelectedRows(nStateId) {
+    const nStateName = nStateId == 8 ? 'Aprobado' : nStateId == 6 ? 'Terminado' : '';
     const taskName = 'Grupo de tareas';
 
     const selected = getSelectedTasks();
@@ -209,7 +208,8 @@ function confirmStateChangeForSelectedRows() {
         return;
     }
 
-    const allowedStates = [5, 6, 7];
+    const allowedStates = nStateId == 8 ? [5, 6, 7] : nStateId == 6 ? [5, 7] : [];
+
     const eligible = selected.filter(item => allowedStates.includes(item.stateId)).map(item => item.id);
 
     if (eligible.length === 0) {

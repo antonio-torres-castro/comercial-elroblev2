@@ -100,6 +100,7 @@ class TaskController extends BaseController
 
             $_GET['show_col_acciones'] = $rModify && $rEliminate;
             $_GET['show_btn_aprobar'] = $rApruve;
+            $_GET['show_btn_terminar'] = $rActivity && $rApruve;
             $_GET['show_btn_nuevo'] = $rCreate;
             $_GET['show_btn_activity'] = $rActivity;
 
@@ -982,10 +983,11 @@ class TaskController extends BaseController
 
             // Obtener datos
             $newState = (int)($_POST['new_state'] ?? 0);
+            $newStateAccionName = $newState == 8 ? 'Aprobadas' : ($newState == 6 ? 'Terminadas' : '');
             $reason = trim($_POST['reason'] ?? '');
 
-            if ($newState !== 8) {
-                $this->jsonError('Solo se admite cambiar a estado Aprobado');
+            if ($newState !== 8 && $newState !== 6) {
+                $this->jsonError('Masivamente solo puedes cambiar a Aprobado/Terminado');
                 return;
             }
             if ($newState == 8 && !$rApruve) {
@@ -1047,12 +1049,12 @@ class TaskController extends BaseController
                     $updatedIds[] = $tid;
                 } else {
                     $skipped++;
-                    $errorMsg .= ";" . $result['message'];
+                    $errorMsg .= (!empty($errorMsg) ? '; ' : '') . $result['message'];
                 }
             }
 
             if ($approved > 0) {
-                $message = "Aprobadas {$approved} tareas";
+                $message = $newStateAccionName . " {$approved} tareas";
                 if ($skipped > 0) {
                     $message .= "; omitidas {$skipped}";
                 }
