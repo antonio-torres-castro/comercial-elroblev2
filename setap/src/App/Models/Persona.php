@@ -226,14 +226,14 @@ class Persona
     {
         try {
             // Verificar en usuarios
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM usuarios WHERE persona_id = :id");
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM usuarios WHERE persona_id = :id and estado_tipo_id != 4");
             $stmt->execute([':id' => $id]);
             if ($stmt->fetchColumn() > 0) {
                 return true;
             }
 
             // Verificar en cliente_contrapartes
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM cliente_contrapartes WHERE persona_id = :id");
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM cliente_contrapartes WHERE persona_id = :id and estado_tipo_id != 4");
             $stmt->execute([':id' => $id]);
             if ($stmt->fetchColumn() > 0) {
                 return true;
