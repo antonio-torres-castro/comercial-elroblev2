@@ -122,7 +122,7 @@ use App\Constants\AppConstants; ?>
                             <div class="card">
                                 <div class="card-body">
                                     <div class="table-responsive-xl">
-                                        <table class="table table-hover">
+                                        <table class="table table-hover" id="myTasksTable">
                                             <thead>
                                                 <tr>
                                                     <th>Tarea</th>

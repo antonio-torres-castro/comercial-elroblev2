@@ -126,3 +126,58 @@ function viewDetail(taskId) {
 
     new bootstrap.Modal(document.getElementById('detailTaskModal')).show();
 }
+
+function refreshMyTasksTableAjax() {
+    const url = window.location.href;
+    return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTbody = doc.querySelector('#myTasksTable tbody');
+            const currentTbody = document.querySelector('#myTasksTable tbody');
+            if (newTbody && currentTbody) {
+                currentTbody.innerHTML = newTbody.innerHTML;
+            }
+            const newNav = doc.querySelector('nav[aria-label="Navegación de páginas"]');
+            const currentNav = document.querySelector('nav[aria-label="Navegación de páginas"]');
+            if (newNav) {
+                if (currentNav) {
+                    currentNav.innerHTML = newNav.innerHTML;
+                } else {
+                    const tableContainer = document.getElementById('myTasksTable')?.parentElement;
+                    if (tableContainer) tableContainer.insertAdjacentElement('afterend', newNav);
+                }
+            } else if (currentNav) {
+                currentNav.remove();
+            }
+        })
+        .then(() => {
+            showAlert('Datos de tareas actualizados', 'info');
+        })
+        .catch(() => {
+            showAlert('Error al actualizar tareas', 'danger');
+        });
+}
+
+let __lastActivityTs = Date.now();
+let __inactive = false;
+const __INACTIVITY_MS = 30000;
+
+function __markActivity() {
+    if (__inactive) {
+        refreshMyTasksTableAjax();
+        __inactive = false;
+    }
+    __lastActivityTs = Date.now();
+}
+
+['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(ev => {
+    window.addEventListener(ev, __markActivity);
+});
+
+setInterval(() => {
+    if (Date.now() - __lastActivityTs > __INACTIVITY_MS) {
+        __inactive = true;
+    }
+}, 5000);
