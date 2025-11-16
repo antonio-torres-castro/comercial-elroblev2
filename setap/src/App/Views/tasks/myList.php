@@ -231,7 +231,10 @@ use App\Constants\AppConstants; ?>
                                                 </li>
 
                                                 <!-- Números -->
-                                                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                                <?php
+                                                $start = max(1, $currentPage - 1);
+                                                $end = min($totalPages, $currentPage + 1);
+                                                for ($i = $start; $i <= $end; $i++): ?>
                                                     <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
                                                         <a class="page-link" href="<?= $baseUrl . '&page=' . $i ?>"><?= $i ?></a>
                                                     </li>
