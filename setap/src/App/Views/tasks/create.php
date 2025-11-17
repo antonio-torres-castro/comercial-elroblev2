@@ -20,28 +20,6 @@ use App\Constants\AppConstants; ?>
 
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 
-    <!-- <style>
-        /* Limitar altura del dropdown nativo */
-        #tarea_id {
-            max-height: 220px;
-            overflow-y: auto;
-        }
-
-        /* Forzar que los <option> respeten el scroll */
-        #tarea_id option {
-            padding: 6px;
-        }
-
-        /* Mantener siempre el último item al fondo */
-        #tarea_id option[value="nueva"] {
-            background: #f6f6f6;
-            font-weight: bold;
-            position: sticky;
-            bottom: 0;
-            z-index: 2;
-        }
-    </style> -->
-
 </head>
 
 <body>
@@ -183,20 +161,6 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-12">
                                             <hr>
                                             <h6 class="text-muted"><i class="bi bi-calendar"></i> Programación</h6>
-                                        </div>
-
-                                        <!-- Tarea Tipo -->
-                                        <div class="col-md-2">
-                                            <label for="tarea_tipo_id" class="form-label">Tipo<span class="text-danger">*</span></label>
-                                            <select class="form-select" id="tarea_tipo_id" name="tarea_tipo_id" required>
-                                                <option value="">Seleccionar tipo</option>
-                                                <?php foreach ($data['taskTypes'] as $type): ?>
-                                                    <option value="<?= $type['id']; ?>"
-                                                        <?= (isset($data['task']['tarea_tipo_id']) && $data['task']['tarea_tipo_id'] == $type['id']) ? 'selected' : ''; ?>>
-                                                        <?= htmlspecialchars($type['nombre']); ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
                                         </div>
 
                                         <!-- Estado -->

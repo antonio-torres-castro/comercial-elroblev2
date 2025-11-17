@@ -386,7 +386,6 @@ class TaskController extends BaseController
                 'subtitle' => 'Asignar',
                 'projects' => $projects,
                 'tasks' => $this->taskModel->getTasksForCreate(),
-                'taskTypes' => $this->taskModel->getTaskTypes(), // Catálogo de tareas existentes
                 'executor_users' => $this->taskModel->getExecutorUsers(),
                 'supervisor_users' => $this->taskModel->getSupervisorUsers(),
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
