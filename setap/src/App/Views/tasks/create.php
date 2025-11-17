@@ -15,7 +15,33 @@ use App\Constants\AppConstants; ?>
     <link rel="apple-touch-icon" href="/setap/public/favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
+
+    <!-- <style>
+        /* Limitar altura del dropdown nativo */
+        #tarea_id {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        /* Forzar que los <option> respeten el scroll */
+        #tarea_id option {
+            padding: 6px;
+        }
+
+        /* Mantener siempre el último item al fondo */
+        #tarea_id option[value="nueva"] {
+            background: #f6f6f6;
+            font-weight: bold;
+            position: sticky;
+            bottom: 0;
+            z-index: 2;
+        }
+    </style> -->
+
 </head>
 
 <body>
@@ -52,16 +78,16 @@ use App\Constants\AppConstants; ?>
                             <!-- Tarea Catálogo -->
                             <div class="col-md-12">
                                 <select class="form-select" id="tarea_id" name="tarea_id" required>
-                                    <option value="">Seleccionar tarea existente...</option>
+                                    <option value="">Seleccionar tarea...</option>
+                                    <option value="nueva" <?= (isset($_POST['tarea_id']) && $_POST['tarea_id'] == 'nueva') ? 'selected' : ''; ?>>
+                                        ➕ Crear nueva tarea
+                                    </option>
                                     <?php foreach ($data['tasks'] as $taskType): ?>
                                         <option value="<?= $taskType['id']; ?>"
                                             <?= (isset($_POST['tarea_id']) && $_POST['tarea_id'] == $taskType['id']) ? 'selected' : ''; ?>>
                                             <?= htmlspecialchars($taskType['nombre']); ?> - <?= htmlspecialchars($taskType['descripcion']); ?>
                                         </option>
                                     <?php endforeach; ?>
-                                    <option value="nueva" <?= (isset($_POST['tarea_id']) && $_POST['tarea_id'] == 'nueva') ? 'selected' : ''; ?>>
-                                        ➕ Crear nueva tarea
-                                    </option>
                                 </select>
                                 <div class="form-text mb-3">Seleccione del catálogo o cree una nueva.</div>
                             </div>
@@ -400,6 +426,9 @@ use App\Constants\AppConstants; ?>
     <script src="/setap/public/js/create-project-task.js"></script>
     <!-- GAP 5: Task State Validation Utilities -->
     <script src="/setap/public/js/task-state-utils.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
 </body>
 
 </html>

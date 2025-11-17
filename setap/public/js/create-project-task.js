@@ -6,6 +6,16 @@
             const nuevaTareaFields = document.getElementById('nueva-tarea-fields');
             const nuevaTareaNombre = document.getElementById('nueva_tarea_nombre');
 
+            const choices = new Choices(tareaSelect, {
+                                        shouldSort: false,
+                                        searchPlaceholderValue: "Buscar tarea...",
+                                        itemSelectText: "",
+                                        searchFields: ['label', 'value'],
+                                        placeholder: true,
+                                        allowHTML: true
+                                        });
+
+
             tareaSelect.addEventListener('change', function() {
                 if (this.value === 'nueva') {
                     nuevaTareaFields.style.display = 'block';
