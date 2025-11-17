@@ -172,7 +172,7 @@ use App\Constants\AppConstants; ?>
                                             <tbody>
                                                 <?php foreach ($data['tasks'] as $task): ?>
                                                     <tr class="clickable-row" id="task-row-<?= $task['id'] ?>" data-state-id="<?= (int)$task['estado_tipo_id'] ?>">
-                                                        <td id="task-column"><!-- Tarea -->
+                                                        <td class="task-column"><!-- Tarea -->
                                                             <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
                                                             <?php if (!empty($task['descripcion'])): ?>
                                                                 <small class="text-muted"><?= htmlspecialchars(substr($task['descripcion'], 0, 100)) ?>...</small>

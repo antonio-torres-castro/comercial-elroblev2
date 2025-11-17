@@ -15,24 +15,31 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const table = document.getElementById("tasksTable");
     if (!table) return;
 
-    table.addEventListener("click", function (e) {
-
-        // Buscar si el clic ocurrió dentro de la columna task-column
-        const taskColumn = e.target.closest("#task-column");
+    function handleRowSelection(target) {
+        const taskColumn = target.closest(".task-column");
         if (!taskColumn) return;
 
-        // Obtener la fila
         const row = taskColumn.closest(".clickable-row");
         if (!row) return;
 
-        // Alternar selección
         row.classList.toggle("table-active");
+    }
+
+    // Pointer events funcionan igual para touch y mouse
+    table.addEventListener("pointerup", function (e) {
+        // Evitar selección accidental si hubo scroll vertical
+        if (e.pointerType === "touch" && Math.abs(e.movementY) > 10) return;
+
+        handleRowSelection(e.target);
     });
 });
+
 
 
 // GAP 5: Cargar transiciones válidas para una tarea
@@ -200,6 +207,7 @@ function getSelectedTasks() {
 // GAP 5: Confirmar cambio de estado a grupo
 function confirmStateChangeForSelectedRows(nStateId) {
     const nStateName = nStateId == 8 ? 'Aprobado' : nStateId == 6 ? 'Terminado' : '';
+    const nStateAccion = nStateId == 8 ? 'aprobación' : nStateId == 6 ? 'terminación' : '';
     const taskName = 'Grupo de tareas';
 
     const selected = getSelectedTasks();
@@ -213,7 +221,7 @@ function confirmStateChangeForSelectedRows(nStateId) {
     const eligible = selected.filter(item => allowedStates.includes(item.stateId)).map(item => item.id);
 
     if (eligible.length === 0) {
-        showAlert('Las tareas seleccionadas no son elegibles para aprobación', 'warning');
+        showAlert('Las tareas seleccionadas no son elegibles para ' + nStateAccion, 'warning');
         return;
     }
 
