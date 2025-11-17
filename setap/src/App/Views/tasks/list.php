@@ -45,23 +45,21 @@ use App\Constants\AppConstants; ?>
                     </div>
 
                     <?php if ($_GET['show_btn_aprobar']): ?>
-                        <div class="<?= ($_GET['show_btn_nuevo'] || $_GET['show_btn_terminar']) ? "col-md-3" : "col-md-6" ?> text-end <?= $_GET['show_btn_nuevo'] ? "mb-2" : "" ?>">
+                        <div class="<?= ($_GET['show_btn_nuevo'] || $_GET['show_btn_terminar']) ? "col-md-2" : "col-md-6" ?> text-end btn-group <?= $_GET['show_btn_nuevo'] ? "mb-2" : "" ?>" role="group">
                             <a onclick="confirmStateChangeForSelectedRows(8)" class="btn btn-success" id="btnAprobar">
                                 <i class="bi bi-check2-square"></i> Aprobar
                             </a>
-                        </div>
-                    <?php endif; ?>
 
-                    <?php if ($_GET['show_btn_terminar']): ?>
-                        <div class="<?= $_GET['show_btn_aprobar'] || $_GET['show_btn_nuevo'] ? "col-md-3" : "col-md-6" ?> text-end <?= $_GET['show_btn_nuevo'] ? "mb-2" : "" ?>">
-                            <a onclick="confirmStateChangeForSelectedRows(6)" class="btn btn-warning" id="btnTerminar">
-                                <i class="bi bi-send-check"></i> Terminar
-                            </a>
+                            <?php if ($_GET['show_btn_terminar']): ?>
+                                <a onclick="confirmStateChangeForSelectedRows(6)" class="btn btn-warning" id="btnTerminar">
+                                    <i class="bi bi-send-check"></i> Terminar
+                                </a>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($_GET['show_btn_nuevo']): ?>
-                        <div class="<?= $_GET['show_btn_aprobar'] ? "col-md-3" : "col-md-6" ?> text-end">
+                        <div class="<?= $_GET['show_btn_aprobar'] ? "col-md-2" : "col-md-6" ?> text-end">
                             <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
                                 <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
                             </a>
