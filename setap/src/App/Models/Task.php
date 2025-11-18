@@ -201,7 +201,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= " ORDER BY pt.fecha_inicio ASC LIMIT ? OFFSET ?";
+            $sql .= " ORDER BY pt.fecha_inicio ASC, pt.id asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 

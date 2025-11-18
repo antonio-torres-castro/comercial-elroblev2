@@ -291,7 +291,7 @@ class Project
                 $params[] = $fechaFin;
             }
 
-            $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC LIMIT ? OFFSET ? ";
+            $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC, pt.id LIMIT ? OFFSET ? ";
             $params[] = $limit;
             $params[] = $offset;
 
