@@ -132,8 +132,7 @@ use App\Constants\AppConstants; ?>
                                             <select class="form-select" id="ejecutor_id" name="ejecutor_id">
                                                 <option value="">Sin asignar</option>
                                                 <?php foreach ($data['executor_users'] as $user): ?>
-                                                    <option value="<?= $user['id']; ?>"
-                                                        <?= (isset($_POST['ejecutor_id']) && $_POST['ejecutor_id'] == $user['id']) ? 'selected' : ''; ?>>
+                                                    <option value="<?= $user['id']; ?>">
                                                         <?= htmlspecialchars($user['nombre_completo'] . ' (' . $user['nombre_usuario'] . ')'); ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -148,7 +147,7 @@ use App\Constants\AppConstants; ?>
                                                 <option value="">Sin supervisor</option>
                                                 <?php foreach ($data['supervisor_users'] as $user): ?>
                                                     <option value="<?= $user['id']; ?>"
-                                                        <?= (isset($_POST['supervisor_id']) && $_POST['supervisor_id'] == $user['id']) ? 'selected' : ''; ?>>
+                                                        <?= (isset($supervisorId) && $supervisorId == $user['id']) ? 'selected' : ''; ?>>
                                                         <?= htmlspecialchars($user['nombre_completo'] . ' (' . $user['nombre_usuario'] . ')'); ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -169,7 +168,7 @@ use App\Constants\AppConstants; ?>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
                                                 <?php foreach ($data['taskStates'] as $state): ?>
                                                     <option value="<?= $state['id']; ?>"
-                                                        <?= (!empty($_POST['estado_tipo_id']) && $_POST['estado_tipo_id'] == $state['id']) || $state['id'] == 1 ? 'selected' : ''; ?>>
+                                                        <?= (!empty($_POST['estado_tipo_id']) && $_POST['estado_tipo_id'] == $state['id']) || $state['id'] == 2 ? 'selected' : ''; ?>>
                                                         <?= htmlspecialchars($state['nombre']); ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -180,7 +179,7 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-2">
                                             <label for="duracion_horas" class="form-label">Duración(horas)</label>
                                             <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" step="0.5" min="0.5" max="9" required
-                                                value="<?= htmlspecialchars($_POST['duracion_horas'] ?? '1.0'); ?>">
+                                                value="<?= htmlspecialchars($_POST['duracion_horas'] ?? '0.5'); ?>">
                                         </div>
 
                                         <!-- Prioridad -->
@@ -257,12 +256,12 @@ use App\Constants\AppConstants; ?>
                                                 <div class="col-md-6">
                                                     <label for="fecha_inicio_masivo" class="form-label">Inicio *</label>
                                                     <input type="date" class="form-control" id="fecha_inicio_masivo" name="fecha_inicio_masivo"
-                                                        value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>" required>
+                                                        value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-03-01')); ?>" required>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="fecha_fin_masivo" class="form-label">Fin *</label>
                                                     <input type="date" class="form-control" id="fecha_fin_masivo" name="fecha_fin_masivo"
-                                                        value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>" required>
+                                                        value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-12-24')); ?>" required>
                                                 </div>
                                             </div>
 

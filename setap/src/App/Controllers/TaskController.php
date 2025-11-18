@@ -378,6 +378,15 @@ class TaskController extends BaseController
                 $projects = $this->taskModel->getProjectById($project_id);
             } else {
                 $projects = $this->taskModel->getProjects($filters);
+                if (count($projects) == 1) {
+                    $project_id = $projects[0]['id'];
+                }
+            }
+
+            $supervisors = $this->taskModel->getSupervisorUsers();
+            $supervisorId = 0;
+            if (count($supervisors) == 1) {
+                $supervisorId = $supervisors[0]['id'];
             }
 
             $data = [
@@ -387,7 +396,7 @@ class TaskController extends BaseController
                 'projects' => $projects,
                 'tasks' => $this->taskModel->getTasksForCreate(),
                 'executor_users' => $this->taskModel->getExecutorUsers(),
-                'supervisor_users' => $this->taskModel->getSupervisorUsers(),
+                'supervisor_users' => $supervisors,
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
                 'task' => null,
                 'task_id' => null,
