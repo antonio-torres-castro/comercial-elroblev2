@@ -364,12 +364,14 @@ function updatePaginationNav(currentPage, totalPages) {
     // Botón "Anterior"
     html += `
         <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
-            <a class="page-link ajax-page" href="#" data-page="${currentPage - 1}">Anterior</a>
+            <a class="page-link ajax-page" href="#" data-page="${currentPage - 1}">&laquo;</a>
         </li>
     `;
 
+    start = Math.max(1, currentPage - 1);
+    end = Math.min(totalPages, currentPage + 1);
     // Números de página
-    for (let i = 1; i <= totalPages; i++) {
+    for (let i = start; i <= end; i++) {
         html += `
             <li class="page-item ${i === currentPage ? 'active' : ''}">
                 <a class="page-link ajax-page" href="#" data-page="${i}">${i}</a>
@@ -380,7 +382,7 @@ function updatePaginationNav(currentPage, totalPages) {
     // Botón "Siguiente"
     html += `
         <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
-            <a class="page-link ajax-page" href="#" data-page="${currentPage + 1}">Siguiente</a>
+            <a class="page-link ajax-page" href="#" data-page="${currentPage + 1}">&raquo;</a>
         </li>
     `;
 

@@ -299,7 +299,7 @@ use App\Constants\AppConstants; ?>
 
                                                 <!-- Botón Anterior -->
                                                 <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                                                    <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage - 1) ?>">Anterior</a>
+                                                    <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage - 1) ?>">&laquo;</a>
                                                 </li>
 
                                                 <!-- Números -->
@@ -314,7 +314,7 @@ use App\Constants\AppConstants; ?>
 
                                                 <!-- Botón Siguiente -->
                                                 <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                                                    <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage + 1) ?>">Siguiente</a>
+                                                    <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage + 1) ?>">&raquo;</a>
                                                 </li>
                                             </ul>
                                         </nav>

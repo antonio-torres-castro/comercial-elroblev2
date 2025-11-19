@@ -356,17 +356,20 @@ use App\Constants\AppConstants;
                                 <ul class="pagination justify-content-center">
                                     <!-- Botón Anterior -->
                                     <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                                        <a class="page-link ajax-page" href="#" data-page="<?= $currentPage - 1 ?>">Anterior</a>
+                                        <a class="page-link ajax-page" href="#" data-page="<?= $currentPage - 1 ?>">&laquo;</a>
                                     </li>
                                     <!-- Números -->
-                                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                    <?php
+                                    $start = max(1, $currentPage - 1);
+                                    $end = min($totalPages, $currentPage + 1);
+                                    for ($i = $start; $i <= $end; $i++): ?>
                                         <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
                                             <a class="page-link ajax-page" href="#" data-page="<?= $i ?>"><?= $i ?></a>
                                         </li>
                                     <?php endfor; ?>
                                     <!-- Botón Siguiente -->
                                     <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                                        <a class="page-link ajax-page" href="#" data-page="<?= $currentPage + 1 ?>">Siguiente</a>
+                                        <a class="page-link ajax-page" href="#" data-page="<?= $currentPage + 1 ?>">&raquo;</a>
                                     </li>
                                 </ul>
                             </nav>

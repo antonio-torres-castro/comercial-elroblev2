@@ -121,7 +121,10 @@
                 <a class="page-link ajax-page" href="#" data-page="<?= $page - 1 ?>">Anterior</a>
             </li>
             <!-- Números -->
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <?php
+            $start = max(1, $page - 1);
+            $end = min($totalPages, $page + 1);
+            for ($i = $start; $i <= $end; $i++): ?>
                 <li class="page-item <?= $i == $page ? 'active' : '' ?>">
                     <a class="page-link ajax-page" href="#" data-page="<?= $i ?>"><?= $i ?></a>
                 </li>
