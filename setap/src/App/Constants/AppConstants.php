@@ -18,6 +18,9 @@ class AppConstants
     /** Ruta principal de home */
     const ROUTE_HOME = '/setap/home';
 
+    /** Ruta principal de My Tasks */
+    const ROUTE_TASKS_MY = '/setap/tasks/my';
+
     /** Ruta de logout */
     const ROUTE_LOGOUT = '/setap/logout';
 

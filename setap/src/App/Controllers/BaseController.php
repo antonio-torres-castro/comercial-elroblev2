@@ -85,6 +85,20 @@ abstract class BaseController
         Security::redirect(AppConstants::ROUTE_HOME);
     }
     /**
+     * Redirige a la página de home
+     */
+    protected function redirectToTasks(): void
+    {
+        Security::redirect(AppConstants::ROUTE_TASKS);
+    }
+    /**
+     * Redirige a la página de home
+     */
+    protected function redirectToMyTasks(): void
+    {
+        Security::redirect(AppConstants::ROUTE_TASKS_MY);
+    }
+    /**
      * Redirige con mensaje de éxito
      */
     protected function redirectWithSuccess(string $route, string $message): void

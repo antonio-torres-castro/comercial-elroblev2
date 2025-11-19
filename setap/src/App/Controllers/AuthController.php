@@ -120,7 +120,19 @@ class AuthController extends AbstractBaseController
             // Iniciar sesión
             if ($this->authService->login($authResult['user'])) {
                 Logger::debug("Voy al home se ha iniciado sesion " . $controllerName . "::login:");
-                $this->redirectToHome();
+                // Obtener usuario actual
+                $currentUser = $this->getCurrentUser();
+                if (!$currentUser) {
+                    $this->redirectToLogin();
+                    return;
+                }
+                if ($currentUser['usuario_tipo_id'] == 4) {
+                    $this->redirectToMyTasks();
+                } elseif (($currentUser['usuario_tipo_id'] == 3)) {
+                    $this->redirectToTasks();
+                } else {
+                    $this->redirectToHome();
+                }
             } else {
                 $_SESSION['login_error'] = 'Error al iniciar sesión';
                 Logger::debug("authService->login fallo" . $controllerName . "::login:");
