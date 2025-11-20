@@ -1,0 +1,23 @@
+# =======================
+# .HTACCESS PARA /mer/
+# =======================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /mer/
+
+    # Permitir acceso directo a /public
+    RewriteCond %{REQUEST_URI} !^/mer/public/
+
+    # Redirigir toda solicitud a public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Options -Indexes
+DirectoryIndex index.php index.html
+
+<FilesMatch "\.(env|ini|log|sh|bak|config|sql)$">
+    Require all denied
+</FilesMatch>
+
+AddDefaultCharset UTF-8
