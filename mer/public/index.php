@@ -94,7 +94,7 @@ $storeAssets = [
           $assets = $storeAssets[$store['slug']] ?? ['banner' => '', 'logo' => ''];
           $productCount = count(products((int)$store['id']));
         ?>
-          <div class="card store-card fade-in" onclick="location.href='/mer/stores/<?= htmlspecialchars((string)$store['slug']) ?>/'">
+          <div class="card store-card fade-in" onclick="location.href='/stores/<?= htmlspecialchars((string)$store['slug']) ?>/'">
             <img src="<?= htmlspecialchars((string)($assets['banner'] ?: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2OSIgdmlld0JveD0iMCAwIDMwMCAxNjkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMTY5IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgMjBIMjAwVjE0MEgxMDBWMjBaIiBmaWxsPSIjRTVFN0VCIi8+Cjwvc3ZnPg==')) ?>" 
                  alt="<?= htmlspecialchars($store['name']) ?>" 
                  class="store-banner"

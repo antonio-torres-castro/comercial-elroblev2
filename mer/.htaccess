@@ -1,15 +1,26 @@
 # =======================
 # .HTACCESS PARA /mer/
+# Sistema de Rutas para Tiendas Virtuales
+# Mall Virtual - Viña del Mar
 # =======================
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /mer/
 
-    # Permitir acceso directo a /public
+    # URLs amigables para tiendas
+    RewriteRule ^stores/(tienda-[a-z0-9-]+)/(.*)$ public/store_$1.php?$2 [QSA,L]
+    RewriteRule ^tienda-([a-z0-9-]+)/?$ public/store_tienda_$1.php [QSA,L]
+    RewriteRule ^tienda-([a-z0-9-]+)/([a-zA-Z0-9-]+)/?$ public/store_tienda_$1.php?view=$2 [QSA,L]
+    # Páginas de administración
+    RewriteRule ^admin/store/(.*)$ public/admin_store.php?view=$1 [QSA,L]
+    # Checkout
+    RewriteRule ^checkout/?$ public/checkout_advanced.php [QSA,L]
+    # API endpoints
+    RewriteRule ^api/(.*)$ public/api/$1.php [QSA,L]
+    # Permitir acceso directo a archivos de /public
     RewriteCond %{REQUEST_URI} !^/mer/public/
-
-    # Redirigir toda solicitud a public/
+    # Redirigir todas las demás solicitudes a public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
@@ -17,7 +28,34 @@ Options -Indexes
 DirectoryIndex index.php index.html
 
 <FilesMatch "\.(env|ini|log|sh|bak|config|sql)$">
-    Require all denied
+    <RequireAll>
+        Require all denied
+    </RequireAll>
 </FilesMatch>
 
+# Configuración de caché para assets
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+</IfModule>
+
+# Configuración de seguridad
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options DENY
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-XSS-Protection "1; mode=block"
+
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    Header set X-Debug-Panel "enabled"
+    Header set X-Debug-Active "true"
+</IfModule>
+
+# ===== CHARSET =====
 AddDefaultCharset UTF-8
