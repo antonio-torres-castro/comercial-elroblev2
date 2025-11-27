@@ -7,7 +7,7 @@
             "request": "launch",
             "port": 9003,
             "pathMappings": {
-                "/var/www/html": "C:/Users/aseso/source/repos/comercial-elroblev2/mer"
+                "C:/Users/aseso/source/repos/comercial-elroblev2/mer": "C:/Users/aseso/source/repos/comercial-elroblev2/mer"
             },
             "log": true
         }

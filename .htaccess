@@ -79,8 +79,8 @@ AddDefaultCharset UTF-8
     php_flag display_errors off
 </IfModule>
 
-<IfModule mod_php.c>
-    #php_value session.save_path "/home/usuario/public_html/setap/storage/sessions"
-    php_value session.save_path "/setap/storage/sessions"
-    php_value session.cookie_path "/setap"
-</IfModule>
+# <IfModule mod_php.c>
+#     #php_value session.save_path "/home/usuario/public_html/setap/storage/sessions"
+#     php_value session.save_path "/setap/storage/sessions"
+#     php_value session.cookie_path "/setap"
+# </IfModule>

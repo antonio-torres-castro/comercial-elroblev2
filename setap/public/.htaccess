@@ -27,7 +27,6 @@
 
 # ===== CONFIGURACION GENERAL =====
 Options -Indexes
-
 # Priorizar index.php
 DirectoryIndex index.php index.html
 

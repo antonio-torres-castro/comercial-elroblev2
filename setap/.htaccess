@@ -10,7 +10,9 @@
     # Redirigir todo a la carpeta public excepto debug y logs
     RewriteCond %{REQUEST_URI} !^/setap/debug/
     RewriteCond %{REQUEST_URI} !^/setap/logs/
+    # Permitir acceso directo a archivos de /public
     RewriteCond %{REQUEST_URI} !^/setap/public/
+    # Redirigir todas las demás solicitudes a public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
@@ -40,6 +42,12 @@ DirectoryIndex index.php index.html
 #  # PHP Handler (production - cPanel EasyApache)
 #  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
 #</IfModule>
+
+<IfModule mod_php.c>
+    #php_value session.save_path "/home/usuario/public_html/setap/storage/sessions"
+    php_value session.save_path "/setap/storage/sessions"
+    php_value session.cookie_path "/setap"
+</IfModule>
 
 # ===== CHARSET =====
 AddDefaultCharset UTF-8
