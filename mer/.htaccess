@@ -7,17 +7,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /mer/
-
-    # URLs amigables para tiendas
-    RewriteRule ^stores/(tienda-[a-z0-9-]+)/(.*)$ public/store_$1.php?$2 [QSA,L]
-    RewriteRule ^tienda-([a-z0-9-]+)/?$ public/store_tienda_$1.php [QSA,L]
-    RewriteRule ^tienda-([a-z0-9-]+)/([a-zA-Z0-9-]+)/?$ public/store_tienda_$1.php?view=$2 [QSA,L]
-    # Páginas de administración
-    RewriteRule ^admin/store/(.*)$ public/admin_store.php?view=$1 [QSA,L]
-    # Checkout
-    RewriteRule ^checkout/?$ public/checkout_advanced.php [QSA,L]
-    # API endpoints
-    RewriteRule ^api/(.*)$ public/api/$1.php [QSA,L]
     # Permitir acceso directo a archivos de /public
     RewriteCond %{REQUEST_URI} !^/mer/public/
     # Redirigir todas las demás solicitudes a public/
