@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 require_once __DIR__ . '/functions.php';
 
@@ -14,7 +15,8 @@ require_once __DIR__ . '/functions.php';
 /**
  * Obtener productos de una tienda con información de stock
  */
-function getStoreProductsWithStock(int $storeId): array {
+function getStoreProductsWithStock(int $storeId): array
+{
     $stmt = db()->prepare("
         SELECT 
             p.*,
@@ -38,20 +40,21 @@ function getStoreProductsWithStock(int $storeId): array {
 /**
  * Verificar disponibilidad de producto para fecha específica
  */
-function checkProductAvailability(int $productId, int $quantity, ?string $date = null): array {
+function checkProductAvailability(int $productId, int $quantity, ?string $date = null): array
+{
     $checkDate = $date ?? date('Y-m-d');
-    
+
     $stmt = db()->prepare("CALL check_product_availability(?, ?, ?)");
     $stmt->execute([$productId, $quantity, $checkDate]);
     $result = $stmt->fetch();
-    
+
     if (!$result) {
         return [
             'available' => false,
             'message' => 'No se pudo verificar disponibilidad'
         ];
     }
-    
+
     return [
         'available' => $result['availability_status'] === 'available',
         'current_stock' => (int)$result['current_stock'],
@@ -59,8 +62,8 @@ function checkProductAvailability(int $productId, int $quantity, ?string $date =
         'total_available' => (int)$result['total_available'],
         'quantity_requested' => $quantity,
         'check_date' => $checkDate,
-        'message' => $result['availability_status'] === 'available' 
-            ? 'Producto disponible' 
+        'message' => $result['availability_status'] === 'available'
+            ? 'Producto disponible'
             : 'Producto no disponible en la cantidad solicitada'
     ];
 }
@@ -68,7 +71,8 @@ function checkProductAvailability(int $productId, int $quantity, ?string $date =
 /**
  * Obtener fechas disponibles para un producto
  */
-function getProductAvailableDates(int $productId, int $daysAhead = 30): array {
+function getProductAvailableDates(int $productId, int $daysAhead = 30): array
+{
     $stmt = db()->prepare("
         SELECT 
             pdc.capacity_date,
@@ -91,36 +95,47 @@ function getProductAvailableDates(int $productId, int $daysAhead = 30): array {
 /**
  * Crear o actualizar un producto
  */
-function upsertProduct(array $productData): array {
+function upsertProduct(array $productData): array
+{
     $required = ['store_id', 'name', 'price', 'service_type'];
-    
+
     foreach ($required as $field) {
         if (empty($productData[$field])) {
             return ['success' => false, 'error' => "Campo requerido: $field"];
         }
     }
-    
+
     $isUpdate = !empty($productData['id']);
-    
+
     // Campos permitidos para inserción/actualización
     $allowedFields = [
-        'id', 'store_id', 'name', 'description', 'price', 'group_id',
-        'stock_quantity', 'stock_min_threshold', 'delivery_days_min', 
-        'delivery_days_max', 'service_type', 'requires_appointment',
-        'image_url', 'active'
+        'id',
+        'store_id',
+        'name',
+        'description',
+        'price',
+        'group_id',
+        'stock_quantity',
+        'stock_min_threshold',
+        'delivery_days_min',
+        'delivery_days_max',
+        'service_type',
+        'requires_appointment',
+        'image_url',
+        'active'
     ];
-    
+
     $data = [];
     foreach ($allowedFields as $field) {
         if (isset($productData[$field])) {
             $data[$field] = $productData[$field];
         }
     }
-    
+
     if ($isUpdate) {
         $id = (int)$data['id'];
         unset($data['id']);
-        
+
         $fields = [];
         $params = [];
         foreach ($data as $key => $value) {
@@ -128,36 +143,36 @@ function upsertProduct(array $productData): array {
             $params[] = $value;
         }
         $params[] = $id;
-        
+
         $sql = "UPDATE products SET " . implode(', ', $fields) . " WHERE id = ?";
-        
+
         $stmt = db()->prepare($sql);
         $success = $stmt->execute($params);
-        
+
         if ($success && !empty($data['stock_quantity'])) {
             logStockMovement($id, $data['store_id'], 'adjustment', $data['stock_quantity'], 'purchase', null, 'Actualización de stock por administrador');
         }
-        
+
         return ['success' => $success, 'id' => $id];
     } else {
-        $sql = "INSERT INTO products (" . implode(', ', array_keys($data)) . ") VALUES (" . 
-               str_repeat('?,', count($data) - 1) . "?)";
-        
+        $sql = "INSERT INTO products (" . implode(', ', array_keys($data)) . ") VALUES (" .
+            str_repeat('?,', count($data) - 1) . "?)";
+
         $stmt = db()->prepare($sql);
         $success = $stmt->execute(array_values($data));
-        
+
         $id = (int)db()->lastInsertId();
-        
+
         if ($success) {
             // Generar capacidades para los próximos 30 días
             generateProductDailyCapacities($id, $data['store_id']);
-            
+
             // Registrar movimiento inicial de stock si es > 0
             if (!empty($data['stock_quantity']) && $data['stock_quantity'] > 0) {
                 logStockMovement($id, $data['store_id'], 'in', $data['stock_quantity'], 'purchase', null, 'Stock inicial');
             }
         }
-        
+
         return ['success' => $success, 'id' => $id];
     }
 }
@@ -165,23 +180,24 @@ function upsertProduct(array $productData): array {
 /**
  * Actualizar stock de un producto
  */
-function updateProductStock(int $productId, int $newStock, ?string $reason = null): array {
+function updateProductStock(int $productId, int $newStock, ?string $reason = null): array
+{
     $product = productById($productId);
     if (!$product) {
         return ['success' => false, 'error' => 'Producto no encontrado'];
     }
-    
+
     $oldStock = (int)$product['stock_quantity'];
     $difference = $newStock - $oldStock;
-    
+
     $stmt = db()->prepare("UPDATE products SET stock_quantity = ? WHERE id = ?");
     $success = $stmt->execute([$newStock, $productId]);
-    
+
     if ($success) {
         $movementType = $difference > 0 ? 'in' : ($difference < 0 ? 'out' : 'adjustment');
         logStockMovement($productId, $product['store_id'], $movementType, abs($difference), 'adjustment', null, $reason ?? 'Ajuste de stock manual');
     }
-    
+
     return ['success' => $success, 'old_stock' => $oldStock, 'new_stock' => $newStock];
 }
 
@@ -192,31 +208,32 @@ function updateProductStock(int $productId, int $newStock, ?string $reason = nul
 /**
  * Crear una cita/agendamiento
  */
-function createAppointment(int $productId, string $date, string $time, int $quantity, ?int $orderId = null, ?string $notes = null): array {
+function createAppointment(int $productId, string $date, string $time, int $quantity, ?int $orderId = null, ?string $notes = null): array
+{
     $product = productById($productId);
     if (!$product) {
         return ['success' => false, 'error' => 'Producto no encontrado'];
     }
-    
+
     // Verificar disponibilidad
     $availability = checkProductAvailability($productId, $quantity, $date);
     if (!$availability['available']) {
         return ['success' => false, 'error' => 'No hay disponibilidad para la fecha y cantidad solicitada'];
     }
-    
+
     // Verificar capacidad para la fecha
     $capacity = getProductCapacity($productId, $date);
     if ($capacity['available_slots'] < $quantity) {
         return ['success' => false, 'error' => 'No hay suficiente capacidad para la fecha solicitada'];
     }
-    
+
     // Crear la cita
     $stmt = db()->prepare("
         INSERT INTO product_appointments 
         (product_id, store_id, appointment_date, appointment_time, quantity_ordered, capacity_consumed, order_id, customer_notes) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    
+
     $capacityConsumed = $quantity;
     $success = $stmt->execute([
         $productId,
@@ -228,23 +245,24 @@ function createAppointment(int $productId, string $date, string $time, int $quan
         $orderId,
         $notes
     ]);
-    
+
     if ($success) {
         $appointmentId = (int)db()->lastInsertId();
-        
+
         // Actualizar capacidad consumed
         updateProductCapacity($productId, $date, $capacityConsumed);
-        
+
         return ['success' => true, 'appointment_id' => $appointmentId];
     }
-    
+
     return ['success' => false, 'error' => 'Error al crear la cita'];
 }
 
 /**
  * Obtener capacidad disponible para un producto en una fecha
  */
-function getProductCapacity(int $productId, string $date): array {
+function getProductCapacity(int $productId, string $date): array
+{
     $stmt = db()->prepare("
         SELECT available_capacity, booked_capacity, available_capacity - booked_capacity as available_slots
         FROM product_daily_capacity 
@@ -252,7 +270,7 @@ function getProductCapacity(int $productId, string $date): array {
     ");
     $stmt->execute([$productId, $date]);
     $result = $stmt->fetch();
-    
+
     if (!$result) {
         return [
             'available_capacity' => 0,
@@ -260,7 +278,7 @@ function getProductCapacity(int $productId, string $date): array {
             'available_slots' => 0
         ];
     }
-    
+
     return [
         'available_capacity' => (int)$result['available_capacity'],
         'booked_capacity' => (int)$result['booked_capacity'],
@@ -271,7 +289,8 @@ function getProductCapacity(int $productId, string $date): array {
 /**
  * Actualizar capacidad consumed para un producto
  */
-function updateProductCapacity(int $productId, string $date, int $quantity): bool {
+function updateProductCapacity(int $productId, string $date, int $quantity): bool
+{
     $stmt = db()->prepare("
         UPDATE product_daily_capacity 
         SET booked_capacity = booked_capacity + ?, updated_at = CURRENT_TIMESTAMP
@@ -283,7 +302,8 @@ function updateProductCapacity(int $productId, string $date, int $quantity): boo
 /**
  * Generar capacidades diarias para un producto
  */
-function generateProductDailyCapacities(int $productId, int $storeId, int $days = 30): bool {
+function generateProductDailyCapacities(int $productId, int $storeId, int $days = 30): bool
+{
     $stmt = db()->prepare("CALL generate_daily_capacities()");
     return $stmt->execute();
 }
@@ -295,15 +315,16 @@ function generateProductDailyCapacities(int $productId, int $storeId, int $days 
 /**
  * Crear grupo de despacho
  */
-function createDeliveryGroup(array $groupData): array {
+function createDeliveryGroup(array $groupData): array
+{
     $required = ['order_id', 'delivery_address', 'delivery_city', 'delivery_contact_name', 'delivery_contact_phone'];
-    
+
     foreach ($required as $field) {
         if (empty($groupData[$field])) {
             return ['success' => false, 'error' => "Campo requerido: $field"];
         }
     }
-    
+
     $stmt = db()->prepare("
         INSERT INTO delivery_groups 
         (order_id, group_name, delivery_address, delivery_city, delivery_contact_name, 
@@ -311,7 +332,7 @@ function createDeliveryGroup(array $groupData): array {
          delivery_date, delivery_time_slot, shipping_cost, delivery_notes) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    
+
     $success = $stmt->execute([
         $groupData['order_id'],
         $groupData['group_name'] ?? 'Grupo 1',
@@ -326,50 +347,52 @@ function createDeliveryGroup(array $groupData): array {
         $groupData['shipping_cost'] ?? 0.00,
         $groupData['delivery_notes'] ?? null
     ]);
-    
+
     if ($success) {
         return ['success' => true, 'group_id' => (int)db()->lastInsertId()];
     }
-    
+
     return ['success' => false, 'error' => 'Error al crear grupo de despacho'];
 }
 
 /**
  * Agregar item a grupo de despacho
  */
-function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): array {
+function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): array
+{
     // Verificar que el item no esté ya en un grupo
     $stmt = db()->prepare("SELECT 1 FROM delivery_group_items WHERE order_item_id = ?");
     $stmt->execute([$orderItemId]);
     if ($stmt->fetch()) {
         return ['success' => false, 'error' => 'El item ya está asignado a un grupo'];
     }
-    
+
     // Obtener información del item
     $stmt = db()->prepare("SELECT quantity, unit_price FROM order_items WHERE id = ?");
     $stmt->execute([$orderItemId]);
     $item = $stmt->fetch();
-    
+
     if (!$item) {
         return ['success' => false, 'error' => 'Item no encontrado'];
     }
-    
+
     $subtotal = (float)$item['unit_price'] * $quantity;
-    
+
     $stmt = db()->prepare("
         INSERT INTO delivery_group_items (delivery_group_id, order_item_id, quantity, unit_price, subtotal) 
         VALUES (?, ?, ?, ?, ?)
     ");
-    
+
     $success = $stmt->execute([$groupId, $orderItemId, $quantity, $item['unit_price'], $subtotal]);
-    
+
     return ['success' => $success, 'subtotal' => $subtotal];
 }
 
 /**
  * Calcular costo de despacho para un grupo
  */
-function calculateDeliveryCost(int $groupId, ?string $couponCode = null): array {
+function calculateDeliveryCost(int $groupId, ?string $couponCode = null): array
+{
     // Obtener items del grupo
     $stmt = db()->prepare("
         SELECT 
@@ -383,21 +406,21 @@ function calculateDeliveryCost(int $groupId, ?string $couponCode = null): array 
     ");
     $stmt->execute([$groupId]);
     $items = $stmt->fetchAll();
-    
+
     if (empty($items)) {
         return ['success' => false, 'error' => 'El grupo no tiene items'];
     }
-    
+
     $subtotal = array_sum(array_column($items, 'item_total'));
     $shippingCost = 0;
     $discount = 0;
-    
+
     // Calcular costo de envío base (esto se puede personalizar por tienda)
     $groupInfo = getDeliveryGroupById($groupId);
     if ($groupInfo && $groupInfo['shipping_cost'] > 0) {
         $shippingCost = (float)$groupInfo['shipping_cost'];
     }
-    
+
     // Aplicar cupón si existe
     if ($couponCode) {
         $coupon = getDeliveryCoupon($couponCode);
@@ -405,9 +428,9 @@ function calculateDeliveryCost(int $groupId, ?string $couponCode = null): array 
             $discount = calculateCouponDiscount($coupon, $subtotal + $shippingCost);
         }
     }
-    
+
     $total = $subtotal + $shippingCost - $discount;
-    
+
     return [
         'success' => true,
         'subtotal' => $subtotal,
@@ -421,7 +444,8 @@ function calculateDeliveryCost(int $groupId, ?string $couponCode = null): array 
 /**
  * Obtener grupo de despacho por ID
  */
-function getDeliveryGroupById(int $groupId): ?array {
+function getDeliveryGroupById(int $groupId): ?array
+{
     $stmt = db()->prepare("
         SELECT dg.*, 
                pl.name as pickup_location_name
@@ -440,7 +464,8 @@ function getDeliveryGroupById(int $groupId): ?array {
 /**
  * Obtener cupón de descuento por código
  */
-function getDeliveryCoupon(string $code): ?array {
+function getDeliveryCoupon(string $code): ?array
+{
     $stmt = db()->prepare("SELECT * FROM delivery_coupons WHERE code = ? AND is_active = 1");
     $stmt->execute([$code]);
     return $stmt->fetch() ?: null;
@@ -449,34 +474,36 @@ function getDeliveryCoupon(string $code): ?array {
 /**
  * Verificar si un cupón es válido
  */
-function isValidCoupon(array $coupon, float $orderAmount): bool {
+function isValidCoupon(array $coupon, float $orderAmount): bool
+{
     // Verificar si está activo
     if (!$coupon['is_active']) {
         return false;
     }
-    
+
     // Verificar fecha de validez
     if ($coupon['valid_until'] && strtotime($coupon['valid_until']) < time()) {
         return false;
     }
-    
+
     // Verificar monto mínimo
     if ($orderAmount < (float)$coupon['min_order_amount']) {
         return false;
     }
-    
+
     // Verificar límite de uso
     if ($coupon['usage_limit'] && $coupon['used_count'] >= $coupon['usage_limit']) {
         return false;
     }
-    
+
     return true;
 }
 
 /**
  * Calcular descuento de cupón
  */
-function calculateCouponDiscount(array $coupon, float $orderAmount): float {
+function calculateCouponDiscount(array $coupon, float $orderAmount): float
+{
     if ($coupon['discount_type'] === 'fixed') {
         return min((float)$coupon['discount_value'], $orderAmount);
     } else {
@@ -491,7 +518,8 @@ function calculateCouponDiscount(array $coupon, float $orderAmount): float {
 /**
  * Marcar cupón como usado
  */
-function useCoupon(string $code): bool {
+function useCoupon(string $code): bool
+{
     $stmt = db()->prepare("UPDATE delivery_coupons SET used_count = used_count + 1 WHERE code = ?");
     return $stmt->execute([$code]);
 }
@@ -503,14 +531,10 @@ function useCoupon(string $code): bool {
 /**
  * Obtener ubicaciones de recojo de una tienda
  */
-function getStorePickupLocations(int $storeId): array {
+function getStorePickupLocations(int $storeId): array
+{
     $stmt = db()->prepare("
-        SELECT *, 
-               CASE 
-                   WHEN CURDATE() BETWEEN valid_from AND valid_until THEN 'valid'
-                   ELSE 'expired'
-               END as validity_status
-        FROM pickup_locations 
+        SELECT * FROM pickup_locations 
         WHERE store_id = ? AND is_active = 1 
         ORDER BY name
     ");
@@ -521,21 +545,22 @@ function getStorePickupLocations(int $storeId): array {
 /**
  * Crear ubicación de recojo
  */
-function createPickupLocation(array $locationData): array {
+function createPickupLocation(array $locationData): array
+{
     $required = ['store_id', 'name', 'address', 'city'];
-    
+
     foreach ($required as $field) {
         if (empty($locationData[$field])) {
             return ['success' => false, 'error' => "Campo requerido: $field"];
         }
     }
-    
+
     $stmt = db()->prepare("
         INSERT INTO pickup_locations 
         (store_id, name, address, city, phone, hours_start, hours_end, days_of_week) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    
+
     $success = $stmt->execute([
         $locationData['store_id'],
         $locationData['name'],
@@ -546,7 +571,7 @@ function createPickupLocation(array $locationData): array {
         $locationData['hours_end'] ?? null,
         $locationData['days_of_week'] ?? null
     ]);
-    
+
     return ['success' => $success, 'id' => $success ? (int)db()->lastInsertId() : null];
 }
 
@@ -557,13 +582,14 @@ function createPickupLocation(array $locationData): array {
 /**
  * Registrar movimiento de stock
  */
-function logStockMovement(int $productId, int $storeId, string $movementType, int $quantity, string $referenceType, ?int $referenceId = null, ?string $notes = null): bool {
+function logStockMovement(int $productId, int $storeId, string $movementType, int $quantity, string $referenceType, ?int $referenceId = null, ?string $notes = null): bool
+{
     $stmt = db()->prepare("
         INSERT INTO stock_movements 
         (product_id, store_id, movement_type, quantity, reference_type, reference_id, notes) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
-    
+
     return $stmt->execute([
         $productId,
         $storeId,
@@ -578,7 +604,8 @@ function logStockMovement(int $productId, int $storeId, string $movementType, in
 /**
  * Obtener historial de movimientos de stock
  */
-function getStockMovements(int $productId, int $limit = 50): array {
+function getStockMovements(int $productId, int $limit = 50): array
+{
     $stmt = db()->prepare("
         SELECT 
             sm.*,
@@ -602,7 +629,8 @@ function getStockMovements(int $productId, int $limit = 50): array {
 /**
  * Obtener configuración de tienda
  */
-function getStoreSettings(int $storeId): array {
+function getStoreSettings(int $storeId): array
+{
     $stmt = db()->prepare("
         SELECT setting_key, setting_value, setting_type, description
         FROM store_settings 
@@ -611,11 +639,11 @@ function getStoreSettings(int $storeId): array {
     ");
     $stmt->execute([$storeId]);
     $settings = $stmt->fetchAll();
-    
+
     $result = [];
     foreach ($settings as $setting) {
         $value = $setting['setting_value'];
-        
+
         // Parsear según el tipo
         switch ($setting['setting_type']) {
             case 'number':
@@ -628,21 +656,22 @@ function getStoreSettings(int $storeId): array {
                 $value = json_decode($value, true);
                 break;
         }
-        
+
         $result[$setting['setting_key']] = [
             'value' => $value,
             'type' => $setting['setting_type'],
             'description' => $setting['description']
         ];
     }
-    
+
     return $result;
 }
 
 /**
  * Actualizar configuración de tienda
  */
-function updateStoreSetting(int $storeId, string $key, $value, string $type = 'text', ?string $description = null): bool {
+function updateStoreSetting(int $storeId, string $key, $value, string $type = 'text', ?string $description = null): bool
+{
     $stmt = db()->prepare("
         INSERT INTO store_settings (store_id, setting_key, setting_value, setting_type, description) 
         VALUES (?, ?, ?, ?, ?) 
@@ -652,9 +681,9 @@ function updateStoreSetting(int $storeId, string $key, $value, string $type = 't
         description = VALUES(description),
         updated_at = CURRENT_TIMESTAMP
     ");
-    
+
     $stringValue = is_string($value) ? $value : (is_array($value) ? json_encode($value) : (string)$value);
-    
+
     return $stmt->execute([$storeId, $key, $stringValue, $type, $description]);
 }
 
@@ -665,10 +694,11 @@ function updateStoreSetting(int $storeId, string $key, $value, string $type = 't
 /**
  * Obtener estadísticas de productos con bajo stock
  */
-function getLowStockProducts(int $storeId = null): array {
+function getLowStockProducts(int $storeId = null): array
+{
     $whereClause = $storeId ? "WHERE p.store_id = ?" : "";
     $params = $storeId ? [$storeId] : [];
-    
+
     $stmt = db()->prepare("
         SELECT 
             p.id,
@@ -691,10 +721,11 @@ function getLowStockProducts(int $storeId = null): array {
 /**
  * Obtener estadísticas de disponibilidad de productos
  */
-function getProductAvailabilityStats(int $storeId = null, int $daysAhead = 7): array {
+function getProductAvailabilityStats(int $storeId = null, int $daysAhead = 7): array
+{
     $whereClause = $storeId ? "WHERE p.store_id = ?" : "";
     $params = $storeId ? [$storeId] : [];
-    
+
     $stmt = db()->prepare("
         SELECT 
             p.id,
@@ -720,25 +751,26 @@ function getProductAvailabilityStats(int $storeId = null, int $daysAhead = 7): a
 /**
  * Obtener estadísticas de despachos
  */
-function getDeliveryStats(int $storeId = null, ?string $startDate = null, ?string $endDate = null): array {
+function getDeliveryStats(int $storeId = null, ?string $startDate = null, ?string $endDate = null): array
+{
     $whereClause = "WHERE 1=1";
     $params = [];
-    
+
     if ($storeId) {
         $whereClause .= " AND dg.store_id = ?";
         $params[] = $storeId;
     }
-    
+
     if ($startDate) {
         $whereClause .= " AND DATE(dg.created_at) >= ?";
         $params[] = $startDate;
     }
-    
+
     if ($endDate) {
         $whereClause .= " AND DATE(dg.created_at) <= ?";
         $params[] = $endDate;
     }
-    
+
     $stmt = db()->prepare("
         SELECT 
             dg.status,
@@ -754,4 +786,3 @@ function getDeliveryStats(int $storeId = null, ?string $startDate = null, ?strin
     $stmt->execute($params);
     return $stmt->fetchAll();
 }
-?>

@@ -3,6 +3,9 @@
 declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../src/functions.php';
+require_once __DIR__ . '/../src/auth_functions.php';
+
+init_secure_session();
 
 // Obtener tiendas
 $stores = stores();
@@ -57,6 +60,32 @@ $storeAssets = [
       </div>
 
       <nav class="header-nav">
+        <?php if (isLoggedIn()): ?>
+          <?php $user = getCurrentUser(); ?>
+          <div class="user-menu">
+            <button class="user-toggle" onclick="toggleUserMenu()">
+              <span class="user-avatar"><?= strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)) ?></span>
+              <span class="user-name"><?= htmlspecialchars($user['first_name']) ?></span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </button>
+            <div class="user-dropdown" id="userDropdown">
+              <a href="/mer/public/profile.php" class="dropdown-item">👤 Mi Perfil</a>
+              <a href="/mer/public/cart.php" class="dropdown-item">🛒 Mi Carrito</a>
+              <div class="dropdown-divider"></div>
+              <?php if (getUserRole() === 'admin'): ?>
+                <a href="/mer/public/admin_store.php?store_id=1" class="dropdown-item">⚙️ Panel Admin</a>
+                <div class="dropdown-divider"></div>
+              <?php endif; ?>
+              <a href="/mer/public/auth/logout.php" class="dropdown-item">🚪 Cerrar Sesión</a>
+            </div>
+          </div>
+        <?php else: ?>
+          <a href="/mer/public/auth/login.php" class="btn btn-outline">Ingresar</a>
+          <a href="/mer/public/auth/register.php" class="btn btn-primary">Registrarse</a>
+        <?php endif; ?>
+        
         <button class="cart-toggle" onclick="openCartModal()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="21" r="1"></circle>
@@ -394,6 +423,32 @@ $storeAssets = [
         }, 300);
       }, 3000);
     }
+
+    // Función para manejar menú de usuario
+    function toggleUserMenu() {
+      const dropdown = document.getElementById('userDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    // Cerrar menú de usuario al hacer clic fuera
+    document.addEventListener('click', function(event) {
+      const userMenu = document.querySelector('.user-menu');
+      const dropdown = document.getElementById('userDropdown');
+      
+      if (userMenu && !userMenu.contains(event.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+
+    // Cerrar menú con Escape
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        const dropdown = document.getElementById('userDropdown');
+        if (dropdown) {
+          dropdown.classList.remove('show');
+        }
+      }
+    });
   </script>
 
   <!-- SEO y Analytics -->
