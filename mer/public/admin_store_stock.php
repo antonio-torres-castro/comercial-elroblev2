@@ -118,7 +118,7 @@ $stockMovements = array_slice($stockMovements, 0, 20);
               </div>
             </td>
             <td>
-              <span style="font-weight: 600; color: <?= $stockLevel === 'low' ? 'var(--admin-danger)' : $stockLevel === 'medium' ? 'var(--admin-warning)' : 'var(--admin-success)' ?>;">
+              <span style="font-weight: 600; color: <?= ($stockLevel === 'low') ? 'var(--admin-danger)' : (($stockLevel === 'medium') ? 'var(--admin-warning)' : 'var(--admin-success)') ?>;">
                 <?= $product['stock_quantity'] ?>
               </span>
               <span class="stock-indicator stock-<?= $stockLevel ?>" style="margin-left: var(--space-xs);">

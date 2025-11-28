@@ -502,7 +502,7 @@ $pickupLocations = getStorePickupLocations($storeId);
          class="nav-item <?= $action === 'settings' ? 'active' : '' ?>">
         ⚙️ Configuración
       </a>
-      <a href="admin_dashboard.php" class="nav-item">
+      <a href="../index.php" class="nav-item">
         ← Volver al Admin Principal
       </a>
     </nav>

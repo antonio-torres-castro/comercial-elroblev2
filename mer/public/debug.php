@@ -7,7 +7,9 @@ if (!defined('DEBUG_MODE') || !DEBUG_MODE) {
     die('Depuración deshabilitada');
 }
 
-session_start();
+require_once __DIR__ . '/../src/auth_functions.php';
+
+init_secure_session();
 require_once __DIR__ . '/../src/functions.php';
 
 echo "<h1>🔍 Depuración del Sistema Mall Virtual</h1>";

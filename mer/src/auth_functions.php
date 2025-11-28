@@ -8,13 +8,14 @@
  * INICIALIZACIÓN DE SESIÓN SEGURA
  */
 function init_secure_session() {
-    // Configurar opciones de sesión ANTES de iniciar
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
-    ini_set('session.use_strict_mode', 1);
-    ini_set('session.cookie_samesite', 'Strict');
-    
+    // Solo configurar opciones de sesión si NO está ya activa
     if (session_status() === PHP_SESSION_NONE) {
+        // Configurar opciones de sesión ANTES de iniciar
+        ini_set('session.cookie_httponly', 1);
+        ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
+        ini_set('session.use_strict_mode', 1);
+        ini_set('session.cookie_samesite', 'Strict');
+        
         session_start();
     }
     

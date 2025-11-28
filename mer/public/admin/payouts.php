@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
-session_start();
 require_once __DIR__ . '/../../src/functions.php';
+require_once __DIR__ . '/../../src/auth_functions.php';
+
+init_secure_session();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payout_id'])) {
   markPayoutPaid((int)$_POST['payout_id'], $_POST['method'] ?? null, $_POST['reference'] ?? null);
   header('Location: payouts.php');

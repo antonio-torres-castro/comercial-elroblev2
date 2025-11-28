@@ -1,7 +1,9 @@
 <?php
 
 declare(strict_types=1);
-session_start();
+require_once __DIR__ . '/../src/auth_functions.php';
+
+init_secure_session();
 require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/advanced_store_functions.php';
 require_once __DIR__ . '/../src/router.php';

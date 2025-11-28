@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
-session_start();
 require_once __DIR__ . '/../../src/functions.php';
+require_once __DIR__ . '/../../src/auth_functions.php';
+
+init_secure_session();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id'])) {
   markPaymentPaid((int)$_POST['payment_id'], $_POST['transaction_id'] ?? null);
   header('Location: payments.php');

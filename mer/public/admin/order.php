@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
-session_start();
 require_once __DIR__ . '/../../src/functions.php';
+require_once __DIR__ . '/../../src/auth_functions.php';
+
+init_secure_session();
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $order = orderById($id);
 if (!$order) { http_response_code(404); echo 'Orden no encontrada'; exit; }
