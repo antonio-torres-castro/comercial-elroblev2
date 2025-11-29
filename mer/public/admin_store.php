@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$products = getStoreProductsWithStock($storeId);
+$products = getStoreProductsWithStock($storeId, 100, 0);
 $lowStockProducts = getLowStockProducts($storeId);
 $availabilityStats = getProductAvailabilityStats($storeId);
 $pickupLocations = getStorePickupLocations($storeId);

@@ -222,3 +222,23 @@ CREATE TABLE store_payouts (
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
   FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE RESTRICT
 );
+
+-- 8. Movimientos de stock
+CREATE TABLE IF NOT EXISTS stock_movements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    store_id INT NOT NULL,
+    movement_type ENUM('in', 'out', 'adjustment') NOT NULL,
+    quantity INT NOT NULL,
+    reference_type ENUM('purchase', 'sale', 'adjustment', 'return', 'damage') NOT NULL,
+    reference_id INT,
+    notes TEXT,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE,
+    INDEX idx_product (product_id),
+    INDEX idx_store (store_id),
+    INDEX idx_date (created_at),
+    INDEX idx_type (movement_type)
+);
