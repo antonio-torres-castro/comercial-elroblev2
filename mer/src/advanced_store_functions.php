@@ -899,4 +899,844 @@ function validateStoreConfig(int $storeId): array {
         'warnings' => $warnings
     ];
 }
+
+// =========================================
+// SISTEMA DE GESTIÓN DE CITAS Y RESERVAS
+// =========================================
+
+/**
+ * Crear una nueva cita o reserva
+ * @param int $storeId ID de la tienda
+ * @param array $appointmentData Datos de la cita
+ * @return array Resultado de la operación
+ */
+function createStoreAppointment(int $storeId, array $appointmentData): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Validar datos requeridos
+        $required = ['customer_name', 'customer_phone', 'service_id', 'appointment_date', 'duration_hours'];
+        foreach ($required as $field) {
+            if (empty($appointmentData[$field])) {
+                return ['success' => false, 'error' => "Campo requerido: $field"];
+            }
+        }
+        
+        // Validar duración mínima (0.5 días)
+        if ($appointmentData['duration_hours'] < 0.5) {
+            return ['success' => false, 'error' => 'La duración mínima es de 0.5 horas'];
+        }
+        
+        // Validar fecha no sea pasada
+        $appointmentDate = new DateTime($appointmentData['appointment_date']);
+        $now = new DateTime();
+        if ($appointmentDate < $now) {
+            return ['success' => false, 'error' => 'La fecha de la cita no puede ser pasada'];
+        }
+        
+        // Verificar disponibilidad si no se permite múltiples citas simultáneas
+        if (!isset($appointmentData['allow_multiple']) || !$appointmentData['allow_multiple']) {
+            $conflict = checkAppointmentConflict($storeId, $appointmentData['appointment_date'], $appointmentData['duration_hours']);
+            if ($conflict) {
+                return ['success' => false, 'error' => 'Conflicto con otra cita en ese horario'];
+            }
+        }
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO store_appointments (
+                store_id, customer_name, customer_phone, customer_email, 
+                service_id, appointment_date, duration_hours, status, 
+                notes, created_by, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'programada', ?, ?, NOW())
+        ");
+        
+        $result = $stmt->execute([
+            $storeId,
+            $appointmentData['customer_name'],
+            $appointmentData['customer_phone'],
+            $appointmentData['customer_email'] ?? null,
+            $appointmentData['service_id'],
+            $appointmentData['appointment_date'],
+            $appointmentData['duration_hours'],
+            $appointmentData['notes'] ?? null,
+            $_SESSION['user_id'] ?? null
+        ]);
+        
+        if ($result) {
+            $appointmentId = $pdo->lastInsertId();
+            
+            // Si es un servicio recurrente, crear recordatorios
+            if (isset($appointmentData['is_recurring']) && $appointmentData['is_recurring']) {
+                createRecurringAppointmentReminders($appointmentId, $appointmentData);
+            }
+            
+            return ['success' => true, 'appointment_id' => $appointmentId];
+        }
+        
+        return ['success' => false, 'error' => 'Error al crear la cita'];
+        
+    } catch (Exception $e) {
+        error_log("Error creating appointment: " . $e->getMessage());
+        return ['success' => false, 'error' => 'Error interno del sistema'];
+    }
+}
+
+/**
+ * Obtener citas de una tienda con filtros
+ * @param int $storeId ID de la tienda
+ * @param array $filters Filtros opcionales
+ * @return array Lista de citas
+ */
+function getStoreAppointments(int $storeId, array $filters = []): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $where = ['store_id = ?'];
+        $params = [$storeId];
+        
+        // Filtro por fecha
+        if (!empty($filters['date_from'])) {
+            $where[] = 'appointment_date >= ?';
+            $params[] = $filters['date_from'];
+        }
+        
+        if (!empty($filters['date_to'])) {
+            $where[] = 'appointment_date <= ?';
+            $params[] = $filters['date_to'] . ' 23:59:59';
+        }
+        
+        // Filtro por estado
+        if (!empty($filters['status'])) {
+            $where[] = 'status = ?';
+            $params[] = $filters['status'];
+        }
+        
+        // Filtro por cliente
+        if (!empty($filters['customer_phone'])) {
+            $where[] = 'customer_phone LIKE ?';
+            $params[] = '%' . $filters['customer_phone'] . '%';
+        }
+        
+        $sql = "
+            SELECT a.*, s.name as service_name, s.description as service_description,
+                   u.name as created_by_name
+            FROM store_appointments a
+            LEFT JOIN store_services s ON a.service_id = s.id
+            LEFT JOIN users u ON a.created_by = u.id
+            WHERE " . implode(' AND ', $where) . "
+            ORDER BY a.appointment_date ASC
+        ";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+    } catch (Exception $e) {
+        error_log("Error getting appointments: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Verificar conflictos de horarios para una cita
+ * @param int $storeId ID de la tienda
+ * @param string $appointmentDate Fecha y hora de la cita
+ * @param float $durationHours Duración en horas
+ * @param int|null $excludeId ID de cita a excluir (para actualizaciones)
+ * @return bool True si hay conflicto
+ */
+function checkAppointmentConflict(int $storeId, string $appointmentDate, float $durationHours, ?int $excludeId = null): bool {
+    try {
+        $pdo = getDBConnection();
+        
+        // Calcular rango de tiempo de la cita
+        $startTime = new DateTime($appointmentDate);
+        $endTime = clone $startTime;
+        $endTime->add(new DateInterval('PT' . intval($durationHours * 60) . 'M'));
+        
+        $where = ['store_id = ?', 'status != ?'];
+        $params = [$storeId, 'cancelada'];
+        
+        if ($excludeId) {
+            $where[] = 'id != ?';
+            $params[] = $excludeId;
+        }
+        
+        // Buscar citas que se superpongan en el tiempo
+        $stmt = $pdo->prepare("
+            SELECT id, appointment_date, duration_hours
+            FROM store_appointments
+            WHERE " . implode(' AND ', $where) . "
+        ");
+        
+        $stmt->execute($params);
+        $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($appointments as $apt) {
+            $existingStart = new DateTime($apt['appointment_date']);
+            $existingEnd = clone $existingStart;
+            $existingEnd->add(new DateInterval('PT' . intval($apt['duration_hours'] * 60) . 'M'));
+            
+            // Verificar superposición
+            if ($startTime < $existingEnd && $endTime > $existingStart) {
+                return true; // Hay conflicto
+            }
+        }
+        
+        return false; // No hay conflicto
+        
+    } catch (Exception $e) {
+        error_log("Error checking appointment conflict: " . $e->getMessage());
+        return true; // En caso de error, asumir conflicto por seguridad
+    }
+}
+
+/**
+ * Actualizar estado de una cita
+ * @param int $appointmentId ID de la cita
+ * @param string $newStatus Nuevo estado
+ * @param string|null $reason Razón del cambio
+ * @param int|null $storeId ID de la tienda (para validación)
+ * @return array Resultado de la operación
+ */
+function updateAppointmentStatus(int $appointmentId, string $newStatus, ?string $reason = null, ?int $storeId = null): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Validar estado
+        $validStatuses = ['programada', 'confirmada', 'en_proceso', 'completada', 'cancelada', 'no_asistio'];
+        if (!in_array($newStatus, $validStatuses)) {
+            return ['success' => false, 'error' => 'Estado no válido'];
+        }
+        
+        // Validar política de cancelación si se está cancelando
+        if ($newStatus === 'cancelada') {
+            $validation = validateCancellationPolicy($appointmentId, $reason);
+            if (!$validation['valid']) {
+                return ['success' => false, 'error' => $validation['message']];
+            }
+        }
+        
+        // Verificar permisos si se proporciona store_id
+        if ($storeId && !checkAppointmentStoreAccess($appointmentId, $storeId)) {
+            return ['success' => false, 'error' => 'Sin permisos para modificar esta cita'];
+        }
+        
+        $stmt = $pdo->prepare("
+            UPDATE store_appointments 
+            SET status = ?, status_reason = ?, updated_at = NOW()
+            WHERE id = ?
+        ");
+        
+        $result = $stmt->execute([$newStatus, $reason, $appointmentId]);
+        
+        if ($result) {
+            // Registrar cambio en historial
+            logAppointmentStatusChange($appointmentId, $newStatus, $reason);
+            
+            // Notificar cambio de estado si es necesario
+            if (in_array($newStatus, ['cancelada', 'confirmada'])) {
+                sendAppointmentStatusNotification($appointmentId, $newStatus);
+            }
+            
+            return ['success' => true];
+        }
+        
+        return ['success' => false, 'error' => 'Error al actualizar el estado'];
+        
+    } catch (Exception $e) {
+        error_log("Error updating appointment status: " . $e->getMessage());
+        return ['success' => false, 'error' => 'Error interno del sistema'];
+    }
+}
+
+/**
+ * Crear servicio de cita
+ * @param int $storeId ID de la tienda
+ * @param array $serviceData Datos del servicio
+ * @return array Resultado de la operación
+ */
+function createAppointmentService(int $storeId, array $serviceData): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $required = ['name', 'description', 'default_duration_hours'];
+        foreach ($required as $field) {
+            if (empty($serviceData[$field])) {
+                return ['success' => false, 'error' => "Campo requerido: $field"];
+            }
+        }
+        
+        // Validar duración mínima
+        if ($serviceData['default_duration_hours'] < 0.5) {
+            return ['success' => false, 'error' => 'La duración mínima es de 0.5 horas'];
+        }
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO store_services (
+                store_id, name, description, default_duration_hours, 
+                price, is_recurring, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $result = $stmt->execute([
+            $storeId,
+            $serviceData['name'],
+            $serviceData['description'],
+            $serviceData['default_duration_hours'],
+            $serviceData['price'] ?? null,
+            isset($serviceData['is_recurring']) ? 1 : 0
+        ]);
+        
+        if ($result) {
+            return ['success' => true, 'service_id' => $pdo->lastInsertId()];
+        }
+        
+        return ['success' => false, 'error' => 'Error al crear el servicio'];
+        
+    } catch (Exception $e) {
+        error_log("Error creating appointment service: " . $e->getMessage());
+        return ['success' => false, 'error' => 'Error interno del sistema'];
+    }
+}
+
+/**
+ * Obtener servicios de citas de una tienda
+ * @param int $storeId ID de la tienda
+ * @return array Lista de servicios
+ */
+function getAppointmentServices(int $storeId): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            SELECT * FROM store_services 
+            WHERE store_id = ? 
+            ORDER BY name ASC
+        ");
+        
+        $stmt->execute([$storeId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+    } catch (Exception $e) {
+        error_log("Error getting appointment services: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Generar calendario automático de citas
+ * @param int $storeId ID de la tienda
+ * @param string $dateFrom Fecha de inicio
+ * @param string $dateTo Fecha de fin
+ * @return array Estadísticas de generación
+ */
+function generateAutomaticCalendar(int $storeId, string $dateFrom, string $dateTo): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Obtener configuración de horarios de la tienda
+        $scheduleConfig = getStoreScheduleConfig($storeId);
+        $services = getAppointmentServices($storeId);
+        
+        $generated = 0;
+        $errors = [];
+        
+        $currentDate = new DateTime($dateFrom);
+        $endDate = new DateTime($dateTo);
+        
+        while ($currentDate <= $endDate) {
+            $dateString = $currentDate->format('Y-m-d');
+            
+            // Verificar si es día laboral
+            $dayOfWeek = $currentDate->format('N'); // 1 = lunes, 7 = domingo
+            if ($dayOfWeek >= 1 && $dayOfWeek <= 6 && !isHoliday($dateString)) {
+                
+                // Generar citas para cada servicio recurrente
+                foreach ($services as $service) {
+                    if ($service['is_recurring']) {
+                        $appointmentTimes = calculateAppointmentTimes($dateString, $scheduleConfig);
+                        
+                        foreach ($appointmentTimes as $timeSlot) {
+                            $appointmentData = [
+                                'customer_name' => 'Cliente Recurrente',
+                                'customer_phone' => '000000000',
+                                'service_id' => $service['id'],
+                                'appointment_date' => $dateString . ' ' . $timeSlot,
+                                'duration_hours' => $service['default_duration_hours'],
+                                'allow_multiple' => true,
+                                'is_recurring' => true,
+                                'notes' => 'Generado automáticamente - Servicio recurrente'
+                            ];
+                            
+                            $result = createStoreAppointment($storeId, $appointmentData);
+                            if ($result['success']) {
+                                $generated++;
+                            } else {
+                                $errors[] = "Error en $dateString $timeSlot: " . $result['error'];
+                            }
+                        }
+                    }
+                }
+            }
+            
+            $currentDate->add(new DateInterval('P1D'));
+        }
+        
+        return [
+            'success' => true,
+            'generated' => $generated,
+            'errors' => $errors,
+            'period' => ['from' => $dateFrom, 'to' => $dateTo]
+        ];
+        
+    } catch (Exception $e) {
+        error_log("Error generating automatic calendar: " . $e->getMessage());
+        return ['success' => false, 'error' => 'Error interno del sistema'];
+    }
+}
+
+/**
+ * Validar política de cancelación
+ * @param int $appointmentId ID de la cita
+ * @param string|null $reason Razón de cancelación
+ * @return array Resultado de validación
+ */
+function validateCancellationPolicy(int $appointmentId, ?string $reason = null): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Obtener datos de la cita
+        $stmt = $pdo->prepare("
+            SELECT a.*, s.cancellation_hours_before 
+            FROM store_appointments a
+            LEFT JOIN store_services s ON a.service_id = s.id
+            WHERE a.id = ?
+        ");
+        
+        $stmt->execute([$appointmentId]);
+        $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$appointment) {
+            return ['valid' => false, 'message' => 'Cita no encontrada'];
+        }
+        
+        // Verificar tiempo mínimo de anticipación
+        if ($appointment['cancellation_hours_before']) {
+            $appointmentDate = new DateTime($appointment['appointment_date']);
+            $now = new DateTime();
+            $hoursDifference = ($appointmentDate->getTimestamp() - $now->getTimestamp()) / 3600;
+            
+            if ($hoursDifference < $appointment['cancellation_hours_before']) {
+                return [
+                    'valid' => false, 
+                    'message' => "La cancelación debe hacerse con al menos {$appointment['cancellation_hours_before']} horas de anticipación"
+                ];
+            }
+        }
+        
+        // Verificar razón requerida
+        $settings = getStoreAppointmentSettings($appointment['store_id']);
+        if ($settings['require_cancellation_reason'] && empty($reason)) {
+            return ['valid' => false, 'message' => 'Se requiere especificar una razón para la cancelación'];
+        }
+        
+        return ['valid' => true, 'message' => 'Cancelación permitida'];
+        
+    } catch (Exception $e) {
+        error_log("Error validating cancellation policy: " . $e->getMessage());
+        return ['valid' => false, 'message' => 'Error al validar política de cancelación'];
+    }
+}
+
+/**
+ * Obtener configuración de políticas de cancelación
+ * @param int $storeId ID de la tienda
+ * @return array Configuración de políticas
+ */
+function getStoreCancellationPolicies(int $storeId): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            SELECT * FROM store_appointment_policies 
+            WHERE store_id = ?
+        ");
+        
+        $stmt->execute([$storeId]);
+        $policies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Configuración por defecto si no existen políticas específicas
+        if (empty($policies)) {
+            return [
+                'default_hours_before' => 24,
+                'require_reason' => true,
+                'auto_confirm' => true,
+                'max_daily_appointments' => 20,
+                'allow_double_booking' => false
+            ];
+        }
+        
+        return $policies;
+        
+    } catch (Exception $e) {
+        error_log("Error getting cancellation policies: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Actualizar configuración de políticas de cancelación
+ * @param int $storeId ID de la tienda
+ * @param array $policies Nueva configuración
+ * @return array Resultado de la operación
+ */
+function updateStoreCancellationPolicies(int $storeId, array $policies): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO store_appointment_policies (
+                store_id, hours_before_cancellation, require_cancellation_reason,
+                auto_confirm_appointments, max_daily_appointments, allow_double_booking,
+                updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, NOW())
+            ON DUPLICATE KEY UPDATE
+                hours_before_cancellation = VALUES(hours_before_cancellation),
+                require_cancellation_reason = VALUES(require_cancellation_reason),
+                auto_confirm_appointments = VALUES(auto_confirm_appointments),
+                max_daily_appointments = VALUES(max_daily_appointments),
+                allow_double_booking = VALUES(allow_double_booking),
+                updated_at = VALUES(updated_at)
+        ");
+        
+        $result = $stmt->execute([
+            $storeId,
+            $policies['hours_before_cancellation'] ?? 24,
+            isset($policies['require_cancellation_reason']) ? 1 : 0,
+            isset($policies['auto_confirm_appointments']) ? 1 : 0,
+            $policies['max_daily_appointments'] ?? 20,
+            isset($policies['allow_double_booking']) ? 1 : 0
+        ]);
+        
+        if ($result) {
+            return ['success' => true];
+        }
+        
+        return ['success' => false, 'error' => 'Error al actualizar políticas'];
+        
+    } catch (Exception $e) {
+        error_log("Error updating cancellation policies: " . $e->getMessage());
+        return ['success' => false, 'error' => 'Error interno del sistema'];
+    }
+}
+
+/**
+ * Obtener estadísticas de citas para dashboard
+ * @param int $storeId ID de la tienda
+ * @param string|null $dateFrom Fecha de inicio
+ * @param string|null $dateTo Fecha de fin
+ * @return array Estadísticas
+ */
+function getAppointmentStatistics(int $storeId, ?string $dateFrom = null, ?string $dateTo = null): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $where = ['store_id = ?'];
+        $params = [$storeId];
+        
+        if ($dateFrom && $dateTo) {
+            $where[] = 'appointment_date BETWEEN ? AND ?';
+            $params[] = $dateFrom;
+            $params[] = $dateTo . ' 23:59:59';
+        } else {
+            // Por defecto, último mes
+            $where[] = 'appointment_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)';
+        }
+        
+        // Estadísticas generales
+        $stmt = $pdo->prepare("
+            SELECT 
+                COUNT(*) as total_appointments,
+                COUNT(CASE WHEN status = 'completada' THEN 1 END) as completed,
+                COUNT(CASE WHEN status = 'cancelada' THEN 1 END) as cancelled,
+                COUNT(CASE WHEN status = 'programada' THEN 1 END) as scheduled,
+                AVG(duration_hours) as avg_duration
+            FROM store_appointments
+            WHERE " . implode(' AND ', $where)
+        );
+        
+        $stmt->execute($params);
+        $generalStats = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Distribución por servicios
+        $stmt = $pdo->prepare("
+            SELECT s.name, COUNT(a.id) as appointment_count
+            FROM store_services s
+            LEFT JOIN store_appointments a ON s.id = a.service_id 
+                AND (" . implode(' AND ', $where) . ")
+            WHERE s.store_id = ?
+            GROUP BY s.id, s.name
+            ORDER BY appointment_count DESC
+        ");
+        
+        $params[] = $storeId;
+        $stmt->execute($params);
+        $serviceStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Citas por día de la semana
+        $stmt = $pdo->prepare("
+            SELECT 
+                DAYNAME(appointment_date) as day_name,
+                DAYOFWEEK(appointment_date) as day_num,
+                COUNT(*) as count
+            FROM store_appointments
+            WHERE " . implode(' AND ', $where) . "
+            GROUP BY DAYOFWEEK(appointment_date), DAYNAME(appointment_date)
+            ORDER BY day_num
+        ");
+        
+        $stmt->execute(array_slice($params, 0, -1)); // Quitar store_id duplicado
+        $weeklyStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return [
+            'general' => $generalStats,
+            'by_service' => $serviceStats,
+            'by_weekday' => $weeklyStats,
+            'period' => ['from' => $dateFrom, 'to' => $dateTo]
+        ];
+        
+    } catch (Exception $e) {
+        error_log("Error getting appointment statistics: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Funciones auxiliares para el sistema de citas
+
+/**
+ * Calcular horarios disponibles para un día
+ * @param string $date Fecha
+ * @param array $scheduleConfig Configuración de horarios
+ * @return array Horarios disponibles
+ */
+function calculateAppointmentTimes(string $date, array $scheduleConfig): array {
+    $times = [];
+    $dateTime = new DateTime($date);
+    
+    $startHour = $scheduleConfig['start_time'] ?? '09:00';
+    $endHour = $scheduleConfig['end_time'] ?? '18:00';
+    $interval = $scheduleConfig['appointment_interval'] ?? 30; // minutos
+    
+    $current = clone $dateTime;
+    $current->setTime(...explode(':', $startHour));
+    $end = clone $dateTime;
+    $end->setTime(...explode(':', $endHour));
+    
+    while ($current < $end) {
+        $times[] = $current->format('H:i');
+        $current->add(new DateInterval('PT' . $interval . 'M'));
+    }
+    
+    return $times;
+}
+
+/**
+ * Verificar si una fecha es día feriados
+ * @param string $date Fecha
+ * @return bool True si es feriado
+ */
+function isHoliday(string $date): bool {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            SELECT id FROM store_holidays 
+            WHERE date = ?
+        ");
+        
+        $stmt->execute([$date]);
+        return $stmt->fetch() !== false;
+        
+    } catch (Exception $e) {
+        error_log("Error checking holiday: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Obtener configuración de horarios de la tienda
+ * @param int $storeId ID de la tienda
+ * @return array Configuración de horarios
+ */
+function getStoreScheduleConfig(int $storeId): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            SELECT * FROM store_schedule_config 
+            WHERE store_id = ?
+        ");
+        
+        $stmt->execute([$storeId]);
+        $config = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$config) {
+            // Configuración por defecto
+            return [
+                'start_time' => '09:00',
+                'end_time' => '18:00',
+                'appointment_interval' => 30,
+                'working_days' => '1,2,3,4,5,6' // Lunes a Sábado
+            ];
+        }
+        
+        return $config;
+        
+    } catch (Exception $e) {
+        error_log("Error getting schedule config: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Obtener configuración de citas de la tienda
+ * @param int $storeId ID de la tienda
+ * @return array Configuración
+ */
+function getStoreAppointmentSettings(int $storeId): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            SELECT * FROM store_appointment_settings 
+            WHERE store_id = ?
+        ");
+        
+        $stmt->execute([$storeId]);
+        $settings = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$settings) {
+            // Configuración por defecto
+            return [
+                'require_cancellation_reason' => true,
+                'send_confirmation_sms' => true,
+                'send_reminder_sms' => true,
+                'reminder_hours_before' => 24
+            ];
+        }
+        
+        return $settings;
+        
+    } catch (Exception $e) {
+        error_log("Error getting appointment settings: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Crear recordatorios para citas recurrentes
+ * @param int $appointmentId ID de la cita
+ * @param array $appointmentData Datos de la cita
+ */
+function createRecurringAppointmentReminders(int $appointmentId, array $appointmentData): void {
+    try {
+        $pdo = getDBConnection();
+        
+        $appointmentDate = new DateTime($appointmentData['appointment_date']);
+        $reminderDate = clone $appointmentDate;
+        $reminderDate->sub(new DateInterval('P1D')); // 1 día antes
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO appointment_reminders (
+                appointment_id, reminder_type, reminder_date, 
+                message, status, created_at
+            ) VALUES (?, 'recurring', ?, ?, 'pending', NOW())
+        ");
+        
+        $stmt->execute([
+            $appointmentId,
+            $reminderDate->format('Y-m-d H:i:s'),
+            "Recordatorio: Tiene una cita programada para mañana"
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Error creating recurring reminders: " . $e->getMessage());
+    }
+}
+
+/**
+ * Verificar acceso a cita por tienda
+ * @param int $appointmentId ID de la cita
+ * @param int $storeId ID de la tienda
+ * @return bool True si tiene acceso
+ */
+function checkAppointmentStoreAccess(int $appointmentId, int $storeId): bool {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            SELECT id FROM store_appointments 
+            WHERE id = ? AND store_id = ?
+        ");
+        
+        $stmt->execute([$appointmentId, $storeId]);
+        return $stmt->fetch() !== false;
+        
+    } catch (Exception $e) {
+        error_log("Error checking appointment access: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Registrar cambio de estado en historial
+ * @param int $appointmentId ID de la cita
+ * @param string $newStatus Nuevo estado
+ * @param string|null $reason Razón
+ */
+function logAppointmentStatusChange(int $appointmentId, string $newStatus, ?string $reason): void {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO appointment_status_history (
+                appointment_id, old_status, new_status, reason, 
+                changed_by, changed_at
+            ) VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $stmt->execute([
+            $appointmentId,
+            'programada', // Simplificado, se podría mejorar obteniendo el estado anterior
+            $newStatus,
+            $reason,
+            $_SESSION['user_id'] ?? null
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Error logging status change: " . $e->getMessage());
+    }
+}
+
+/**
+ * Enviar notificación de cambio de estado
+ * @param int $appointmentId ID de la cita
+ * @param string $status Nuevo estado
+ */
+function sendAppointmentStatusNotification(int $appointmentId, string $status): void {
+    try {
+        // Implementación básica - se podría expandir con envío real de SMS/email
+        error_log("Appointment $appointmentId status changed to: $status");
+        
+        // TODO: Integrar con sistema de notificaciones
+        // - SMS para cambios de estado importantes
+        // - Email de confirmación
+        // - Notificaciones push
+        
+    } catch (Exception $e) {
+        error_log("Error sending status notification: " . $e->getMessage());
+    }
+}
 ?>
