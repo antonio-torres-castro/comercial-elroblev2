@@ -1739,4 +1739,744 @@ function sendAppointmentStatusNotification(int $appointmentId, string $status): 
         error_log("Error sending status notification: " . $e->getMessage());
     }
 }
+
+// =========================================
+// SISTEMA DE GESTIÓN DE ENTREGAS
+// =========================================
+
+/**
+ * Crear una nueva entrega
+ * @param int $storeId ID de la tienda
+ * @param array $deliveryData Datos de la entrega
+ * @return array Resultado de la operación
+ */
+function createStoreDelivery(int $storeId, array $deliveryData): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Validar datos requeridos
+        $required = ['customer_name', 'customer_phone', 'delivery_address', 'delivery_city', 'delivery_method_id'];
+        foreach ($required as $field) {
+            if (empty($deliveryData[$field])) {
+                return ['success' => false, 'error' => "Campo requerido: $field"];
+            }
+        }
+        
+        // Validar fecha de entrega futura
+        if (isset($deliveryData['scheduled_date']) && strtotime($deliveryData['scheduled_date']) < time()) {
+            return ['success' => false, 'error' => 'La fecha de entrega debe ser futura'];
+        }
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO deliveries (
+                store_id, order_id, customer_name, customer_phone, customer_email,
+                delivery_address, delivery_city, delivery_method_id, scheduled_date,
+                special_instructions, priority_level, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $result = $stmt->execute([
+            $storeId,
+            $deliveryData['order_id'] ?? null,
+            $deliveryData['customer_name'],
+            $deliveryData['customer_phone'],
+            $deliveryData['customer_email'] ?? null,
+            $deliveryData['delivery_address'],
+            $deliveryData['delivery_city'],
+            $deliveryData['delivery_method_id'],
+            $deliveryData['scheduled_date'] ?? null,
+            $deliveryData['special_instructions'] ?? null,
+            $deliveryData['priority_level'] ?? 'normal'
+        ]);
+        
+        if ($result) {
+            $deliveryId = $pdo->lastInsertId();
+            
+            // Log de auditoría
+            logDeliveryActivity($deliveryId, 'creada', 'Entrega creada exitosamente');
+            
+            return [
+                'success' => true,
+                'delivery_id' => $deliveryId,
+                'message' => 'Entrega creada exitosamente'
+            ];
+        }
+        
+        return ['success' => false, 'error' => 'Error al crear la entrega'];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Obtener entregas de una tienda
+ * @param int $storeId ID de la tienda
+ * @param array $filters Filtros opcionales
+ * @return array Lista de entregas
+ */
+function getStoreDeliveries(int $storeId, array $filters = []): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $where = ['d.store_id = ?'];
+        $params = [$storeId];
+        
+        // Aplicar filtros
+        if (!empty($filters['status'])) {
+            $where[] = 'd.status = ?';
+            $params[] = $filters['status'];
+        }
+        
+        if (!empty($filters['date_from'])) {
+            $where[] = 'd.scheduled_date >= ?';
+            $params[] = $filters['date_from'];
+        }
+        
+        if (!empty($filters['date_to'])) {
+            $where[] = 'd.scheduled_date <= ?';
+            $params[] = $filters['date_to'];
+        }
+        
+        if (!empty($filters['city'])) {
+            $where[] = 'd.delivery_city = ?';
+            $params[] = $filters['city'];
+        }
+        
+        $stmt = $pdo->prepare("
+            SELECT 
+                d.*,
+                dm.name as method_name,
+                dm.cost as method_cost,
+                o.total as order_total,
+                o.order_number
+            FROM deliveries d
+            LEFT JOIN delivery_methods dm ON dm.id = d.delivery_method_id
+            LEFT JOIN orders o ON o.id = d.order_id
+            WHERE " . implode(' AND ', $where) . "
+            ORDER BY d.scheduled_date DESC, d.created_at DESC
+            LIMIT 500
+        ");
+        
+        $stmt->execute($params);
+        $deliveries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Calcular estadísticas para cada entrega
+        foreach ($deliveries as &$delivery) {
+            $delivery['status_color'] = getDeliveryStatusColor($delivery['status']);
+            $delivery['days_until_delivery'] = $delivery['scheduled_date'] ? 
+                ceil((strtotime($delivery['scheduled_date']) - time()) / (24*60*60)) : null;
+            $delivery['is_overdue'] = $delivery['scheduled_date'] && 
+                strtotime($delivery['scheduled_date']) < time() && $delivery['status'] !== 'entregada';
+        }
+        
+        return $deliveries;
+        
+    } catch (Exception $e) {
+        error_log("Error getting deliveries: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Actualizar estado de una entrega
+ * @param int $deliveryId ID de la entrega
+ * @param string $newStatus Nuevo estado
+ * @param string|null $reason Razón del cambio
+ * @param string|null $notes Notas adicionales
+ * @return array Resultado de la operación
+ */
+function updateDeliveryStatus(int $deliveryId, string $newStatus, ?string $reason = null, ?string $notes = null): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $validStatuses = ['pendiente', 'programada', 'en_transito', 'entregada', 'fallida', 'cancelada'];
+        if (!in_array($newStatus, $validStatuses)) {
+            return ['success' => false, 'error' => 'Estado no válido'];
+        }
+        
+        // Obtener estado anterior
+        $stmt = $pdo->prepare("SELECT status FROM deliveries WHERE id = ?");
+        $stmt->execute([$deliveryId]);
+        $oldStatus = $stmt->fetchColumn();
+        
+        if (!$oldStatus) {
+            return ['success' => false, 'error' => 'Entrega no encontrada'];
+        }
+        
+        $stmt = $pdo->prepare("
+            UPDATE deliveries 
+            SET status = ?, updated_at = NOW(),
+                notes = CONCAT(COALESCE(notes, ''), '\n', ?)
+            WHERE id = ?
+        ");
+        
+        $result = $stmt->execute([$newStatus, $notes ?? '', $deliveryId]);
+        
+        if ($result) {
+            // Registrar cambio en historial
+            logDeliveryStatusChange($deliveryId, $oldStatus, $newStatus, $reason);
+            
+            // Enviar notificación si es necesario
+            sendDeliveryStatusNotification($deliveryId, $newStatus);
+            
+            return ['success' => true, 'message' => 'Estado actualizado exitosamente'];
+        }
+        
+        return ['success' => false, 'error' => 'Error al actualizar estado'];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Crear método de entrega
+ * @param int $storeId ID de la tienda
+ * @param array $methodData Datos del método
+ * @return array Resultado de la operación
+ */
+function createDeliveryMethod(int $storeId, array $methodData): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $required = ['name', 'base_cost', 'delivery_time_days'];
+        foreach ($required as $field) {
+            if (empty($methodData[$field])) {
+                return ['success' => false, 'error' => "Campo requerido: $field"];
+            }
+        }
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO delivery_methods (
+                store_id, name, description, base_cost, delivery_time_days,
+                max_weight, max_volume, active, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $result = $stmt->execute([
+            $storeId,
+            $methodData['name'],
+            $methodData['description'] ?? null,
+            $methodData['base_cost'],
+            $methodData['delivery_time_days'],
+            $methodData['max_weight'] ?? null,
+            $methodData['max_volume'] ?? null,
+            $methodData['active'] ?? 1
+        ]);
+        
+        if ($result) {
+            $methodId = $pdo->lastInsertId();
+            logDeliveryActivity($methodId, 'método_creado', 'Método de entrega creado');
+            
+            return [
+                'success' => true,
+                'method_id' => $methodId,
+                'message' => 'Método de entrega creado exitosamente'
+            ];
+        }
+        
+        return ['success' => false, 'error' => 'Error al crear método de entrega'];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Obtener métodos de entrega de una tienda
+ * @param int $storeId ID de la tienda
+ * @param bool $activeOnly Solo métodos activos
+ * @return array Lista de métodos
+ */
+function getStoreDeliveryMethods(int $storeId, bool $activeOnly = true): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $where = ['store_id = ?'];
+        $params = [$storeId];
+        
+        if ($activeOnly) {
+            $where[] = 'active = 1';
+        }
+        
+        $stmt = $pdo->prepare("
+            SELECT * FROM delivery_methods
+            WHERE " . implode(' AND ', $where) . "
+            ORDER BY name ASC
+        ");
+        
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+    } catch (Exception $e) {
+        error_log("Error getting delivery methods: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Generar calendario automático de entregas
+ * @param int $storeId ID de la tienda
+ * @param string $startDate Fecha de inicio
+ * @param int $days Días a generar
+ * @return array Resultado de la operación
+ */
+function generateDeliveryCalendar(int $storeId, string $startDate, int $days = 7): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Obtener configuración de horarios de la tienda
+        $storeHours = getStoreHours($storeId);
+        $workingDays = $storeHours['working_days'] ?? [1,2,3,4,5]; // Lunes a Viernes por defecto
+        
+        $startTimestamp = strtotime($startDate);
+        $generatedDates = [];
+        
+        for ($i = 0; $i < $days; $i++) {
+            $currentDate = date('Y-m-d', $startTimestamp + ($i * 24*60*60));
+            $dayOfWeek = date('N', strtotime($currentDate)); // 1 = Lunes, 7 = Domingo
+            
+            if (in_array($dayOfWeek, $workingDays)) {
+                $generatedDates[] = $currentDate;
+            }
+        }
+        
+        // Guardar fechas disponibles
+        $stmt = $pdo->prepare("
+            INSERT IGNORE INTO delivery_schedules (store_id, available_date, slots_morning, slots_afternoon, created_at)
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+        
+        $inserted = 0;
+        foreach ($generatedDates as $date) {
+            $result = $stmt->execute([$storeId, $date, 10, 8]); // Slots por defecto
+            if ($result) $inserted++;
+        }
+        
+        return [
+            'success' => true,
+            'generated_dates' => $inserted,
+            'dates' => $generatedDates,
+            'message' => "Calendario generado exitosamente: $inserted fechas"
+        ];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Verificar conflictos de entrega
+ * @param int $storeId ID de la tienda
+ * @param string $date Fecha de entrega
+ * @param string $timeSlot Turno (morning/afternoon)
+ * @param int $driverId ID del repartidor (opcional)
+ * @return array Información de conflictos
+ */
+function checkDeliveryConflicts(int $storeId, string $date, string $timeSlot = 'morning', int $driverId = null): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $where = ['d.store_id = ?', 'd.scheduled_date = ?', 'd.status != ?'];
+        $params = [$storeId, $date, 'cancelada'];
+        
+        if ($driverId) {
+            $where[] = 'd.assigned_driver_id = ?';
+            $params[] = $driverId;
+        }
+        
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as delivery_count
+            FROM deliveries d
+            WHERE " . implode(' AND ', $where)
+        );
+        
+        $stmt->execute($params);
+        $deliveryCount = $stmt->fetchColumn();
+        
+        // Obtener límites de capacidad
+        $capacity = $timeSlot === 'morning' ? 10 : 8; // Capacidad por defecto
+        $conflicts = $deliveryCount >= $capacity;
+        
+        return [
+            'has_conflicts' => $conflicts,
+            'current_deliveries' => (int)$deliveryCount,
+            'max_capacity' => $capacity,
+            'available_slots' => max(0, $capacity - $deliveryCount),
+            'conflicts' => $conflicts ? 'Capacidad alcanzada para este turno' : null
+        ];
+        
+    } catch (Exception $e) {
+        return [
+            'has_conflicts' => false,
+            'error' => 'Error al verificar conflictos: ' . $e->getMessage()
+        ];
+    }
+}
+
+/**
+ * Obtener estadísticas de entregas
+ * @param int $storeId ID de la tienda
+ * @param string $startDate Fecha de inicio
+ * @param string $endDate Fecha de fin
+ * @return array Estadísticas
+ */
+function getDeliveryStatistics(int $storeId, string $startDate, string $endDate): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Estadísticas generales
+        $stmt = $pdo->prepare("
+            SELECT 
+                COUNT(*) as total_deliveries,
+                SUM(CASE WHEN status = 'entregada' THEN 1 ELSE 0 END) as delivered,
+                SUM(CASE WHEN status = 'en_transito' THEN 1 ELSE 0 END) as in_transit,
+                SUM(CASE WHEN status = 'fallida' THEN 1 ELSE 0 END) as failed,
+                SUM(CASE WHEN status = 'pendiente' THEN 1 ELSE 0 END) as pending,
+                AVG(base_cost) as avg_delivery_cost,
+                SUM(base_cost) as total_delivery_revenue
+            FROM deliveries
+            WHERE store_id = ? AND scheduled_date BETWEEN ? AND ?
+        ");
+        
+        $stmt->execute([$storeId, $startDate, $endDate]);
+        $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Entregas por ciudad
+        $stmt = $pdo->prepare("
+            SELECT 
+                delivery_city,
+                COUNT(*) as delivery_count,
+                SUM(base_cost) as total_revenue
+            FROM deliveries
+            WHERE store_id = ? AND scheduled_date BETWEEN ? AND ?
+            GROUP BY delivery_city
+            ORDER BY delivery_count DESC
+            LIMIT 10
+        ");
+        
+        $stmt->execute([$storeId, $startDate, $endDate]);
+        $cityStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Entregas por método
+        $stmt = $pdo->prepare("
+            SELECT 
+                dm.name as method_name,
+                COUNT(d.id) as delivery_count,
+                SUM(d.base_cost) as total_revenue,
+                AVG(d.base_cost) as avg_cost
+            FROM delivery_methods dm
+            LEFT JOIN deliveries d ON d.delivery_method_id = dm.id
+            WHERE dm.store_id = ? AND d.scheduled_date BETWEEN ? AND ?
+            GROUP BY dm.id, dm.name
+            ORDER BY delivery_count DESC
+        ");
+        
+        $stmt->execute([$storeId, $startDate, $endDate]);
+        $methodStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return [
+            'general' => $stats,
+            'by_city' => $cityStats,
+            'by_method' => $methodStats,
+            'delivery_rate' => $stats['total_deliveries'] > 0 ? 
+                round(($stats['delivered'] / $stats['total_deliveries']) * 100, 2) : 0
+        ];
+        
+    } catch (Exception $e) {
+        error_log("Error getting delivery statistics: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Obtener horario de entregas de una tienda
+ * @param int $storeId ID de la tienda
+ * @param string|null $startDate Fecha de inicio (opcional)
+ * @return array Horarios disponibles
+ */
+function getStoreDeliverySchedule(int $storeId, ?string $startDate = null): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $where = ['store_id = ?'];
+        $params = [$storeId];
+        
+        if ($startDate) {
+            $where[] = 'available_date >= ?';
+            $params[] = $startDate;
+        }
+        
+        $stmt = $pdo->prepare("
+            SELECT * FROM delivery_schedules
+            WHERE " . implode(' AND ', $where) . "
+            ORDER BY available_date ASC
+        ");
+        
+        $stmt->execute($params);
+        $schedules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Calcular entregas programadas para cada fecha
+        foreach ($schedules as &$schedule) {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) FROM deliveries 
+                WHERE store_id = ? AND scheduled_date = ? AND status != 'cancelada'
+            ");
+            $stmt->execute([$storeId, $schedule['available_date']]);
+            $schedule['booked_deliveries'] = (int)$stmt->fetchColumn();
+            $schedule['available_slots'] = ($schedule['slots_morning'] + $schedule['slots_afternoon']) - $schedule['booked_deliveries'];
+        }
+        
+        return $schedules;
+        
+    } catch (Exception $e) {
+        error_log("Error getting delivery schedule: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Obtener colores de estado para entregas
+ * @param string $status Estado de la entrega
+ * @return string Color correspondiente
+ */
+function getDeliveryStatusColor(string $status): string {
+    $colors = [
+        'pendiente' => '#f59e0b',     // Amarillo
+        'programada' => '#3b82f6',    // Azul
+        'en_transito' => '#8b5cf6',   // Púrpura
+        'entregada' => '#10b981',     // Verde
+        'fallida' => '#ef4444',       // Rojo
+        'cancelada' => '#6b7280'      // Gris
+    ];
+    
+    return $colors[$status] ?? '#6b7280';
+}
+
+/**
+ * Log de actividad de entregas
+ * @param int $deliveryId ID de la entrega
+ * @param string $action Acción realizada
+ * @param string $description Descripción
+ * @param string $userId Usuario que realizó la acción
+ */
+function logDeliveryActivity(int $deliveryId, string $action, string $description, ?string $userId = null): void {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO delivery_activity_log (
+                delivery_id, action, description, user_id, created_at
+            ) VALUES (?, ?, ?, ?, NOW())
+        ");
+        
+        $stmt->execute([
+            $deliveryId,
+            $action,
+            $description,
+            $userId ?? ($_SESSION['user_id'] ?? null)
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Error logging delivery activity: " . $e->getMessage());
+    }
+}
+
+/**
+ * Log de cambios de estado de entregas
+ * @param int $deliveryId ID de la entrega
+ * @param string $oldStatus Estado anterior
+ * @param string $newStatus Estado nuevo
+ * @param string|null $reason Razón del cambio
+ */
+function logDeliveryStatusChange(int $deliveryId, string $oldStatus, string $newStatus, ?string $reason): void {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO delivery_status_history (
+                delivery_id, old_status, new_status, reason, 
+                changed_by, changed_at
+            ) VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        
+        $stmt->execute([
+            $deliveryId,
+            $oldStatus,
+            $newStatus,
+            $reason,
+            $_SESSION['user_id'] ?? null
+        ]);
+        
+        logDeliveryActivity($deliveryId, 'estado_cambiado', 
+            "Estado cambiado de '$oldStatus' a '$newStatus'" . ($reason ? " - $reason" : ''));
+        
+    } catch (Exception $e) {
+        error_log("Error logging delivery status change: " . $e->getMessage());
+    }
+}
+
+/**
+ * Enviar notificación de cambio de estado de entrega
+ * @param int $deliveryId ID de la entrega
+ * @param string $status Nuevo estado
+ */
+function sendDeliveryStatusNotification(int $deliveryId, string $status): void {
+    try {
+        // Implementación básica - se podría expandir con envío real de SMS/email
+        error_log("Delivery $deliveryId status changed to: $status");
+        
+        // TODO: Integrar con sistema de notificaciones
+        // - SMS para entregas en tránsito y entregadas
+        // - Email de confirmación
+        // - Notificaciones push
+        
+    } catch (Exception $e) {
+        error_log("Error sending delivery status notification: " . $e->getMessage());
+    }
+}
+
+/**
+ * Obtener repartidores activos
+ * @param int $storeId ID de la tienda
+ * @return array Lista de repartidores
+ */
+function getStoreDrivers(int $storeId): array {
+    try {
+        $pdo = getDBConnection();
+        
+        $stmt = $pdo->prepare("
+            SELECT * FROM delivery_drivers
+            WHERE store_id = ? AND active = 1
+            ORDER BY name ASC
+        ");
+        
+        $stmt->execute([$storeId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+    } catch (Exception $e) {
+        error_log("Error getting store drivers: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Asignar repartidor a entrega
+ * @param int $deliveryId ID de la entrega
+ * @param int $driverId ID del repartidor
+ * @return array Resultado de la operación
+ */
+function assignDriverToDelivery(int $deliveryId, int $driverId): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Verificar que el repartidor existe y está activo
+        $stmt = $pdo->prepare("
+            SELECT id FROM delivery_drivers 
+            WHERE id = ? AND store_id = (SELECT store_id FROM deliveries WHERE id = ?) AND active = 1
+        ");
+        $stmt->execute([$driverId, $deliveryId]);
+        
+        if (!$stmt->fetch()) {
+            return ['success' => false, 'error' => 'Repartidor no encontrado o inactivo'];
+        }
+        
+        $stmt = $pdo->prepare("
+            UPDATE deliveries 
+            SET assigned_driver_id = ?, updated_at = NOW()
+            WHERE id = ?
+        ");
+        
+        $result = $stmt->execute([$driverId, $deliveryId]);
+        
+        if ($result) {
+            logDeliveryActivity($deliveryId, 'repartidor_asignado', "Repartidor ID: $driverId asignado");
+            
+            return ['success' => true, 'message' => 'Repartidor asignado exitosamente'];
+        }
+        
+        return ['success' => false, 'error' => 'Error al asignar repartidor'];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Calcular costo de entrega dinámico
+ * @param int $storeId ID de la tienda
+ * @param int $methodId ID del método
+ * @param string $city Ciudad de destino
+ * @param float $weight Peso del paquete (opcional)
+ * @return array Cálculo detallado
+ */
+function calculateDeliveryCost(int $storeId, int $methodId, string $city, float $weight = 0): array {
+    try {
+        $pdo = getDBConnection();
+        
+        // Obtener método base
+        $stmt = $pdo->prepare("
+            SELECT * FROM delivery_methods 
+            WHERE id = ? AND store_id = ? AND active = 1
+        ");
+        $stmt->execute([$methodId, $storeId]);
+        $method = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$method) {
+            return ['success' => false, 'error' => 'Método de entrega no encontrado'];
+        }
+        
+        $baseCost = (float)$method['base_cost'];
+        $totalCost = $baseCost;
+        $calculations = [
+            'base_cost' => $baseCost,
+            'weight_surcharge' => 0,
+            'distance_surcharge' => 0,
+            'additional_fees' => 0,
+            'total_cost' => $totalCost
+        ];
+        
+        // Recargo por peso
+        if ($weight > 0 && $method['max_weight'] > 0 && $weight > $method['max_weight']) {
+            $overweight = $weight - $method['max_weight'];
+            $weightSurcharge = $overweight * 2.0; // $2 por kg extra
+            $calculations['weight_surcharge'] = $weightSurcharge;
+            $totalCost += $weightSurcharge;
+        }
+        
+        // Recargo por distancia (simplificado)
+        $distanceFactors = [
+            'local' => 1.0,
+            'regional' => 1.5,
+            'nacional' => 2.5
+        ];
+        
+        $distanceFactor = 1.0; // Factor base
+        if (strpos(strtolower($city), 'capital') !== false || strpos(strtolower($city), 'centro') !== false) {
+            $distanceFactor = 1.2; // Entrega local
+        } else {
+            $distanceFactor = 1.8; // Entrega regional/nacional
+        }
+        
+        if ($distanceFactor > 1.0) {
+            $distanceSurcharge = $baseCost * ($distanceFactor - 1.0);
+            $calculations['distance_surcharge'] = $distanceSurcharge;
+            $totalCost += $distanceSurcharge;
+        }
+        
+        $calculations['total_cost'] = round($totalCost, 2);
+        $calculations['delivery_days'] = $method['delivery_time_days'];
+        $calculations['method_name'] = $method['name'];
+        
+        return [
+            'success' => true,
+            'cost_breakdown' => $calculations,
+            'estimated_delivery' => date('Y-m-d', strtotime("+{$method['delivery_time_days']} days"))
+        ];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
+    }
+}
 ?>
