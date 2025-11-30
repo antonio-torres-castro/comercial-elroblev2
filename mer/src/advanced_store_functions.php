@@ -1,794 +1,123 @@
 <?php
-
 declare(strict_types=1);
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/config.php';
 
 /**
- * FUNCIONES PARA SISTEMA DE TIENDA AVANZADO
- * Mall Virtual - Viña del Mar
+ * Obtener todos los productos de una tienda con stock actual y paginación
  */
-
-// =============================================================================
-// GESTIÓN DE PRODUCTOS CON STOCK Y AGENDAMIENTO
-// =============================================================================
-
-/**
- * Obtener productos de una tienda con información de stock y paginación
- */
-function getStoreProductsWithStock(int $storeId, int $limit = 100, int $offset = 0): array
-{
+function getStoreProductsWithStock(int $storeId, int $limit = 100, int $offset = 0): array {
     // Validar parámetros de paginación
     $limit = max(1, min(1000, $limit)); // Entre 1 y 1000
     $offset = max(0, $offset); // No negativo
-
+    
     $stmt = db()->prepare("
         SELECT 
             p.*,
-            pdc.available_capacity - pdc.booked_capacity as available_slots,
-            pdc.capacity_date,
-            CASE WHEN p.stock_quantity <= p.stock_min_threshold THEN 'LOW' ELSE 'OK' END as stock_status,
-            CASE 
-                WHEN p.service_type = 'servicio' AND p.requires_appointment = 1 THEN 'requires_appointment'
-                WHEN p.service_type = 'producto' THEN 'standard'
-                ELSE 'hybrid'
-            END as service_mode
+            s.name as store_name,
+            COALESCE(SUM(sm.quantity), 0) as current_stock,
+            COALESCE(sm.last_updated, p.created_at) as stock_updated
         FROM products p
-        LEFT JOIN product_daily_capacity pdc ON pdc.product_id = p.id AND pdc.capacity_date = CURDATE()
-        WHERE p.store_id = ? AND p.active = 1
+        JOIN stores s ON s.id = p.store_id
+        LEFT JOIN stock_movements sm ON sm.product_id = p.id
+        WHERE p.store_id = ?
+        GROUP BY p.id
         ORDER BY p.name
         LIMIT ?, ?
     ");
-
+    
     $stmt->bindValue(1, $storeId, PDO::PARAM_INT);
     $stmt->bindValue(2, $limit, PDO::PARAM_INT);
     $stmt->bindValue(3, $offset, PDO::PARAM_INT);
-
-    try {
-        $stmt->execute();
-        return $stmt->fetchAll();
-    } catch (PDOException $e) {
-        // Manejo de errores: tablas o columnas que no existen (desarrollo)
-        if (
-            strpos($e->getMessage(), "doesn't exist") !== false ||
-            strpos($e->getMessage(), "Unknown column") !== false
-        ) {
-            return [];
-        }
-        throw $e;
-    }
+    $stmt->execute();
+    
+    return $stmt->fetchAll();
 }
 
 /**
- * Verificar disponibilidad de producto para fecha específica
+ * Obtener movimientos de stock de un producto con paginación
  */
-function checkProductAvailability(int $productId, int $quantity, ?string $date = null): array
-{
-    $checkDate = $date ?? date('Y-m-d');
-
-    try {
-        $stmt = db()->prepare("CALL check_product_availability(?, ?, ?)");
-        $stmt->execute([$productId, $quantity, $checkDate]);
-        $result = $stmt->fetch();
-
-        if (!$result) {
-            return [
-                'available' => false,
-                'message' => 'No se pudo verificar disponibilidad'
-            ];
-        }
-
-        return [
-            'available' => $result['availability_status'] === 'available',
-            'current_stock' => (int)($result['current_stock'] ?? 0),
-            'available_capacity' => (int)($result['available_capacity'] ?? 0),
-            'total_available' => (int)($result['total_available'] ?? 0),
-            'quantity_requested' => $quantity,
-            'check_date' => $checkDate,
-            'message' => $result['availability_status'] === 'available'
-                ? 'Producto disponible'
-                : 'Producto no disponible en la cantidad solicitada'
-        ];
-    } catch (PDOException $e) {
-        // Si el procedimiento no existe o hay error, asumir disponibilidad básica
-        if (strpos($e->getMessage(), "doesn't exist") !== false) {
-            return [
-                'available' => true, // Asumir disponible si no hay procedimientos
-                'current_stock' => 999,
-                'available_capacity' => 999,
-                'total_available' => 999,
-                'quantity_requested' => $quantity,
-                'check_date' => $checkDate,
-                'message' => 'Sistema en desarrollo - disponibilidad no verificada'
-            ];
-        }
-        throw $e;
-    }
-}
-
-/**
- * Obtener fechas disponibles para un producto con paginación
- */
-function getProductAvailableDates(int $productId, int $daysAhead = 30, int $limit = 100, int $offset = 0): array
-{
-    // Validar parámetros
-    $daysAhead = max(1, min(365, $daysAhead)); // Entre 1 día y 1 año
-    $limit = max(1, min(1000, $limit)); // Entre 1 y 1000
-    $offset = max(0, $offset); // No negativo
-
+function getStockMovements(int $productId, int $limit = 50, int $offset = 0): array {
+    if ($limit <= 0 || $limit > 1000) $limit = 50;
+    if ($offset < 0) $offset = 0;
+    
     $stmt = db()->prepare("
         SELECT 
-            pdc.capacity_date,
-            pdc.available_capacity - pdc.booked_capacity as available_slots,
-            p.stock_quantity
+            sm.*,
+            p.name as product_name,
+            u.username as performed_by
+        FROM stock_movements sm
+        JOIN products p ON p.id = sm.product_id
+        LEFT JOIN users u ON u.id = sm.performed_by_user_id
+        WHERE sm.product_id = ?
+        ORDER BY sm.created_at DESC
+        LIMIT ?, ?
+    ");
+    
+    $stmt->bindValue(1, $productId, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+    $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    return $stmt->fetchAll();
+}
+
+/**
+ * Obtener fechas disponibles para un producto específico
+ */
+function getProductAvailableDates(int $productId, int $daysAhead = 30, int $limit = 30, int $offset = 0): array {
+    if ($limit <= 0 || $limit > 100) $limit = 30;
+    if ($offset < 0) $offset = 0;
+    
+    $stmt = db()->prepare("
+        SELECT 
+            DATE(pdc.capacity_date) as available_date,
+            pdc.available_capacity - pdc.booked_capacity as remaining_capacity,
+            pdc.available_capacity,
+            pdc.booked_capacity
         FROM product_daily_capacity pdc
-        JOIN products p ON p.id = pdc.product_id
-        WHERE pdc.product_id = ? 
-          AND pdc.capacity_date >= CURDATE()
-          AND pdc.capacity_date <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
-          AND pdc.available_capacity > pdc.booked_capacity
-          AND p.stock_quantity > 0
+        WHERE pdc.product_id = ?
+        AND pdc.capacity_date >= CURDATE()
+        AND pdc.capacity_date <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+        AND (pdc.available_capacity - pdc.booked_capacity) > 0
         ORDER BY pdc.capacity_date
         LIMIT ?, ?
     ");
-
+    
     $stmt->bindValue(1, $productId, PDO::PARAM_INT);
     $stmt->bindValue(2, $daysAhead, PDO::PARAM_INT);
     $stmt->bindValue(3, $limit, PDO::PARAM_INT);
     $stmt->bindValue(4, $offset, PDO::PARAM_INT);
-
-    try {
-        $stmt->execute();
-        return $stmt->fetchAll();
-    } catch (PDOException $e) {
-        // Manejo de errores: tablas o columnas que no existen (desarrollo)
-        if (
-            strpos($e->getMessage(), "doesn't exist") !== false ||
-            strpos($e->getMessage(), "Unknown column") !== false
-        ) {
-            return [];
-        }
-        throw $e;
-    }
+    $stmt->execute();
+    
+    return $stmt->fetchAll();
 }
 
 /**
- * Crear o actualizar un producto
+ * Obtener ubicaciones de retiro para una tienda
  */
-function upsertProduct(array $productData): array
-{
-    $required = ['store_id', 'name', 'price', 'service_type'];
-
-    foreach ($required as $field) {
-        if (empty($productData[$field])) {
-            return ['success' => false, 'error' => "Campo requerido: $field"];
-        }
-    }
-
-    $isUpdate = !empty($productData['id']);
-
-    // Campos permitidos para inserción/actualización
-    $allowedFields = [
-        'id',
-        'store_id',
-        'name',
-        'description',
-        'price',
-        'group_id',
-        'stock_quantity',
-        'stock_min_threshold',
-        'delivery_days_min',
-        'delivery_days_max',
-        'service_type',
-        'requires_appointment',
-        'image_url',
-        'active'
-    ];
-
-    $data = [];
-    foreach ($allowedFields as $field) {
-        if (isset($productData[$field])) {
-            $data[$field] = $productData[$field];
-        }
-    }
-
-    if ($isUpdate) {
-        $id = (int)$data['id'];
-        unset($data['id']);
-
-        $fields = [];
-        $params = [];
-        foreach ($data as $key => $value) {
-            $fields[] = "$key = ?";
-            $params[] = $value;
-        }
-        $params[] = $id;
-
-        $sql = "UPDATE products SET " . implode(', ', $fields) . " WHERE id = ?";
-
-        $stmt = db()->prepare($sql);
-        $success = $stmt->execute($params);
-
-        if ($success && !empty($data['stock_quantity'])) {
-            logStockMovement($id, $data['store_id'], 'adjustment', $data['stock_quantity'], 'purchase', null, 'Actualización de stock por administrador');
-        }
-
-        return ['success' => $success, 'id' => $id];
-    } else {
-        $sql = "INSERT INTO products (" . implode(', ', array_keys($data)) . ") VALUES (" .
-            str_repeat('?,', count($data) - 1) . "?)";
-
-        $stmt = db()->prepare($sql);
-        $success = $stmt->execute(array_values($data));
-
-        $id = (int)db()->lastInsertId();
-
-        if ($success) {
-            // Generar capacidades para los próximos 30 días
-            generateProductDailyCapacities($id, $data['store_id']);
-
-            // Registrar movimiento inicial de stock si es > 0
-            if (!empty($data['stock_quantity']) && $data['stock_quantity'] > 0) {
-                logStockMovement($id, $data['store_id'], 'in', $data['stock_quantity'], 'purchase', null, 'Stock inicial');
-            }
-        }
-
-        return ['success' => $success, 'id' => $id];
-    }
-}
-
-/**
- * Actualizar stock de un producto
- */
-function updateProductStock(int $productId, int $newStock, ?string $reason = null): array
-{
-    $product = productById($productId);
-    if (!$product) {
-        return ['success' => false, 'error' => 'Producto no encontrado'];
-    }
-
-    $oldStock = (int)$product['stock_quantity'];
-    $difference = $newStock - $oldStock;
-
-    $stmt = db()->prepare("UPDATE products SET stock_quantity = ? WHERE id = ?");
-    $success = $stmt->execute([$newStock, $productId]);
-
-    if ($success) {
-        $movementType = $difference > 0 ? 'in' : ($difference < 0 ? 'out' : 'adjustment');
-        logStockMovement($productId, $product['store_id'], $movementType, abs($difference), 'adjustment', null, $reason ?? 'Ajuste de stock manual');
-    }
-
-    return ['success' => $success, 'old_stock' => $oldStock, 'new_stock' => $newStock];
-}
-
-// =============================================================================
-// SISTEMA DE AGENDAMIENTO
-// =============================================================================
-
-/**
- * Crear una cita/agendamiento
- */
-function createAppointment(int $productId, string $date, string $time, int $quantity, ?int $orderId = null, ?string $notes = null): array
-{
-    $product = productById($productId);
-    if (!$product) {
-        return ['success' => false, 'error' => 'Producto no encontrado'];
-    }
-
-    // Verificar disponibilidad
-    $availability = checkProductAvailability($productId, $quantity, $date);
-    if (!$availability['available']) {
-        return ['success' => false, 'error' => 'No hay disponibilidad para la fecha y cantidad solicitada'];
-    }
-
-    // Verificar capacidad para la fecha
-    $capacity = getProductCapacity($productId, $date);
-    if ($capacity['available_slots'] < $quantity) {
-        return ['success' => false, 'error' => 'No hay suficiente capacidad para la fecha solicitada'];
-    }
-
-    // Crear la cita
-    $stmt = db()->prepare("
-        INSERT INTO product_appointments 
-        (product_id, store_id, appointment_date, appointment_time, quantity_ordered, capacity_consumed, order_id, customer_notes) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-
-    $capacityConsumed = $quantity;
-    $success = $stmt->execute([
-        $productId,
-        $product['store_id'],
-        $date,
-        $time,
-        $quantity,
-        $capacityConsumed,
-        $orderId,
-        $notes
-    ]);
-
-    if ($success) {
-        $appointmentId = (int)db()->lastInsertId();
-
-        // Actualizar capacidad consumed
-        updateProductCapacity($productId, $date, $capacityConsumed);
-
-        return ['success' => true, 'appointment_id' => $appointmentId];
-    }
-
-    return ['success' => false, 'error' => 'Error al crear la cita'];
-}
-
-/**
- * Obtener capacidad disponible para un producto en una fecha
- */
-function getProductCapacity(int $productId, string $date): array
-{
-    $stmt = db()->prepare("
-        SELECT available_capacity, booked_capacity, available_capacity - booked_capacity as available_slots
-        FROM product_daily_capacity 
-        WHERE product_id = ? AND capacity_date = ?
-    ");
-    $stmt->execute([$productId, $date]);
-    $result = $stmt->fetch();
-
-    if (!$result) {
-        return [
-            'available_capacity' => 0,
-            'booked_capacity' => 0,
-            'available_slots' => 0
-        ];
-    }
-
-    return [
-        'available_capacity' => (int)$result['available_capacity'],
-        'booked_capacity' => (int)$result['booked_capacity'],
-        'available_slots' => (int)$result['available_slots']
-    ];
-}
-
-/**
- * Actualizar capacidad consumed para un producto
- */
-function updateProductCapacity(int $productId, string $date, int $quantity): bool
-{
-    $stmt = db()->prepare("
-        UPDATE product_daily_capacity 
-        SET booked_capacity = booked_capacity + ?, updated_at = CURRENT_TIMESTAMP
-        WHERE product_id = ? AND capacity_date = ?
-    ");
-    return $stmt->execute([$quantity, $productId, $date]);
-}
-
-/**
- * Generar capacidades diarias para un producto
- */
-function generateProductDailyCapacities(int $productId, int $storeId, int $days = 30): bool
-{
-    try {
-        $stmt = db()->prepare("CALL generate_daily_capacities()");
-        return $stmt->execute();
-    } catch (PDOException $e) {
-        // Si el procedimiento no existe, retornar false sin lanzar error
-        // Esto es normal durante desarrollo
-        if (strpos($e->getMessage(), "doesn't exist") !== false) {
-            return false;
-        }
-        throw $e;
-    }
-}
-
-// =============================================================================
-// SISTEMA DE DESPACHOS AGRUPADOS
-// =============================================================================
-
-/**
- * Crear grupo de despacho
- */
-function createDeliveryGroup(array $groupData): array
-{
-    $required = ['order_id', 'delivery_address', 'delivery_city', 'delivery_contact_name', 'delivery_contact_phone'];
-
-    foreach ($required as $field) {
-        if (empty($groupData[$field])) {
-            return ['success' => false, 'error' => "Campo requerido: $field"];
-        }
-    }
-
-    $stmt = db()->prepare("
-        INSERT INTO delivery_groups 
-        (order_id, group_name, delivery_address, delivery_city, delivery_contact_name, 
-         delivery_contact_phone, delivery_contact_email, pickup_location_id, 
-         delivery_date, delivery_time_slot, shipping_cost, delivery_notes) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-
-    $success = $stmt->execute([
-        $groupData['order_id'],
-        $groupData['group_name'] ?? 'Grupo 1',
-        $groupData['delivery_address'],
-        $groupData['delivery_city'],
-        $groupData['delivery_contact_name'],
-        $groupData['delivery_contact_phone'],
-        $groupData['delivery_contact_email'] ?? null,
-        $groupData['pickup_location_id'] ?? null,
-        $groupData['delivery_date'] ?? null,
-        $groupData['delivery_time_slot'] ?? null,
-        $groupData['shipping_cost'] ?? 0.00,
-        $groupData['delivery_notes'] ?? null
-    ]);
-
-    if ($success) {
-        return ['success' => true, 'group_id' => (int)db()->lastInsertId()];
-    }
-
-    return ['success' => false, 'error' => 'Error al crear grupo de despacho'];
-}
-
-/**
- * Agregar item a grupo de despacho
- */
-function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): array
-{
-    // Verificar que el item no esté ya en un grupo
-    $stmt = db()->prepare("SELECT 1 FROM delivery_group_items WHERE order_item_id = ?");
-    $stmt->execute([$orderItemId]);
-    if ($stmt->fetch()) {
-        return ['success' => false, 'error' => 'El item ya está asignado a un grupo'];
-    }
-
-    // Obtener información del item
-    $stmt = db()->prepare("SELECT quantity, unit_price FROM order_items WHERE id = ?");
-    $stmt->execute([$orderItemId]);
-    $item = $stmt->fetch();
-
-    if (!$item) {
-        return ['success' => false, 'error' => 'Item no encontrado'];
-    }
-
-    $subtotal = (float)$item['unit_price'] * $quantity;
-
-    $stmt = db()->prepare("
-        INSERT INTO delivery_group_items (delivery_group_id, order_item_id, quantity, unit_price, subtotal) 
-        VALUES (?, ?, ?, ?, ?)
-    ");
-
-    $success = $stmt->execute([$groupId, $orderItemId, $quantity, $item['unit_price'], $subtotal]);
-
-    return ['success' => $success, 'subtotal' => $subtotal];
-}
-
-/**
- * Calcular costo de despacho para un grupo
- */
-function calculateDeliveryCost(int $groupId, ?string $couponCode = null): array
-{
-    // Obtener items del grupo
+function getStorePickupLocations(int $storeId): array {
     $stmt = db()->prepare("
         SELECT 
-            dgi.*,
-            p.name as product_name,
-            dgi.quantity * dgi.unit_price as item_total
-        FROM delivery_group_items dgi
-        JOIN order_items oi ON oi.id = dgi.order_item_id
-        JOIN products p ON p.id = oi.product_id
-        WHERE dgi.delivery_group_id = ?
-    ");
-    $stmt->execute([$groupId]);
-    $items = $stmt->fetchAll();
-
-    if (empty($items)) {
-        return ['success' => false, 'error' => 'El grupo no tiene items'];
-    }
-
-    $subtotal = array_sum(array_column($items, 'item_total'));
-    $shippingCost = 0;
-    $discount = 0;
-
-    // Calcular costo de envío base (esto se puede personalizar por tienda)
-    $groupInfo = getDeliveryGroupById($groupId);
-    if ($groupInfo && $groupInfo['shipping_cost'] > 0) {
-        $shippingCost = (float)$groupInfo['shipping_cost'];
-    }
-
-    // Aplicar cupón si existe
-    if ($couponCode) {
-        $coupon = getDeliveryCoupon($couponCode);
-        if ($coupon && isValidCoupon($coupon, $subtotal + $shippingCost)) {
-            $discount = calculateCouponDiscount($coupon, $subtotal + $shippingCost);
-        }
-    }
-
-    $total = $subtotal + $shippingCost - $discount;
-
-    return [
-        'success' => true,
-        'subtotal' => $subtotal,
-        'shipping_cost' => $shippingCost,
-        'discount' => $discount,
-        'total' => $total,
-        'item_count' => count($items)
-    ];
-}
-
-/**
- * Obtener grupo de despacho por ID
- */
-function getDeliveryGroupById(int $groupId): ?array
-{
-    $stmt = db()->prepare("
-        SELECT dg.*, 
-               pl.name as pickup_location_name
-        FROM delivery_groups dg
-        LEFT JOIN pickup_locations pl ON pl.id = dg.pickup_location_id
-        WHERE dg.id = ?
-    ");
-    $stmt->execute([$groupId]);
-    return $stmt->fetch() ?: null;
-}
-
-// =============================================================================
-// GESTIÓN DE CUPONES DE DESPACHO
-// =============================================================================
-
-/**
- * Obtener cupón de descuento por código
- */
-function getDeliveryCoupon(string $code): ?array
-{
-    $stmt = db()->prepare("SELECT * FROM delivery_coupons WHERE code = ? AND is_active = 1");
-    $stmt->execute([$code]);
-    return $stmt->fetch() ?: null;
-}
-
-/**
- * Verificar si un cupón es válido
- */
-function isValidCoupon(array $coupon, float $orderAmount): bool
-{
-    // Verificar si está activo
-    if (!$coupon['is_active']) {
-        return false;
-    }
-
-    // Verificar fecha de validez
-    if ($coupon['valid_until'] && strtotime($coupon['valid_until']) < time()) {
-        return false;
-    }
-
-    // Verificar monto mínimo
-    if ($orderAmount < (float)$coupon['min_order_amount']) {
-        return false;
-    }
-
-    // Verificar límite de uso
-    if ($coupon['usage_limit'] && $coupon['used_count'] >= $coupon['usage_limit']) {
-        return false;
-    }
-
-    return true;
-}
-
-/**
- * Calcular descuento de cupón
- */
-function calculateCouponDiscount(array $coupon, float $orderAmount): float
-{
-    if ($coupon['discount_type'] === 'fixed') {
-        return min((float)$coupon['discount_value'], $orderAmount);
-    } else {
-        $discount = $orderAmount * ((float)$coupon['discount_value'] / 100);
-        if ($coupon['max_discount_amount']) {
-            $discount = min($discount, (float)$coupon['max_discount_amount']);
-        }
-        return $discount;
-    }
-}
-
-/**
- * Marcar cupón como usado
- */
-function useCoupon(string $code): bool
-{
-    $stmt = db()->prepare("UPDATE delivery_coupons SET used_count = used_count + 1 WHERE code = ?");
-    return $stmt->execute([$code]);
-}
-
-// =============================================================================
-// GESTIÓN DE UBICACIONES DE RECOJO
-// =============================================================================
-
-/**
- * Obtener ubicaciones de recojo de una tienda
- */
-function getStorePickupLocations(int $storeId): array
-{
-    $stmt = db()->prepare("
-        SELECT * FROM pickup_locations 
-        WHERE store_id = ? AND is_active = 1 
-        ORDER BY name
+            spl.*,
+            s.name as store_name
+        FROM store_pickup_locations spl
+        JOIN stores s ON s.id = spl.store_id
+        WHERE spl.store_id = ?
+        AND spl.active = 1
+        ORDER BY spl.name
     ");
     $stmt->execute([$storeId]);
     return $stmt->fetchAll();
 }
 
 /**
- * Crear ubicación de recojo
- */
-function createPickupLocation(array $locationData): array
-{
-    $required = ['store_id', 'name', 'address', 'city'];
-
-    foreach ($required as $field) {
-        if (empty($locationData[$field])) {
-            return ['success' => false, 'error' => "Campo requerido: $field"];
-        }
-    }
-
-    $stmt = db()->prepare("
-        INSERT INTO pickup_locations 
-        (store_id, name, address, city, phone, hours_start, hours_end, days_of_week) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-
-    $success = $stmt->execute([
-        $locationData['store_id'],
-        $locationData['name'],
-        $locationData['address'],
-        $locationData['city'],
-        $locationData['phone'] ?? null,
-        $locationData['hours_start'] ?? null,
-        $locationData['hours_end'] ?? null,
-        $locationData['days_of_week'] ?? null
-    ]);
-
-    return ['success' => $success, 'id' => $success ? (int)db()->lastInsertId() : null];
-}
-
-// =============================================================================
-// MOVIMIENTOS DE STOCK
-// =============================================================================
-
-/**
- * Registrar movimiento de stock
- */
-function logStockMovement(int $productId, int $storeId, string $movementType, int $quantity, string $referenceType, ?int $referenceId = null, ?string $notes = null): bool
-{
-    $stmt = db()->prepare("
-        INSERT INTO stock_movements 
-        (product_id, store_id, movement_type, quantity, reference_type, reference_id, notes) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ");
-
-    return $stmt->execute([
-        $productId,
-        $storeId,
-        $movementType,
-        $quantity,
-        $referenceType,
-        $referenceId,
-        $notes
-    ]);
-}
-
-/**
- * Obtener historial de movimientos de stock con paginación
- */
-function getStockMovements(int $productId, int $limit = 50, int $offset = 0): array
-{
-    // Validar parámetros de paginación
-    $limit = max(1, min(1000, $limit)); // Entre 1 y 1000
-    $offset = max(0, $offset); // No negativo
-
-    $stmt = db()->prepare("
-        SELECT 
-            sm.*,
-            p.name as product_name,
-            s.name as store_name
-        FROM stock_movements sm
-        JOIN products p ON p.id = sm.product_id
-        JOIN stores s ON s.id = sm.store_id
-        WHERE sm.product_id = ?
-        ORDER BY sm.created_at DESC
-        LIMIT ?, ?
-    ");
-
-    $stmt->bindValue(1, $productId, PDO::PARAM_INT);
-    $stmt->bindValue(2, $limit, PDO::PARAM_INT);
-    $stmt->bindValue(3, $offset, PDO::PARAM_INT);
-
-    try {
-        $stmt->execute();
-        return $stmt->fetchAll();
-    } catch (PDOException $e) {
-        // Manejo de errores: tablas o columnas que no existen (desarrollo)
-        if (
-            strpos($e->getMessage(), "doesn't exist") !== false ||
-            strpos($e->getMessage(), "Unknown column") !== false
-        ) {
-            return [];
-        }
-
-        // Re-lanzar otros errores para debugging
-        throw $e;
-    }
-}
-
-// =============================================================================
-// CONFIGURACIÓN DE TIENDAS
-// =============================================================================
-
-/**
- * Obtener configuración de tienda
- */
-function getStoreSettings(int $storeId): array
-{
-    $stmt = db()->prepare("
-        SELECT setting_key, setting_value, setting_type, description
-        FROM store_settings 
-        WHERE store_id = ?
-        ORDER BY setting_key
-    ");
-    $stmt->execute([$storeId]);
-    $settings = $stmt->fetchAll();
-
-    $result = [];
-    foreach ($settings as $setting) {
-        $value = $setting['setting_value'];
-
-        // Parsear según el tipo
-        switch ($setting['setting_type']) {
-            case 'number':
-                $value = (float)$value;
-                break;
-            case 'boolean':
-                $value = (bool)$value;
-                break;
-            case 'json':
-                $value = json_decode($value, true);
-                break;
-        }
-
-        $result[$setting['setting_key']] = [
-            'value' => $value,
-            'type' => $setting['setting_type'],
-            'description' => $setting['description']
-        ];
-    }
-
-    return $result;
-}
-
-/**
- * Actualizar configuración de tienda
- */
-function updateStoreSetting(int $storeId, string $key, $value, string $type = 'text', ?string $description = null): bool
-{
-    $stmt = db()->prepare("
-        INSERT INTO store_settings (store_id, setting_key, setting_value, setting_type, description) 
-        VALUES (?, ?, ?, ?, ?) 
-        ON DUPLICATE KEY UPDATE 
-        setting_value = VALUES(setting_value), 
-        setting_type = VALUES(setting_type),
-        description = VALUES(description),
-        updated_at = CURRENT_TIMESTAMP
-    ");
-
-    $stringValue = is_string($value) ? $value : (is_array($value) ? json_encode($value) : (string)$value);
-
-    return $stmt->execute([$storeId, $key, $stringValue, $type, $description]);
-}
-
-// =============================================================================
-// REPORTES Y ESTADÍSTICAS
-// =============================================================================
-
-/**
  * Obtener estadísticas de productos con bajo stock
  */
-function getLowStockProducts(int $storeId = null): array
-{
+function getLowStockProducts(int $storeId = null): array {
     $whereClause = $storeId ? "WHERE p.store_id = ?" : "";
     $params = $storeId ? [$storeId] : [];
-
+    
     $stmt = db()->prepare("
         SELECT 
             p.id,
@@ -811,11 +140,10 @@ function getLowStockProducts(int $storeId = null): array
 /**
  * Obtener estadísticas de disponibilidad de productos
  */
-function getProductAvailabilityStats(int $storeId = null, int $daysAhead = 7): array
-{
+function getProductAvailabilityStats(int $storeId = null, int $daysAhead = 7): array {
     $whereClause = $storeId ? "WHERE p.store_id = ?" : "";
     $params = $storeId ? [$storeId] : [];
-
+    
     $stmt = db()->prepare("
         SELECT 
             p.id,
@@ -841,26 +169,25 @@ function getProductAvailabilityStats(int $storeId = null, int $daysAhead = 7): a
 /**
  * Obtener estadísticas de despachos
  */
-function getDeliveryStats(int $storeId = null, ?string $startDate = null, ?string $endDate = null): array
-{
+function getDeliveryStats(int $storeId = null, ?string $startDate = null, ?string $endDate = null): array {
     $whereClause = "WHERE 1=1";
     $params = [];
-
+    
     if ($storeId) {
         $whereClause .= " AND dg.store_id = ?";
         $params[] = $storeId;
     }
-
+    
     if ($startDate) {
         $whereClause .= " AND DATE(dg.created_at) >= ?";
         $params[] = $startDate;
     }
-
+    
     if ($endDate) {
         $whereClause .= " AND DATE(dg.created_at) <= ?";
         $params[] = $endDate;
     }
-
+    
     $stmt = db()->prepare("
         SELECT 
             dg.status,
@@ -876,3 +203,700 @@ function getDeliveryStats(int $storeId = null, ?string $startDate = null, ?strin
     $stmt->execute($params);
     return $stmt->fetchAll();
 }
+
+/**
+ * Obtener capacidades diarias de todos los productos de una tienda
+ */
+function getStoreProductCapacities(int $storeId): array {
+    $stmt = db()->prepare("
+        SELECT 
+            p.id as product_id,
+            p.name as product_name,
+            p.service_type,
+            COUNT(pdc.id) as configured_days,
+            SUM(pdc.available_capacity) as total_configured_capacity,
+            SUM(CASE WHEN pdc.capacity_date >= CURDATE() THEN pdc.available_capacity ELSE 0 END) as future_capacity,
+            SUM(pdc.booked_capacity) as total_booked_capacity
+        FROM products p
+        LEFT JOIN product_daily_capacity pdc ON p.id = pdc.product_id
+        WHERE p.store_id = ?
+        GROUP BY p.id, p.name, p.service_type
+        ORDER BY p.name
+    ");
+    $stmt->execute([$storeId]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Obtener capacidades diarias específicas para un producto en un rango de fechas
+ */
+function getProductDailyCapacities(int $productId, int $daysAhead = 30): array {
+    $stmt = db()->prepare("
+        SELECT 
+            DATE(capacity_date) as date,
+            available_capacity,
+            booked_capacity,
+            (available_capacity - booked_capacity) as remaining_capacity
+        FROM product_daily_capacity
+        WHERE product_id = ?
+        AND capacity_date >= CURDATE()
+        AND capacity_date <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+        ORDER BY capacity_date
+    ");
+    $stmt->execute([$productId, $daysAhead]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Actualizar o crear capacidad diaria para un producto
+ */
+function updateProductDailyCapacity(int $productId, int $storeId, string $date, int $availableCapacity, ?string $notes = null): bool {
+    // Verificar que la fecha no sea en el pasado
+    if (strtotime($date) < strtotime(date('Y-m-d'))) {
+        return false;
+    }
+    
+    $stmt = db()->prepare("
+        INSERT INTO product_daily_capacity (product_id, store_id, capacity_date, available_capacity, booked_capacity, notes, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 0, ?, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE 
+            available_capacity = VALUES(available_capacity),
+            notes = VALUES(notes),
+            updated_at = NOW()
+    ");
+    
+    return $stmt->execute([$productId, $storeId, $date, $availableCapacity, $notes]);
+}
+
+/**
+ * Eliminar capacidad diaria para un producto
+ */
+function deleteProductDailyCapacity(int $productId, string $date): bool {
+    $stmt = db()->prepare("
+        DELETE FROM product_daily_capacity 
+        WHERE product_id = ? AND capacity_date = ?
+    ");
+    return $stmt->execute([$productId, $date]);
+}
+
+/**
+ * Configurar capacidad masiva para múltiples fechas de un producto
+ */
+function bulkUpdateProductCapacities(int $productId, int $storeId, array $dateCapacities): array {
+    $results = [];
+    
+    foreach ($dateCapacities as $date => $capacity) {
+        if (empty($date) || !is_numeric($capacity) || $capacity < 0) {
+            $results[$date] = ['success' => false, 'error' => 'Fecha o capacidad inválida'];
+            continue;
+        }
+        
+        $success = updateProductDailyCapacity($productId, $storeId, $date, (int)$capacity);
+        $results[$date] = ['success' => $success];
+    }
+    
+    return $results;
+}
+
+/**
+ * Obtener estadísticas de capacidad por producto
+ */
+function getProductCapacityStats(int $productId, int $daysAhead = 30): array {
+    $stmt = db()->prepare("
+        SELECT 
+            COUNT(*) as total_days,
+            SUM(available_capacity) as total_configured_capacity,
+            SUM(booked_capacity) as total_booked_capacity,
+            SUM(available_capacity - booked_capacity) as total_remaining_capacity,
+            AVG(available_capacity) as avg_daily_capacity,
+            SUM(CASE WHEN (available_capacity - booked_capacity) <= 0 THEN 1 ELSE 0 END) as fully_booked_days,
+            SUM(CASE WHEN available_capacity = 0 THEN 1 ELSE 0 END) as unavailable_days
+        FROM product_daily_capacity
+        WHERE product_id = ?
+        AND capacity_date >= CURDATE()
+        AND capacity_date <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+    ");
+    $stmt->execute([$productId, $daysAhead]);
+    return $stmt->fetch() ?: [];
+}
+
+/**
+ * Configurar zonas geográficas de servicio para una tienda
+ */
+function updateStoreServiceZones(int $storeId, array $zones): bool {
+    // Primero eliminar zonas existentes
+    $stmt = db()->prepare("DELETE FROM store_service_zones WHERE store_id = ?");
+    $stmt->execute([$storeId]);
+    
+    // Insertar nuevas zonas
+    $stmt = db()->prepare("
+        INSERT INTO store_service_zones (store_id, zone_name, zone_type, city, region, max_services_per_day, active, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, 1, NOW())
+    ");
+    
+    foreach ($zones as $zone) {
+        if (!empty($zone['name']) && !empty($zone['type']) && is_numeric($zone['max_services'])) {
+            $zoneType = in_array($zone['type'], ['ciudad', 'comuna', 'region']) ? $zone['type'] : 'ciudad';
+            $maxServices = max(1, (int)$zone['max_services']);
+            
+            $stmt->execute([
+                $storeId,
+                $zone['name'],
+                $zoneType,
+                $zone['city'] ?? '',
+                $zone['region'] ?? '',
+                $maxServices
+            ]);
+        }
+    }
+    
+    return true;
+}
+
+/**
+ * Obtener zonas de servicio de una tienda
+ */
+function getStoreServiceZones(int $storeId): array {
+    $stmt = db()->prepare("
+        SELECT * FROM store_service_zones 
+        WHERE store_id = ? AND active = 1 
+        ORDER BY zone_name
+    ");
+    $stmt->execute([$storeId]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Configurar horarios por defecto para productos/servicios
+ */
+function setProductDefaultSchedule(int $productId, array $schedule): bool {
+    $stmt = db()->prepare("
+        INSERT INTO product_default_schedule (product_id, day_of_week, start_time, end_time, active)
+        VALUES (?, ?, ?, ?, 1)
+        ON DUPLICATE KEY UPDATE 
+            start_time = VALUES(start_time),
+            end_time = VALUES(end_time),
+            updated_at = NOW()
+    ");
+    
+    foreach ($schedule as $day => $times) {
+        if (isset($times['start']) && isset($times['end'])) {
+            $dayOfWeek = (int)$day; // 0 = domingo, 1 = lunes, etc.
+            $startTime = $times['start'];
+            $endTime = $times['end'];
+            
+            if ($dayOfWeek >= 0 && $dayOfWeek <= 6) {
+                $stmt->execute([$productId, $dayOfWeek, $startTime, $endTime]);
+            }
+        }
+    }
+    
+    return true;
+}
+
+/**
+ * Obtener horarios por defecto de un producto
+ */
+function getProductDefaultSchedule(int $productId): array {
+    $stmt = db()->prepare("
+        SELECT * FROM product_default_schedule 
+        WHERE product_id = ? AND active = 1 
+        ORDER BY day_of_week
+    ");
+    $stmt->execute([$productId]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Generar capacidades automáticas para un producto basado en su configuración
+ */
+function generateAutomaticCapacities(int $productId, int $storeId, int $daysAhead = 30, ?int $defaultCapacity = null): bool {
+    // Obtener configuración del producto
+    $product = db()->prepare("SELECT * FROM products WHERE id = ? AND store_id = ?");
+    $product->execute([$productId, $storeId]);
+    $product = $product->fetch();
+    
+    if (!$product) return false;
+    
+    // Usar capacidad del producto o la pasada como parámetro
+    $capacityToUse = $defaultCapacity ?? $product['stock_quantity'] ?? 10;
+    
+    // Generar capacidades para los próximos días
+    $currentDate = date('Y-m-d');
+    $endDate = date('Y-m-d', strtotime("+$daysAhead days"));
+    
+    $stmt = db()->prepare("
+        INSERT IGNORE INTO product_daily_capacity (product_id, store_id, capacity_date, available_capacity, booked_capacity, created_at)
+        SELECT ?, ?, date_series.date, ?, 0, NOW()
+        FROM (
+            SELECT DATE_ADD('$currentDate', INTERVAL row_number OVER () - 1 DAY) as date
+            FROM (
+                SELECT 1 as n UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION
+                SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10
+            ) numbers
+            CROSS JOIN (
+                SELECT 1 as n UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION
+                SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10 UNION
+                SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14 UNION SELECT 15 UNION
+                SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19 UNION SELECT 20 UNION
+                SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24 UNION SELECT 25 UNION
+                SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29 UNION SELECT 30
+            ) more_numbers
+            LIMIT $daysAhead
+        ) date_series
+        WHERE date_series.date <= '$endDate'
+    ");
+    
+    return $stmt->execute([$productId, $storeId, $capacityToUse]);
+}
+
+/**
+ * =====================================
+ * SISTEMA DE CONFIGURACIÓN DE TIENDA
+ * =====================================
+ */
+
+/**
+ * Obtener configuraciones de una tienda
+ */
+function getStoreConfigurations(int $storeId): array {
+    $stmt = db()->prepare("
+        SELECT * FROM store_configurations 
+        WHERE store_id = ? 
+        ORDER BY category, config_key
+    ");
+    $stmt->execute([$storeId]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Obtener configuración específica de una tienda
+ */
+function getStoreConfig(int $storeId, string $category, string $configKey): ?array {
+    $stmt = db()->prepare("
+        SELECT * FROM store_configurations 
+        WHERE store_id = ? AND category = ? AND config_key = ?
+    ");
+    $stmt->execute([$storeId, $category, $configKey]);
+    $result = $stmt->fetch();
+    return $result ?: null;
+}
+
+/**
+ * Establecer configuración de una tienda
+ */
+function setStoreConfig(int $storeId, string $category, string $configKey, string $configValue, ?string $description = null): bool {
+    $stmt = db()->prepare("
+        INSERT INTO store_configurations (store_id, category, config_key, config_value, description, updated_at)
+        VALUES (?, ?, ?, ?, ?, NOW())
+        ON DUPLICATE KEY UPDATE 
+            config_value = VALUES(config_value),
+            description = COALESCE(VALUES(description), description),
+            updated_at = NOW()
+    ");
+    return $stmt->execute([$storeId, $category, $configKey, $configValue, $description]);
+}
+
+/**
+ * Obtener categorías de configuración disponibles
+ */
+function getConfigCategories(): array {
+    return [
+        'payment_methods' => 'Métodos de Pago',
+        'language' => 'Idioma y Regionalización',
+        'permissions' => 'Usuarios y Permisos',
+        'integrations' => 'Integraciones',
+        'notifications' => 'Notificaciones',
+        'security' => 'Seguridad',
+        'general' => 'Configuración General'
+    ];
+}
+
+/**
+ * Obtener métodos de pago disponibles
+ */
+function getAvailablePaymentMethods(): array {
+    return [
+        'transbank_webpay' => 'Transbank WebPay Plus',
+        'transbank_onepay' => 'Transbank OnePay',
+        'cash' => 'Efectivo',
+        'transfer' => 'Transferencia Bancaria',
+        'check' => 'Cheque',
+        'credit_term' => 'Plazo de Pago'
+    ];
+}
+
+/**
+ * Verificar si Transbank está configurado
+ */
+function isTransbankConfigured(int $storeId): array {
+    $config = getStoreConfig($storeId, 'payment_methods', 'transbank_enabled');
+    
+    if (!$config || $config['config_value'] !== 'true') {
+        return ['configured' => false, 'message' => 'Transbank no está habilitado'];
+    }
+    
+    // Verificar credenciales
+    $commerceCode = getStoreConfig($storeId, 'payment_methods', 'transbank_commerce_code');
+    $apiKey = getStoreConfig($storeId, 'payment_methods', 'transbank_api_key');
+    
+    if (!$commerceCode || empty($commerceCode['config_value']) || 
+        !$apiKey || empty($apiKey['config_value'])) {
+        return ['configured' => false, 'message' => 'Credenciales de Transbank incompletas'];
+    }
+    
+    return [
+        'configured' => true, 
+        'environment' => getStoreConfig($storeId, 'payment_methods', 'transbank_environment')['config_value'] ?? 'Integration',
+        'commerce_code' => $commerceCode['config_value'],
+        'enabled' => true
+    ];
+}
+
+/**
+ * Configurar Transbank para una tienda
+ */
+function configureTransbank(int $storeId, array $config): bool {
+    $required = ['commerce_code', 'api_key', 'environment'];
+    
+    foreach ($required as $field) {
+        if (!isset($config[$field]) || empty($config[$field])) {
+            return false;
+        }
+    }
+    
+    // Configurar credenciales
+    $success = true;
+    $success &= setStoreConfig($storeId, 'payment_methods', 'transbank_enabled', 'true', 'Habilitar procesamiento de pagos Transbank');
+    $success &= setStoreConfig($storeId, 'payment_methods', 'transbank_commerce_code', $config['commerce_code'], 'Código de comercio Transbank');
+    $success &= setStoreConfig($storeId, 'payment_methods', 'transbank_api_key', $config['api_key'], 'API Key Transbank');
+    $success &= setStoreConfig($storeId, 'payment_methods', 'transbank_environment', $config['environment'], 'Ambiente Transbank (Integration/Production)');
+    
+    if (isset($config['private_key_path'])) {
+        $success &= setStoreConfig($storeId, 'payment_methods', 'transbank_private_key_path', $config['private_key_path'], 'Ruta a clave privada');
+    }
+    
+    if (isset($config['public_cert_path'])) {
+        $success &= setStoreConfig($storeId, 'payment_methods', 'transbank_public_cert_path', $config['public_cert_path'], 'Ruta a certificado público');
+    }
+    
+    if (isset($config['bank_cert_path'])) {
+        $success &= setStoreConfig($storeId, 'payment_methods', 'transbank_bank_cert_path', $config['bank_cert_path'], 'Ruta a certificado del banco');
+    }
+    
+    return $success;
+}
+
+/**
+ * Obtener configuración de idioma
+ */
+function getLanguageConfig(int $storeId): array {
+    $defaultLang = getStoreConfig($storeId, 'language', 'default_language')['config_value'] ?? 'es';
+    $timezone = getStoreConfig($storeId, 'language', 'timezone')['config_value'] ?? 'America/Santiago';
+    $dateFormat = getStoreConfig($storeId, 'language', 'date_format')['config_value'] ?? 'd/m/Y';
+    $currency = getStoreConfig($storeId, 'language', 'currency')['config_value'] ?? 'CLP';
+    $decimalSeparator = getStoreConfig($storeId, 'language', 'decimal_separator')['config_value'] ?? ',';
+    
+    return [
+        'default_language' => $defaultLang,
+        'timezone' => $timezone,
+        'date_format' => $dateFormat,
+        'currency' => $currency,
+        'decimal_separator' => $decimalSeparator,
+        'thousands_separator' => getStoreConfig($storeId, 'language', 'thousands_separator')['config_value'] ?? '.'
+    ];
+}
+
+/**
+ * Establecer configuración de idioma
+ */
+function setLanguageConfig(int $storeId, array $config): bool {
+    $success = true;
+    
+    if (isset($config['default_language'])) {
+        $success &= setStoreConfig($storeId, 'language', 'default_language', $config['default_language'], 'Idioma predeterminado');
+    }
+    
+    if (isset($config['timezone'])) {
+        $success &= setStoreConfig($storeId, 'language', 'timezone', $config['timezone'], 'Zona horaria');
+    }
+    
+    if (isset($config['date_format'])) {
+        $success &= setStoreConfig($storeId, 'language', 'date_format', $config['date_format'], 'Formato de fecha');
+    }
+    
+    if (isset($config['currency'])) {
+        $success &= setStoreConfig($storeId, 'language', 'currency', $config['currency'], 'Moneda');
+    }
+    
+    if (isset($config['decimal_separator'])) {
+        $success &= setStoreConfig($storeId, 'language', 'decimal_separator', $config['decimal_separator'], 'Separador decimal');
+    }
+    
+    if (isset($config['thousands_separator'])) {
+        $success &= setStoreConfig($storeId, 'language', 'thousands_separator', $config['thousands_separator'], 'Separador de miles');
+    }
+    
+    return $success;
+}
+
+/**
+ * Obtener niveles de permisos
+ */
+function getPermissionLevels(): array {
+    return [
+        'admin' => [
+            'name' => 'Administrador',
+            'description' => 'Acceso completo al sistema',
+            'permissions' => ['all']
+        ],
+        'manager' => [
+            'name' => 'Gerente de Tienda',
+            'description' => 'Administración de tienda específica',
+            'permissions' => ['manage_store', 'view_reports', 'manage_inventory', 'process_orders']
+        ],
+        'employee' => [
+            'name' => 'Empleado',
+            'description' => 'Operaciones básicas',
+            'permissions' => ['view_products', 'process_orders', 'confirm_deliveries']
+        ]
+    ];
+}
+
+/**
+ * Obtener permisos configurados para una tienda
+ */
+function getStorePermissions(int $storeId): array {
+    $defaultPermissions = getPermissionLevels();
+    $configuredPerms = [];
+    
+    foreach ($defaultPermissions as $level => $data) {
+        $enabled = getStoreConfig($storeId, 'permissions', $level . '_enabled');
+        $configuredPerms[$level] = array_merge($data, [
+            'enabled' => $enabled ? ($enabled['config_value'] === 'true') : ($level === 'employee') // Employee habilitado por defecto
+        ]);
+    }
+    
+    return $configuredPerms;
+}
+
+/**
+ * Establecer permisos de una tienda
+ */
+function setStorePermissions(int $storeId, array $permissions): bool {
+    $success = true;
+    
+    foreach ($permissions as $level => $data) {
+        if (isset($data['enabled'])) {
+            $success &= setStoreConfig($storeId, 'permissions', $level . '_enabled', 
+                $data['enabled'] ? 'true' : 'false', 
+                "Habilitar permisos de nivel $level"
+            );
+        }
+    }
+    
+    return $success;
+}
+
+/**
+ * Obtener integraciones configuradas
+ */
+function getStoreIntegrations(int $storeId): array {
+    $integrations = [];
+    
+    // Transbank
+    $transbankStatus = isTransbankConfigured($storeId);
+    $integrations['transbank'] = [
+        'name' => 'Transbank',
+        'enabled' => $transbankStatus['configured'],
+        'status' => $transbankStatus['configured'] ? 'active' : 'disabled',
+        'environment' => $transbankStatus['environment'] ?? 'Integration',
+        'last_check' => date('Y-m-d H:i:s')
+    ];
+    
+    // SETAP (futuro)
+    $setapEnabled = getStoreConfig($storeId, 'integrations', 'setap_enabled');
+    $integrations['setap'] = [
+        'name' => 'SETAP',
+        'enabled' => $setapEnabled ? ($setapEnabled['config_value'] === 'true') : false,
+        'status' => 'planned',
+        'description' => 'Integración con sistema SETAP (futuro)',
+        'last_check' => null
+    ];
+    
+    return $integrations;
+}
+
+/**
+ * Configurar integración SETAP
+ */
+function configureSETAP(int $storeId, array $config): bool {
+    $success = true;
+    
+    if (isset($config['enabled'])) {
+        $success &= setStoreConfig($storeId, 'integrations', 'setap_enabled', 
+            $config['enabled'] ? 'true' : 'false', 
+            'Habilitar integración SETAP'
+        );
+    }
+    
+    if (isset($config['api_endpoint'])) {
+        $success &= setStoreConfig($storeId, 'integrations', 'setap_api_endpoint', 
+            $config['api_endpoint'], 
+            'URL del endpoint SETAP'
+        );
+    }
+    
+    if (isset($config['api_key'])) {
+        $success &= setStoreConfig($storeId, 'integrations', 'setap_api_key', 
+            $config['api_key'], 
+            'API Key SETAP'
+        );
+    }
+    
+    return $success;
+}
+
+/**
+ * Obtener configuración de notificaciones
+ */
+function getNotificationConfig(int $storeId): array {
+    return [
+        'email_enabled' => getStoreConfig($storeId, 'notifications', 'email_enabled')['config_value'] ?? 'true',
+        'email_admin' => getStoreConfig($storeId, 'notifications', 'email_admin')['config_value'] ?? '',
+        'email_sales' => getStoreConfig($storeId, 'notifications', 'email_sales')['config_value'] ?? '',
+        'sms_enabled' => getStoreConfig($storeId, 'notifications', 'sms_enabled')['config_value'] ?? 'false',
+        'order_confirmations' => getStoreConfig($storeId, 'notifications', 'order_confirmations')['config_value'] ?? 'true',
+        'delivery_updates' => getStoreConfig($storeId, 'notifications', 'delivery_updates')['config_value'] ?? 'true'
+    ];
+}
+
+/**
+ * Establecer configuración de notificaciones
+ */
+function setNotificationConfig(int $storeId, array $config): bool {
+    $success = true;
+    
+    $fields = ['email_enabled', 'email_admin', 'email_sales', 'sms_enabled', 'order_confirmations', 'delivery_updates'];
+    
+    foreach ($fields as $field) {
+        if (isset($config[$field])) {
+            $success &= setStoreConfig($storeId, 'notifications', $field, $config[$field], "Configuración de notificación: $field");
+        }
+    }
+    
+    return $success;
+}
+
+/**
+ * Obtener estadísticas de configuración
+ */
+function getConfigStats(int $storeId): array {
+    $configs = getStoreConfigurations($storeId);
+    $stats = [
+        'total_configs' => count($configs),
+        'payment_methods' => 0,
+        'language' => 0,
+        'permissions' => 0,
+        'integrations' => 0,
+        'notifications' => 0,
+        'security' => 0,
+        'general' => 0
+    ];
+    
+    foreach ($configs as $config) {
+        if (isset($stats[$config['category']])) {
+            $stats[$config['category']]++;
+        }
+    }
+    
+    // Verificar estado de integraciones
+    $integrations = getStoreIntegrations($storeId);
+    $activeIntegrations = array_filter($integrations, function($int) {
+        return $int['enabled'] && $int['status'] === 'active';
+    });
+    
+    $stats['active_integrations'] = count($activeIntegrations);
+    $stats['total_integrations'] = count($integrations);
+    
+    return $stats;
+}
+
+/**
+ * Exportar configuraciones de una tienda
+ */
+function exportStoreConfig(int $storeId): array {
+    return [
+        'store_id' => $storeId,
+        'exported_at' => date('c'),
+        'configurations' => getStoreConfigurations($storeId),
+        'integrations' => getStoreIntegrations($storeId),
+        'permissions' => getStorePermissions($storeId),
+        'language' => getLanguageConfig($storeId),
+        'notifications' => getNotificationConfig($storeId)
+    ];
+}
+
+/**
+ * Importar configuraciones a una tienda
+ */
+function importStoreConfig(int $storeId, array $configData): bool {
+    if (!isset($configData['configurations'])) {
+        return false;
+    }
+    
+    $success = true;
+    
+    // Importar configuraciones individuales
+    foreach ($configData['configurations'] as $config) {
+        $success &= setStoreConfig(
+            $storeId, 
+            $config['category'], 
+            $config['config_key'], 
+            $config['config_value'], 
+            $config['description'] ?? null
+        );
+    }
+    
+    return $success;
+}
+
+/**
+ * Verificar integridad de configuración
+ */
+function validateStoreConfig(int $storeId): array {
+    $issues = [];
+    $warnings = [];
+    
+    // Verificar Transbank si está habilitado
+    $transbankStatus = isTransbankConfigured($storeId);
+    if ($transbankStatus['configured'] === false) {
+        $transbankEnabled = getStoreConfig($storeId, 'payment_methods', 'transbank_enabled');
+        if ($transbankEnabled && $transbankEnabled['config_value'] === 'true') {
+            $issues[] = 'Transbank está habilitado pero no está correctamente configurado';
+        }
+    }
+    
+    // Verificar configuración de idioma
+    $langConfig = getLanguageConfig($storeId);
+    if ($langConfig['default_language'] !== 'es') {
+        $warnings[] = 'Idioma predeterminado no es español';
+    }
+    
+    // Verificar permisos mínimos
+    $permissions = getStorePermissions($storeId);
+    $hasActivePermissions = array_filter($permissions, function($perm) {
+        return $perm['enabled'];
+    });
+    
+    if (empty($hasActivePermissions)) {
+        $issues[] = 'No hay niveles de permisos habilitados';
+    }
+    
+    return [
+        'valid' => empty($issues),
+        'issues' => $issues,
+        'warnings' => $warnings
+    ];
+}
+?>

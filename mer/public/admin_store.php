@@ -9,8 +9,18 @@ init_secure_session();
 // Verificar autenticación de administrador
 requireRole('admin');
 
+// Obtener todas las tiendas disponibles
+$allStores = stores();
+
+// Determinar tienda actual
 $storeId = isset($_GET['store_id']) ? (int)$_GET['store_id'] : 1; // Por defecto tienda-a
 $store = storeById($storeId);
+
+// Si la tienda no existe, usar la primera disponible
+if (!$store && !empty($allStores)) {
+    $storeId = $allStores[0]['id'];
+    $store = storeById($storeId);
+}
 
 if (!$store) {
     echo 'Tienda no encontrada';
@@ -140,6 +150,50 @@ $pickupLocations = getStorePickupLocations($storeId);
 .store-subtitle {
   color: #9CA3AF;
   font-size: 0.875rem;
+}
+
+.store-selector {
+  position: sticky;
+  top: 0;
+  background: var(--admin-light);
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--admin-border);
+  z-index: 10;
+}
+
+.store-selector-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.store-selector-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--admin-primary);
+  white-space: nowrap;
+}
+
+.store-selector-select {
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--admin-primary);
+  font-size: 0.875rem;
+  min-width: 200px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.store-selector-select:hover {
+  border-color: var(--admin-accent);
+}
+
+.store-selector-select:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .nav-menu {
@@ -461,6 +515,24 @@ $pickupLocations = getStorePickupLocations($storeId);
     flex-direction: column;
     text-align: center;
   }
+
+  .store-selector {
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  .store-selector-form {
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+  
+  .store-selector-label {
+    font-size: 0.75rem;
+  }
+  
+  .store-selector-select {
+    min-width: 150px;
+    font-size: 0.75rem;
+  }
 }
 </style>
 </head>
@@ -510,6 +582,28 @@ $pickupLocations = getStorePickupLocations($storeId);
   
   <!-- Main Content -->
   <div class="admin-main">
+    <!-- Selector de Tiendas -->
+    <div class="store-selector">
+      <form class="store-selector-form" method="GET">
+        <label class="store-selector-label" for="store_id">Administrar Tienda:</label>
+        <select name="store_id" id="store_id" class="store-selector-select" onchange="changeStore()">
+          <?php foreach ($allStores as $storeOption): ?>
+            <option value="<?= $storeOption['id'] ?>" 
+                    <?= $storeOption['id'] == $storeId ? 'selected' : '' ?>>
+              <?= htmlspecialchars($storeOption['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        
+        <!-- Preservar otros parámetros de la URL -->
+        <?php foreach ($_GET as $key => $value): ?>
+          <?php if ($key !== 'store_id'): ?>
+            <input type="hidden" name="<?= htmlspecialchars($key) ?>" value="<?= htmlspecialchars($value) ?>">
+          <?php endif; ?>
+        <?php endforeach; ?>
+      </form>
+    </div>
+    
     <?php if (isset($_SESSION['message'])): ?>
       <div class="alert alert-success">
         <?= htmlspecialchars($_SESSION['message']) ?>
@@ -632,6 +726,18 @@ $pickupLocations = getStorePickupLocations($storeId);
 </div>
 
 <script>
+function changeStore() {
+  const select = document.getElementById('store_id');
+  const selectedValue = select.value;
+  
+  // Construir la nueva URL con el store_id seleccionado
+  const url = new URL(window.location);
+  url.searchParams.set('store_id', selectedValue);
+  
+  // Recargar la página con la nueva tienda
+  window.location.href = url.toString();
+}
+
 function openModal(modalId) {
   document.getElementById(modalId).classList.add('show');
 }
