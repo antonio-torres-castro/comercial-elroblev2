@@ -39,7 +39,6 @@ const TRANSBANK_ENV = 'Production';                            // Ambiente de pr
 // CONFIGURACIÓN DE CERTIFICADOS (OBLIGATORIO EN PRODUCCIÓN)
 // =============================================================================
 
-/*
 // Rutas de certificados (obligatorios en producción)
 const TRANSBANK_PRIVATE_KEY_PATH = '/ruta/absoluta/a/tu/clave_privada.key';
 const TRANSBANK_PUBLIC_CERT_PATH = '/ruta/absoluta/a/tu/certificado_publico.crt';
@@ -51,7 +50,6 @@ const TRANSBANK_SSL_CA_PATH = '/ruta/a/ca-certificates.crt';
 
 // Validación de certificados
 define('TRANSBANK_VALIDATE_CERTS', true);
-*/
 
 // =============================================================================
 // CONFIGURACIÓN AVANZADA DE SEGURIDAD

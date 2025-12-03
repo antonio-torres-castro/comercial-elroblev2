@@ -2542,3 +2542,411 @@ function calculateDeliveryCost(int $storeId, int $methodId, string $city, float 
         return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
     }
 }
+
+/**
+ * Actualizar el stock de un producto con registro de movimiento
+ */
+function updateProductStock(int $productId, int $newStock, string $reason = 'Actualización manual'): array
+{
+    try {
+        $pdo = db();
+        
+        // Obtener stock actual
+        $stmt = $pdo->prepare("SELECT stock_quantity FROM products WHERE id = ?");
+        $stmt->execute([$productId]);
+        $currentStock = $stmt->fetchColumn();
+        
+        if ($currentStock === false) {
+            return ['success' => false, 'error' => 'Producto no encontrado'];
+        }
+        
+        $currentStock = (int)$currentStock;
+        $stockDifference = $newStock - $currentStock;
+        
+        // Iniciar transacción
+        $pdo->beginTransaction();
+        
+        // Actualizar stock
+        $stmt = $pdo->prepare("
+            UPDATE products 
+            SET stock_quantity = ?, 
+                updated_at = NOW() 
+            WHERE id = ?
+        ");
+        $stmt->execute([$newStock, $productId]);
+        
+        // Registrar movimiento de stock
+        if ($stockDifference !== 0) {
+            $stmt = $pdo->prepare("
+                INSERT INTO stock_movements (product_id, quantity_change, reason, created_at)
+                VALUES (?, ?, ?, NOW())
+            ");
+            $stmt->execute([$productId, $stockDifference, $reason]);
+        }
+        
+        $pdo->commit();
+        
+        return [
+            'success' => true,
+            'previous_stock' => $currentStock,
+            'new_stock' => $newStock,
+            'difference' => $stockDifference,
+            'message' => 'Stock actualizado exitosamente'
+        ];
+        
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollback();
+        }
+        return ['success' => false, 'error' => 'Error al actualizar stock: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Insertar o actualizar un producto (Upsert)
+ */
+function upsertProduct(array $productData): array
+{
+    try {
+        $pdo = db();
+        
+        // Validar datos requeridos
+        if (empty($productData['name']) || empty($productData['store_id'])) {
+            return ['success' => false, 'error' => 'Nombre y store_id son requeridos'];
+        }
+        
+        $requiredFields = ['name', 'store_id', 'price', 'category'];
+        foreach ($requiredFields as $field) {
+            if (!isset($productData[$field])) {
+                return ['success' => false, 'error' => "Campo requerido faltante: {$field}"];
+            }
+        }
+        
+        // Configurar valores por defecto
+        $defaults = [
+            'active' => 1,
+            'stock_quantity' => 0,
+            'min_stock_level' => 0,
+            'weight_grams' => 0,
+            'dimensions' => json_encode([]),
+            'description' => '',
+            'sku' => '',
+            'barcode' => '',
+            'supplier_id' => null,
+            'cost_price' => null,
+            'tax_rate' => 19.0
+        ];
+        
+        $productData = array_merge($defaults, $productData);
+        
+        // Validar y limpiar datos
+        $productData['name'] = trim($productData['name']);
+        $productData['price'] = (float)$productData['price'];
+        $productData['stock_quantity'] = (int)$productData['stock_quantity'];
+        $productData['store_id'] = (int)$productData['store_id'];
+        
+        // Generar SKU automático si no se proporciona
+        if (empty($productData['sku'])) {
+            $productData['sku'] = 'SKU-' . strtoupper(substr(md5(uniqid()), 0, 8));
+        }
+        
+        $pdo->beginTransaction();
+        
+        // Verificar si el producto existe
+        if (!empty($productData['id'])) {
+            // UPDATE
+            $productId = (int)$productData['id'];
+            
+            $stmt = $pdo->prepare("
+                UPDATE products SET
+                    name = ?, description = ?, price = ?, cost_price = ?,
+                    category = ?, sku = ?, barcode = ?, active = ?,
+                    stock_quantity = ?, min_stock_level = ?, weight_grams = ?,
+                    dimensions = ?, supplier_id = ?, tax_rate = ?, updated_at = NOW()
+                WHERE id = ? AND store_id = ?
+            ");
+            
+            $stmt->execute([
+                $productData['name'],
+                $productData['description'],
+                $productData['price'],
+                $productData['cost_price'],
+                $productData['category'],
+                $productData['sku'],
+                $productData['barcode'],
+                $productData['active'],
+                $productData['stock_quantity'],
+                $productData['min_stock_level'],
+                $productData['weight_grams'],
+                $productData['dimensions'],
+                $productData['supplier_id'],
+                $productData['tax_rate'],
+                $productId,
+                $productData['store_id']
+            ]);
+            
+            if ($stmt->rowCount() === 0) {
+                $pdo->rollback();
+                return ['success' => false, 'error' => 'Producto no encontrado o sin permisos'];
+            }
+            
+            $action = 'updated';
+            
+        } else {
+            // INSERT
+            $stmt = $pdo->prepare("
+                INSERT INTO products (
+                    store_id, name, description, price, cost_price, category,
+                    sku, barcode, active, stock_quantity, min_stock_level,
+                    weight_grams, dimensions, supplier_id, tax_rate, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            ");
+            
+            $stmt->execute([
+                $productData['store_id'],
+                $productData['name'],
+                $productData['description'],
+                $productData['price'],
+                $productData['cost_price'],
+                $productData['category'],
+                $productData['sku'],
+                $productData['barcode'],
+                $productData['active'],
+                $productData['stock_quantity'],
+                $productData['min_stock_level'],
+                $productData['weight_grams'],
+                $productData['dimensions'],
+                $productData['supplier_id'],
+                $productData['tax_rate']
+            ]);
+            
+            $productId = $pdo->lastInsertId();
+            $action = 'created';
+        }
+        
+        $pdo->commit();
+        
+        return [
+            'success' => true,
+            'action' => $action,
+            'product_id' => $productId,
+            'sku' => $productData['sku'],
+            'message' => 'Producto ' . ($action === 'created' ? 'creado' : 'actualizado') . ' exitosamente'
+        ];
+        
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollback();
+        }
+        return ['success' => false, 'error' => 'Error al guardar producto: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Crear un grupo de entrega para organizar pedidos
+ */
+function createDeliveryGroup(array $groupData): array
+{
+    try {
+        $pdo = db();
+        
+        // Validar datos requeridos
+        $required = ['order_id', 'delivery_method_id', 'delivery_address_id', 'delivery_date'];
+        foreach ($required as $field) {
+            if (empty($groupData[$field])) {
+                return ['success' => false, 'error' => "Campo requerido: {$field}"];
+            }
+        }
+        
+        // Configurar valores por defecto
+        $defaults = [
+            'status' => 'pendiente',
+            'shipping_cost' => 0.00,
+            'delivery_time_slot' => 'morning',
+            'delivery_notes' => '',
+            'assigned_driver_id' => null
+        ];
+        
+        $groupData = array_merge($defaults, $groupData);
+        
+        // Validar y limpiar datos
+        $groupData['order_id'] = (int)$groupData['order_id'];
+        $groupData['delivery_method_id'] = (int)$groupData['delivery_method_id'];
+        $groupData['delivery_address_id'] = (int)$groupData['delivery_address_id'];
+        $groupData['shipping_cost'] = (float)$groupData['shipping_cost'];
+        
+        $pdo->beginTransaction();
+        
+        // Crear el grupo de entrega
+        $stmt = $pdo->prepare("
+            INSERT INTO delivery_groups (
+                order_id, delivery_method_id, delivery_address_id, delivery_date,
+                delivery_time_slot, status, shipping_cost, delivery_notes,
+                assigned_driver_id, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ");
+        
+        $stmt->execute([
+            $groupData['order_id'],
+            $groupData['delivery_method_id'],
+            $groupData['delivery_address_id'],
+            $groupData['delivery_date'],
+            $groupData['delivery_time_slot'],
+            $groupData['status'],
+            $groupData['shipping_cost'],
+            $groupData['delivery_notes'],
+            $groupData['assigned_driver_id']
+        ]);
+        
+        $groupId = $pdo->lastInsertId();
+        
+        // Registrar actividad
+        $stmt = $pdo->prepare("
+            INSERT INTO delivery_activity_log (
+                delivery_group_id, activity_type, description, created_at
+            ) VALUES (?, 'created', ?, NOW())
+        ");
+        $stmt->execute([$groupId, 'Grupo de entrega creado']);
+        
+        $pdo->commit();
+        
+        return [
+            'success' => true,
+            'group_id' => $groupId,
+            'status' => $groupData['status'],
+            'message' => 'Grupo de entrega creado exitosamente'
+        ];
+        
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollback();
+        }
+        return ['success' => false, 'error' => 'Error al crear grupo de entrega: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Agregar un item a un grupo de entrega
+ */
+function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): array
+{
+    try {
+        $pdo = db();
+        
+        // Verificar que el grupo existe
+        $stmt = $pdo->prepare("SELECT id FROM delivery_groups WHERE id = ?");
+        $stmt->execute([$groupId]);
+        if (!$stmt->fetch()) {
+            return ['success' => false, 'error' => 'Grupo de entrega no encontrado'];
+        }
+        
+        // Verificar que el item de orden existe
+        $stmt = $pdo->prepare("
+            SELECT oi.id, oi.quantity, p.name 
+            FROM order_items oi 
+            JOIN products p ON oi.product_id = p.id 
+            WHERE oi.id = ? AND oi.quantity >= ?
+        ");
+        $stmt->execute([$orderItemId, $quantity]);
+        $item = $stmt->fetch();
+        
+        if (!$item) {
+            return ['success' => false, 'error' => 'Item de orden no encontrado o cantidad insuficiente'];
+        }
+        
+        $pdo->beginTransaction();
+        
+        // Agregar item al grupo
+        $stmt = $pdo->prepare("
+            INSERT INTO delivery_group_items (delivery_group_id, order_item_id, quantity, created_at)
+            VALUES (?, ?, ?, NOW())
+            ON DUPLICATE KEY UPDATE quantity = VALUES(quantity)
+        ");
+        
+        $stmt->execute([$groupId, $orderItemId, $quantity]);
+        
+        // Registrar actividad
+        $stmt = $pdo->prepare("
+            INSERT INTO delivery_activity_log (
+                delivery_group_id, activity_type, description, created_at
+            ) VALUES (?, 'item_added', ?, NOW())
+        ");
+        $stmt->execute([$groupId, "Item agregado: {$item['name']} (cantidad: {$quantity})"]);
+        
+        $pdo->commit();
+        
+        return [
+            'success' => true,
+            'group_id' => $groupId,
+            'order_item_id' => $orderItemId,
+            'quantity' => $quantity,
+            'message' => 'Item agregado al grupo de entrega exitosamente'
+        ];
+        
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollback();
+        }
+        return ['success' => false, 'error' => 'Error al agregar item al grupo: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Obtener los horarios de funcionamiento de una tienda
+ */
+function getStoreHours(int $storeId): array
+{
+    try {
+        $pdo = db();
+        
+        // Intentar obtener horarios específicos de la tienda
+        $stmt = $pdo->prepare("
+            SELECT 
+                working_days,
+                opening_time,
+                closing_time,
+                lunch_start,
+                lunch_end,
+                timezone
+            FROM store_settings 
+            WHERE store_id = ? AND setting_key = 'business_hours'
+        ");
+        $stmt->execute([$storeId]);
+        $settings = $stmt->fetch();
+        
+        if ($settings) {
+            // Parsear los días de trabajo
+            $workingDays = json_decode($settings['working_days'], true) ?: [1, 2, 3, 4, 5];
+            
+            return [
+                'working_days' => $workingDays,
+                'opening_time' => $settings['opening_time'] ?? '09:00',
+                'closing_time' => $settings['closing_time'] ?? '18:00',
+                'lunch_start' => $settings['lunch_start'] ?? '13:00',
+                'lunch_end' => $settings['lunch_end'] ?? '14:00',
+                'timezone' => $settings['timezone'] ?? 'America/Santiago'
+            ];
+        }
+        
+        // Horarios por defecto si no están configurados
+        return [
+            'working_days' => [1, 2, 3, 4, 5], // Lunes a Viernes
+            'opening_time' => '09:00',
+            'closing_time' => '18:00',
+            'lunch_start' => '13:00',
+            'lunch_end' => '14:00',
+            'timezone' => 'America/Santiago'
+        ];
+        
+    } catch (Exception $e) {
+        // En caso de error, devolver horarios por defecto
+        return [
+            'working_days' => [1, 2, 3, 4, 5],
+            'opening_time' => '09:00',
+            'closing_time' => '18:00',
+            'lunch_start' => '13:00',
+            'lunch_end' => '14:00',
+            'timezone' => 'America/Santiago'
+        ];
+    }
+}
