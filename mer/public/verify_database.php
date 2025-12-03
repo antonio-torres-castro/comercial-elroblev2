@@ -420,7 +420,7 @@ header('Content-Type: text/html; charset=utf-8');
                         echo "<td><strong>{$coupon['code']}</strong></td>";
                         echo "<td>{$coupon['discount_type']}</td>";
                         echo "<td>{$coupon['discount_value']}</td>";
-                        echo "<td>${$coupon['min_order_amount']}</td>";
+                        echo "<td>{$coupon['min_order_amount']}</td>";
                         echo "<td>{$coupon['usage_limit']}</td>";
                         echo "</tr>";
                     }

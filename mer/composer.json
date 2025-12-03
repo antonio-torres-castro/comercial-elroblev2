@@ -1,0 +1,21 @@
+{
+    "name": "comercial-elroble/ecommerce",
+    "description": "Sistema de comercio electrónico para Comercial El Roble",
+    "type": "project",
+    "require": {
+        "php": "^8.1",
+        "transbank/transbank-sdk": "^3.0",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

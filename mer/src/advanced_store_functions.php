@@ -2950,3 +2950,100 @@ function getStoreHours(int $storeId): array
         ];
     }
 }
+
+/**
+ * Obtener configuración de tienda
+ * @param int $storeId ID de la tienda
+ * @return array Configuración de la tienda
+ */
+function getStoreSettings(int $storeId): array {
+    try {
+        $pdo = db();
+        $stmt = $pdo->prepare("
+            SELECT setting_key, setting_value, setting_type, description
+            FROM store_settings 
+            WHERE store_id = ?
+            ORDER BY setting_key
+        ");
+        $stmt->execute([$storeId]);
+        
+        $settings = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $settings[$row['setting_key']] = [
+                'value' => $row['setting_value'],
+                'type' => $row['setting_type'],
+                'description' => $row['description']
+            ];
+        }
+        
+        // Configuraciones por defecto si no existen
+        $defaults = [
+            'primary_color' => ['value' => '#5E422E', 'type' => 'string', 'description' => 'Color principal'],
+            'secondary_color' => ['value' => '#926D50', 'type' => 'string', 'description' => 'Color secundario'],
+            'store_description' => ['value' => '', 'type' => 'text', 'description' => 'Descripción de la tienda'],
+            'delivery_enabled' => ['value' => '1', 'type' => 'boolean', 'description' => 'Delivery habilitado'],
+            'min_order_amount' => ['value' => '0', 'type' => 'number', 'description' => 'Monto mínimo de orden'],
+            'delivery_fee' => ['value' => '0', 'type' => 'number', 'description' => 'Costo de delivery'],
+            'working_hours' => ['value' => '09:00-18:00', 'type' => 'string', 'description' => 'Horarios de trabajo']
+        ];
+        
+        // Combinar con valores por defecto
+        foreach ($defaults as $key => $default) {
+            if (!isset($settings[$key])) {
+                $settings[$key] = $default;
+            }
+        }
+        
+        return $settings;
+        
+    } catch (Exception $e) {
+        error_log("Error getting store settings: " . $e->getMessage());
+        // Devolver configuraciones por defecto en caso de error
+        return [
+            'primary_color' => ['value' => '#5E422E', 'type' => 'string'],
+            'secondary_color' => ['value' => '#926D50', 'type' => 'string'],
+            'delivery_enabled' => ['value' => '1', 'type' => 'boolean']
+        ];
+    }
+}
+
+/**
+ * Actualizar configuración de tienda
+ * @param int $storeId ID de la tienda
+ * @param string $key Clave de configuración
+ * @param string $value Valor de configuración
+ * @param string $type Tipo de valor (string, number, boolean, text)
+ * @param string $description Descripción opcional
+ * @return bool True si se actualizó correctamente
+ */
+function updateStoreSetting(int $storeId, string $key, string $value, string $type = 'string', string $description = ''): bool {
+    try {
+        $pdo = db();
+        
+        // Verificar si la configuración existe
+        $stmt = $pdo->prepare("SELECT id FROM store_settings WHERE store_id = ? AND setting_key = ?");
+        $stmt->execute([$storeId, $key]);
+        $exists = $stmt->fetch();
+        
+        if ($exists) {
+            // Actualizar configuración existente
+            $stmt = $pdo->prepare("
+                UPDATE store_settings 
+                SET setting_value = ?, setting_type = ?, description = ?, updated_at = NOW()
+                WHERE store_id = ? AND setting_key = ?
+            ");
+            return $stmt->execute([$value, $type, $description, $storeId, $key]);
+        } else {
+            // Crear nueva configuración
+            $stmt = $pdo->prepare("
+                INSERT INTO store_settings (store_id, setting_key, setting_value, setting_type, description, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+            ");
+            return $stmt->execute([$storeId, $key, $value, $type, $description]);
+        }
+        
+    } catch (Exception $e) {
+        error_log("Error updating store setting: " . $e->getMessage());
+        return false;
+    }
+}
