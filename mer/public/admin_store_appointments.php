@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sistema de Gestión de Citas y Reservas
  * Vista completa para administrar citas, servicios y políticas
@@ -22,6 +23,20 @@ $appointments = getStoreAppointments($storeId, ['date_from' => date('Y-m-d'), 'd
 $services = getAppointmentServices($storeId);
 $statistics = getAppointmentStatistics($storeId, date('Y-m-01'), date('Y-m-t'));
 $policies = getStoreCancellationPolicies($storeId);
+
+function getStatusBadgeColor(string $status): string
+{
+    $colors = [
+        'programada' => 'warning',
+        'confirmada' => 'info',
+        'en_proceso' => 'primary',
+        'completada' => 'success',
+        'cancelada' => 'danger',
+        'no_asistio' => 'secondary'
+    ];
+    return $colors[$status] || 'secondary';
+}
+
 ?>
 
 <div class="appointments-container">
@@ -87,7 +102,7 @@ $policies = getStoreCancellationPolicies($storeId);
 
     <!-- Contenido de tabs -->
     <div class="tab-content" id="appointmentsTabContent">
-        
+
         <!-- Panel de Citas del Día -->
         <div class="tab-pane fade show active" id="appointments-panel" role="tabpanel">
             <div class="tab-content-inner">
@@ -178,15 +193,17 @@ $policies = getStoreCancellationPolicies($storeId);
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li><a class="dropdown-item" href="#" onclick="editAppointment(<?= $appointment['id'] ?>)">
-                                                        <i class="bi bi-pencil"></i> Editar
-                                                    </a></li>
+                                                            <i class="bi bi-pencil"></i> Editar
+                                                        </a></li>
                                                     <li><a class="dropdown-item text-danger" href="#" onclick="cancelAppointment(<?= $appointment['id'] ?>)">
-                                                        <i class="bi bi-x-circle"></i> Cancelar
-                                                    </a></li>
-                                                    <li><hr class="dropdown-divider"></li>
+                                                            <i class="bi bi-x-circle"></i> Cancelar
+                                                        </a></li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
                                                     <li><a class="dropdown-item" href="#" onclick="markNoShow(<?= $appointment['id'] ?>)">
-                                                        <i class="bi bi-person-x"></i> No Asistió
-                                                    </a></li>
+                                                            <i class="bi bi-person-x"></i> No Asistió
+                                                        </a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -240,12 +257,14 @@ $policies = getStoreCancellationPolicies($storeId);
                                                     </button>
                                                     <ul class="dropdown-menu">
                                                         <li><a class="dropdown-item" href="#" onclick="editService(<?= $service['id'] ?>)">
-                                                            <i class="bi bi-pencil"></i> Editar
-                                                        </a></li>
-                                                        <li><hr class="dropdown-divider"></li>
+                                                                <i class="bi bi-pencil"></i> Editar
+                                                            </a></li>
+                                                        <li>
+                                                            <hr class="dropdown-divider">
+                                                        </li>
                                                         <li><a class="dropdown-item text-danger" href="#" onclick="deleteService(<?= $service['id'] ?>)">
-                                                            <i class="bi bi-trash"></i> Eliminar
-                                                        </a></li>
+                                                                <i class="bi bi-trash"></i> Eliminar
+                                                            </a></li>
                                                     </ul>
                                                 </div>
                                             </div>
@@ -349,7 +368,7 @@ $policies = getStoreCancellationPolicies($storeId);
         <div class="tab-pane fade" id="policies-panel" role="tabpanel">
             <div class="tab-content-inner">
                 <h4>Políticas de Cancelación y Gestión</h4>
-                
+
                 <form id="policies-form" onsubmit="updatePolicies(event)">
                     <div class="row">
                         <div class="col-md-6">
@@ -360,14 +379,14 @@ $policies = getStoreCancellationPolicies($storeId);
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="hours-before-cancellation" class="form-label">Horas mínimas de anticipación</label>
-                                        <input type="number" class="form-control" id="hours-before-cancellation" 
-                                               value="<?= $policies['hours_before_cancellation'] ?? 24 ?>" min="1" max="168">
+                                        <input type="number" class="form-control" id="hours-before-cancellation"
+                                            value="<?= $policies['hours_before_cancellation'] ?? 24 ?>" min="1" max="168">
                                         <div class="form-text">Tiempo mínimo para cancelar sin penalización</div>
                                     </div>
-                                    
+
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="require-cancellation-reason" 
-                                               <?= ($policies['require_cancellation_reason'] ?? true) ? 'checked' : '' ?>>
+                                        <input class="form-check-input" type="checkbox" id="require-cancellation-reason"
+                                            <?= ($policies['require_cancellation_reason'] ?? true) ? 'checked' : '' ?>>
                                         <label class="form-check-label" for="require-cancellation-reason">
                                             Requerir razón para cancelación
                                         </label>
@@ -375,7 +394,7 @@ $policies = getStoreCancellationPolicies($storeId);
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
@@ -383,22 +402,22 @@ $policies = getStoreCancellationPolicies($storeId);
                                 </div>
                                 <div class="card-body">
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="auto-confirm-appointments" 
-                                               <?= ($policies['auto_confirm_appointments'] ?? true) ? 'checked' : '' ?>>
+                                        <input class="form-check-input" type="checkbox" id="auto-confirm-appointments"
+                                            <?= ($policies['auto_confirm_appointments'] ?? true) ? 'checked' : '' ?>>
                                         <label class="form-check-label" for="auto-confirm-appointments">
                                             Confirmar citas automáticamente
                                         </label>
                                     </div>
-                                    
+
                                     <div class="mb-3">
                                         <label for="max-daily-appointments" class="form-label">Máximo citas por día</label>
-                                        <input type="number" class="form-control" id="max-daily-appointments" 
-                                               value="<?= $policies['max_daily_appointments'] ?? 20 ?>" min="1" max="100">
+                                        <input type="number" class="form-control" id="max-daily-appointments"
+                                            value="<?= $policies['max_daily_appointments'] ?? 20 ?>" min="1" max="100">
                                     </div>
-                                    
+
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="allow-double-booking" 
-                                               <?= ($policies['allow_double_booking'] ?? false) ? 'checked' : '' ?>>
+                                        <input class="form-check-input" type="checkbox" id="allow-double-booking"
+                                            <?= ($policies['allow_double_booking'] ?? false) ? 'checked' : '' ?>>
                                         <label class="form-check-label" for="allow-double-booking">
                                             Permitir múltiples citas simultáneas
                                         </label>
@@ -407,7 +426,7 @@ $policies = getStoreCancellationPolicies($storeId);
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mt-4">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Guardar Políticas
@@ -421,7 +440,7 @@ $policies = getStoreCancellationPolicies($storeId);
         <div class="tab-pane fade" id="new-appointment-panel" role="tabpanel">
             <div class="tab-content-inner">
                 <h4>Crear Nueva Cita</h4>
-                
+
                 <form id="new-appointment-form" onsubmit="createAppointment(event)">
                     <div class="row">
                         <div class="col-md-6">
@@ -437,7 +456,7 @@ $policies = getStoreCancellationPolicies($storeId);
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -459,7 +478,7 @@ $policies = getStoreCancellationPolicies($storeId);
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -471,38 +490,38 @@ $policies = getStoreCancellationPolicies($storeId);
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="duration-hours" class="form-label">Duración (horas) *</label>
-                                <input type="number" class="form-control" id="duration-hours" name="duration_hours" 
-                                       min="0.5" step="0.5" value="1" required>
+                                <input type="number" class="form-control" id="duration-hours" name="duration_hours"
+                                    min="0.5" step="0.5" value="1" required>
                                 <div class="form-text">Duración mínima: 0.5 horas</div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="appointment-notes" class="form-label">Notas</label>
-                        <textarea class="form-control" id="appointment-notes" name="notes" rows="3" 
-                                  placeholder="Observaciones adicionales para la cita..."></textarea>
+                        <textarea class="form-control" id="appointment-notes" name="notes" rows="3"
+                            placeholder="Observaciones adicionales para la cita..."></textarea>
                     </div>
-                    
+
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="allow-multiple" name="allow_multiple">
                         <label class="form-check-label" for="allow-multiple">
                             Permitir múltiples citas simultáneas
                         </label>
                     </div>
-                    
+
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="is-recurring" name="is_recurring">
                         <label class="form-check-label" for="is-recurring">
                             Servicio recurrente (crear recordatorios automáticos)
                         </label>
                     </div>
-                    
+
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle"></i>
                         <strong>Validación automática:</strong> El sistema verificará conflictos de horarios y la disponibilidad antes de crear la cita.
                     </div>
-                    
+
                     <div class="mt-4">
                         <button type="submit" class="btn btn-success btn-lg">
                             <i class="bi bi-calendar-plus"></i> Crear Cita
@@ -541,8 +560,8 @@ $policies = getStoreCancellationPolicies($storeId);
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="service-duration" class="form-label">Duración (horas) *</label>
-                                <input type="number" class="form-control" id="service-duration" name="duration_hours" 
-                                       min="0.5" step="0.5" value="1" required>
+                                <input type="number" class="form-control" id="service-duration" name="duration_hours"
+                                    min="0.5" step="0.5" value="1" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -585,8 +604,8 @@ $policies = getStoreCancellationPolicies($storeId);
                 </div>
                 <div class="mb-3">
                     <label for="cancellation-reason" class="form-label">Motivo de la cancelación *</label>
-                    <textarea class="form-control" id="cancellation-reason" rows="3" required 
-                              placeholder="Especifique el motivo de la cancelación..."></textarea>
+                    <textarea class="form-control" id="cancellation-reason" rows="3" required
+                        placeholder="Especifique el motivo de la cancelación..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -600,333 +619,321 @@ $policies = getStoreCancellationPolicies($storeId);
 </div>
 
 <style>
-.appointments-container {
-    padding: 20px;
-}
+    .appointments-container {
+        padding: 20px;
+    }
 
-.section-header {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-}
+    .section-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
 
-.stats-cards {
-    display: flex;
-    gap: 15px;
-}
-
-.stat-card {
-    text-align: center;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    min-width: 80px;
-}
-
-.stat-number {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #495057;
-}
-
-.stat-label {
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-top: 2px;
-}
-
-.nav-tabs .nav-link {
-    border: none;
-    color: #6c757d;
-}
-
-.nav-tabs .nav-link.active {
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
-}
-
-.tab-content-inner {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    min-height: 400px;
-}
-
-.appointment-card {
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.2s;
-}
-
-.appointment-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.appointment-card.status-completada {
-    border-left: 4px solid #28a745;
-}
-
-.appointment-card.status-cancelada {
-    border-left: 4px solid #dc3545;
-    opacity: 0.7;
-}
-
-.appointment-card.status-programada {
-    border-left: 4px solid #ffc107;
-}
-
-.appointment-info {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.info-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.875rem;
-}
-
-.service-card {
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    height: 100%;
-}
-
-.service-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: 10px;
-}
-
-.meta-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.875rem;
-    color: #6c757d;
-}
-
-@media (max-width: 768px) {
     .stats-cards {
-        flex-wrap: wrap;
-        margin-top: 15px;
+        display: flex;
+        gap: 15px;
     }
-    
+
     .stat-card {
-        min-width: 60px;
-        padding: 8px;
+        text-align: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        min-width: 80px;
     }
-    
-    .section-header .d-flex {
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #495057;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 2px;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+    }
+
+    .tab-content-inner {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        min-height: 400px;
+    }
+
+    .appointment-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+
+    .appointment-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .appointment-card.status-completada {
+        border-left: 4px solid #28a745;
+    }
+
+    .appointment-card.status-cancelada {
+        border-left: 4px solid #dc3545;
+        opacity: 0.7;
+    }
+
+    .appointment-card.status-programada {
+        border-left: 4px solid #ffc107;
+    }
+
+    .appointment-info {
+        display: flex;
         flex-direction: column;
-        align-items: stretch !important;
+        gap: 5px;
     }
-}
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+    }
+
+    .service-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        height: 100%;
+    }
+
+    .service-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    @media (max-width: 768px) {
+        .stats-cards {
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            min-width: 60px;
+            padding: 8px;
+        }
+
+        .section-header .d-flex {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+    }
 </style>
 
 <script>
-// Variables globales
-let currentAppointmentId = null;
+    // Variables globales
+    let currentAppointmentId = null;
 
-// Utilidades
-function showTab(tabId) {
-    const tab = new bootstrap.Tab(document.getElementById(tabId));
-    tab.show();
-}
-
-function getStatusBadgeColor(status) {
-    const colors = {
-        'programada': 'warning',
-        'confirmada': 'info',
-        'en_proceso': 'primary',
-        'completada': 'success',
-        'cancelada': 'danger',
-        'no_asistio': 'secondary'
-    };
-    return colors[status] || 'secondary';
-}
-
-// Funciones de gestión de citas
-function refreshAppointments() {
-    const date = document.getElementById('filterDate').value;
-    const status = document.getElementById('filterStatus').value;
-    
-    // Simular actualización (en implementación real haría AJAX)
-    location.reload();
-}
-
-function confirmAppointment(id) {
-    if (confirm('¿Confirmar esta cita?')) {
-        updateAppointmentStatus(id, 'confirmada');
+    // Utilidades
+    function showTab(tabId) {
+        const tab = new bootstrap.Tab(document.getElementById(tabId));
+        tab.show();
     }
-}
 
-function startAppointment(id) {
-    if (confirm('¿Iniciar esta cita?')) {
-        updateAppointmentStatus(id, 'en_proceso');
+    // Funciones de gestión de citas
+    function refreshAppointments() {
+        const date = document.getElementById('filterDate').value;
+        const status = document.getElementById('filterStatus').value;
+
+        // Simular actualización (en implementación real haría AJAX)
+        location.reload();
     }
-}
 
-function completeAppointment(id) {
-    if (confirm('¿Marcar como completada?')) {
-        updateAppointmentStatus(id, 'completada');
-    }
-}
-
-function cancelAppointment(id) {
-    currentAppointmentId = id;
-    document.getElementById('cancellation-reason').value = '';
-    new bootstrap.Modal(document.getElementById('cancellationModal')).show();
-}
-
-function confirmCancellation() {
-    const reason = document.getElementById('cancellation-reason').value;
-    if (!reason.trim()) {
-        alert('Debe especificar un motivo para la cancelación');
-        return;
-    }
-    
-    if (currentAppointmentId) {
-        updateAppointmentStatus(currentAppointmentId, 'cancelada', reason);
-        bootstrap.Modal.getInstance(document.getElementById('cancellationModal')).hide();
-    }
-}
-
-function markNoShow(id) {
-    if (confirm('¿Marcar como no asistió?')) {
-        updateAppointmentStatus(id, 'no_asistio', 'Cliente no se presentó');
-    }
-}
-
-function editAppointment(id) {
-    alert('Función de edición pendiente de implementación');
-}
-
-function updateAppointmentStatus(id, status, reason = null) {
-    // Implementación AJAX real
-    fetch('ajax/appointments.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'updateStatus',
-            appointment_id: id,
-            status: status,
-            reason: reason
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + data.error);
+    function confirmAppointment(id) {
+        if (confirm('¿Confirmar esta cita?')) {
+            updateAppointmentStatus(id, 'confirmada');
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al actualizar el estado de la cita');
-    });
-}
-
-// Gestión de servicios
-function openServiceModal(serviceId = null) {
-    document.getElementById('service-form').reset();
-    document.getElementById('service-id-edit').value = serviceId || '';
-    
-    if (serviceId) {
-        // Cargar datos del servicio para edición
-        document.getElementById('serviceModalTitle').textContent = 'Editar Servicio';
-        // TODO: Implementar carga de datos
-    } else {
-        document.getElementById('serviceModalTitle').textContent = 'Nuevo Servicio';
     }
-    
-    new bootstrap.Modal(document.getElementById('serviceModal')).show();
-}
 
-function saveService() {
-    const form = document.getElementById('service-form');
-    const formData = new FormData(form);
-    formData.append('action', 'saveService');
-    
-    fetch('ajax/appointments.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            bootstrap.Modal.getInstance(document.getElementById('serviceModal')).hide();
-            location.reload();
-        } else {
-            alert('Error: ' + data.error);
+    function startAppointment(id) {
+        if (confirm('¿Iniciar esta cita?')) {
+            updateAppointmentStatus(id, 'en_proceso');
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al guardar el servicio');
-    });
-}
+    }
 
-function editService(id) {
-    openServiceModal(id);
-}
+    function completeAppointment(id) {
+        if (confirm('¿Marcar como completada?')) {
+            updateAppointmentStatus(id, 'completada');
+        }
+    }
 
-function deleteService(id) {
-    if (confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
+    function cancelAppointment(id) {
+        currentAppointmentId = id;
+        document.getElementById('cancellation-reason').value = '';
+        new bootstrap.Modal(document.getElementById('cancellationModal')).show();
+    }
+
+    function confirmCancellation() {
+        const reason = document.getElementById('cancellation-reason').value;
+        if (!reason.trim()) {
+            alert('Debe especificar un motivo para la cancelación');
+            return;
+        }
+
+        if (currentAppointmentId) {
+            updateAppointmentStatus(currentAppointmentId, 'cancelada', reason);
+            bootstrap.Modal.getInstance(document.getElementById('cancellationModal')).hide();
+        }
+    }
+
+    function markNoShow(id) {
+        if (confirm('¿Marcar como no asistió?')) {
+            updateAppointmentStatus(id, 'no_asistio', 'Cliente no se presentó');
+        }
+    }
+
+    function editAppointment(id) {
+        alert('Función de edición pendiente de implementación');
+    }
+
+    function updateAppointmentStatus(id, status, reason = null) {
+        // Implementación AJAX real
         fetch('ajax/appointments.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'deleteService',
-                service_id: id
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'updateStatus',
+                    appointment_id: id,
+                    status: status,
+                    reason: reason
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar el servicio');
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar el estado de la cita');
+            });
     }
-}
 
-// Calendario automático
-function generateCalendar(event) {
-    event.preventDefault();
-    
-    const form = document.getElementById('calendar-generator-form');
-    const formData = new FormData(form);
-    formData.append('action', 'generateCalendar');
-    
-    const resultsDiv = document.getElementById('calendar-generator-results');
-    resultsDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> Generando calendario...</div>';
-    
-    fetch('ajax/appointments.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            resultsDiv.innerHTML = `
+    // Gestión de servicios
+    function openServiceModal(serviceId = null) {
+        document.getElementById('service-form').reset();
+        document.getElementById('service-id-edit').value = serviceId || '';
+
+        if (serviceId) {
+            // Cargar datos del servicio para edición
+            document.getElementById('serviceModalTitle').textContent = 'Editar Servicio';
+            // TODO: Implementar carga de datos
+        } else {
+            document.getElementById('serviceModalTitle').textContent = 'Nuevo Servicio';
+        }
+
+        new bootstrap.Modal(document.getElementById('serviceModal')).show();
+    }
+
+    function saveService() {
+        const form = document.getElementById('service-form');
+        const formData = new FormData(form);
+        formData.append('action', 'saveService');
+
+        fetch('ajax/appointments.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('serviceModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al guardar el servicio');
+            });
+    }
+
+    function editService(id) {
+        openServiceModal(id);
+    }
+
+    function deleteService(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
+            fetch('ajax/appointments.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'deleteService',
+                        service_id: id
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar el servicio');
+                });
+        }
+    }
+
+    // Calendario automático
+    function generateCalendar(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('calendar-generator-form');
+        const formData = new FormData(form);
+        formData.append('action', 'generateCalendar');
+
+        const resultsDiv = document.getElementById('calendar-generator-results');
+        resultsDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> Generando calendario...</div>';
+
+        fetch('ajax/appointments.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultsDiv.innerHTML = `
                 <div class="alert alert-success">
                     <i class="bi bi-check-circle"></i>
                     <strong>¡Calendario generado exitosamente!</strong><br>
@@ -935,120 +942,120 @@ function generateCalendar(event) {
                     ${data.errors && data.errors.length ? `<br><strong>Errores:</strong> ${data.errors.length}` : ''}
                 </div>
             `;
-        } else {
-            resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.error}</div>`;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        resultsDiv.innerHTML = '<div class="alert alert-danger">Error al generar el calendario</div>';
-    });
-}
+                } else {
+                    resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.error}</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = '<div class="alert alert-danger">Error al generar el calendario</div>';
+            });
+    }
 
-function updateScheduleConfig() {
-    const startTime = document.getElementById('store-start-time').value;
-    const endTime = document.getElementById('store-end-time').value;
-    const interval = document.getElementById('appointment-interval').value;
-    
-    fetch('ajax/appointments.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'updateScheduleConfig',
-            start_time: startTime,
-            end_time: endTime,
-            appointment_interval: interval
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Configuración actualizada exitosamente');
-        } else {
-            alert('Error: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al actualizar la configuración');
-    });
-}
+    function updateScheduleConfig() {
+        const startTime = document.getElementById('store-start-time').value;
+        const endTime = document.getElementById('store-end-time').value;
+        const interval = document.getElementById('appointment-interval').value;
 
-// Políticas
-function updatePolicies(event) {
-    event.preventDefault();
-    
-    const form = document.getElementById('policies-form');
-    const formData = new FormData(form);
-    formData.append('action', 'updatePolicies');
-    
-    fetch('ajax/appointments.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Políticas actualizadas exitosamente');
-        } else {
-            alert('Error: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al actualizar las políticas');
-    });
-}
+        fetch('ajax/appointments.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'updateScheduleConfig',
+                    start_time: startTime,
+                    end_time: endTime,
+                    appointment_interval: interval
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Configuración actualizada exitosamente');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar la configuración');
+            });
+    }
 
-// Nueva cita
-function createAppointment(event) {
-    event.preventDefault();
-    
-    const form = document.getElementById('new-appointment-form');
-    const formData = new FormData(form);
-    formData.append('action', 'createAppointment');
-    
-    fetch('ajax/appointments.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Cita creada exitosamente');
-            form.reset();
-            refreshAppointments();
-            showTab('appointments-tab');
-        } else {
-            alert('Error: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al crear la cita');
-    });
-}
+    // Políticas
+    function updatePolicies(event) {
+        event.preventDefault();
 
-function resetForm() {
-    document.getElementById('new-appointment-form').reset();
-}
+        const form = document.getElementById('policies-form');
+        const formData = new FormData(form);
+        formData.append('action', 'updatePolicies');
 
-// Eventos del DOM
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-completar duración cuando se selecciona un servicio
-    document.getElementById('service-id').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        if (selectedOption.dataset.duration) {
-            document.getElementById('duration-hours').value = selectedOption.dataset.duration;
-        }
+        fetch('ajax/appointments.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Políticas actualizadas exitosamente');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar las políticas');
+            });
+    }
+
+    // Nueva cita
+    function createAppointment(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('new-appointment-form');
+        const formData = new FormData(form);
+        formData.append('action', 'createAppointment');
+
+        fetch('ajax/appointments.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cita creada exitosamente');
+                    form.reset();
+                    refreshAppointments();
+                    showTab('appointments-tab');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al crear la cita');
+            });
+    }
+
+    function resetForm() {
+        document.getElementById('new-appointment-form').reset();
+    }
+
+    // Eventos del DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-completar duración cuando se selecciona un servicio
+        document.getElementById('service-id').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.dataset.duration) {
+                document.getElementById('duration-hours').value = selectedOption.dataset.duration;
+            }
+        });
+
+        // Validar fecha mínima para citas
+        const appointmentDateInput = document.getElementById('appointment-date');
+        const now = new Date();
+        const minDate = now.toISOString().slice(0, 16);
+        appointmentDateInput.min = minDate;
     });
-    
-    // Validar fecha mínima para citas
-    const appointmentDateInput = document.getElementById('appointment-date');
-    const now = new Date();
-    const minDate = now.toISOString().slice(0, 16);
-    appointmentDateInput.min = minDate;
-});
 </script>

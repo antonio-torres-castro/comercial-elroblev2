@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Configuración de Transbank para Producción
  * Mall Virtual - Viña del Mar
@@ -134,42 +135,44 @@ const TRANSBANK_ADMIN_EMAIL = 'ventas@tudominio.com';
 /**
  * Verificar si la configuración es válida para producción
  */
-function validateTransbankConfig() {
+function validateTransbankConfig()
+{
     $errors = [];
-    
+
     if (!defined('TRANSBANK_MOCK') || TRANSBANK_MOCK) {
         return ['warning' => 'Sistema en modo desarrollo - No procesar pagos reales'];
     }
-    
+
     // Validar credenciales
     if (empty(TRANSBANK_COMMERCE_CODE) || TRANSBANK_COMMERCE_CODE === 'TU_CODIGO_COMERCIO_AQUI') {
         $errors[] = 'Código de comercio no configurado';
     }
-    
+
     if (empty(TRANSBANK_API_KEY) || TRANSBANK_API_KEY === 'TU_API_KEY_AQUI') {
         $errors[] = 'API Key no configurada';
     }
-    
+
     if (TRANSBANK_ENV !== 'Production') {
         $errors[] = 'Ambiente no configurado para producción';
     }
-    
+
     // Validar archivos de certificado (si están definidos)
     if (defined('TRANSBANK_PRIVATE_KEY_PATH') && !file_exists(TRANSBANK_PRIVATE_KEY_PATH)) {
         $errors[] = 'Archivo de clave privada no encontrado';
     }
-    
+
     if (defined('TRANSBANK_PUBLIC_CERT_PATH') && !file_exists(TRANSBANK_PUBLIC_CERT_PATH)) {
         $errors[] = 'Archivo de certificado público no encontrado';
     }
-    
+
     return $errors;
 }
 
 /**
  * Verificar que el servidor cumple con los requisitos mínimos
  */
-function checkServerRequirements() {
+function checkServerRequirements()
+{
     $requirements = [
         'openssl' => extension_loaded('openssl'),
         'curl' => extension_loaded('curl'),
@@ -178,14 +181,14 @@ function checkServerRequirements() {
         'ssl_enabled' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
         'https_forced' => true // Forzar HTTPS en producción
     ];
-    
+
     $missing = [];
     foreach ($requirements as $req => $status) {
         if (!$status && $req !== 'https_forced') {
             $missing[] = $req;
         }
     }
-    
+
     return [
         'status' => empty($missing),
         'missing' => $missing,
@@ -196,7 +199,8 @@ function checkServerRequirements() {
 /**
  * Log de auditoría de transacciones
  */
-function logTransactionAudit($action, $data = []) {
+function logTransactionAudit($action, $data = [])
+{
     $auditEntry = [
         'timestamp' => date('c'),
         'action' => $action,
@@ -205,7 +209,7 @@ function logTransactionAudit($action, $data = []) {
         'session_id' => session_id(),
         'data' => $data
     ];
-    
+
     if (defined('TRANSBANK_AUDIT_LOG_FILE')) {
         error_log(json_encode($auditEntry) . PHP_EOL, 3, TRANSBANK_AUDIT_LOG_FILE);
     }
@@ -214,36 +218,38 @@ function logTransactionAudit($action, $data = []) {
 /**
  * Validación de IP permitida
  */
-function isAllowedTransbankIP() {
+function isAllowedTransbankIP()
+{
     if (!defined('TRANSBANK_ALLOWED_IPS') || empty(TRANSBANK_ALLOWED_IPS)) {
         return true; // Permitir todas si no hay restricciones
     }
-    
+
     $clientIP = $_SERVER['REMOTE_ADDR'] ?? '';
-    
+
     foreach (TRANSBANK_ALLOWED_IPS as $allowedRange) {
         if (ip_in_range($clientIP, $allowedRange)) {
             return true;
         }
     }
-    
+
     return false;
 }
 
 /**
  * Utilidad para verificar si un IP está en un rango
  */
-function ip_in_range($ip, $range) {
+function ip_in_range($ip, $range)
+{
     if (strpos($range, '/') === false) {
         return $ip === $range;
     }
-    
+
     list($subnet, $mask) = explode('/', $range);
-    
+
     if ((ip2long($ip) & ~((1 << (32 - $mask)) - 1)) == ip2long($subnet)) {
         return true;
     }
-    
+
     return false;
 }
 
@@ -264,5 +270,3 @@ $serverCheck = checkServerRequirements();
 if (!$serverCheck['status']) {
     error_log('Transbank Server Requirements Missing: ' . implode(', ', $serverCheck['missing']));
 }
-
-?>
