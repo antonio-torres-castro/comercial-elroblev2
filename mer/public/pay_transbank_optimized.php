@@ -45,7 +45,7 @@ if (!transbank_available()) {
 
 // Configurar Transbank SDK
 try {
-    if (!transbankIsAvailable()) {
+    if (!transbank_available()) {
         // Modo mock - mostrar página de pago simulado
         showMockPaymentPage($order, $orderItems, $orderStoreTotals);
         exit;
@@ -84,7 +84,7 @@ try {
  */
 function handleTransbankReturn(string $token, int $orderId): void {
     // Verificar si el SDK está disponible
-    if (!transbankIsAvailable()) {
+    if (!transbank_available()) {
         // Modo mock - simular respuesta exitosa
         $mockResult = [
             'status' => 'AUTHORIZED',
@@ -172,7 +172,7 @@ function createTransbankTransaction(array $order, array $orderItems): array {
  */
 function initTransbankTransaction(array $order, int $paymentId): array {
     // Verificar si el SDK está disponible
-    if (!transbankIsAvailable()) {
+    if (!transbank_available()) {
         // Modo mock - generar token simulado
         return [
             'success' => true,

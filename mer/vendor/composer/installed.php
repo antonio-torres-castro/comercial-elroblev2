@@ -3,7 +3,7 @@
         'name' => 'comercial-elroble/ecommerce',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'fa581a6994c72119e5371f8acc6b04b671328514',
+        'reference' => '125a3b33b3ab180427dc7ecf6a8593be5a90ac50',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'comercial-elroble/ecommerce' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'fa581a6994c72119e5371f8acc6b04b671328514',
+            'reference' => '125a3b33b3ab180427dc7ecf6a8593be5a90ac50',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
