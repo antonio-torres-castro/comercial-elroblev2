@@ -15,15 +15,35 @@ function getStoreProductsWithStock(int $storeId, int $limit = 100, int $offset =
 
     $stmt = db()->prepare("
         SELECT 
-            p.*,
-            s.name as store_name,
-            COALESCE(SUM(sm.quantity), 0) as current_stock,
-            COALESCE(sm.last_updated, p.created_at) as stock_updated
+            p.id,
+            p.store_id,
+            p.name,
+            p.description,
+            p.price,
+            p.group_id,
+            p.active,
+            p.created_at,
+            p.stock_quantity,
+            p.stock_min_threshold,
+            p.delivery_days_min,
+            p.delivery_days_max,
+            p.service_type,
+            p.requires_appointment,
+            p.image_url,
+            s.name AS store_name,
+            COALESCE(sm.total_stock, 0) AS current_stock,
+            COALESCE(sm.last_update, p.created_at) AS stock_updated
         FROM products p
         JOIN stores s ON s.id = p.store_id
-        LEFT JOIN stock_movements sm ON sm.product_id = p.id
+        LEFT JOIN (
+            SELECT 
+                product_id,
+                SUM(quantity) AS total_stock,
+                MAX(created_at) AS last_update
+            FROM stock_movements
+            GROUP BY product_id
+        ) sm ON sm.product_id = p.id
         WHERE p.store_id = ?
-        GROUP BY p.id
         ORDER BY p.name
         LIMIT ?, ?
     ");
@@ -2550,22 +2570,22 @@ function updateProductStock(int $productId, int $newStock, string $reason = 'Act
 {
     try {
         $pdo = db();
-        
+
         // Obtener stock actual
         $stmt = $pdo->prepare("SELECT stock_quantity FROM products WHERE id = ?");
         $stmt->execute([$productId]);
         $currentStock = $stmt->fetchColumn();
-        
+
         if ($currentStock === false) {
             return ['success' => false, 'error' => 'Producto no encontrado'];
         }
-        
+
         $currentStock = (int)$currentStock;
         $stockDifference = $newStock - $currentStock;
-        
+
         // Iniciar transacción
         $pdo->beginTransaction();
-        
+
         // Actualizar stock
         $stmt = $pdo->prepare("
             UPDATE products 
@@ -2574,7 +2594,7 @@ function updateProductStock(int $productId, int $newStock, string $reason = 'Act
             WHERE id = ?
         ");
         $stmt->execute([$newStock, $productId]);
-        
+
         // Registrar movimiento de stock
         if ($stockDifference !== 0) {
             $stmt = $pdo->prepare("
@@ -2583,9 +2603,9 @@ function updateProductStock(int $productId, int $newStock, string $reason = 'Act
             ");
             $stmt->execute([$productId, $stockDifference, $reason]);
         }
-        
+
         $pdo->commit();
-        
+
         return [
             'success' => true,
             'previous_stock' => $currentStock,
@@ -2593,7 +2613,6 @@ function updateProductStock(int $productId, int $newStock, string $reason = 'Act
             'difference' => $stockDifference,
             'message' => 'Stock actualizado exitosamente'
         ];
-        
     } catch (Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollback();
@@ -2609,19 +2628,19 @@ function upsertProduct(array $productData): array
 {
     try {
         $pdo = db();
-        
+
         // Validar datos requeridos
         if (empty($productData['name']) || empty($productData['store_id'])) {
             return ['success' => false, 'error' => 'Nombre y store_id son requeridos'];
         }
-        
+
         $requiredFields = ['name', 'store_id', 'price', 'category'];
         foreach ($requiredFields as $field) {
             if (!isset($productData[$field])) {
                 return ['success' => false, 'error' => "Campo requerido faltante: {$field}"];
             }
         }
-        
+
         // Configurar valores por defecto
         $defaults = [
             'active' => 1,
@@ -2636,27 +2655,27 @@ function upsertProduct(array $productData): array
             'cost_price' => null,
             'tax_rate' => 19.0
         ];
-        
+
         $productData = array_merge($defaults, $productData);
-        
+
         // Validar y limpiar datos
         $productData['name'] = trim($productData['name']);
         $productData['price'] = (float)$productData['price'];
         $productData['stock_quantity'] = (int)$productData['stock_quantity'];
         $productData['store_id'] = (int)$productData['store_id'];
-        
+
         // Generar SKU automático si no se proporciona
         if (empty($productData['sku'])) {
             $productData['sku'] = 'SKU-' . strtoupper(substr(md5(uniqid()), 0, 8));
         }
-        
+
         $pdo->beginTransaction();
-        
+
         // Verificar si el producto existe
         if (!empty($productData['id'])) {
             // UPDATE
             $productId = (int)$productData['id'];
-            
+
             $stmt = $pdo->prepare("
                 UPDATE products SET
                     name = ?, description = ?, price = ?, cost_price = ?,
@@ -2665,7 +2684,7 @@ function upsertProduct(array $productData): array
                     dimensions = ?, supplier_id = ?, tax_rate = ?, updated_at = NOW()
                 WHERE id = ? AND store_id = ?
             ");
-            
+
             $stmt->execute([
                 $productData['name'],
                 $productData['description'],
@@ -2684,14 +2703,13 @@ function upsertProduct(array $productData): array
                 $productId,
                 $productData['store_id']
             ]);
-            
+
             if ($stmt->rowCount() === 0) {
                 $pdo->rollback();
                 return ['success' => false, 'error' => 'Producto no encontrado o sin permisos'];
             }
-            
+
             $action = 'updated';
-            
         } else {
             // INSERT
             $stmt = $pdo->prepare("
@@ -2701,7 +2719,7 @@ function upsertProduct(array $productData): array
                     weight_grams, dimensions, supplier_id, tax_rate, created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
             ");
-            
+
             $stmt->execute([
                 $productData['store_id'],
                 $productData['name'],
@@ -2719,13 +2737,13 @@ function upsertProduct(array $productData): array
                 $productData['supplier_id'],
                 $productData['tax_rate']
             ]);
-            
+
             $productId = $pdo->lastInsertId();
             $action = 'created';
         }
-        
+
         $pdo->commit();
-        
+
         return [
             'success' => true,
             'action' => $action,
@@ -2733,7 +2751,6 @@ function upsertProduct(array $productData): array
             'sku' => $productData['sku'],
             'message' => 'Producto ' . ($action === 'created' ? 'creado' : 'actualizado') . ' exitosamente'
         ];
-        
     } catch (Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollback();
@@ -2749,7 +2766,7 @@ function createDeliveryGroup(array $groupData): array
 {
     try {
         $pdo = db();
-        
+
         // Validar datos requeridos
         $required = ['order_id', 'delivery_method_id', 'delivery_address_id', 'delivery_date'];
         foreach ($required as $field) {
@@ -2757,7 +2774,7 @@ function createDeliveryGroup(array $groupData): array
                 return ['success' => false, 'error' => "Campo requerido: {$field}"];
             }
         }
-        
+
         // Configurar valores por defecto
         $defaults = [
             'status' => 'pendiente',
@@ -2766,17 +2783,17 @@ function createDeliveryGroup(array $groupData): array
             'delivery_notes' => '',
             'assigned_driver_id' => null
         ];
-        
+
         $groupData = array_merge($defaults, $groupData);
-        
+
         // Validar y limpiar datos
         $groupData['order_id'] = (int)$groupData['order_id'];
         $groupData['delivery_method_id'] = (int)$groupData['delivery_method_id'];
         $groupData['delivery_address_id'] = (int)$groupData['delivery_address_id'];
         $groupData['shipping_cost'] = (float)$groupData['shipping_cost'];
-        
+
         $pdo->beginTransaction();
-        
+
         // Crear el grupo de entrega
         $stmt = $pdo->prepare("
             INSERT INTO delivery_groups (
@@ -2785,7 +2802,7 @@ function createDeliveryGroup(array $groupData): array
                 assigned_driver_id, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         ");
-        
+
         $stmt->execute([
             $groupData['order_id'],
             $groupData['delivery_method_id'],
@@ -2797,9 +2814,9 @@ function createDeliveryGroup(array $groupData): array
             $groupData['delivery_notes'],
             $groupData['assigned_driver_id']
         ]);
-        
+
         $groupId = $pdo->lastInsertId();
-        
+
         // Registrar actividad
         $stmt = $pdo->prepare("
             INSERT INTO delivery_activity_log (
@@ -2807,16 +2824,15 @@ function createDeliveryGroup(array $groupData): array
             ) VALUES (?, 'created', ?, NOW())
         ");
         $stmt->execute([$groupId, 'Grupo de entrega creado']);
-        
+
         $pdo->commit();
-        
+
         return [
             'success' => true,
             'group_id' => $groupId,
             'status' => $groupData['status'],
             'message' => 'Grupo de entrega creado exitosamente'
         ];
-        
     } catch (Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollback();
@@ -2832,14 +2848,14 @@ function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): 
 {
     try {
         $pdo = db();
-        
+
         // Verificar que el grupo existe
         $stmt = $pdo->prepare("SELECT id FROM delivery_groups WHERE id = ?");
         $stmt->execute([$groupId]);
         if (!$stmt->fetch()) {
             return ['success' => false, 'error' => 'Grupo de entrega no encontrado'];
         }
-        
+
         // Verificar que el item de orden existe
         $stmt = $pdo->prepare("
             SELECT oi.id, oi.quantity, p.name 
@@ -2849,22 +2865,22 @@ function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): 
         ");
         $stmt->execute([$orderItemId, $quantity]);
         $item = $stmt->fetch();
-        
+
         if (!$item) {
             return ['success' => false, 'error' => 'Item de orden no encontrado o cantidad insuficiente'];
         }
-        
+
         $pdo->beginTransaction();
-        
+
         // Agregar item al grupo
         $stmt = $pdo->prepare("
             INSERT INTO delivery_group_items (delivery_group_id, order_item_id, quantity, created_at)
             VALUES (?, ?, ?, NOW())
             ON DUPLICATE KEY UPDATE quantity = VALUES(quantity)
         ");
-        
+
         $stmt->execute([$groupId, $orderItemId, $quantity]);
-        
+
         // Registrar actividad
         $stmt = $pdo->prepare("
             INSERT INTO delivery_activity_log (
@@ -2872,9 +2888,9 @@ function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): 
             ) VALUES (?, 'item_added', ?, NOW())
         ");
         $stmt->execute([$groupId, "Item agregado: {$item['name']} (cantidad: {$quantity})"]);
-        
+
         $pdo->commit();
-        
+
         return [
             'success' => true,
             'group_id' => $groupId,
@@ -2882,7 +2898,6 @@ function addItemToDeliveryGroup(int $groupId, int $orderItemId, int $quantity): 
             'quantity' => $quantity,
             'message' => 'Item agregado al grupo de entrega exitosamente'
         ];
-        
     } catch (Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollback();
@@ -2898,7 +2913,7 @@ function getStoreHours(int $storeId): array
 {
     try {
         $pdo = db();
-        
+
         // Intentar obtener horarios específicos de la tienda
         $stmt = $pdo->prepare("
             SELECT 
@@ -2913,11 +2928,11 @@ function getStoreHours(int $storeId): array
         ");
         $stmt->execute([$storeId]);
         $settings = $stmt->fetch();
-        
+
         if ($settings) {
             // Parsear los días de trabajo
             $workingDays = json_decode($settings['working_days'], true) ?: [1, 2, 3, 4, 5];
-            
+
             return [
                 'working_days' => $workingDays,
                 'opening_time' => $settings['opening_time'] ?? '09:00',
@@ -2927,7 +2942,7 @@ function getStoreHours(int $storeId): array
                 'timezone' => $settings['timezone'] ?? 'America/Santiago'
             ];
         }
-        
+
         // Horarios por defecto si no están configurados
         return [
             'working_days' => [1, 2, 3, 4, 5], // Lunes a Viernes
@@ -2937,7 +2952,6 @@ function getStoreHours(int $storeId): array
             'lunch_end' => '14:00',
             'timezone' => 'America/Santiago'
         ];
-        
     } catch (Exception $e) {
         // En caso de error, devolver horarios por defecto
         return [
@@ -2956,7 +2970,8 @@ function getStoreHours(int $storeId): array
  * @param int $storeId ID de la tienda
  * @return array Configuración de la tienda
  */
-function getStoreSettings(int $storeId): array {
+function getStoreSettings(int $storeId): array
+{
     try {
         $pdo = db();
         $stmt = $pdo->prepare("
@@ -2966,7 +2981,7 @@ function getStoreSettings(int $storeId): array {
             ORDER BY setting_key
         ");
         $stmt->execute([$storeId]);
-        
+
         $settings = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $settings[$row['setting_key']] = [
@@ -2975,7 +2990,7 @@ function getStoreSettings(int $storeId): array {
                 'description' => $row['description']
             ];
         }
-        
+
         // Configuraciones por defecto si no existen
         $defaults = [
             'primary_color' => ['value' => '#5E422E', 'type' => 'string', 'description' => 'Color principal'],
@@ -2986,16 +3001,15 @@ function getStoreSettings(int $storeId): array {
             'delivery_fee' => ['value' => '0', 'type' => 'number', 'description' => 'Costo de delivery'],
             'working_hours' => ['value' => '09:00-18:00', 'type' => 'string', 'description' => 'Horarios de trabajo']
         ];
-        
+
         // Combinar con valores por defecto
         foreach ($defaults as $key => $default) {
             if (!isset($settings[$key])) {
                 $settings[$key] = $default;
             }
         }
-        
+
         return $settings;
-        
     } catch (Exception $e) {
         error_log("Error getting store settings: " . $e->getMessage());
         // Devolver configuraciones por defecto en caso de error
@@ -3016,15 +3030,16 @@ function getStoreSettings(int $storeId): array {
  * @param string $description Descripción opcional
  * @return bool True si se actualizó correctamente
  */
-function updateStoreSetting(int $storeId, string $key, string $value, string $type = 'string', string $description = ''): bool {
+function updateStoreSetting(int $storeId, string $key, string $value, string $type = 'string', string $description = ''): bool
+{
     try {
         $pdo = db();
-        
+
         // Verificar si la configuración existe
         $stmt = $pdo->prepare("SELECT id FROM store_settings WHERE store_id = ? AND setting_key = ?");
         $stmt->execute([$storeId, $key]);
         $exists = $stmt->fetch();
-        
+
         if ($exists) {
             // Actualizar configuración existente
             $stmt = $pdo->prepare("
@@ -3041,7 +3056,6 @@ function updateStoreSetting(int $storeId, string $key, string $value, string $ty
             ");
             return $stmt->execute([$storeId, $key, $value, $type, $description]);
         }
-        
     } catch (Exception $e) {
         error_log("Error updating store setting: " . $e->getMessage());
         return false;
