@@ -124,13 +124,13 @@ function getStorePickupLocations(int $storeId): array
 {
     $stmt = db()->prepare("
         SELECT 
-            spl.*,
+            pl.*,
             s.name as store_name
-        FROM store_pickup_locations spl
-        JOIN stores s ON s.id = spl.store_id
-        WHERE spl.store_id = ?
-        AND spl.active = 1
-        ORDER BY spl.name
+        FROM pickup_locations pl
+        JOIN stores s ON s.id = pl.store_id
+        WHERE pl.store_id = ?
+        AND pl.is_active = 1
+        ORDER BY pl.name
     ");
     $stmt->execute([$storeId]);
     return $stmt->fetchAll();
