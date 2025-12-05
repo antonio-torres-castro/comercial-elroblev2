@@ -1065,35 +1065,35 @@ function getStoreAppointments(int $storeId, array $filters = []): array
     try {
         $pdo = db();
 
-        $where = ['store_id = ?'];
+        $where = ['a.store_id = ?'];
         $params = [$storeId];
 
         // Filtro por fecha
         if (!empty($filters['date_from'])) {
-            $where[] = 'appointment_date >= ?';
+            $where[] = 'a.appointment_date >= ?';
             $params[] = $filters['date_from'];
         }
 
         if (!empty($filters['date_to'])) {
-            $where[] = 'appointment_date <= ?';
+            $where[] = 'a.appointment_date <= ?';
             $params[] = $filters['date_to'] . ' 23:59:59';
         }
 
         // Filtro por estado
         if (!empty($filters['status'])) {
-            $where[] = 'status = ?';
+            $where[] = 'a.status = ?';
             $params[] = $filters['status'];
         }
 
         // Filtro por cliente
         if (!empty($filters['customer_phone'])) {
-            $where[] = 'customer_phone LIKE ?';
+            $where[] = 'a.customer_phone LIKE ?';
             $params[] = '%' . $filters['customer_phone'] . '%';
         }
 
         $sql = "
             SELECT a.*, s.name as service_name, s.description as service_description,
-                   u.name as created_by_name
+                   u.email as created_by_name
             FROM store_appointments a
             LEFT JOIN store_services s ON a.service_id = s.id
             LEFT JOIN users u ON a.created_by = u.id
@@ -1518,16 +1518,16 @@ function getAppointmentStatistics(int $storeId, ?string $dateFrom = null, ?strin
     try {
         $pdo = db();
 
-        $where = ['store_id = ?'];
+        $where = ['a.store_id = ?'];
         $params = [$storeId];
 
         if ($dateFrom && $dateTo) {
-            $where[] = 'appointment_date BETWEEN ? AND ?';
+            $where[] = 'a.appointment_date BETWEEN ? AND ?';
             $params[] = $dateFrom;
             $params[] = $dateTo . ' 23:59:59';
         } else {
             // Por defecto, último mes
-            $where[] = 'appointment_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)';
+            $where[] = 'a.appointment_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)';
         }
 
         // Estadísticas generales
@@ -1539,7 +1539,7 @@ function getAppointmentStatistics(int $storeId, ?string $dateFrom = null, ?strin
                 COUNT(CASE WHEN status = 'cancelada' THEN 1 END) as cancelled,
                 COUNT(CASE WHEN status = 'programada' THEN 1 END) as scheduled,
                 AVG(duration_hours) as avg_duration
-            FROM store_appointments
+            FROM store_appointments a
             WHERE " . implode(' AND ', $where)
         );
 
@@ -1567,7 +1567,7 @@ function getAppointmentStatistics(int $storeId, ?string $dateFrom = null, ?strin
                 DAYNAME(appointment_date) as day_name,
                 DAYOFWEEK(appointment_date) as day_num,
                 COUNT(*) as count
-            FROM store_appointments
+            FROM store_appointments a
             WHERE " . implode(' AND ', $where) . "
             GROUP BY DAYOFWEEK(appointment_date), DAYNAME(appointment_date)
             ORDER BY day_num
