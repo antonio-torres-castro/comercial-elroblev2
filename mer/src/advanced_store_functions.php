@@ -2590,8 +2590,7 @@ function updateProductStock(int $productId, int $newStock, string $reason = 'Act
         // Actualizar stock
         $stmt = $pdo->prepare("
             UPDATE products 
-            SET stock_quantity = ?, 
-                updated_at = NOW() 
+            SET stock_quantity = stock_quantity + ? 
             WHERE id = ?
         ");
         $stmt->execute([$newStock, $productId]);
@@ -2599,10 +2598,13 @@ function updateProductStock(int $productId, int $newStock, string $reason = 'Act
         // Registrar movimiento de stock
         if ($stockDifference !== 0) {
             $stmt = $pdo->prepare("
-                INSERT INTO stock_movements (product_id, quantity_change, reason, created_at)
-                VALUES (?, ?, ?, NOW())
+                INSERT INTO stock_movements (product_id, store_id, movement_type, quantity, reference_type, reference_id, notes, created_by, created_at)
+                Select                               id, store_id,             1,        ?,              3,            1,     ?,          
+                      1, -- esto por ahora esta fijo pero debe ser el id del usuario que esta ejecutando el servicio
+                      NOW()
+                      From products Where id = ?
             ");
-            $stmt->execute([$productId, $stockDifference, $reason]);
+            $stmt->execute([$stockDifference, $reason, $productId]);
         }
 
         $pdo->commit();
