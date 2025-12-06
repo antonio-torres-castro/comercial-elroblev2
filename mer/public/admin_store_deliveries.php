@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Módulo de Gestión de Entregas y Envíos
  * Sistema completo para administrar entregas, métodos, repartidores y seguimiento
@@ -18,29 +19,29 @@ if (!isset($store) || !isset($products)) {
 // Procesar acciones AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
-    
+
     try {
         $action = $_POST['action'];
-        
+
         switch ($action) {
             case 'update_delivery_status':
                 $deliveryId = (int)$_POST['delivery_id'];
                 $newStatus = $_POST['status'];
                 $reason = $_POST['reason'] ?? null;
                 $notes = $_POST['notes'] ?? null;
-                
+
                 $result = updateDeliveryStatus($deliveryId, $newStatus, $reason, $notes);
                 echo json_encode($result);
                 exit;
-                
+
             case 'assign_driver':
                 $deliveryId = (int)$_POST['delivery_id'];
                 $driverId = (int)$_POST['driver_id'];
-                
+
                 $result = assignDriverToDelivery($deliveryId, $driverId);
                 echo json_encode($result);
                 exit;
-                
+
             case 'create_delivery_method':
                 $methodData = [
                     'name' => $_POST['name'],
@@ -49,19 +50,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     'delivery_time_days' => (int)$_POST['delivery_time_days'],
                     'active' => isset($_POST['active']) ? 1 : 0
                 ];
-                
+
                 $result = createDeliveryMethod($store['id'], $methodData);
                 echo json_encode($result);
                 exit;
-                
+
             case 'get_delivery_stats':
                 $startDate = $_POST['start_date'] ?? date('Y-m-d', strtotime('-30 days'));
                 $endDate = $_POST['end_date'] ?? date('Y-m-d');
-                
+
                 $stats = getDeliveryStatistics($store['id'], $startDate, $endDate);
                 echo json_encode(['success' => true, 'data' => $stats]);
                 exit;
-                
+
             default:
                 echo json_encode(['success' => false, 'error' => 'Acción no válida']);
                 exit;
@@ -175,9 +176,9 @@ $deliveryStats = getDeliveryStats($store['id']);
                 </div>
             <?php else: ?>
                 <?php foreach ($deliveries as $delivery): ?>
-                    <div class="delivery-card" data-status="<?= $delivery['status'] ?>" 
-                         data-date="<?= $delivery['created_at'] ?>" 
-                         data-search="<?= strtolower($delivery['customer_name'] . ' ' . $delivery['delivery_address']) ?>">
+                    <div class="delivery-card" data-status="<?= $delivery['status'] ?>"
+                        data-date="<?= $delivery['created_at'] ?>"
+                        data-search="<?= strtolower($delivery['customer_name'] . ' ' . $delivery['delivery_address']) ?>">
                         <div class="delivery-header">
                             <div class="delivery-info">
                                 <span class="delivery-id">#<?= $delivery['id'] ?></span>
@@ -431,9 +432,9 @@ $deliveryStats = getDeliveryStats($store['id']);
                 </div>
                 <div class="form-group">
                     <label for="scheduled_date">Fecha Programada</label>
-                    <input type="date" id="scheduled_date" name="scheduled_date" 
-                           min="<?= date('Y-m-d') ?>" 
-                           value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+                    <input type="date" id="scheduled_date" name="scheduled_date"
+                        min="<?= date('Y-m-d') ?>"
+                        value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
                 </div>
                 <div class="form-group">
                     <label for="priority_level">Prioridad</label>
@@ -539,820 +540,905 @@ $deliveryStats = getDeliveryStats($store['id']);
 </div>
 
 <style>
-/* Estilos específicos para el módulo de entregas */
+    /* Estilos específicos para el módulo de entregas */
 
-/* Estadísticas Rápidas */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    border-left: 4px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.stat-card.pending { border-left-color: #ff9800; }
-.stat-card.in-transit { border-left-color: #2196f3; }
-.stat-card.delivered { border-left-color: #4caf50; }
-.stat-card.failed { border-left-color: #f44336; }
-
-.stat-icon {
-    font-size: 2rem;
-    opacity: 0.7;
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #333;
-}
-
-.stat-label {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-/* Pestañas */
-.tabs-navigation {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 1.5rem;
-}
-
-.tab-btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    background: transparent;
-    color: #666;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s ease;
-}
-
-.tab-btn:hover {
-    background: #f5f5f5;
-    color: #333;
-}
-
-.tab-btn.active {
-    color: #007bff;
-    border-bottom-color: #007bff;
-    font-weight: 500;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.tab-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.tab-header h3 {
-    margin: 0;
-    color: #333;
-}
-
-.filters {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.filters select,
-.filters input {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-/* Lista de Entregas */
-.deliveries-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.delivery-card {
-    background: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-left: 4px solid #e0e0e0;
-}
-
-.delivery-card[data-status="pendiente"] { border-left-color: #ff9800; }
-.delivery-card[data-status="confirmado"] { border-left-color: #2196f3; }
-.delivery-card[data-status="en_preparacion"] { border-left-color: #9c27b0; }
-.delivery-card[data-status="en_transito"] { border-left-color: #607d8b; }
-.delivery-card[data-status="entregada"] { border-left-color: #4caf50; }
-.delivery-card[data-status="fallida"] { border-left-color: #f44336; }
-.delivery-card[data-status="cancelado"] { border-left-color: #9e9e9e; }
-
-.delivery-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.delivery-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.delivery-id {
-    font-weight: bold;
-    color: #666;
-}
-
-.status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.status-pendiente { background: #fff3e0; color: #f57c00; }
-.status-confirmado { background: #e3f2fd; color: #1976d2; }
-.status-en_preparacion { background: #f3e5f5; color: #7b1fa2; }
-.status-en_transito { background: #eceff1; color: #455a64; }
-.status-entregada { background: #e8f5e8; color: #2e7d32; }
-.status-fallida { background: #ffebee; color: #d32f2f; }
-.status-cancelado { background: #f5f5f5; color: #616161; }
-.status-active { background: #e8f5e8; color: #2e7d32; }
-.status-inactive { background: #f5f5f5; color: #616161; }
-
-.priority-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    background: #ffebee;
-    color: #c62828;
-}
-
-.delivery-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.delivery-body {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1rem;
-}
-
-.delivery-details {
-    display: grid;
-    gap: 0.5rem;
-}
-
-.detail-item {
-    font-size: 0.9rem;
-}
-
-.detail-item strong {
-    color: #333;
-}
-
-.delivery-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.meta-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-}
-
-.meta-label {
-    color: #666;
-}
-
-.meta-value {
-    font-weight: 500;
-}
-
-.text-danger {
-    color: #d32f2f;
-}
-
-.text-warning {
-    color: #f57c00;
-}
-
-/* Grid de Métodos */
-.methods-grid,
-.drivers-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-}
-
-.method-card,
-.driver-card {
-    background: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.method-header,
-.driver-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.method-header h4,
-.driver-header h4 {
-    margin: 0;
-    color: #333;
-}
-
-.method-body,
-.driver-body {
-    margin-bottom: 1rem;
-}
-
-.method-details,
-.driver-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.detail-label {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.detail-value {
-    font-weight: 500;
-    color: #333;
-}
-
-.method-actions,
-.driver-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Estado Vacío */
-.empty-state {
-    text-align: center;
-    padding: 3rem 2rem;
-    color: #666;
-}
-
-.empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-.empty-state h4 {
-    margin-bottom: 0.5rem;
-    color: #333;
-}
-
-/* Formulario */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
-
-.form-group label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #333;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-}
-
-/* Checkbox personalizado */
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    margin: 0;
-}
-
-.checkbox-custom {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #ddd;
-    border-radius: 3px;
-    position: relative;
-    background: white;
-}
-
-.checkbox-custom::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    color: white;
-    font-weight: bold;
-    font-size: 12px;
-    transition: transform 0.2s ease;
-}
-
-input[type="checkbox"]:checked + .checkbox-custom {
-    background: #007bff;
-    border-color: #007bff;
-}
-
-input[type="checkbox"]:checked + .checkbox-custom::after {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-input[type="checkbox"] {
-    display: none;
-}
-
-/* Modal */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal {
-    background: white;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid #eee;
-}
-
-.modal-header h3 {
-    margin: 0;
-    color: #333;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #666;
-}
-
-.modal-body {
-    padding: 1.5rem;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    padding: 1.5rem;
-    border-top: 1px solid #eee;
-}
-
-/* Botones */
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-primary {
-    background: #007bff;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #0056b3;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #545b62;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid #ddd;
-    color: #333;
-}
-
-.btn-outline:hover {
-    background: #f8f9fa;
-    border-color: #adb5bd;
-}
-
-.btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-}
-
-/* Utilidades */
-.icon-plus::before { content: '+'; }
-.icon-refresh::before { content: '↻'; }
-.icon-edit::before { content: '✏'; }
-.icon-eye::before { content: '👁'; }
-.icon-check::before { content: '✓'; }
-.icon-warning::before { content: '⚠'; }
-
-@media (max-width: 768px) {
+    /* Estadísticas Rápidas */
     .stats-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
     }
-    
-    .delivery-body {
-        grid-template-columns: 1fr;
+
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border-left: 4px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    
-    .filters {
-        flex-wrap: wrap;
+
+    .stat-card.pending {
+        border-left-color: #ff9800;
     }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
+
+    .stat-card.in-transit {
+        border-left-color: #2196f3;
     }
-    
+
+    .stat-card.delivered {
+        border-left-color: #4caf50;
+    }
+
+    .stat-card.failed {
+        border-left-color: #f44336;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        opacity: 0.7;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    /* Pestañas */
+    .tabs-navigation {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        background: transparent;
+        color: #666;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .tab-btn:hover {
+        background: #f5f5f5;
+        color: #333;
+    }
+
+    .tab-btn.active {
+        color: #007bff;
+        border-bottom-color: #007bff;
+        font-weight: 500;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
     .tab-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .tab-header h3 {
+        margin: 0;
+        color: #333;
+    }
+
+    .filters {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .filters select,
+    .filters input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    /* Lista de Entregas */
+    .deliveries-list {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
         gap: 1rem;
     }
-    
-    .tabs-navigation {
-        flex-wrap: wrap;
+
+    .delivery-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #e0e0e0;
     }
-}
+
+    .delivery-card[data-status="pendiente"] {
+        border-left-color: #ff9800;
+    }
+
+    .delivery-card[data-status="confirmado"] {
+        border-left-color: #2196f3;
+    }
+
+    .delivery-card[data-status="en_preparacion"] {
+        border-left-color: #9c27b0;
+    }
+
+    .delivery-card[data-status="en_transito"] {
+        border-left-color: #607d8b;
+    }
+
+    .delivery-card[data-status="entregada"] {
+        border-left-color: #4caf50;
+    }
+
+    .delivery-card[data-status="fallida"] {
+        border-left-color: #f44336;
+    }
+
+    .delivery-card[data-status="cancelado"] {
+        border-left-color: #9e9e9e;
+    }
+
+    .delivery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .delivery-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .delivery-id {
+        font-weight: bold;
+        color: #666;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-pendiente {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+
+    .status-confirmado {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .status-en_preparacion {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .status-en_transito {
+        background: #eceff1;
+        color: #455a64;
+    }
+
+    .status-entregada {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .status-fallida {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+
+    .status-cancelado {
+        background: #f5f5f5;
+        color: #616161;
+    }
+
+    .status-active {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .status-inactive {
+        background: #f5f5f5;
+        color: #616161;
+    }
+
+    .priority-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .delivery-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .delivery-body {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+    }
+
+    .delivery-details {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .detail-item {
+        font-size: 0.9rem;
+    }
+
+    .detail-item strong {
+        color: #333;
+    }
+
+    .delivery-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .meta-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+    }
+
+    .meta-label {
+        color: #666;
+    }
+
+    .meta-value {
+        font-weight: 500;
+    }
+
+    .text-danger {
+        color: #d32f2f;
+    }
+
+    .text-warning {
+        color: #f57c00;
+    }
+
+    /* Grid de Métodos */
+    .methods-grid,
+    .drivers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .method-card,
+    .driver-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .method-header,
+    .driver-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .method-header h4,
+    .driver-header h4 {
+        margin: 0;
+        color: #333;
+    }
+
+    .method-body,
+    .driver-body {
+        margin-bottom: 1rem;
+    }
+
+    .method-details,
+    .driver-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .detail-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .method-actions,
+    .driver-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Estado Vacío */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #666;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    /* Formulario */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    /* Checkbox personalizado */
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .checkbox-custom {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ddd;
+        border-radius: 3px;
+        position: relative;
+        background: white;
+    }
+
+    .checkbox-custom::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        transition: transform 0.2s ease;
+    }
+
+    input[type="checkbox"]:checked+.checkbox-custom {
+        background: #007bff;
+        border-color: #007bff;
+    }
+
+    input[type="checkbox"]:checked+.checkbox-custom::after {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    input[type="checkbox"] {
+        display: none;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal {
+        background: white;
+        border-radius: 8px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        color: #333;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-top: 1px solid #eee;
+    }
+
+    /* Botones */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #ddd;
+        color: #333;
+    }
+
+    .btn-outline:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    /* Utilidades */
+    .icon-plus::before {
+        content: '+';
+    }
+
+    .icon-refresh::before {
+        content: '↻';
+    }
+
+    .icon-edit::before {
+        content: '✏';
+    }
+
+    .icon-eye::before {
+        content: '👁';
+    }
+
+    .icon-check::before {
+        content: '✓';
+    }
+
+    .icon-warning::before {
+        content: '⚠';
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .delivery-body {
+            grid-template-columns: 1fr;
+        }
+
+        .filters {
+            flex-wrap: wrap;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tab-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .tabs-navigation {
+            flex-wrap: wrap;
+        }
+    }
 </style>
 
 <script>
-// Variables globales
-let currentWeek = new Date();
-let editingMethodId = null;
-let editingDriverId = null;
+    // Variables globales
+    let currentWeek = new Date();
+    let editingMethodId = null;
+    let editingDriverId = null;
 
-// Función para cambiar pestañas
-function switchTab(tabName) {
-    // Ocultar todas las pestañas
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    // Quitar clase active de todos los botones
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Mostrar la pestaña seleccionada
-    document.getElementById(tabName).classList.add('active');
-    
-    // Activar el botón correspondiente
-    event.target.classList.add('active');
-    
-    // Cargar contenido específico de la pestaña
-    if (tabName === 'calendar') {
-        loadDeliveryCalendar();
-    } else if (tabName === 'reports') {
-        generateReport();
-    }
-}
-
-// Filtrar entregas
-function filterDeliveries() {
-    const statusFilter = document.getElementById('status-filter').value;
-    const dateFilter = document.getElementById('date-filter').value;
-    const searchFilter = document.getElementById('search-filter').value.toLowerCase();
-    
-    document.querySelectorAll('.delivery-card').forEach(card => {
-        const status = card.dataset.status;
-        const date = card.dataset.date;
-        const search = card.dataset.search;
-        
-        let show = true;
-        
-        if (statusFilter && status !== statusFilter) {
-            show = false;
-        }
-        
-        if (dateFilter && !date.startsWith(dateFilter)) {
-            show = false;
-        }
-        
-        if (searchFilter && !search.includes(searchFilter)) {
-            show = false;
-        }
-        
-        card.style.display = show ? 'block' : 'none';
-    });
-}
-
-// Actualizar estado de entrega
-function updateDeliveryStatus(deliveryId) {
-    document.getElementById('status-delivery-id').value = deliveryId;
-    showModal('status-modal');
-}
-
-// Guardar cambio de estado
-async function saveStatusChange() {
-    const form = document.getElementById('status-form');
-    const formData = new FormData(form);
-    formData.append('action', 'update_delivery_status');
-    formData.append('delivery_id', document.getElementById('status-delivery-id').value);
-    
-    try {
-        const response = await fetch(window.location.href, {
-            method: 'POST',
-            body: formData
+    // Función para cambiar pestañas
+    function switchTab(tabName) {
+        // Ocultar todas las pestañas
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showAlert('success', 'Estado actualizado exitosamente');
-            closeModal('status-modal');
-            location.reload();
-        } else {
-            showAlert('error', result.error || 'Error al actualizar estado');
-        }
-    } catch (error) {
-        showAlert('error', 'Error de conexión');
-    }
-}
 
-// Mostrar modal de nuevo método
-function showNewMethodModal() {
-    editingMethodId = null;
-    document.getElementById('method-modal-title').textContent = 'Nuevo Método de Entrega';
-    document.getElementById('method-form').reset();
-    document.getElementById('method-id').value = '';
-    showModal('method-modal');
-}
-
-// Guardar método
-async function saveMethod() {
-    const form = document.getElementById('method-form');
-    const formData = new FormData(form);
-    formData.append('action', 'create_delivery_method');
-    
-    if (editingMethodId) {
-        formData.append('method_id', editingMethodId);
-    }
-    
-    try {
-        const response = await fetch(window.location.href, {
-            method: 'POST',
-            body: formData
+        // Quitar clase active de todos los botones
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showAlert('success', 'Método guardado exitosamente');
-            closeModal('method-modal');
-            location.reload();
-        } else {
-            showAlert('error', result.error || 'Error al guardar método');
+
+        // Mostrar la pestaña seleccionada
+        document.getElementById(tabName).classList.add('active');
+
+        // Activar el botón correspondiente
+        event.target.classList.add('active');
+
+        // Cargar contenido específico de la pestaña
+        if (tabName === 'calendar') {
+            loadDeliveryCalendar();
+        } else if (tabName === 'reports') {
+            generateReport();
         }
-    } catch (error) {
-        showAlert('error', 'Error de conexión');
     }
-}
 
-// Mostrar/ocultar modal
-function showModal(modalId) {
-    document.getElementById('modal-overlay').style.display = 'flex';
-    document.getElementById(modalId).style.display = 'block';
-}
+    // Filtrar entregas
+    function filterDeliveries() {
+        const statusFilter = document.getElementById('status-filter').value;
+        const dateFilter = document.getElementById('date-filter').value;
+        const searchFilter = document.getElementById('search-filter').value.toLowerCase();
 
-function closeModal(modalId) {
-    document.getElementById('modal-overlay').style.display = 'none';
-    document.getElementById(modalId).style.display = 'none';
-}
+        document.querySelectorAll('.delivery-card').forEach(card => {
+            const status = card.dataset.status;
+            const date = card.dataset.date;
+            const search = card.dataset.search;
 
-// Crear nueva entrega
-async function createDelivery(event) {
-    event.preventDefault();
-    
-    const form = document.getElementById('new-delivery-form');
-    const formData = new FormData(form);
-    formData.append('action', 'create_delivery');
-    
-    try {
-        const response = await fetch(window.location.href, {
-            method: 'POST',
-            body: formData
+            let show = true;
+
+            if (statusFilter && status !== statusFilter) {
+                show = false;
+            }
+
+            if (dateFilter && !date.startsWith(dateFilter)) {
+                show = false;
+            }
+
+            if (searchFilter && !search.includes(searchFilter)) {
+                show = false;
+            }
+
+            card.style.display = show ? 'block' : 'none';
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showAlert('success', 'Entrega creada exitosamente');
-            resetForm();
-            // Opcional: cambiar a la pestaña de entregas
-        } else {
-            showAlert('error', result.error || 'Error al crear entrega');
+    }
+
+    // Actualizar estado de entrega
+    function updateDeliveryStatus(deliveryId) {
+        document.getElementById('status-delivery-id').value = deliveryId;
+        showModal('status-modal');
+    }
+
+    // Guardar cambio de estado
+    async function saveStatusChange() {
+        const form = document.getElementById('status-form');
+        const formData = new FormData(form);
+        formData.append('action', 'update_delivery_status');
+        formData.append('delivery_id', document.getElementById('status-delivery-id').value);
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert('success', 'Estado actualizado exitosamente');
+                closeModal('status-modal');
+                location.reload();
+            } else {
+                showAlert('error', result.error || 'Error al actualizar estado');
+            }
+        } catch (error) {
+            showAlert('error', 'Error de conexión');
         }
-    } catch (error) {
-        showAlert('error', 'Error de conexión');
     }
-}
 
-// Resetear formulario
-function resetForm() {
-    document.getElementById('new-delivery-form').reset();
-}
-
-// Cargar calendario de entregas
-function loadDeliveryCalendar() {
-    const container = document.getElementById('delivery-calendar');
-    const startOfWeek = new Date(currentWeek);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    
-    let calendarHTML = '<div class="calendar-row">';
-    calendarHTML += '<div class="calendar-header">Hora</div>';
-    
-    // Días de la semana
-    for (let i = 0; i < 7; i++) {
-        const day = new Date(startOfWeek);
-        day.setDate(day.getDate() + i);
-        const dayName = day.toLocaleDateString('es-ES', { weekday: 'short' });
-        const dayNum = day.getDate();
-        calendarHTML += `<div class="calendar-day-header">${dayName} ${dayNum}</div>`;
+    // Mostrar modal de nuevo método
+    function showNewMethodModal() {
+        editingMethodId = null;
+        document.getElementById('method-modal-title').textContent = 'Nuevo Método de Entrega';
+        document.getElementById('method-form').reset();
+        document.getElementById('method-id').value = '';
+        showModal('method-modal');
     }
-    calendarHTML += '</div>';
-    
-    // Horarios
-    const timeSlots = ['09:00', '11:00', '14:00', '16:00'];
-    timeSlots.forEach(time => {
-        calendarHTML += `<div class="calendar-row">`;
-        calendarHTML += `<div class="calendar-time">${time}</div>`;
-        
+
+    // Guardar método
+    async function saveMethod() {
+        const form = document.getElementById('method-form');
+        const formData = new FormData(form);
+        formData.append('action', 'create_delivery_method');
+
+        if (editingMethodId) {
+            formData.append('method_id', editingMethodId);
+        }
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert('success', 'Método guardado exitosamente');
+                closeModal('method-modal');
+                location.reload();
+            } else {
+                showAlert('error', result.error || 'Error al guardar método');
+            }
+        } catch (error) {
+            showAlert('error', 'Error de conexión');
+        }
+    }
+
+    // Mostrar/ocultar modal
+    function showModal(modalId) {
+        document.getElementById('modal-overlay').style.display = 'flex';
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById('modal-overlay').style.display = 'none';
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Crear nueva entrega
+    async function createDelivery(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('new-delivery-form');
+        const formData = new FormData(form);
+        formData.append('action', 'create_delivery');
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showAlert('success', 'Entrega creada exitosamente');
+                resetForm();
+                // Opcional: cambiar a la pestaña de entregas
+            } else {
+                showAlert('error', result.error || 'Error al crear entrega');
+            }
+        } catch (error) {
+            showAlert('error', 'Error de conexión');
+        }
+    }
+
+    // Resetear formulario
+    function resetForm() {
+        document.getElementById('new-delivery-form').reset();
+    }
+
+    // Cargar calendario de entregas
+    function loadDeliveryCalendar() {
+        const container = document.getElementById('delivery-calendar');
+        const startOfWeek = new Date(currentWeek);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+        let calendarHTML = '<div class="calendar-row">';
+        calendarHTML += '<div class="calendar-header">Hora</div>';
+
+        // Días de la semana
         for (let i = 0; i < 7; i++) {
             const day = new Date(startOfWeek);
             day.setDate(day.getDate() + i);
-            const dateStr = day.toISOString().split('T')[0];
-            
-            calendarHTML += `<div class="calendar-cell" data-date="${dateStr}" data-time="${time}">`;
-            calendarHTML += '<div class="cell-content">';
-            // Aquí se pueden agregar entregas programadas
-            calendarHTML += '</div>';
-            calendarHTML += '</div>';
+            const dayName = day.toLocaleDateString('es-ES', {
+                weekday: 'short'
+            });
+            const dayNum = day.getDate();
+            calendarHTML += `<div class="calendar-day-header">${dayName} ${dayNum}</div>`;
         }
-        
         calendarHTML += '</div>';
-    });
-    
-    container.innerHTML = calendarHTML;
-}
 
-// Generar reporte
-async function generateReport() {
-    const startDate = document.getElementById('report-start-date').value;
-    const endDate = document.getElementById('report-end-date').value;
-    
-    const formData = new FormData();
-    formData.append('action', 'get_delivery_stats');
-    formData.append('start_date', startDate);
-    formData.append('end_date', endDate);
-    
-    try {
-        const response = await fetch(window.location.href, {
-            method: 'POST',
-            body: formData
+        // Horarios
+        const timeSlots = ['09:00', '11:00', '14:00', '16:00'];
+        timeSlots.forEach(time => {
+            calendarHTML += `<div class="calendar-row">`;
+            calendarHTML += `<div class="calendar-time">${time}</div>`;
+
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startOfWeek);
+                day.setDate(day.getDate() + i);
+                const dateStr = day.toISOString().split('T')[0];
+
+                calendarHTML += `<div class="calendar-cell" data-date="${dateStr}" data-time="${time}">`;
+                calendarHTML += '<div class="cell-content">';
+                // Aquí se pueden agregar entregas programadas
+                calendarHTML += '</div>';
+                calendarHTML += '</div>';
+            }
+
+            calendarHTML += '</div>';
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            displayReport(result.data);
-        } else {
-            showAlert('error', 'Error al generar reporte');
-        }
-    } catch (error) {
-        showAlert('error', 'Error de conexión');
+
+        container.innerHTML = calendarHTML;
     }
-}
 
-// Mostrar reporte
-function displayReport(stats) {
-    const container = document.getElementById('reports-content');
-    
-    let reportHTML = '<div class="report-grid">';
-    reportHTML += '<div class="report-card">';
-    reportHTML += '<h4>Total de Entregas</h4>';
-    reportHTML += `<div class="report-number">${stats.total_deliveries || 0}</div>`;
-    reportHTML += '</div>';
-    
-    reportHTML += '<div class="report-card">';
-    reportHTML += '<h4>Tasa de Entrega</h4>';
-    reportHTML += `<div class="report-number">${(stats.delivery_rate * 100).toFixed(1)}%</div>`;
-    reportHTML += '</div>';
-    
-    reportHTML += '<div class="report-card">';
-    reportHTML += '<h4>Promedio por Entrega</h4>';
-    reportHTML += `<div class="report-number">$${Number(stats.avg_delivery_cost || 0).toLocaleString()}</div>`;
-    reportHTML += '</div>';
-    
-    reportHTML += '<div class="report-card">';
-    reportHTML += '<h4>Ingresos por Envío</h4>';
-    reportHTML += `<div class="report-number">$${Number(stats.total_delivery_revenue || 0).toLocaleString()}</div>`;
-    reportHTML += '</div>';
-    reportHTML += '</div>';
-    
-    container.innerHTML = reportHTML;
-}
+    // Generar reporte
+    async function generateReport() {
+        const startDate = document.getElementById('report-start-date').value;
+        const endDate = document.getElementById('report-end-date').value;
 
-// Mostrar alertas
-function showAlert(type, message) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
-    alertDiv.style.cssText = `
+        const formData = new FormData();
+        formData.append('action', 'get_delivery_stats');
+        formData.append('start_date', startDate);
+        formData.append('end_date', endDate);
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                displayReport(result.data);
+            } else {
+                showAlert('error', 'Error al generar reporte');
+            }
+        } catch (error) {
+            showAlert('error', 'Error de conexión');
+        }
+    }
+
+    // Mostrar reporte
+    function displayReport(stats) {
+        const container = document.getElementById('reports-content');
+
+        let reportHTML = '<div class="report-grid">';
+        reportHTML += '<div class="report-card">';
+        reportHTML += '<h4>Total de Entregas</h4>';
+        reportHTML += `<div class="report-number">${stats.total_deliveries || 0}</div>`;
+        reportHTML += '</div>';
+
+        reportHTML += '<div class="report-card">';
+        reportHTML += '<h4>Tasa de Entrega</h4>';
+        reportHTML += `<div class="report-number">${(stats.delivery_rate * 100).toFixed(1)}%</div>`;
+        reportHTML += '</div>';
+
+        reportHTML += '<div class="report-card">';
+        reportHTML += '<h4>Promedio por Entrega</h4>';
+        reportHTML += `<div class="report-number">$${Number(stats.avg_delivery_cost || 0).toLocaleString()}</div>`;
+        reportHTML += '</div>';
+
+        reportHTML += '<div class="report-card">';
+        reportHTML += '<h4>Ingresos por Envío</h4>';
+        reportHTML += `<div class="report-number">$${Number(stats.total_delivery_revenue || 0).toLocaleString()}</div>`;
+        reportHTML += '</div>';
+        reportHTML += '</div>';
+
+        container.innerHTML = reportHTML;
+    }
+
+    // Mostrar alertas
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        alertDiv.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
@@ -1362,44 +1448,44 @@ function showAlert(type, message) {
         color: white;
         background: ${type === 'success' ? '#28a745' : '#dc3545'};
     `;
-    
-    document.body.appendChild(alertDiv);
-    
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 3000);
-}
 
-// Funciones de navegación del calendario
-function previousWeek() {
-    currentWeek.setDate(currentWeek.getDate() - 7);
-    loadDeliveryCalendar();
-    updateWeekDisplay();
-}
+        document.body.appendChild(alertDiv);
 
-function nextWeek() {
-    currentWeek.setDate(currentWeek.getDate() + 7);
-    loadDeliveryCalendar();
-    updateWeekDisplay();
-}
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
 
-function updateWeekDisplay() {
-    const startOfWeek = new Date(currentWeek);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 6);
-    
-    document.getElementById('current-week').textContent = 
-        `${startOfWeek.toLocaleDateString('es-ES')} - ${endOfWeek.toLocaleDateString('es-ES')}`;
-}
+    // Funciones de navegación del calendario
+    function previousWeek() {
+        currentWeek.setDate(currentWeek.getDate() - 7);
+        loadDeliveryCalendar();
+        updateWeekDisplay();
+    }
 
-// Funciones de actualización
-function refreshDeliveries() {
-    location.reload();
-}
+    function nextWeek() {
+        currentWeek.setDate(currentWeek.getDate() + 7);
+        loadDeliveryCalendar();
+        updateWeekDisplay();
+    }
 
-// Inicializar
-document.addEventListener('DOMContentLoaded', function() {
-    updateWeekDisplay();
-});
+    function updateWeekDisplay() {
+        const startOfWeek = new Date(currentWeek);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(endOfWeek.getDate() + 6);
+
+        document.getElementById('current-week').textContent =
+            `${startOfWeek.toLocaleDateString('es-ES')} - ${endOfWeek.toLocaleDateString('es-ES')}`;
+    }
+
+    // Funciones de actualización
+    function refreshDeliveries() {
+        location.reload();
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        updateWeekDisplay();
+    });
 </script>

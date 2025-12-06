@@ -202,7 +202,7 @@ function getDeliveryStats(?int $storeId = null, ?string $startDate = null, ?stri
     $params = [];
 
     if ($storeId) {
-        $whereClause .= " AND dg.store_id = ?";
+        $whereClause .= " AND oi.store_id = ?";
         $params[] = $storeId;
     }
 
@@ -224,6 +224,7 @@ function getDeliveryStats(?int $storeId = null, ?string $startDate = null, ?stri
             AVG(dgi.subtotal) as avg_subtotal
         FROM delivery_groups dg
         LEFT JOIN delivery_group_items dgi ON dgi.delivery_group_id = dg.id
+        LEFT JOIN order_items oi ON oi.order_id = dg.order_id And oi.id = dgi.order_item_id
         $whereClause
         GROUP BY dg.status
         ORDER BY dg.status
@@ -1925,9 +1926,9 @@ function getStoreDeliveries(int $storeId, array $filters = []): array
             SELECT 
                 d.*,
                 dm.name as method_name,
-                dm.cost as method_cost,
+                dm.base_cost as method_cost,
                 o.total as order_total,
-                o.order_number
+                o.id as order_number
             FROM deliveries d
             LEFT JOIN delivery_methods dm ON dm.id = d.delivery_method_id
             LEFT JOIN orders o ON o.id = d.order_id
