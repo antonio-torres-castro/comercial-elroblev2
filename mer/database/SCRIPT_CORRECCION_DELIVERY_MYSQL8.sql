@@ -1,9 +1,12 @@
 -- =============================================================================
 -- SCRIPT DE CORRECCIÓN Y NORMALIZACIÓN DEL SISTEMA DE DELIVERY
--- Versión: 1.0
+-- Versión: 1.1 - CORREGIDO
 -- Autor: MiniMax Agent
--- Fecha: 2025-12-07
+-- Fecha: 2025-12-08
 -- Descripción: Corrige inconsistencias entre estructuras de BD y código del sistema
+-- CORRECCIONES v1.1:
+-- - Agregado campo weight_grams en delivery_group_items
+-- - Agregados campos faltantes en tabla products
 -- =============================================================================
 
 -- Configuración inicial
@@ -11,6 +14,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
+
+-- Ejecutar limpieza
+CALL quick_orphan_cleanup();
 
 DROP TABLE IF EXISTS delivery_addresses;
 DROP TABLE IF EXISTS delivery_schedules;
@@ -190,7 +196,115 @@ CREATE TABLE IF NOT EXISTS delivery_zone_costs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Costos de entrega por zona geográfica';
 
 -- =============================================================================
--- PARTE 3: MIGRACIÓN DE DATOS EXISTENTES
+-- PARTE 3: CORRECCIÓN DE CAMPOS FALTANTES
+-- =============================================================================
+
+-- CORRECCIÓN 1: Asegurar que delivery_group_items tenga el campo weight_grams
+-- Verificar si existe la columna weight_grams en delivery_group_items
+SET @db_name = DATABASE();
+SET @table_name = 'delivery_group_items';
+SET @column_name = 'weight_grams';
+
+SELECT COUNT(*) INTO @column_exists 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_SCHEMA = @db_name 
+AND TABLE_NAME = @table_name 
+AND COLUMN_NAME = @column_name;
+
+-- Agregar weight_grams solo si no existe
+SET @sql = IF(@column_exists = 0, 
+    CONCAT('ALTER TABLE ', @table_name, ' ADD COLUMN ', @column_name, ' DECIMAL(8,2) DEFAULT 0.00 COMMENT "Peso en gramos del producto"'),
+    CONCAT('SELECT "Columna ', @column_name, ' ya existe en ', @table_name, '" AS mensaje')
+);
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- CORRECCIÓN 2: Agregar campos faltantes en products (VERSIÓN WORKBENCH)
+SET @db = DATABASE();
+
+-- 1. AGREGAR CAMPOS FALTANTES
+SET @add_columns_sql = NULL;
+
+SELECT 
+    CONCAT('ALTER TABLE products ', 
+           GROUP_CONCAT(
+               CONCAT('ADD COLUMN ', col_name, ' ', col_type, 
+                      IF(col_default = 'NULL', ' DEFAULT NULL', CONCAT(' DEFAULT ', col_default)),
+                      ' COMMENT "', col_comment, '"')
+               SEPARATOR ', '
+           )
+    ) INTO @add_columns_sql
+FROM (
+    SELECT 'cost_price' as col_name, 'DECIMAL(10,2)' as col_type, '0.00' as col_default, 'Precio de costo' as col_comment
+    UNION SELECT 'category', 'VARCHAR(100)', 'NULL', 'Categoría del producto'
+    UNION SELECT 'sku', 'VARCHAR(50)', 'NULL', 'Código SKU'
+    UNION SELECT 'barcode', 'VARCHAR(50)', 'NULL', 'Código de barras'
+    UNION SELECT 'min_stock_level', 'INT', '5', 'Nivel mínimo de stock'
+    UNION SELECT 'weight_grams', 'DECIMAL(8,2)', '0.00', 'Peso en gramos'
+    UNION SELECT 'dimensions', 'JSON', 'NULL', 'Dimensiones del producto'
+    UNION SELECT 'supplier_id', 'INT', 'NULL', 'ID del proveedor'
+    UNION SELECT 'tax_rate', 'DECIMAL(5,2)', '0.00', 'Tasa de impuesto'
+) cols
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_SCHEMA = @db 
+    AND TABLE_NAME = 'products' 
+    AND COLUMN_NAME = cols.col_name
+);
+
+-- Usar función IF() para decidir qué ejecutar
+SET @execute_sql = IF(@add_columns_sql IS NOT NULL,
+    @add_columns_sql,
+    'SELECT "Todos los campos ya existen en products" AS mensaje'
+);
+
+PREPARE stmt FROM @execute_sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 2. AGREGAR FOREIGN KEY CON VALIDACIÓN COMPLETA
+-- Verificar todas las condiciones usando subconsultas
+SET @fk_sql = (
+    SELECT IF(
+        -- Condiciones para agregar FK
+        (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES 
+         WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'suppliers') > 0
+        AND
+        (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+         WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'products' 
+         AND COLUMN_NAME = 'supplier_id') > 0
+        AND
+        (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+         WHERE CONSTRAINT_SCHEMA = @db AND TABLE_NAME = 'products' 
+         AND CONSTRAINT_NAME = 'fk_products_supplier' AND CONSTRAINT_TYPE = 'FOREIGN KEY') = 0,
+        
+        -- Si se cumplen las condiciones
+        'ALTER TABLE products ADD CONSTRAINT fk_products_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers (id) ON DELETE SET NULL',
+        
+        -- Si no se cumplen
+        CONCAT('SELECT "', 
+            CASE 
+                WHEN (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'suppliers') = 0 
+                THEN 'Tabla suppliers no existe'
+                WHEN (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'products' AND COLUMN_NAME = 'supplier_id') = 0 
+                THEN 'Columna supplier_id no existe en products'
+                WHEN (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = @db AND TABLE_NAME = 'products' AND CONSTRAINT_NAME = 'fk_products_supplier') > 0 
+                THEN 'Foreign key fk_products_supplier ya existe'
+                ELSE 'No se puede agregar foreign key'
+            END,
+            '" AS fk_info')
+    )
+);
+
+PREPARE fk_stmt FROM @fk_sql;
+EXECUTE fk_stmt;
+DEALLOCATE PREPARE fk_stmt;
+
+-- =============================================================================
+-- PARTE 4: MIGRACIÓN DE DATOS EXISTENTES
 -- =============================================================================
 
 -- Crear direcciones basadas en los datos existentes de delivery_groups
@@ -229,7 +343,7 @@ WHERE NOT EXISTS (
 );
 
 -- =============================================================================
--- PARTE 4: MODIFICACIÓN DE TABLA delivery_groups
+-- PARTE 5: MODIFICACIÓN DE TABLA delivery_groups
 -- =============================================================================
 
 -- Agregar la columna delivery_address_id a delivery_groups
@@ -424,7 +538,7 @@ EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
 -- =============================================================================
--- PARTE 5: ACTUALIZACIÓN DE ESTADOS PARA CONSISTENCIA
+-- PARTE 6: ACTUALIZACIÓN DE ESTADOS PARA CONSISTENCIA
 -- =============================================================================
 
 -- Actualizar estados de delivery_groups para que coincidan con el estándar
@@ -439,7 +553,7 @@ UPDATE delivery_groups SET status = 'entregada' WHERE status = 'delivered';
 UPDATE delivery_groups SET status = 'cancelada' WHERE status = 'cancelled';
 
 -- =============================================================================
--- PARTE 6: TRIGGERS ACTUALIZADOS (CORREGIDO)
+-- PARTE 7: TRIGGERS ACTUALIZADOS (CORREGIDO)
 -- =============================================================================
 
 -- Primero, resetear la conexión para evitar problemas de sincronización
@@ -519,7 +633,7 @@ END$$
 DELIMITER ;
 
 -- =============================================================================
--- PARTE 7: VISTAS ACTUALIZADAS
+-- PARTE 8: VISTAS ACTUALIZADAS
 -- =============================================================================
 
 -- Vista actualizada para grupos de entrega activos con información completa
@@ -576,7 +690,7 @@ WHERE d.scheduled_date IS NOT NULL
 GROUP BY d.store_id, DATE(d.scheduled_date);
 
 -- =============================================================================
--- PARTE 8: PROCEDIMIENTOS ALMACENADOS
+-- PARTE 9: PROCEDIMIENTOS ALMACENADOS
 -- =============================================================================
 
 -- Primero eliminar procedimientos existentes
@@ -709,7 +823,7 @@ END$$
 DELIMITER ;
 
 -- =============================================================================
--- PARTE 9: DATOS INICIALES
+-- PARTE 10: DATOS INICIALES
 -- =============================================================================
 
 -- Insertar métodos de entrega por defecto si no existen
@@ -765,7 +879,7 @@ CROSS JOIN (
 WHERE DAYOFWEEK(CURDATE() + INTERVAL t.n DAY) NOT IN (1, 7); -- Excluir domingos y sábados
 
 -- =============================================================================
--- PARTE 10: VERIFICACIÓN Y LIMPIEZA FINAL
+-- PARTE 11: VERIFICACIÓN Y LIMPIEZA FINAL
 -- =============================================================================
 
 -- Habilitar foreign keys
@@ -848,16 +962,22 @@ CAMBIOS PRINCIPALES IMPLEMENTADOS:
    - delivery_tracking: Seguimiento GPS
    - delivery_zone_costs: Costos por zona
 
-3. CONSISTENCIA DE ESTADOS:
+3. CORRECCIÓN DE CAMPOS FALTANTES:
+   - Agregado campo weight_grams a delivery_group_items (REQUIRED por código PHP)
+   - Agregados 9 campos faltantes a tabla products: cost_price, category, sku, barcode, min_stock_level, weight_grams, dimensions, supplier_id, tax_rate
+   - Agregado foreign key para supplier_id
+   - CAMPOS AGREGADOS A PRODUCTS: cost_price, category, sku, barcode, min_stock_level, weight_grams, dimensions, supplier_id, tax_rate
+
+4. CONSISTENCIA DE ESTADOS:
    - Estados unificados: pendiente, programada, en_preparacion, en_transito, entregada, fallida, cancelada
    - Triggers actualizados para nueva estructura
 
-4. PROCEDIMIENTOS CORREGIDOS:
+5. PROCEDIMIENTOS CORREGIDOS:
    - createDeliveryGroupFixed: Versión corregida que usa delivery_address_id
    - GetPendingDeliveries: Mejorado para nueva estructura
    - AssignBestDriver: Optimizado con nueva estructura
 
-5. VISTAS ACTUALIZADAS:
+6. VISTAS ACTUALIZADAS:
    - v_active_delivery_groups: Usa delivery_addresses en lugar de campos directos
    - v_delivery_statistics: Estadísticas mejoradas
 
@@ -865,10 +985,24 @@ COMPATIBILIDAD:
 - Mantiene compatibilidad con código existente
 - Preserva todos los datos existentes
 - Agrega funcionalidad completa del sistema
+- CORRIGE INCONSISTENCIAS: delivery_group_items.weight_grams y products.* campos
 
 PRÓXIMOS PASOS:
 1. Actualizar código PHP para usar createDeliveryGroupFixed()
 2. Implementar funcionalidad de notificaciones
 3. Integrar con APIs de geolocalización
 4. Desarrollar dashboard de seguimiento
+5. Verificar que todos los campos PHP funcionan correctamente
+
+CAMPOS CORREGIDOS:
+- delivery_group_items.weight_grams (DECIMAL(8,2) DEFAULT 0.00)
+- products.cost_price (DECIMAL(10,2) DEFAULT 0.00)
+- products.category (VARCHAR(100) DEFAULT NULL)
+- products.sku (VARCHAR(50) DEFAULT NULL)
+- products.barcode (VARCHAR(50) DEFAULT NULL)
+- products.min_stock_level (INT DEFAULT 5)
+- products.weight_grams (DECIMAL(8,2) DEFAULT 0.00)
+- products.dimensions (JSON DEFAULT NULL)
+- products.supplier_id (INT DEFAULT NULL)
+- products.tax_rate (DECIMAL(5,2) DEFAULT 0.00)
 */
