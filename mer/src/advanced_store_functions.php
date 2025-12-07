@@ -2758,6 +2758,7 @@ function upsertProduct(array $productData): array
         if ($pdo->inTransaction()) {
             $pdo->rollback();
         }
+
         return ['success' => false, 'error' => 'Error al guardar producto: ' . $e->getMessage()];
     }
 }
