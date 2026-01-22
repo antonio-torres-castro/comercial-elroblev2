@@ -30,6 +30,7 @@ BEGIN
 	Where pt.fecha_inicio <= fechaHasta
 	and pt.estado_tipo_id in (2, 3, 5, 6, 7, 8)
     GROUP BY pt.proyecto_id;
+    
     DROP TABLE IF EXISTS pendingProjectTasks;
 	Create Temporary Table pendingProjectTasks
 	Select pt.proyecto_id, count(pt.id) as pending
@@ -38,7 +39,8 @@ BEGIN
     Where pt.fecha_inicio < fechaHasta
 	and pt.estado_tipo_id in (2, 5, 6, 7)
     GROUP BY pt.proyecto_id;
-	DROP TABLE IF EXISTS completeProjectTasks;
+	
+    DROP TABLE IF EXISTS completeProjectTasks;
 	Create Temporary Table completeProjectTasks
     Select pt.proyecto_id, count(pt.id) as complete
 	From proyecto_tareas pt
@@ -46,6 +48,7 @@ BEGIN
 	Where pt.fecha_inicio <= fechaHasta
 	and pt.estado_tipo_id = 8
     GROUP BY pt.proyecto_id;
+    
     DROP TABLE IF EXISTS progressProjectTasks;
 	Create Temporary Table progressProjectTasks
 	Select pt.proyecto_id, count(pt.id) as progress
@@ -84,7 +87,7 @@ BEGIN
       LEFT JOIN progressProjectTasks prg on prg.proyecto_id   = p.id
      WHERE (fechaDesde = '19000101' and fecha_inicio >= fechaDesde) 
      and p.fecha_inicio   <= fechaHasta 
-     and p.fecha_fin      >= fechaHasta 
+     -- and p.fecha_fin      >= fechaHasta 
      and p.estado_tipo_id != 4;
 
 END//

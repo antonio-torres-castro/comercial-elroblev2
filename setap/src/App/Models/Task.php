@@ -512,6 +512,7 @@ class Task
                 SET
                     nombre = ?,
                     descripcion = ?,
+                    tarea_categoria_id = ?,
                     estado_tipo_id = ?,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE id = ?
@@ -521,6 +522,7 @@ class Task
             return $stmt->execute([
                 $data['nombre'],
                 $data['descripcion'],
+                $data['tarea_categoria_id'],
                 $data['estado_tipo_id'],
                 $id
             ]);
@@ -577,12 +579,28 @@ class Task
     }
 
     /**
+     * Obtener tipos de tareas disponibles (catálogo general)
+     */
+    public function getTaskCategorys(): array
+    {
+        try {
+            $sql = "SELECT id, nombre FROM tarea_categorias ORDER BY nombre";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskCategorys: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtener tipos de tareas (catálogo general)
      */
     public function getTasks(): array
     {
         try {
-            $sql = "SELECT id, nombre, descripcion, estado_tipo_id, fecha_Creado, fecha_modificacion FROM tareas WHERE estado_tipo_id = 2 ORDER BY nombre";
+            $sql = "SELECT id, nombre, descripcion, tarea_categoria_id, estado_tipo_id, fecha_Creado, fecha_modificacion FROM tareas WHERE estado_tipo_id = 2 ORDER BY nombre";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -598,7 +616,7 @@ class Task
     public function getAllTasks(): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id ORDER BY t.nombre";
+            $sql = "SELECT t.id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id ORDER BY t.nombre";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -614,7 +632,7 @@ class Task
     public function getTaskById(?int $id): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.id = ?";
+            $sql = "SELECT t.id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.id = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -630,7 +648,7 @@ class Task
     public function getTaskByName(?string $name): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, et.nombre as estado FROM tareas t INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.nombre = ?";
+            $sql = "SELECT t.id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.nombre = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$name]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
