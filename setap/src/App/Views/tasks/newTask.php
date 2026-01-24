@@ -73,7 +73,7 @@ use App\Constants\AppConstants; ?>
                                                     value="<?= htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>"
                                                     maxlength="150">
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-3">
                                                 <!-- Estado -->
                                                 <label for="estado_tipo_id" class="form-label">Estado<span class="text-danger">*</span></label>
                                                 <select class="form-select" id="estado_tipo_id" name="estado_tipo_id" required>
@@ -81,6 +81,18 @@ use App\Constants\AppConstants; ?>
                                                         <option value="<?= $state['id']; ?>"
                                                             <?= (!empty($_POST['estado_tipo_id']) && $_POST['estado_tipo_id'] == $state['id']) || $state['id'] == 1 ? 'selected' : ''; ?>>
                                                             <?= htmlspecialchars($state['nombre']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <!-- Categoria -->
+                                                <label for="tarea_categoria_id" class="form-label">Categoria<span class="text-danger">*</span></label>
+                                                <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
+                                                    <?php foreach ($data['taskCategorys'] as $category): ?>
+                                                        <option value="<?= $category['id']; ?>"
+                                                            <?= (!empty($_POST['tarea_categoria_id']) && $_POST['tarea_categoria_id'] == $category['id']) || $category['id'] == 1 ? 'selected' : ''; ?>>
+                                                            <?= htmlspecialchars($category['nombre']); ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
@@ -143,6 +155,7 @@ use App\Constants\AppConstants; ?>
                                                 <tr>
                                                     <td id="tdNombre<?= $tarea['id'] ?>"><?= $tarea['nombre'] ?></td>
                                                     <td id="tdDescripcion<?= $tarea['id'] ?>"><?= $tarea['descripcion'] ?></td>
+                                                    <td id="tdCategoriaId<?= $tarea['id'] ?>" hidden><?= $tarea['tarea_categoria_id'] ?></td>
                                                     <td id="tdEstadoTipoId<?= $tarea['id'] ?>" hidden><?= $tarea['estado_tipo_id'] ?></td>
                                                     <td id="tdEstado<?= $tarea['id'] ?>">
                                                         <span class="badge bg-<?= $tarea['estado_tipo_id'] == 2 ? 'success' : 'secondary' ?>">
@@ -205,6 +218,18 @@ use App\Constants\AppConstants; ?>
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <!-- Categoria -->
+                            <label for="editCategoriaId" class="form-label">Categoria<span class="text-danger">*</span></label>
+                            <select class="form-select" id="editCategoriaId" name="editCategoriaId" required>
+                                <?php foreach ($data['taskCategorys'] as $category): ?>
+                                    <option value="<?= $category['id']; ?>">
+                                        <?= htmlspecialchars($category['nombre']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                     </div>
 
                     <div class="modal-footer">

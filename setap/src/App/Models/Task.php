@@ -263,7 +263,7 @@ class Task
     /**
      * Crear nueva tarea
      */
-    public function taskCreate(?string $tareaNombre, ?string $tareaDescripcion): ?int
+    public function taskCreate(?string $tareaNombre, ?string $tareaDescripcion, ?int $tareaCategoriaId): ?int
     {
         try {
             $this->db->beginTransaction();
@@ -273,8 +273,8 @@ class Task
                 $stmt->execute([$tareaNombre]);
                 $arrayTareaId = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if (empty($arrayTareaId)) {
-                    $stmt = $this->db->prepare("INSERT INTO tareas (nombre, descripcion, estado_tipo_id) VALUES (?, ?, 2)");
-                    $stmt->execute([$tareaNombre, $tareaDescripcion ?? '']);
+                    $stmt = $this->db->prepare("INSERT INTO tareas (nombre, descripcion, estado_tipo_id, tarea_categoria_id) VALUES (?, ?, 2, ?)");
+                    $stmt->execute([$tareaNombre, $tareaDescripcion ?? '', $tareaCategoriaId ?? 0]);
                     $tareaId = $this->db->lastInsertId();
                 } else {
                     $tareaId = $arrayTareaId[0];

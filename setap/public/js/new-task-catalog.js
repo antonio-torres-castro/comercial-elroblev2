@@ -47,7 +47,7 @@
         }
 
         /**
-         * Actualizar contenido de la tabla de feriados
+         * Actualizar contenido de la tabla de tareas
          */
         function updateTasksTable(tareas) {
             const tbody = document.getElementById('tasks-tbody');
@@ -58,6 +58,7 @@
         <tr>
             <td id="tdNombre${tarea.id}">${tarea.nombre}</td>
             <td id="tdDescripcion${tarea.id}">${tarea.descripcion}</td>
+            <td id="tdCategoriaId${tarea.id}" hidden>${tarea.tarea_categoria_id}</td>
             <td id="tdEstadoTipoId${tarea.id}" hidden>${tarea.estado_tipo_id}</td>
             <td id="tdEstado${tarea.id}">
                 <span class="badge bg-${tarea.estado_tipo_id == 2 ? 'success' : 'secondary'}">
@@ -83,7 +84,6 @@
          */
         async function editTask(id) {
             try {
-                // Aquí podrías cargar los datos del feriado específico
                 // Por simplicidad, usaremos los datos de la tabla
                 const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
 
@@ -92,6 +92,7 @@
                 document.getElementById('editTareaNombre').value = document.getElementById('tdNombre' + id).textContent;
                 document.getElementById('editTareaDescripcion').value = document.getElementById('tdDescripcion' + id).textContent;
                 document.getElementById('editEstadoTipoId').value = document.getElementById('tdEstadoTipoId' + id).textContent;
+                document.getElementById('editCategoriaId').value = document.getElementById('tdCategoriaId' + id).textContent;
 
                 modal.show();
             } catch (error) {

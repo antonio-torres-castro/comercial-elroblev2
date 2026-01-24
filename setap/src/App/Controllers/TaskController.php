@@ -332,6 +332,7 @@ class TaskController extends BaseController
                 'subtitle' => 'Definición',
                 'tasks' => $this->taskModel->getAllTasks(), // Catálogo de tareas existentes
                 'taskStates' => $this->taskModel->getTaskStatesForNewTask(),
+                'taskCategorys' => $this->taskModel->getTaskCategorys(),
                 'success' => $_GET['success'] ?? '',
                 'error' => $_GET['error'] ?? ''
             ];
@@ -531,8 +532,9 @@ class TaskController extends BaseController
 
             $nueva_tarea_nombre = trim($_POST['nueva_tarea_nombre']);
             $nueva_tarea_descripcion = trim($_POST['nueva_tarea_descripcion'] ?? '');
+            $nueva_tarea_categoria_id = trim($_POST['tarea_categoria_id'] ?? '');
             // Crear tarea
-            $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion);
+            $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion, $nueva_tarea_categoria_id);
             if ($taskId) {
                 Security::redirect("/task/newTask?success=Tarea tipo creada");
             } else {
@@ -721,7 +723,8 @@ class TaskController extends BaseController
                 'id' => (int)$_POST['id'],
                 'nombre' => $_POST['editTareaNombre'],
                 'descripcion' => !empty($_POST['editTareaDescripcion']) ? $_POST['editTareaDescripcion'] : '',
-                'estado_tipo_id' => (int)$_POST['editEstadoTipoId']
+                'estado_tipo_id' => (int)$_POST['editEstadoTipoId'],
+                'tarea_categoria_id' => (int)$_POST['editCategoriaId']
             ];
 
             // Actualizar tarea
