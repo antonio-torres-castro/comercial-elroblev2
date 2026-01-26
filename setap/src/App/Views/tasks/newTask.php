@@ -90,8 +90,7 @@ use App\Constants\AppConstants; ?>
                                                 <label for="tarea_categoria_id" class="form-label">Categoria<span class="text-danger">*</span></label>
                                                 <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
                                                     <?php foreach ($data['taskCategorys'] as $category): ?>
-                                                        <option value="<?= $category['id']; ?>"
-                                                            <?= (!empty($_POST['tarea_categoria_id']) && $_POST['tarea_categoria_id'] == $category['id']) || $category['id'] == 1 ? 'selected' : ''; ?>>
+                                                        <option value="<?= $category['id']; ?>">
                                                             <?= htmlspecialchars($category['nombre']); ?>
                                                         </option>
                                                     <?php endforeach; ?>
@@ -135,6 +134,20 @@ use App\Constants\AppConstants; ?>
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><i class="bi bi-list-task"></i>Tareas</h5>
+
+                                <div class="col-md-3">
+                                    <select class="form-select" id="filtro_tarea_categoria_id" name="filtro_tarea_categoria_id">
+                                        <option value="<?= 0; ?>">
+                                            <?= 'Todas'; ?>
+                                        </option>
+                                        <?php foreach ($data['taskCategorys'] as $category): ?>
+                                            <option value="<?= $category['id']; ?>">
+                                                <?= htmlspecialchars($category['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
                                 <button class="btn btn-sm btn-outline-primary" onclick="refreshTasksTable()">
                                     <i class="fas fa-sync"></i> Actualizar
                                 </button>
