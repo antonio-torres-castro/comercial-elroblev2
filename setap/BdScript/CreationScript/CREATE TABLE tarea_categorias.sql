@@ -9,6 +9,8 @@ CREATE TABLE tarea_categorias (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Clases de tarea: Aseo, Construcción Menor, Construcción, Electrico, Tecnologica, Instalación, Administración, Gestión, Producción';
 
 Insert Into tarea_categorias (nombre, fecha_creacion, fecha_actualizacion)
+Select 'Aseo Baños Menores', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP union
+Select 'Aseo Baños Mayores', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP union
 Select 'Aseo Oficinas', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP union
 Select 'Aseo Salas Menores', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP union
 Select 'Aseo Salas Mayores', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP union
@@ -26,5 +28,5 @@ Select 'Consultoría', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP union
 Select 'Administración', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP union
 Select 'Gestión', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP;
 
-ALTER TABLE comerci3_bdsetap.tareas 
-ADD COLUMN tarea_categoria_id INT NULL AFTER `descripcion`;
+ ALTER TABLE comerci3_bdsetap.tareas 
+ ADD COLUMN tarea_categoria_id INT NULL AFTER `descripcion`;
