@@ -875,10 +875,10 @@ class TaskController extends BaseController
     /**
      * Tabla Feriados Vista principal del mantenedor de feriados
      */
-    public function refreshTasksTable()
+    public function refreshTasksTable(?int $id = null)
     {
         try {
-            $tasks = $this->taskModel->getAllTasks();
+            $tasks = $id == 0 ? $this->taskModel->getAllTasks() : $this->taskModel->getGroupTasks($id);
             $this->jsonSuccess('Tareas cargadas correctamente', ['tareas' => $tasks]);
         } catch (Exception $e) {
             Logger::error("UserController::refreshTasksTable: " . $e->getMessage());

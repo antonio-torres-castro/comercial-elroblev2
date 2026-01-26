@@ -33,7 +33,8 @@
          */
         async function refreshTasksTable() {
             try {
-                const response = await fetch(`/setap/tasks/refreshTasksTable`);
+                idCategoria = document.getElementById('filtro_tarea_categoria_id').value;
+                const response = await fetch(`/setap/tasks/refreshTasksTable/${idCategoria}`);
                 const data = await response.json();
 
                 if (data.success) {

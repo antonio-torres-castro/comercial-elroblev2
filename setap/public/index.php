@@ -579,7 +579,7 @@ try {
 
                 case 'refreshTasksTable':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                        $controller->refreshTasksTable();
+                        $controller->refreshTasksTable((int)$id);
                     } else {
                         http_response_code(405);
                         echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);

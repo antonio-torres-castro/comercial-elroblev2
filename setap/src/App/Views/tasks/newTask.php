@@ -136,7 +136,7 @@ use App\Constants\AppConstants; ?>
                                 <h5 class="mb-0"><i class="bi bi-list-task"></i>Tareas</h5>
 
                                 <div class="col-md-3">
-                                    <select class="form-select" id="filtro_tarea_categoria_id" name="filtro_tarea_categoria_id">
+                                    <select class="form-select" id="filtro_tarea_categoria_id" name="filtro_tarea_categoria_id" onchange="refreshTasksTable()">
                                         <option value="<?= 0; ?>">
                                             <?= 'Todas'; ?>
                                         </option>
