@@ -83,6 +83,8 @@ class Database
         return self::$instance;
     }
 
+
+
     public static function disconnect(): void
     {
         self::$instance = null;
