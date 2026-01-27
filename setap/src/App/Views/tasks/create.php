@@ -32,7 +32,7 @@ use App\Constants\AppConstants; ?>
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?= $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-sm btn-secondary">
+                        <a href="javascript:history.back()" class="btn btn-sm btn-secondary">
                             <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                         </a>
                     </div>
@@ -372,7 +372,7 @@ use App\Constants\AppConstants; ?>
                             <!-- Botones -->
                             <div class="col-12 mt-3">
                                 <div class="d-flex justify-content-end gap-2">
-                                    <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary">
+                                    <a href="javascript:history.back()" class="btn btn-secondary">
                                         <i class="bi bi-x-lg"></i> <?= AppConstants::UI_BTN_CANCEL ?>
                                     </a>
                                     <button id="createBtn" type="submit" class="btn btn-setap-primary">

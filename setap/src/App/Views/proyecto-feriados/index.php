@@ -32,7 +32,7 @@ use App\Constants\AppConstants;
                     <div>
                         <h2 class="mb-1">Gestión de Feriados</h2>
                     </div>
-                    <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>/<?= $project['id'] ?>" class="btn btn-secondary">
+                    <a href="javascript:history.back()" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                     </a>
                 </div>
