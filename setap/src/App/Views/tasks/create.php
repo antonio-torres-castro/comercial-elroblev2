@@ -77,7 +77,7 @@ use App\Constants\AppConstants; ?>
                                     </div>
                                     <div class="card-body">
                                         <div class="row g-3">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label for="nueva_tarea_nombre" class="form-label">
                                                     Nombre llave <span class="text-danger">*</span>
                                                 </label>
@@ -86,10 +86,20 @@ use App\Constants\AppConstants; ?>
                                                     value="<?= htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>"
                                                     maxlength="150">
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label for="nueva_tarea_descripcion" class="form-label">Descripción</label>
                                                 <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
                                                     placeholder="Descripción detallada de la tarea" rows="3"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="tarea_categoria_id" class="form-label">Categoria<span class="text-danger">*</span></label>
+                                                <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
+                                                    <?php foreach ($data['taskCategorys'] as $category): ?>
+                                                        <option value="<?= $category['id']; ?>">
+                                                            <?= htmlspecialchars($category['nombre']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>

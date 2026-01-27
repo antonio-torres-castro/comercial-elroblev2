@@ -399,6 +399,7 @@ class TaskController extends BaseController
                 'executor_users' => $this->taskModel->getExecutorUsers(),
                 'supervisor_users' => $supervisors,
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
+                'taskCategorys' => $this->taskModel->getTaskCategorys(),
                 'task' => null,
                 'task_id' => null,
                 'project_id' => $project_id,
@@ -468,7 +469,7 @@ class TaskController extends BaseController
             if (!empty($_POST['tarea_id']) && $_POST['tarea_id'] !== 'nueva') {
                 $tareaId = (int)$_POST['tarea_id'];
             } else {
-                $tareaId = $this->taskModel->taskCreate(trim($_POST['nueva_tarea_nombre']), trim($_POST['nueva_tarea_descripcion'] ?? ''));
+                $tareaId = $this->taskModel->taskCreate(trim($_POST['nueva_tarea_nombre']), trim($_POST['nueva_tarea_descripcion'] ?? ''), trim($_POST['tarea_categoria_id'] ?? '0'));
                 if ($tareaId == null) {
                     Security::redirect("/tasks/create?error=" . urlencode('Error al crear la nueva tarea'));
                     return;
