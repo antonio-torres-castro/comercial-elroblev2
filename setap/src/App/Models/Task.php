@@ -1433,4 +1433,43 @@ class Task
             return 0;
         }
     }
+
+    /**
+     * Obtener historial de cambios de una tarea específica
+     */
+    public function getTaskHistory(int $proyectoTareaId): array
+    {
+        try {
+            $sql = "
+                SELECT
+                    ht.id,
+                    ht.proyecto_tarea_id,
+                    ht.usuario_id,
+                    u.email as usuario_email,
+                    ht.supervisor_id,
+                    us.email as supervisor_email,
+                    ht.contraparte_id,
+                    ht.fecha_evento,
+                    ht.comentario,
+                    eta.nombre as estado_anterior,
+                    etn.nombre as estado_nuevo
+                FROM historial_tareas ht
+                JOIN proyecto_tareas pt ON pt.id = ht.proyecto_tarea_id
+                JOIN usuarios u ON u.id = ht.usuario_id
+                JOIN usuarios us ON us.id = ht.supervisor_id
+                JOIN estado_tipos etn ON etn.id = ht.estado_tipo_nuevo
+                LEFT JOIN estado_tipos eta ON eta.id = ht.estado_tipo_anterior
+                WHERE ht.proyecto_tarea_id = ?
+                ORDER BY ht.fecha_evento DESC
+                LIMIT 10
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$proyectoTareaId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskHistory: " . $e->getMessage());
+            return [];
+        }
+    }
 }

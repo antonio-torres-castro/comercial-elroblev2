@@ -107,6 +107,81 @@ use App\Constants\AppConstants; ?>
                         </div>
                     </div>
                 </div>
+
+                <!-- Historial de Cambios -->
+                <?php if (!empty($data['task_history'])): ?>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historial de Cambios</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="ps-4">Fecha Evento</th>
+                                                <th>Usuario</th>
+                                                <th>Cambio de Estado</th>
+                                                <th>Supervisor</th>
+                                                <th class="text-center">Detalle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($data['task_history'] as $index => $history): ?>
+                                            <tr class="history-row">
+                                                <td class="ps-4">
+                                                    <?= htmlspecialchars(date('Y-m-d H:i:s', strtotime($history['fecha_evento']))) ?>
+                                                </td>
+                                                <td>
+                                                    <?= htmlspecialchars($history['usuario_email'] ?? 'N/A') ?>
+                                                </td>
+                                                <td>
+                                                    <?php 
+                                                        $estadoAnterior = $history['estado_anterior'] ?? 'N/A';
+                                                        $estadoNuevo = $history['estado_nuevo'] ?? 'N/A';
+                                                        echo htmlspecialchars($estadoAnterior) . ' <i class="bi bi-arrow-right text-primary"></i> ' . htmlspecialchars($estadoNuevo);
+                                                    ?>
+                                                </td>
+                                                <td>
+                                                    <?= htmlspecialchars($history['supervisor_email'] ?? 'N/A') ?>
+                                                </td>
+                                                <td class="text-center">
+                                                    <?php if (!empty(trim($history['comentario'] ?? ''))): ?>
+                                                    <button class="btn btn-sm btn-outline-primary toggle-comment" type="button" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#comment-<?= $index ?>" 
+                                                            aria-expanded="false" 
+                                                            aria-controls="comment-<?= $index ?>">
+                                                        <i class="bi bi-chat-text"></i> Ver
+                                                    </button>
+                                                    <?php else: ?>
+                                                    <span class="text-muted small">Sin comentarios</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                            <?php if (!empty(trim($history['comentario'] ?? ''))): ?>
+                                            <tr class="history-comment-row">
+                                                <td colspan="5" class="p-0 border-0">
+                                                    <div class="collapse" id="comment-<?= $index ?>">
+                                                        <div class="p-3 bg-light border-start border-primary border-3">
+                                                            <strong class="text-muted">Comentario:</strong>
+                                                            <p class="mb-0 mt-1"><?= htmlspecialchars($history['comentario']) ?></p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </main>
         </div>
     </div>

@@ -290,6 +290,10 @@ class TaskController extends BaseController
                 return;
             }
             $task = $id ? $this->taskModel->getById($id) : null;
+            
+            // Obtener historial de la tarea
+            $taskHistory = $id ? $this->taskModel->getTaskHistory($id) : [];
+            
             // Datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,
@@ -297,6 +301,7 @@ class TaskController extends BaseController
                 'subtitle' => $task['tarea_nombre'],
                 'task_id' => $id,
                 'task' => $task,
+                'task_history' => $taskHistory,
                 'action' => 'view'
             ];
 
