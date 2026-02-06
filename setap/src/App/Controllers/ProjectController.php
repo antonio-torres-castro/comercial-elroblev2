@@ -176,6 +176,11 @@ class ProjectController extends BaseController
 
             $fecha_inicio = $_POST['fecha_inicio'] ?? null;
             $fecha_fin = $_POST['fecha_fin'] ?? date("Y-m-d");
+            $estado_tipo_id = null;
+            if (isset($_POST['estado_tipo_id'])) {
+                $estadoSeleccionado = (int)$_POST['estado_tipo_id'];
+                $estado_tipo_id = in_array($estadoSeleccionado, [5, 6, 7, 8], true) ? $estadoSeleccionado : null;
+            }
             //siempre con una fecha de tope a hoy, en caso que no se haya indicado
             if ($fecha_inicio != null) {
                 $_GET['fecha_inicio'] = $fecha_inicio;
@@ -199,11 +204,11 @@ class ProjectController extends BaseController
             $page = isset($_POST['page']) && is_numeric($_POST['page']) && $_POST['page'] > 0 ? (int)$_POST['page'] : 1;
             $offset = ($page - 1) * $perPage;
             // Contar total de registros según filtros
-            $totalTareas = $this->projectModel->countProjectTasks($id, $fecha_inicio, $fecha_fin);
+            $totalTareas = $this->projectModel->countProjectTasks($id, $fecha_inicio, $fecha_fin, $estado_tipo_id);
             $totalPages = max(1, ceil($totalTareas / $perPage));
 
             // Obtener tareas del proyecto paginadas
-            $tasks = $this->projectModel->getProjectTasks($id, $perPage, $offset, $fecha_inicio, $fecha_fin);
+            $tasks = $this->projectModel->getProjectTasks($id, $perPage, $offset, $fecha_inicio, $fecha_fin, $estado_tipo_id);
 
             ob_start();
             include __DIR__ . '/../Views/projects/partials/card_tasks.php';

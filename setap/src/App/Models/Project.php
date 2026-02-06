@@ -215,7 +215,7 @@ class Project
     /**
      * Obtener todas las tareas de un proyecto
      */
-    public function countProjectTasks(int $projectId, ?string $fechaInicio, ?string $fechaFin): int
+    public function countProjectTasks(int $projectId, ?string $fechaInicio, ?string $fechaFin, ?int $estadoTipoId = null): int
     {
         try {
             $sql = "SELECT Count(1) as total
@@ -240,6 +240,10 @@ class Project
                 $sql .= " and pt.fecha_inicio <= ? ";
                 $params[] = $fechaFin;
             }
+            if (!empty($estadoTipoId)) {
+                $sql .= " and pt.estado_tipo_id = ? ";
+                $params[] = $estadoTipoId;
+            }
 
             $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC ";
 
@@ -256,7 +260,7 @@ class Project
     /**
      * Obtener todas las tareas de un proyecto
      */
-    public function getProjectTasks(int $projectId, int $limit = 7, int $offset = 0, ?string $fechaInicio = null, ?string $fechaFin = null): array
+    public function getProjectTasks(int $projectId, int $limit = 7, int $offset = 0, ?string $fechaInicio = null, ?string $fechaFin = null, ?int $estadoTipoId = null): array
     {
         try {
             $sql = "SELECT pt.id, pt.proyecto_id, pt.tarea_id, 
@@ -289,6 +293,10 @@ class Project
             if (!empty($fechaFin)) {
                 $sql .= " and pt.fecha_inicio <= ? ";
                 $params[] = $fechaFin;
+            }
+            if (!empty($estadoTipoId)) {
+                $sql .= " and pt.estado_tipo_id = ? ";
+                $params[] = $estadoTipoId;
             }
 
             $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC, pt.id LIMIT ? OFFSET ? ";

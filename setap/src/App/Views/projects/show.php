@@ -21,6 +21,10 @@ use App\Constants\AppConstants; ?>
             transition: transform 0.2s;
         }
 
+        .stat-card-filter {
+            cursor: pointer;
+        }
+
         .stat-card:hover {
             transform: translateY(-2px);
         }
@@ -142,7 +146,7 @@ use App\Constants\AppConstants; ?>
         <!-- Estadísticas del Proyecto -->
         <div class="row mb-4">
             <div class="col-md-2">
-                <div class="card stat-card border-setap-primary">
+                <div class="card stat-card border-setap-primary stat-card-filter" role="button" tabindex="0" data-task-status="">
                     <div class="card-body text-center">
                         <h6 class="text-setap-primary"><?= $stats['total_tareas'] ?? 0 ?></h6>
                         <p class="mb-0">Total Tareas</p>
@@ -150,7 +154,7 @@ use App\Constants\AppConstants; ?>
                 </div>
             </div>
             <div class="col-md-2">
-                <div class="card stat-card border-success">
+                <div class="card stat-card border-success stat-card-filter" role="button" tabindex="0" data-task-status="8">
                     <div class="card-body text-center">
                         <h6 class="text-success"><?= $stats['tareas_aprobadas'] ?? 0 ?></h6>
                         <p class="mb-0">Completadas</p>
@@ -158,7 +162,7 @@ use App\Constants\AppConstants; ?>
                 </div>
             </div>
             <div class="col-md-2">
-                <div class="card stat-card border-warning">
+                <div class="card stat-card border-warning stat-card-filter" role="button" tabindex="0" data-task-status="6">
                     <div class="card-body text-center">
                         <h6 class="text-warning"><?= $stats['tareas_terminadas'] ?? 0 ?></h6>
                         <p class="mb-0">Terminadas</p>
@@ -166,7 +170,7 @@ use App\Constants\AppConstants; ?>
                 </div>
             </div>
             <div class="col-md-2">
-                <div class="card stat-card border-secondary">
+                <div class="card stat-card border-secondary stat-card-filter" role="button" tabindex="0" data-task-status="5">
                     <div class="card-body text-center">
                         <h6 class="text-warning"><?= $stats['tareas_iniciadas'] ?? 0 ?></h6>
                         <p class="mb-0">Iniciadas</p>
@@ -174,7 +178,7 @@ use App\Constants\AppConstants; ?>
                 </div>
             </div>
             <div class="col-md-2">
-                <div class="card stat-card border-danger">
+                <div class="card stat-card border-danger stat-card-filter" role="button" tabindex="0" data-task-status="7">
                     <div class="card-body text-center">
                         <h6 class="text-warning"><?= $stats['tareas_rechazadas'] ?? 0 ?></h6>
                         <p class="mb-0">Rechazadas</p>
