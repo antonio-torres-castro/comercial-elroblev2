@@ -771,6 +771,7 @@ class TaskController extends BaseController
             }
 
             $id = (int)($_POST['id'] ?? 0);
+            $deleteAllOccurrences = (int)($_POST['delete_all_occurrences'] ?? 0) === 1;
             if ($id <= 0) {
                 $this->redirectWithError(AppConstants::ROUTE_TASKS, AppConstants::ERROR_INVALID_TASK_ID);
                 return;
@@ -790,13 +791,17 @@ class TaskController extends BaseController
             }
 
             // Eliminar tarea
-            if ($this->taskModel->delete($id)) {
+            if ($this->taskModel->delete($id, $deleteAllOccurrences)) {
                 // Si es petición AJAX, devolver JSON
                 if (
                     !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
                 ) {
-                    $this->jsonSuccess('Tarea eliminada correctamente');
+                    $this->jsonSuccess(
+                        $deleteAllOccurrences
+                            ? 'Tareas eliminadas correctamente para el proyecto'
+                            : 'Tarea eliminada correctamente'
+                    );
                 } else {
                     $this->redirectWithSuccess(AppConstants::ROUTE_TASKS, AppConstants::SUCCESS_TASK_DELETED);
                 }

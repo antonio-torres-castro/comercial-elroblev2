@@ -533,11 +533,22 @@ class Task
     }
 
     /**
-     * Eliminar tarea (soft delete)
+     * Eliminar tarea(s) de proyecto (soft delete)
      */
-    public function delete(int $id): bool
+    public function delete(int $id, bool $deleteAllOccurrences = false): bool
     {
         try {
+            if ($deleteAllOccurrences) {
+                $sql = "UPDATE proyecto_tareas pt
+                        INNER JOIN proyecto_tareas source_task ON source_task.id = ?
+                        SET pt.estado_tipo_id = 4, pt.fecha_modificacion = NOW()
+                        WHERE pt.proyecto_id = source_task.proyecto_id
+                          AND pt.tarea_id = source_task.tarea_id
+                          AND pt.estado_tipo_id < 5";
+                $stmt = $this->db->prepare($sql);
+                return $stmt->execute([$id]);
+            }
+
             $sql = "UPDATE proyecto_tareas SET estado_tipo_id = 4, fecha_modificacion = NOW() WHERE id = ?";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$id]);
