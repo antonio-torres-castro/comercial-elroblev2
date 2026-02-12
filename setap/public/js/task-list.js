@@ -157,6 +157,7 @@ function updateStatusBadge(taskId, stateId) {
 function deleteTask(id, name, stateId) {
     taskToDelete = id;
     document.getElementById('deleteTaskName').textContent = name;
+    document.getElementById('deleteScopeSingle').checked = true;
 
     // GAP 5: Mostrar warning si es tarea aprobada
     const warning = document.getElementById('deleteWarning');
@@ -175,16 +176,25 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
     if (taskToDelete) {
         const formData = new FormData();
         formData.append('id', taskToDelete);
+        const deleteAllOccurrences = document.querySelector('input[name="deleteScope"]:checked')?.value ?? '0';
+        formData.append('delete_all_occurrences', deleteAllOccurrences);
 
         fetch('/setap/tasks/delete', {
                 method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Remover fila de la tabla
-                    document.getElementById(`task-row-${taskToDelete}`).remove();
+                    if (deleteAllOccurrences === '1') {
+                        refreshTasksTableAjax();
+                    } else {
+                        // Remover fila de la tabla
+                        document.getElementById(`task-row-${taskToDelete}`)?.remove();
+                    }
                     showAlert(data.message, 'success');
                 } else {
                     showAlert('Error: ' + data.message, 'danger');
