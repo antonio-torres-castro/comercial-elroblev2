@@ -1135,6 +1135,7 @@ class Task
             }
 
             // Actualizar estado
+            $sqlAutoAsignacion = '';
             if ($newState == 5 && $ejecutor_id == null) {
                 $sqlAutoAsignacion =  ", ejecutor_id = ?";
                 $params[] = $userId;
