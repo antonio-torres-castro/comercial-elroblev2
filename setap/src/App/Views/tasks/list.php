@@ -345,20 +345,18 @@ use App\Constants\AppConstants; ?>
                                 <p>¿Estás seguro de que deseas eliminar la tarea <strong id="deleteTaskName"></strong>?</p>
                                 <p class="text-muted small">Esta acción no se puede deshacer.</p>
                                 <div class="mb-3">
-                                    <label class="form-label">Alcance de eliminación:</label>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="deleteScope" id="deleteScopeSingle" value="0" checked>
                                         <label class="form-check-label" for="deleteScopeSingle">
-                                            Eliminar solo esta ocurrencia
+                                            Eliminar ocurrencia
                                         </label>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="deleteScope" id="deleteScopeAll" value="1">
                                         <label class="form-check-label" for="deleteScopeAll">
-                                            Eliminar todas las ocurrencias de esta tarea en el proyecto
+                                            Eliminar todas las ocurrencias
                                         </label>
                                     </div>
-                                    <small class="text-muted">La opción "todas las ocurrencias" eliminará solo registros con estado menor a 5.</small>
                                 </div>
                                 <div id="deleteWarning" class="alert alert-warning d-none">
                                     <i class="bi bi-exclamation-triangle"></i>
