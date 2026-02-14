@@ -1082,7 +1082,7 @@ class Task
     /**
      * Cambiar estado de una tarea con validaciones
      */
-    public function changeState(int $taskId, int $newState, int $userId, string $userRole, string $reason = ''): array
+    public function changeState(int $taskId, int $newState, int $userId, string $userRole, string $reason = '', array $photos = []): array
     {
         try {
             $params = [];
@@ -1140,7 +1140,10 @@ class Task
             }
 
             // Registrar en historial si la tabla existe
-            $this->registerStateHistory($taskId, $currentState, $newState, $userId, $reason, $supervisor_id, $contraparte_id);
+            $historyId = $this->registerStateHistory($taskId, $currentState, $newState, $userId, $reason, $supervisor_id, $contraparte_id);
+            if (!empty($photos) && $historyId > 0) {
+                $this->registerHistoryPhotos($historyId, $photos, $newState);
+            }
 
             $this->db->commit();
 
@@ -1155,7 +1158,7 @@ class Task
     /**
      * Registrar cambio de estado en historial
      */
-    private function registerStateHistory(int $taskId, int $oldState, int $newState, int $userId, string $reason, $supervisor_id, $contraparte_id): void
+    private function registerStateHistory(int $taskId, int $oldState, int $newState, int $userId, string $reason, $supervisor_id, $contraparte_id): int
     {
         try {
             // Verificar si la tabla historial_tareas existe
@@ -1178,10 +1181,29 @@ class Task
 
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([$taskId, $userId, $supervisor_id, $contraparte_id, $reason, $oldState, $newState]);
+
+                return (int)$this->db->lastInsertId();
             }
+
+            return 0;
         } catch (PDOException $e) {
             // Solo logear el error, no interrumpir el proceso principal
             Logger::error("registrar historial de tarea: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function registerHistoryPhotos(int $historyId, array $photoUrls, int $stateTypeId): void
+    {
+        if ($historyId <= 0 || empty($photoUrls)) {
+            return;
+        }
+
+        $sql = "INSERT INTO tarea_fotos (historial_tarea_id, url_foto, fecha_Creado, estado_tipo_id) VALUES (?, ?, CURRENT_TIMESTAMP, ?)";
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($photoUrls as $photoUrl) {
+            $stmt->execute([$historyId, $photoUrl, $stateTypeId]);
         }
     }
 

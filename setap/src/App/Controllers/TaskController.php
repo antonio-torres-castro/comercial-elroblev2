@@ -10,6 +10,7 @@ use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use DateTime;
 use Exception;
+use RuntimeException;
 
 class TaskController extends BaseController
 {
@@ -937,28 +938,159 @@ class TaskController extends BaseController
             }
 
             $reason = trim($_POST['reason'] ?? '');
+            $photoProcessing = $this->processEvidencePhotos($_FILES['photos'] ?? null);
+            if (!$photoProcessing['success']) {
+                $this->jsonError($photoProcessing['message'] ?? 'No fue posible procesar las fotos de evidencia');
+                return;
+            }
 
             if ($taskId <= 0 || $newState <= 0) {
+                $this->removeEvidenceFiles($photoProcessing['photos'] ?? []);
                 $this->jsonError('Error al cambiar estado de la tarea');
                 return;
             }
+
             // Cambiar estado usando el modelo con validaciones
             $result = $this->taskModel->changeState(
                 $taskId,
                 $newState,
                 $currentUser['id'],
                 $currentUser['rol'],
-                $reason
+                $reason,
+                $photoProcessing['photos'] ?? []
             );
 
             if ($result['success']) {
                 $this->jsonSuccess($result['message'] ?? 'Estado de tarea actualizado correctamente');
             } else {
+                $this->removeEvidenceFiles($photoProcessing['photos'] ?? []);
                 $this->jsonError($result['message'] ?? 'Error al cambiar estado de la tarea');
             }
         } catch (Exception $e) {
             Logger::error("TaskController::changeState: " . $e->getMessage());
             $this->jsonError('Error interno del servidor');
+        }
+    }
+
+    private function processEvidencePhotos($uploadedPhotos): array
+    {
+        if (empty($uploadedPhotos) || !isset($uploadedPhotos['name']) || empty($uploadedPhotos['name'][0])) {
+            return ['success' => true, 'photos' => []];
+        }
+
+        $photoPaths = [];
+        try {
+            $photoDir = dirname(__DIR__, 3) . '/storage/fotos';
+            if (!is_dir($photoDir) && !mkdir($photoDir, 0775, true) && !is_dir($photoDir)) {
+                throw new RuntimeException('No fue posible preparar el directorio de fotos.');
+            }
+
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            $photoCount = count($uploadedPhotos['name']);
+
+            for ($i = 0; $i < $photoCount; $i++) {
+                if (($uploadedPhotos['error'][$i] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+                    continue;
+                }
+
+                if (($uploadedPhotos['error'][$i] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+                    throw new RuntimeException('Error subiendo una de las fotos de evidencia.');
+                }
+
+                $tmpPath = $uploadedPhotos['tmp_name'][$i] ?? '';
+                if (empty($tmpPath) || !is_uploaded_file($tmpPath)) {
+                    throw new RuntimeException('Archivo de foto inválido.');
+                }
+
+                $imgInfo = @getimagesize($tmpPath);
+                $mimeType = $imgInfo['mime'] ?? '';
+                if (!in_array($mimeType, $allowedMimeTypes, true)) {
+                    throw new RuntimeException('Solo se permiten fotos JPG, PNG o WEBP.');
+                }
+
+                $relativePath = $this->optimizeAndSaveImage($tmpPath, $mimeType, $photoDir);
+                $photoPaths[] = $relativePath;
+            }
+
+            return ['success' => true, 'photos' => $photoPaths];
+        } catch (Exception $e) {
+            $this->removeEvidenceFiles($photoPaths);
+            Logger::error('TaskController::processEvidencePhotos: ' . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    private function optimizeAndSaveImage(string $tmpPath, string $mimeType, string $photoDir): string
+    {
+        $maxDimension = 1280;
+
+        switch ($mimeType) {
+            case 'image/jpeg':
+                $sourceImage = imagecreatefromjpeg($tmpPath);
+                break;
+            case 'image/png':
+                $sourceImage = imagecreatefrompng($tmpPath);
+                break;
+            case 'image/webp':
+                $sourceImage = imagecreatefromwebp($tmpPath);
+                break;
+            default:
+                throw new RuntimeException('Formato de imagen no soportado.');
+        }
+
+        if (!$sourceImage) {
+            throw new RuntimeException('No fue posible leer una de las imágenes enviadas.');
+        }
+
+        $width = imagesx($sourceImage);
+        $height = imagesy($sourceImage);
+        $scale = min($maxDimension / max($width, 1), $maxDimension / max($height, 1), 1);
+
+        $newWidth = (int)max(1, floor($width * $scale));
+        $newHeight = (int)max(1, floor($height * $scale));
+
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+        if (!$resizedImage) {
+            imagedestroy($sourceImage);
+            throw new RuntimeException('No fue posible optimizar una imagen.');
+        }
+
+        $isTransparent = in_array($mimeType, ['image/png', 'image/webp'], true);
+        if ($isTransparent) {
+            imagealphablending($resizedImage, false);
+            imagesavealpha($resizedImage, true);
+            $transparent = imagecolorallocatealpha($resizedImage, 0, 0, 0, 127);
+            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+        }
+
+        imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        $fileName = sprintf('evidencia_%s_%s.jpg', date('YmdHis'), bin2hex(random_bytes(8)));
+        $fullPath = $photoDir . '/' . $fileName;
+        $saved = imagejpeg($resizedImage, $fullPath, 75);
+
+        imagedestroy($sourceImage);
+        imagedestroy($resizedImage);
+
+        if (!$saved) {
+            throw new RuntimeException('No fue posible almacenar una foto de evidencia.');
+        }
+
+        return 'storage/fotos/' . $fileName;
+    }
+
+    private function removeEvidenceFiles(array $photos): void
+    {
+        if (empty($photos)) {
+            return;
+        }
+
+        $basePath = dirname(__DIR__, 3) . '/';
+        foreach ($photos as $relativePath) {
+            $fullPath = $basePath . ltrim($relativePath, '/');
+            if (is_file($fullPath)) {
+                @unlink($fullPath);
+            }
         }
     }
 

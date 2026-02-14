@@ -322,6 +322,18 @@ use App\Constants\AppConstants; ?>
                                         <textarea class="form-control" id="changeStateReason" name="reason" rows="3"
                                             placeholder="Describe el motivo del cambio de estado..."></textarea>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label for="changeStatePhotos" class="form-label">Fotos de evidencia (opcional):</label>
+                                        <input
+                                            type="file"
+                                            class="form-control"
+                                            id="changeStatePhotos"
+                                            name="photos[]"
+                                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                                            multiple>
+                                        <div class="form-text">Puedes subir una o más fotos. Se optimizarán automáticamente para visualización en celular.</div>
+                                    </div>
                                 </form>
                             </div>
                             <div class="modal-footer">
