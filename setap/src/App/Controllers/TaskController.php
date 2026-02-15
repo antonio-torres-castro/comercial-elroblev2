@@ -974,7 +974,8 @@ class TaskController extends BaseController
 
     private function processEvidencePhotos($uploadedPhotos): array
     {
-        if (empty($uploadedPhotos) || !isset($uploadedPhotos['name']) || empty($uploadedPhotos['name'][0])) {
+        $files = $this->normalizeUploadedPhotos($uploadedPhotos);
+        if (empty($files)) {
             return ['success' => true, 'photos' => []];
         }
 
@@ -986,20 +987,20 @@ class TaskController extends BaseController
             }
 
             $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-            $photoCount = count($uploadedPhotos['name']);
 
-            for ($i = 0; $i < $photoCount; $i++) {
-                if (($uploadedPhotos['error'][$i] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            foreach ($files as $file) {
+                $uploadError = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
+                if ($uploadError === UPLOAD_ERR_NO_FILE) {
                     continue;
                 }
 
-                if (($uploadedPhotos['error'][$i] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+                if ($uploadError !== UPLOAD_ERR_OK) {
                     throw new RuntimeException('Error subiendo una de las fotos de evidencia.');
                 }
 
-                $tmpPath = $uploadedPhotos['tmp_name'][$i] ?? '';
-                if (empty($tmpPath) || !is_uploaded_file($tmpPath)) {
-                    throw new RuntimeException('Archivo de foto inválido.');
+                $tmpPath = (string)($file['tmp_name'] ?? '');
+                if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+                    throw new RuntimeException('Archivo de foto inválido o no recibido correctamente.');
                 }
 
                 $imgInfo = @getimagesize($tmpPath);
@@ -1018,6 +1019,32 @@ class TaskController extends BaseController
             Logger::error('TaskController::processEvidencePhotos: ' . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    private function normalizeUploadedPhotos($uploadedPhotos): array
+    {
+        if (empty($uploadedPhotos) || !isset($uploadedPhotos['error'])) {
+            return [];
+        }
+
+        if (!is_array($uploadedPhotos['error'])) {
+            return [$uploadedPhotos];
+        }
+
+        $normalized = [];
+        $count = count($uploadedPhotos['error']);
+
+        for ($i = 0; $i < $count; $i++) {
+            $normalized[] = [
+                'name' => $uploadedPhotos['name'][$i] ?? '',
+                'type' => $uploadedPhotos['type'][$i] ?? '',
+                'tmp_name' => $uploadedPhotos['tmp_name'][$i] ?? '',
+                'error' => $uploadedPhotos['error'][$i] ?? UPLOAD_ERR_NO_FILE,
+                'size' => $uploadedPhotos['size'][$i] ?? 0,
+            ];
+        }
+
+        return $normalized;
     }
 
     private function optimizeAndSaveImage(string $tmpPath, string $mimeType, string $photoDir): string

@@ -44,7 +44,19 @@ function confirmStateChange(taskId, newStateId, newStateName) {
 // GAP 5: Ejecutar cambio de estado
 document.getElementById('confirmChangeState').addEventListener('click', function() {
     const confirmBtn = document.getElementById('confirmChangeState');
-    const formData = new FormData(document.getElementById('changeStateForm'));
+    const formElement = document.getElementById('changeStateForm');
+    const formData = new FormData();
+
+    formData.append('csrf_token', formElement.querySelector('input[name="csrf_token"]').value);
+    formData.append('task_id', document.getElementById('changeStateTaskId').value);
+    formData.append('new_state', document.getElementById('changeStateNewState').value);
+    formData.append('reason', document.getElementById('changeStateReason').value);
+
+    const photosInput = document.getElementById('changeStatePhotos');
+    Array.from(photosInput.files || []).forEach(file => {
+        formData.append('photos[]', file, file.name);
+    });
+
     confirmBtn.disabled = true;
 
     fetch('/setap/tasks/change-state', {

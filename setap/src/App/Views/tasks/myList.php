@@ -302,7 +302,7 @@ use App\Constants\AppConstants; ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
-                                <form id="changeStateForm">
+                                <form id="changeStateForm" method="POST" enctype="multipart/form-data">
                                     <?= Security::renderCsrfField() ?>
                                     <input type="hidden" id="changeStateTaskId" name="task_id">
                                     <input type="hidden" id="changeStateNewState" name="new_state">
