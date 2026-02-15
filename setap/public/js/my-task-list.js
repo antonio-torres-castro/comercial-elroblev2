@@ -36,13 +36,28 @@ function confirmStateChange(taskId, newStateId, newStateName) {
     document.getElementById('changeStateTaskName').textContent = taskName;
     document.getElementById('changeStateNewStateName').textContent = newStateName;
     document.getElementById('changeStateReason').value = '';
+    document.getElementById('changeStatePhotos').value = '';
 
     new bootstrap.Modal(document.getElementById('changeStateModal')).show();
 }
 
 // GAP 5: Ejecutar cambio de estado
 document.getElementById('confirmChangeState').addEventListener('click', function() {
-    const formData = new FormData(document.getElementById('changeStateForm'));
+    const confirmBtn = document.getElementById('confirmChangeState');
+    const formElement = document.getElementById('changeStateForm');
+    const formData = new FormData();
+
+    formData.append('csrf_token', formElement.querySelector('input[name="csrf_token"]').value);
+    formData.append('task_id', document.getElementById('changeStateTaskId').value);
+    formData.append('new_state', document.getElementById('changeStateNewState').value);
+    formData.append('reason', document.getElementById('changeStateReason').value);
+
+    const photosInput = document.getElementById('changeStatePhotos');
+    Array.from(photosInput.files || []).forEach(file => {
+        formData.append('photos[]', file, file.name);
+    });
+
+    confirmBtn.disabled = true;
 
     fetch('/setap/tasks/change-state', {
             method: 'POST',
@@ -68,6 +83,9 @@ document.getElementById('confirmChangeState').addEventListener('click', function
         .catch(error => {
             console.error('Error:', error);
             showAlert('Error de conexión al servidor', 'danger');
+        })
+        .finally(() => {
+            confirmBtn.disabled = false;
         });
 });
 
