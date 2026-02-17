@@ -37,6 +37,7 @@ function confirmStateChange(taskId, newStateId, newStateName) {
     document.getElementById('changeStateNewStateName').textContent = newStateName;
     document.getElementById('changeStateReason').value = '';
     document.getElementById('changeStatePhotos').value = '';
+    document.getElementById('changeStatePhotosCamera').value = '';
 
     new bootstrap.Modal(document.getElementById('changeStateModal')).show();
 }
@@ -52,8 +53,14 @@ document.getElementById('confirmChangeState').addEventListener('click', function
     formData.append('new_state', document.getElementById('changeStateNewState').value);
     formData.append('reason', document.getElementById('changeStateReason').value);
 
-    const photosInput = document.getElementById('changeStatePhotos');
-    Array.from(photosInput.files || []).forEach(file => {
+    const galleryInput = document.getElementById('changeStatePhotos');
+    const cameraInput = document.getElementById('changeStatePhotosCamera');
+
+    Array.from(cameraInput.files || []).forEach(file => {
+        formData.append('photos[]', file, file.name);
+    });
+
+    Array.from(galleryInput.files || []).forEach(file => {
         formData.append('photos[]', file, file.name);
     });
 
