@@ -324,13 +324,24 @@ use App\Constants\AppConstants; ?>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="changeStatePhotos" class="form-label">Fotos de evidencia (opcional):</label>
+                                        <label for="changeStatePhotosCamera" class="form-label">Tomar foto (cámara):</label>
+                                        <input
+                                            type="file"
+                                            class="form-control"
+                                            id="changeStatePhotosCamera"
+                                            accept="image/*"
+                                            capture="environment"
+                                            multiple>
+                                        <div class="form-text">En móviles compatibles abrirá la cámara trasera (según navegador/dispositivo).</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="changeStatePhotos" class="form-label">Fotos de evidencia (galería):</label>
                                         <input
                                             type="file"
                                             class="form-control"
                                             id="changeStatePhotos"
-                                            name="photos[]"
-                                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                                            accept="image/*"
                                             multiple>
                                         <div class="form-text">Puedes subir una o más fotos. Se optimizarán automáticamente para visualización en celular.</div>
                                     </div>
