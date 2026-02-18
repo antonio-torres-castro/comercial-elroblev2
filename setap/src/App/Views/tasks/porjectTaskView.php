@@ -111,130 +111,130 @@ use App\Constants\AppConstants; ?>
 
                 <!-- Historial de Cambios -->
                 <?php if (!empty($data['task_history'])): ?>
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header bg-info text-white">
-                                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historial de Cambios</h5>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th class="ps-4">Fecha Evento</th>
-                                                <th>Usuario</th>
-                                                <th>Cambio de Estado</th>
-                                                <th>Supervisor</th>
-                                                <th class="text-center">Detalle</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($data['task_history'] as $index => $history): ?>
-                                            <tr class="history-row">
-                                                <td class="ps-4">
-                                                    <?= htmlspecialchars(date('Y-m-d H:i:s', strtotime($history['fecha_evento']))) ?>
-                                                </td>
-                                                <td>
-                                                    <?= htmlspecialchars($history['usuario_email'] ?? 'N/A') ?>
-                                                </td>
-                                                <td>
-                                                    <?php 
-                                                        $estadoAnterior = $history['estado_anterior'] ?? 'N/A';
-                                                        $estadoNuevo = $history['estado_nuevo'] ?? 'N/A';
-                                                        echo htmlspecialchars($estadoAnterior) . ' <i class="bi bi-arrow-right text-primary"></i> ' . htmlspecialchars($estadoNuevo);
-                                                    ?>
-                                                </td>
-                                                <td>
-                                                    <?= htmlspecialchars($history['supervisor_email'] ?? 'N/A') ?>
-                                                </td>
-                                                <td class="text-center">
-                                                    <?php
-                                                        $hasComment = !empty(trim($history['comentario'] ?? ''));
-                                                        $photos = $history['fotos'] ?? [];
-                                                        $hasPhotos = !empty($photos);
-                                                    ?>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historial de Cambios</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-4">Fecha Evento</th>
+                                                    <th>Usuario</th>
+                                                    <th>Cambio de Estado</th>
+                                                    <th>Supervisor</th>
+                                                    <th class="text-center">Detalle</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($data['task_history'] as $index => $history): ?>
+                                                    <tr class="history-row">
+                                                        <td class="ps-4">
+                                                            <?= htmlspecialchars(date('Y-m-d H:i:s', strtotime($history['fecha_evento']))) ?>
+                                                        </td>
+                                                        <td>
+                                                            <?= htmlspecialchars($history['usuario_email'] ?? 'N/A') ?>
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $estadoAnterior = $history['estado_anterior'] ?? 'N/A';
+                                                            $estadoNuevo = $history['estado_nuevo'] ?? 'N/A';
+                                                            echo htmlspecialchars($estadoAnterior) . ' <i class="bi bi-arrow-right text-primary"></i> ' . htmlspecialchars($estadoNuevo);
+                                                            ?>
+                                                        </td>
+                                                        <td>
+                                                            <?= htmlspecialchars($history['supervisor_email'] ?? 'N/A') ?>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <?php
+                                                            $hasComment = !empty(trim($history['comentario'] ?? ''));
+                                                            $photos = $history['fotos'] ?? [];
+                                                            $hasPhotos = !empty($photos);
+                                                            ?>
+                                                            <?php if ($hasComment): ?>
+                                                                <button class="btn btn-sm btn-outline-primary toggle-comment mb-1" type="button"
+                                                                    data-bs-toggle="collapse"
+                                                                    data-bs-target="#comment-<?= $index ?>"
+                                                                    aria-expanded="false"
+                                                                    aria-controls="comment-<?= $index ?>">
+                                                                    <i class="bi bi-chat-text"></i> Comentario
+                                                                </button>
+                                                            <?php endif; ?>
+
+                                                            <?php if ($hasPhotos): ?>
+                                                                <button class="btn btn-sm btn-outline-success toggle-photos mb-1" type="button"
+                                                                    data-bs-toggle="collapse"
+                                                                    data-bs-target="#photos-<?= $index ?>"
+                                                                    aria-expanded="false"
+                                                                    aria-controls="photos-<?= $index ?>">
+                                                                    <i class="bi bi-images"></i> Evidencias (<?= count($photos) ?>)
+                                                                </button>
+                                                            <?php endif; ?>
+
+                                                            <?php if (!$hasComment && !$hasPhotos): ?>
+                                                                <span class="text-muted small">Sin detalle</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                    </tr>
                                                     <?php if ($hasComment): ?>
-                                                    <button class="btn btn-sm btn-outline-primary toggle-comment mb-1" type="button"
-                                                            data-bs-toggle="collapse"
-                                                            data-bs-target="#comment-<?= $index ?>"
-                                                            aria-expanded="false"
-                                                            aria-controls="comment-<?= $index ?>">
-                                                        <i class="bi bi-chat-text"></i> Comentario
-                                                    </button>
+                                                        <tr class="history-comment-row">
+                                                            <td colspan="5" class="p-0 border-0">
+                                                                <div class="collapse" id="comment-<?= $index ?>">
+                                                                    <div class="p-3 bg-light border-start border-primary border-3">
+                                                                        <strong class="text-muted">Comentario:</strong>
+                                                                        <p class="mb-0 mt-1"><?= htmlspecialchars($history['comentario']) ?></p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
                                                     <?php endif; ?>
 
                                                     <?php if ($hasPhotos): ?>
-                                                    <button class="btn btn-sm btn-outline-success toggle-photos mb-1" type="button"
-                                                            data-bs-toggle="collapse"
-                                                            data-bs-target="#photos-<?= $index ?>"
-                                                            aria-expanded="false"
-                                                            aria-controls="photos-<?= $index ?>">
-                                                        <i class="bi bi-images"></i> Evidencias (<?= count($photos) ?>)
-                                                    </button>
-                                                    <?php endif; ?>
-
-                                                    <?php if (!$hasComment && !$hasPhotos): ?>
-                                                    <span class="text-muted small">Sin detalle</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                            </tr>
-                                            <?php if ($hasComment): ?>
-                                            <tr class="history-comment-row">
-                                                <td colspan="5" class="p-0 border-0">
-                                                    <div class="collapse" id="comment-<?= $index ?>">
-                                                        <div class="p-3 bg-light border-start border-primary border-3">
-                                                            <strong class="text-muted">Comentario:</strong>
-                                                            <p class="mb-0 mt-1"><?= htmlspecialchars($history['comentario']) ?></p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <?php endif; ?>
-
-                                            <?php if ($hasPhotos): ?>
-                                            <tr class="history-photos-row">
-                                                <td colspan="5" class="p-0 border-0">
-                                                    <div class="collapse" id="photos-<?= $index ?>">
-                                                        <div class="p-3 bg-light border-start border-success border-3">
-                                                            <strong class="text-muted d-block mb-2">Evidencia fotográfica:</strong>
-                                                            <div class="row g-3">
-                                                                <?php foreach ($photos as $photo): ?>
-                                                                <div class="col-sm-6 col-md-4 col-lg-3">
-                                                                    <div class="card h-100 shadow-sm">
-                                                                        <a href="<?= htmlspecialchars($photo['url_foto']) ?>" target="_blank" rel="noopener noreferrer">
-                                                                            <img src="<?= htmlspecialchars($photo['url_foto']) ?>"
-                                                                                class="card-img-top"
-                                                                                alt="Evidencia de cambio de estado"
-                                                                                style="height: 180px; object-fit: cover;">
-                                                                        </a>
-                                                                        <div class="card-body p-2">
-                                                                            <small class="text-muted d-block">
-                                                                                <?= htmlspecialchars(date('Y-m-d H:i:s', strtotime($photo['fecha_Creado'] ?? 'now'))) ?>
-                                                                            </small>
-                                                                            <?php if (!empty($photo['estado_nombre'])): ?>
-                                                                            <small class="badge text-bg-secondary mt-1">
-                                                                                <?= htmlspecialchars($photo['estado_nombre']) ?>
-                                                                            </small>
-                                                                            <?php endif; ?>
+                                                        <tr class="history-photos-row">
+                                                            <td colspan="5" class="p-0 border-0">
+                                                                <div class="collapse" id="photos-<?= $index ?>">
+                                                                    <div class="p-3 bg-light border-start border-success border-3">
+                                                                        <strong class="text-muted d-block mb-2">Evidencia fotográfica:</strong>
+                                                                        <div class="row g-3">
+                                                                            <?php foreach ($photos as $photo): ?>
+                                                                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                                                                    <div class="card h-100 shadow-sm">
+                                                                                        <a href="<?= htmlspecialchars($photo['url_foto']) ?>" target="_blank" rel="noopener noreferrer">
+                                                                                            <img src="<?= htmlspecialchars($photo['url_foto']) ?>"
+                                                                                                class="card-img-top"
+                                                                                                alt="Evidencia de cambio de estado"
+                                                                                                style="height: 180px; object-fit: cover;">
+                                                                                        </a>
+                                                                                        <div class="card-body p-2">
+                                                                                            <small class="text-muted d-block">
+                                                                                                <?= htmlspecialchars(date('Y-m-d H:i:s', strtotime($photo['fecha_Creado'] ?? 'now'))) ?>
+                                                                                            </small>
+                                                                                            <?php if (!empty($photo['estado_nombre'])): ?>
+                                                                                                <small class="badge text-bg-secondary mt-1">
+                                                                                                    <?= htmlspecialchars($photo['estado_nombre']) ?>
+                                                                                                </small>
+                                                                                            <?php endif; ?>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            <?php endforeach; ?>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <?php endforeach; ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <?php endif; ?>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
             </main>
         </div>
@@ -252,7 +252,7 @@ use App\Constants\AppConstants; ?>
                 formData.append('task_id', String(taskId));
                 formData.append('csrf_token', '<?= \App\Helpers\Security::getCsrfToken() ?>');
 
-                await fetch('<?= BASE_PATH ?>/tasks/clear-history-uploads', {
+                await fetch('<?= BASE_PATH ?>tasks/clear-history-uploads', {
                     method: 'POST',
                     body: formData,
                     credentials: 'same-origin'
