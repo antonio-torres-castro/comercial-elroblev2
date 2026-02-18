@@ -197,7 +197,7 @@ use App\Constants\AppConstants; ?>
                                                             <td colspan="5" class="p-0 border-0">
                                                                 <div class="collapse" id="photos-<?= $index ?>">
                                                                     <div class="p-3 bg-light border-start border-success border-3">
-                                                                        <strong class="text-muted d-block mb-2">Evidencia fotográfica:</strong>
+                                                                        <strong class="text-muted d-block mb-2">Evidencia:</strong>
                                                                         <div class="row g-3">
                                                                             <?php foreach ($photos as $photo): ?>
                                                                                 <div class="col-sm-6 col-md-4 col-lg-3">
