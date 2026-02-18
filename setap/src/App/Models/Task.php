@@ -1472,4 +1472,49 @@ class Task
             return [];
         }
     }
+
+    /**
+     * Obtener evidencias fotográficas para un conjunto de registros de historial
+     */
+    public function getTaskHistoryPhotos(array $historialIds): array
+    {
+        try {
+            if (empty($historialIds)) {
+                return [];
+            }
+
+            $placeholders = implode(',', array_fill(0, count($historialIds), '?'));
+            $sql = "
+                SELECT
+                    tf.id,
+                    tf.historial_tarea_id,
+                    tf.url_foto,
+                    tf.fecha_Creado,
+                    tf.estado_tipo_id,
+                    et.nombre as estado_nombre
+                FROM tarea_fotos tf
+                LEFT JOIN estado_tipos et ON et.id = tf.estado_tipo_id
+                WHERE tf.historial_tarea_id IN ($placeholders)
+                ORDER BY tf.fecha_Creado DESC, tf.id DESC
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(array_values($historialIds));
+            $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $groupedPhotos = [];
+            foreach ($photos as $photo) {
+                $historialId = (int) $photo['historial_tarea_id'];
+                if (!isset($groupedPhotos[$historialId])) {
+                    $groupedPhotos[$historialId] = [];
+                }
+                $groupedPhotos[$historialId][] = $photo;
+            }
+
+            return $groupedPhotos;
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskHistoryPhotos: " . $e->getMessage());
+            return [];
+        }
+    }
 }
