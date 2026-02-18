@@ -1508,6 +1508,8 @@ class Task
                 if (!isset($groupedPhotos[$historialId])) {
                     $groupedPhotos[$historialId] = [];
                 }
+
+                $photo['url_foto'] = $this->copyHistoryPhotoToPublicUploads($photo['url_foto'] ?? '');
                 $groupedPhotos[$historialId][] = $photo;
             }
 
@@ -1515,6 +1517,67 @@ class Task
         } catch (PDOException $e) {
             Logger::error("Task::getTaskHistoryPhotos: " . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Copiar una foto histórica desde storage a public/uploads y devolver su URL pública.
+     */
+    private function copyHistoryPhotoToPublicUploads(string $originalUrl): string
+    {
+        if ($originalUrl === '') {
+            return $originalUrl;
+        }
+
+        try {
+            $setapRoot = dirname(__DIR__, 3);
+            $publicUploadsDir = $setapRoot . '/public/uploads';
+            $storagePhotosDir = $setapRoot . '/storage/fotos';
+
+            if (!is_dir($publicUploadsDir) && !mkdir($publicUploadsDir, 0775, true) && !is_dir($publicUploadsDir)) {
+                Logger::error('Task::copyHistoryPhotoToPublicUploads no pudo crear directorio uploads');
+                return $originalUrl;
+            }
+
+            $fileName = basename(parse_url($originalUrl, PHP_URL_PATH) ?? $originalUrl);
+            if ($fileName === '' || $fileName === '.' || $fileName === '..') {
+                return $originalUrl;
+            }
+
+            $safeFileName = preg_replace('/[^A-Za-z0-9._-]/', '_', $fileName) ?: $fileName;
+            $destinationPath = $publicUploadsDir . '/' . $safeFileName;
+
+            $sourceCandidates = [
+                $storagePhotosDir . '/' . $fileName,
+                $storagePhotosDir . '/' . $safeFileName,
+                $setapRoot . '/' . ltrim(str_replace('\\', '/', parse_url($originalUrl, PHP_URL_PATH) ?? ''), '/'),
+                $setapRoot . '/' . ltrim(str_replace('\\', '/', $originalUrl), '/'),
+            ];
+
+            $sourcePath = '';
+            foreach ($sourceCandidates as $candidate) {
+                if ($candidate !== '' && is_file($candidate)) {
+                    $sourcePath = $candidate;
+                    break;
+                }
+            }
+
+            if ($sourcePath === '') {
+                Logger::error('Task::copyHistoryPhotoToPublicUploads no encontró origen para: ' . $originalUrl);
+                return $originalUrl;
+            }
+
+            if (!is_file($destinationPath)) {
+                if (!@copy($sourcePath, $destinationPath)) {
+                    Logger::error('Task::copyHistoryPhotoToPublicUploads error al copiar: ' . $sourcePath);
+                    return $originalUrl;
+                }
+            }
+
+            return BASE_PATH . '/public/uploads/' . rawurlencode($safeFileName);
+        } catch (\Throwable $e) {
+            Logger::error('Task::copyHistoryPhotoToPublicUploads: ' . $e->getMessage());
+            return $originalUrl;
         }
     }
 }
