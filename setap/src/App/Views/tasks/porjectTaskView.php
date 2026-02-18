@@ -27,9 +27,10 @@ use App\Constants\AppConstants; ?>
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?php echo $data['title']; ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="javascript:history.back()" class="btn btn-sm btn-secondary">
+                        <button type="button" class="btn btn-sm btn-secondary" id="btn-back-task-detail"
+                            onclick="clearTaskUploadsAndGoBack(<?= (int) ($data['task_id'] ?? 0) ?>)">
                             <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -238,6 +239,31 @@ use App\Constants\AppConstants; ?>
             </main>
         </div>
     </div>
+
+    <script>
+        async function clearTaskUploadsAndGoBack(taskId) {
+            try {
+                if (!taskId) {
+                    history.back();
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('task_id', String(taskId));
+                formData.append('csrf_token', '<?= \App\Helpers\Security::getCsrfToken() ?>');
+
+                await fetch('<?= BASE_PATH ?>/tasks/clear-history-uploads', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+            } catch (error) {
+                console.error('No se pudieron limpiar evidencias temporales:', error);
+            } finally {
+                history.back();
+            }
+        }
+    </script>
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
