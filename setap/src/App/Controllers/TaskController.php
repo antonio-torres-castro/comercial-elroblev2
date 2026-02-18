@@ -294,6 +294,17 @@ class TaskController extends BaseController
             
             // Obtener historial de la tarea
             $taskHistory = $id ? $this->taskModel->getTaskHistory($id) : [];
+
+            if (!empty($taskHistory)) {
+                $historialIds = array_column($taskHistory, 'id');
+                $historyPhotos = $this->taskModel->getTaskHistoryPhotos($historialIds);
+
+                foreach ($taskHistory as &$historyItem) {
+                    $historyId = (int) ($historyItem['id'] ?? 0);
+                    $historyItem['fotos'] = $historyPhotos[$historyId] ?? [];
+                }
+                unset($historyItem);
+            }
             
             // Datos para la vista - ESTANDARIZADO
             $data = [
