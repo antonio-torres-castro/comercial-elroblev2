@@ -326,6 +326,47 @@ class TaskController extends BaseController
     }
 
     /**
+     * Eliminar evidencias temporales de una tarea desde public/uploads
+     */
+    public function clearHistoryUploads()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->jsonError('Sesión no válida', [], 401);
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->jsonError(AppConstants::ERROR_METHOD_NOT_ALLOWED, [], 405);
+                return;
+            }
+
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->jsonError('Token CSRF inválido', [], 419);
+                return;
+            }
+
+            if (!$this->permissionService->hasPermission($currentUser['id'], 'Read')) {
+                $this->jsonError(AppConstants::ERROR_NO_PERMISSIONS, [], 403);
+                return;
+            }
+
+            $taskId = (int) ($_POST['task_id'] ?? 0);
+            if ($taskId <= 0) {
+                $this->jsonError('Tarea inválida', [], 422);
+                return;
+            }
+
+            $deletedCount = $this->taskModel->clearTaskHistoryUploads($taskId);
+            $this->jsonSuccess('Limpieza de evidencias ejecutada', ['deleted_files' => $deletedCount]);
+        } catch (Exception $e) {
+            Logger::error('TaskController::clearHistoryUploads: ' . $e->getMessage());
+            $this->jsonError('Error interno del servidor', [], 500);
+        }
+    }
+
+    /**
      * Mostrar formulario de creación
      */
     public function newTask()

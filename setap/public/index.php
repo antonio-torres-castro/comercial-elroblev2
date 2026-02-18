@@ -594,6 +594,15 @@ try {
                     }
                     break;
 
+                case 'clear-history-uploads':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->clearHistoryUploads();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'change-state':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->changeState();

@@ -1554,6 +1554,59 @@ class Task
         }
     }
 
+
+    /**
+     * Eliminar de public/uploads las evidencias asociadas al historial de una tarea.
+     */
+    public function clearTaskHistoryUploads(int $proyectoTareaId): int
+    {
+        try {
+            if ($proyectoTareaId <= 0) {
+                return 0;
+            }
+
+            $sql = "
+                SELECT tf.url_foto
+                FROM tarea_fotos tf
+                INNER JOIN historial_tareas ht ON ht.id = tf.historial_tarea_id
+                WHERE ht.proyecto_tarea_id = ?
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$proyectoTareaId]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($rows)) {
+                return 0;
+            }
+
+            $setapRoot = dirname(__DIR__, 3);
+            $publicUploadsDir = $setapRoot . '/public/uploads';
+
+            if (!is_dir($publicUploadsDir)) {
+                return 0;
+            }
+
+            $deletedCount = 0;
+            foreach ($rows as $row) {
+                $safeFileName = $this->buildSafeUploadFileName($row['url_foto'] ?? '');
+                if ($safeFileName === '') {
+                    continue;
+                }
+
+                $uploadPath = $publicUploadsDir . '/' . $safeFileName;
+                if (is_file($uploadPath) && @unlink($uploadPath)) {
+                    $deletedCount++;
+                }
+            }
+
+            return $deletedCount;
+        } catch (PDOException $e) {
+            Logger::error('Task::clearTaskHistoryUploads: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
     /**
      * Copiar una foto histórica desde storage a public/uploads y devolver su URL pública.
      */
@@ -1573,12 +1626,12 @@ class Task
                 return $originalUrl;
             }
 
-            $fileName = basename(parse_url($originalUrl, PHP_URL_PATH) ?? $originalUrl);
-            if ($fileName === '' || $fileName === '.' || $fileName === '..') {
+            $safeFileName = $this->buildSafeUploadFileName($originalUrl);
+            if ($safeFileName === '') {
                 return $originalUrl;
             }
 
-            $safeFileName = preg_replace('/[^A-Za-z0-9._-]/', '_', $fileName) ?: $fileName;
+            $fileName = basename(parse_url($originalUrl, PHP_URL_PATH) ?? $originalUrl);
             $destinationPath = $publicUploadsDir . '/' . $safeFileName;
 
             $sourceCandidates = [
@@ -1614,4 +1667,17 @@ class Task
             return $originalUrl;
         }
     }
+    /**
+     * Normalizar nombre de archivo para uso en public/uploads.
+     */
+    private function buildSafeUploadFileName(string $url): string
+    {
+        $fileName = basename(parse_url($url, PHP_URL_PATH) ?? $url);
+        if ($fileName === '' || $fileName === '.' || $fileName === '..') {
+            return '';
+        }
+
+        return preg_replace('/[^A-Za-z0-9._-]/', '_', $fileName) ?: $fileName;
+    }
+
 }
