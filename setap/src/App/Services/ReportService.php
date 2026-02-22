@@ -108,12 +108,6 @@ class ReportService
 
         $params = [];
 
-        // Filtros de fecha
-        if (!empty($parameters['date_from'])) {
-            $sql .= " AND p.fecha_inicio >= ?";
-            $params[] = $parameters['date_from'];
-        }
-
         if (!empty($parameters['date_to'])) {
             $sql .= " AND p.fecha_inicio <= ?";
             $params[] = $parameters['date_to'];
@@ -193,8 +187,8 @@ class ReportService
                     AND pt.fecha_inicio <= ?
                     AND (? = 0 OR pt.proyecto_id = ?)
                 ) AS complete,
-                SUM(pt.estado_tipo_id IN (2,5,6,7)
-                    AND pt.fecha_inicio = ?
+                SUM(pt.estado_tipo_id IN (5,6,7)
+                    AND pt.fecha_inicio <= ?
                     AND (? = 0 OR pt.proyecto_id = ?)
                 ) AS progress
             FROM proyecto_tareas pt
@@ -228,26 +222,40 @@ class ReportService
             $summaryData = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
             // --- 2) Detalle de tareas (posicionales) ---
-            $sqlTasks = "
-            SELECT
-                pt.id, t.nombre, DATE_FORMAT(pt.fecha_inicio, '%Y-%m-%d') AS inicio, pt.duracion_horas AS dura,
-                pt.prioridad, e.nombre AS estado, c.razon_social,
-                p.fecha_inicio, p.fecha_fin, tt.nombre AS tipo_tarea
+            $sqlTasks = "SELECT count(x.id) recurrencias, x.nombre,
+                DATE_FORMAT( min(x.fecha_inicio) , '%Y-%m-%d') AS inicio, 
+                avg(x.duracion_horas) AS dura,
+                x.prioridad, x.estado, x.razon_social,
+                DATE_FORMAT( max(x.fecha_fin) , '%Y-%m-%d') AS fin,
+                x.atraso,
+                x.categoria
+            FROM (SELECT pt.id, t.nombre,
+                pt.fecha_inicio, 
+                pt.duracion_horas,
+                pt.prioridad, 
+                e.nombre AS estado, 
+                c.razon_social,
+                pt.fecha_fin,
+                case when (pt.fecha_fin < ? and pt.estado_tipo_id < 8) then 'Si' else '--' end AS atraso,
+                tc.nombre AS categoria
             FROM proyecto_tareas pt
             INNER JOIN estado_tipos e ON e.id = pt.estado_tipo_id
             INNER JOIN proyectos p ON p.id = pt.proyecto_id
             INNER JOIN clientes c ON c.id = p.cliente_id
             INNER JOIN tareas t ON t.id = pt.tarea_id
-            INNER JOIN tarea_tipos tt ON tt.id = p.tarea_tipo_id
-            WHERE pt.estado_tipo_id IN (2,5,6,7)
+            INNER JOIN tarea_categorias tc ON tc.id = t.tarea_categoria_id
+            WHERE pt.estado_tipo_id IN (2,5,6,7,8)
               AND (pt.fecha_inicio <= ?)
-              AND (? = 0 OR pt.proyecto_id = ?);
+              AND (? = 0 OR pt.proyecto_id = ?)
+			) x
+            Group by x.nombre, x.prioridad, x.estado, x.razon_social, x.categoria, x.atraso;
         ";
 
             $paramsTasks = [
                 $fecha,
+                $fecha,
                 $projectId,
-                $projectId
+                $projectId,
             ];
 
             $stmt = $this->db->prepare($sqlTasks);
