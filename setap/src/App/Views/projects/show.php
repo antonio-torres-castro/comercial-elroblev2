@@ -255,20 +255,22 @@ use App\Constants\AppConstants; ?>
             <div class="col-md-4">
 
                 <!-- Acciones Rápidas -->
-                <div class="card mb-1">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightning"></i> Acciones Rápidas</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <?php if ($_GET['show_btn_nuevo']): ?>
-                                <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
-                                    <i class="bi bi-plus-circle"></i> Agregar Tarea
-                                </a>
-                            <?php endif; ?>
+                <?php if ($_GET['show_btn_nuevo']): ?>
+                    <div class="card mb-1">
+                        <div class="card-header">
+                            <h5><i class="bi bi-lightning"></i> Acciones Rápidas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <?php if ($_GET['show_btn_nuevo']): ?>
+                                    <a href="<?= AppConstants::ROUTE_TASKS_CREATE ?>?project_id=<?= $project['id'] ?>" class="btn btn-outline-setap-primary">
+                                        <i class="bi bi-plus-circle"></i> Agregar Tarea
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
-                </div>
+                <?php endif; ?>
 
                 <!-- Feriados del Proyecto -->
                 <?php if (!empty($holidays)): ?>
