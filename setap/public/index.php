@@ -58,7 +58,7 @@ $id = $parts[2] ?? null;
 if ($controllerName === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!Security::checkRateLimit('login', 5, 300)) {
         http_response_code(429);
-        echo json_encode(['error' => 'Demasiados intentos. Intente más tarde.']);
+        echo json_encode(['error' => 'Demasiados intentos. Intente mas tarde.']);
         exit;
     }
 }
