@@ -14,5 +14,5 @@ SELECT
             INNER JOIN tareas t ON t.id = pt.tarea_id
             INNER JOIN tarea_categorias tc ON tc.id = t.tarea_categoria_id
             WHERE pt.estado_tipo_id IN (2,5,6,7,8)
-            
+            and p.cliente_id = 2
             Group by t.nombre, pt.prioridad, e.nombre, c.razon_social, tc.nombre,  case when (pt.fecha_fin < '20260221' and pt.estado_tipo_id < 8) then 'Si' else '--' end;

@@ -94,16 +94,16 @@ class HomeController extends BaseController
             $totalProyectos = $stmt->fetchColumn();
 
             // 3. Proyectos activos (estado activo)
-            $stmt = $db->prepare("SELECT COUNT(1) FROM proyectos WHERE fecha_inicio < curdate() and fecha_fin > curdate() and estado_tipo_id IN (2, 5)" . $sqlAnd);
+            $stmt = $db->prepare("SELECT COUNT(1) FROM proyectos WHERE fecha_inicio < curdate() and estado_tipo_id IN (2, 5)" . $sqlAnd);
             $stmt->execute($params);
             $proyectosActivos = $stmt->fetchColumn();
 
             // 4. Tareas pendientes (estado activo=2, o iniciado=5, rechazado=7).
-            $sqlAnd = $cliente_id > 0 ? " and pt.cliente_id = ?" : "";
+            $sqlAnd = $cliente_id > 0 ? " and p.cliente_id = ?" : "";
             $stmt = $db->prepare("SELECT count(1) 
                                   FROM proyecto_tareas pt 
                                   Inner Join proyectos p on p.id = pt.proyecto_id 
-                                  WHERE p.fecha_inicio < curdate() and p.fecha_fin > curdate()
+                                  WHERE p.fecha_inicio < curdate()
                                   and pt.estado_tipo_id IN (2, 5, 6, 7)" . $sqlAnd);
             $stmt->execute($params);
             $tareasPendientes = $stmt->fetchColumn();
