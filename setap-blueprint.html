@@ -1,164 +1,318 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <title>SETAP | Software de Gestión Operativa Digital</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="SETAP es el software de gestión operativa digital que permite control en tiempo real, trazabilidad y reducción de supervisión en servicios recurrentes. Modalidad SaaS o On-Premise.">
+    <title>SETAP | Software de Gestión Operativa Digital</title>
 
-    <!-- Meta SEO -->
-    <meta name="description" content="SETAP es el software de gestión operativa digital que permite control en tiempo real, trazabilidad y reducción de supervisión en servicios recurrentes. Modalidad SaaS o On-Premise.">
-
-    <!-- Bootstrap CSS (igual al sitio principal) -->
-    <link rel="stylesheet" href="https://comercial-elroble.cl/assets/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="assets/images/mbr-130x115_rojo.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="assets/web/assets/mobirise-icons/mobirise-icons.css">
+    <link rel="stylesheet" href="assets/tether/tether.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-reboot.min.css">
+    <link rel="stylesheet" href="assets/dropdown/css/style.css">
+    <link rel="stylesheet" href="assets/theme/css/style.css">
+    <link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css" type="text/css">
 
     <style>
-        /* Colores corporativos */
-        :root {
-            --roble-red: #b22222;
-            --roble-dark: #333;
-            --roble-light: #f8f9fa;
-            --roble-text: #222;
+        .cid-setapHero {
+            background-image: url("assets/images/CleaningTeam.jpg");
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            color: var(--roble-text);
+        .setap-box {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 30px 22px;
+            height: 100%;
         }
 
-        .hero {
-            background: var(--roble-red);
-            color: white;
-            padding: 80px 0;
-            text-align: center;
+        .setap-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
         }
-        .section-padding {
-            padding: 60px 0;
+
+        .setap-list li {
+            margin: 10px 0;
+            font-size: 1.05rem;
         }
-        .metric-box {
-            background: var(--roble-light);
-            padding: 25px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+
+        .setap-list li span {
+            color: #7f1933;
+            margin-right: 8px;
         }
-        .cta-section {
-            background-color: var(--roble-red);
-            color: white;
-            padding: 50px 0;
-            text-align: center;
+
+        .setap-dashboard {
+            border-radius: 10px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
         }
-        .btn-roble {
-            background-color: white;
-            color: var(--roble-red);
-            border: 2px solid var(--roble-red);
-            font-weight: bold;
-        }
-        .btn-roble:hover {
-            background-color: var(--roble-red);
-            color: white;
+
+        .setap-cta {
+            background: linear-gradient(135deg, #7f1933 0%, #9b2242 100%);
         }
     </style>
 </head>
 
 <body>
 
-<!-- HERO -->
-<section class="hero">
-    <div class="container">
-        <h1>Software de Gestión Operativa Digital</h1>
-        <p class="lead">Control en tiempo real, trazabilidad y respaldo para servicios recurrentes externalizados.</p>
-        <p><em>Simplifique procesos. Reduzca supervisión. Mejore resultados.</em></p>
-    </div>
-</section>
+    <section class="menu cid-SiteMenuSeccion" once="menu" id="menu1-setap">
+        <nav
+            class="navbar navbar-expand beta-menu navbar-dropdown align-items-center navbar-fixed-top navbar-toggleable-sm">
 
-<!-- PROBLEMA QUE RESUELVE -->
-<section class="section-padding">
-    <div class="container text-center">
-        <h2>El desafío en servicios recurrentes</h2>
-        <p class="mt-3">
-            En muchas organizaciones, la ejecución de aseo profesional, mantención y tareas recurrentes
-            carece de control digitalizado. Esto genera:
-        </p>
-        <ul class="list-unstyled mt-3">
-            <li>🔹 Supervisión presencial constante</li>
-            <li>🔹 Falta de evidencia estructurada</li>
-            <li>🔹 Dificultad para medir cumplimiento real</li>
-        </ul>
-    </div>
-</section>
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
 
-<!-- ¿QUÉ ES SETAP? -->
-<section class="section-padding bg-light">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h2>¿Qué es SETAP?</h2>
-                <p>
-                    SETAP es el software de gestión operativa digital que integra ejecución en terreno con control institucional,
-                    proporcionando trazabilidad, métricas y control de cumplimiento en tiempo real.
-                </p>
-                <ul>
-                    <li>Planificación estructurada</li>
-                    <li>Control por rol y permisos</li>
-                    <li>Evidencia digital de ejecución</li>
-                    <li>Histórico completo por proyecto</li>
+            <div class="menu-logo">
+                <div class="navbar-brand">
+                    <span class="navbar-logo">
+                        <a href="index.html">
+                            <img src="assets/images/mbr-130x115_rojo.jpg" alt="Comercial El Roble" title=""
+                                style="height: 3.8rem;">
+                        </a>
+                    </span>
+
+                    <span class="navbar-caption-wrap">
+                        <a class="navbar-caption text-white display-4" href="index.html">
+                            Comercial El Roble
+                        </a>
+                    </span>
+                </div>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav nav-dropdown" data-app-modern-menu="true">
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="servicios.html">
+                            <span class="mbri-setting mbr-iconfont mbr-iconfont-btn"></span>
+                            Servicios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="suelos.html">
+                            Pisos<br>Alfombras
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="aseo.html">
+                            Aseo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="cortinas.html">
+                            Cortinas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="proyectos.html">
+                            Proyectos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="empresa.html">
+                            <span class="mbri-home mbr-iconfont mbr-iconfont-btn"></span>
+                            Nosotros
+                        </a>
+                    </li>
                 </ul>
-            </div>
-            <div class="col-md-6 text-center">
-                <img src="/assets/images/setap-dashboard.png" class="img-fluid shadow rounded" alt="Dashboard SETAP">
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- BENEFICIOS -->
-<section class="section-padding">
-    <div class="container text-center">
-        <h2>Beneficios claves</h2>
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="metric-box">
-                    <h4>Reducción de Supervisión</h4>
-                    <p>Hasta 80% menos desplazamientos y llamadas.</p>
+                <div class="navbar-buttons mbr-section-btn">
+                    <a class="btn btn-sm btn-primary display-3" href="servicios.html#form4-y">
+                        <span class="mbri-save mbr-iconfont mbr-iconfont-btn "></span>
+                        Solicita Visita
+                    </a>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="metric-box">
-                    <h4>Trazabilidad Total</h4>
-                    <p>Evidencia documentada al iniciar y finalizar cada tarea.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="metric-box">
-                    <h4>Visibilidad Gerencial</h4>
-                    <p>Progreso de proyectos en tiempo real.</p>
+        </nav>
+    </section>
+
+    <section class="engine"></section>
+
+    <section class="header1 cid-setapHero mbr-fullscreen mbr-parallax-background" id="header1-setap">
+        <div class="mbr-overlay" style="opacity: 0.35; background-color: rgb(15, 118, 153);"></div>
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="mbr-white col-md-10 align-center">
+                    <h1 class="mbr-section-title mbr-bold pb-3 mbr-fonts-style display-1">Software de Gestión Operativa
+                        Digital</h1>
+                    <p class="mbr-text pb-3 mbr-fonts-style display-5">Control en tiempo real, trazabilidad y respaldo
+                        para servicios recurrentes externalizados.</p>
+                    <p class="mbr-text pb-3 mbr-fonts-style display-5"><em>Simplifique procesos. Reduzca supervisión.
+                            Mejore resultados.</em></p>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- CASO REAL -->
-<section class="section-padding bg-light">
-    <div class="container text-center">
-        <h2>Caso de uso real</h2>
-        <p class="mt-3">
-            Proyecto piloto en mantención de aseo profesional para un establecimiento educacional,
-            con más de 8.700 tareas anuales y más de 4.400 horas planificadas, utilizando roles diferenciados
-            y calendario completo adaptado al ciclo operativo.
-        </p>
-    </div>
-</section>
+        <div class="mbr-arrow hidden-sm-down" aria-hidden="true">
+            <a href="#desafio-setap">
+                <i class="mbri-down mbr-iconfont"></i>
+            </a>
+        </div>
+    </section>
 
-<!-- CTA -->
-<section class="cta-section">
-    <div class="container">
-        <h2>¿Quiere conocer cómo funciona SETAP?</h2>
-        <a href="https://comercial-elroble.cl/contacto" class="btn btn-roble btn-lg mt-3">
-            Solicitar Presentación Ejecutiva
-        </a>
-    </div>
-</section>
+    <section class="features1 cid-segundaSeccionVista" id="desafio-setap">
+        <div class="container">
+            <div class="media-container-row">
+                <div class="card col-12 col-md-10 col-lg-10 p-4 mx-auto align-center">
+                    <div class="card-img pb-3">
+                        <span class="mbr-iconfont mbri-alert" style="color: rgb(127, 25, 51);"></span>
+                    </div>
+                    <div class="card-box">
+                        <h2 class="card-title mbr-fonts-style display-2">El desafío en servicios recurrentes</h2>
+                        <p class="mbr-text mbr-fonts-style display-7 mt-3">En muchas organizaciones, la ejecución de aseo
+                            profesional, mantención y tareas recurrentes carece de control digitalizado. Esto genera:</p>
+                        <ul class="setap-list mt-3">
+                            <li><span>🔹</span>Supervisión presencial constante</li>
+                            <li><span>🔹</span>Falta de evidencia estructurada</li>
+                            <li><span>🔹</span>Dificultad para medir cumplimiento real</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <section class="features11 cid-setapIntro" id="setap-que-es">
+        <div class="container">
+            <div class="media-container-row">
+                <div class="mbr-figure m-auto" style="width: 50%;">
+                    <img src="assets/images/setap-dashboard.png" class="setap-dashboard" alt="Dashboard SETAP">
+                </div>
+
+                <div class="align-left aside-content">
+                    <h2 class="mbr-title pt-2 mbr-fonts-style display-2">¿Qué es SETAP?</h2>
+                    <div class="mbr-section-text">
+                        <p class="mbr-text mb-4 pt-3 mbr-light mbr-fonts-style display-7">SETAP es el software de gestión
+                            operativa digital que integra ejecución en terreno con control institucional,
+                            proporcionando trazabilidad, métricas y control de cumplimiento en tiempo real.</p>
+                    </div>
+                    <div class="block-content">
+                        <div class="card p-3 pr-3">
+                            <div class="media">
+                                <div class="align-self-center card-img pb-3">
+                                    <span class="mbr-iconfont mbri-right" style="color: rgb(127, 25, 51);"></span>
+                                </div>
+                                <div class="media-body">
+                                    <p class="mbr-fonts-style display-7">Planificación estructurada</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-3 pr-3">
+                            <div class="media">
+                                <div class="align-self-center card-img pb-3">
+                                    <span class="mbr-iconfont mbri-right" style="color: rgb(127, 25, 51);"></span>
+                                </div>
+                                <div class="media-body">
+                                    <p class="mbr-fonts-style display-7">Control por rol y permisos</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-3 pr-3">
+                            <div class="media">
+                                <div class="align-self-center card-img pb-3">
+                                    <span class="mbr-iconfont mbri-right" style="color: rgb(127, 25, 51);"></span>
+                                </div>
+                                <div class="media-body">
+                                    <p class="mbr-fonts-style display-7">Evidencia digital de ejecución</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-3 pr-3">
+                            <div class="media">
+                                <div class="align-self-center card-img pb-3">
+                                    <span class="mbr-iconfont mbri-right" style="color: rgb(127, 25, 51);"></span>
+                                </div>
+                                <div class="media-body">
+                                    <p class="mbr-fonts-style display-7">Histórico completo por proyecto</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features4 cid-setapBeneficios" id="beneficios-setap">
+        <div class="container">
+            <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">Beneficios claves</h2>
+            <div class="media-container-row mt-4">
+                <div class="card p-4 col-12 col-md-6 col-lg-4">
+                    <div class="setap-box align-center">
+                        <h4 class="card-title pb-3 mbr-fonts-style display-5">Reducción de Supervisión</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">Hasta 80% menos desplazamientos y llamadas.</p>
+                    </div>
+                </div>
+                <div class="card p-4 col-12 col-md-6 col-lg-4">
+                    <div class="setap-box align-center">
+                        <h4 class="card-title pb-3 mbr-fonts-style display-5">Trazabilidad Total</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">Evidencia documentada al iniciar y finalizar cada
+                            tarea.</p>
+                    </div>
+                </div>
+                <div class="card p-4 col-12 col-md-6 col-lg-4">
+                    <div class="setap-box align-center">
+                        <h4 class="card-title pb-3 mbr-fonts-style display-5">Visibilidad Gerencial</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">Progreso de proyectos en tiempo real.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mbr-section content4 cid-setapCaso bg-light" id="caso-setap">
+        <div class="container">
+            <div class="media-container-row">
+                <div class="title col-12 col-md-10 mx-auto align-center">
+                    <h2 class="align-center pb-3 mbr-fonts-style display-2">Caso de uso real</h2>
+                    <p class="mbr-text align-center mbr-fonts-style display-7">Proyecto piloto en mantención de aseo
+                        profesional para un establecimiento educacional,
+                        con más de 8.700 tareas anuales y más de 4.400 horas planificadas, utilizando roles
+                        diferenciados
+                        y calendario completo adaptado al ciclo operativo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="header1 setap-cta" id="cta-setap">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="mbr-white col-md-10 align-center">
+                    <h2 class="mbr-section-title mbr-fonts-style pb-3 display-2">¿Quiere conocer cómo funciona SETAP?</h2>
+                    <div class="mbr-section-btn">
+                        <a class="btn btn-md btn-white-outline display-4" href="https://comercial-elroble.cl/contacto">
+                            Solicitar Presentación Ejecutiva
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="assets/web/assets/jquery/jquery.min.js"></script>
+    <script src="assets/popper/popper.min.js"></script>
+    <script src="assets/tether/tether.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/smoothscroll/smooth-scroll.js"></script>
+    <script src="assets/parallax/jarallax.min.js"></script>
+    <script src="assets/dropdown/js/script.min.js"></script>
+    <script src="assets/touchswipe/jquery.touch-swipe.min.js"></script>
+    <script src="assets/theme/js/script.js"></script>
 </body>
+
 </html>
