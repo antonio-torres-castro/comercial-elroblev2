@@ -814,7 +814,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= "ORDER BY exec.nombre_usuario ASC, pt.id asc LIMIT ? OFFSET ?";
+            $sql .= " ORDER BY pe.nombre ASC, pe.nombre asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 

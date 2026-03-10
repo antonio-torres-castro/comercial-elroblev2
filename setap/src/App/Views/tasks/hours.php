@@ -242,7 +242,7 @@ use App\Constants\AppConstants; ?>
                 </div>
 
                 <div class="modal fade" id="personasModal" tabindex="-1">
-                    <div class="modal-dialog modal-lg">
+                    <div class="modal-dialog modal-small">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Colaboradores asignados</h5>
