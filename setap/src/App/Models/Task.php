@@ -231,8 +231,8 @@ class Task
                             SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
                             SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
                             SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
+                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
+                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
@@ -298,7 +298,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= "GROUP BY pt.fecha_inicio ORDER BY pt.fecha_inicio ASC, pt.id asc LIMIT ? OFFSET ?";
+            $sql .= " GROUP BY pt.fecha_inicio ORDER BY pt.fecha_inicio ASC, pt.fecha_inicio asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -306,7 +306,7 @@ class Task
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            Logger::error("Task::getAll: " . $e->getMessage());
+            Logger::error("Task::getHorasDiarias: " . $e->getMessage());
             return [];
         }
     }
@@ -330,8 +330,8 @@ class Task
                             SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
                             SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
                             SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
+                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
+                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
@@ -397,7 +397,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= "GROUP BY semana_inicio ORDER BY semana_inicio ASC, pt.id asc LIMIT ? OFFSET ?";
+            $sql .= " GROUP BY semana_inicio ORDER BY semana_inicio ASC, semana_inicio asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -429,8 +429,8 @@ class Task
                             SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
                             SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
                             SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
+                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
+                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
@@ -496,7 +496,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= "GROUP BY DATE_FORMAT(pt.fecha_inicio, '%Y-%m') ORDER BY mes ASC, pt.id asc LIMIT ? OFFSET ?";
+            $sql .= " GROUP BY DATE_FORMAT(pt.fecha_inicio, '%Y-%m') ORDER BY mes ASC, DATE_FORMAT(pt.fecha_inicio, '%Y-%m') asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -510,18 +510,246 @@ class Task
     }
 
     /**
-     * Obtener todas las personas asignadas a tareas
+     * Contar periodos diarios
      */
-    public function getPersonasTareasPeriodo(array $filters = [], int $limit = 7, int $offset = 0): array
+    public function countPeriodosDiarios(array $filters = []): int
     {
         try {
             $uti = $filters['current_usuario_tipo_id'];
             $cu = $filters['current_usuario_id'];
             $params = [];
 
-            $sql = "SELECT Distinct IFNULL(pp.nombre, '') as planner,
-                                    IFNULL(pe.nombre, '') as ejecutor, 
-                                    IFNULL(ps.nombre, '') as supervisor
+            $sql = "SELECT COUNT(DISTINCT pt.fecha_inicio) as total
+                FROM proyecto_tareas pt
+                INNER JOIN tareas t ON pt.tarea_id = t.id
+                INNER JOIN proyectos p ON pt.proyecto_id = p.id
+                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
+                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
+                INNER JOIN clientes c ON p.cliente_id = c.id
+                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
+            $strWhere = " WHERE pug.usuario_id = ? ";
+            $params[] = $cu;
+
+            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+                $strWhere .= " and pt.proyecto_id = ?";
+                $params[] = $filters['proyecto_id'];
+            }
+
+            if (isset($uti) && $uti > 2) {
+                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            }
+
+            if (isset($uti) && $uti == 4) {
+                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $params[] = $cu;
+            }
+
+            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
+                $estadoTipoIds = is_array($filters['estado_tipo_id'])
+                    ? $filters['estado_tipo_id']
+                    : [$filters['estado_tipo_id']];
+                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
+                if (!empty($estadoTipoIds)) {
+                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
+                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $params = array_merge($params, $estadoTipoIds);
+                }
+            }
+
+            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $params[] = $filters['fecha_inicio'];
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
+                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $params[] = $filters['fecha_inicio'];
+            }
+
+            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
+                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $params[] = $filters['fecha_fin'];
+            }
+
+            $sql .= $strWhere;
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            Logger::error("Task::countPeriodosDiarios: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Contar periodos semanales
+     */
+    public function countPeriodosSemanales(array $filters = []): int
+    {
+        try {
+            $uti = $filters['current_usuario_tipo_id'];
+            $cu = $filters['current_usuario_id'];
+            $params = [];
+
+            $sql = "SELECT COUNT(DISTINCT DATE_SUB(pt.fecha_inicio, INTERVAL WEEKDAY(pt.fecha_inicio) DAY)) as total
+                FROM proyecto_tareas pt
+                INNER JOIN tareas t ON pt.tarea_id = t.id
+                INNER JOIN proyectos p ON pt.proyecto_id = p.id
+                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
+                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
+                INNER JOIN clientes c ON p.cliente_id = c.id
+                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
+            $strWhere = " WHERE pug.usuario_id = ? ";
+            $params[] = $cu;
+
+            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+                $strWhere .= " and pt.proyecto_id = ?";
+                $params[] = $filters['proyecto_id'];
+            }
+
+            if (isset($uti) && $uti > 2) {
+                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            }
+
+            if (isset($uti) && $uti == 4) {
+                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $params[] = $cu;
+            }
+
+            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
+                $estadoTipoIds = is_array($filters['estado_tipo_id'])
+                    ? $filters['estado_tipo_id']
+                    : [$filters['estado_tipo_id']];
+                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
+                if (!empty($estadoTipoIds)) {
+                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
+                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $params = array_merge($params, $estadoTipoIds);
+                }
+            }
+
+            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $params[] = $filters['fecha_inicio'];
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
+                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $params[] = $filters['fecha_inicio'];
+            }
+
+            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
+                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $params[] = $filters['fecha_fin'];
+            }
+
+            $sql .= $strWhere;
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            Logger::error("Task::countPeriodosSemanales: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Contar periodos mensuales
+     */
+    public function countPeriodosMensuales(array $filters = []): int
+    {
+        try {
+            $uti = $filters['current_usuario_tipo_id'];
+            $cu = $filters['current_usuario_id'];
+            $params = [];
+
+            $sql = "SELECT COUNT(DISTINCT DATE_FORMAT(pt.fecha_inicio, '%Y-%m')) as total
+                FROM proyecto_tareas pt
+                INNER JOIN tareas t ON pt.tarea_id = t.id
+                INNER JOIN proyectos p ON pt.proyecto_id = p.id
+                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
+                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
+                INNER JOIN clientes c ON p.cliente_id = c.id
+                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
+            $strWhere = " WHERE pug.usuario_id = ? ";
+            $params[] = $cu;
+
+            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+                $strWhere .= " and pt.proyecto_id = ?";
+                $params[] = $filters['proyecto_id'];
+            }
+
+            if (isset($uti) && $uti > 2) {
+                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            }
+
+            if (isset($uti) && $uti == 4) {
+                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $params[] = $cu;
+            }
+
+            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
+                $estadoTipoIds = is_array($filters['estado_tipo_id'])
+                    ? $filters['estado_tipo_id']
+                    : [$filters['estado_tipo_id']];
+                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
+                if (!empty($estadoTipoIds)) {
+                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
+                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $params = array_merge($params, $estadoTipoIds);
+                }
+            }
+
+            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $params[] = $filters['fecha_inicio'];
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
+                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $params[] = $filters['fecha_inicio'];
+            }
+
+            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
+                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $params[] = $filters['fecha_fin'];
+            }
+
+            $sql .= $strWhere;
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            Logger::error("Task::countPeriodosMensuales: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Obtener todas las personas asignadas a tareas en un periodo determinado
+     */
+    public function getPersonasTareasPeriodo(array $filters = [], int $limit = 200, int $offset = 0): array
+    {
+        try {
+            $uti = $filters['current_usuario_tipo_id'];
+            $cu = $filters['current_usuario_id'];
+            $params = [];
+
+            $sql = "SELECT DISTINCT
+                            pe.nombre as nombre,
+                            exec.nombre_usuario as usuario
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
@@ -530,13 +758,9 @@ class Task
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
-                INNER JOIN usuarios plan ON pt.planificador_id = plan.id
-                inner join personas pp ON pp.id = plan.persona_id
-                LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                inner join personas pe ON pe.id = exec.persona_id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id
-                inner join personas ps ON ps.id = super.persona_id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+                INNER JOIN usuarios exec ON pt.ejecutor_id = exec.id
+                INNER JOIN personas pe ON pe.id = exec.persona_id ";
+            $strWhere = " WHERE pug.usuario_id = ? AND pt.ejecutor_id IS NOT NULL ";
             $params[] = $cu;
 
             // Filtros
@@ -590,7 +814,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= "ORDER BY exec.email ASC, pt.id asc LIMIT ? OFFSET ?";
+            $sql .= "ORDER BY exec.nombre_usuario ASC, pt.id asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -598,10 +822,11 @@ class Task
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            Logger::error("Task::getAll: " . $e->getMessage());
+            Logger::error("Task::getPersonasTareasPeriodo: " . $e->getMessage());
             return [];
         }
     }
+
 
     /**
      * Obtener tarea por ID

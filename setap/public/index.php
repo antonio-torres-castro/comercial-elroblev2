@@ -639,6 +639,23 @@ try {
                     }
                     break;
 
+                case 'horas':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->horas();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_TASKS_HOURS);
+                    }
+                    break;
+
+                case 'personas-periodo':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->personasPeriodo();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+		    
                 case 'my':
                     $controller->myIndex();
 

@@ -158,6 +158,229 @@ class TaskController extends BaseController
     }
 
     /**
+     * Vista de horas planificadas (dia/semana/mes)
+     */
+    public function horas()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
+
+            $aManageTask = $this->permissionService->hasMenuAccess($cu, 'manage_tasks');
+            if (!$aManageTask) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+
+            if (!empty($_GET['proyecto_id'])) {
+                $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
+            }
+            if (isset($_GET['estado_tipo_id']) && !empty($_GET['estado_tipo_id'])) {
+                $filters['estado_tipo_id'] = $_GET['estado_tipo_id'];
+            }
+            if (!empty($_GET['usuario_id'])) {
+                $filters['usuario_id'] = (int)$_GET['usuario_id'];
+            }
+
+            if (!empty($_GET['fecha_inicio'])) {
+                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            }
+            if (!empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = $_GET['fecha_fin'];
+            }
+            if (empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = date('Y-m-d');
+                $_GET['fecha_fin'] = $filters['fecha_fin'];
+            }
+
+            if ($uti == 6) {
+                $filters['contraparte_id'] = $contraparteId;
+            }
+            if ($uti == 3) {
+                $filters['supervisor_id'] = $cu;
+            }
+            if ($uti == 2) {
+                $filters['planificador_id'] = $cu;
+            }
+
+            if (empty($_GET['usuario_id'])) {
+                if ($uti == 4) {
+                    $filters['ejecutor_id'] = $cu;
+                    $_GET['usuario_id'] = $filters['ejecutor_id'];
+                }
+            }
+
+            $projects = $this->taskModel->getProjects($filters);
+            if (count($projects) == 1) {
+                $_GET['proyecto_id'] = $projects[0]['id'];
+            }
+
+            $users = $this->taskModel->getExecutorUsers();
+            if (count($users) == 1) {
+                $_GET['usuario_id'] = $users[0]['id'];
+            }
+
+            $taskStates = $this->taskModel->getTaskStates($filters);
+
+            $modo = $_GET['modo'] ?? 'dia';
+            if (!in_array($modo, ['dia', 'semana', 'mes'], true)) {
+                $modo = 'dia';
+            }
+            $_GET['modo'] = $modo;
+
+            $perPage = 7;
+            $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+            $offset = ($currentPage - 1) * $perPage;
+
+            switch ($modo) {
+                case 'semana':
+                    $totalRows = $this->taskModel->countPeriodosSemanales($filters);
+                    $rows = $this->taskModel->getHorasSemanales($filters, $perPage, $offset);
+                    break;
+                case 'mes':
+                    $totalRows = $this->taskModel->countPeriodosMensuales($filters);
+                    $rows = $this->taskModel->getHorasMensuales($filters, $perPage, $offset);
+                    break;
+                case 'dia':
+                default:
+                    $totalRows = $this->taskModel->countPeriodosDiarios($filters);
+                    $rows = $this->taskModel->getHorasDiarias($filters, $perPage, $offset);
+                    break;
+            }
+
+            $totalPages = max(1, ceil($totalRows / $perPage));
+
+            $hoursRows = [];
+            foreach ($rows as $row) {
+                if ($modo === 'semana') {
+                    $inicio = $row['semana_inicio'] ?? '';
+                    $fin = $inicio ? (new DateTime($inicio))->modify('+6 days')->format('Y-m-d') : '';
+                } elseif ($modo === 'mes') {
+                    $inicio = !empty($row['mes']) ? $row['mes'] . '-01' : '';
+                    $fin = $inicio ? (new DateTime($inicio))->modify('last day of this month')->format('Y-m-d') : '';
+                } else {
+                    $inicio = $row['fecha_inicio'] ?? '';
+                    $fin = $inicio;
+                }
+
+                $row['periodo_inicio'] = $inicio;
+                $row['periodo_fin'] = $fin;
+                $hoursRows[] = $row;
+            }
+
+            $data = [
+                'user' => $currentUser,
+                'hoursRows' => $hoursRows,
+                'totalRecords' => $totalRows,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
+                'projects' => $projects,
+                'taskStates' => $taskStates,
+                'users' => $users,
+                'filters' => $filters,
+                'mode' => $modo,
+                'title' => 'Horas planificadas',
+                'subtitle' => 'Vista por dia/semana/mes',
+                'error' => $_GET['error'] ?? '',
+                'success' => $_GET['success'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/tasks/hours.php';
+        } catch (Exception $e) {
+            Logger::error("TaskController::horas: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    /**
+     * Obtener personas asignadas a tareas en un periodo (JSON)
+     */
+    public function personasPeriodo()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->jsonUnauthorized('Sesion no valida');
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+                $this->jsonError(AppConstants::ERROR_METHOD_NOT_ALLOWED, [], 405);
+                return;
+            }
+
+            $cu = $currentUser['id'];
+            $uti = $currentUser['usuario_tipo_id'];
+            $contraparteId = $currentUser['contraparte_id'];
+
+            $aManageTask = $this->permissionService->hasMenuAccess($cu, 'manage_tasks');
+            if (!$aManageTask) {
+                $this->jsonForbidden();
+                return;
+            }
+
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+
+            if (!empty($_GET['proyecto_id'])) {
+                $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
+            }
+            if (isset($_GET['estado_tipo_id']) && !empty($_GET['estado_tipo_id'])) {
+                $filters['estado_tipo_id'] = $_GET['estado_tipo_id'];
+            }
+            if (!empty($_GET['usuario_id'])) {
+                $filters['usuario_id'] = (int)$_GET['usuario_id'];
+            }
+
+            if (!empty($_GET['fecha_inicio'])) {
+                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            }
+            if (!empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = $_GET['fecha_fin'];
+            }
+            if (empty($filters['fecha_inicio']) || empty($filters['fecha_fin'])) {
+                $this->jsonError('Fechas requeridas', [], 422);
+                return;
+            }
+
+            if ($uti == 6) {
+                $filters['contraparte_id'] = $contraparteId;
+            }
+            if ($uti == 3) {
+                $filters['supervisor_id'] = $cu;
+            }
+            if ($uti == 2) {
+                $filters['planificador_id'] = $cu;
+            }
+            if (empty($_GET['usuario_id'])) {
+                if ($uti == 4) {
+                    $filters['ejecutor_id'] = $cu;
+                }
+            }
+
+            $personas = $this->taskModel->getPersonasTareasPeriodo($filters, 200, 0);
+            $this->jsonSuccess('Colaboradores cargados', ['personas' => $personas]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::personasPeriodo: " . $e->getMessage());
+            $this->jsonInternalError();
+        }
+    }    
+    
+    /**
      * Lista de tareas (plural) - Para Ejecutor
      */
     public function myIndex()
