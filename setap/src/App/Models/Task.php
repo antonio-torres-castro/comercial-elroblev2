@@ -510,7 +510,7 @@ class Task
     }
 
     /**
-     * Obtener todas las tareas con información relacionada agrupadas por mes
+     * Obtener todas las personas asignadas a tareas
      */
     public function getPersonasTareasPeriodo(array $filters = [], int $limit = 7, int $offset = 0): array
     {
@@ -519,7 +519,9 @@ class Task
             $cu = $filters['current_usuario_id'];
             $params = [];
 
-            $sql = "SELECT Distinct IFNULL(plan.email, '') as planner, IFNULL(exec.email, '') as ejecutor, IFNULL(super.email, '') as supervisor
+            $sql = "SELECT Distinct IFNULL(pp.nombre, '') as planner,
+                                    IFNULL(pe.nombre, '') as ejecutor, 
+                                    IFNULL(ps.nombre, '') as supervisor
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
@@ -529,8 +531,11 @@ class Task
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
+                inner join personas pp ON pp.id = plan.persona_id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
+                inner join personas pe ON pe.id = exec.persona_id
+                LEFT JOIN usuarios super ON pt.supervisor_id = super.id
+                inner join personas ps ON ps.id = super.persona_id ";
             $strWhere = " WHERE pug.usuario_id = ? ";
             $params[] = $cu;
 
