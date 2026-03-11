@@ -111,6 +111,8 @@ class AuthService
             $_SESSION['cliente_id'] = $userData['cliente_id'];
             $_SESSION['contraparte_id'] = $userData['contraparte_id'];
 
+            $this->logUserEvent((int)$userData['id'], 1);
+
             return true;
         } catch (Exception $e) {
             Logger::error($controllerName . "::login:" . $e->getMessage());
@@ -124,6 +126,10 @@ class AuthService
     public function logout(): bool
     {
         try {
+
+            $userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+            $this->logUserEvent($userId, 2);
+
             // Limpiar datos de sesión
             session_unset();
             session_destroy();
@@ -136,6 +142,34 @@ class AuthService
         } catch (Exception $e) {
             Logger::error("logout: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    private function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 
