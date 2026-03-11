@@ -253,6 +253,12 @@ use App\Constants\AppConstants; ?>
                                                         class="btn btn-outline-setap-primary" title="Editar">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
+                                                    <button type="button" class="btn btn-outline-setap-primary btn-persona-users"
+                                                        data-persona-id="<?= (int)$persona['id'] ?>"
+                                                        data-persona-name="<?= htmlspecialchars($persona['nombre'], ENT_QUOTES) ?>"
+                                                        title="Usuarios asociados">
+                                                        <i class="bi bi-people"></i>
+                                                    </button>
                                                     <button type="button" class="btn btn-outline-danger"
                                                         onclick="confirmDelete(<?= (int)$persona['id'] ?>, '<?= htmlspecialchars($persona['nombre']) ?>')"
                                                         title="Eliminar">
@@ -268,6 +274,47 @@ use App\Constants\AppConstants; ?>
                         </table>
                     </div>
                 <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal de Usuarios Asociados -->
+    <div class="modal fade" id="personaUsersModal" tabindex="-1" aria-labelledby="personaUsersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="personaUsersModalLabel">Usuarios asociados</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2">Persona: <strong id="personaUsersName"></strong></p>
+                    <div id="personaUsersAlert" class="alert alert-danger d-none" role="alert"></div>
+                    <div id="personaUsersLoading" class="text-center text-muted py-3 d-none">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        Cargando usuarios...
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Estado</th>
+                                    <th>Cliente</th>
+                                </tr>
+                            </thead>
+                            <tbody id="personaUsersTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="personaUsersEmpty" class="text-center text-muted py-3 d-none">
+                        <i class="bi bi-people"></i>
+                        <p class="mb-0">No hay usuarios asociados.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -306,17 +353,113 @@ use App\Constants\AppConstants; ?>
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 
     <script>
-        function confirmDelete(id, name) {
-            document.getElementById('deletePersonaId').value = id;
-            document.getElementById('personaName').textContent = name;
-            new bootstrap.Modal(document.getElementById('deleteModal')).show();
-        }
+    function confirmDelete(id, name) {
+        document.getElementById('deletePersonaId').value = id;
+        document.getElementById('personaName').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
 
-        // Auto-enviar formulario cuando cambie el filtro de estado
-        document.getElementById('estado_tipo_id').addEventListener('change', function() {
-            this.form.submit();
+    // Auto-enviar formulario cuando cambie el filtro de estado
+    document.getElementById('estado_tipo_id').addEventListener('change', function() {
+        this.form.submit();
+    });
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    const personaUsersModal = new bootstrap.Modal(document.getElementById('personaUsersModal'));
+    const personaUsersName = document.getElementById('personaUsersName');
+    const personaUsersAlert = document.getElementById('personaUsersAlert');
+    const personaUsersLoading = document.getElementById('personaUsersLoading');
+    const personaUsersEmpty = document.getElementById('personaUsersEmpty');
+    const personaUsersTableBody = document.getElementById('personaUsersTableBody');
+    const personaUsersEndpoint = '<?= AppConstants::ROUTE_PERSONAS ?>/usuarios';
+
+    function setUsersLoading(isLoading) {
+        personaUsersLoading.classList.toggle('d-none', !isLoading);
+    }
+
+    function setUsersAlert(message) {
+        if (!message) {
+            personaUsersAlert.classList.add('d-none');
+            personaUsersAlert.textContent = '';
+            return;
+        }
+        personaUsersAlert.textContent = message;
+        personaUsersAlert.classList.remove('d-none');
+    }
+
+    function renderPersonaUsers(usuarios) {
+        personaUsersTableBody.innerHTML = '';
+        if (!usuarios || usuarios.length === 0) {
+            personaUsersEmpty.classList.remove('d-none');
+            return;
+        }
+        personaUsersEmpty.classList.add('d-none');
+
+        usuarios.forEach(function(usuario) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${escapeHtml(usuario.nombre_usuario || '')}</strong></td>
+                <td>${escapeHtml(usuario.email || '')}</td>
+                <td>${escapeHtml(usuario.estado || '')}</td>
+                <td>${escapeHtml(usuario.cliente || '')}</td>
+            `;
+            personaUsersTableBody.appendChild(row);
         });
-    </script>
+    }
+
+    document.querySelectorAll('.btn-persona-users').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const personaId = this.getAttribute('data-persona-id');
+            const personaName = this.getAttribute('data-persona-name') || '';
+
+            personaUsersName.textContent = personaName;
+            personaUsersTableBody.innerHTML = '';
+            personaUsersEmpty.classList.add('d-none');
+            setUsersAlert('');
+            setUsersLoading(true);
+
+            personaUsersModal.show();
+
+            fetch(`${personaUsersEndpoint}?id=${encodeURIComponent(personaId)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar usuarios');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (!data || data.success === false) {
+                        setUsersAlert(data && data.message ? data.message : 'No fue posible cargar usuarios');
+                        personaUsersEmpty.classList.remove('d-none');
+                        return;
+                    }
+                    renderPersonaUsers(data.usuarios || []);
+                })
+                .catch(function() {
+                    setUsersAlert('No fue posible cargar usuarios');
+                    personaUsersEmpty.classList.remove('d-none');
+                })
+                .finally(function() {
+                    setUsersLoading(false);
+                });
+        });
+    });
+</script>
 </body>
 
 </html>

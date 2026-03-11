@@ -86,6 +86,30 @@ class Persona
         }
     }
 
+
+    /**
+     * Obtener usuarios asociados a una persona
+     */
+    public function getUsersByPersona(int $personaId): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT u.nombre_usuario, u.email, IFNULL(e.nombre, '') as estado, IFNULL(c.razon_social, '') as cliente
+                FROM personas p
+                INNER JOIN usuarios u ON p.id = u.persona_id
+                INNER JOIN estado_tipos e ON e.id = u.estado_tipo_id
+                LEFT JOIN clientes c ON c.id = u.cliente_id
+                WHERE p.id = :id
+            ");
+            $stmt->execute([':id' => $personaId]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            Logger::error('Persona::getUsersByPersona error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     /**
      * Crear una nueva persona
      */

@@ -386,6 +386,10 @@ try {
                     $controller->delete();
                     break;
 
+                case 'usuarios':
+                    $controller->usuarios();
+                    break;
+
                 case 'store':
                     $controller->store();
                     break;

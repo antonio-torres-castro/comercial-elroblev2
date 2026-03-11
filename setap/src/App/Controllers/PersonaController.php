@@ -259,6 +259,43 @@ class PersonaController extends AbstractBaseController
         }, 'show');
     }
 
+
+    /**
+     * API: Obtener usuarios asociados a una persona
+     */
+    public function usuarios()
+    {
+        return $this->executeWithErrorHandling(function () {
+            $currentUser = $this->getCurrentUser();
+
+            if (!$currentUser) {
+                http_response_code(401);
+                $this->jsonUnauthorized();
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_personas')) {
+                http_response_code(403);
+                $this->jsonForbidden();
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+                $this->jsonError(AppConstants::ERROR_METHOD_NOT_ALLOWED, [], 405);
+                return;
+            }
+
+            $personaId = (int)($_GET['id'] ?? 0);
+            if ($personaId <= 0) {
+                $this->jsonError(AppConstants::ERROR_INVALID_PERSONA_ID, [], 400);
+                return;
+            }
+
+            $usuarios = $this->personaModel->getUsersByPersona($personaId);
+            $this->jsonSuccess('Usuarios asociados obtenidos correctamente', ['usuarios' => $usuarios]);
+        }, 'usuarios');
+    }
+
     /**
      * Validar datos de persona
      */
