@@ -745,7 +745,7 @@ class User
             return [];
         }
     }
-    
+
     /**
      * Obtener logs de login/logout con filtros y paginación
      */
@@ -756,7 +756,7 @@ class User
             $where = $this->buildUserLogFilters($filters, $params);
 
             $sql = "
-                SELECT ul.fecha, ul.IP, u.nombre_usuario, p.nombre, ut.nombre as rol
+                SELECT ul.fecha, ul.IP, u.nombre_usuario, p.nombre, ut.nombre as rol, case ul.tipo_registro when 1 then 'login' when 2 then 'logout' end tipo
                 FROM usuario_logs ul
                 INNER JOIN usuarios u ON u.id = ul.usuario_id
                 INNER JOIN personas p ON p.id = u.persona_id
@@ -841,5 +841,4 @@ class User
 
         return $where;
     }
-    
 }

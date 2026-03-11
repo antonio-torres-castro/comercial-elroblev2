@@ -115,6 +115,8 @@ use App\Constants\AppConstants;
                                     <th>IP</th>
                                     <th>Usuario</th>
                                     <th>Persona</th>
+                                    <th>Rol</th>
+                                    <th>Tipo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -131,6 +133,8 @@ use App\Constants\AppConstants;
                                             <td><?= htmlspecialchars($log['IP']) ?></td>
                                             <td><?= htmlspecialchars($log['nombre_usuario']) ?></td>
                                             <td><?= htmlspecialchars($log['nombre']) ?></td>
+                                            <td><?= htmlspecialchars($log['rol']) ?></td>
+                                            <td><?= htmlspecialchars($log['tipo']) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -205,7 +209,9 @@ use App\Constants\AppConstants;
                 }
             });
 
-            const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+            const blob = new Blob([csv.join('\n')], {
+                type: 'text/csv'
+            });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
