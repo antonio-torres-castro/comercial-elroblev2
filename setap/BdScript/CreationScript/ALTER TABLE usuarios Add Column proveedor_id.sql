@@ -1,0 +1,1 @@
+ALTER TABLE usuarios Add Column proveedor_id INT NULL DEFAULT NULL AFTER cliente_id;

@@ -13,6 +13,7 @@ use App\Controllers\MenuController;
 use App\Controllers\PersonaController;
 use App\Controllers\PerfilController;
 use App\Controllers\ClientController;
+use App\Controllers\SuppliersController;
 use App\Controllers\TaskController;
 use App\Controllers\ReportController;
 use App\Controllers\GrupoTipoController;
@@ -477,6 +478,61 @@ try {
             }
             break;
 
+        case 'suppliers':
+            $controller = new SuppliersController();
+
+            switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+
+                case 'edit':
+                    if ($id) {
+                        $controller->edit($id);
+                    } else {
+                        $controller->index();
+                    }
+                    break;
+
+                case 'store':
+                    $controller->store();
+                    break;
+
+                case 'update':
+                    $controller->update();
+                    break;
+
+                case 'delete':
+                    $controller->delete();
+                    break;
+
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+
+        case 'supplier':
+            $controller = new SuppliersController();
+
+            switch ($action) {
+                case 'create':
+                    $controller->create();
+                    break;
+
+                default:
+                    if ($action) {
+                        $controller->edit($action);
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+            }
+            break;
         case 'client-counterparties':
             $controller = new ClientController();
             $controller->counterparties();

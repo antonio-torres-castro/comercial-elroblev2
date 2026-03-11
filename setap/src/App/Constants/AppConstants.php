@@ -41,6 +41,17 @@ class AppConstants
 
     /** Ruta de edición de clientes */
     const ROUTE_CLIENTS_EDIT = '/setap/clients/edit';
+    /** Ruta base de proveedor */
+    const ROUTE_SUPPLIER = '/setap/supplier';
+
+    /** Ruta base de proveedores */
+    const ROUTE_SUPPLIERS = '/setap/suppliers';
+
+    /** Ruta de creacion de proveedores */
+    const ROUTE_SUPPLIERS_CREATE = '/setap/suppliers/create';
+
+    /** Ruta de edicion de proveedores */
+    const ROUTE_SUPPLIERS_EDIT = '/setap/suppliers/edit';
 
     /** Ruta base de tareas */
     const ROUTE_TASKS = '/setap/tasks';
@@ -274,6 +285,8 @@ class AppConstants
 
     /** Error de cliente no encontrado */
     const ERROR_CLIENT_NOT_FOUND = 'Cliente no encontrado';
+    /** Error de proveedor no encontrado */
+    const ERROR_SUPPLIER_NOT_FOUND = 'Proveedor no encontrado';
 
     /** Error de menú no encontrado */
     const ERROR_MENU_NOT_FOUND = 'Menú no encontrado';
@@ -286,11 +299,22 @@ class AppConstants
     /** Error de ID de cliente inválido */
     const ERROR_INVALID_CLIENT_ID = 'ID de cliente inválido';
 
+    /** Error de ID de proveedor invalido */
+    const ERROR_INVALID_SUPPLIER_ID = 'ID de proveedor invalido';
+
     /** Error al guardar el cliente */
     const ERROR_SAVE_CLIENT = 'Error al guardar el cliente';
 
     /** Error al actualizar el cliente */
     const ERROR_UPDATE_CLIENT = 'Error al actualizar el cliente';
+    /** Error al guardar el proveedor */
+    const ERROR_SAVE_SUPPLIER = 'Error al guardar el proveedor';
+
+    /** Error al actualizar el proveedor */
+    const ERROR_UPDATE_SUPPLIER = 'Error al actualizar el proveedor';
+
+    /** ID de proveedor requerido */
+    const ERROR_SUPPLIER_ID_REQUIRED = 'ID de proveedor requerido';
 
     /** Error al guardar la contraparte */
     const ERROR_SAVE_COUNTERPARTY = 'Error al guardar la contraparte';
@@ -340,6 +364,14 @@ class AppConstants
 
     /** Éxito al crear cliente */
     const SUCCESS_CLIENT_CREATED = 'Cliente creado exitosamente';
+    /** Exito al crear proveedor */
+    const SUCCESS_SUPPLIER_CREATED = 'Proveedor creado exitosamente';
+
+    /** Exito al actualizar proveedor */
+    const SUCCESS_SUPPLIER_UPDATED = 'Proveedor actualizado exitosamente';
+
+    /** Exito al eliminar proveedor */
+    const SUCCESS_SUPPLIER_DELETED = 'Proveedor eliminado exitosamente';
 
     /** Éxito al crear menú */
     const SUCCESS_MENU_CREATED = 'Menú creado exitosamente';
@@ -451,6 +483,8 @@ class AppConstants
 
     /** Nuevo Cliente */
     const UI_NEW_CLIENT = 'Nuevo Cliente';
+    /** Nuevo Proveedor */
+    const UI_NEW_SUPPLIER = 'Nuevo Proveedor';
 
     /** Nuevo Proyecto */
     const UI_NEW_PROJECT = 'Nuevo Proyecto';
@@ -466,6 +500,8 @@ class AppConstants
 
     /** Crear Cliente */
     const UI_CREATE_CLIENT = 'Crear Cliente';
+    /** Crear Proveedor */
+    const UI_CREATE_SUPPLIER = 'Crear Proveedor';
 
     /** Crear Proyecto */
     const UI_CREATE_PROJECT = 'Crear Proyecto';
@@ -493,6 +529,8 @@ class AppConstants
 
     /** Lista de clientes */
     const UI_CLIENT_LIST = 'Lista de clientes';
+    /** Lista de proveedores */
+    const UI_SUPPLIER_LIST = 'Lista de proveedores';
 
     /** Lista de proyectos */
     const UI_PROJECT_LIST = 'Lista de proyectos';
@@ -516,6 +554,12 @@ class AppConstants
 
     /** Gestión de Clientes */
     const UI_CLIENT_MANAGEMENT = 'Gestión de Clientes';
+
+    /** Gestion de Proveedores */
+    const UI_SUPPLIER_MANAGEMENT = 'Gestion de Proveedores';
+
+    /** Editar Proveedor */
+    const UI_EDIT_SUPPLIER = 'Editar Proveedor';
 
     /** Editar Cliente */
     const UI_EDIT_CLIENT = 'Editar Cliente';
