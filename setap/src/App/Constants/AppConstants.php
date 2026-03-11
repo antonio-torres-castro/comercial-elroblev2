@@ -27,6 +27,9 @@ class AppConstants
     /** Ruta base de usuarios */
     const ROUTE_USERS = '/setap/users';
 
+    /** Ruta de logs de usuarios */
+    const ROUTE_USERS_LOGS = '/setap/users/userlog';
+
     /** Ruta base de cliente */
     const ROUTE_CLIENT = '/setap/client';
 
@@ -604,3 +607,4 @@ class AppConstants
         return $baseRoute . '?' . self::PARAM_ERROR . '=' . urlencode($message);
     }
 }
+

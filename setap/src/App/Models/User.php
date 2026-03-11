@@ -745,4 +745,101 @@ class User
             return [];
         }
     }
+    
+    /**
+     * Obtener logs de login/logout con filtros y paginación
+     */
+    public function getUserLogs(array $filters = [], int $limit = 25, int $offset = 0): array
+    {
+        try {
+            $params = [];
+            $where = $this->buildUserLogFilters($filters, $params);
+
+            $sql = "
+                SELECT ul.fecha, ul.IP, u.nombre_usuario, p.nombre, ut.nombre as rol
+                FROM usuario_logs ul
+                INNER JOIN usuarios u ON u.id = ul.usuario_id
+                INNER JOIN personas p ON p.id = u.persona_id
+                INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
+                $where
+                ORDER BY ul.fecha DESC
+                LIMIT :limit OFFSET :offset
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("User::getUserLogs: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Contar logs de login/logout con filtros
+     */
+    public function countUserLogs(array $filters = []): int
+    {
+        try {
+            $params = [];
+            $where = $this->buildUserLogFilters($filters, $params);
+
+            $sql = "
+                SELECT COUNT(*)
+                FROM usuario_logs ul
+                INNER JOIN usuarios u ON u.id = ul.usuario_id
+                INNER JOIN personas p ON p.id = u.persona_id
+                INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
+                $where
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+            $stmt->execute();
+
+            return (int)($stmt->fetchColumn() ?: 0);
+        } catch (PDOException $e) {
+            Logger::error("User::countUserLogs: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Construir filtros SQL para logs de usuario
+     */
+    private function buildUserLogFilters(array $filters, array &$params): string
+    {
+        $where = " WHERE 1=1 ";
+
+        if (!empty($filters['search'])) {
+            $where .= " AND (u.nombre_usuario LIKE :search OR p.nombre LIKE :search OR ul.IP LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        if (!empty($filters['role'])) {
+            $where .= " AND ut.nombre = :role";
+            $params[':role'] = $filters['role'];
+        }
+
+        if (!empty($filters['fecha_inicio'])) {
+            $where .= " AND ul.fecha >= :fecha_inicio";
+            $params[':fecha_inicio'] = $filters['fecha_inicio'] . ' 00:00:00';
+        }
+
+        if (!empty($filters['fecha_fin'])) {
+            $where .= " AND ul.fecha <= :fecha_fin";
+            $params[':fecha_fin'] = $filters['fecha_fin'] . ' 23:59:59';
+        }
+
+        return $where;
+    }
+    
 }

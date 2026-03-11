@@ -1183,4 +1183,57 @@ class UserController extends BaseController
             return [];
         }
     }
+
+    /**
+     * Registro de logins/logouts
+     */
+    public function userLog()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
+                return;
+            }
+
+            $filters = [
+                'search' => trim($_GET['search'] ?? ''),
+                'role' => trim($_GET['role'] ?? ''),
+                'fecha_inicio' => trim($_GET['fecha_inicio'] ?? ''),
+                'fecha_fin' => trim($_GET['fecha_fin'] ?? '')
+            ];
+
+            $page = max(1, (int)($_GET['page'] ?? 1));
+            $limit = max(10, min(100, (int)($_GET['limit'] ?? 25)));
+            $offset = ($page - 1) * $limit;
+
+            $logs = $this->userModel->getUserLogs($filters, $limit, $offset);
+            $totalRows = $this->userModel->countUserLogs($filters);
+            $totalPages = max(1, (int)ceil($totalRows / $limit));
+
+            $userTypes = $this->getUserTypes();
+
+            $data = [
+                'user' => $currentUser,
+                'logs' => $logs,
+                'userTypes' => $userTypes,
+                'filters' => $filters,
+                'totalRows' => $totalRows,
+                'currentPage' => $page,
+                'totalPages' => $totalPages
+            ];
+
+            require_once __DIR__ . '/../Views/users/userlog.php';
+        } catch (Exception $e) {
+            Logger::error('UserController::userLog: ' . $e->getMessage());
+            http_response_code(500);
+            echo AppConstants::ERROR_INTERNAL_SERVER;
+        }
+    }
 }

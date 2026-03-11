@@ -147,6 +147,9 @@ try {
                     $controller->permissions();
                     break;
 
+                case 'userlog':
+                    $controller->userLog();
+                    break;
                 case '':
                 default:
                     $controller->index();
@@ -993,3 +996,5 @@ try {
         </html>';
     }
 }
+
+
