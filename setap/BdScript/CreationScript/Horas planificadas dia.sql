@@ -1,6 +1,6 @@
 SELECT
     'dia' as lapso,
-    pt.fecha_inicio,
+    DATE(pt.fecha_inicio) fecha_inicio,
     
     SUM(pt.duracion_horas) AS total_horas, round(SUM(pt.duracion_horas) / 9, 2) as personas,
 

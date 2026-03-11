@@ -378,8 +378,8 @@ class TaskController extends BaseController
             Logger::error("TaskController::personasPeriodo: " . $e->getMessage());
             $this->jsonInternalError();
         }
-    }    
-    
+    }
+
     /**
      * Lista de tareas (plural) - Para Ejecutor
      */
@@ -514,7 +514,7 @@ class TaskController extends BaseController
                 return;
             }
             $task = $id ? $this->taskModel->getById($id) : null;
-            
+
             // Obtener historial de la tarea
             $taskHistory = $id ? $this->taskModel->getTaskHistory($id) : [];
 
@@ -528,7 +528,7 @@ class TaskController extends BaseController
                 }
                 unset($historyItem);
             }
-            
+
             // Datos para la vista - ESTANDARIZADO
             $data = [
                 'user' => $currentUser,

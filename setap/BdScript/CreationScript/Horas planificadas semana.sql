@@ -1,7 +1,7 @@
 SELECT
     'semana' AS lapso,
 
-    DATE_SUB(pt.fecha_inicio, INTERVAL WEEKDAY(pt.fecha_inicio) DAY) AS semana_inicio,
+    DATE_SUB(date(pt.fecha_inicio), INTERVAL WEEKDAY(pt.fecha_inicio) DAY) AS semana_inicio,
 
     SUM(pt.duracion_horas) AS total_horas, ROUND( SUM(pt.duracion_horas) / (COUNT(DISTINCT pt.fecha_inicio) * 9), 2) AS personas,
 
