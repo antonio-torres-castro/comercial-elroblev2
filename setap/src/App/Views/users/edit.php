@@ -58,7 +58,7 @@ use App\Constants\AppConstants; ?>
         .persona-result-card {
             border: 1px solid #dee2e6;
             border-radius: 0.5rem;
-            padding: 0.75rem;
+            padding: 1rem;
             margin-bottom: 0.5rem;
             transition: all 0.3s ease;
         }
@@ -92,6 +92,20 @@ use App\Constants\AppConstants; ?>
                         </h4>
                     </div>
                     <div class="card-body">
+                        <!-- Mostrar errores si existen (búsqueda de personas) -->
+                        <?php if (isset($_SESSION['errors'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Se encontraron errores:</h6>
+                                <ul class="mb-0">
+                                    <?php foreach ($_SESSION['errors'] as $errorMessage): ?>
+                                        <li><?= htmlspecialchars($errorMessage) ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <?php unset($_SESSION['errors']); ?>
+                        <?php endif; ?>
+
                         <?php if (!empty($error)): ?>
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
@@ -120,20 +134,136 @@ use App\Constants\AppConstants; ?>
                             </div>
                         <?php endif; ?>
 
+                        <?php
+                        $oldInput = $_SESSION['old_input'] ?? [];
+                        if (isset($_SESSION['old_input'])) {
+                            unset($_SESSION['old_input']);
+                        }
+                        ?>
+
+                        <!-- Vista previa del avatar -->
+                        <div class="text-center mb-4">
+                            <div class="user-avatar-preview" id="avatarPreview">
+                                <?= strtoupper(substr($userToEdit['nombre_completo'] ?? 'U', 0, 1)) ?>
+                            </div>
+                            <h5><?= htmlspecialchars($userToEdit['nombre_completo']) ?></h5>
+                            <p class="text-muted">@<?= htmlspecialchars($userToEdit['nombre_usuario']) ?></p>
+                        </div>
+                        <hr>
+
+                        <!-- Paso 1: Buscar y Seleccionar Persona -->
+                        <div class="form-section">
+                            <h6><i class="bi bi-person-check"></i> Paso 1: Buscar y Seleccionar Persona</h6>
+
+                            <!-- Formulario de búsqueda -->
+                            <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/seek_personas" class="needs-validation" novalidate id="search-form">
+                                <?= Security::renderCsrfField() ?>
+                                <input type="hidden" name="current_user_id" value="<?= (int)$userToEdit['id'] ?>">
+
+                                <div class="row mb-3">
+                                    <div class="col-md-5">
+                                        <label for="persona_search" class="form-label">Buscar Persona</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            id="persona_search"
+                                            name="persona_search"
+                                            placeholder="RUT completo o parte del nombre"
+                                            value="<?= htmlspecialchars($oldInput['persona_search'] ?? '') ?>">
+                                        <div class="form-text">Deje vacío para ver todas las personas</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="search_type" class="form-label">Tipo de Búsqueda</label>
+                                        <select class="form-select" id="search_type" name="search_type">
+                                            <option value="all" <?= ($oldInput['search_type'] ?? 'all') === 'all' ? 'selected' : '' ?>>Buscar en todo</option>
+                                            <option value="rut" <?= ($oldInput['search_type'] ?? '') === 'rut' ? 'selected' : '' ?>>Solo por RUT</option>
+                                            <option value="name" <?= ($oldInput['search_type'] ?? '') === 'name' ? 'selected' : '' ?>>Solo por nombre</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button type="submit" name="search_persona" class="btn btn-outline-primary me-2">
+                                            <i class="bi bi-search"></i> Buscar
+                                        </button>
+                                        <button type="submit" name="search_persona" onclick="document.getElementById('persona_search').value='';" class="btn btn-outline-secondary">
+                                            <i class="bi bi-list"></i> Ver Todas
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <!-- Estadísticas de búsqueda -->
+                            <?php if (isset($_SESSION['search_stats'])): ?>
+                                <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <i class="bi bi-info-circle"></i>
+                                        <strong>Resultados:</strong> <?= $_SESSION['search_stats']['total'] ?> persona(s) encontrada(s)
+                                    </div>
+                                    <div class="small">
+                                        <span class="badge bg-success"><?= $_SESSION['search_stats']['available'] ?> disponibles</span>
+                                        <span class="badge bg-warning"><?= $_SESSION['search_stats']['assigned'] ?> asignadas</span>
+                                    </div>
+                                </div>
+                                <?php unset($_SESSION['search_stats']); ?>
+                            <?php endif; ?>
+
+                            <!-- Resultados de búqueda -->
+                            <?php if (isset($_SESSION['persona_results'])): ?>
+                                <div class="mb-3">
+                                    <label class="form-label">Seleccionar Persona (Opcional)</label>
+                                    <?php if (empty($_SESSION['persona_results'])): ?>
+                                        <div class="alert alert-warning">
+                                            <i class="bi bi-exclamation-triangle"></i> No se encontraron personas con ese criterio de búsqueda.
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="row" style="max-height: 400px; overflow-y: auto;">
+                                            <?php foreach ($_SESSION['persona_results'] as $persona): ?>
+                                                <div class="col-md-6 mb-2">
+                                                    <div class="persona-result-card <?= $persona['has_user'] ? 'border-warning' : '' ?>">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input"
+                                                                type="radio"
+                                                                name="persona_id"
+                                                                id="persona_<?= $persona['id'] ?>"
+                                                                value="<?= $persona['id'] ?>"
+                                                                <?= ($oldInput['new_persona_id'] ?? '') == $persona['id'] ? 'checked' : '' ?>
+                                                                onchange="updatePersonaSelection(this)">
+                                                            <label class="form-check-label w-100" for="persona_<?= $persona['id'] ?>">
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <strong><?= htmlspecialchars($persona['nombre']) ?></strong>
+                                                                        <?php if ($persona['id'] == $userToEdit['persona_id']): ?>
+                                                                            <span class="badge bg-info ms-2">ACTUAL</span>
+                                                                        <?php elseif ($persona['has_user']): ?>
+                                                                            <span class="badge bg-warning ms-2">Asignada a: <?= htmlspecialchars($persona['usuario_asociado']) ?></span>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                    <div class="col-12">
+                                                                        <small class="text-muted">RUT: <?= htmlspecialchars($persona['rut']) ?></small>
+                                                                    </div>
+                                                                    <?php if (!empty($persona['telefono'])): ?>
+                                                                        <div class="col-12">
+                                                                            <small class="text-muted">Tel: <?= htmlspecialchars($persona['telefono']) ?></small>
+                                                                        </div>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php unset($_SESSION['persona_results']); ?>
+                            <?php endif; ?>
+                        </div>
+
                         <form method="POST" action="<?= AppConstants::ROUTE_USERS ?>/update" id="userEditForm">
                             <?= Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$userToEdit['id'] ?>">
                             <input type="hidden" name="current_persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
+                            <input type="hidden" id="new_persona_id_hidden" name="new_persona_id" value="<?= htmlspecialchars($oldInput['new_persona_id'] ?? '') ?>">
 
-                            <!-- Vista previa del avatar -->
-                            <div class="text-center mb-4">
-                                <div class="user-avatar-preview" id="avatarPreview">
-                                    <?= strtoupper(substr($userToEdit['nombre_completo'] ?? 'U', 0, 1)) ?>
-                                </div>
-                                <h5><?= htmlspecialchars($userToEdit['nombre_completo']) ?></h5>
-                                <p class="text-muted">@<?= htmlspecialchars($userToEdit['nombre_usuario']) ?></p>
-                            </div>
-                            <hr>
+
 
                             <div class="row">
                                 <!-- Información Personal -->
@@ -169,89 +299,6 @@ use App\Constants\AppConstants; ?>
                                             <div class="form-text">Este campo no se puede editar desde aquí. Para modificar datos personales, edite la persona directamente.</div>
                                         </div>
 
-                                        <!-- Búsqueda de personas para cambio -->
-                                        <div class="mb-3">
-                                            <label class="form-label">Buscar Nueva Persona (Opcional)</label>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <input type="text"
-                                                        class="form-control"
-                                                        id="persona_search"
-                                                        name="persona_search"
-                                                        placeholder="RUT o nombre para buscar"
-                                                        value="<?= htmlspecialchars($_SESSION['old_input']['persona_search'] ?? '') ?>">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <select class="form-select" id="search_type" name="search_type">
-                                                        <option value="all" <?= ($_SESSION['old_input']['search_type'] ?? 'all') === 'all' ? 'selected' : '' ?>>Todo</option>
-                                                        <option value="rut" <?= ($_SESSION['old_input']['search_type'] ?? '') === 'rut' ? 'selected' : '' ?>>RUT</option>
-                                                        <option value="name" <?= ($_SESSION['old_input']['search_type'] ?? '') === 'name' ? 'selected' : '' ?>>Nombre</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <button type="submit" name="search_persona" class="btn btn-outline-primary btn-sm">
-                                                        <i class="bi bi-search"></i> Buscar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Estadísticas de búsqueda -->
-                                        <?php if (isset($_SESSION['search_stats'])): ?>
-                                            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
-                                                <div>
-                                                    <i class="bi bi-info-circle"></i>
-                                                    <strong>Resultados:</strong> <?= $_SESSION['search_stats']['total'] ?> persona(s) encontrada(s)
-                                                </div>
-                                                <div class="small">
-                                                    <span class="badge bg-success"><?= $_SESSION['search_stats']['available'] ?> disponibles</span>
-                                                    <span class="badge bg-warning"><?= $_SESSION['search_stats']['assigned'] ?> asignadas</span>
-                                                </div>
-                                            </div>
-                                            <?php unset($_SESSION['search_stats']); ?>
-                                        <?php endif; ?>
-
-                                        <!-- Resultados de búsqueda -->
-                                        <?php if (isset($_SESSION['persona_results'])): ?>
-                                            <div class="mb-3">
-                                                <label class="form-label">Seleccionar Nueva Persona</label>
-                                                <?php if (empty($_SESSION['persona_results'])): ?>
-                                                    <div class="alert alert-warning">
-                                                        <i class="bi bi-exclamation-triangle"></i> No se encontraron personas con ese criterio.
-                                                    </div>
-                                                <?php else: ?>
-                                                    <div class="row" style="max-height: 300px; overflow-y: auto;">
-                                                        <?php foreach ($_SESSION['persona_results'] as $persona): ?>
-                                                            <div class="col-12 mb-2">
-                                                                <div class="persona-result-card small <?= $persona['has_user'] ? 'border-warning' : '' ?> <?= $persona['id'] == $userToEdit['persona_id'] ? 'border-info bg-info bg-opacity-10' : '' ?>">
-                                                                    <div class="form-check">
-                                                                        <input class="form-check-input"
-                                                                            type="radio"
-                                                                            name="new_persona_id"
-                                                                            id="new_persona_<?= $persona['id'] ?>"
-                                                                            value="<?= $persona['id'] ?>"
-                                                                            <?= ($_SESSION['old_input']['new_persona_id'] ?? '') == $persona['id'] ? 'checked' : '' ?>>
-                                                                        <label class="form-check-label w-100" for="new_persona_<?= $persona['id'] ?>">
-                                                                            <strong><?= htmlspecialchars($persona['nombre']) ?></strong>
-                                                                            - RUT: <?= htmlspecialchars($persona['rut']) ?>
-                                                                            <?php if ($persona['id'] == $userToEdit['persona_id']): ?>
-                                                                                <span class="badge bg-info ms-2">ACTUAL</span>
-                                                                            <?php elseif ($persona['has_user']): ?>
-                                                                                <span class="badge bg-warning ms-2">Asignada a: <?= htmlspecialchars($persona['usuario_asociado']) ?></span>
-                                                                            <?php endif; ?>
-                                                                            <?php if (!empty($persona['telefono'])): ?>
-                                                                                <br><small class="text-muted">Tel: <?= htmlspecialchars($persona['telefono']) ?></small>
-                                                                            <?php endif; ?>
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                            <?php unset($_SESSION['persona_results']); ?>
-                                        <?php endif; ?>
 
                                         <!-- Campo persona actual (solo lectura para información) -->
                                         <div class="mb-3">
@@ -259,7 +306,7 @@ use App\Constants\AppConstants; ?>
                                             <input type="text" class="form-control"
                                                 value="<?= htmlspecialchars($userToEdit['nombre_completo']) ?> - RUT: <?= htmlspecialchars($userToEdit['rut']) ?>"
                                                 readonly>
-                                            <input type="hidden" name="persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
+                                            <input type="hidden" id="persona_id" name="persona_id" value="<?= (int)$userToEdit['persona_id'] ?>">
                                             <div class="form-text">Para cambiar la persona, use la búsqueda de arriba y seleccione una nueva persona.</div>
                                         </div>
                                     </div>
@@ -434,6 +481,53 @@ use App\Constants\AppConstants; ?>
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 
     <script>
+        // Función para actualizar selección de persona
+        function updatePersonaSelection(radio) {
+            // Limpiar clases de selección previa
+            document.querySelectorAll('.persona-result-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Agregar clase a la seleccionada
+            if (radio.checked) {
+                radio.closest('.persona-result-card').classList.add('selected');
+                const hiddenInput = document.getElementById('new_persona_id_hidden');
+                if (hiddenInput) {
+                    hiddenInput.value = radio.value;
+                }
+
+                // Mostrar indicador visual de que hay una persona seleccionada
+                showPersonaSelectedFeedback(radio);
+            }
+        }
+
+        // Función para mostrar feedback visual cuando se selecciona una persona
+        function showPersonaSelectedFeedback(radio) {
+            const formSection = document.querySelector('.form-section');
+
+            // Remover feedback previo
+            const existingFeedback = formSection.querySelector('.persona-selected-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            // Obtener datos de la persona seleccionada
+            const label = radio.closest('.persona-result-card').querySelector('label');
+            const personaName = label.querySelector('strong').textContent;
+            const personaRut = label.querySelector('small').textContent;
+
+            // Crear feedback
+            const feedback = document.createElement('div');
+            feedback.className = 'alert alert-success persona-selected-feedback mt-3';
+            feedback.innerHTML = `
+                <i class="bi bi-check-circle"></i> 
+                <strong>Persona seleccionada:</strong> ${personaName} - ${personaRut}
+                <br><small>Ahora puede continuar con los datos del usuario.</small>
+            `;
+
+            formSection.appendChild(feedback);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('userEditForm');
             const updateBtn = document.getElementById('updateBtn');
@@ -579,6 +673,16 @@ use App\Constants\AppConstants; ?>
 
             // Nota: Se eliminó la validación AJAX de email en tiempo real - ahora se valida en el backend
             // Nota: Se eliminaron los listeners de persona_id ya que es un campo hidden, no un select
+
+            // Marcar persona seleccionada si existe
+            const selectedPersonaId = document.getElementById('new_persona_id_hidden')?.value;
+            if (selectedPersonaId) {
+                const radio = document.querySelector(`input[name="persona_id"][value="${selectedPersonaId}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    updatePersonaSelection(radio);
+                }
+            }
 
             // Validación del formulario
             form.addEventListener('submit', function(e) {

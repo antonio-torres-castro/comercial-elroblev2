@@ -559,6 +559,8 @@ class User
             if ($excludeUserId !== null) {
                 $sql .= " AND (u.id IS NULL OR u.id = ?)";
                 $params[] = $excludeUserId;
+            } else {
+                $sql .= " AND (u.id IS NULL)";
             }
 
             // Aplicar filtro de búsqueda según tipo
