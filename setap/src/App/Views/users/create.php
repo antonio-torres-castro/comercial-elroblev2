@@ -312,9 +312,24 @@
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <div class="invalid-feedback">Debe seleccionar un cliente para este tipo de usuario</div>
+                                            <div class="invalid-feedback" id="client-feedback">Debe seleccionar un cliente para este tipo de usuario</div>
+                                        </div>
+
+                                        <div class="mb-3 proveedor-conditional" id="proveedor-field">
+                                            <label for="proveedor_id" class="form-label">Proveedor Asociado *</label>
+                                            <select class="form-select" id="proveedor_id" name="proveedor_id">
+                                                <option value="">Seleccione un proveedor</option>
+                                                <?php foreach ($suppliers as $supplier): ?>
+                                                    <option value="<?= $supplier['id'] ?>"
+                                                        <?= ($oldInput['proveedor_id'] ?? '') == $supplier['id'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($supplier['razon_social']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="invalid-feedback" id="proveedor-feedback">Debe seleccionar un proveedor para este tipo de usuario</div>
                                         </div>
                                     </div>
+
                                 </div>
 
                                 <div class="row">
@@ -416,19 +431,41 @@
             const userTypeSelect = document.getElementById('usuario_tipo_id');
             const selectedOption = userTypeSelect.options[userTypeSelect.selectedIndex];
             const userTypeName = selectedOption ? selectedOption.getAttribute('data-name') : '';
+
             const clientField = document.getElementById('client-field');
             const clientSelect = document.getElementById('cliente_id');
+            const proveedorField = document.getElementById('proveedor-field');
+            const proveedorSelect = document.getElementById('proveedor_id');
 
             // Mostrar campo cliente solo para tipos 'client' y 'counterparty'
             if (userTypeName === 'client' || userTypeName === 'counterparty') {
                 clientField.style.display = 'block';
                 clientField.classList.add('client-conditional');
                 clientSelect.setAttribute('required', 'required');
+
+                proveedorField.style.display = 'none';
+                proveedorField.classList.remove('proveedor-conditional');
+                proveedorSelect.removeAttribute('required');
+                proveedorSelect.value = '';
+            } else if (userTypeName === 'executor' || userTypeName === 'supervisor' || userTypeName === 'planner') {
+                proveedorField.style.display = 'block';
+                proveedorField.classList.add('proveedor-conditional');
+                proveedorSelect.setAttribute('required', 'required');
+
+                clientField.style.display = 'none';
+                clientField.classList.remove('client-conditional');
+                clientSelect.removeAttribute('required');
+                clientSelect.value = '';
             } else {
                 clientField.style.display = 'none';
                 clientField.classList.remove('client-conditional');
                 clientSelect.removeAttribute('required');
                 clientSelect.value = '';
+
+                proveedorField.style.display = 'none';
+                proveedorField.classList.remove('proveedor-conditional');
+                proveedorSelect.removeAttribute('required');
+                proveedorSelect.value = '';
             }
         }
 

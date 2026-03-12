@@ -87,6 +87,7 @@ class User
         try {
             // Determinar cliente_id según tipo de usuario y validaciones de negocio
             $clienteId = $this->determineClienteId($data);
+            $proveedorId = $this->determineProveedorId($data);
 
             $sql = "
                 INSERT INTO usuarios (
@@ -96,11 +97,12 @@ class User
                     clave_hash,
                     usuario_tipo_id,
                     cliente_id,
+                    proveedor_id,
                     estado_tipo_id,
                     fecha_inicio,
                     fecha_termino,
                     fecha_Creado
-                ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NOW())
             ";
 
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
@@ -113,6 +115,7 @@ class User
                 $hashedPassword,
                 $data['usuario_tipo_id'],
                 $clienteId,
+                $proveedorId,
                 empty($data['fecha_inicio']) ? null : $data['fecha_inicio'],
                 empty($data['fecha_termino']) ? null : $data['fecha_termino']
             ]);
@@ -162,11 +165,12 @@ class User
 
             // Determinar cliente_id para la actualización
             $clienteId = $this->determineClienteId($data);
+            $proveedorId = $this->determineProveedorId($data);
 
             // Solo actualizar campos específicos del usuario - NO datos de persona
             $usuarioSql = "
                 UPDATE usuarios
-                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, estado_tipo_id = ?,
+                SET email = ?, usuario_tipo_id = ?, cliente_id = ?, proveedor_id = ?, estado_tipo_id = ?,
                     fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -187,6 +191,7 @@ class User
                 $data['email'],
                 $data['usuario_tipo_id'],
                 $clienteId,
+                $proveedorId,
                 $data['estado_tipo_id'] ?? 1,
                 $data['fecha_inicio'] ?? null,
                 $data['fecha_termino'] ?? null,
@@ -369,7 +374,6 @@ class User
 
     /**
      * Determinar cliente_id según el tipo de usuario y lógica de negocio
-     * GAP 1 y GAP 2: Solo usuarios 'client' y 'counterparty' deben tener cliente_id
      */
     private function determineClienteId(array $data): ?int
     {
@@ -386,6 +390,29 @@ class User
                 throw new Exception("Usuario tipo '$tipoUsuario' debe tener cliente_id asignado");
             }
             return (int)$data['cliente_id'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Determinar proveedor_id según el tipo de usuario y lógica de negocio
+     */
+    private function determineProveedorId(array $data): ?int
+    {
+        $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
+
+        // Usuarios de la empresa propietaria NO deben tener cliente_id
+        if (in_array($tipoUsuario, ['client', 'counterparty', 'admin'])) {
+            return null;
+        }
+
+        // Usuarios de cliente deben tener cliente_id
+        if (in_array($tipoUsuario, ['executor', 'supervisor', 'planner'])) {
+            if (empty($data['proveedor_id'])) {
+                throw new Exception("Usuario tipo '$tipoUsuario' debe tener proveedor_id asignado");
+            }
+            return (int)$data['proveedor_id'];
         }
 
         return null;
@@ -461,6 +488,26 @@ class User
             $stmt = $this->db->prepare("
                 SELECT id, razon_social, rut
                 FROM clientes
+                WHERE estado_tipo_id = 2
+                ORDER BY razon_social
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("obteniendo clientes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener todos los proveedores disponibles para asignacion
+     */
+    public function getAvailableSuppliers(): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id, razon_social, rut
+                FROM proveedores
                 WHERE estado_tipo_id = 2
                 ORDER BY razon_social
             ");

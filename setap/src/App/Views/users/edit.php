@@ -429,6 +429,38 @@ use App\Constants\AppConstants; ?>
                                 </div>
                             </div>
 
+                            <!-- Asignación de Proveedor -->
+                            <div class="row mb-4" id="supplier-selection" style="display: none;">
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-building"></i> Asignación de Cliente
+                                    </h5>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="proveedor_id" class="form-label">Cliente <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="proveedor_id" name="proveedor_id">
+                                            <option value="">Seleccionar proveedor...</option>
+                                            <?php if (isset($suppliers) && is_array($suppliers)): ?>
+                                                <?php foreach ($suppliers as $supplier): ?>
+                                                    <option value="<?= $supplier['id'] ?>"
+                                                        data-rut="<?= htmlspecialchars($supplier['rut'] ?? '') ?>"
+                                                        <?= (isset($userToEdit['proveedor_id']) && $supplier['id'] == $userToEdit['proveedor_id']) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($supplier['razon_social']) ?>
+                                                        <?= !empty($supplier['rut']) ? ' - RUT: ' . htmlspecialchars($supplier['rut']) : '' ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                        <div class="form-text">
+                                            Seleccione el proveedor al que pertenece este usuario.
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
                             <!-- Información Adicional -->
                             <div class="row mb-4">
                                 <div class="col-12">
@@ -537,24 +569,49 @@ use App\Constants\AppConstants; ?>
                 const userTypeSelect = document.getElementById('usuario_tipo_id');
                 const selectedOption = userTypeSelect.options[userTypeSelect.selectedIndex];
                 const userType = selectedOption.text.split(' - ')[0].trim();
+
                 const clientSection = document.getElementById('client-selection');
                 const clientSelect = document.getElementById('cliente_id');
-                const validationInfo = document.getElementById('client-validation-info');
+                const validationClientInfo = document.getElementById('client-validation-info');
+
+                const supplierSection = document.getElementById('supplier-selection');
+                const supplierSelect = document.getElementById('proveedor_id');
 
                 // Tipos de usuario que requieren cliente
                 const clientUserTypes = ['client', 'counterparty'];
+                const supplierUserTypes = ['executor', 'supervisor', 'planner'];
 
                 if (clientUserTypes.includes(userType.toLowerCase())) {
                     // Mostrar selección de cliente
                     clientSection.style.display = 'block';
                     clientSelect.required = true;
-                    validationInfo.style.display = 'block';
+                    validationClientInfo.style.display = 'block';
+
+                    // Ocultar selección de proveedor
+                    supplierSection.style.display = 'none';
+                    supplierSelect.required = false;
+                    supplierSelect.value = '';
+                } else if (supplierUserTypes.includes(userType.toLowerCase())) {
+                    // Mostrar selección de proveedor
+                    supplierSection.style.display = 'block';
+                    supplierSelect.required = true;
+
+                    // Ocultar selección de cliente
+                    clientSection.style.display = 'none';
+                    clientSelect.required = false;
+                    clientSelect.value = '';
+                    validationClientInfo.style.display = 'none';
                 } else {
                     // Ocultar selección de cliente
                     clientSection.style.display = 'none';
                     clientSelect.required = false;
                     clientSelect.value = '';
-                    validationInfo.style.display = 'none';
+                    validationClientInfo.style.display = 'none';
+
+                    // Ocultar selección de proveedor
+                    supplierSection.style.display = 'none';
+                    supplierSelect.required = false;
+                    supplierSelect.value = '';
                 }
             }
 

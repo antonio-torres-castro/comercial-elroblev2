@@ -102,6 +102,7 @@ class UserController extends BaseController
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
             $clients = $this->userModel->getAvailableClients();
+            $suppliers = $this->userModel->getAvailableSuppliers();
 
             // Obtener todas las personas disponibles
             $availablePersonas = $this->userModel->getAllPersonas();
@@ -112,6 +113,7 @@ class UserController extends BaseController
                 'userTypes' => $userTypes,
                 'estadosTipo' => $estadosTipo,
                 'clients' => $clients,
+                'suppliers' => $suppliers,
                 'availablePersonas' => $availablePersonas,
                 'title' => AppConstants::UI_CREATE_USER,
                 'subtitle' => 'Agregar nuevo usuario al sistema',
@@ -199,6 +201,7 @@ class UserController extends BaseController
                 'password' => $_POST['password'], // No sanitizar contraseñas
                 'usuario_tipo_id' => (int)$_POST['usuario_tipo_id'],
                 'cliente_id' => !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null,
+                'proveedor_id' => !empty($_POST['proveedor_id']) ? (int)$_POST['proveedor_id'] : null,
                 'fecha_inicio' => !empty($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : null,
                 'fecha_termino' => !empty($_POST['fecha_termino']) ? $_POST['fecha_termino'] : null
             ];
@@ -414,6 +417,7 @@ class UserController extends BaseController
             $userTypes = $this->getUserTypes();
             $estadosTipo = $this->getEstadosTipo();
             $clients = $this->userModel->getAvailableClients();
+            $suppliers = $this->userModel->getAvailableSuppliers();
 
             $availablePersonas = $this->userModel->getAllPersonas($id);
 
@@ -422,6 +426,7 @@ class UserController extends BaseController
                 'userTypes' => $userTypes,
                 'estadosTipo' => $estadosTipo,
                 'clients' => $clients,
+                'suppliers' => $suppliers,
                 'availablePersonas' => $availablePersonas,
                 'currentUser' => $currentUser,
                 'error' => $_GET['error'] ?? '',
