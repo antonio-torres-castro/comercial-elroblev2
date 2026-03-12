@@ -439,7 +439,7 @@ use App\Constants\AppConstants; ?>
 
                                 <div class="col-md-12">
                                     <div class="mb-3">
-                                        <label for="proveedor_id" class="form-label">Cliente <span class="text-danger">*</span></label>
+                                        <label for="proveedor_id" class="form-label">Proveedor <span class="text-danger">*</span></label>
                                         <select class="form-select" id="proveedor_id" name="proveedor_id">
                                             <option value="">Seleccionar proveedor...</option>
                                             <?php if (isset($suppliers) && is_array($suppliers)): ?>
