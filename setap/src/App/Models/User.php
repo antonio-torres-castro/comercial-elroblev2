@@ -25,16 +25,18 @@ class User
     {
         try {
             $sql = "
-                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id, u.estado_tipo_id,
+                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id, u.proveedor_id, u.estado_tipo_id,
                        p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
-                       c.razon_social as cliente_nombre
+                       c.razon_social as cliente_nombre,
+                       pr.razon_social as proveedor_nombre
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id /*siempre tiene un estado el registro*/
                 LEFT JOIN clientes c ON u.cliente_id = c.id
+                LEFT JOIN proveedores pr ON u.proveedor_id = pr.id
                 WHERE u.estado_tipo_id != 4 /* Excluir usuarios eliminados */
                 ORDER BY u.fecha_Creado DESC
             ";

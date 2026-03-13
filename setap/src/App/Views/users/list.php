@@ -156,7 +156,7 @@ use App\Constants\AppConstants;
                                     <th>Información Personal</th>
                                     <th>Contacto</th>
                                     <th>Rol</th>
-                                    <th>Cliente</th> <!-- GAP 1 y GAP 2: Nueva columna -->
+                                    <th>Cliente /<br>Proveedor</th> <!-- GAP 1 y GAP 2: Nueva columna -->
                                     <th>Estado</th>
                                     <th>Registro</th>
                                     <th class="table-actions">Acciones</th>
@@ -213,7 +213,6 @@ use App\Constants\AppConstants;
                                                 </span>
                                             </td>
                                             <td>
-                                                <!-- GAP 1 y GAP 2: Mostrar cliente asignado -->
                                                 <?php if (!empty($user['cliente_id']) && !empty($user['cliente_nombre'])): ?>
                                                     <div class="small">
                                                         <i class="bi bi-building"></i>
@@ -222,10 +221,16 @@ use App\Constants\AppConstants;
                                                     <div class="text-muted smaller">
                                                         ID: <?= $user['cliente_id'] ?>
                                                     </div>
-                                                <?php else: ?>
-                                                    <span class="text-muted small">
-                                                        <i class="bi bi-dash"></i> No asignado
-                                                    </span>
+                                                <?php endif; ?>
+
+                                                <?php if (!empty($user['proveedor_id']) && !empty($user['proveedor_nombre'])): ?>
+                                                    <div class="small">
+                                                        <i class="bi bi-person-arms-up"></i>
+                                                        <span class="fw-semibold"><?= htmlspecialchars($user['proveedor_nombre']) ?></span>
+                                                    </div>
+                                                    <div class="text-muted smaller">
+                                                        ID: <?= $user['proveedor_id'] ?>
+                                                    </div>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
@@ -246,7 +251,7 @@ use App\Constants\AppConstants;
                                                 <div class="btn-group btn-group-sm" role="group">
                                                     <?php if (Security::hasPermission('Read')): ?>
                                                         <button type="button" class="btn btn-outline-info"
-                                                            onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>', <?= Security::hasPermission('Modify') ?>)"
+                                                            onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>', '<?= htmlspecialchars($user['cliente_nombre'] ?? $user['proveedor_nombre'] ?? 'No Asignado') ?>', <?= Security::hasPermission('Modify') ?>)"
                                                             title="Ver detalles">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
@@ -440,7 +445,7 @@ use App\Constants\AppConstants;
             });
         }
 
-        function showUserDetailsModal(userId, userName, email, statusId, fechaCreacion, canModify) {
+        function showUserDetailsModal(userId, userName, email, statusId, fechaCreacion, entidad, canModify) {
             const modal = new bootstrap.Modal(document.getElementById('userModal'));
             const modalBody = document.getElementById('userModalBody');
 
@@ -458,6 +463,10 @@ use App\Constants\AppConstants;
                         <div class="row mb-2">
                             <div class="col-sm-4"><strong>Email:</strong></div>
                             <div class="col-sm-8">${email}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Entidad:</strong></div>
+                            <div class="col-sm-8">${entidad}</div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-sm-4"><strong>Estado:</strong></div>
