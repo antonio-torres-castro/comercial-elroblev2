@@ -52,22 +52,24 @@ class Project
     public function find(int $id): array|false
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT p.*,
-                       c.id as cliente_id, c.razon_social as cliente_nombre, c.rut as cliente_rut,
-                       c.direccion as cliente_direccion, c.telefono as cliente_telefono,
-                       tt.id as tarea_tipo_id, tt.nombre as tipo_tarea,
-                       et.id as estado_tipo_id, et.nombre as estado_nombre,
-                       cc.id as contraparte_id,
-                       CONCAT(per.nombre, ' (', per.rut, ')') as contraparte_nombre,
-                       cc.email as contraparte_email, cc.telefono as contraparte_telefono,
-                       cc.cargo as contraparte_cargo
+            $stmt = $this->db->prepare("SELECT p.*,
+                    c.id as cliente_id, c.razon_social as cliente_nombre, c.rut as cliente_rut,
+                    c.direccion as cliente_direccion, c.telefono as cliente_telefono,
+                    p.proveedor_id, pr.razon_social as proveedor_nombre, pr.rut as proveedor_rut,
+                    pr.direccion as proveedor_direccion, pr.telefono as proveedor_telefono,
+                    tt.id as tarea_tipo_id, tt.nombre as tipo_tarea,
+                    et.id as estado_tipo_id, et.nombre as estado_nombre,
+                    cc.id as contraparte_id,
+                    CONCAT(per.nombre, ' (', per.rut, ')') as contraparte_nombre,
+                    cc.email as contraparte_email, cc.telefono as contraparte_telefono,
+                    cc.cargo as contraparte_cargo
                 FROM proyectos p
-                INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                INNER JOIN cliente_contrapartes cc ON p.contraparte_id = cc.id
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                LEFT JOIN cliente_contrapartes cc ON p.contraparte_id = cc.id
                 INNER JOIN personas per ON cc.persona_id = per.id
+                LEFT JOIN proveedores pr ON pr.id = p.proveedor_id
                 WHERE p.id = ? AND p.estado_tipo_id != 4
             ");
 
@@ -89,13 +91,14 @@ class Project
 
             $stmt = $this->db->prepare("
                 INSERT INTO proyectos (
-                    cliente_id, direccion, fecha_inicio, fecha_fin,
+                    cliente_id, proveedor_id, direccion, fecha_inicio, fecha_fin,
                     tarea_tipo_id, estado_tipo_id, contraparte_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $result = $stmt->execute([
                 $data['cliente_id'],
+                $data['proveedor_id'],
                 $data['direccion'] ?? null,
                 $data['fecha_inicio'],
                 $data['fecha_fin'] ?? null,
@@ -135,7 +138,7 @@ class Project
 
             $stmt = $this->db->prepare("
                 UPDATE proyectos SET
-                    cliente_id = ?, direccion = ?, fecha_inicio = ?, fecha_fin = ?,
+                    cliente_id = ?, proveedor_id = ?, direccion = ?, fecha_inicio = ?, fecha_fin = ?,
                     tarea_tipo_id = ?, estado_tipo_id = ?, contraparte_id = ?,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE id = ? AND estado_tipo_id != 4
@@ -143,6 +146,7 @@ class Project
 
             $result = $stmt->execute([
                 $data['cliente_id'],
+                $data['proveedor_id'],
                 $data['direccion'] ?? null,
                 $data['fecha_inicio'],
                 $data['fecha_fin'] ?? null,
@@ -477,6 +481,19 @@ class Project
         }
     }
 
+    /** Obtener el ID del proveedor al que pertenece un proyecto */
+    public function getProveedorIdProyecto(int $projectId): ?int
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT proveedor_id FROM proyectos WHERE id = ?");
+            $stmt->execute([$projectId]);
+            return $stmt->fetchColumn() !== false ? (int)$stmt->fetchColumn() : null;
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::ProveedorIdProyecto error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
     /** Crear asignación usuario-grupo (evitando duplicados) */
     public function addUsuarioGrupo(int $projectId, int $usuarioId, int $grupoId): array
     {
@@ -545,6 +562,19 @@ class Project
             return $stmt->fetchAll();
         } catch (Exception $e) {
             \App\Helpers\Logger::error('Project::getAllUsers error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /** Obtener los usuarios por proveedor (para selector) */
+    public function getUsersBySupplier(int $supplierId): array
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT id, nombre_usuario FROM usuarios WHERE estado_tipo_id != 4 AND (? = 0 OR proveedor_id = ?) ORDER BY nombre_usuario");
+            $stmt->execute([$supplierId, $supplierId]);
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::getUsersBySupplier error: ' . $e->getMessage());
             return [];
         }
     }

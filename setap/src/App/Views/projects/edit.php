@@ -56,7 +56,7 @@ use App\Constants\AppConstants; ?>
                     <p class="text-muted">Proyecto: <?= htmlspecialchars($project['cliente_nombre']) ?></p>
                 </div>
                 <div class="col-md-4 text-end">
-                    <a href="<?= AppConstants::ROUTE_PROJECTS_SHOW ?>?<?= (int)$project['id'] ?>" class="btn btn-outline-secondary">
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                     </a>
                 </div>
@@ -90,6 +90,21 @@ use App\Constants\AppConstants; ?>
                                             <option value="<?= (int)$client['id'] ?>"
                                                 <?= $client['id'] == $project['cliente_id'] ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($client['nombre']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="mb-3">
+                                    <label for="proveedor_id" class="form-label">Proveedor <span class="required">*</span></label>
+                                    <select class="form-select" id="proveedor_id" name="proveedor_id" required>
+                                        <option value="">Seleccionar Proveedor</option>
+                                        <?php foreach ($suppliers as $supplier): ?>
+                                            <option value="<?= (int)$supplier['id'] ?>"
+                                                <?= $supplier['id'] == $project['proveedor_id'] ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($supplier['nombre']) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>

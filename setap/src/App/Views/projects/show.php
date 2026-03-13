@@ -99,6 +99,11 @@ use App\Constants\AppConstants; ?>
                 </p>
             </div>
             <div class="col-md-5 text-end">
+
+                <a href="javascript:history.back()" class="btn btn-secondary mr-2">
+                    <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
+                </a>
+
                 <?php if ($_GET['show_btn_editar']): ?>
                     <a href="<?= AppConstants::ROUTE_PROJECTS_EDIT ?>?id=<?= $project['id'] ?>" class="btn btn-warning mr-2">
                         <i class="bi bi-pencil"></i> Editar
@@ -274,7 +279,7 @@ use App\Constants\AppConstants; ?>
 
                 <!-- Feriados del Proyecto -->
                 <?php if (!empty($holidays)): ?>
-                    <div class="card mb-4">
+                    <div class="card mb-4" style="max-height: 290px; overflow-y: auto;">
                         <div class="card-header">
                             <h5><i class="bi bi-calendar-x"></i> Feriados del Proyecto</h5>
                         </div>
@@ -312,6 +317,24 @@ use App\Constants\AppConstants; ?>
                                 <i class="bi bi-telephone"></i>
                                 <a href="tel:<?= htmlspecialchars($project['contraparte_telefono']) ?>">
                                     <?= htmlspecialchars($project['contraparte_telefono']) ?>
+                                </a>
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Información de Proveedor -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-person-arms-up"></i> Información del Proveedor</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6><?= htmlspecialchars($project['proveedor_nombre']) ?></h6>
+                        <?php if ($project['proveedor_telefono']): ?>
+                            <p class="mb-1">
+                                <i class="bi bi-telephone"></i>
+                                <a href="tel:<?= htmlspecialchars($project['proveedor_telefono']) ?>">
+                                    <?= htmlspecialchars($project['proveedor_telefono']) ?>
                                 </a>
                             </p>
                         <?php endif; ?>

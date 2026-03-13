@@ -806,12 +806,15 @@ class User
             $params = [];
             $where = $this->buildUserLogFilters($filters, $params);
 
-            $sql = "
-                SELECT ul.fecha, ul.IP, u.nombre_usuario, p.nombre, ut.nombre as rol, case ul.tipo_registro when 1 then 'login' when 2 then 'logout' end tipo
+            $sql = "SELECT ul.fecha, ul.IP, u.nombre_usuario, p.nombre, ut.nombre as rol, 
+                    pr.razon_social as proveedor_nombre, c.razon_social as cliente_nombre,
+                    case ul.tipo_registro when 1 then 'login' when 2 then 'logout' end tipo
                 FROM usuario_logs ul
                 INNER JOIN usuarios u ON u.id = ul.usuario_id
                 INNER JOIN personas p ON p.id = u.persona_id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
+                LEFT JOIN proveedores pr ON pr.id = u.proveedor_id
+                LEFT JOIN clientes c ON c.id = u.cliente_id
                 $where
                 ORDER BY ul.fecha DESC
                 LIMIT :limit OFFSET :offset

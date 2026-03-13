@@ -116,6 +116,7 @@ use App\Constants\AppConstants;
                                     <th>Usuario</th>
                                     <th>Persona</th>
                                     <th>Rol</th>
+                                    <th>Cliente / <br>Proveedor</th>
                                     <th>Tipo</th>
                                 </tr>
                             </thead>
@@ -134,6 +135,17 @@ use App\Constants\AppConstants;
                                             <td><?= htmlspecialchars($log['nombre_usuario']) ?></td>
                                             <td><?= htmlspecialchars($log['nombre']) ?></td>
                                             <td><?= htmlspecialchars($log['rol']) ?></td>
+                                            <td>
+                                                <?php
+                                                if (!empty($log['cliente_nombre'])) {
+                                                    echo '<span class="badge bg-info">' . htmlspecialchars($log['cliente_nombre']) . '</span>';
+                                                } elseif (!empty($log['proveedor_nombre'])) {
+                                                    echo '<span class="badge bg-warning">' . htmlspecialchars($log['proveedor_nombre']) . '</span>';
+                                                } else {
+                                                    echo '<span class="text-muted">N/A</span>';
+                                                }
+                                                ?>
+                                            </td>
                                             <td><?= htmlspecialchars($log['tipo']) ?></td>
                                         </tr>
                                     <?php endforeach; ?>

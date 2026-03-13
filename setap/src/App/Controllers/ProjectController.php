@@ -234,12 +234,14 @@ class ProjectController extends BaseController
 
         // Obtener datos necesarios para el formulario
         $clients = $this->getClients();
+        $suppliers = $this->getSuppliers();
         $taskTypes = $this->getTaskTypes();
         $projectStates = $this->getProjectStates();
         $counterparts = $this->getCounterparts();
 
         $this->view('projects/create', [
             'clients' => $clients,
+            'suppliers' => $suppliers,
             'taskTypes' => $taskTypes,
             'projectStates' => $projectStates,
             'counterparts' => $counterparts,
@@ -277,6 +279,7 @@ class ProjectController extends BaseController
 
             $projectData = [
                 'cliente_id' => (int)$_POST['cliente_id'],
+                'proveedor_id' => (int)$_POST['proveedor_id'],
                 'direccion' => Security::sanitizeInput($_POST['direccion']),
                 'fecha_inicio' => $_POST['fecha_inicio'],
                 'fecha_fin' => !empty($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null,
@@ -324,6 +327,7 @@ class ProjectController extends BaseController
 
         // Obtener datos para el formulario
         $clients = $this->getClients();
+        $suppliers = $this->getSuppliers();
         $taskTypes = $this->getTaskTypes();
         $counterparts = $this->getCounterparts();
         $projectStates = $this->getProjectStates();
@@ -332,6 +336,7 @@ class ProjectController extends BaseController
         $this->view('projects/edit', [
             'project' => $project,
             'clients' => $clients,
+            'suppliers' => $suppliers,
             'taskTypes' => $taskTypes,
             'counterparts' => $counterparts,
             'projectStates' => $projectStates,
@@ -376,6 +381,7 @@ class ProjectController extends BaseController
 
             $projectData = [
                 'cliente_id' => (int)$_POST['cliente_id'],
+                'proveedor_id' => (int)$_POST['proveedor_id'],
                 'direccion' => Security::sanitizeInput($_POST['direccion']),
                 'fecha_inicio' => $_POST['fecha_inicio'],
                 'fecha_fin' => !empty($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null,
@@ -567,6 +573,23 @@ class ProjectController extends BaseController
         }
     }
 
+    private function getSuppliers(): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id, razon_social as nombre, rut
+                FROM proveedores
+                WHERE estado_tipo_id != 4
+                ORDER BY razon_social
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            Logger::error('ProjectController::getSuppliers error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     private function getTaskTypes(): array
     {
         try {
@@ -652,7 +675,10 @@ class ProjectController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            if (!$currentUser) { $this->redirectToLogin(); return; }
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project')) {
                 http_response_code(403);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED]);
@@ -665,9 +691,9 @@ class ProjectController extends BaseController
                 echo json_encode(['success' => false, 'message' => 'ID de proyecto inválido']);
                 return;
             }
-
+            $proveedorId = $this->projectModel->getProveedorIdProyecto($projectId);
             $assigned = $this->projectModel->getUsuariosGrupo($projectId);
-            $users = $this->projectModel->getAllUsers();
+            $users = $this->projectModel->getUsersBySupplier($proveedorId);
             $grupos = $this->projectModel->getGrupoTipos();
             $projectActive = $this->projectModel->isActive($projectId);
 
@@ -690,9 +716,14 @@ class ProjectController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            if (!$currentUser) { $this->redirectToLogin(); return; }
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
-                !$this->permissionService->hasPermission($currentUser['id'], 'Create')) {
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            if (
+                !$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
+                !$this->permissionService->hasPermission($currentUser['id'], 'Create')
+            ) {
                 http_response_code(403);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
                 return;
@@ -738,9 +769,14 @@ class ProjectController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            if (!$currentUser) { $this->redirectToLogin(); return; }
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
-                !$this->permissionService->hasPermission($currentUser['id'], 'Modify')) {
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            if (
+                !$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
+                !$this->permissionService->hasPermission($currentUser['id'], 'Modify')
+            ) {
                 http_response_code(403);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
                 return;
@@ -786,9 +822,14 @@ class ProjectController extends BaseController
     {
         try {
             $currentUser = $this->getCurrentUser();
-            if (!$currentUser) { $this->redirectToLogin(); return; }
-            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
-                !$this->permissionService->hasPermission($currentUser['id'], 'Eliminate')) {
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            if (
+                !$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project') ||
+                !$this->permissionService->hasPermission($currentUser['id'], 'Eliminate')
+            ) {
                 http_response_code(403);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
                 return;

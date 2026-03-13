@@ -1,0 +1,1 @@
+ALTER TABLE proyectos ADD COLUMN proveedor_id INT NOT NULL DEFAULT 0 AFTER cliente_id;

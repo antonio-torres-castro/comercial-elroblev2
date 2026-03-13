@@ -27,11 +27,10 @@ class AuthService
 
         try {
             //El estado estado_tipo_id = 2, es un registro activo, que en el contexto de persona y usuario debe estar en ese punto para poder ser un usuario valido
-            $stmt = $this->db->prepare("
-                SELECT Distinct u.id, u.nombre_usuario, u.email, u.clave_hash, u.estado_tipo_id,
-                       p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
-                       ut.nombre as rol, ut.id as usuario_tipo_id,
-                       p.estado_tipo_id as persona_estado, COALESCE(u.cliente_id, 0) as cliente_id, COALESCE(cc.id, 0) as contraparte_id
+            $stmt = $this->db->prepare("SELECT Distinct u.id, u.nombre_usuario, u.email, u.clave_hash, u.estado_tipo_id,
+                       p.nombre as nombre_completo, p.rut, p.telefono, p.direccion, ut.nombre as rol, ut.id as usuario_tipo_id,
+                       p.estado_tipo_id as persona_estado, COALESCE(u.cliente_id, 0) as cliente_id, COALESCE(cc.id, 0) as contraparte_id,
+                       COALESCE(u.proveedor_id, 0) as proveedor_id
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 INNER JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
@@ -109,6 +108,7 @@ class AuthService
             $_SESSION['usuario_tipo_id'] = $userData['usuario_tipo_id'];
             $_SESSION['login_time'] = time();
             $_SESSION['cliente_id'] = $userData['cliente_id'];
+            $_SESSION['proveedor_id'] = $userData['proveedor_id'];
             $_SESSION['contraparte_id'] = $userData['contraparte_id'];
 
             $this->logUserEvent((int)$userData['id'], 1);
