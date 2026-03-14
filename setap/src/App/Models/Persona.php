@@ -142,7 +142,7 @@ class Persona
         } catch (Exception $e) {
             $this->db->rollBack();
             Logger::error('Persona::create error: ' . $e->getMessage());
-            return null;
+            throw $e; // Re-lanzar la excepción para que el controlador pueda manejarla
         }
     }
 
@@ -225,7 +225,7 @@ class Persona
     public function rutExists(string $rut, ?int $excludeId = null): bool
     {
         try {
-            $sql = "SELECT COUNT(*) FROM personas WHERE rut = :rut AND estado_tipo_id != 4";
+            $sql = "SELECT COUNT(*) FROM personas WHERE rut = :rut";
             $params = [':rut' => $rut];
 
             if ($excludeId) {

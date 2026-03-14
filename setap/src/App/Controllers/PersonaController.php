@@ -117,7 +117,12 @@ class PersonaController extends AbstractBaseController
                 'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2)
             ];
 
-            $personaId = $this->personaModel->create($personaData);
+            try {
+                $personaId = $this->personaModel->create($personaData);
+            } catch (Exception $e) {
+                $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, 'Error al crear persona: ' . $e->getMessage());
+            }
+
             if ($personaId) {
                 Security::logSecurityEvent('persona_created', [
                     'persona_id' => $personaId,
@@ -308,8 +313,8 @@ class PersonaController extends AbstractBaseController
             $errors[] = 'El RUT es obligatorio';
         } elseif (!Security::validateRut($data['rut'])) {
             $errors[] = 'El RUT no es válido';
-        } elseif ($this->personaModel->rutExists($data['rut'], $excludeId)) {
-            $errors[] = 'El RUT ya está registrado';
+        } elseif ($this->personaModel->rutExists($data['rut_clean'], $excludeId)) {
+            $errors[] = 'El RUT ya está registrado, revise si esta eliminada la persona';
         }
 
         // Validar nombre

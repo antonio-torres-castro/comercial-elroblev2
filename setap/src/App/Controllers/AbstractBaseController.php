@@ -130,7 +130,7 @@ abstract class AbstractBaseController extends BaseController
             }
 
             http_response_code(500);
-            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+            echo $this->renderError($e->getMessage() ?? AppConstants::ERROR_INTERNAL_SERVER);
             return null;
         }
     }
