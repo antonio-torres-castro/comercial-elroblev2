@@ -31,7 +31,15 @@ class Persona
                        p.fecha_creado, p.fecha_modificacion
                 FROM personas p
                 LEFT JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                WHERE p.estado_tipo_id != 4";
+                ";
+
+            // Filtro por proveedor
+            if (!empty($filters['proveedor_id'])) {
+                $sql .= " INNER JOIN usuarios u ON p.id = u.persona_id
+                          ";
+            }
+
+            $sql .= " WHERE p.estado_tipo_id != 4";
 
             $params = [];
 
@@ -39,6 +47,12 @@ class Persona
             if (!empty($filters['estado_tipo_id'])) {
                 $sql .= " AND p.estado_tipo_id = :estado_tipo_id";
                 $params[':estado_tipo_id'] = $filters['estado_tipo_id'];
+            }
+
+            // Filtro por proveedor
+            if (!empty($filters['proveedor_id'])) {
+                $sql .= " AND u.proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
             }
 
             // Filtro por búsqueda general

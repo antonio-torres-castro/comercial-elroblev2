@@ -53,6 +53,8 @@ class UserController extends BaseController
                 return;
             }
 
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Verificar acceso al menú primero
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_users')) {
                 http_response_code(403);
@@ -60,7 +62,13 @@ class UserController extends BaseController
                 return;
             }
 
-            $users = $this->userModel->getAll();
+            $filters = [];
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
+            $users = $this->userModel->getAll($filters);
 
             // Obtener tipos de usuario para filtro
             $userTypes = $this->getUserTypes();

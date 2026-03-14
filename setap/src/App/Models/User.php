@@ -21,7 +21,7 @@ class User
     /**
      * Obtener todos los usuarios con información relacionada
      */
-    public function getAll(): array
+    public function getAll(array $filters = []): array
     {
         try {
             $sql = "
@@ -37,12 +37,19 @@ class User
                 INNER JOIN estado_tipos et ON u.estado_tipo_id = et.id /*siempre tiene un estado el registro*/
                 LEFT JOIN clientes c ON u.cliente_id = c.id
                 LEFT JOIN proveedores pr ON u.proveedor_id = pr.id
-                WHERE u.estado_tipo_id != 4 /* Excluir usuarios eliminados */
-                ORDER BY u.fecha_Creado DESC
+                WHERE u.estado_tipo_id != 4
             ";
 
+            // Filtro por proveedor
+            if (!empty($filters['proveedor_id'])) {
+                $sql .= " AND u.proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
+            $sql .= " ORDER BY u.fecha_Creado DESC";
+
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute($params);
             return $stmt->fetchAll();
         } catch (PDOException $e) {
             Logger::error("User::getAll: " . $e->getMessage());
