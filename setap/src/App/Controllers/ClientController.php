@@ -101,10 +101,12 @@ class ClientController extends BaseController
             }
 
             $statusTypes = $this->clientModel->getStatusTypes();
+            $suppliers = $this->clientModel->getSuppliers(); // Para el campo de proveedor
 
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('clients/create', [
                 'user' => $currentUser,
+                'suppliers' => $suppliers,
                 'title' => AppConstants::UI_NEW_CLIENT,
                 'subtitle' => 'Crear nuevo cliente',
                 'client' => null,
@@ -203,10 +205,12 @@ class ClientController extends BaseController
 
             $statusTypes = $this->clientModel->getStatusTypes();
             $counterparties = $this->clientModel->getCounterparties((int)$id);
+            $suppliers = $this->clientModel->getSuppliers(); // Para el campo de proveedor
 
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('clients/edit', [
                 'user' => $currentUser,
+                'suppliers' => $suppliers,
                 'title' => AppConstants::UI_EDIT_CLIENT,
                 'subtitle' => 'Editando: ' . $client['razon_social'],
                 'client_id' => $id,  // Añadir para consistencia

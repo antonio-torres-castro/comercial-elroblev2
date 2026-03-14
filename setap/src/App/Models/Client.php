@@ -101,14 +101,15 @@ class Client
         try {
             $query = "
                 INSERT INTO {$this->table} (
-                    rut, razon_social, direccion, email, telefono,
+                    proveedor_id, rut, razon_social, direccion, email, telefono,
                     fecha_inicio_contrato, fecha_facturacion, fecha_termino_contrato,
                     estado_tipo_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([
+                $data['proveedor_id'] ?? null,
                 $data['rut'] ?? null,
                 $data['razon_social'],
                 $data['direccion'] ?? null,
@@ -135,6 +136,7 @@ class Client
         try {
             $query = "
                 UPDATE {$this->table} SET
+                    proveedor_id = ?,
                     rut = ?,
                     razon_social = ?,
                     direccion = ?,
@@ -150,6 +152,7 @@ class Client
 
             $stmt = $this->db->prepare($query);
             $result = $stmt->execute([
+                $data['proveedor_id'] ?? null,
                 $data['rut'] ?? null,
                 $data['razon_social'],
                 $data['direccion'] ?? null,
@@ -283,6 +286,23 @@ class Client
         } catch (Exception $e) {
             Logger::error("Client::addCounterpartie: " . $e->getMessage());
             throw new Exception("Error al agregar la contraparte");
+        }
+    }
+
+    public function getSuppliers(): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id, razon_social as nombre, rut
+                FROM proveedores
+                WHERE estado_tipo_id != 4
+                ORDER BY razon_social
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            Logger::error('ProjectController::getSuppliers error: ' . $e->getMessage());
+            return [];
         }
     }
 

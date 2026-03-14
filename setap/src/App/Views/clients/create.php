@@ -146,6 +146,22 @@ use App\Constants\AppConstants;
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
+
+                                        <div class="col-md-6">
+                                            <label for="proveedor_id" class="form-label">Proveedor <span class="required">*</span></label>
+                                            <select class="form-select" id="proveedor_id" name="proveedor_id" required>
+                                                <option value="">Seleccionar Proveedor</option>
+                                                <?php foreach ($suppliers as $supplier): ?>
+                                                    <option value="<?= (int)$supplier['id'] ?>">
+                                                        <?= htmlspecialchars($supplier['nombre']) ?>
+                                                        <?php if (!empty($supplier['rut'])): ?>
+                                                            - RUT: <?= htmlspecialchars($supplier['rut']) ?>
+                                                        <?php endif; ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
                                     </div>
 
                                     <!-- Botones -->

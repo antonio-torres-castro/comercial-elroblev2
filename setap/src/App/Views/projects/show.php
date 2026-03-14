@@ -329,7 +329,7 @@ use App\Constants\AppConstants; ?>
                         <h5><i class="bi bi-person-arms-up"></i> Información del Proveedor</h5>
                     </div>
                     <div class="card-body">
-                        <h6><?= htmlspecialchars($project['proveedor_nombre']) ?></h6>
+                        <h6><?= htmlspecialchars($project['proveedor_nombre'] ?? '') ?></h6>
                         <?php if ($project['proveedor_telefono']): ?>
                             <p class="mb-1">
                                 <i class="bi bi-telephone"></i>
