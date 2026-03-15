@@ -229,6 +229,9 @@ class ProjectController extends BaseController
 
     public function create()
     {
+        $currentUser = $this->getCurrentUser();
+        $uti = $currentUser['usuario_tipo_id'];
+
         // Verificar acceso al menú de gestión de proyecto individual
         if (!isset($_SESSION['user_id']) || !$this->permissionService->hasMenuAccess($_SESSION['user_id'], 'manage_project')) {
             http_response_code(403);
@@ -236,9 +239,14 @@ class ProjectController extends BaseController
             return;
         }
 
+        $filters = [];
+        if ($uti > 1) {
+            $filters['proveedor_id'] = $currentUser['proveedor_id'];
+        }
+
         // Obtener datos necesarios para el formulario
         $clients = $this->getClients();
-        $suppliers = $this->getSuppliers();
+        $suppliers = $this->getSuppliers($filters);
         $taskTypes = $this->getTaskTypes();
         $projectStates = $this->getProjectStates();
         $counterparts = $this->getCounterparts();
@@ -577,13 +585,18 @@ class ProjectController extends BaseController
         }
     }
 
-    private function getSuppliers(): array
+    private function getSuppliers(array $filters = []): array
     {
         try {
+            $filtroProveedor = "";
+            if (isset($filters['proveedor_id']) && is_numeric($filters['proveedor_id'])) {
+                $filtroProveedor = "AND id = " . (int)$filters['proveedor_id'];
+            }
             $stmt = $this->db->prepare("
                 SELECT id, razon_social as nombre, rut
                 FROM proveedores
                 WHERE estado_tipo_id != 4
+                $filtroProveedor
                 ORDER BY razon_social
             ");
             $stmt->execute();

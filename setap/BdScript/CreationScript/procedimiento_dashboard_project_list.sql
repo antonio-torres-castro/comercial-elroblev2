@@ -7,7 +7,7 @@ DROP procedure IF EXISTS `comerci3_bdsetap`.`dashboard_project_list`;
 
 DELIMITER $$
 USE `comerci3_bdsetap`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `dashboard_project_list`(in clienteId int, in proveedorId int,
+CREATE PROCEDURE `dashboard_project_list`(in clienteId int, in proveedorId int,
 in estadoTipoId int, in tareaTipoId int,
 in fechaDesde date, in fechaHasta date)
 BEGIN
@@ -25,7 +25,7 @@ BEGIN
           From clientes  c
     Inner Join proyectos p on p.cliente_id = c.id
     Where (clienteId    = 0 or c.id             = clienteId)
-      and (proveedorId  = 0 or c.proveedor_id             = proveedorId)
+      and (proveedorId  = 0 or c.proveedor_id   = proveedorId)
       and (estadoTipoId = 0 or p.estado_tipo_id = estadoTipoId)
       and (tareaTipoId  = 0 or p.tarea_tipo_id  = tareaTipoId);
     
