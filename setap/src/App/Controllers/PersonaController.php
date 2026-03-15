@@ -45,8 +45,9 @@ class PersonaController extends AbstractBaseController
             // Aplicar filtros si están presentes
             $filters = $this->extractFilters(['estado_tipo_id', 'search']);
 
-            $_GET['show_btn_nuevo'] = $rCreate;
-            $_GET['show_col_acciones'] = $rModify && $rEliminate;
+            //Botón nueva persona, solo el administrador puede crear peronas
+            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
 
             if ($uti > 1) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];

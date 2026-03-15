@@ -77,7 +77,7 @@ use App\Constants\AppConstants;
                     </h2>
                 </div>
                 <div class="col-md-6 text-end">
-                    <?php if (Security::hasPermission('Create')): ?>
+                    <?php if (Security::hasPermission('Create') && $_GET['show_btn_nuevo']): ?>
                         <a href="<?= \App\Constants\AppConstants::ROUTE_USERS_CREATE ?>" class="btn btn-setap-primary">
                             <i class="bi bi-person-plus"></i> <?= AppConstants::UI_NEW_USER ?>
                         </a>
@@ -251,13 +251,13 @@ use App\Constants\AppConstants;
                                                 <div class="btn-group btn-group-sm" role="group">
                                                     <?php if (Security::hasPermission('Read')): ?>
                                                         <button type="button" class="btn btn-outline-info"
-                                                            onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>', '<?= htmlspecialchars($user['cliente_nombre'] ?? $user['proveedor_nombre'] ?? 'No Asignado') ?>', <?= Security::hasPermission('Modify') ?>)"
+                                                            onclick="showUserDetailsModal(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>', '<?= htmlspecialchars($user['email']) ?>', '<?= $user['estado_tipo_id'] ?>', '<?= htmlspecialchars($user['fecha_Creado']) ?>', '<?= htmlspecialchars($user['cliente_nombre'] ?? $user['proveedor_nombre'] ?? 'No Asignado') ?>', <?= Security::hasPermission('Modify') && $_GET['show_col_acciones'] ?>)"
                                                             title="Ver detalles">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
                                                     <?php endif; ?>
 
-                                                    <?php if (Security::hasPermission('Modify')): ?>
+                                                    <?php if (Security::hasPermission('Modify') && $_GET['show_col_acciones']): ?>
                                                         <a href="<?= AppConstants::ROUTE_USERS_EDIT ?>?id=<?= $user['id'] ?>"
                                                             class="btn btn-outline-warning"
                                                             title="<?= AppConstants::UI_BTN_EDIT ?>">
@@ -292,7 +292,7 @@ use App\Constants\AppConstants;
                                                         <?php endif; ?>
                                                     <?php endif; ?>
 
-                                                    <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id']): ?>
+                                                    <?php if (Security::hasPermission('Eliminate') && $user['id'] != $_SESSION['user_id'] && $_GET['show_col_acciones']): ?>
                                                         <button type="button" class="btn btn-outline-danger"
                                                             onclick="deleteUser(<?= $user['id'] ?>, '<?= htmlspecialchars($user['nombre_usuario']) ?>')"
                                                             title="<?= AppConstants::UI_BTN_DELETE ?>">

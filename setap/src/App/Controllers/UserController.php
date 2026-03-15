@@ -62,6 +62,14 @@ class UserController extends BaseController
                 return;
             }
 
+            $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
+            $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
+            $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
+
+            //Botón nueva persona, solo el administrador puede crear peronas
+            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
+
             $filters = [];
 
             if ($uti > 1) {
