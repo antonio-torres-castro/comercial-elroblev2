@@ -488,7 +488,10 @@ class Project
         try {
             $stmt = $this->db->prepare("SELECT proveedor_id FROM proyectos WHERE id = ?");
             $stmt->execute([$projectId]);
-            return $stmt->fetchColumn() !== false ? (int)$stmt->fetchColumn() : null;
+
+            $proveedorId = $stmt->fetchColumn();
+
+            return $proveedorId ? (int)$proveedorId : null;
         } catch (Exception $e) {
             \App\Helpers\Logger::error('Project::ProveedorIdProyecto error: ' . $e->getMessage());
             return null;

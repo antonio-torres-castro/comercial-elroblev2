@@ -108,11 +108,12 @@ class Persona
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT u.nombre_usuario, u.email, IFNULL(e.nombre, '') as estado, IFNULL(c.razon_social, '') as cliente
+                SELECT u.nombre_usuario, u.email, IFNULL(e.nombre, '') as estado, IFNULL(c.razon_social, ifnull(pr.razon_social, '')) as cliente
                 FROM personas p
                 INNER JOIN usuarios u ON p.id = u.persona_id
                 INNER JOIN estado_tipos e ON e.id = u.estado_tipo_id
                 LEFT JOIN clientes c ON c.id = u.cliente_id
+                LEFT JOIN proveedores pr ON pr.id = u.proveedor_id
                 WHERE p.id = :id
             ");
             $stmt->execute([':id' => $personaId]);

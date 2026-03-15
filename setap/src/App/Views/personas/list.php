@@ -301,7 +301,7 @@ use App\Constants\AppConstants; ?>
                                     <th>Usuario</th>
                                     <th>Email</th>
                                     <th>Estado</th>
-                                    <th>Cliente</th>
+                                    <th>Cliente \<br>Proveedor</th>
                                 </tr>
                             </thead>
                             <tbody id="personaUsersTableBody"></tbody>
@@ -353,113 +353,113 @@ use App\Constants\AppConstants; ?>
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
 
     <script>
-    function confirmDelete(id, name) {
-        document.getElementById('deletePersonaId').value = id;
-        document.getElementById('personaName').textContent = name;
-        new bootstrap.Modal(document.getElementById('deleteModal')).show();
-    }
-
-    // Auto-enviar formulario cuando cambie el filtro de estado
-    document.getElementById('estado_tipo_id').addEventListener('change', function() {
-        this.form.submit();
-    });
-
-    function escapeHtml(value) {
-        if (value === null || value === undefined) {
-            return '';
+        function confirmDelete(id, name) {
+            document.getElementById('deletePersonaId').value = id;
+            document.getElementById('personaName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
-        return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
 
-    const personaUsersModal = new bootstrap.Modal(document.getElementById('personaUsersModal'));
-    const personaUsersName = document.getElementById('personaUsersName');
-    const personaUsersAlert = document.getElementById('personaUsersAlert');
-    const personaUsersLoading = document.getElementById('personaUsersLoading');
-    const personaUsersEmpty = document.getElementById('personaUsersEmpty');
-    const personaUsersTableBody = document.getElementById('personaUsersTableBody');
-    const personaUsersEndpoint = '<?= AppConstants::ROUTE_PERSONAS ?>/usuarios';
+        // Auto-enviar formulario cuando cambie el filtro de estado
+        document.getElementById('estado_tipo_id').addEventListener('change', function() {
+            this.form.submit();
+        });
 
-    function setUsersLoading(isLoading) {
-        personaUsersLoading.classList.toggle('d-none', !isLoading);
-    }
-
-    function setUsersAlert(message) {
-        if (!message) {
-            personaUsersAlert.classList.add('d-none');
-            personaUsersAlert.textContent = '';
-            return;
+        function escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
-        personaUsersAlert.textContent = message;
-        personaUsersAlert.classList.remove('d-none');
-    }
 
-    function renderPersonaUsers(usuarios) {
-        personaUsersTableBody.innerHTML = '';
-        if (!usuarios || usuarios.length === 0) {
-            personaUsersEmpty.classList.remove('d-none');
-            return;
+        const personaUsersModal = new bootstrap.Modal(document.getElementById('personaUsersModal'));
+        const personaUsersName = document.getElementById('personaUsersName');
+        const personaUsersAlert = document.getElementById('personaUsersAlert');
+        const personaUsersLoading = document.getElementById('personaUsersLoading');
+        const personaUsersEmpty = document.getElementById('personaUsersEmpty');
+        const personaUsersTableBody = document.getElementById('personaUsersTableBody');
+        const personaUsersEndpoint = '<?= AppConstants::ROUTE_PERSONAS ?>/usuarios';
+
+        function setUsersLoading(isLoading) {
+            personaUsersLoading.classList.toggle('d-none', !isLoading);
         }
-        personaUsersEmpty.classList.add('d-none');
 
-        usuarios.forEach(function(usuario) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
+        function setUsersAlert(message) {
+            if (!message) {
+                personaUsersAlert.classList.add('d-none');
+                personaUsersAlert.textContent = '';
+                return;
+            }
+            personaUsersAlert.textContent = message;
+            personaUsersAlert.classList.remove('d-none');
+        }
+
+        function renderPersonaUsers(usuarios) {
+            personaUsersTableBody.innerHTML = '';
+            if (!usuarios || usuarios.length === 0) {
+                personaUsersEmpty.classList.remove('d-none');
+                return;
+            }
+            personaUsersEmpty.classList.add('d-none');
+
+            usuarios.forEach(function(usuario) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
                 <td><strong>${escapeHtml(usuario.nombre_usuario || '')}</strong></td>
                 <td>${escapeHtml(usuario.email || '')}</td>
                 <td>${escapeHtml(usuario.estado || '')}</td>
                 <td>${escapeHtml(usuario.cliente || '')}</td>
             `;
-            personaUsersTableBody.appendChild(row);
-        });
-    }
+                personaUsersTableBody.appendChild(row);
+            });
+        }
 
-    document.querySelectorAll('.btn-persona-users').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const personaId = this.getAttribute('data-persona-id');
-            const personaName = this.getAttribute('data-persona-name') || '';
+        document.querySelectorAll('.btn-persona-users').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const personaId = this.getAttribute('data-persona-id');
+                const personaName = this.getAttribute('data-persona-name') || '';
 
-            personaUsersName.textContent = personaName;
-            personaUsersTableBody.innerHTML = '';
-            personaUsersEmpty.classList.add('d-none');
-            setUsersAlert('');
-            setUsersLoading(true);
+                personaUsersName.textContent = personaName;
+                personaUsersTableBody.innerHTML = '';
+                personaUsersEmpty.classList.add('d-none');
+                setUsersAlert('');
+                setUsersLoading(true);
 
-            personaUsersModal.show();
+                personaUsersModal.show();
 
-            fetch(`${personaUsersEndpoint}?id=${encodeURIComponent(personaId)}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('Error al cargar usuarios');
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    if (!data || data.success === false) {
-                        setUsersAlert(data && data.message ? data.message : 'No fue posible cargar usuarios');
+                fetch(`${personaUsersEndpoint}?id=${encodeURIComponent(personaId)}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar usuarios');
+                        }
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (!data || data.success === false) {
+                            setUsersAlert(data && data.message ? data.message : 'No fue posible cargar usuarios');
+                            personaUsersEmpty.classList.remove('d-none');
+                            return;
+                        }
+                        renderPersonaUsers(data.usuarios || []);
+                    })
+                    .catch(function() {
+                        setUsersAlert('No fue posible cargar usuarios');
                         personaUsersEmpty.classList.remove('d-none');
-                        return;
-                    }
-                    renderPersonaUsers(data.usuarios || []);
-                })
-                .catch(function() {
-                    setUsersAlert('No fue posible cargar usuarios');
-                    personaUsersEmpty.classList.remove('d-none');
-                })
-                .finally(function() {
-                    setUsersLoading(false);
-                });
+                    })
+                    .finally(function() {
+                        setUsersLoading(false);
+                    });
+            });
         });
-    });
-</script>
+    </script>
 </body>
 
 </html>

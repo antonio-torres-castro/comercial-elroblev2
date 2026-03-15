@@ -150,6 +150,11 @@ class Task
             $strWhere = " WHERE pug.usuario_id = ? ";
             $params[] = $cu;
 
+            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+                $strWhere .= " and p.proyecto_id = ?";
+                $params[] = $filters['proyecto_id'];
+            }
+
             // Filtros
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
                 $strWhere .= " and pt.proyecto_id = ?";
@@ -1324,22 +1329,27 @@ class Task
         $myFilters = [];
 
         try {
-            $sql = "Select DISTINCT p.id, 
+            $sql = "SELECT DISTINCT p.id, 
                                     CONCAT(c.razon_social, ' (', p.fecha_inicio, '.', p.fecha_fin, ')') as nombre, 
                                     c.razon_social as cliente_nombre
-                    From proyectos p 
-                    Inner Join clientes c on p.cliente_id = c.id
-                    Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                    Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id ";
+                    FROM proyectos p 
+                    INNER JOIN clientes c ON p.cliente_id = c.id
+                    INNER JOIN proyecto_usuarios_grupo pug ON pug.estado_tipo_id = 2 AND pug.proyecto_id = p.id
+                    INNER JOIN grupo_tipos gt ON gt.id between 1 and 5 AND gt.id = pug.grupo_id ";
 
             if ($uti == 1 || $uti == 2) {
-                $sql .= " Where p.estado_tipo_id IN (1, 2, 5)";
+                $sql .= " WHERE p.estado_tipo_id IN (1, 2, 5)";
             } else {
-                $sql .= " Where p.estado_tipo_id = 2";
+                $sql .= " WHERE p.estado_tipo_id = 2";
             }
 
-            $sql .= " and pug.usuario_id = ? ";
+            $sql .= " AND pug.usuario_id = ? ";
             $myFilters[] = $filters['current_usuario_id'];
+
+            if ($uti > 1) {
+                $sql .= " AND p.proveedor_id = ? ";
+                $myFilters[] = $filters['proveedor_id'];
+            }
 
             $sql .= " ORDER BY c.razon_social";
 

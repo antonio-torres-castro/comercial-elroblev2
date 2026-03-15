@@ -82,6 +82,9 @@ class TaskController extends BaseController
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
 
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
             if ($uti == 6) {
                 $filters['contraparte_id'] = $contraparteId;
             }

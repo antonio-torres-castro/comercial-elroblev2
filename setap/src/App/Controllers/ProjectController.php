@@ -78,7 +78,7 @@ class ProjectController extends BaseController
         $projects = $this->projectModel->getAll($filters);
 
         // Obtener datos para filtros
-        $clients = $this->getClients();
+        $clients = $this->getClients($filters);
         $projectStates = $this->getProjectStates();
         $taskTypes = $this->getTaskTypes();
 
@@ -245,7 +245,7 @@ class ProjectController extends BaseController
         }
 
         // Obtener datos necesarios para el formulario
-        $clients = $this->getClients();
+        $clients = $this->getClients($filters);
         $suppliers = $this->getSuppliers($filters);
         $taskTypes = $this->getTaskTypes();
         $projectStates = $this->getProjectStates();
@@ -568,13 +568,18 @@ class ProjectController extends BaseController
         return $errors;
     }
 
-    private function getClients(): array
+    private function getClients(array $filters = []): array
     {
         try {
+            $filtroProveedor = "";
+            if (isset($filters['proveedor_id']) && is_numeric($filters['proveedor_id'])) {
+                $filtroProveedor = "AND proveedor_id = " . (int)$filters['proveedor_id'];
+            }
             $stmt = $this->db->prepare("
                 SELECT id, razon_social as nombre, rut
                 FROM clientes
                 WHERE estado_tipo_id != 4
+                $filtroProveedor
                 ORDER BY razon_social
             ");
             $stmt->execute();
