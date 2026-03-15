@@ -25,12 +25,13 @@ class Project
     {
         try {
             //dashboard_project_list (in clienteId int, in estadoTipoId int, in tareaTipoId int, in fechaDesde date, in fechaHasta date)
-            $sql = "CALL dashboard_project_list(?, ?, ?, ?, ?);";
+            $sql = "CALL dashboard_project_list(?, ?, ?, ?, ?, ?);";
 
             $params = [];
 
             // Aplicar filtros
             $params[] = !isset($filters['cliente_id']) || empty($filters['cliente_id']) ? 0 : $filters['cliente_id'];
+            $params[] = !isset($filters['proveedor_id']) || empty($filters['proveedor_id']) ? 0 : $filters['proveedor_id'];
             $params[] = !isset($filters['estado_tipo_id']) || empty($filters['estado_tipo_id']) ? 0 : $filters['estado_tipo_id'];
             $params[] = !isset($filters['tarea_tipo_id']) || empty($filters['tarea_tipo_id']) ? 0 : $filters['tarea_tipo_id'];
             $params[] = !isset($filters['fecha_desde']) || empty($filters['fecha_desde']) ? null : $filters['fecha_desde'];

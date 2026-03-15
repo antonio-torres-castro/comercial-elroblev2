@@ -155,7 +155,8 @@ use App\Constants\AppConstants;
                                             <select class="form-select" id="proveedor_id" name="proveedor_id" required>
                                                 <option value="">Seleccionar Proveedor</option>
                                                 <?php foreach ($suppliers as $supplier): ?>
-                                                    <option value="<?= (int)$supplier['id'] ?>">
+                                                    <option value="<?= (int)$supplier['id'] ?>"
+                                                        <?php echo $client['proveedor_id'] == $supplier['id'] ? 'selected' : ''; ?>>
                                                         <?= htmlspecialchars($supplier['nombre']) ?>
                                                         <?php if (!empty($supplier['rut'])): ?>
                                                             - RUT: <?= htmlspecialchars($supplier['rut']) ?>

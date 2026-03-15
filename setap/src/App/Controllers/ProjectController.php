@@ -65,6 +65,10 @@ class ProjectController extends BaseController
             $filters['fecha_hasta'] = $_GET['fecha_hasta'];
         }
 
+        if ($uti > 1) {
+            $filters['proveedor_id'] = $currentUser['proveedor_id'];
+        }
+
         $_GET['acceso_proyecto'] = $aManageProject;
         $_GET['show_btn_nuevo'] = $rCreate;
         $_GET['show_btn_editar'] = $rModify;

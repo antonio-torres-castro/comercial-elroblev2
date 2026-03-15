@@ -47,6 +47,8 @@ class ClientController extends BaseController
                 return;
             }
 
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Verificar permisos para gestión de clientes
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_clients')) {
                 http_response_code(403);
@@ -60,6 +62,10 @@ class ClientController extends BaseController
                 'razon_social' => $_GET['razon_social'] ?? '',
                 'estado_tipo_id' => $_GET['estado_tipo_id'] ?? ''
             ];
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
 
             // Obtener clientes
             $clients = $this->clientModel->getAll($filters);

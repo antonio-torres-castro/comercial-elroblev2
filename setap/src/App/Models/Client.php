@@ -34,7 +34,7 @@ class Client
                         cc.cliente_id = c.id 
                     AND cc.estado_tipo_id = 2) as total_contrapartes
                 FROM {$this->table} c
-                LEFT JOIN estado_tipos et ON c.estado_tipo_id = et.id
+                INNER JOIN estado_tipos et ON c.estado_tipo_id = et.id
             ";
 
             $params = [];
@@ -53,6 +53,11 @@ class Client
             if (!empty($filters['estado_tipo_id'])) {
                 $query .= " AND c.estado_tipo_id = ?";
                 $params[] = $filters['estado_tipo_id'];
+            }
+
+            if (isset($filters['proveedor_id'])) {
+                $query .= " AND c.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
             }
 
             $query .= " ORDER BY c.razon_social ASC";

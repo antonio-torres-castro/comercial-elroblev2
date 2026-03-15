@@ -40,6 +40,8 @@ class User
                 WHERE u.estado_tipo_id != 4
             ";
 
+            $params = [];
+
             // Filtro por proveedor
             if (!empty($filters['proveedor_id'])) {
                 $sql .= " AND u.proveedor_id = :proveedor_id";

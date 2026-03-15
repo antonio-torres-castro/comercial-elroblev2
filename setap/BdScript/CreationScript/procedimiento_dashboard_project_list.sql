@@ -1,13 +1,19 @@
-use comerci3_bdsetap;
-DROP PROCEDURE IF EXISTS dashboard_project_list;
+USE `comerci3_bdsetap`;
+DROP procedure IF EXISTS `dashboard_project_list`;
 
-DELIMITER //
-CREATE PROCEDURE dashboard_project_list (in clienteId int, 
+USE `comerci3_bdsetap`;
+DROP procedure IF EXISTS `comerci3_bdsetap`.`dashboard_project_list`;
+;
+
+DELIMITER $$
+USE `comerci3_bdsetap`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `dashboard_project_list`(in clienteId int, in proveedorId int,
 in estadoTipoId int, in tareaTipoId int,
 in fechaDesde date, in fechaHasta date)
 BEGIN
 	-- Primer Query Summary Tasks
     SET clienteId    = IFNULL(clienteId,    0);
+    SET proveedorId  = IFNULL(proveedorId,  0);
     SET estadoTipoId = IFNULL(estadoTipoId, 0);
     SET tareaTipoId  = IFNULL(tareaTipoId,  0);
     SET fechaDesde   = IFNULL(fechaDesde,   19000101);
@@ -19,6 +25,7 @@ BEGIN
           From clientes  c
     Inner Join proyectos p on p.cliente_id = c.id
     Where (clienteId    = 0 or c.id             = clienteId)
+      and (proveedorId  = 0 or c.proveedor_id             = proveedorId)
       and (estadoTipoId = 0 or p.estado_tipo_id = estadoTipoId)
       and (tareaTipoId  = 0 or p.tarea_tipo_id  = tareaTipoId);
     
@@ -90,5 +97,8 @@ BEGIN
      -- and p.fecha_fin      >= fechaHasta 
      and p.estado_tipo_id != 4;
 
-END//
+END$$
+
 DELIMITER ;
+;
+
