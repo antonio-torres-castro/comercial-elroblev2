@@ -294,19 +294,24 @@ class Client
         }
     }
 
-    public function getSuppliers(): array
+    public function getSuppliers(array $filters = []): array
     {
         try {
+            $filtroProveedor = "";
+            if (isset($filters['proveedor_id']) && is_numeric($filters['proveedor_id'])) {
+                $filtroProveedor = "AND id = " . (int)$filters['proveedor_id'];
+            }
             $stmt = $this->db->prepare("
                 SELECT id, razon_social as nombre, rut
                 FROM proveedores
                 WHERE estado_tipo_id != 4
+                $filtroProveedor
                 ORDER BY razon_social
             ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
-            Logger::error('ProjectController::getSuppliers error: ' . $e->getMessage());
+            Logger::error('ModelClient::getSuppliers error: ' . $e->getMessage());
             return [];
         }
     }

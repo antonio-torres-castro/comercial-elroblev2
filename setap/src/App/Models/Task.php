@@ -21,6 +21,27 @@ class Task
         $this->db = Database::getInstance();
     }
 
+    public function getSuppliers(array $filters = []): array
+    {
+        try {
+            $filtroProveedor = "";
+            if (isset($filters['proveedor_id']) && is_numeric($filters['proveedor_id'])) {
+                $filtroProveedor = "AND id = " . (int)$filters['proveedor_id'];
+            }
+            $stmt = $this->db->prepare("
+                SELECT id, razon_social as nombre, rut
+                FROM proveedores
+                WHERE estado_tipo_id != 4
+                $filtroProveedor
+                ORDER BY razon_social
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            Logger::error('ModelTask::getSuppliers error: ' . $e->getMessage());
+            return [];
+        }
+    }
 
     /**
      * Contar total de tareas según los filtros
@@ -1227,7 +1248,7 @@ class Task
     /**
      * Obtener tipos de tareas (catálogo general)
      */
-    public function getTasks(): array
+    public function getTasks(array $filters = []): array
     {
         try {
             $sql = "SELECT id, nombre, descripcion, tarea_categoria_id, estado_tipo_id, fecha_Creado, fecha_modificacion FROM tareas WHERE estado_tipo_id = 2 ORDER BY nombre";
@@ -1243,12 +1264,26 @@ class Task
     /**
      * Obtener tipos de tareas (catálogo general)
      */
-    public function getAllTasks(): array
+    public function getAllTasks(array $filters = []): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id ORDER BY t.nombre";
+            $params = [];
+            // Filtro por proveedor
+            if (!empty($filters['proveedor_id'])) {
+                $strWhere = " AND u.proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
+            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, 
+            t.fecha_Creado, t.fecha_modificacion, 
+            tc.nombre as categoria, et.nombre as estado 
+            FROM tareas t
+            INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id 
+            INNER JOIN estado_tipos et on et.id = t.estado_tipo_id 
+            $strWhere
+            ORDER BY t.nombre";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getTaskTypes: " . $e->getMessage());
@@ -1259,10 +1294,10 @@ class Task
     /**
      * Obtener tipos de tareas (catálogo general) por id de categoria para tareas
      */
-    public function getGroupTasks(?int $id): array
+    public function getGroupTasks(?int $id, array $filters = []): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.tarea_categoria_id = ? ORDER BY t.nombre";
+            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.tarea_categoria_id = ? ORDER BY t.nombre";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1278,7 +1313,7 @@ class Task
     public function getTaskById(?int $id): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.id = ?";
+            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.id = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1294,7 +1329,7 @@ class Task
     public function getTaskByName(?string $name): array
     {
         try {
-            $sql = "SELECT t.id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.nombre = ?";
+            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.nombre = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$name]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1307,7 +1342,7 @@ class Task
     /**
      * Obtener tareas activas (catálogo general)
      */
-    public function getTasksForCreate(): array
+    public function getTasksForCreate(array $filters = []): array
     {
         try {
             $sql = "SELECT id, nombre, descripcion FROM tareas WHERE estado_tipo_id = 2 ORDER BY nombre";
@@ -1368,12 +1403,12 @@ class Task
     public function getProjectsActivos(?string $usuario_id): array
     {
         try {
-            $sql = "Select DISTINCT p.id, 
+            $sql = "SELECT DISTINCT p.id, 
                                     CONCAT(c.razon_social, ' (', p.fecha_inicio, '.', p.fecha_fin, ')') as nombre, 
                                     c.razon_social as cliente_nombre
-                    From proyectos p 
-                    Inner Join clientes c on p.cliente_id = c.id
-                    Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
+                    FROM proyectos p 
+                    INNER JOIN clientes c ON p.cliente_id = c.id
+                    INNER JOIN proyecto_usuarios_grupo pug ON pug.estado_tipo_id = 2 AND pug.proyecto_id = p.id
                     Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                     WHERE p.estado_tipo_id = 2";
 
@@ -1400,8 +1435,7 @@ class Task
     public function getProjectById(?int $id = 0): array
     {
         try {
-            $sql = "
-                SELECT p.id, 
+            $sql = "SELECT p.id, 
                 CONCAT('Proyecto para ', c.razon_social) as nombre, 
                 c.razon_social as cliente_nombre
                 FROM proyectos p
@@ -1424,8 +1458,7 @@ class Task
     public function getUsers(): array
     {
         try {
-            $sql = "
-                SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
+            $sql = "SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 WHERE u.estado_tipo_id = 2

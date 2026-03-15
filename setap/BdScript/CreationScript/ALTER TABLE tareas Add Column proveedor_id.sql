@@ -1,0 +1,1 @@
+ALTER TABLE tareas Add Column proveedor_id INT NULL DEFAULT 0 AFTER id;

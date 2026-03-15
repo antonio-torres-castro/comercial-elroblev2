@@ -603,6 +603,9 @@ class TaskController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
@@ -610,11 +613,20 @@ class TaskController extends BaseController
                 return;
             }
 
+            $filters = [];
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
+            $suppliers = $this->taskModel->getSuppliers($filters);
+
             $data = [
                 'user' => $currentUser,
                 'title' => AppConstants::UI_NEW_TASK_TYPE,
                 'subtitle' => 'Definición',
-                'tasks' => $this->taskModel->getAllTasks(), // Catálogo de tareas existentes
+                'suppliers' => $suppliers,
+                'tasks' => $this->taskModel->getAllTasks($filters), // Catálogo de tareas existentes
                 'taskStates' => $this->taskModel->getTaskStatesForNewTask(),
                 'taskCategorys' => $this->taskModel->getTaskCategorys(),
                 'success' => $_GET['success'] ?? '',
