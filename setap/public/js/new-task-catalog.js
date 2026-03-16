@@ -15,6 +15,8 @@
             });
 
             initializeFormHandlers();
+
+            refreshTasksTable();
         });
 
         /**
@@ -33,8 +35,15 @@
          */
         async function refreshTasksTable() {
             try {
-                idCategoria = document.getElementById('filtro_tarea_categoria_id').value;
-                const response = await fetch(`/setap/tasks/refreshTasksTable/${idCategoria}`);
+                const idCategoria = document.getElementById('filtro_tarea_categoria_id').value;
+                const idProveedor = document.getElementById('filtro_proveedor_id').value;
+
+                const params = new URLSearchParams({
+                    categoria: idCategoria,
+                    proveedor: idProveedor
+                });
+
+                const response = await fetch(`/setap/tasks/refreshTasksTable?${params.toString()}`);
                 const data = await response.json();
 
                 if (data.success) {

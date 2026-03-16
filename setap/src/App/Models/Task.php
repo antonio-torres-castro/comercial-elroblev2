@@ -1270,7 +1270,7 @@ class Task
             $params = [];
             // Filtro por proveedor
             if (!empty($filters['proveedor_id'])) {
-                $strWhere = " AND u.proveedor_id = :proveedor_id";
+                $strWhere = " AND t.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $filters['proveedor_id'];
             }
 
@@ -1294,12 +1294,31 @@ class Task
     /**
      * Obtener tipos de tareas (catálogo general) por id de categoria para tareas
      */
-    public function getGroupTasks(?int $id, array $filters = []): array
+    public function getGroupTasks(array $filters = []): array
     {
         try {
-            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.tarea_categoria_id = ? ORDER BY t.nombre";
+            $params = [];
+
+            $strWhere = " WHERE t.tarea_categoria_id = :categoria_id ";
+            $params[':categoria_id'] = $filters['categoria_id'];
+
+            // Filtro por proveedor
+            if (!empty($filters['proveedor_id'])) {
+                $strWhere .= " AND t.proveedor_id = :proveedor_id ";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
+            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, 
+            t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, 
+            et.nombre as estado 
+            FROM tareas t 
+            INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id 
+            INNER JOIN estado_tipos et on et.id = t.estado_tipo_id 
+            $strWhere
+            ORDER BY t.nombre";
+
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([$id]);
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getTaskTypes: " . $e->getMessage());

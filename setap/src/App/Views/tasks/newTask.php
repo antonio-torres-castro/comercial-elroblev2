@@ -96,10 +96,21 @@ use App\Constants\AppConstants; ?>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
-                                            <div class="col-md-12">
+                                            <div class="col-md-6">
                                                 <label for="nueva_tarea_descripcion" class="form-label">Descripción</label>
                                                 <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
-                                                    placeholder="Descripción detallada de la tarea" rows="1"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
+                                                    placeholder="Descripción detallada de la tarea" rows="2"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <!-- Proveedor -->
+                                                <label for="proveedor_id" class="form-label">Proveedor<span class="text-danger">*</span></label>
+                                                <select class="form-select" id="proveedor_id" name="proveedor_id" required>
+                                                    <?php foreach ($data['suppliers'] as $supplier): ?>
+                                                        <option value="<?= $supplier['id']; ?>">
+                                                            <?= htmlspecialchars($supplier['nombre']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -137,12 +148,20 @@ use App\Constants\AppConstants; ?>
 
                                 <div class="col-md-3">
                                     <select class="form-select" id="filtro_tarea_categoria_id" name="filtro_tarea_categoria_id" onchange="refreshTasksTable()">
-                                        <option value="<?= 0; ?>">
-                                            <?= 'Todas'; ?>
-                                        </option>
                                         <?php foreach ($data['taskCategorys'] as $category): ?>
                                             <option value="<?= $category['id']; ?>">
                                                 <?= htmlspecialchars($category['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <!-- Proveedor -->
+                                    <select class="form-select" id="filtro_proveedor_id" name="filtro_proveedor_id" onchange="refreshTasksTable()">
+                                        <?php foreach ($data['suppliers'] as $supplier): ?>
+                                            <option value="<?= $supplier['id']; ?>">
+                                                Proveedor: <?= htmlspecialchars($supplier['nombre']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>

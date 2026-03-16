@@ -246,27 +246,30 @@ use App\Constants\AppConstants; ?>
                                         <td>
                                             <small><?= date('d/m/Y H:i', strtotime($persona['fecha_creado'])) ?></small>
                                         </td>
-                                        <?php if ($_GET['show_col_acciones']): ?>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
+
+
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-setap-primary btn-persona-users"
+                                                    data-persona-id="<?= (int)$persona['id'] ?>"
+                                                    data-persona-name="<?= htmlspecialchars($persona['nombre'], ENT_QUOTES) ?>"
+                                                    title="Usuarios asociados">
+                                                    <i class="bi bi-people"></i>
+                                                </button>
+                                                <?php if ($_GET['show_col_acciones']): ?>
                                                     <a href="<?= AppConstants::ROUTE_PERSONAS ?>/edit?id=<?= (int)$persona['id'] ?>"
                                                         class="btn btn-outline-setap-primary" title="Editar">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-outline-setap-primary btn-persona-users"
-                                                        data-persona-id="<?= (int)$persona['id'] ?>"
-                                                        data-persona-name="<?= htmlspecialchars($persona['nombre'], ENT_QUOTES) ?>"
-                                                        title="Usuarios asociados">
-                                                        <i class="bi bi-people"></i>
-                                                    </button>
+
                                                     <button type="button" class="btn btn-outline-danger"
                                                         onclick="confirmDelete(<?= (int)$persona['id'] ?>, '<?= htmlspecialchars($persona['nombre']) ?>')"
                                                         title="Eliminar">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
-                                                </div>
-                                            </td>
-                                        <?php endif; ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
 
                                     </tr>
                                 <?php endforeach; ?>
