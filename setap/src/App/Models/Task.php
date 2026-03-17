@@ -171,11 +171,6 @@ class Task
             $strWhere = " WHERE pug.usuario_id = ? ";
             $params[] = $cu;
 
-            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and p.proyecto_id = ?";
-                $params[] = $filters['proyecto_id'];
-            }
-
             // Filtros
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
                 $strWhere .= " and pt.proyecto_id = ?";
@@ -903,7 +898,7 @@ class Task
     /**
      * Crear nueva tarea
      */
-    public function taskCreate(?string $tareaNombre, ?string $tareaDescripcion, ?int $tareaCategoriaId): ?int
+    public function taskCreate(?string $tareaNombre, ?string $tareaDescripcion, ?int $tareaCategoriaId, ?int $proveedorId): ?int
     {
         try {
             $this->db->beginTransaction();
@@ -913,8 +908,8 @@ class Task
                 $stmt->execute([$tareaNombre]);
                 $arrayTareaId = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if (empty($arrayTareaId)) {
-                    $stmt = $this->db->prepare("INSERT INTO tareas (nombre, descripcion, estado_tipo_id, tarea_categoria_id) VALUES (?, ?, 2, ?)");
-                    $stmt->execute([$tareaNombre, $tareaDescripcion ?? '', $tareaCategoriaId ?? 0]);
+                    $stmt = $this->db->prepare("INSERT INTO tareas (nombre, descripcion, estado_tipo_id, tarea_categoria_id, proveedor_id) VALUES (?, ?, 2, ?, ?)");
+                    $stmt->execute([$tareaNombre, $tareaDescripcion ?? '', $tareaCategoriaId ?? 0, $proveedorId ?? null]);
                     $tareaId = $this->db->lastInsertId();
                 } else {
                     $tareaId = $arrayTareaId[0];
@@ -1364,9 +1359,26 @@ class Task
     public function getTasksForCreate(array $filters = []): array
     {
         try {
-            $sql = "SELECT id, nombre, descripcion FROM tareas WHERE estado_tipo_id = 2 ORDER BY nombre";
+            $params = [];
+            $strWhere = "WHERE estado_tipo_id = 2";
+
+            if (!empty($filters['categoria_id'])) {
+                $strWhere .= " AND tarea_categoria_id = :categoria_id";
+                $params[':categoria_id'] = $filters['categoria_id'];
+            }
+
+            if (!empty($filters['proveedor_id'])) {
+                $strWhere .= " AND proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
+            $sql = "SELECT id, nombre, descripcion, tarea_categoria_id, proveedor_id
+                    FROM tareas
+                    $strWhere
+                    ORDER BY nombre";
+
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getTaskTypes: " . $e->getMessage());
@@ -1400,7 +1412,7 @@ class Task
             $sql .= " AND pug.usuario_id = ? ";
             $myFilters[] = $filters['current_usuario_id'];
 
-            if ($uti > 1) {
+            if (!empty($filters['proveedor_id'])) {
                 $sql .= " AND p.proveedor_id = ? ";
                 $myFilters[] = $filters['proveedor_id'];
             }
@@ -1495,18 +1507,28 @@ class Task
     /**
      * Obtener usuarios disponibles para asignación
      */
-    public function getExecutorUsers(): array
+    public function getExecutorUsers(?array $filters = []): array
     {
         try {
+            $params = [];
+
+            $strAndWhere = "";
+
+            if (!empty($filters['proveedor_id'])) {
+                $strAndWhere = " AND u.proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
             $sql = "
                 SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 4
+                $strAndWhere
                 ORDER BY p.nombre
             ";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getUsers: " . $e->getMessage());

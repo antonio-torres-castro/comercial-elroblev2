@@ -701,6 +701,8 @@ class ProjectController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+            $uti = $currentUser['usuario_tipo_id'];
+
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_project')) {
                 http_response_code(403);
                 echo json_encode(['success' => false, 'message' => AppConstants::ERROR_ACCESS_DENIED]);
@@ -714,8 +716,12 @@ class ProjectController extends BaseController
                 return;
             }
             $proveedorId = $this->projectModel->getProveedorIdProyecto($projectId);
+            if ($uti > 1) {
+                $users = $this->projectModel->getUsersBySupplier($proveedorId);
+            } else {
+                $users = $this->projectModel->getUsersBySupplierToAdmin($proveedorId);
+            }
             $assigned = $this->projectModel->getUsuariosGrupo($projectId);
-            $users = $this->projectModel->getUsersBySupplier($proveedorId);
             $grupos = $this->projectModel->getGrupoTipos();
             $projectActive = $this->projectModel->isActive($projectId);
 

@@ -113,7 +113,7 @@ class TaskController extends BaseController
                 $_GET['proyecto_id'] = $projects[0]['id'];
             }
 
-            $users = $this->taskModel->getExecutorUsers();
+            $users = $this->taskModel->getExecutorUsers($filters);
             if (count($users) == 1) {
                 $_GET['usuario_id'] = $users[0]['id'];
             }
@@ -230,7 +230,11 @@ class TaskController extends BaseController
                 $_GET['proyecto_id'] = $projects[0]['id'];
             }
 
-            $users = $this->taskModel->getExecutorUsers();
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
+            $users = $this->taskModel->getExecutorUsers($filters);
             if (count($users) == 1) {
                 $_GET['usuario_id'] = $users[0]['id'];
             }
@@ -699,7 +703,7 @@ class TaskController extends BaseController
                 'suppliers' => $suppliers,
                 'projects' => $projects,
                 'tasks' => $this->taskModel->getTasksForCreate(),
-                'executor_users' => $this->taskModel->getExecutorUsers(),
+                'executor_users' => $this->taskModel->getExecutorUsers($filters),
                 'supervisor_users' => $supervisors,
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
                 'taskCategorys' => $this->taskModel->getTaskCategorys(),
@@ -772,7 +776,7 @@ class TaskController extends BaseController
             if (!empty($_POST['tarea_id']) && $_POST['tarea_id'] !== 'nueva') {
                 $tareaId = (int)$_POST['tarea_id'];
             } else {
-                $tareaId = $this->taskModel->taskCreate(trim($_POST['nueva_tarea_nombre']), trim($_POST['nueva_tarea_descripcion'] ?? ''), trim($_POST['tarea_categoria_id'] ?? '0'));
+                $tareaId = $this->taskModel->taskCreate(trim($_POST['nueva_tarea_nombre']), trim($_POST['nueva_tarea_descripcion'] ?? ''), (int)($_POST['tarea_categoria_id'] ?? 0), (int)($_POST['proveedor_id'] ?? 0));
                 if ($tareaId == null) {
                     Security::redirect("/tasks/create?error=" . urlencode('Error al crear la nueva tarea'));
                     return;
@@ -837,8 +841,9 @@ class TaskController extends BaseController
             $nueva_tarea_nombre = trim($_POST['nueva_tarea_nombre']);
             $nueva_tarea_descripcion = trim($_POST['nueva_tarea_descripcion'] ?? '');
             $nueva_tarea_categoria_id = trim($_POST['tarea_categoria_id'] ?? '');
+            $proveedorId = (int)($_POST['proveedor_id'] ?? 0);
             // Crear tarea
-            $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion, $nueva_tarea_categoria_id);
+            $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion, $nueva_tarea_categoria_id, $proveedorId);
             if ($taskId) {
                 Security::redirect("/task/newTask?success=Tarea tipo creada");
             } else {
@@ -895,7 +900,7 @@ class TaskController extends BaseController
                 'subtitle' => "Editando: {$task['tarea_nombre']}",
                 'projects' => $this->taskModel->getProjects($filters),
                 'taskTypes' => $this->taskModel->getTaskTypes(),
-                'executor_users' => $this->taskModel->getExecutorUsers(),
+                'executor_users' => $this->taskModel->getExecutorUsers($filters),
                 'supervisor_users' => $this->taskModel->getSupervisorUsers(),
                 'taskStates' => $this->taskModel->getTasksForCreate(),
                 'task' => $task,
@@ -1220,6 +1225,85 @@ class TaskController extends BaseController
         }
     }
 
+
+    /**
+     * Cargar tareas para el select de asignación (JSON)
+     */
+    public function refreshTaskSelect()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+
+            $idCategoria = isset($_GET['categoria']) ? (int)$_GET['categoria'] : 0;
+            $idProveedor = isset($_GET['proveedor']) ? (int)$_GET['proveedor'] : 0;
+
+            $filters = [];
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            } else {
+                if ($idProveedor > 0) {
+                    $filters['proveedor_id'] = $idProveedor;
+                }
+            }
+
+            if ($idCategoria > 0) {
+                $filters['categoria_id'] = $idCategoria;
+            }
+
+            $tasks = $this->taskModel->getTasksForCreate($filters);
+            $this->jsonSuccess('Tareas cargadas correctamente', ['tareas' => $tasks]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::refreshTaskSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar tareas', [], 500);
+        }
+    }
+
+    /**
+     * Cargar proyectos por proveedor (JSON)
+     */
+    public function refreshProjectsSelect()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
+
+            $idProveedor = isset($_GET['proveedor']) ? (int)$_GET['proveedor'] : 0;
+
+            $filters = [
+                'current_usuario_tipo_id' => $uti,
+                'current_usuario_id' => $cu,
+                'contraparte_id' => $contraparteId
+            ];
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            } else {
+                if ($idProveedor > 0) {
+                    $filters['proveedor_id'] = $idProveedor;
+                }
+            }
+
+            $projects = $this->taskModel->getProjects($filters);
+            $this->jsonSuccess('Proyectos cargados correctamente', ['projects' => $projects]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::refreshProjectsSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar proyectos', [], 500);
+        }
+    }
     /**
      * Cambiar estado de una tarea (GAP 5)
      */

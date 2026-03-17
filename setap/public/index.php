@@ -649,6 +649,24 @@ try {
                     }
                     break;
 
+                case 'refreshTaskSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshTaskSelect();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'refreshProjectsSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshProjectsSelect();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'show':
                     if ($id) {
                         $controller->show((int)$id);

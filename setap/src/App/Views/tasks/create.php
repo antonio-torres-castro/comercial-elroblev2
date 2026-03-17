@@ -57,7 +57,7 @@ use App\Constants\AppConstants; ?>
                             <div class="row mb-2">
                                 <div class="col-md-6">
                                     <!-- Proveedor -->
-                                    <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="refreshTasksTable()">
+                                    <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="refreshTasksAndProjects()">
                                         <?php foreach ($data['suppliers'] as $supplier): ?>
                                             <option value="<?= $supplier['id']; ?>">
                                                 Proveedor: <?= htmlspecialchars($supplier['nombre']); ?>
@@ -67,7 +67,7 @@ use App\Constants\AppConstants; ?>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
+                                    <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required onchange="refreshTasksSelect()">
                                         <?php foreach ($data['taskCategorys'] as $category): ?>
                                             <option value="<?= $category['id']; ?>">
                                                 Categoria: <?= htmlspecialchars($category['nombre']); ?>

@@ -83,7 +83,7 @@ use App\Constants\AppConstants; ?>
                                                     <?php foreach ($data['projects'] as $project): ?>
                                                         <option value="<?= $project['id'] ?>"
                                                             <?= (isset($_GET['proyecto_id']) && $_GET['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
-                                                            <?= htmlspecialchars($project['cliente_nombre']) ?>
+                                                            <?= htmlspecialchars($project['nombre']) ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>

@@ -583,6 +583,19 @@ class Project
         }
     }
 
+    /** Obtener los usuarios por proveedor (para selector) */
+    public function getUsersBySupplierToAdmin(int $supplierId): array
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT id, nombre_usuario FROM usuarios WHERE estado_tipo_id != 4 AND (usuario_tipo_id = 1 OR proveedor_id = ?) ORDER BY nombre_usuario");
+            $stmt->execute([$supplierId]);
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            \App\Helpers\Logger::error('Project::getUsersBySupplier error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     /**
      * Obtener proyectos por rango de fechas
      */
