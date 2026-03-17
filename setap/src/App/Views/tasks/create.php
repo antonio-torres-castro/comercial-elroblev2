@@ -54,6 +54,29 @@ use App\Constants\AppConstants; ?>
                             <?= Security::renderCsrfField() ?>
                             <!-- Definicion tarea catalogo:inicio-->
                             <!-- Tarea Catálogo -->
+                            <div class="row mb-2">
+                                <div class="col-md-6">
+                                    <!-- Proveedor -->
+                                    <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="refreshTasksTable()">
+                                        <?php foreach ($data['suppliers'] as $supplier): ?>
+                                            <option value="<?= $supplier['id']; ?>">
+                                                Proveedor: <?= htmlspecialchars($supplier['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
+                                        <?php foreach ($data['taskCategorys'] as $category): ?>
+                                            <option value="<?= $category['id']; ?>">
+                                                Categoria: <?= htmlspecialchars($category['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="col-md-12">
                                 <select class="form-select" id="tarea_id" name="tarea_id" required>
                                     <option value="">Seleccionar tarea...</option>
@@ -67,8 +90,10 @@ use App\Constants\AppConstants; ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <div class="form-text mb-3">Seleccione del catálogo o cree una nueva.</div>
+                                <div class="form-text mb-3"> Seleccione del catálogo o cree una nueva.</div>
                             </div>
+
+
                             <!-- Campos para nueva tarea (ocultos por defecto) -->
                             <div class="col-12" id="nueva-tarea-fields" style="display: none;">
                                 <div class="card border-primary mb-2">
@@ -86,20 +111,10 @@ use App\Constants\AppConstants; ?>
                                                     value="<?= htmlspecialchars($_POST['nueva_tarea_nombre'] ?? ''); ?>"
                                                     maxlength="150">
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-8">
                                                 <label for="nueva_tarea_descripcion" class="form-label">Descripción</label>
                                                 <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
-                                                    placeholder="Descripción detallada de la tarea" rows="3"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label for="tarea_categoria_id" class="form-label">Categoria<span class="text-danger">*</span></label>
-                                                <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
-                                                    <?php foreach ($data['taskCategorys'] as $category): ?>
-                                                        <option value="<?= $category['id']; ?>">
-                                                            <?= htmlspecialchars($category['nombre']); ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
+                                                    placeholder="Descripción detallada de la tarea" rows="1"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
                                             </div>
                                         </div>
                                     </div>

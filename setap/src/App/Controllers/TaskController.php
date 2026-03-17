@@ -662,6 +662,12 @@ class TaskController extends BaseController
             $filters['current_usuario_id'] = $cu;
             $filters['contraparte_id'] = $contraparteId;
 
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
+            $suppliers = $this->taskModel->getSuppliers($filters);
+
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
                 http_response_code(403);
@@ -690,6 +696,7 @@ class TaskController extends BaseController
                 'user' => $currentUser,
                 'title' => AppConstants::UI_PROJECT_TASK,
                 'subtitle' => 'Asignar',
+                'suppliers' => $suppliers,
                 'projects' => $projects,
                 'tasks' => $this->taskModel->getTasksForCreate(),
                 'executor_users' => $this->taskModel->getExecutorUsers(),
