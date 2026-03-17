@@ -75,7 +75,7 @@ use App\Constants\AppConstants; ?>
                             <div class="card">
                                 <div class="card-body">
                                     <form method="GET" id="getFormFilter" class="row g-3">
-                                        <div class="col-md-2">
+                                        <div class="col-md-3">
                                             <label class="form-label">Proyecto</label>
                                             <select class="form-select" name="proyecto_id">
                                                 <option value="">Todos</option>
@@ -128,9 +128,9 @@ use App\Constants\AppConstants; ?>
                                                 value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
                                         </div>
 
-                                        <div class="col-md-2 d-flex align-items-center">
+                                        <div class="col-md-1 d-flex align-items-center">
                                             <button type="submit" class="btn btn-outline-setap-primary me-2">
-                                                <i class="bi bi-search"></i> Filtrar
+                                                <i class="bi bi-search"></i>
                                             </button>
                                             <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-outline-secondary">
                                                 <i class="bi bi-x-lg"></i>
@@ -180,7 +180,7 @@ use App\Constants\AppConstants; ?>
                                                         </td><!-- fin Tarea -->
                                                         <td <?= $_GET['show_col_proyecto'] ? '' : 'hidden' ?>><!-- Proyecto -->
                                                             <small>
-                                                                <?= htmlspecialchars($task['cliente_nombre']) ?>
+                                                                <?= htmlspecialchars($task['proyecto_nombre']) ?>
                                                             </small>
                                                         </td><!-- fin Proyecto -->
                                                         <td><!-- Estado -->

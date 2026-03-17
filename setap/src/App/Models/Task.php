@@ -149,7 +149,7 @@ class Task
                     pt.prioridad,
                     pt.fecha_Creado,
                     p.id as proyecto_id,
-                    CONCAT('Proyecto para ', c.razon_social) as proyecto_nombre,
+                    CONCAT(c.razon_social, '.', p.fecha_inicio, '.', p.fecha_fin) as proyecto_nombre,
                     c.razon_social as cliente_nombre,
                     tt.nombre as tipo_tarea,
                     et.nombre as estado,
