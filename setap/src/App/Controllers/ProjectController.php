@@ -67,11 +67,12 @@ class ProjectController extends BaseController
 
         if ($uti > 1) {
             $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            $filters['cliente_id'] = $currentUser['cliente_id'];
         } elseif (isset($_GET['proveedor_id']) && is_numeric($_GET['proveedor_id'])) {
             $filters['proveedor_id'] = (int)$_GET['proveedor_id'];
         }
 
-        $_GET['show_proveedores'] = $uti > 1;
+        $_GET['show_proveedores'] = ($uti === 1);
 
         $_GET['acceso_proyecto'] = $aManageProject;
         $_GET['show_btn_nuevo'] = $rCreate;

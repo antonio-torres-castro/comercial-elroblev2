@@ -85,7 +85,7 @@ use App\Helpers\Security;
             <div class="card mb-4">
                 <div class="card-body">
                     <form method="GET" action="<?= AppConstants::ROUTE_PROJECTS ?>" class="row align-items-end">
-                        <div class="col-md-3" <?= $_GET['show_proveedores'] ? 'hidden' : '' ?>>
+                        <div class="col-md-3" <?= $_GET['show_proveedores'] ? '' : 'hidden' ?>>
                             <label for="proveedor_id" class="form-label">Proveedor</label>
                             <select class="form-select" name="proveedor_id" id="proveedor_id">
                                 <option value="">Todos los proveedores</option>
