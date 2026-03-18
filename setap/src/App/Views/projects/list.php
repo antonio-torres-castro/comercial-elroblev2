@@ -85,6 +85,19 @@ use App\Helpers\Security;
             <div class="card mb-4">
                 <div class="card-body">
                     <form method="GET" action="<?= AppConstants::ROUTE_PROJECTS ?>" class="row align-items-end">
+                        <div class="col-md-3" <?= $_GET['show_proveedores'] ? 'hidden' : '' ?>>
+                            <label for="proveedor_id" class="form-label">Proveedor</label>
+                            <select class="form-select" name="proveedor_id" id="proveedor_id">
+                                <option value="">Todos los proveedores</option>
+                                <?php foreach ($suppliers as $supplier): ?>
+                                    <option value="<?= $supplier['id'] ?>"
+                                        <?= ($filters['proveedor_id'] ?? '') == $supplier['id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($supplier['nombre']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                         <div class="col-md-3">
                             <label for="cliente_id" class="form-label">Cliente</label>
                             <select class="form-select" name="cliente_id" id="cliente_id">
@@ -97,6 +110,7 @@ use App\Helpers\Security;
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
                         <div class="col-md-2">
                             <label for="estado_tipo_id" class="form-label">Estado</label>
                             <select class="form-select" name="estado_tipo_id" id="estado_tipo_id">
@@ -119,7 +133,7 @@ use App\Helpers\Security;
                             <input type="date" class="form-control" name="fecha_hasta" id="fecha_hasta"
                                 value="<?= htmlspecialchars($filters['fecha_hasta'] ?? '') ?>">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 mt-2">
                             <button type="submit" class="btn btn-setap-primary me-2">
                                 <i class="bi bi-funnel"></i> Filtrar
                             </button>
@@ -168,22 +182,25 @@ use App\Helpers\Security;
                                     </span>
                                 </div>
                                 <div class="card-body">
-                                    <div class="mb-3">
+                                    <div class="mb-2">
+                                        <h6 class="text-setap-primary">Proveedor:</h6>
+                                        <p class="mb-1"><?= htmlspecialchars($project['proveedor_nombre'] ?: 'No especificado') ?></p>
+                                    </div>
+                                    <div class="mb-2">
                                         <h6 class="text-setap-primary">Ubicación:</h6>
                                         <p class="mb-1"><?= htmlspecialchars($project['direccion'] ?: 'No especificada') ?></p>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <h6 class="text-setap-primary">Fechas:</h6>
-                                        <div class="small">
-                                            <div><strong>Inicio:</strong> <?= date('d/m/Y', strtotime($project['fecha_inicio'])) ?></div>
+                                    <div class="mb-2">
+                                        <div class="col-sm-10 d-flex flex-wrap gap-2">
+                                            <div class="col-sm-6"><strong>Inicio:</strong> <?= date('d/m/Y', strtotime($project['fecha_inicio'])) ?></div>
                                             <?php if ($project['fecha_fin']): ?>
-                                                <div><strong>Fin:</strong> <?= date('d/m/Y', strtotime($project['fecha_fin'])) ?></div>
+                                                <div class="col-sm-5"><strong>Fin:</strong> <?= date('d/m/Y', strtotime($project['fecha_fin'])) ?></div>
                                             <?php endif; ?>
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
+                                    <div class="mb-2">
                                         <h6 class="text-setap-primary">Progreso:</h6>
                                         <?php
                                         $totalTasks = $project['total_tareas'] ?? 0;
@@ -198,7 +215,7 @@ use App\Helpers\Security;
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
+                                    <div class="mb-2">
                                         <h6 class="text-setap-primary">Contraparte:</h6>
                                         <div class="small">
                                             <div><?= htmlspecialchars($project['contraparte_nombre']) ?></div>

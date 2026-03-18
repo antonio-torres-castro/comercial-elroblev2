@@ -21,9 +21,10 @@ BEGIN
     
     DROP TABLE IF EXISTS fClientes;
     Create Temporary Table fClientes
-    Select c.id as cliente_id, c.razon_social, p.id as proyecto_id
+    Select c.id as cliente_id, c.razon_social, p.id as proyecto_id, pr.razon_social as proveedor_nombre
           From clientes  c
     Inner Join proyectos p on p.cliente_id = c.id
+    Inner Join proveedores pr on pr.id = c.proveedor_id
     Where (clienteId    = 0 or c.id             = clienteId)
       and (proveedorId  = 0 or c.proveedor_id   = proveedorId)
       and (estadoTipoId = 0 or p.estado_tipo_id = estadoTipoId)
@@ -72,6 +73,7 @@ BEGIN
             p.contraparte_id, 
             p.fecha_Creado, p.fecha_modificacion,
             c.razon_social as cliente_nombre,
+            c.proveedor_nombre,
             tt.nombre      as tipo_tarea,
             et.nombre      as estado_nombre,
             CONCAT(per.nombre, ' (', per.rut, ')') as contraparte_nombre,

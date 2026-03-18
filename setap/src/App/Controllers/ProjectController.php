@@ -67,7 +67,11 @@ class ProjectController extends BaseController
 
         if ($uti > 1) {
             $filters['proveedor_id'] = $currentUser['proveedor_id'];
+        } elseif (isset($_GET['proveedor_id']) && is_numeric($_GET['proveedor_id'])) {
+            $filters['proveedor_id'] = (int)$_GET['proveedor_id'];
         }
+
+        $_GET['show_proveedores'] = $uti > 1;
 
         $_GET['acceso_proyecto'] = $aManageProject;
         $_GET['show_btn_nuevo'] = $rCreate;
@@ -77,12 +81,15 @@ class ProjectController extends BaseController
 
         $projects = $this->projectModel->getAll($filters);
 
+        $suppliers = $this->getSuppliers($uti === 1 ? [] : $filters);
+
         // Obtener datos para filtros
         $clients = $this->getClients($filters);
         $projectStates = $this->getProjectStates();
         $taskTypes = $this->getTaskTypes();
 
         $this->view('projects/list', [
+            'suppliers' => $suppliers,
             'projects' => $projects,
             'clients' => $clients,
             'projectStates' => $projectStates,
