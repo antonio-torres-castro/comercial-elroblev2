@@ -169,7 +169,9 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-6">
                                             <label for="supervisor_id" class="form-label">Supervisor</label>
                                             <select class="form-select" id="supervisor_id" name="supervisor_id" required>
-                                                <option value="">Sin supervisor</option>
+                                                <?php if (count($data['supervisor_users']) > 1): ?>
+                                                    <option value="">Sin supervisor</option>
+                                                <?php endif; ?>
                                                 <?php foreach ($data['supervisor_users'] as $user): ?>
                                                     <option value="<?= $user['id']; ?>"
                                                         <?= (isset($supervisorId) && $supervisorId == $user['id']) ? 'selected' : ''; ?>>

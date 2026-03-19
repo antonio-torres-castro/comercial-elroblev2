@@ -667,6 +667,15 @@ try {
                     }
                     break;
 
+                case 'refreshSupervisorSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshSupervisorSelect();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'show':
                     if ($id) {
                         $controller->show((int)$id);

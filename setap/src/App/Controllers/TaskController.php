@@ -690,7 +690,7 @@ class TaskController extends BaseController
                 }
             }
 
-            $supervisors = $this->taskModel->getSupervisorUsers();
+            $supervisors = $this->taskModel->getSupervisorUsers($filters);
             $supervisorId = 0;
             if (count($supervisors) == 1) {
                 $supervisorId = $supervisors[0]['id'];
@@ -1304,6 +1304,39 @@ class TaskController extends BaseController
             $this->jsonError('Error al cargar proyectos', [], 500);
         }
     }
+
+    /**
+     * Cargar supervisores por proveedor (JSON)
+     */
+    public function refreshSupervisorSelect()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+
+            $idProveedor = isset($_GET['proveedor_id']) ? (int)$_GET['proveedor_id'] : 0;
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            } else {
+                if ($idProveedor > 0) {
+                    $filters['proveedor_id'] = $idProveedor;
+                }
+            }
+
+            $supervisors = $this->taskModel->getSupervisorUsers($filters);
+            $this->jsonSuccess('Supervisores cargados correctamente', ['supervisors' => $supervisors]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::refreshSupervisorSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar supervisores', [], 500);
+        }
+    }
+
     /**
      * Cambiar estado de una tarea (GAP 5)
      */

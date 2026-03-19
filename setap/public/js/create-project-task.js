@@ -167,7 +167,7 @@ function openTab(evt, nameTab) {
 }
 
 async function refreshTasksAndProjects() {
-    await Promise.all([refreshTasksSelect(), refreshProjectsSelect()]);
+    await Promise.all([refreshTasksSelect(), refreshProjectsSelect(), refreshSupervisorSelect()]);
 }
 
 async function refreshTasksSelect() {
@@ -278,5 +278,57 @@ function updateProjectSelectOptions(projects) {
     const stillExists = projects.some(project => String(project.id) === previousValue);
     if (stillExists) {
         proyectoSelect.value = previousValue;
+    }
+}
+
+async function refreshSupervisorSelect() {
+    try {
+        const proveedorSelect = document.getElementById('proveedor_id');
+        const supervisorSelect = document.getElementById('supervisor_id');
+
+        if (!proveedorSelect || !supervisorSelect) {
+            return;
+        }
+
+        const params = new URLSearchParams({
+            proveedor_id: proveedorSelect.value || ''
+        });
+
+        const response = await fetch(`/setap/tasks/refreshSupervisorSelect?${params.toString()}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            console.error('Error al cargar supervisores:', data.message);
+            return;
+        }
+
+        updateSupervisorSelectOptions(data.supervisors || []);
+    } catch (error) {
+        console.error('Error al cargar supervisores:', error);
+    }
+}
+
+function updateSupervisorSelectOptions(supervisors) {
+    const supervisorSelect = document.getElementById('supervisor_id');
+    if (!supervisorSelect) {
+        return;
+    }
+
+    const previousValue = supervisorSelect.value;
+    let optionsHtml = '';
+
+    if (supervisors.length > 1) {
+        optionsHtml = '<option value="">Sin supervisor</option>';
+    }
+
+    supervisors.forEach(supervisor => {
+        optionsHtml += `<option value="${supervisor.id}">${supervisor.nombre_completo + ' (' + supervisor.nombre_usuario + ')'}</option>`;
+    });
+
+    supervisorSelect.innerHTML = optionsHtml;
+
+    const stillExists = supervisors.some(supervisor => String(supervisor.id) === previousValue);
+    if (stillExists) {
+        supervisorSelect.value = previousValue;
     }
 }

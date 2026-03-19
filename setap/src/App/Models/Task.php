@@ -1539,18 +1539,22 @@ class Task
     /**
      * Obtener usuarios disponibles para asignación
      */
-    public function getSupervisorUsers(): array
+    public function getSupervisorUsers(?array $filters = []): array
     {
         try {
-            $sql = "
-                SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
+            $params = [];
+
+            $sql = "SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
-                WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 3
+                WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 3 and u.proveedor_id = :proveedor_id
                 ORDER BY p.nombre
             ";
+
+            $params[':proveedor_id'] = $filters['proveedor_id'] ?? null;
+
             $stmt = $this->db->prepare($sql);
-            $stmt->execute();
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getUsers: " . $e->getMessage());
