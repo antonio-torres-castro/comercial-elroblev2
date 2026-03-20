@@ -244,6 +244,8 @@ class TaskController extends BaseController
             $projects = $this->taskModel->getProjects($filters);
             if (count($projects) == 1) {
                 $_GET['proyecto_id'] = $projects[0]['id'];
+            } elseif (isset($projects) && count($projects) > 0 && !isset($filters['proyecto_id'])) {
+                $filters['proyecto_id'] = (int)$projects[0]['id'];
             }
 
             if ($uti > 1) {
