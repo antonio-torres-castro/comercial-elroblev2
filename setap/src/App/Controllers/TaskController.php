@@ -61,9 +61,8 @@ class TaskController extends BaseController
             $filters['current_usuario_tipo_id'] = $uti;
             $filters['current_usuario_id'] = $cu;
 
-            if (!empty($_GET['proyecto_id'])) {
-                $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
-            }
+            $filters['proyecto_id'] = empty($_GET['proyecto_id']) ? 0 : (int)$_GET['proyecto_id'];
+
             if (isset($_GET['estado_tipo_id']) && !empty($_GET['estado_tipo_id'])) {
                 $filters['estado_tipo_id'] = $_GET['estado_tipo_id'];
             }
@@ -108,9 +107,25 @@ class TaskController extends BaseController
             $_GET['show_btn_nuevo'] = $rCreate;
             $_GET['show_btn_activity'] = $rActivity;
 
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            } elseif ($uti == 1) {
+                $filters['proveedor_id'] = $_GET['proveedor_id'];
+            }
+
+            $suppliers = $this->taskModel->getSuppliers($filters);
+
             $projects = $this->taskModel->getProjects($filters);
             if (count($projects) == 1) {
                 $_GET['proyecto_id'] = $projects[0]['id'];
+            }
+
+            if (!empty($_GET['excluye_eliminados'])) {
+                $filters['excluye_eliminados'] = $_GET['excluye_eliminados'];
+            }
+
+            if (!empty($_GET['excluye_no_asignados'])) {
+                $filters['excluye_no_asignados'] = $_GET['excluye_no_asignados'];
             }
 
             $users = $this->taskModel->getExecutorUsers($filters);
@@ -138,6 +153,7 @@ class TaskController extends BaseController
             // Datos para la vista
             $data = [
                 'user' => $currentUser,
+                'suppliers' => $suppliers,
                 'tasks' => $tasks,
                 'totalRecords' => $totalRows,
                 'currentPage' => $currentPage,

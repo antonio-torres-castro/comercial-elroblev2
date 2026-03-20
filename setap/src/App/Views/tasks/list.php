@@ -75,10 +75,24 @@ use App\Constants\AppConstants; ?>
                             <div class="card">
                                 <div class="card-body">
                                     <form method="GET" id="getFormFilter" class="row g-3">
+
+                                        <div class="col-md-3">
+                                            <!-- Proveedor -->
+                                            <label class="form-label">Proveedor</label>
+                                            <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="this.form.submit()">
+                                                <option value="">Selecionar...</option>
+                                                <?php foreach ($data['suppliers'] as $supplier): ?>
+                                                    <option value="<?= $supplier['id']; ?>"
+                                                        <?= (isset($_GET['proveedor_id']) && $_GET['proveedor_id'] == $supplier['id']) ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($supplier['nombre']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Proyecto</label>
-                                            <select class="form-select" name="proyecto_id">
-                                                <option value="">Todos</option>
+                                            <select class="form-select" name="proyecto_id" onchange="this.form.submit()">
+                                                <option value="">Selecionar...</option>
                                                 <?php if (!empty($data['projects'])): ?>
                                                     <?php foreach ($data['projects'] as $project): ?>
                                                         <option value="<?= $project['id'] ?>"
@@ -89,7 +103,7 @@ use App\Constants\AppConstants; ?>
                                                 <?php endif; ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <label class="form-label">Estado</label>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id[]" multiple>
                                                 <?php if (!empty($data['taskStates'])): ?>
@@ -103,8 +117,17 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
                                         <div class="col-md-2">
+                                            <div class="mb-3 form-check">
+                                                <input type="checkbox" class="form-check-input" id="excluye_eliminados" name="excluye_eliminados" value="1"
+                                                    <?= (isset($_GET['excluye_eliminados']) && $_GET['excluye_eliminados'] == 1) ? 'checked' : '' ?>
+                                                    onchange="this.form.submit()">
+                                                <label class="form-check-label" for="excluye_eliminados">Excluye eliminados</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
                                             <label class="form-label">Ejecuta</label>
-                                            <select class="form-select" name="usuario_id">
+                                            <select class="form-select" name="usuario_id" onchange="this.form.submit()">
                                                 <option value="">Todos</option>
                                                 <?php if (!empty($data['users'])): ?>
                                                     <?php foreach ($data['users'] as $user): ?>
@@ -115,6 +138,15 @@ use App\Constants\AppConstants; ?>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
                                             </select>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="mb-3 form-check">
+                                                <input type="checkbox" class="form-check-input" id="excluye_no_asignados" name="excluye_no_asignados" value="1"
+                                                    <?= (isset($_GET['excluye_no_asignados']) && $_GET['excluye_no_asignados'] == 1) ? 'checked' : '' ?>
+                                                    onchange="this.form.submit()">
+                                                <label class="form-check-label" for="excluye_no_asignados">Excluye no asignados</label>
+                                            </div>
                                         </div>
 
                                         <div class="col-md-2">

@@ -66,7 +66,7 @@ class Task
             $params[] = $cu;
 
             // Filtros
-            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+            if (isset($filters['proyecto_id'])) {
                 $strWhere .= " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
@@ -78,6 +78,17 @@ class Task
             if (isset($uti) && $uti == 4) {
                 $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
+            } elseif (isset($filters['usuario_id'])) {
+                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $params[] = $filters['usuario_id'];
+            }
+
+            if (isset($filters['excluye_no_asignados']) && $filters['excluye_no_asignados'] == 1) {
+                $strWhere .= " AND pt.ejecutor_id is not null ";
+            }
+
+            if (isset($filters['excluye_no_asignados']) && $filters['excluye_no_asignados'] == 1) {
+                $strWhere .= " AND pt.ejecutor_id is not null ";
             }
 
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
@@ -97,6 +108,10 @@ class Task
                     // Agregamos todos los IDs al array de parámetros
                     $params = array_merge($params, $estadoTipoIds);
                 }
+            }
+
+            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
+                $strWhere .= " AND pt.estado_tipo_id != 4 ";
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
@@ -172,7 +187,7 @@ class Task
             $params[] = $cu;
 
             // Filtros
-            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+            if (isset($filters['proyecto_id'])) {
                 $strWhere .= " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
@@ -184,6 +199,13 @@ class Task
             if (isset($uti) && $uti == 4) {
                 $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
+            } elseif (isset($filters['usuario_id'])) {
+                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $params[] = $filters['usuario_id'];
+            }
+
+            if (isset($filters['excluye_no_asignados']) && $filters['excluye_no_asignados'] == 1) {
+                $strWhere .= " AND pt.ejecutor_id is not null ";
             }
 
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
@@ -203,6 +225,10 @@ class Task
                     // Agregamos todos los IDs al array de parámetros
                     $params = array_merge($params, $estadoTipoIds);
                 }
+            }
+
+            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
+                $strWhere .= " AND pt.estado_tipo_id != 4 ";
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
