@@ -324,6 +324,10 @@ class Task
                 }
             }
 
+            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
+                $strWhere .= " AND pt.estado_tipo_id != 4 ";
+            }
+
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
                 $strWhere .= " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
@@ -423,6 +427,10 @@ class Task
                 }
             }
 
+            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
+                $strWhere .= " AND pt.estado_tipo_id != 4 ";
+            }
+
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
                 $strWhere .= " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
@@ -520,6 +528,10 @@ class Task
                     // Agregamos todos los IDs al array de parámetros
                     $params = array_merge($params, $estadoTipoIds);
                 }
+            }
+
+            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
+                $strWhere .= " AND pt.estado_tipo_id != 4 ";
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
@@ -1419,7 +1431,7 @@ class Task
         try {
             $sql = "SELECT DISTINCT p.id, 
                                     CONCAT(c.razon_social, ' (', p.fecha_inicio, '.', p.fecha_fin, ')') as nombre, 
-                                    c.razon_social as cliente_nombre
+                                    c.razon_social as cliente_nombre, p.proveedor_id
                     FROM proyectos p 
                     INNER JOIN clientes c ON p.cliente_id = c.id
                     INNER JOIN proyecto_usuarios_grupo pug ON pug.estado_tipo_id = 2 AND pug.proyecto_id = p.id
@@ -1547,10 +1559,17 @@ class Task
                 $params[':proveedor_id'] = $filters['proveedor_id'];
             }
 
-            $sql = "
-                SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
+            if (!empty($filters['proyecto_id'])) {
+                $strAndWhere .= " AND pug.proyecto_id = :proyecto_id";
+                $params[':proyecto_id'] = $filters['proyecto_id'];
+            }
+
+            $strJoinUsuariosProyectos = " INNER JOIN proyecto_usuarios_grupo pug ON u.id = pug.usuario_id ";
+
+            $sql = "SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
+                $strJoinUsuariosProyectos
                 WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 4
                 $strAndWhere
                 ORDER BY p.nombre
@@ -1601,6 +1620,10 @@ class Task
             $sql = "Select id, nombre, descripcion From estado_tipos";
             if ($uti > 2) {
                 $sql .= " Where id In (2, 5, 6, 7, 8)";
+            }
+
+            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] === "1") {
+                $sql .= (strpos($sql, 'Where') !== false) ? "" : " Where id In (1, 2, 5, 6, 7, 8)";
             }
             $sql .= " Order By id";
 

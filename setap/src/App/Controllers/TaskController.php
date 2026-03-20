@@ -248,12 +248,17 @@ class TaskController extends BaseController
 
             if ($uti > 1) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            } elseif (isset($_GET['proyecto_id']) && !empty($_GET['proyecto_id'])) {
+                $filters['proveedor_id'] = (int)$projects[array_search($_GET['proyecto_id'], array_column($projects, 'id'))]['proveedor_id'];
             }
 
             $users = $this->taskModel->getExecutorUsers($filters);
             if (count($users) == 1) {
                 $_GET['usuario_id'] = $users[0]['id'];
             }
+
+            $filters['excluye_eliminados'] = "1"; //Esta funcionalidad no maneja eliminados porque es solo para los que ejecutan las tareas, y no deberían ver las eliminadas aunque tengan permisos para eso en la vista general
+            $_GET['excluye_eliminados'] = $filters['excluye_eliminados'];
 
             $taskStates = $this->taskModel->getTaskStates($filters);
 

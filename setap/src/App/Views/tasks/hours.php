@@ -48,10 +48,9 @@ use App\Constants\AppConstants; ?>
                             <div class="card">
                                 <div class="card-body">
                                     <form method="GET" id="getFormFilter" class="row g-3">
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <label class="form-label">Proyecto</label>
-                                            <select class="form-select" name="proyecto_id">
-                                                <option value="">Todos</option>
+                                            <select class="form-select" name="proyecto_id" onchange="this.form.submit()">
                                                 <?php if (!empty($data['projects'])): ?>
                                                     <?php foreach ($data['projects'] as $project): ?>
                                                         <option value="<?= $project['id'] ?>"
@@ -62,7 +61,7 @@ use App\Constants\AppConstants; ?>
                                                 <?php endif; ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-3">
                                             <label class="form-label">Estado</label>
                                             <select class="form-select" id="estado_tipo_id" name="estado_tipo_id[]" multiple>
                                                 <?php if (!empty($data['taskStates'])): ?>
@@ -77,7 +76,7 @@ use App\Constants\AppConstants; ?>
                                         </div>
                                         <div class="col-md-2">
                                             <label class="form-label">Ejecuta</label>
-                                            <select class="form-select" name="usuario_id">
+                                            <select class="form-select" name="usuario_id" onchange="this.form.submit()">
                                                 <option value="">Todos</option>
                                                 <?php if (!empty($data['users'])): ?>
                                                     <?php foreach ($data['users'] as $user): ?>
@@ -90,9 +89,9 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-1">
+                                        <div class="col-md-2">
                                             <label class="form-label">Lapso</label>
-                                            <select class="form-select" name="modo">
+                                            <select class="form-select" name="modo" onchange="this.form.submit()">
                                                 <option value="dia" <?= (isset($_GET['modo']) && $_GET['modo'] === 'dia') ? 'selected' : '' ?>>Día</option>
                                                 <option value="semana" <?= (isset($_GET['modo']) && $_GET['modo'] === 'semana') ? 'selected' : '' ?>>Semana</option>
                                                 <option value="mes" <?= (isset($_GET['modo']) && $_GET['modo'] === 'mes') ? 'selected' : '' ?>>Mes</option>
@@ -102,12 +101,12 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-2">
                                             <label for="fecha_inicio" class="form-label">Inicio</label>
                                             <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio"
-                                                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+                                                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>" onchange="this.form.submit()">
                                         </div>
                                         <div class="col-md-2">
                                             <label for="fecha_fin" class="form-label">Fin</label>
                                             <input type="date" class="form-control" name="fecha_fin" id="fecha_fin"
-                                                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+                                                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>" onchange="this.form.submit()">
                                         </div>
 
                                         <div class="col-md-1 d-flex align-items-center">
