@@ -54,13 +54,13 @@ use App\Constants\AppConstants; ?>
                                     <form method="GET" id="getFormFilter" class="row g-3">
                                         <div class="col-md-2">
                                             <label class="form-label">Proyecto</label>
-                                            <select class="form-select" name="proyecto_id">
+                                            <select class="form-select" name="proyecto_id" onchange="this.form.submit()">
                                                 <option value="">Todos</option>
                                                 <?php if (!empty($data['projects'])): ?>
                                                     <?php foreach ($data['projects'] as $project): ?>
                                                         <option value="<?= $project['id'] ?>"
                                                             <?= (isset($_GET['proyecto_id']) && $_GET['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
-                                                            <?= htmlspecialchars($project['cliente_nombre']) ?>
+                                                            <?= htmlspecialchars($project['nombre']) ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
@@ -68,11 +68,11 @@ use App\Constants\AppConstants; ?>
                                         </div>
                                         <div class="col-md-2">
                                             <label class="form-label">Estado</label>
-                                            <select class="form-select" name="estado_tipo_id">
+                                            <select class="form-select" name="estado_tipo_id" onchange="this.form.submit()">
                                                 <option value="">Todos</option>
                                                 <?php if (!empty($data['taskStates'])): ?>
                                                     <?php foreach ($data['taskStates'] as $state): ?>
-                                                        <option value="<?= $state['id'] ?>"
+                                                        <option value=" <?= $state['id'] ?>"
                                                             <?= (isset($_GET['estado_tipo_id']) && $_GET['estado_tipo_id'] == $state['id']) ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($state['nombre']) ?>
                                                         </option>
@@ -98,12 +98,12 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-2">
                                             <label for="fecha_inicio" class="form-label">Inicio</label>
                                             <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
-                                                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+                                                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>" onchange="this.form.submit()">
                                         </div>
                                         <div class="col-md-2">
                                             <label for="fecha_fin" class="form-label">Fin</label>
                                             <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
-                                                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+                                                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>" onchange="this.form.submit()">
                                         </div>
 
                                         <div class="col-md-2 d-flex align-items-end">

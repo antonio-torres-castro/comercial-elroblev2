@@ -439,11 +439,15 @@ class TaskController extends BaseController
 
             $filters['current_usuario_tipo_id'] = $uti;
             $filters['current_usuario_id'] = $cu;
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
 
             if (!empty($_GET['proyecto_id'])) {
                 $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
             }
-            $projects = $this->taskModel->getProjectsActivos($currentUser['id']);
+
+            $projects = $this->taskModel->getProjectsActivos($filters);
             if (count($projects) == 1) {
                 $_GET['proyecto_id'] = $projects[0]['id'];
             }
@@ -468,6 +472,9 @@ class TaskController extends BaseController
                     $_GET['usuario_id'] = $filters['ejecutor_id'];
                 }
             }
+
+            $filters['excluye_eliminados'] = "1"; //Esta funcionalidad no maneja eliminados porque es solo para los que ejecutan las tareas, y no deberían ver las eliminadas aunque tengan permisos para eso en la vista general
+
             if (!empty($_GET['fecha_inicio'])) {
                 $filters['fecha_inicio'] = $_GET['fecha_inicio'];
             }

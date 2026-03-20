@@ -152,12 +152,12 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-2">
                                             <label for="fecha_inicio" class="form-label">Inicio</label>
                                             <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
-                                                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+                                                value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>" onchange="this.form.submit()">
                                         </div>
                                         <div class="col-md-2">
                                             <label for="fecha_fin" class="form-label">Fin</label>
                                             <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
-                                                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+                                                value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>" onchange="this.form.submit()">
                                         </div>
 
                                         <div class="col-md-1 d-flex align-items-center">

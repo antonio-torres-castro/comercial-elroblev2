@@ -87,10 +87,6 @@ class Task
                 $strWhere .= " AND pt.ejecutor_id is not null ";
             }
 
-            if (isset($filters['excluye_no_asignados']) && $filters['excluye_no_asignados'] == 1) {
-                $strWhere .= " AND pt.ejecutor_id is not null ";
-            }
-
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
                 // Aseguramos que sea un array
                 $estadoTipoIds = is_array($filters['estado_tipo_id'])
@@ -1457,7 +1453,7 @@ class Task
     /**
      * Obtener proyectos disponibles
      */
-    public function getProjectsActivos(?string $usuario_id): array
+    public function getProjectsActivos(?array $filters = []): array
     {
         try {
             $sql = "SELECT DISTINCT p.id, 
@@ -1470,10 +1466,16 @@ class Task
                     WHERE p.estado_tipo_id = 2";
 
             $params = [];
-            if (!empty($usuario_id)) {
+            if (!empty($filters['current_usuario_id'])) {
                 $sql .= " and pug.usuario_id = ?";
-                $params[] = $usuario_id;
+                $params[] = $filters['current_usuario_id'];
             }
+
+            if (!empty($filters['proveedor_id'])) {
+                $sql .= " AND p.proveedor_id = ? ";
+                $params[] = $filters['proveedor_id'];
+            }
+
             $sql .= " ORDER BY c.razon_social";
 
             $stmt = $this->db->prepare($sql);
