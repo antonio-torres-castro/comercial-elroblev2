@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const ugAlert = document.getElementById('ugAlert');
   const usuarioSelect = document.getElementById('ug_usuario_id');
   const grupoSelect = document.getElementById('ug_grupo_id');
+  const hhInput = document.getElementById('ug_hh');
   const addBtn = document.getElementById('ugAddBtn');
   const ugTableBody = document.querySelector('#ugTable tbody');
   const csrfInput = document.querySelector('#ugForm input[name="csrf_token"]');
@@ -62,6 +63,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const tr = document.createElement('tr');
         const tdUser = document.createElement('td');
         tdUser.textContent = row.username;
+        const tdHH = document.createElement('td');
+        const inputHH = document.createElement('input');
+        inputHH.type = 'number';
+        inputHH.step = '0.01'; // importante para decimales
+        inputHH.className = 'form-control form-control-sm';
+        inputHH.value = row.hh ?? 0;
+        inputHH.disabled = !projectActive;
+        tdHH.appendChild(inputHH);
+
         const tdGrupo = document.createElement('td');
         const select = document.createElement('select');
         select.className = 'form-select form-select-sm';
@@ -83,7 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btnUpd.title = 'Actualizar';
         btnUpd.disabled = !projectActive;
         btnUpd.addEventListener('click', async () => {
-          await updateRow(row.id, parseInt(select.value, 10));
+          const hhValue = parseFloat(inputHH.value);
+
+          if (isNaN(hhValue)) {
+            showAlert('warning', 'HH debe ser un número válido');
+            return;
+          }
+
+          await updateRow(row.id, parseInt(select.value, 10), hhValue);
         });
 
         const btnDel = document.createElement('button');
@@ -98,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tdAcc.appendChild(btnDel);
 
         tr.appendChild(tdUser);
+        tr.appendChild(tdHH);
         tr.appendChild(tdGrupo);
         tr.appendChild(tdAcc);
         ugTableBody.appendChild(tr);
@@ -110,6 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
   async function addRow() {
     const usuario_id = parseInt(usuarioSelect.value, 10);
     const grupo_id = parseInt(grupoSelect.value, 10);
+    const hhValue = parseFloat(hhInput.value);
+
+    if (isNaN(hhValue)) {
+      showAlert('warning', 'HH debe ser un número válido');
+      return;
+    }
+
     if (!usuario_id || !grupo_id) {
       showAlert('warning', 'Seleccione usuario y grupo');
       return;
@@ -120,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('project_id', projectId);
       formData.append('usuario_id', usuario_id);
       formData.append('grupo_id', grupo_id);
+      formData.append('hh', hhValue);
       const res = await fetch('/setap/project/usuarios-grupo-add', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {
@@ -133,13 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function updateRow(id, grupo_id) {
+  async function updateRow(id, grupo_id, hh) {
     try {
       const formData = new FormData();
       formData.append('csrf_token', csrfInput ? csrfInput.value : '');
       formData.append('id', id);
       formData.append('project_id', projectId);
       formData.append('grupo_id', grupo_id);
+      formData.append('hh', hh);
       const res = await fetch('/setap/project/usuarios-grupo-update', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.success) {

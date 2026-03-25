@@ -779,6 +779,7 @@ class ProjectController extends BaseController
             $projectId = (int)($_POST['project_id'] ?? 0);
             $usuarioId = (int)($_POST['usuario_id'] ?? 0);
             $grupoId = (int)($_POST['grupo_id'] ?? 0);
+            $hh = (float)($_POST['hh'] ?? 0);
             if ($projectId <= 0 || $usuarioId <= 0 || $grupoId <= 0) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'Parámetros incompletos']);
@@ -792,7 +793,7 @@ class ProjectController extends BaseController
                 return;
             }
 
-            $res = $this->projectModel->addUsuarioGrupo($projectId, $usuarioId, $grupoId);
+            $res = $this->projectModel->addUsuarioGrupo($projectId, $usuarioId, $grupoId, $hh);
             echo json_encode($res);
         } catch (Exception $e) {
             Logger::error('ProjectController::usuariosGrupoAdd: ' . $e->getMessage());
@@ -832,6 +833,7 @@ class ProjectController extends BaseController
             $id = (int)($_POST['id'] ?? 0);
             $projectId = (int)($_POST['project_id'] ?? 0);
             $grupoId = (int)($_POST['grupo_id'] ?? 0);
+            $hh = (int)($_POST['hh'] ?? 0);
             if ($id <= 0 || $projectId <= 0 || $grupoId <= 0) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'Parámetros incompletos']);
@@ -845,7 +847,7 @@ class ProjectController extends BaseController
                 return;
             }
 
-            $res = $this->projectModel->updateUsuarioGrupo($id, $grupoId);
+            $res = $this->projectModel->updateUsuarioGrupo($id, $grupoId, $hh);
             echo json_encode($res);
         } catch (Exception $e) {
             Logger::error('ProjectController::usuariosGrupoUpdate: ' . $e->getMessage());

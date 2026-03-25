@@ -24,13 +24,17 @@ use App\Helpers\Security;
                             <label class="form-label">Usuario</label>
                             <select class="form-select" name="usuario_id" id="ug_usuario_id"></select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
+                            <label class="form-label">HH</label>
+                            <input type="number" class="form-control" name="hh" id="ug_hh" step="0.5" min="0">
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Grupo</label>
                             <select class="form-select" name="grupo_id" id="ug_grupo_id"></select>
                         </div>
-                        <div class="col-md-2 text-end">
+                        <div class="col-md-1 text-end">
                             <button type="button" class="btn btn-primary w-100" id="ugAddBtn">
-                                <i class="bi bi-plus-lg"></i> Nuevo
+                                <i class="bi bi-plus-lg"></i>
                             </button>
                         </div>
                     </div>
@@ -40,7 +44,8 @@ use App\Helpers\Security;
                     <table class="table table-sm align-middle" id="ugTable">
                         <thead>
                             <tr>
-                                <th>Usuario</th>
+                                <th width="50%">Usuario</th>
+                                <th width="10%">HH</th>
                                 <th>Grupo</th>
                                 <th class="text-end">Acciones</th>
                             </tr>

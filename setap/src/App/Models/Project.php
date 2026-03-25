@@ -451,6 +451,7 @@ class Project
                         pug.proyecto_id,
                         pug.usuario_id,
                         u.nombre_usuario AS username,
+                        pug.hh,
                         u.estado_tipo_id AS usuario_estado_tipo_id,
                         pug.grupo_id,
                         gt.nombre AS grupo_nombre,
@@ -499,7 +500,7 @@ class Project
     }
 
     /** Crear asignación usuario-grupo (evitando duplicados) */
-    public function addUsuarioGrupo(int $projectId, int $usuarioId, int $grupoId): array
+    public function addUsuarioGrupo(int $projectId, int $usuarioId, int $grupoId, float $hh): array
     {
         try {
             // validar duplicidad
@@ -509,8 +510,8 @@ class Project
                 return ['success' => false, 'message' => 'Ya existe la asociación'];
             }
 
-            $stmt = $this->db->prepare("INSERT INTO proyecto_usuarios_grupo (proyecto_id, usuario_id, grupo_id, estado_tipo_id) VALUES (?, ?, ?, 2)");
-            $ok = $stmt->execute([$projectId, $usuarioId, $grupoId]);
+            $stmt = $this->db->prepare("INSERT INTO proyecto_usuarios_grupo (proyecto_id, usuario_id, grupo_id, estado_tipo_id, hh) VALUES (?, ?, ?, 2, ?)");
+            $ok = $stmt->execute([$projectId, $usuarioId, $grupoId, $hh]);
             return $ok ? ['success' => true] : ['success' => false, 'message' => 'Error al crear'];
         } catch (Exception $e) {
             \App\Helpers\Logger::error('Project::addUsuarioGrupo error: ' . $e->getMessage());
@@ -519,11 +520,11 @@ class Project
     }
 
     /** Actualizar grupo de una asignación */
-    public function updateUsuarioGrupo(int $id, int $grupoId): array
+    public function updateUsuarioGrupo(int $id, int $grupoId, float $hh): array
     {
         try {
-            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET grupo_id = ? WHERE id = ? AND estado_tipo_id != 4");
-            $ok = $stmt->execute([$grupoId, $id]);
+            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET grupo_id = ?, hh = ? WHERE id = ? AND estado_tipo_id != 4");
+            $ok = $stmt->execute([$grupoId, $hh, $id]);
             return $ok ? ['success' => true] : ['success' => false, 'message' => 'Error al actualizar'];
         } catch (Exception $e) {
             \App\Helpers\Logger::error('Project::updateUsuarioGrupo error: ' . $e->getMessage());
