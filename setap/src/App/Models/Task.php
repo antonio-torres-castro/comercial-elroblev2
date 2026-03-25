@@ -53,16 +53,19 @@ class Task
             $cu = $filters['current_usuario_id'];
             $params = [];
 
-            $sql = "SELECT Count(distinct pt.id) as total
+            $sql = "SELECT Count(pt.id) as total
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-				Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             // Filtros
@@ -150,8 +153,7 @@ class Task
             $cu = $filters['current_usuario_id'];
             $params = [];
 
-            $sql = "SELECT Distinct
-                    pt.id,
+            $sql = "SELECT pt.id,
                     pt.tarea_id,
                     t.nombre as tarea_nombre,
                     t.descripcion,
@@ -171,15 +173,18 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             // Filtros
@@ -279,15 +284,18 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             // Filtros
@@ -298,6 +306,8 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            } else {
+                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
@@ -382,15 +392,18 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             // Filtros
@@ -401,6 +414,8 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            } else {
+                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
@@ -485,15 +500,18 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             // Filtros
@@ -504,6 +522,8 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            } else {
+                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
@@ -578,12 +598,15 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
@@ -593,6 +616,8 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            } else {
+                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
@@ -654,12 +679,15 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
@@ -669,6 +697,8 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            } else {
+                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
@@ -730,12 +760,15 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
-            $strWhere = " WHERE pug.usuario_id = ? ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) ";
             $params[] = $cu;
 
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
@@ -745,6 +778,8 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            } else {
+                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
@@ -808,14 +843,17 @@ class Task
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                Inner Join proyecto_usuarios_grupo pug on pug.estado_tipo_id = 2 and pug.proyecto_id = p.id
-                Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 INNER JOIN personas pe ON pe.id = exec.persona_id ";
-            $strWhere = " WHERE pug.usuario_id = ? AND pt.ejecutor_id IS NOT NULL ";
+            $strWhere = " WHERE EXISTS (SELECT 1
+						FROM proyecto_usuarios_grupo pug
+						WHERE pug.proyecto_id = p.id
+						  AND pug.usuario_id = ?
+						  AND pug.estado_tipo_id = 2
+						  AND pug.grupo_id BETWEEN 1 AND 5) AND pt.ejecutor_id IS NOT NULL ";
             $params[] = $cu;
 
             // Filtros
@@ -826,6 +864,8 @@ class Task
 
             if (isset($uti) && $uti > 2) {
                 $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            } else {
+                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
@@ -1433,9 +1473,7 @@ class Task
                                     CONCAT(c.razon_social, ' (', p.fecha_inicio, '.', p.fecha_fin, ')') as nombre, 
                                     c.razon_social as cliente_nombre, p.proveedor_id
                     FROM proyectos p 
-                    INNER JOIN clientes c ON p.cliente_id = c.id
-                    INNER JOIN proyecto_usuarios_grupo pug ON pug.estado_tipo_id = 2 AND pug.proyecto_id = p.id
-                    INNER JOIN grupo_tipos gt ON gt.id between 1 and 5 AND gt.id = pug.grupo_id ";
+                    INNER JOIN clientes c ON p.cliente_id = c.id ";
 
             if ($uti == 1 || $uti == 2) {
                 $sql .= " WHERE p.estado_tipo_id IN (1, 2, 5)";
@@ -1443,7 +1481,7 @@ class Task
                 $sql .= " WHERE p.estado_tipo_id = 2";
             }
 
-            $sql .= " AND pug.usuario_id = ? ";
+            $sql .= " AND EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id BETWEEN 1 AND 5) ";
             $myFilters[] = $filters['current_usuario_id'];
 
             if (!empty($filters['proveedor_id'])) {
@@ -1473,13 +1511,11 @@ class Task
                                     c.razon_social as cliente_nombre
                     FROM proyectos p 
                     INNER JOIN clientes c ON p.cliente_id = c.id
-                    INNER JOIN proyecto_usuarios_grupo pug ON pug.estado_tipo_id = 2 AND pug.proyecto_id = p.id
-                    Inner Join grupo_tipos gt on gt.id between 1 and 5 and gt.id = pug.grupo_id
                     WHERE p.estado_tipo_id = 2";
 
             $params = [];
             if (!empty($filters['current_usuario_id'])) {
-                $sql .= " and pug.usuario_id = ?";
+                $sql .= " and EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id BETWEEN 1 AND 5)";
                 $params[] = $filters['current_usuario_id'];
             }
 

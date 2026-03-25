@@ -107,9 +107,9 @@ class TaskController extends BaseController
             $_GET['show_btn_nuevo'] = $rCreate;
             $_GET['show_btn_activity'] = $rActivity;
 
-            if ($uti > 1) {
+            if ($uti > 1 && isset($currentUser['proveedor_id'])) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
-            } elseif ($uti == 1) {
+            } elseif ($uti == 1 && isset($_GET['proyecto_id'])) {
                 $filters['proveedor_id'] = $_GET['proveedor_id'];
             }
 
