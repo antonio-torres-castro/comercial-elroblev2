@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     const form = document.getElementById('createTaskForm');
-    const formData = new FormData(form);
     const createBtn = document.getElementById('createBtn');
 
     const fechaInicioMasivo = document.getElementById('fecha_inicio_masivo');
@@ -59,6 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const fechaEspecificaFin = document.getElementById('fecha_especifica_fin');
     const fechaInicioRango = document.getElementById('fecha_inicio_rango');
     const fechaFinRango = document.getElementById('fecha_fin_rango');
+    const fechaInicioIntervalo = document.getElementById('fecha_inicio_intervalo');
+    const fechaFinIntervalo = document.getElementById('fecha_fin_intervalo');
 
     function validateDates(fechaInicio, fechaFin) {
         if (fechaInicio.value && fechaFin.value) {
@@ -75,8 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function validateDatesGetway() {
-        var i, iors, tipoOcurrencia, retorno;
-        tipoOcurrencia = formData.get('optionOcurrencia');
+        var retorno;
+        const currentFormData = new FormData(form);
+        const tipoOcurrencia = currentFormData.get('optionOcurrencia');
         if (tipoOcurrencia == '1') {
             retorno = validateDates(fechaInicioMasivo, fechaFinMasivo);
         }
@@ -85,6 +87,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (tipoOcurrencia == '3') {
             retorno = validateDates(fechaInicioRango, fechaFinRango);
+        }
+        if (tipoOcurrencia == '4') {
+            retorno = validateDates(fechaInicioIntervalo, fechaFinIntervalo);
         }
         return retorno;
     }
@@ -112,6 +117,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     fechaFinRango.addEventListener('change', () => {
         validateDates(fechaInicioRango, fechaFinRango);
+    });
+
+    ///Intervalo Fechas
+    fechaInicioIntervalo.addEventListener('change', () => {
+        fechaFinIntervalo.min = fechaInicioIntervalo.value;
+        validateDates(fechaInicioIntervalo, fechaFinIntervalo);
+    });
+    fechaFinIntervalo.addEventListener('change', () => {
+        validateDates(fechaInicioIntervalo, fechaFinIntervalo);
     });
             // Envío del formulario
     form.addEventListener('submit', function(e) {

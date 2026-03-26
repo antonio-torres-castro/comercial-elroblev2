@@ -221,7 +221,7 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio" onclick="selOpt(event, 'masivo')"
                                                     name="optionOcurrencia" id="iorMasivo" value="1" checked>
@@ -236,6 +236,11 @@ use App\Constants\AppConstants; ?>
                                                 <input class="form-check-input" type="radio" onclick="selOpt(event, 'rango')"
                                                     name="optionOcurrencia" id="iorRango" value="3">
                                                 <label class="form-check-label" for="iorRango">Rango</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" onclick="selOpt(event, 'intervalo')"
+                                                    name="optionOcurrencia" id="iorIntervalo" value="4">
+                                                <label class="form-check-label" for="iorIntervalo">Intervalo</label>
                                             </div>
                                         </div>
 
@@ -269,6 +274,13 @@ use App\Constants\AppConstants; ?>
                                             <button class="nav-link" id="rango-tab" onclick="openTab(event, 'Rango')"
                                                 data-bs-toggle="tab" data-bs-target="#rango" type="button" role="tab" name="button-tab">
                                                 <i class="fas fa-calendar-alt"></i> Todos los dias entre...
+                                            </button>
+                                        </li>
+
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="intervalo-tab" onclick="openTab(event, 'Intervalo')"
+                                                data-bs-toggle="tab" data-bs-target="#intervalo" type="button" role="tab" name="button-tab">
+                                                <i class="fas fa-calendar-alt"></i> Cada N dias...
                                             </button>
                                         </li>
                                     </ul>
@@ -381,6 +393,98 @@ use App\Constants\AppConstants; ?>
                                             </div>
 
                                         </div>
+
+                                        <!-- Intervalo de Fechas Tab -->
+                                        <div class="tab-pane fade" id="intervalo" role="tabpanel" name="tabpane">
+                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="fecha_inicio_intervalo" class="form-label">Inicio *</label>
+                                                    <input type="date" class="form-control" id="fecha_inicio_intervalo" name="fecha_inicio_intervalo"
+                                                        value="<?= htmlspecialchars($_POST['fecha_inicio_intervalo'] ?? date('Y-03-01')); ?>" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="fecha_fin_intervalo" class="form-label">Fin *</label>
+                                                    <input type="date" class="form-control" id="fecha_fin_intervalo" name="fecha_fin_intervalo"
+                                                        value="<?= htmlspecialchars($_POST['fecha_fin_intervalo'] ?? date('Y-12-24')); ?>" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <label for="intervalo_dias" class="form-label">Intervalo (cada N dias) *</label>
+                                                    <input type="number" class="form-control" id="intervalo_dias" name="intervalo_dias" min="1"
+                                                        value="<?= htmlspecialchars($_POST['intervalo_dias'] ?? '15'); ?>" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="duracion_bloque_dias" class="form-label">Duracion del bloque (dias) *</label>
+                                                    <input type="number" class="form-control" id="duracion_bloque_dias" name="duracion_bloque_dias" min="1"
+                                                        value="<?= htmlspecialchars($_POST['duracion_bloque_dias'] ?? '1'); ?>" required>
+                                                </div>
+                                                <div class="col-md-4 d-flex align-items-end">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ajustar_feriados" name="ajustar_feriados" value="1" checked>
+                                                        <label class="form-check-label" for="ajustar_feriados">Mover a dia habil si cae feriado</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-12">
+                                                    <label class="form-label">Dias de la semana (opcional)</label>
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias_intervalo[]" value="1" id="intervalo_lunes">
+                                                                <label class="form-check-label" for="intervalo_lunes">Lunes</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias_intervalo[]" value="2" id="intervalo_martes">
+                                                                <label class="form-check-label" for="intervalo_martes">Martes</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias_intervalo[]" value="3" id="intervalo_miercoles">
+                                                                <label class="form-check-label" for="intervalo_miercoles">Miercoles</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias_intervalo[]" value="4" id="intervalo_jueves">
+                                                                <label class="form-check-label" for="intervalo_jueves">Jueves</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias_intervalo[]" value="5" id="intervalo_viernes">
+                                                                <label class="form-check-label" for="intervalo_viernes">Viernes</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias_intervalo[]" value="6" id="intervalo_sabado">
+                                                                <label class="form-check-label" for="intervalo_sabado">Sabado</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" name="dias_intervalo[]" value="0" id="intervalo_domingo">
+                                                                <label class="form-check-label" for="intervalo_domingo">Domingo</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="form-text">Si no seleccionas dias, se tomaran todos.</div>
+
+                                        </div>
+
                                     </div>
 
                                 </div>

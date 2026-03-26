@@ -801,6 +801,10 @@ class TaskController extends BaseController
                 $fechaInicio = $_POST['fecha_inicio_rango'];
                 $fechaFin = $_POST['fecha_fin_rango'];
             }
+            if ($tipoOcurr == '4') {
+                $fechaInicio = $_POST['fecha_inicio_intervalo'];
+                $fechaFin = $_POST['fecha_fin_intervalo'];
+            }
             // Determinar si usar tarea existente o crear nueva
             $tareaId = 0;
             if (!empty($_POST['tarea_id']) && $_POST['tarea_id'] !== 'nueva') {
@@ -825,7 +829,11 @@ class TaskController extends BaseController
                 'prioridad' => (int)($_POST['prioridad'] ?? 0),
                 'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 1),
                 'tipo_ocurrencia' => $tipoOcurr,
-                'dias_semana' => $_POST['dias']
+                'dias_semana' => $_POST['dias'] ?? [],
+                'intervalo_dias' => (int)($_POST['intervalo_dias'] ?? 0),
+                'duracion_bloque_dias' => (int)($_POST['duracion_bloque_dias'] ?? 0),
+                'dias_semana_intervalo' => $_POST['dias_intervalo'] ?? [],
+                'ajustar_feriados' => !empty($_POST['ajustar_feriados']) ? 1 : 0
             ];
 
             $result = false;
@@ -1841,6 +1849,9 @@ class TaskController extends BaseController
         $diasSemana = $data['dias'] ?? [];
         $diasSemana = array_map('intval', $diasSemana); // Convertir días a array de enteros
 
+        $diasIntervalo = $data['dias_intervalo'] ?? [];
+        $diasIntervalo = array_map('intval', $diasIntervalo);
+
         $fechaInicio = "";
         $fechaFin = "";
         if ($tipoOcurrencia == '1') {
@@ -1854,6 +1865,10 @@ class TaskController extends BaseController
         if ($tipoOcurrencia == '3') {
             $fechaInicio = $data['fecha_inicio_rango'];
             $fechaFin = $data['fecha_fin_rango'];
+        }
+        if ($tipoOcurrencia == '4') {
+            $fechaInicio = $data['fecha_inicio_intervalo'];
+            $fechaFin = $data['fecha_fin_intervalo'];
         }
 
         // Validar fecha de inicio
@@ -1878,6 +1893,43 @@ class TaskController extends BaseController
             }
             if (empty($fechasGeneradas)) {
                 $errors[] = 'La configuracion masiva entregada no genera fechas para tarea';
+            }
+        }
+
+        if ($tipoOcurrencia == '4') {
+            $intervaloDias = (int)($data['intervalo_dias'] ?? 0);
+            $duracionBloque = (int)($data['duracion_bloque_dias'] ?? 0);
+            if ($intervaloDias < 1) {
+                $errors[] = 'El intervalo en dias debe ser mayor o igual a 1';
+            }
+            if ($duracionBloque < 1) {
+                $errors[] = 'La duracion del bloque debe ser mayor o igual a 1';
+            }
+
+            $cursor = new \DateTime($fechaInicio);
+            $endCheck = new \DateTime($fechaFin);
+            $hasDate = false;
+            $useFilter = !empty($diasIntervalo);
+            while ($cursor <= $endCheck) {
+                for ($i2 = 0; $i2 < $duracionBloque; $i2++) {
+                    $candidate = (clone $cursor)->add(new \DateInterval('P' . $i2 . 'D'));
+                    if ($candidate > $endCheck) {
+                        break;
+                    }
+                    if ($useFilter) {
+                        $dayOfWeek = (int)$candidate->format('w');
+                        if (!in_array($dayOfWeek, $diasIntervalo)) {
+                            continue;
+                        }
+                    }
+                    $hasDate = true;
+                    break 2;
+                }
+                $cursor->add(new \DateInterval('P' . max($intervaloDias, 1) . 'D'));
+            }
+
+            if (!$hasDate) {
+                $errors[] = 'La configuracion de intervalo no genera fechas para tarea';
             }
         }
 

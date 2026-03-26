@@ -1144,6 +1144,101 @@ class Task
     }
 
     /**
+     * Crear tarea en proyecto intervalo de fechas
+     */
+    public function projectTaskCreateIntervalo(array $data): ?bool
+    {
+        try {
+            $result = false;
+            $intervaloDias = max(1, (int)($data['intervalo_dias'] ?? 1));
+            $duracionBloque = max(1, (int)($data['duracion_bloque_dias'] ?? 1));
+            $diasSemana = $data['dias_semana_intervalo'] ?? [];
+            $diasSemana = array_map('intval', $diasSemana);
+            $useFilter = !empty($diasSemana);
+            $ajustarFeriados = !empty($data['ajustar_feriados']);
+            $projectId = (int)$data['proyecto_id'];
+
+            $start = new \DateTime($data['fecha_inicio']);
+            $end = new \DateTime($data['fecha_fin']);
+
+            while ($start <= $end) {
+                for ($i = 0; $i < $duracionBloque; $i++) {
+                    $candidate = (clone $start)->add(new \DateInterval('P' . $i . 'D'));
+                    if ($candidate > $end) {
+                        break;
+                    }
+                    if ($useFilter) {
+                        $dayOfWeek = (int)$candidate->format('w');
+                        if (!in_array($dayOfWeek, $diasSemana, true)) {
+                            continue;
+                        }
+                    }
+
+                    if ($ajustarFeriados) {
+                        $candidate = $this->getNextValidDate($projectId, $candidate, $diasSemana, $useFilter, $end);
+                        if ($candidate === null) {
+                            continue;
+                        }
+                    }
+
+                    $data['fecha_inicio'] = $candidate->format('Y-m-d');
+                    $data['fecha_fin'] = $data['fecha_inicio'];
+                    $result = $this->projectTaskCreate($data);
+                }
+
+                $start->add(new \DateInterval('P' . $intervaloDias . 'D'));
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            Logger::error("Task::projectTaskCreateIntervalo: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function isHolidayDate(int $projectId, string $date): bool
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id FROM proyecto_feriados
+                WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
+            ");
+            $stmt->execute([$projectId, $date]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            Logger::error("Task::isHolidayDate: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function getNextValidDate(int $projectId, \DateTime $date, array $allowedWeekdays, bool $useWeekdayFilter, \DateTime $end): ?\DateTime
+    {
+        try {
+            $candidate = clone $date;
+            $iterations = 0;
+            $maxIterations = 3650;
+
+            while ($candidate <= $end && $iterations < $maxIterations) {
+                $dateStr = $candidate->format('Y-m-d');
+                $isHoliday = $this->isHolidayDate($projectId, $dateStr);
+                $weekdayOk = !$useWeekdayFilter || in_array((int)$candidate->format('w'), $allowedWeekdays, true);
+
+                if (!$isHoliday && $weekdayOk) {
+                    return $candidate;
+                }
+
+                $candidate->add(new \DateInterval('P1D'));
+                $iterations++;
+            }
+
+            return null;
+        } catch (Exception $e) {
+            Logger::error("Task::getNextValidDate: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Crear nueva tarea en proyecto
      */
     public function create(array $data): ?bool
@@ -1162,6 +1257,10 @@ class Task
             //Rango de fechas todos los dias
             if ($tipoO == 3) {
                 $result = $this->projectTaskCreateRango($data);
+            }
+
+            if ($tipoO == 4) {
+                $result = $this->projectTaskCreateIntervalo($data);
             }
 
             return $result;
