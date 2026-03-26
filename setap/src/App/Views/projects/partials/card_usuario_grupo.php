@@ -26,7 +26,7 @@ use App\Helpers\Security;
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">HH</label>
-                            <input type="number" class="form-control" name="hh" id="ug_hh" step="0.5" min="0">
+                            <input type="number" class="form-control" name="hh" id="ug_hh" step="0.5" min="0.5" value="0.5">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Grupo</label>
