@@ -127,6 +127,7 @@ class ProjectController extends BaseController
         $_GET['show_btn_nuevo'] = $rCreate;
         $_GET['show_btn_editar'] = $rModify;
         $_GET['show_btn_gestionar_feriados'] = $rCreate && $rModify;
+        $_GET['show_btn_gestionar_colaboradores'] = $rCreate && $rModify;
         $_GET['show_btn_cambiar_estado'] = $rEliminate;
         $_GET['show_btn_ver'] = $rRead;
 

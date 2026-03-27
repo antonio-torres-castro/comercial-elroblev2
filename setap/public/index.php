@@ -871,6 +871,8 @@ try {
             }
             break;
 
+        case 'proyecto-colaboradores':
+
         case 'user':
             // Redireccionar las rutas /user/{id} a las rutas estándar
             if ($action) {

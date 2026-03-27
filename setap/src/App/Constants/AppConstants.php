@@ -59,7 +59,7 @@ class AppConstants
     /** Ruta base de tareas */
     const ROUTE_MY_TASKS = '/setap/tasks/my';
 
-/** Ruta base de horas planificadas */
+    /** Ruta base de horas planificadas */
     const ROUTE_TASKS_HOURS = '/setap/tasks/horas';
 
     /** Ruta de creación de tareas */
@@ -141,6 +141,9 @@ class AppConstants
 
     /** Ruta de reporte de proyecto */
     const ROUTE_PROJECT_HOLIDAYS = "/setap/proyecto-feriados";
+
+    /** Ruta de gestión de colaboradores de proyecto */
+    const ROUTE_PROJECT_COLABORADORES = "/setap/proyecto-colaboradores";
 
     // ===== RUTAS CON ACCIONES =====
 
@@ -651,4 +654,3 @@ class AppConstants
         return $baseRoute . '?' . self::PARAM_ERROR . '=' . urlencode($message);
     }
 }
-

@@ -78,7 +78,7 @@ use App\Constants\AppConstants; ?>
         <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
         <!-- Header del Proyecto -->
         <div class="row mb-4">
-            <div class="col-md-7">
+            <div class="col-md-5">
                 <h2>
                     <i class="bi bi-building"></i> <?= htmlspecialchars($project['cliente_nombre']) ?>
                     <?php
@@ -98,7 +98,7 @@ use App\Constants\AppConstants; ?>
                     <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($project['direccion'] ?: 'Ubicación no especificada') ?>
                 </p>
             </div>
-            <div class="col-md-5 text-end">
+            <div class="col-md-7 text-end">
 
                 <a href="javascript:history.back()" class="btn btn-secondary mr-2">
                     <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
@@ -119,6 +119,12 @@ use App\Constants\AppConstants; ?>
                 <?php if ($_GET['show_btn_gestionar_feriados']): ?>
                     <a href="<?= AppConstants::ROUTE_PROJECT_HOLIDAYS ?>?proyecto_id=<?= $project['id'] ?>" class="btn btn-info mr-2">
                         <i class="bi bi-calendar-x"></i> Feriados
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($_GET['show_btn_gestionar_colaboradores']): ?>
+                    <a href="<?= AppConstants::ROUTE_PROJECT_COLABORADORES ?>?proyecto_id=<?= $project['id'] ?>" class="btn btn-info mr-2">
+                        <i class="bi bi-person-vcard"></i> Colab.
                     </a>
                 <?php endif; ?>
 
