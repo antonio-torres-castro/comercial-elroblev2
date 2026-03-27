@@ -30,7 +30,7 @@ use App\Constants\AppConstants; ?>
         <div class="row">
             <main class="col-12 px-md-4">
                 <div class="row mb-2">
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <h2>
                             <i class="bi bi-clock-history"></i> Horas planificadas
                             <span class="badge bg-secondary ms-1"><?= $totalRows ?> periodos</span>
@@ -39,6 +39,11 @@ use App\Constants\AppConstants; ?>
                                 <i class="bi bi-eye"></i> Filtros
                             </button>
                         </h2>
+                    </div>
+                    <div class="col-md-2">
+                        <h4>
+                            <span class="badge bg-secondary ms-1"><?= $data['hh'] ?> HH Capacidad Diaria</span>
+                        </h4>
                     </div>
                 </div>
 
@@ -107,6 +112,15 @@ use App\Constants\AppConstants; ?>
                                             <label for="fecha_fin" class="form-label">Fin</label>
                                             <input type="date" class="form-control" name="fecha_fin" id="fecha_fin"
                                                 value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>" onchange="this.form.submit()">
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="mb-3 form-check">
+                                                <input type="checkbox" class="form-check-input" id="solo_excedidos" name="solo_excedidos" value="1"
+                                                    <?= (isset($_GET['solo_excedidos']) && $_GET['solo_excedidos'] == 1) ? 'checked' : '' ?>
+                                                    onchange="this.form.submit()">
+                                                <label class="form-check-label" for="solo_excedidos">Solo excedidos</label>
+                                            </div>
                                         </div>
 
                                         <div class="col-md-1 d-flex align-items-center">

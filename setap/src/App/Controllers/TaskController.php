@@ -264,6 +264,12 @@ class TaskController extends BaseController
 
             $taskStates = $this->taskModel->getTaskStates($filters);
 
+            $hh = $this->taskModel->DailyCapacity($filters);
+
+            $filters['solo_excedidos'] = isset($_GET['solo_excedidos']) && $_GET['solo_excedidos'] == 1 ? '1' : '0';
+
+            $filters['hh_daily_capacity'] = $hh;
+
             $modo = $_GET['modo'] ?? 'dia';
             if (!in_array($modo, ['dia', 'semana', 'mes'], true)) {
                 $modo = 'dia';
@@ -313,6 +319,7 @@ class TaskController extends BaseController
             $data = [
                 'user' => $currentUser,
                 'hoursRows' => $hoursRows,
+                'hh' => $hh,
                 'totalRecords' => $totalRows,
                 'currentPage' => $currentPage,
                 'totalPages' => $totalPages,

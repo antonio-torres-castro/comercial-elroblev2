@@ -262,6 +262,34 @@ class Task
         }
     }
 
+    public function DailyCapacity(array $filters = []): int
+    {
+        try {
+            $params = [];
+
+            $sql = "SELECT sum(ifnull(pug.hh, 0)) hh
+                        FROM proyecto_usuarios_grupo pug
+                    INNER JOIN usuarios u ON u.id = pug.usuario_id
+                    INNER JOIN personas p ON p.id = u.persona_id
+                    WHERE pug.estado_tipo_id = 2
+                    AND pug.grupo_id = 4 ";
+
+            // Filtros
+            if (isset($filters['proyecto_id'])) {
+                $sql .= " and pug.proyecto_id = ?";
+                $params[] = $filters['proyecto_id'];
+            }
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['hh'] ?? 0);
+        } catch (PDOException $e) {
+            Logger::error("Task::DailyCapacity: " . $e->getMessage());
+            return 0;
+        }
+    }
+
     /**
      * Obtener todas las tareas con información relacionada agrupadas por día
      */
@@ -354,8 +382,15 @@ class Task
                 $params[] = $filters['fecha_fin'];
             }
 
+            $strHaving = "";
+
+            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1 && isset($filters['hh_daily_capacity'])) {
+                $strHaving .= " HAVING SUM(pt.duracion_horas) > ? ";
+                $params[] = $filters['hh_daily_capacity'];
+            }
+
             $sql .= $strWhere;
-            $sql .= " GROUP BY pt.fecha_inicio ORDER BY pt.fecha_inicio ASC, pt.fecha_inicio asc LIMIT ? OFFSET ?";
+            $sql .= " GROUP BY pt.fecha_inicio " . $strHaving . " ORDER BY pt.fecha_inicio ASC, pt.fecha_inicio asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -462,8 +497,15 @@ class Task
                 $params[] = $filters['fecha_fin'];
             }
 
+            $strHaving = "";
+
+            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1 && isset($filters['hh_daily_capacity'])) {
+                $strHaving .= " HAVING SUM(pt.duracion_horas) > ? ";
+                $params[] = $filters['hh_daily_capacity'] * 5; // Asumiendo 5 días laborables a la semana
+            }
+
             $sql .= $strWhere;
-            $sql .= " GROUP BY semana_inicio ORDER BY semana_inicio ASC, semana_inicio asc LIMIT ? OFFSET ?";
+            $sql .= " GROUP BY semana_inicio " . $strHaving . " ORDER BY semana_inicio ASC, semana_inicio asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -570,8 +612,15 @@ class Task
                 $params[] = $filters['fecha_fin'];
             }
 
+            $strHaving = "";
+
+            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1 && isset($filters['hh_daily_capacity'])) {
+                $strHaving .= " HAVING SUM(pt.duracion_horas) > ? ";
+                $params[] = $filters['hh_daily_capacity'] * 20; // Asumiendo 20 días laborables al mes
+            }
+
             $sql .= $strWhere;
-            $sql .= " GROUP BY DATE_FORMAT(pt.fecha_inicio, '%Y-%m') ORDER BY mes ASC, DATE_FORMAT(pt.fecha_inicio, '%Y-%m') asc LIMIT ? OFFSET ?";
+            $sql .= " GROUP BY DATE_FORMAT(pt.fecha_inicio, '%Y-%m') " . $strHaving . " ORDER BY mes ASC, DATE_FORMAT(pt.fecha_inicio, '%Y-%m') asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
