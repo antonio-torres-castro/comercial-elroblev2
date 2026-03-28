@@ -24,10 +24,12 @@ $dayNames = [
 
 $projectEndDate = $project['fecha_fin'] ?: $project['fecha_inicio'];
 $selectedDefaultHh = 9;
+$selectedUserName = '';
 if (!empty($executors) && !empty($selected_user_id)) {
     foreach ($executors as $executor) {
         if ((int)$executor['usuario_id'] === (int)$selected_user_id) {
             $selectedDefaultHh = isset($executor['hh_default']) ? (float)$executor['hh_default'] : 9;
+            $selectedUserName = $executor['nombre_completo'] ?? $executor['nombre_usuario'] ?? '';
             break;
         }
     }
@@ -162,7 +164,7 @@ if (!empty($executors) && !empty($selected_user_id)) {
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-end">
-                                                    <a class="btn btn-sm btn-outline-primary" href="?proyecto_id=<?= (int)$project['id'] ?>&usuario_id=<?= $uid ?>&fecha_inicio=<?= htmlspecialchars($fecha_inicio) ?>&fecha_fin=<?= htmlspecialchars($fecha_fin) ?>">
+                                                    <a class="btn btn-sm btn-outline-primary btn-view-calendar" href="?proyecto_id=<?= (int)$project['id'] ?>&usuario_id=<?= $uid ?>&fecha_inicio=<?= htmlspecialchars($fecha_inicio) ?>&fecha_fin=<?= htmlspecialchars($fecha_fin) ?>">
                                                         Ver calendario
                                                     </a>
                                                 </td>
@@ -179,9 +181,9 @@ if (!empty($executors) && !empty($selected_user_id)) {
             </div>
 
             <div class="col-lg-7">
-                <div class="card">
+                <div class="card" id="calendarCard">
                     <div class="card-header">
-                        <h5 class="mb-0">Calendario de disponibilidad</h5>
+                        <h5 class="mb-0">Calendario de disponibilidad<?= $selectedUserName ? ' - ' . htmlspecialchars($selectedUserName) : '' ?></h5>
                     </div>
                     <div class="card-body">
                         <?php if ($selected_user_id > 0): ?>
@@ -229,6 +231,22 @@ if (!empty($executors) && !empty($selected_user_id)) {
                                         <input type="hidden" name="usuario_id" value="<?= (int)$selected_user_id ?>">
                                         <button type="submit" class="btn btn-warning">
                                             <i class="bi bi-save"></i> Guardar calendario base
+                                        </button>
+                                    </form>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if ($calendar_exists): ?>
+                                <div class="alert alert-light border d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                                    <div>
+                                        Calendario guardado. Puede eliminarlo para regenerar desde cero.
+                                    </div>
+                                    <form id="form-delete-calendar" class="d-flex">
+                                        <?= Security::renderCsrfField() ?>
+                                        <input type="hidden" name="proyecto_id" value="<?= (int)$project['id'] ?>">
+                                        <input type="hidden" name="usuario_id" value="<?= (int)$selected_user_id ?>">
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Eliminar calendario
                                         </button>
                                     </form>
                                 </div>

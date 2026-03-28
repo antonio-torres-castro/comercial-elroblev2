@@ -7,7 +7,6 @@ use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
 use App\Helpers\Logger;
-
 use App\Models\ProyectoColaboradores;
 use App\Models\Task;
 use App\Constants\AppConstants;
@@ -454,6 +453,51 @@ class ProyectoColaboradoresController extends BaseController
             echo json_encode(['success' => true, 'message' => 'Calendario guardado correctamente']);
         } catch (Exception $e) {
             Logger::error('ProyectoColaboradoresController::saveCalendar error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
+        }
+    }
+
+    public function deleteCalendar()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $userId = (int)$currentUser['id'];
+            $canAccess = $this->permissionService->hasMenuAccess($userId, 'manage_project')
+                || $this->permissionService->hasMenuAccess($userId, 'manage_projects');
+            if (!$canAccess || !$this->permissionService->hasPermission($userId, 'Modify')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_NO_PERMISSIONS]);
+                return;
+            }
+
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN]);
+                return;
+            }
+
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $usuarioId = (int)($_POST['usuario_id'] ?? 0);
+            if ($projectId <= 0 || $usuarioId <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Parametros incompletos']);
+                return;
+            }
+
+            $deleted = $this->proyectoColaboradoresModel->deleteDisponibilidad($projectId, $usuarioId, 4);
+            if ($deleted) {
+                echo json_encode(['success' => true, 'message' => 'Calendario eliminado']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'No se pudo eliminar el calendario']);
+            }
+        } catch (Exception $e) {
+            Logger::error('ProyectoColaboradoresController::deleteCalendar error: ' . $e->getMessage());
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => AppConstants::ERROR_INTERNAL_SERVER]);
         }

@@ -207,6 +207,19 @@ class ProyectoColaboradores
             return 0;
         }
     }
+
+    public function deleteDisponibilidad(int $projectId, int $usuarioId, int $grupoId): bool
+    {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM proyecto_usuarios_grupo_disponibilidad
+                WHERE proyecto_id = ? AND usuario_id = ? AND grupo_id = ?");
+            return $stmt->execute([$projectId, $usuarioId, $grupoId]);
+        } catch (PDOException $e) {
+            Logger::error('ProyectoColaboradores::deleteDisponibilidad error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getDisponibilidad(
         int $projectId,
         int $usuarioId,

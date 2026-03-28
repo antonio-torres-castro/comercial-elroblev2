@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Proyecto Colaboradores - JS
  */
 
@@ -18,19 +18,13 @@ document.addEventListener('DOMContentLoaded', function () {
         addExecutorForm.addEventListener('submit', handleAddExecutor);
     }
 
-    const saveCalendarForm = document.getElementById('form-save-calendar');
-    if (saveCalendarForm) {
-        saveCalendarForm.addEventListener('submit', handleSaveCalendar);
-    }
+    initCalendarSection(document);
 
-    const addDateForm = document.getElementById('form-add-date');
-    if (addDateForm) {
-        addDateForm.addEventListener('submit', handleAddDate);
-    }
-
-    const editButtons = document.querySelectorAll('.btn-edit-day');
-    editButtons.forEach((btn) => {
-        btn.addEventListener('click', () => openEditModal(btn));
+    document.addEventListener('click', function (event) {
+        const link = event.target.closest('.btn-view-calendar');
+        if (!link) return;
+        event.preventDefault();
+        loadCalendar(link.href);
     });
 
     const editForm = document.getElementById('form-edit-day');
@@ -38,6 +32,28 @@ document.addEventListener('DOMContentLoaded', function () {
         editForm.addEventListener('submit', handleEditDay);
     }
 });
+
+function initCalendarSection(root) {
+    const saveCalendarForm = root.querySelector('#form-save-calendar');
+    if (saveCalendarForm) {
+        saveCalendarForm.addEventListener('submit', handleSaveCalendar);
+    }
+
+    const deleteCalendarForm = root.querySelector('#form-delete-calendar');
+    if (deleteCalendarForm) {
+        deleteCalendarForm.addEventListener('submit', handleDeleteCalendar);
+    }
+
+    const addDateForm = root.querySelector('#form-add-date');
+    if (addDateForm) {
+        addDateForm.addEventListener('submit', handleAddDate);
+    }
+
+    const editButtons = root.querySelectorAll('.btn-edit-day');
+    editButtons.forEach((btn) => {
+        btn.addEventListener('click', () => openEditModal(btn));
+    });
+}
 
 async function handleAddExecutor(e) {
     e.preventDefault();
@@ -69,12 +85,45 @@ async function handleSaveCalendar(e) {
     });
 }
 
+async function handleDeleteCalendar(e) {
+    e.preventDefault();
+    if (!confirm('¿Eliminar el calendario completo de este usuario?')) {
+        return;
+    }
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const response = await fetch('/setap/proyecto-colaboradores/delete-calendar', {
+        method: 'POST',
+        body: formData,
+    });
+
+    await handleJsonResponse(response, null, () => {
+        window.location.reload();
+    });
+}
+
 async function handleAddDate(e) {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
 
     const response = await fetch('/setap/proyecto-colaboradores/add-date', {
+        method: 'POST',
+        body: formData,
+    });
+
+    await handleJsonResponse(response, null, () => {
+        window.location.reload();
+    });
+}
+
+async function handleEditDay(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const response = await fetch('/setap/proyecto-colaboradores/update-day', {
         method: 'POST',
         body: formData,
     });
@@ -104,17 +153,28 @@ function openEditModal(button) {
     }
 }
 
-async function handleEditDay(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
+async function loadCalendar(url) {
+    const calendarCard = document.getElementById('calendarCard');
+    if (!calendarCard) {
+        window.location.href = url;
+        return;
+    }
 
-    const response = await fetch('/setap/proyecto-colaboradores/update-day', {
-        method: 'POST',
-        body: formData,
-    });
-
-    await handleJsonResponse(response, null, () => {
-        window.location.reload();
-    });
+    try {
+        calendarCard.classList.add('opacity-50');
+        const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newCard = doc.getElementById('calendarCard');
+        if (!newCard) {
+            window.location.href = url;
+            return;
+        }
+        calendarCard.replaceWith(newCard);
+        initCalendarSection(newCard);
+        window.history.pushState({}, '', url);
+    } catch (error) {
+        window.location.href = url;
+    }
 }

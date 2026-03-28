@@ -894,6 +894,15 @@ try {
                     }
                     break;
 
+                case 'delete-calendar':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->deleteCalendar();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'add-date':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->addDate();
@@ -920,8 +929,6 @@ try {
             }
             break;
 		
-		
-
         case 'user':
             // Redireccionar las rutas /user/{id} a las rutas estándar
             if ($action) {
