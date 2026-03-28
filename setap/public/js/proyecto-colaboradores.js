@@ -49,6 +49,37 @@ function initCalendarSection(root) {
         addDateForm.addEventListener('submit', handleAddDate);
     }
 
+    const filterForm = root.querySelector('form[method="GET"]');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams(formData);
+            const url = `?${params.toString()}`;
+            loadCalendar(url);
+        });
+    }
+
+    const holidayLinks = root.querySelectorAll('.holiday-pagination .pagination a.page-link');
+    holidayLinks.forEach((link) => {
+        link.addEventListener('click', function (e) {
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#')) return;
+            e.preventDefault();
+            loadPartial(href, 'holidaySection');
+        });
+    });
+
+    const calendarLinks = root.querySelectorAll('.calendar-pagination .pagination a.page-link');
+    calendarLinks.forEach((link) => {
+        link.addEventListener('click', function (e) {
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#')) return;
+            e.preventDefault();
+            loadPartial(href, 'calendarTableSection');
+        });
+    });
+
     const editButtons = root.querySelectorAll('.btn-edit-day');
     editButtons.forEach((btn) => {
         btn.addEventListener('click', () => openEditModal(btn));
@@ -150,6 +181,32 @@ function openEditModal(button) {
     if (modalEl) {
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
+    }
+}
+
+
+async function loadPartial(url, targetId) {
+    const target = document.getElementById(targetId);
+    if (!target) {
+        loadCalendar(url);
+        return;
+    }
+
+    try {
+        const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newTarget = doc.getElementById(targetId);
+        if (!newTarget) {
+            loadCalendar(url);
+            return;
+        }
+        target.replaceWith(newTarget);
+        initCalendarSection(newTarget);
+        window.history.pushState({}, '', url);
+    } catch (error) {
+        loadCalendar(url);
     }
 }
 

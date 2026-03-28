@@ -282,6 +282,7 @@ if (!empty($executors) && !empty($selected_user_id)) {
                                 </div>
                             </form>
 
+                            <div id="holidaySection">
                             <div class="card mb-3">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="mb-0">Feriados del proyecto</h6>
@@ -320,6 +321,7 @@ if (!empty($executors) && !empty($selected_user_id)) {
                             </div>
 
                             <?php if ($holiday_total_pages > 1): ?>
+                            <div class="holiday-pagination">
                                 <?php
                                 $holidayQuery = $_GET;
                                 unset($holidayQuery['holiday_page']);
@@ -343,6 +345,7 @@ if (!empty($executors) && !empty($selected_user_id)) {
                                         </li>
                                     </ul>
                                 </nav>
+                            </div>
                             <?php endif; ?>
 
                             <div class="table-responsive">
@@ -398,6 +401,7 @@ if (!empty($executors) && !empty($selected_user_id)) {
                             </div>
 
                             <?php if ($calendar_total_pages > 1): ?>
+                                <div class="calendar-pagination">
                                 <?php
                                 $queryString = $_GET;
                                 unset($queryString['page']);
@@ -421,7 +425,9 @@ if (!empty($executors) && !empty($selected_user_id)) {
                                         </li>
                                     </ul>
                                 </nav>
-                            <?php endif; ?>
+                            </div>
+                            </div>
+                        <?php endif; ?>
                         <?php else: ?>
                             <div class="text-muted">Seleccione un ejecutor para administrar su disponibilidad.</div>
                         <?php endif; ?>
