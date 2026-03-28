@@ -317,7 +317,17 @@ class Task
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
+                LEFT JOIN usuarios super ON pt.supervisor_id = super.id 
+                -- capacidad dinamica
+                LEFT JOIN (
+                            SELECT 
+                                d.fecha,
+                                SUM(d.hh) as hh_disponibles,
+                                d.proyecto_id
+                            FROM proyecto_usuarios_grupo_disponibilidad d
+                            WHERE d.grupo_id = 4
+                            GROUP BY d.proyecto_id, d.fecha
+                        ) ca ON ca.proyecto_id = pt.proyecto_id AND ca.fecha = DATE(pt.fecha_inicio) ";
             $strWhere = " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
@@ -362,9 +372,9 @@ class Task
                 }
             }
 
-            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
-                $strWhere .= " AND pt.estado_tipo_id != 4 ";
-            }
+            // if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
+            //     $strWhere .= " AND pt.estado_tipo_id != 4 ";
+            // }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
                 $strWhere .= " AND pt.fecha_inicio between ? and ?";
@@ -384,9 +394,8 @@ class Task
 
             $strHaving = "";
 
-            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1 && isset($filters['hh_daily_capacity'])) {
-                $strHaving .= " HAVING SUM(pt.duracion_horas) > ? ";
-                $params[] = $filters['hh_daily_capacity'];
+            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1) {
+                $strHaving .= " HAVING SUM(pt.duracion_horas) > COALESCE(MAX(ca.hh_disponibles), 0) ";
             }
 
             $sql .= $strWhere;
