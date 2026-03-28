@@ -18,6 +18,7 @@ use App\Controllers\TaskController;
 use App\Controllers\ReportController;
 use App\Controllers\GrupoTipoController;
 use App\Controllers\ProyectoFeriadoController;
+use App\Controllers\ProyectoColaboradoresController;
 use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
 use App\Helpers\Security;
@@ -872,6 +873,54 @@ try {
             break;
 
         case 'proyecto-colaboradores':
+            $controller = new ProyectoColaboradoresController();
+
+            switch ($action) {
+                case 'add-executor':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->addExecutor();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'save-calendar':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->saveCalendar();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'add-date':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->addDate();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'update-day':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->updateDay();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case '':
+                case null:
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+		
+		
 
         case 'user':
             // Redireccionar las rutas /user/{id} a las rutas estándar
