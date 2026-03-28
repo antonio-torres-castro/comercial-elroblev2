@@ -9,6 +9,7 @@ use PDO;
 use PDOException;
 use Exception;
 
+use function MyNamespace\empty1;
 use function PHPUnit\Framework\isEmpty;
 use function PHPUnit\Framework\isNull;
 
@@ -298,10 +299,17 @@ class Task
         try {
             $uti = $filters['current_usuario_tipo_id'];
             $cu = $filters['current_usuario_id'];
+
+            // Filtros
+            $strProyectoId = "";
             $params = [];
+            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
+                $strProyectoId = " and d.proyecto_id = ? ";
+                $params[] = $filters['proyecto_id'];
+            }
 
             $sql = "SELECT 'dia' as lapso,
-                            DATE(pt.fecha_inicio) fecha_inicio,
+                            pt.fecha_inicio fecha_inicio,
                             
                             SUM(pt.duracion_horas) AS total_horas, round(SUM(pt.duracion_horas) / 9, 2) as personas,
                             SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
@@ -326,30 +334,35 @@ class Task
                                 d.proyecto_id
                             FROM proyecto_usuarios_grupo_disponibilidad d
                             WHERE d.grupo_id = 4
+                            $strProyectoId
                             GROUP BY d.proyecto_id, d.fecha
-                        ) ca ON ca.proyecto_id = pt.proyecto_id AND ca.fecha = DATE(pt.fecha_inicio) ";
-            $strWhere = " WHERE EXISTS (SELECT 1
-						FROM proyecto_usuarios_grupo pug
-						WHERE pug.proyecto_id = p.id
-						  AND pug.usuario_id = ?
-						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
+                        ) ca ON ca.proyecto_id = pt.proyecto_id AND ca.fecha = pt.fecha_inicio 
+                
+                INNER JOIN (
+                                SELECT DISTINCT proyecto_id
+                                FROM proyecto_usuarios_grupo
+                                WHERE usuario_id = ?
+                                AND estado_tipo_id = 2
+                                AND grupo_id BETWEEN 1 AND 5
+                            ) pugf ON pugf.proyecto_id = pt.proyecto_id
+                        ";
             $params[] = $cu;
 
             // Filtros
+            $strWhere = "";
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+                $strWhere .= empty($strWhere) ? " WHERE pt.proyecto_id = ? " : " and pt.proyecto_id = ? ";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id in (2, 5, 6, 7, 8) " : " AND pt.estado_tipo_id in (2, 5, 6, 7, 8) ";
             } else {
-                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
+                $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8) " : " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8) ";
             }
 
             if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= empty($strWhere) ? " WHERE (pt.ejecutor_id is null or pt.ejecutor_id = ?) " : " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?) ";
                 $params[] = $cu;
             }
 
@@ -366,7 +379,7 @@ class Task
                     // Creamos placeholders (?, ?, ?, ...)
                     $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
                     // Agregamos la condición con el IN dinámico
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id IN ($placeholders) " : " AND pt.estado_tipo_id IN ($placeholders) ";
                     // Agregamos todos los IDs al array de parámetros
                     $params = array_merge($params, $estadoTipoIds);
                 }
@@ -377,18 +390,18 @@ class Task
             // }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $strWhere .= empty($strWhere) ? " WHERE pt.fecha_inicio between ? and ? " : " AND pt.fecha_inicio between ? and ? ";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $strWhere .= empty($strWhere) ? " WHERE pt.fecha_inicio >= ? " : " AND pt.fecha_inicio >= ? ";
                 $params[] = $filters['fecha_inicio'];
             }
 
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $strWhere .= empty($strWhere) ? " WHERE pt.fecha_inicio <= ? " : " AND pt.fecha_inicio <= ? ";
                 $params[] = $filters['fecha_fin'];
             }
 
@@ -399,7 +412,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= " GROUP BY pt.fecha_inicio " . $strHaving . " ORDER BY pt.fecha_inicio ASC, pt.fecha_inicio asc LIMIT ? OFFSET ?";
+            $sql .= " GROUP BY pt.fecha_inicio " . $strHaving . " ORDER BY pt.fecha_inicio ASC LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
