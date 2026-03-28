@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (projectIdInput) {
         currentProjectId = projectIdInput.value;
     }
+
+    const editProjectIdInput = document.getElementById('edit-proyecto-id');
+    if (editProjectIdInput && currentProjectId) {
+        editProjectIdInput.value = currentProjectId;
+    }
 });
 
 /**
@@ -337,7 +342,12 @@ function updateHolidaysTable(feriados) {
                 </span>
             </td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="editHoliday(${feriado.id})" title="Editar">
+                <button class="btn btn-sm btn-outline-primary"
+                    onclick="editHoliday(this)"
+                    data-id="${feriado.id}"
+                    data-irrenunciable="${feriado.ind_irrenunciable ? 1 : 0}"
+                    data-observaciones="${(feriado.observaciones || '').replace(/"/g, '&quot;')}"
+                    title="Editar">
                     <i class="fas fa-edit"></i>
                 </button>
                 <button class="btn btn-sm btn-outline-danger" onclick="deleteHoliday(${feriado.id})" title="Eliminar">
@@ -356,9 +366,19 @@ function updateHolidaysTable(feriados) {
  * @param {number} totalPages - Total de páginas disponibles
  */
 function updatePaginationNav(currentPage, totalPages) {
-    const pagination = document.querySelector('.pagination.justify-content-center');
+    const nav = document.getElementById('holidays-pagination-nav');
+    if (!nav) return;
+
+    const pagination = nav.querySelector('.pagination.justify-content-center');
     if (!pagination) return;
 
+    if (!totalPages || totalPages <= 1) {
+        pagination.innerHTML = '';
+        nav.classList.add('d-none');
+        return;
+    }
+
+    nav.classList.remove('d-none');
     let html = '';
 
     // Botón "Anterior"
@@ -368,8 +388,8 @@ function updatePaginationNav(currentPage, totalPages) {
         </li>
     `;
 
-    start = Math.max(1, currentPage - 1);
-    end = Math.min(totalPages, currentPage + 1);
+    const start = Math.max(1, currentPage - 1);
+    const end = Math.min(totalPages, currentPage + 1);
     // Números de página
     for (let i = start; i <= end; i++) {
         html += `
@@ -404,15 +424,28 @@ function updateStats(stats) {
 /**
  * Editar feriado
  */
-async function editHoliday(id) {
+async function editHoliday(target) {
     try {
-        // Aquí podrías cargar los datos del feriado específico
-        // Por simplicidad, usaremos los datos de la tabla
         const modal = new bootstrap.Modal(document.getElementById('editHolidayModal'));
-        
-        // Configurar el ID en el formulario
-        document.getElementById('edit-holiday-id').value = id;
-        
+        const idInput = document.getElementById('edit-holiday-id');
+        const renunciable = document.getElementById('edit-renunciable');
+        const irrenunciable = document.getElementById('edit-irrenunciable');
+        const observacionesInput = document.getElementById('edit-observaciones');
+
+        if (typeof target === 'object' && target !== null) {
+            idInput.value = target.dataset.id || '';
+            const indIrrenunciable = target.dataset.irrenunciable === '1';
+            if (renunciable && irrenunciable) {
+                renunciable.checked = !indIrrenunciable;
+                irrenunciable.checked = indIrrenunciable;
+            }
+            if (observacionesInput) {
+                observacionesInput.value = target.dataset.observaciones || '';
+            }
+        } else {
+            idInput.value = target;
+        }
+
         modal.show();
     } catch (error) {
         console.error('Error:', error);
@@ -430,6 +463,9 @@ async function handleEditSubmit(e) {
         const formData = new FormData(e.target);
         const response = await fetch('/setap/proyecto-feriados/update', {
             method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: formData
         });
 

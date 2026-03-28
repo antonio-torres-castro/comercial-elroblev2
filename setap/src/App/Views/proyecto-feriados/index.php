@@ -337,7 +337,12 @@ use App\Constants\AppConstants;
                                                 </span>
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-primary" onclick="editHoliday(<?= $feriado['id'] ?>)" title="Editar">
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                    onclick="editHoliday(this)"
+                                                    data-id="<?= $feriado['id'] ?>"
+                                                    data-irrenunciable="<?= $feriado['ind_irrenunciable'] ? 1 : 0 ?>"
+                                                    data-observaciones="<?= htmlspecialchars($feriado['observaciones'] ?? '', ENT_QUOTES) ?>"
+                                                    title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 <button class="btn btn-sm btn-outline-danger" onclick="deleteHoliday(<?= $feriado['id'] ?>)" title="Eliminar">
@@ -351,9 +356,9 @@ use App\Constants\AppConstants;
                         </div>
 
                         <!-- Paginación -->
-                        <?php if ($totalPages > 1): ?>
-                            <nav aria-label="Navegación de páginas" class="mt-3">
-                                <ul class="pagination justify-content-center">
+                        <nav aria-label="Navegación de páginas" class="mt-3 <?= $totalPages > 1 ? '' : 'd-none' ?>" id="holidays-pagination-nav">
+                            <ul class="pagination justify-content-center">
+                                <?php if ($totalPages > 1): ?>
                                     <!-- Botón Anterior -->
                                     <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
                                         <a class="page-link ajax-page" href="#" data-page="<?= $currentPage - 1 ?>">&laquo;</a>
@@ -371,9 +376,9 @@ use App\Constants\AppConstants;
                                     <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
                                         <a class="page-link ajax-page" href="#" data-page="<?= $currentPage + 1 ?>">&raquo;</a>
                                     </li>
-                                </ul>
-                            </nav>
-                        <?php endif; ?>
+                                <?php endif; ?>
+                            </ul>
+                        </nav>
 
                     </div>
                 </div>
@@ -415,6 +420,7 @@ use App\Constants\AppConstants;
                     <div class="modal-body">
                         <?= Security::renderCsrfField() ?>
                         <input type="hidden" name="id" id="edit-holiday-id">
+                        <input type="hidden" name="proyecto_id" id="edit-proyecto-id">
 
                         <div class="mb-3">
                             <label class="form-label">Tipo de Feriado</label>

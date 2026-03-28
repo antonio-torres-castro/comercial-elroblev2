@@ -371,27 +371,52 @@ class ProyectoFeriadoController extends BaseController
     public function update()
     {
         try {
+            $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+                || (!empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                if ($isAjax) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED
+                    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                    return;
+                }
+
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
 
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                if ($isAjax) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => AppConstants::ERROR_INVALID_CSRF_TOKEN
+                    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                    return;
+                }
+
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
                 return;
             }
 
             $id = (int)($_POST['id'] ?? 0);
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
+            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
 
             if (!$id) {
-                $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+                if ($isAjax) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'ID de feriado requerido'
+                    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                    return;
+                }
+
                 $this->redirectWithError($returnUrl, 'ID de feriado requerido');
                 return;
             }
-
-            $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
 
             $data = [
                 'tipo_feriado' => $_POST['tipo_feriado'] ?? 'especifico',
@@ -401,15 +426,36 @@ class ProyectoFeriadoController extends BaseController
             ];
 
             $success = $this->proyectoFeriadoModel->update($id, $data);
+            $message = $success ? AppConstants::SUCCESS_HOLIDAY_UPDATED : 'Error al actualizar feriado';
+
+            if ($isAjax) {
+                echo json_encode([
+                    'success' => $success,
+                    'message' => $message
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                return;
+            }
+
             if ($success) {
-                $this->redirectWithSuccess($returnUrl, AppConstants::SUCCESS_HOLIDAY_UPDATED);
+                $this->redirectWithSuccess($returnUrl, $message);
             } else {
-                $this->redirectWithError($returnUrl, 'Error al actualizar feriado');
+                $this->redirectWithError($returnUrl, $message);
             }
         } catch (\Exception $e) {
             Logger::error('ProyectoFeriadoController::update error: ' . $e->getMessage());
             $projectId = (int)($_POST['proyecto_id'] ?? 0);
             $returnUrl = $projectId ? AppConstants::ROUTE_PROJECT_HOLIDAYS . "?proyecto_id={$projectId}" : AppConstants::ROUTE_PROJECTS;
+            $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+                || (!empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
+            if ($isAjax) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error interno del servidor'
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                return;
+            }
+
             $this->redirectWithError($returnUrl, 'Error interno del servidor');
         }
     }
