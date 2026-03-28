@@ -292,7 +292,7 @@ class Task
     }
 
     /**
-     * Obtener todas las tareas con información relacionada agrupadas por día
+     * Obtener todas las tareas con información relacionada agrupadas por dia
      */
     public function getHorasDiarias(array $filters = [], int $limit = 7, int $offset = 0): array
     {
@@ -300,124 +300,148 @@ class Task
             $uti = $filters['current_usuario_tipo_id'];
             $cu = $filters['current_usuario_id'];
 
-            // Filtros
-            $strProyectoId = "";
-            $params = [];
-            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strProyectoId = " and d.proyecto_id = ? ";
-                $params[] = $filters['proyecto_id'];
+            // =========================
+            // 1. PARAMS SEPARADOS
+            // =========================
+            $paramsSubquery = [];
+            $paramsMain = [];
+
+            // =========================
+            // 2. SUBQUERY CAPACIDAD
+            // =========================
+            $sqlCapacidad = "SELECT 
+                d.fecha,
+                SUM(d.hh) as hh_disponibles,
+                d.proyecto_id
+            FROM proyecto_usuarios_grupo_disponibilidad d
+            WHERE d.grupo_id = 4 ";
+
+            if (!empty($filters['proyecto_id'])) {
+                $sqlCapacidad .= " AND d.proyecto_id = ? ";
+                $paramsSubquery[] = $filters['proyecto_id'];
             }
 
-            $sql = "SELECT 'dia' as lapso,
-                            pt.fecha_inicio fecha_inicio,
-                            
-                            SUM(pt.duracion_horas) AS total_horas, round(SUM(pt.duracion_horas) / 9, 2) as personas,
-                            SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
-                            SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
-                FROM proyecto_tareas pt
-                INNER JOIN tareas t ON pt.tarea_id = t.id
-                INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
-                INNER JOIN usuarios plan ON pt.planificador_id = plan.id
-                LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id 
-                -- capacidad dinamica
-                LEFT JOIN (
-                            SELECT 
-                                d.fecha,
-                                SUM(d.hh) as hh_disponibles,
-                                d.proyecto_id
-                            FROM proyecto_usuarios_grupo_disponibilidad d
-                            WHERE d.grupo_id = 4
-                            $strProyectoId
-                            GROUP BY d.proyecto_id, d.fecha
-                        ) ca ON ca.proyecto_id = pt.proyecto_id AND ca.fecha = pt.fecha_inicio 
-                
-                INNER JOIN (
-                                SELECT DISTINCT proyecto_id
-                                FROM proyecto_usuarios_grupo
-                                WHERE usuario_id = ?
-                                AND estado_tipo_id = 2
-                                AND grupo_id BETWEEN 1 AND 5
-                            ) pugf ON pugf.proyecto_id = pt.proyecto_id
-                        ";
-            $params[] = $cu;
+            $sqlCapacidad .= " GROUP BY d.proyecto_id, d.fecha ";
 
-            // Filtros
-            $strWhere = "";
-            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= empty($strWhere) ? " WHERE pt.proyecto_id = ? " : " and pt.proyecto_id = ? ";
-                $params[] = $filters['proyecto_id'];
+            // =========================
+            // 3. SUBQUERY ACCESO USUARIO
+            // =========================
+            $sqlAcceso = "SELECT DISTINCT proyecto_id
+            FROM proyecto_usuarios_grupo
+            WHERE usuario_id = ?
+              AND estado_tipo_id = 2
+              AND grupo_id BETWEEN 1 AND 5 ";
+            $paramsSubquery[] = $cu;
+
+            // =========================
+            // 4. QUERY BASE
+            // =========================
+            $sql = "SELECT 
+                'dia' as lapso,
+                pt.fecha_inicio,
+                SUM(pt.duracion_horas) AS total_horas,
+                ROUND(SUM(pt.duracion_horas) / 9, 2) as personas,
+
+                SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
+                SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
+                SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
+                SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
+                SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada,
+
+                COALESCE(MAX(ca.hh_disponibles), 0) as hh_disponibles
+
+            FROM proyecto_tareas pt
+            INNER JOIN tareas t ON pt.tarea_id = t.id
+            INNER JOIN proyectos p ON pt.proyecto_id = p.id
+            INNER JOIN clientes c ON p.cliente_id = c.id
+            INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+            INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
+            INNER JOIN usuarios plan ON pt.planificador_id = plan.id
+            LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
+            LEFT JOIN usuarios super ON pt.supervisor_id = super.id
+
+            LEFT JOIN ( $sqlCapacidad ) ca 
+                ON ca.proyecto_id = pt.proyecto_id 
+                AND ca.fecha = pt.fecha_inicio
+
+            INNER JOIN ( $sqlAcceso ) pugf 
+                ON pugf.proyecto_id = pt.proyecto_id
+        ";
+
+            // =========================
+            // 5. WHERE DINÁMICO LIMPIO
+            // =========================
+            $where = [];
+
+            if (!empty($filters['proyecto_id'])) {
+                $where[] = "pt.proyecto_id = ?";
+                $paramsMain[] = $filters['proyecto_id'];
             }
 
-            if (isset($uti) && $uti > 2) {
-                $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id in (2, 5, 6, 7, 8) " : " AND pt.estado_tipo_id in (2, 5, 6, 7, 8) ";
+            if ($uti > 2) {
+                $where[] = "pt.estado_tipo_id IN (2,5,6,7,8)";
             } else {
-                $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8) " : " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8) ";
+                $where[] = "pt.estado_tipo_id IN (1,2,3,5,6,7,8)";
             }
 
-            if (isset($uti) && $uti == 4) {
-                $strWhere .= empty($strWhere) ? " WHERE (pt.ejecutor_id is null or pt.ejecutor_id = ?) " : " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?) ";
-                $params[] = $cu;
+            if ($uti == 4) {
+                $where[] = "(pt.ejecutor_id IS NULL OR pt.ejecutor_id = ?)";
+                $paramsMain[] = $cu;
             }
 
-            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
-                // Aseguramos que sea un array
-                $estadoTipoIds = is_array($filters['estado_tipo_id'])
-                    ? $filters['estado_tipo_id']
-                    : [$filters['estado_tipo_id']];
+            if (!empty($filters['estado_tipo_id'])) {
+                $ids = is_array($filters['estado_tipo_id']) ? $filters['estado_tipo_id'] : [$filters['estado_tipo_id']];
+                $ids = array_filter($ids);
 
-                // Eliminamos vacíos o nulos
-                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
-
-                if (!empty($estadoTipoIds)) {
-                    // Creamos placeholders (?, ?, ?, ...)
-                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
-                    // Agregamos la condición con el IN dinámico
-                    $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id IN ($placeholders) " : " AND pt.estado_tipo_id IN ($placeholders) ";
-                    // Agregamos todos los IDs al array de parámetros
-                    $params = array_merge($params, $estadoTipoIds);
+                if ($ids) {
+                    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                    $where[] = "pt.estado_tipo_id IN ($placeholders)";
+                    $paramsMain = array_merge($paramsMain, $ids);
                 }
             }
 
-            // if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
-            //     $strWhere .= " AND pt.estado_tipo_id != 4 ";
-            // }
-
-            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= empty($strWhere) ? " WHERE pt.fecha_inicio between ? and ? " : " AND pt.fecha_inicio between ? and ? ";
-                $params[] = $filters['fecha_inicio'];
-                $params[] = $filters['fecha_fin'];
+            if (!empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                $where[] = "pt.fecha_inicio BETWEEN ? AND ?";
+                $paramsMain[] = $filters['fecha_inicio'];
+                $paramsMain[] = $filters['fecha_fin'];
+            } elseif (!empty($filters['fecha_inicio'])) {
+                $where[] = "pt.fecha_inicio >= ?";
+                $paramsMain[] = $filters['fecha_inicio'];
+            } elseif (!empty($filters['fecha_fin'])) {
+                $where[] = "pt.fecha_inicio <= ?";
+                $paramsMain[] = $filters['fecha_fin'];
             }
 
-            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= empty($strWhere) ? " WHERE pt.fecha_inicio >= ? " : " AND pt.fecha_inicio >= ? ";
-                $params[] = $filters['fecha_inicio'];
+            if (!empty($where)) {
+                $sql .= " WHERE " . implode(" AND ", $where);
             }
 
-            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= empty($strWhere) ? " WHERE pt.fecha_inicio <= ? " : " AND pt.fecha_inicio <= ? ";
-                $params[] = $filters['fecha_fin'];
+            // =========================
+            // 6. GROUP + HAVING
+            // =========================
+            $sql .= " GROUP BY pt.fecha_inicio ";
+
+            if (!empty($filters['solo_excedidos'])) {
+                $sql .= " HAVING SUM(pt.duracion_horas) > COALESCE(MAX(ca.hh_disponibles), 0)";
             }
 
-            $strHaving = "";
+            $sql .= " ORDER BY pt.fecha_inicio ASC LIMIT ? OFFSET ?";
 
-            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1) {
-                $strHaving .= " HAVING SUM(pt.duracion_horas) > COALESCE(MAX(ca.hh_disponibles), 0) ";
-            }
+            // =========================
+            // 7. PARAMS FINALES (ORDEN SEGURO)
+            // =========================
+            $params = array_merge(
+                $paramsSubquery,
+                $paramsMain,
+                [$limit, $offset]
+            );
 
-            $sql .= $strWhere;
-            $sql .= " GROUP BY pt.fecha_inicio " . $strHaving . " ORDER BY pt.fecha_inicio ASC LIMIT ? OFFSET ?";
-            $params[] = $limit;
-            $params[] = $offset;
-
+            // =========================
+            // 8. EJECUCIÓN
+            // =========================
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getHorasDiarias: " . $e->getMessage());
@@ -435,18 +459,33 @@ class Task
             $cu = $filters['current_usuario_id'];
             $params = [];
 
+            // filtro proyecto para capacidad
+            $strProyectoId = "";
+            if (!empty($filters['proyecto_id'])) {
+                $strProyectoId = " AND d.proyecto_id = ? ";
+                $params[] = $filters['proyecto_id'];
+            }
+
             $sql = "SELECT 'semana' AS lapso,
 
-                            DATE_SUB(date(pt.fecha_inicio), INTERVAL WEEKDAY(pt.fecha_inicio) DAY) AS semana_inicio,
+                        DATE_SUB(pt.fecha_inicio, INTERVAL WEEKDAY(pt.fecha_inicio) DAY) AS semana_inicio,
 
-                            SUM(pt.duracion_horas) AS total_horas,  ROUND( SUM(pt.duracion_horas) / (COUNT(DISTINCT pt.fecha_inicio) * 9), 2) AS personas,
+                        SUM(pt.duracion_horas) AS total_horas,
 
-                            SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
-                            SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
+                        ROUND(
+                            SUM(pt.duracion_horas) / (COUNT(DISTINCT pt.fecha_inicio) * 9), 
+                        2) AS personas,
+
+                        SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
+                        SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
+                        SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
+                        SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
+                        SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada,
+
+                        COALESCE(SUM(ca.hh_disponibles), 0) as hh_disponibles
+
                 FROM proyecto_tareas pt
+
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
                 INNER JOIN clientes c ON p.cliente_id = c.id
@@ -454,88 +493,90 @@ class Task
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
-            $strWhere = " WHERE EXISTS (SELECT 1
-						FROM proyecto_usuarios_grupo pug
-						WHERE pug.proyecto_id = p.id
-						  AND pug.usuario_id = ?
-						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
+                LEFT JOIN usuarios super ON pt.supervisor_id = super.id 
+
+                -- 🔥 capacidad diaria
+                LEFT JOIN (
+                    SELECT 
+                        d.fecha,
+                        SUM(d.hh) as hh_disponibles,
+                        d.proyecto_id
+                    FROM proyecto_usuarios_grupo_disponibilidad d
+                    WHERE d.grupo_id = 4
+                    $strProyectoId
+                    GROUP BY d.proyecto_id, d.fecha
+                ) ca ON ca.proyecto_id = pt.proyecto_id 
+                    AND ca.fecha = pt.fecha_inicio
+
+                -- 🔥 acceso usuario optimizado
+                INNER JOIN (
+                    SELECT DISTINCT proyecto_id
+                    FROM proyecto_usuarios_grupo
+                    WHERE usuario_id = ?
+                      AND estado_tipo_id = 2
+                      AND grupo_id BETWEEN 1 AND 5
+                ) pugf ON pugf.proyecto_id = pt.proyecto_id
+        ";
+
             $params[] = $cu;
 
-            // Filtros
-            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+            // ===== WHERE dinámico (igual que ya tienes) =====
+            $strWhere = "";
+
+            if (!empty($filters['proyecto_id'])) {
+                $strWhere .= empty($strWhere) ? " WHERE pt.proyecto_id = ? " : " AND pt.proyecto_id = ? ";
                 $params[] = $filters['proyecto_id'];
             }
 
-            if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            if ($uti > 2) {
+                $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id IN (2,5,6,7,8) " : " AND pt.estado_tipo_id IN (2,5,6,7,8) ";
             } else {
-                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
+                $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id IN (1,2,3,5,6,7,8) " : " AND pt.estado_tipo_id IN (1,2,3,5,6,7,8) ";
             }
 
-            if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+            if ($uti == 4) {
+                $strWhere .= empty($strWhere) ? " WHERE (pt.ejecutor_id IS NULL OR pt.ejecutor_id = ?) " : " AND (pt.ejecutor_id IS NULL OR pt.ejecutor_id = ?) ";
                 $params[] = $cu;
             }
 
-            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
-                // Aseguramos que sea un array
-                $estadoTipoIds = is_array($filters['estado_tipo_id'])
-                    ? $filters['estado_tipo_id']
-                    : [$filters['estado_tipo_id']];
+            if (!empty($filters['estado_tipo_id'])) {
+                $ids = is_array($filters['estado_tipo_id']) ? $filters['estado_tipo_id'] : [$filters['estado_tipo_id']];
+                $ids = array_filter($ids);
 
-                // Eliminamos vacíos o nulos
-                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
-
-                if (!empty($estadoTipoIds)) {
-                    // Creamos placeholders (?, ?, ?, ...)
-                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
-                    // Agregamos la condición con el IN dinámico
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
-                    // Agregamos todos los IDs al array de parámetros
-                    $params = array_merge($params, $estadoTipoIds);
+                if ($ids) {
+                    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                    $strWhere .= empty($strWhere) ? " WHERE pt.estado_tipo_id IN ($placeholders) " : " AND pt.estado_tipo_id IN ($placeholders) ";
+                    $params = array_merge($params, $ids);
                 }
             }
 
-            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
-                $strWhere .= " AND pt.estado_tipo_id != 4 ";
-            }
-
-            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+            if (!empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                $strWhere .= empty($strWhere) ? " WHERE pt.fecha_inicio BETWEEN ? AND ? " : " AND pt.fecha_inicio BETWEEN ? AND ? ";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
-            }
-
-            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
-                $params[] = $filters['fecha_inicio'];
-            }
-
-            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
-                $params[] = $filters['fecha_fin'];
-            }
-
-            $strHaving = "";
-
-            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1 && isset($filters['hh_daily_capacity'])) {
-                $strHaving .= " HAVING SUM(pt.duracion_horas) > ? ";
-                $params[] = $filters['hh_daily_capacity'] * 5; // Asumiendo 5 días laborables a la semana
             }
 
             $sql .= $strWhere;
-            $sql .= " GROUP BY semana_inicio " . $strHaving . " ORDER BY semana_inicio ASC, semana_inicio asc LIMIT ? OFFSET ?";
+
+            // 🔥 agrupación semanal
+            $sql .= " GROUP BY semana_inicio ";
+
+            // 🔥 HAVING correcto (capacidad real semanal)
+            if (!empty($filters['solo_excedidos'])) {
+                $sql .= " HAVING SUM(pt.duracion_horas) > COALESCE(SUM(ca.hh_disponibles), 0)";
+            }
+
+            $sql .= " ORDER BY semana_inicio ASC LIMIT ? OFFSET ?";
+
             $params[] = $limit;
             $params[] = $offset;
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            Logger::error("Task::getAll: " . $e->getMessage());
+            Logger::error("Task::getHorasSemanales: " . $e->getMessage());
             return [];
         }
     }
@@ -548,109 +589,158 @@ class Task
         try {
             $uti = $filters['current_usuario_tipo_id'];
             $cu = $filters['current_usuario_id'];
-            $params = [];
 
-            $sql = "SELECT 'mes' AS lapso,
+            // =========================
+            // 1. PARAMS SEPARADOS
+            // =========================
+            $paramsSubquery = [];
+            $paramsMain = [];
 
-                            DATE_FORMAT(pt.fecha_inicio, '%Y-%m') AS mes,
+            // =========================
+            // 2. SUBQUERY CAPACIDAD (DIARIA)
+            // =========================
+            $sqlCapacidad = "
+            SELECT 
+                d.fecha,
+                SUM(d.hh) as hh_disponibles,
+                d.proyecto_id
+            FROM proyecto_usuarios_grupo_disponibilidad d
+            WHERE d.grupo_id = 4
+        ";
 
-                            SUM(pt.duracion_horas) AS total_horas, ROUND( SUM(pt.duracion_horas) / (COUNT(DISTINCT pt.fecha_inicio) * 9), 2) AS personas,
-
-                            SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
-                            SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
-                            SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada
-                FROM proyecto_tareas pt
-                INNER JOIN tareas t ON pt.tarea_id = t.id
-                INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
-                INNER JOIN usuarios plan ON pt.planificador_id = plan.id
-                LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
-            $strWhere = " WHERE EXISTS (SELECT 1
-						FROM proyecto_usuarios_grupo pug
-						WHERE pug.proyecto_id = p.id
-						  AND pug.usuario_id = ?
-						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
-            $params[] = $cu;
-
-            // Filtros
-            if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
-                $params[] = $filters['proyecto_id'];
+            if (!empty($filters['proyecto_id'])) {
+                $sqlCapacidad .= " AND d.proyecto_id = ? ";
+                $paramsSubquery[] = $filters['proyecto_id'];
             }
 
-            if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+            $sqlCapacidad .= " GROUP BY d.proyecto_id, d.fecha ";
+
+            // =========================
+            // 3. SUBQUERY ACCESO USUARIO
+            // =========================
+            $sqlAcceso = "
+            SELECT DISTINCT proyecto_id
+            FROM proyecto_usuarios_grupo
+            WHERE usuario_id = ?
+              AND estado_tipo_id = 2
+              AND grupo_id BETWEEN 1 AND 5
+        ";
+            $paramsSubquery[] = $cu;
+
+            // =========================
+            // 4. QUERY BASE
+            // =========================
+            $sql = "
+            SELECT 
+                'mes' as lapso,
+                DATE_FORMAT(pt.fecha_inicio, '%Y-%m') as mes,
+
+                SUM(pt.duracion_horas) AS total_horas,
+                ROUND(SUM(pt.duracion_horas) / (COUNT(DISTINCT pt.fecha_inicio) * 9), 2) as personas,
+
+                SUM(CASE WHEN pt.estado_tipo_id = 2 THEN pt.duracion_horas ELSE 0 END) AS horas_activo,
+                SUM(CASE WHEN pt.estado_tipo_id = 5 THEN pt.duracion_horas ELSE 0 END) AS horas_iniciada,
+                SUM(CASE WHEN pt.estado_tipo_id = 6 THEN pt.duracion_horas ELSE 0 END) AS horas_terminada,
+                SUM(CASE WHEN pt.estado_tipo_id = 8 THEN pt.duracion_horas ELSE 0 END) AS horas_aprobada,
+                SUM(CASE WHEN pt.estado_tipo_id = 7 THEN pt.duracion_horas ELSE 0 END) AS horas_rechazada,
+
+                COALESCE(SUM(ca.hh_disponibles), 0) as hh_disponibles
+
+            FROM proyecto_tareas pt
+            INNER JOIN tareas t ON pt.tarea_id = t.id
+            INNER JOIN proyectos p ON pt.proyecto_id = p.id
+            INNER JOIN clientes c ON p.cliente_id = c.id
+            INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+            INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
+            INNER JOIN usuarios plan ON pt.planificador_id = plan.id
+            LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
+            LEFT JOIN usuarios super ON pt.supervisor_id = super.id
+
+            LEFT JOIN ( $sqlCapacidad ) ca 
+                ON ca.proyecto_id = pt.proyecto_id 
+                AND ca.fecha = pt.fecha_inicio
+
+            INNER JOIN ( $sqlAcceso ) pugf 
+                ON pugf.proyecto_id = pt.proyecto_id
+        ";
+
+            // =========================
+            // 5. WHERE DINÁMICO
+            // =========================
+            $where = [];
+
+            if (!empty($filters['proyecto_id'])) {
+                $where[] = "pt.proyecto_id = ?";
+                $paramsMain[] = $filters['proyecto_id'];
+            }
+
+            if ($uti > 2) {
+                $where[] = "pt.estado_tipo_id IN (2,5,6,7,8)";
             } else {
-                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
+                $where[] = "pt.estado_tipo_id IN (1,2,3,5,6,7,8)";
             }
 
-            if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
-                $params[] = $cu;
+            if ($uti == 4) {
+                $where[] = "(pt.ejecutor_id IS NULL OR pt.ejecutor_id = ?)";
+                $paramsMain[] = $cu;
             }
 
-            if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
-                // Aseguramos que sea un array
-                $estadoTipoIds = is_array($filters['estado_tipo_id'])
-                    ? $filters['estado_tipo_id']
-                    : [$filters['estado_tipo_id']];
+            if (!empty($filters['estado_tipo_id'])) {
+                $ids = is_array($filters['estado_tipo_id']) ? $filters['estado_tipo_id'] : [$filters['estado_tipo_id']];
+                $ids = array_filter($ids);
 
-                // Eliminamos vacíos o nulos
-                $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
-
-                if (!empty($estadoTipoIds)) {
-                    // Creamos placeholders (?, ?, ?, ...)
-                    $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
-                    // Agregamos la condición con el IN dinámico
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
-                    // Agregamos todos los IDs al array de parámetros
-                    $params = array_merge($params, $estadoTipoIds);
+                if ($ids) {
+                    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                    $where[] = "pt.estado_tipo_id IN ($placeholders)";
+                    $paramsMain = array_merge($paramsMain, $ids);
                 }
             }
 
-            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
-                $strWhere .= " AND pt.estado_tipo_id != 4 ";
+            if (!empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                $where[] = "pt.fecha_inicio BETWEEN ? AND ?";
+                $paramsMain[] = $filters['fecha_inicio'];
+                $paramsMain[] = $filters['fecha_fin'];
+            } elseif (!empty($filters['fecha_inicio'])) {
+                $where[] = "pt.fecha_inicio >= ?";
+                $paramsMain[] = $filters['fecha_inicio'];
+            } elseif (!empty($filters['fecha_fin'])) {
+                $where[] = "pt.fecha_inicio <= ?";
+                $paramsMain[] = $filters['fecha_fin'];
             }
 
-            if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
-                $params[] = $filters['fecha_inicio'];
-                $params[] = $filters['fecha_fin'];
+            if (!empty($where)) {
+                $sql .= " WHERE " . implode(" AND ", $where);
             }
 
-            if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
-                $params[] = $filters['fecha_inicio'];
+            // =========================
+            // 6. GROUP + HAVING
+            // =========================
+            $sql .= " GROUP BY mes ";
+
+            if (!empty($filters['solo_excedidos'])) {
+                $sql .= " HAVING SUM(pt.duracion_horas) > COALESCE(SUM(ca.hh_disponibles), 0)";
             }
 
-            if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
-                $params[] = $filters['fecha_fin'];
-            }
+            $sql .= " ORDER BY mes ASC LIMIT ? OFFSET ?";
 
-            $strHaving = "";
+            // =========================
+            // 7. PARAMS FINALES
+            // =========================
+            $params = array_merge(
+                $paramsSubquery,
+                $paramsMain,
+                [$limit, $offset]
+            );
 
-            if (isset($filters['solo_excedidos']) && $filters['solo_excedidos'] == 1 && isset($filters['hh_daily_capacity'])) {
-                $strHaving .= " HAVING SUM(pt.duracion_horas) > ? ";
-                $params[] = $filters['hh_daily_capacity'] * 20; // Asumiendo 20 días laborables al mes
-            }
-
-            $sql .= $strWhere;
-            $sql .= " GROUP BY DATE_FORMAT(pt.fecha_inicio, '%Y-%m') " . $strHaving . " ORDER BY mes ASC, DATE_FORMAT(pt.fecha_inicio, '%Y-%m') asc LIMIT ? OFFSET ?";
-            $params[] = $limit;
-            $params[] = $offset;
-
+            // =========================
+            // 8. EJECUCIÓN
+            // =========================
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            Logger::error("Task::getAll: " . $e->getMessage());
+            Logger::error("Task::getHorasMensuales: " . $e->getMessage());
             return [];
         }
     }
