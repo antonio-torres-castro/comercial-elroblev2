@@ -142,6 +142,18 @@ class AppConstants
     /** Ruta de reporte de proyecto */
     const ROUTE_PROJECT_HOLIDAYS = "/setap/proyecto-feriados";
 
+    /** Ruta base de procesos */
+    const ROUTE_PROCESSES = '/setap/process';
+
+    /** Ruta de creación de procesos */
+    const ROUTE_PROCESSES_CREATE = '/setap/process/create';
+
+    /** Ruta de edición de procesos */
+    const ROUTE_PROCESSES_EDIT = '/setap/process/edit';
+
+    /** Ruta de vista de procesos */
+    const ROUTE_PROCESSES_SHOW = '/setap/process/show';
+
     /** Ruta de gestión de colaboradores de proyecto */
     const ROUTE_PROJECT_COLABORADORES = "/setap/proyecto-colaboradores";
 
@@ -319,6 +331,15 @@ class AppConstants
     /** ID de proveedor requerido */
     const ERROR_SUPPLIER_ID_REQUIRED = 'ID de proveedor requerido';
 
+    /** Error de proceso no encontrado */
+    const ERROR_PROCESS_NOT_FOUND = 'Proceso no encontrado';
+
+    /** Error al guardar el proceso */
+    const ERROR_SAVE_PROCESS = 'Error al guardar el proceso';
+
+    /** Error al actualizar el proceso */
+    const ERROR_UPDATE_PROCESS = 'Error al actualizar el proceso';
+
     /** Error al guardar la contraparte */
     const ERROR_SAVE_COUNTERPARTY = 'Error al guardar la contraparte';
 
@@ -375,6 +396,15 @@ class AppConstants
 
     /** Exito al eliminar proveedor */
     const SUCCESS_SUPPLIER_DELETED = 'Proveedor eliminado exitosamente';
+
+    /** Exito al crear proceso */
+    const SUCCESS_PROCESS_CREATED = 'Proceso creado exitosamente';
+
+    /** Exito al actualizar proceso */
+    const SUCCESS_PROCESS_UPDATED = 'Proceso actualizado exitosamente';
+
+    /** Exito al eliminar proceso */
+    const SUCCESS_PROCESS_DELETED = 'Proceso eliminado exitosamente';
 
     /** Éxito al crear menú */
     const SUCCESS_MENU_CREATED = 'Menú creado exitosamente';

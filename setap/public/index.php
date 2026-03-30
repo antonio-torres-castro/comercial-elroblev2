@@ -15,6 +15,7 @@ use App\Controllers\PerfilController;
 use App\Controllers\ClientController;
 use App\Controllers\SuppliersController;
 use App\Controllers\TaskController;
+use App\Controllers\ProcessController;
 use App\Controllers\ReportController;
 use App\Controllers\GrupoTipoController;
 use App\Controllers\ProyectoFeriadoController;
@@ -534,6 +535,65 @@ try {
                     break;
             }
             break;
+
+        case 'process':
+            $controller = new ProcessController();
+
+            switch ($action) {
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+
+                case 'edit':
+                    if ($id) {
+                        $controller->edit($id);
+                    } else {
+                        $controller->index();
+                    }
+                    break;
+
+                case 'show':
+                    if ($id) {
+                        $controller->show($id);
+                    } else {
+                        $controller->show();
+                    }
+                    break;
+
+                case 'store':
+                    $controller->store();
+                    break;
+
+                case 'update':
+                    $controller->update();
+                    break;
+
+                case 'delete':
+                    $controller->delete();
+                    break;
+
+                case 'getTasks':
+                    $controller->getTasks();
+                    break;
+
+                case 'getProcesses':
+                    $controller->getProcesses();
+                    break;
+
+                case 'getTaskDetail':
+                    $controller->getTaskDetail();
+                    break;
+
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+
         case 'client-counterparties':
             $controller = new ClientController();
             $controller->counterparties();
