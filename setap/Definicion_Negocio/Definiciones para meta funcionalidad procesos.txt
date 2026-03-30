@@ -1,0 +1,150 @@
+Tecnología invoucrada: MySQL 8, php 8.3, HTML, Ajax, boostrap5.3, todas las vistas responsivas.
+
+- \comercial-elroblev2\setap\public\js\process-create.js : Archivo para java script de vista \comercial-elroblev2\setap\src\App\Views\process\create.php
+- \comercial-elroblev2\setap\public\js\process-list.js : Archivo para java script de vista \comercial-elroblev2\setap\src\App\Views\process\list.php
+- \comercial-elroblev2\setap\public\js\process-edit.js : Archivo para java script de vista \comercial-elroblev2\setap\src\App\Views\process\edit.php
+- \comercial-elroblev2\setap\public\js\process-view.js : Archivo para java script de vista \comercial-elroblev2\setap\src\App\Views\process\view.php
+- \comercial-elroblev2\setap\src\App\Controllers\ProcessController.php : Controlador principal para créate.php y list.php
+- \comercial-elroblev2\setap\src\App\Models\Process.php : Model para Presscontroller.php
+- \comercial-elroblev2\setap\src\App\Views\process\create.php : Vista para crear proceso nuevo
+- \comercial-elroblev2\setap\src\App\Views\process\list.php : Vista para listar los procesos existentes
+- \comercial-elroblev2\setap\src\App\Views\process\edit.php : Vista para modificar proceso
+- \comercial-elroblev2\setap\src\App\Views\process\view.php : Vista para ver de que tareas se compone un proceso
+
+Tablas involucradas:
+
+CREATE TABLE `proyectos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cliente_id` int NOT NULL,
+  `proveedor_id` int NOT NULL DEFAULT '0',
+  `direccion` varchar(255) DEFAULT NULL,
+  `fecha_inicio` date NOT NULL,
+  `fecha_fin` date DEFAULT NULL,
+  `tarea_tipo_id` int NOT NULL,
+  `estado_tipo_id` int NOT NULL DEFAULT '0',
+  `contraparte_id` int NOT NULL,
+  `fecha_Creado` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_modificacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `cliente_id` (`cliente_id`),
+  KEY `tarea_tipo_id` (`tarea_tipo_id`),
+  KEY `estado_tipo_id` (`estado_tipo_id`),
+  KEY `contraparte_id` (`contraparte_id`),
+  CONSTRAINT `proyectos_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`),
+  CONSTRAINT `proyectos_ibfk_2` FOREIGN KEY (`tarea_tipo_id`) REFERENCES `tarea_tipos` (`id`),
+  CONSTRAINT `proyectos_ibfk_3` FOREIGN KEY (`estado_tipo_id`) REFERENCES `estado_tipos` (`id`),
+  CONSTRAINT `proyectos_ibfk_4` FOREIGN KEY (`contraparte_id`) REFERENCES `cliente_contrapartes` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE proyecto_procesos (
+  id INT NOT NULL AUTO_INCREMENT,
+  proveedor_id INT NULL DEFAULT 0,
+  nombre VARCHAR(100) NULL,
+  descripcion LONGTEXT NULL,
+  PRIMARY KEY (id));
+
+ALTER TABLE proyecto_procesos 
+ADD INDEX fk_pp_proveedor_id_idx (proveedor_id ASC) VISIBLE;
+
+ALTER TABLE proyecto_procesos 
+ADD CONSTRAINT fk_pp_proveedor_id
+  FOREIGN KEY (proveedor_id)
+  REFERENCES proveedores (id)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+-- DROP TABLE proyecto_proceso_tareas;
+CREATE TABLE proyecto_proceso_tareas (
+  id INT NOT NULL AUTO_INCREMENT,
+  proyecto_proceso_id INT NULL DEFAULT NULL,
+  tarea_id INT NULL DEFAULT NULL,
+  hh decimal DEFAULT 0.5,
+  PRIMARY KEY (id),
+  INDEX fk_ppt_proceso_id_idx (proyecto_proceso_id ASC) VISIBLE,
+  INDEX fk_ppt_tarea_id_idx (tarea_id ASC) VISIBLE,
+  CONSTRAINT fk_ppt_proceso_id
+    FOREIGN KEY (proyecto_proceso_id)
+    REFERENCES proyecto_procesos (id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_ppt_tarea_id
+    FOREIGN KEY (tarea_id)
+    REFERENCES tareas (id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+
+CREATE TABLE `tareas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `proveedor_id` int DEFAULT '0',
+  `nombre` varchar(150) NOT NULL,
+  `descripcion` text NOT NULL,
+  `tarea_categoria_id` int DEFAULT NULL,
+  `estado_tipo_id` int NOT NULL DEFAULT '0',
+  `fecha_Creado` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_modificacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`),
+  KEY `estado_tipo_id` (`estado_tipo_id`),
+  CONSTRAINT `tareas_ibfk_1` FOREIGN KEY (`estado_tipo_id`) REFERENCES `estado_tipos` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `tarea_categorias` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) DEFAULT NULL,
+  `fecha_creacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_actualizacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Clases de tarea: Aseo, Construcción Menor, Construcción, Electrico, Tecnologica, Instalación, Administración, Gestión, Producción';
+
+
+# Definición funcionalidades vistas
+## Definición de meta funcionalidad
+Un proceso es un conjunto de tareas que deben completarse para que se cumpla un objetivo. En SETAP solo nos avocaremos a la definición del conjunto de tareas que tendrá asociado cada proceso y además que este estará indexado a un proveedor en especifico. En términos prácticos un proceso en SETAP es un conjunto de tareas que esta agrupado por un id de proceso, que a su vez esta asociado a un proveedor_id único. Así, un conjunto de tareas que tiene en común un id de proceso, conforma un proceso en SETAP.
+
+### create.php
+Esta funcionalidad tendrá las siguientes facilidades uso:
+- un selector de proveedor que deberá ser visible cuando el usuario es un admin (usuario_id = 1)
+- un selector de tareas categorías
+- un selector de tareas, filtradas por proveedor seleccionado y por categoría seleccionada, con buscador.
+- un control numérico para indicar duración en horas, mínimo 0.5, step 0.5
+- un botón para levantar un pop-up (modal) para crear una tarea nueva, que debe tener lo necesario como en la vista "\comercial-elroblev2\setap\src\App\Views\tasks\newTask.php", al grabar tarea nueva debe refrescar el selector de tareas.
+- un botón agregar tarea al proceso
+- un botón limpiar, que elimina todas las tareas asociadas a un proceso
+- una tabla que muestre las tareas que se van agregando al proceso. Luego en esta tabla se debe tener las siguientes columnas
+-- Tarea (nombre)
+-- Duración
+-- Categoría
+-- Acciones, aquí se debe tener los siguientes botones:
+--- Ver, para levantar pop-up (modal) que muestra los datos de la tarea en la línea
+--- Eliminar, para eliminar proceso la tarea seleccionada
+
+### edit.php
+Esta funcionalidad tendrá lo necesario para editar un proceso:
+- un selector de proveedor que deberá ser visible cuando el usuario es un admin (usuario_id = 1)
+- un selector de procesos, que se seleccionara automáticamente cuando el edit.php haya sido invocado desde list.php, con buscador.
+- Todos los controles el create.php
+
+### view.php
+Esta funcionalidad tendrá un lo necesario solo para ver de que tareas esta compuesto un procesos
+- un selector de proveedor que deberá ser visible cuando el usuario es un admin (usuario_id = 1)
+- un selector de procesos, que se seleccionara automáticamente cuando el edit.php haya sido invocado desde list.php, con buscador.
+- una tabla que muestre las tareas que se van agregando al proceso. Luego en esta tabla se debe tener las siguientes columnas
+-- Tarea (nombre)
+-- Duración
+-- Categoría
+-- Acciones, aquí se debe tener los siguientes botones:
+--- Ver, para levantar pop-up (modal) que muestra los datos de la tarea en la línea
+
+### list.php
+Esta funcionalidad tendrá lo necesario para ver los procesos que tiene creados un proveedor determinado
+- un selector de proveedor que deberá ser visible cuando el usuario es un admin (usuario_id = 1)
+- Botón crear proceso, invoca create.php
+- Tabla con lista de procesos, columnas
+-- Nombre
+-- Descripción, hasta 100 caracteres de la descripción
+-- Acciones
+--- Ver, invoca el view.php
+--- Editar, invoca el edit.php
+--- Eliminar, elimina proceso
