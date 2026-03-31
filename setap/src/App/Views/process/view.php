@@ -2,6 +2,7 @@
 
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+
 $isAdmin = $data['user']['id'] == 1;
 $processTasks = $data['processTasks'] ?? [];
 $process = $data['process'] ?? null;
@@ -96,9 +97,9 @@ $process = $data['process'] ?? null;
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php 
+                                                <?php
                                                 $totalHoras = 0;
-                                                foreach ($processTasks as $task): 
+                                                foreach ($processTasks as $task):
                                                     $totalHoras += (float)$task['hh'];
                                                 ?>
                                                     <tr>
@@ -106,8 +107,8 @@ $process = $data['process'] ?? null;
                                                         <td><?= number_format($task['hh'], 1); ?> hrs</td>
                                                         <td><?= htmlspecialchars($task['categoria_nombre'] ?? 'N/A'); ?></td>
                                                         <td>
-                                                            <button type="button" class="btn btn-sm btn-outline-info btn-view-task" 
-                                                                    data-task-id="<?= $task['tarea_id']; ?>">
+                                                            <button type="button" class="btn btn-sm btn-outline-info btn-view-task"
+                                                                data-task-id="<?= $task['tarea_id']; ?>">
                                                                 <i class="bi bi-eye"></i> Ver
                                                             </button>
                                                         </td>

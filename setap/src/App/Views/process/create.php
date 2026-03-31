@@ -2,6 +2,7 @@
 
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+
 $isAdmin = $data['user']['id'] == 1;
 $processTasks = $data['processTasks'] ?? [];
 ?>
@@ -21,6 +22,7 @@ $processTasks = $data['processTasks'] ?? [];
         .task-row:hover {
             background-color: #f8f9fa;
         }
+
         .task-search-results {
             max-height: 300px;
             overflow-y: auto;
@@ -76,27 +78,27 @@ $processTasks = $data['processTasks'] ?? [];
                                                     <option value="">Seleccione un proveedor</option>
                                                     <?php foreach ($data['suppliers'] as $supplier): ?>
                                                         <option value="<?= $supplier['id']; ?>">
-                                                            <?= htmlspecialchars($supplier['nombre']); ?>
+                                                            <?= htmlspecialchars($supplier['razon_social']); ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
                                         <?php else: ?>
-                                            <input type="hidden" name="proveedor_id" id="proveedor_id" 
-                                                   value="<?= $data['suppliers'][0]['id'] ?? ''; ?>">
+                                            <input type="hidden" name="proveedor_id" id="proveedor_id"
+                                                value="<?= $data['suppliers'][0]['id'] ?? ''; ?>">
                                         <?php endif; ?>
                                         <div class="col-md-4">
                                             <label for="nombre" class="form-label">
                                                 Nombre del Proceso<span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre" 
-                                                   maxlength="100" required
-                                                   value="<?= htmlspecialchars($data['process']['nombre'] ?? ''); ?>">
+                                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                                maxlength="100" required
+                                                value="<?= htmlspecialchars($data['process']['nombre'] ?? ''); ?>">
                                         </div>
                                         <div class="col-md-4">
                                             <label for="descripcion" class="form-label">Descripcion</label>
-                                            <textarea class="form-control" id="descripcion" name="descripcion" 
-                                                      rows="2"><?= htmlspecialchars($data['process']['descripcion'] ?? ''); ?></textarea>
+                                            <textarea class="form-control" id="descripcion" name="descripcion"
+                                                rows="2"><?= htmlspecialchars($data['process']['descripcion'] ?? ''); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -123,16 +125,16 @@ $processTasks = $data['processTasks'] ?? [];
                                         </div>
                                         <div class="col-md-4">
                                             <label for="task_search" class="form-label">Buscar Tarea</label>
-                                            <input type="text" class="form-control" id="task_search" 
-                                                   placeholder="Escriba para buscar tareas..." autocomplete="off">
+                                            <input type="text" class="form-control" id="task_search"
+                                                placeholder="Escriba para buscar tareas..." autocomplete="off">
                                             <div id="taskSearchResults" class="task-search-results list-group position-absolute w-100 mt-1 d-none z-3"></div>
                                         </div>
                                         <div class="col-md-2">
                                             <label for="tarea_hh" class="form-label">
                                                 Duracion (hrs)<span class="text-danger">*</span>
                                             </label>
-                                            <input type="number" class="form-control" id="tarea_hh" 
-                                                   min="0.5" step="0.5" value="0.5" required>
+                                            <input type="number" class="form-control" id="tarea_hh"
+                                                min="0.5" step="0.5" value="0.5" required>
                                         </div>
                                         <div class="col-md-3 d-flex align-items-end gap-2">
                                             <button type="button" class="btn btn-setap-primary" id="btnAddTask">
@@ -174,8 +176,8 @@ $processTasks = $data['processTasks'] ?? [];
                                                         <td><?= number_format($task['hh'], 1); ?> hrs</td>
                                                         <td><?= htmlspecialchars($task['categoria_nombre'] ?? 'N/A'); ?></td>
                                                         <td>
-                                                            <button type="button" class="btn btn-sm btn-outline-info btn-view-task" 
-                                                                    data-task-id="<?= $task['tarea_id']; ?>">
+                                                            <button type="button" class="btn btn-sm btn-outline-info btn-view-task"
+                                                                data-task-id="<?= $task['tarea_id']; ?>">
                                                                 <i class="bi bi-eye"></i>
                                                             </button>
                                                             <button type="button" class="btn btn-sm btn-outline-danger btn-remove-task">
@@ -255,7 +257,7 @@ $processTasks = $data['processTasks'] ?? [];
                                     Nombre<span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre"
-                                       maxlength="150" required>
+                                    maxlength="150" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="nueva_tarea_categoria" class="form-label">Categoria<span class="text-danger">*</span></label>
@@ -277,7 +279,7 @@ $processTasks = $data['processTasks'] ?? [];
                             <div class="col-md-12">
                                 <label for="nueva_tarea_descripcion" class="form-label">Descripcion</label>
                                 <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
-                                          rows="2"></textarea>
+                                    rows="2"></textarea>
                             </div>
                         </div>
                     </div>

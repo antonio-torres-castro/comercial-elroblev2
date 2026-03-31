@@ -27,7 +27,7 @@ class Process
             $query = "
                 SELECT
                     pp.*,
-                    p.nombre as proveedor_nombre
+                    p.razon_social as proveedor_nombre
                 FROM {$this->table} pp
                 LEFT JOIN proveedores p ON pp.proveedor_id = p.id
                 WHERE 1=1
@@ -66,7 +66,7 @@ class Process
             $query = "
                 SELECT
                     pp.*,
-                    p.nombre as proveedor_nombre
+                    p.razon_social as proveedor_nombre
                 FROM {$this->table} pp
                 LEFT JOIN proveedores p ON pp.proveedor_id = p.id
                 WHERE pp.id = ?

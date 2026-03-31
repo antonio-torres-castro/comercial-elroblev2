@@ -471,7 +471,7 @@ class ProcessController extends BaseController
                 return;
             }
 
-            $task = $this->taskModel->find((int)$tareaId);
+            $task = $this->taskModel->getTaskById((int)$tareaId);
             echo json_encode(['task' => $task]);
         } catch (Exception $e) {
             Logger::error("ProcessController::getTaskDetail: " . $e->getMessage());
@@ -484,9 +484,12 @@ class ProcessController extends BaseController
      */
     private function getSuppliersForUser(array $currentUser): array
     {
+
+        $filters = ['estado_tipo_id' => 2]; // Solo proveedores activos
+
         if ($currentUser['id'] == 1) {
             // Admin puede ver todos los proveedores
-            return $this->supplierModel->getAll();
+            return $this->supplierModel->getAll($filters);
         } else {
             // Otros usuarios solo ven su proveedor
             $supplierId = $currentUser['proveedor_id'] ?? null;

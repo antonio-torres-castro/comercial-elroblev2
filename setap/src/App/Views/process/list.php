@@ -2,6 +2,7 @@
 
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+
 $isAdmin = $data['user']['id'] == 1;
 ?>
 <!DOCTYPE html>
@@ -62,7 +63,7 @@ $isAdmin = $data['user']['id'] == 1;
                                             <option value="">Todos los proveedores</option>
                                             <?php foreach ($data['suppliers'] as $supplier): ?>
                                                 <option value="<?= $supplier['id']; ?>" <?= ($data['filters']['proveedor_id'] ?? '') == $supplier['id'] ? 'selected' : ''; ?>>
-                                                    <?= htmlspecialchars($supplier['nombre']); ?>
+                                                    <?= htmlspecialchars($supplier['razon_social']); ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
@@ -70,9 +71,9 @@ $isAdmin = $data['user']['id'] == 1;
                                 <?php endif; ?>
                                 <div class="col-md-4">
                                     <label for="nombre" class="form-label">Nombre del Proceso</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre" 
-                                           value="<?= htmlspecialchars($data['filters']['nombre'] ?? ''); ?>" 
-                                           placeholder="Buscar por nombre">
+                                    <input type="text" class="form-control" id="nombre" name="nombre"
+                                        value="<?= htmlspecialchars($data['filters']['nombre'] ?? ''); ?>"
+                                        placeholder="Buscar por nombre">
                                 </div>
                                 <div class="col-md-4 d-flex align-items-end">
                                     <button type="submit" class="btn btn-primary me-2">
@@ -127,26 +128,26 @@ $isAdmin = $data['user']['id'] == 1;
                                                     </td>
                                                 <?php endif; ?>
                                                 <td>
-                                                    <?php 
-                                                        $descripcion = $process['descripcion'] ?? '';
-                                                        echo htmlspecialchars(mb_substr($descripcion, 0, 100));
-                                                        if (mb_strlen($descripcion) > 100) {
-                                                            echo '...';
-                                                        }
+                                                    <?php
+                                                    $descripcion = $process['descripcion'] ?? '';
+                                                    echo htmlspecialchars(mb_substr($descripcion, 0, 100));
+                                                    if (mb_strlen($descripcion) > 100) {
+                                                        echo '...';
+                                                    }
                                                     ?>
                                                 </td>
                                                 <td>
-                                                    <a href="<?= AppConstants::ROUTE_PROCESSES ?>/show/<?= $process['id']; ?>" 
-                                                       class="btn btn-sm btn-outline-info" title="Ver">
+                                                    <a href="<?= AppConstants::ROUTE_PROCESSES ?>/show/<?= $process['id']; ?>"
+                                                        class="btn btn-sm btn-outline-info" title="Ver">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
-                                                    <a href="<?= AppConstants::ROUTE_PROCESSES ?>/edit/<?= $process['id']; ?>" 
-                                                       class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <a href="<?= AppConstants::ROUTE_PROCESSES ?>/edit/<?= $process['id']; ?>"
+                                                        class="btn btn-sm btn-outline-primary" title="Editar">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                            onclick="confirmDelete(<?= $process['id']; ?>, '<?= htmlspecialchars(addslashes($process['nombre'])); ?>')" 
-                                                            title="Eliminar">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        onclick="confirmDelete(<?= $process['id']; ?>, '<?= htmlspecialchars(addslashes($process['nombre'])); ?>')"
+                                                        title="Eliminar">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </td>
