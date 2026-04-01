@@ -32,7 +32,7 @@ function initEventListeners() {
     
     // Selector de categoria
     document.getElementById('categoria_id').addEventListener('change', function() {
-        refreshTaskSearch();
+        refreshTaskSearch(true);
     });
     
     // Proveedor cambio - recargar tareas disponibles
@@ -42,7 +42,7 @@ function initEventListeners() {
             clearProcessTasksTable();
             processTasks = [];
             updateTaskCount();
-            refreshTaskSearch();
+            refreshTaskSearch(true);
         });
     }
     
@@ -78,21 +78,13 @@ function initTaskSearch() {
         clearTimeout(searchTimeout);
         const query = this.value.trim();
         
-        if (query.length < 2) {
-            resultsContainer.classList.add('d-none');
-            selectedTask = null;
-            return;
-        }
-        
         searchTimeout = setTimeout(() => {
             searchTasks(query);
         }, 300);
     });
     
     searchInput.addEventListener('focus', function() {
-        if (this.value.trim().length >= 2) {
-            searchTasks(this.value.trim());
-        }
+        searchTasks(this.value.trim() || '');
     });
     
     // Ocultar resultados al hacer clic fuera
@@ -117,7 +109,8 @@ function searchTasks(query) {
     
     const params = new URLSearchParams({
         proveedor_id: proveedorId,
-        categoria_id: categoriaId || ''
+        categoria_id: categoriaId || '',
+        q: query || ''
     });
     
     fetch('/setap/process/getTasks?' + params.toString())
@@ -128,12 +121,7 @@ function searchTasks(query) {
                 return;
             }
             
-            const tasks = data.tasks || [];
-            const filteredTasks = tasks.filter(t => 
-                t.nombre.toLowerCase().includes(query.toLowerCase())
-            );
-            
-            displaySearchResults(filteredTasks);
+            displaySearchResults(data.tasks || []);
         })
         .catch(error => {
             console.error('Error al buscar tareas:', error);
@@ -147,7 +135,7 @@ function displaySearchResults(tasks) {
     const resultsContainer = document.getElementById('taskSearchResults');
     
     if (tasks.length === 0) {
-        resultsContainer.innerHTML = '<button type="button" class="list-group-item list-group-item-action text-muted">No se encontraron tareas</button>';
+        resultsContainer.innerHTML = '<div class="list-group-item text-muted">No se encontraron tareas</div>';
         resultsContainer.classList.remove('d-none');
         return;
     }
@@ -186,6 +174,16 @@ function selectTask(btn) {
     
     document.getElementById('task_search').value = selectedTask.nombre;
     document.getElementById('taskSearchResults').classList.add('d-none');
+}
+
+/**
+ * Refrescar busqueda
+ */
+function refreshTaskSearch(force = false) {
+    const query = document.getElementById('task_search').value.trim();
+    if (force || query.length >= 0) {
+        searchTasks(query);
+    }
 }
 
 /**
@@ -239,9 +237,7 @@ function removeTaskFromProcess(taskId) {
  * Limpiar todas las tareas del proceso
  */
 function clearAllTasks() {
-    if (processTasks.length === 0) {
-        return;
-    }
+    if (processTasks.length === 0) return;
     
     if (confirm('Esta seguro que desea eliminar todas las tareas del proceso?')) {
         processTasks = [];
@@ -404,7 +400,7 @@ function createNewTask() {
                 alert('Tarea creada exitosamente');
                 
                 // Actualizar busqueda de tareas
-                refreshTaskSearch();
+                refreshTaskSearch(true);
             } else {
                 alert('Error al crear tarea: ' + (data.error || 'Error desconocido'));
             }
@@ -416,17 +412,7 @@ function createNewTask() {
 }
 
 /**
- * Refrescar busqueda de tareas
- */
-function refreshTaskSearch() {
-    const query = document.getElementById('task_search').value.trim();
-    if (query.length >= 2) {
-        searchTasks(query);
-    }
-}
-
-/**
- * Poblar tareas iniciales (para modo edicion)
+ * Poblar tareas iniciales
  */
 function populateInitialTasks() {
     const rows = document.querySelectorAll('#processTasksBody tr');

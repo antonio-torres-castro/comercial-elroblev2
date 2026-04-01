@@ -313,7 +313,7 @@ class Process
     /**
      * Obtener tareas filtradas por proveedor y categoria
      */
-    public function getTasksFiltered(int $proveedorId, ?int $categoriaId = null): array
+    public function getTasksFiltered(int $proveedorId, ?int $categoriaId = null, $search = null): array
     {
         try {
             $query = "
@@ -327,14 +327,19 @@ class Process
                 FROM tareas t
                 LEFT JOIN tarea_categorias tc ON t.tarea_categoria_id = tc.id
                 LEFT JOIN estado_tipos et ON t.estado_tipo_id = et.id
-                WHERE t.proveedor_id = ? AND t.estado_tipo_id != 4
+                WHERE t.proveedor_id = :proveedor_id AND t.estado_tipo_id != 4
             ";
 
-            $params = [$proveedorId];
+            $params = [':proveedor_id' => $proveedorId];
 
             if ($categoriaId) {
-                $query .= " AND t.tarea_categoria_id = ?";
-                $params[] = $categoriaId;
+                $query .= " AND t.tarea_categoria_id = :categoria_id";
+                $params[':categoria_id'] = $categoriaId;
+            }
+
+            if (!empty($search)) {
+                $query .= " AND LOWER(t.nombre) LIKE :search";
+                $params[':search'] = '%' . strtolower($search) . '%';
             }
 
             $query .= " ORDER BY t.nombre ASC";

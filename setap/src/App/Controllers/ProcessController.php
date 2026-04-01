@@ -407,13 +407,14 @@ class ProcessController extends BaseController
 
             $proveedorId = $_GET['proveedor_id'] ?? null;
             $categoriaId = $_GET['categoria_id'] ?? null;
+            $search = $_GET['q'] ?? null;
 
             if (!$proveedorId) {
                 echo json_encode(['error' => 'Proveedor requerido']);
                 return;
             }
 
-            $tasks = $this->processModel->getTasksFiltered($proveedorId, $categoriaId);
+            $tasks = $this->processModel->getTasksFiltered($proveedorId, $categoriaId, $search);
             echo json_encode(['tasks' => $tasks]);
         } catch (Exception $e) {
             Logger::error("ProcessController::getTasks: " . $e->getMessage());
