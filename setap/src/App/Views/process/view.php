@@ -127,7 +127,7 @@ $process = $data['process'] ?? null;
                                 <?php else: ?>
                                     <div class="text-center text-muted py-4">
                                         <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                        <p class="mb-0">Este proceso no tiene tareas asignadas</p>
+                                        <p class="mb-0">Este proceso no tiene tareas definidas</p>
                                     </div>
                                 <?php endif; ?>
                             </div>

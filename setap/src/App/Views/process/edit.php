@@ -80,7 +80,7 @@ $processTasks = $data['processTasks'] ?? [];
                                                     <?php foreach ($data['suppliers'] as $supplier): ?>
                                                         <option value="<?= $supplier['id']; ?>"
                                                             <?= ($data['process']['proveedor_id'] ?? '') == $supplier['id'] ? 'selected' : ''; ?>>
-                                                            <?= htmlspecialchars($supplier['nombre']); ?>
+                                                            <?= htmlspecialchars($supplier['razon_social']); ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
