@@ -104,7 +104,7 @@ function initTaskSearch() {
 }
 
 /**
- * Buscar tareas por nombre
+ * Buscar tareas por nombre (SERVER SIDE)
  */
 function searchTasks(query) {
     const proveedorId = document.getElementById('proveedor_id').value;
