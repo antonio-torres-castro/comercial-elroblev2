@@ -393,11 +393,23 @@ function createNewTask() {
         formData.append('csrf_token', csrfToken.value);
     }
     
-    fetch('/setap/tasks/storet', {
+    fetch('/setap/tasks/storetp', {
         method: 'POST',
         body: formData
     })
-        .then(response => response.json())
+        .then(async response => {
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // Lanza error con el mensaje real del backend
+                    throw {
+                            message: data.error || 'Error desconocido',
+                            status: response.status
+                        };
+                }
+
+                return data;
+        })
         .then(data => {
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('newTaskModal')).hide();
@@ -410,9 +422,9 @@ function createNewTask() {
             }
         })
         .catch(error => {
-            console.error('Error al crear tarea:', error);
-            alert('Error al crear tarea');
-        });
+                            console.error(error);
+                            alert(`Error (${error.status}): ${error.message}`);
+                        });
 }
 
 /**

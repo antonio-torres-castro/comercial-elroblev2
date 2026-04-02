@@ -1096,12 +1096,125 @@ class TaskController extends BaseController
             $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion, $nueva_tarea_categoria_id, $proveedorId);
             if ($taskId) {
                 Security::redirect("/task/newTask?success=Tarea tipo creada");
+            } elseif ($taskId === null) {
+                Security::redirect("/task/newTask?error=Error creando tarea tipo, nombre ya existe");
             } else {
                 Security::redirect("/task/newTask?error=Error creando tarea tipo");
             }
         } catch (Exception $e) {
             Logger::error("TaskController::storeT: " . $e->getMessage());
             Security::redirect("/tasks/storeT?error=Error interno del servidor");
+        }
+    }
+
+    /**
+     * Guardar nueva tarea tipo (AJAX)
+     */
+    public function storeTP()
+    {
+        try {
+            // Asegurar respuesta JSON
+            header('Content-Type: application/json');
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Método no permitido'
+                ]);
+                return;
+            }
+
+            // Verificar CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Token de seguridad inválido'
+                ]);
+                return;
+            }
+
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                http_response_code(401);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Usuario no autenticado'
+                ]);
+                return;
+            }
+
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+                http_response_code(403);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Sin permisos'
+                ]);
+                return;
+            }
+
+            // Obtener datos
+            $nombre = trim($_POST['nueva_tarea_nombre'] ?? '');
+            $descripcion = trim($_POST['nueva_tarea_descripcion'] ?? '');
+            $categoriaId = trim($_POST['tarea_categoria_id'] ?? '');
+            $estadoId = trim($_POST['estado_tipo_id'] ?? '');
+            $proveedorId = (int)($_POST['proveedor_id'] ?? 0);
+
+            // Validaciones básicas backend (no confíes solo en JS)
+            if (!$nombre) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'El nombre es obligatorio'
+                ]);
+                return;
+            }
+
+            if (!$proveedorId) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Proveedor inválido'
+                ]);
+                return;
+            }
+
+            // Crear tarea
+            $taskId = $this->taskModel->taskCreate(
+                $nombre,
+                $descripcion,
+                $categoriaId,
+                $proveedorId,
+                $estadoId // asegúrate que tu modelo lo soporte
+            );
+
+            if ($taskId) {
+                echo json_encode([
+                    'success' => true,
+                    'task_id' => $taskId,
+                    'message' => 'Tarea creada correctamente'
+                ]);
+            } elseif ($taskId === null) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Error creando tarea, nombre ya existe'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'No se pudo crear la tarea'
+                ]);
+            }
+        } catch (Exception $e) {
+            Logger::error("TaskController::storeTP: " . $e->getMessage());
+
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error interno del servidor'
+            ]);
         }
     }
 

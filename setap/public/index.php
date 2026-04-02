@@ -693,6 +693,14 @@ try {
                     }
                     break;
 
+                case 'storetp':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->storeTP();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_TASKS);
+                    }
+                    break;
+
                 case 'delete':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->delete();

@@ -406,7 +406,7 @@ class ProcessController extends BaseController
             }
 
             $proveedorId = $_GET['proveedor_id'] ?? null;
-            $categoriaId = $_GET['categoria_id'] ?? null;
+            $categoriaId = $_GET['categoria_id'] && !empty($_GET['categoria_id']) ? $_GET['categoria_id'] : null;
             $search = $_GET['q'] ?? null;
 
             if (!$proveedorId) {

@@ -1147,7 +1147,7 @@ class Task
                     $stmt->execute([$tareaNombre, $tareaDescripcion ?? '', $tareaCategoriaId ?? 0, $proveedorId ?? null]);
                     $tareaId = $this->db->lastInsertId();
                 } else {
-                    $tareaId = $arrayTareaId[0];
+                    $tareaId = null;
                 }
             } else {
                 $this->db->rollBack();
