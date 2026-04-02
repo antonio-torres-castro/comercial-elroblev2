@@ -134,7 +134,7 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-3">
                                             <label class="form-label">Ejecuta</label>
                                             <select class="form-select" name="usuario_id" onchange="this.form.submit()">
-                                                <option value="">Todos</option>
+                                                <option value="-1">Todos</option>
                                                 <?php if (!empty($data['users'])): ?>
                                                     <?php foreach ($data['users'] as $user): ?>
                                                         <option value="<?= $user['id'] ?>"

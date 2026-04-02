@@ -69,7 +69,7 @@ class TaskController extends BaseController
             if (isset($_GET['estado_tipo_id']) && !empty($_GET['estado_tipo_id'])) {
                 $filters['estado_tipo_id'] = $_GET['estado_tipo_id'];
             }
-            if (!empty($_GET['usuario_id'])) {
+            if (!empty($_GET['usuario_id']) && $_GET['usuario_id'] != -1) {
                 $filters['usuario_id'] = (int)$_GET['usuario_id'];
             }
 
@@ -132,7 +132,7 @@ class TaskController extends BaseController
             }
 
             $users = $this->taskModel->getExecutorUsers($filters);
-            if (count($users) == 1) {
+            if (count($users) == 1 && $uti > 1) {
                 $_GET['usuario_id'] = $users[0]['id'];
             }
 
@@ -935,7 +935,7 @@ class TaskController extends BaseController
                     'ejecutor_id' => null, // No se asigna ejecutor aquí
                     'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
                     'fecha_inicio' => $fechaInicio,
-                    'duracion_horas' => (float)$pTask['duracion_horas'],
+                    'duracion_horas' => (float)$pTask['hh'],
                     'fecha_fin' => $fechaFin,
                     'prioridad' => $pTask['prioridad'] ?? 5, // Default "5 - Media"
                     'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2), // Default "Activo"
