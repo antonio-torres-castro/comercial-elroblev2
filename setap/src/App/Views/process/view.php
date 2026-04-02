@@ -119,8 +119,8 @@ $process = $data['process'] ?? null;
                                             </tbody>
                                             <tfoot class="table-secondary">
                                                 <tr>
-                                                    <th colspan="2" class="text-end">Total Horas:</th>
-                                                    <th><?= number_format($totalHoras, 1); ?> hrs</th>
+                                                    <th colspan="1" class="text-end">Total Horas:</th>
+                                                    <th colspan="3"><?= number_format($totalHoras, 1); ?> hrs</th>
                                                     <th></th>
                                                 </tr>
                                             </tfoot>

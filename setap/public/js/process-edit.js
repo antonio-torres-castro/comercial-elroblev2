@@ -334,11 +334,11 @@ function viewTaskDetail(taskId) {
                 return;
             }
             
-            const task = data.task;
+            const task = data.task[0];
             document.getElementById('viewTaskNombre').textContent = task.nombre || '-';
             document.getElementById('viewTaskDescripcion').textContent = task.descripcion || '-';
-            document.getElementById('viewTaskCategoria').textContent = task.categoria_nombre || 'N/A';
-            document.getElementById('viewTaskEstado').textContent = task.estado_nombre || '-';
+            document.getElementById('viewTaskCategoria').textContent = task.categoria || 'N/A';
+            document.getElementById('viewTaskEstado').textContent = task.estado || '-';
             
             new bootstrap.Modal(document.getElementById('viewTaskModal')).show();
         })
