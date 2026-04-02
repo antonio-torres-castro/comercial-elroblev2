@@ -310,6 +310,7 @@ function prepareFormSubmission(e) {
     if (!proveedorId) {
         e.preventDefault();
         alert('Por favor seleccione un proveedor');
+        document.getElementById('proveedor_id').focus();
         return;
     }
     

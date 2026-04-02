@@ -104,6 +104,7 @@ function searchTasks(query) {
     
     if (!proveedorId) {
         alert('Por favor seleccione un proveedor primero');
+        document.getElementById('proveedor_id').focus();
         return;
     }
     
@@ -308,6 +309,7 @@ function prepareFormSubmission(e) {
     if (!proveedorId) {
         e.preventDefault();
         alert('Por favor seleccione un proveedor');
+        document.getElementById('proveedor_id').focus();
         return;
     }
     

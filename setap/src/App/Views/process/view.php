@@ -92,6 +92,7 @@ $process = $data['process'] ?? null;
                                                 <tr>
                                                     <th>Tarea</th>
                                                     <th>Duracion</th>
+                                                    <th>Prioridad</th>
                                                     <th>Categoria</th>
                                                     <th>Acciones</th>
                                                 </tr>
@@ -105,6 +106,7 @@ $process = $data['process'] ?? null;
                                                     <tr>
                                                         <td><?= htmlspecialchars($task['tarea_nombre']); ?></td>
                                                         <td><?= number_format($task['hh'], 1); ?> hrs</td>
+                                                        <td><?= htmlspecialchars($task['prioridad'] ?? 'N/A'); ?></td>
                                                         <td><?= htmlspecialchars($task['categoria_nombre'] ?? 'N/A'); ?></td>
                                                         <td>
                                                             <button type="button" class="btn btn-sm btn-outline-info btn-view-task"
