@@ -104,6 +104,8 @@ function searchTasks(query) {
     
     if (!proveedorId) {
         alert('Por favor seleccione un proveedor primero');
+
+        document.getElementById('proveedor_id').focus();
         return;
     }
     
@@ -196,6 +198,7 @@ function addTaskToProcess() {
     }
     
     const hh = parseFloat(document.getElementById('tarea_hh').value);
+    const prioridad = parseInt(document.getElementById('prioridad').value);
     if (isNaN(hh) || hh < 0.5) {
         alert('La duracion debe ser al menos 0.5 horas');
         return;
@@ -212,7 +215,8 @@ function addTaskToProcess() {
         nombre: selectedTask.nombre,
         descripcion: selectedTask.descripcion,
         categoria: selectedTask.categoria,
-        hh: hh
+        hh: hh,
+        prioridad: prioridad // Valor por defecto, se puede modificar para permitir seleccion
     });
     
     renderProcessTasksTable();
@@ -222,6 +226,7 @@ function addTaskToProcess() {
     selectedTask = null;
     document.getElementById('task_search').value = '';
     document.getElementById('tarea_hh').value = '0.5';
+    document.getElementById('prioridad').value = '5';
 }
 
 /**
@@ -269,6 +274,7 @@ function renderProcessTasksTable() {
         <tr data-task-id="${task.tarea_id}" data-hh="${task.hh}">
             <td>${escapeHtml(task.nombre)}</td>
             <td>${task.hh.toFixed(1)} hrs</td>
+            <td>${task.prioridad}</td>
             <td>${escapeHtml(task.categoria || 'N/A')}</td>
             <td>
                 <button type="button" class="btn btn-sm btn-outline-info btn-view-task" 
@@ -436,6 +442,7 @@ function populateInitialTasks() {
         processTasks.push({
             tarea_id: parseInt(row.dataset.taskId),
             hh: parseFloat(row.dataset.hh) || 0.5,
+            prioridad: parseInt(row.dataset.prioridad) || 5,
             nombre: row.querySelector('td:first-child').textContent.trim(),
             categoria: row.querySelector('td:nth-child(3)').textContent.trim()
         });

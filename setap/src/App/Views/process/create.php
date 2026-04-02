@@ -112,7 +112,7 @@ $processTasks = $data['processTasks'] ?? [];
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label for="categoria_id" class="form-label">Categoria</label>
                                             <select class="form-select" id="categoria_id">
                                                 <option value="">Todas las categorias</option>
@@ -135,12 +135,22 @@ $processTasks = $data['processTasks'] ?? [];
                                                 style="z-index: 1050;">
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-1">
                                             <label for="tarea_hh" class="form-label">
                                                 Duracion (hrs)<span class="text-danger">*</span>
                                             </label>
                                             <input type="number" class="form-control" id="tarea_hh"
                                                 min="0.5" step="0.5" value="0.5" required>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="prioridad" class="form-label">Prioridad</label>
+                                            <select class="form-select" id="prioridad">
+                                                <option value="0" <?= ($_POST['prioridad'] ?? '') === '0' ? 'selected' : ''; ?>>0 - Baja</option>
+                                                <option value="3" <?= ($_POST['prioridad'] ?? '') === '3' ? 'selected' : ''; ?>>3 - Normal</option>
+                                                <option value="5" <?= (!isset($_POST['prioridad']) || $_POST['prioridad'] == '5') ? 'selected' : ''; ?>>5 - Media</option>
+                                                <option value="7" <?= ($_POST['prioridad'] ?? '') === '7' ? 'selected' : ''; ?>>7 - Alta</option>
+                                                <option value="10" <?= ($_POST['prioridad'] ?? '') === '10' ? 'selected' : ''; ?>>10 - Crítica</option>
+                                            </select>
                                         </div>
                                         <div class="col-md-3 d-flex align-items-end gap-2">
                                             <button type="button" class="btn btn-setap-primary" id="btnAddTask">
@@ -171,6 +181,7 @@ $processTasks = $data['processTasks'] ?? [];
                                                 <tr>
                                                     <th>Tarea</th>
                                                     <th>Duracion</th>
+                                                    <th>Prioridad</th>
                                                     <th>Categoria</th>
                                                     <th>Acciones</th>
                                                 </tr>
@@ -180,6 +191,7 @@ $processTasks = $data['processTasks'] ?? [];
                                                     <tr data-task-id="<?= $task['tarea_id']; ?>" data-hh="<?= $task['hh']; ?>">
                                                         <td><?= htmlspecialchars($task['tarea_nombre']); ?></td>
                                                         <td><?= number_format($task['hh'], 1); ?> hrs</td>
+                                                        <td><?= htmlspecialchars($task['prioridad'] ?? 'N/A'); ?></td>
                                                         <td><?= htmlspecialchars($task['categoria_nombre'] ?? 'N/A'); ?></td>
                                                         <td>
                                                             <button type="button" class="btn btn-sm btn-outline-info btn-view-task"

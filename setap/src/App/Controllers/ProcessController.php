@@ -163,7 +163,7 @@ class ProcessController extends BaseController
             $tasksData = json_decode($_POST['process_tasks_json'] ?? '[]', true);
             if (!empty($tasksData)) {
                 foreach ($tasksData as $task) {
-                    $this->processModel->addTaskToProcess($processId, $task['tarea_id'], $task['hh']);
+                    $this->processModel->addTaskToProcess($processId, $task['tarea_id'], $task['hh'], $task['prioridad']);
                 }
             }
 
@@ -286,7 +286,7 @@ class ProcessController extends BaseController
                 $tasksData = json_decode($_POST['process_tasks_json'] ?? '[]', true);
                 if (!empty($tasksData)) {
                     foreach ($tasksData as $task) {
-                        $this->processModel->addTaskToProcess($id, $task['tarea_id'], $task['hh']);
+                        $this->processModel->addTaskToProcess($id, $task['tarea_id'], $task['hh'], $task['prioridad']);
                     }
                 }
             }

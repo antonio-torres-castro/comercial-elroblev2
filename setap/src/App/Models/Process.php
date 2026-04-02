@@ -197,6 +197,7 @@ class Process
                     ppt.id,
                     ppt.tarea_id,
                     ppt.hh,
+                    ppt.prioridad,
                     t.nombre as tarea_nombre,
                     t.descripcion as tarea_descripcion,
                     tc.nombre as categoria_nombre
@@ -220,22 +221,24 @@ class Process
     /**
      * Agregar tarea a un proceso
      */
-    public function addTaskToProcess(int $processId, int $tareaId, float $hh): int
+    public function addTaskToProcess(int $processId, int $tareaId, float $hh, int $prioridad): int
     {
         try {
             $query = "
                 INSERT INTO {$this->tasksTable} (
                     proveedor_proceso_id,
                     tarea_id,
-                    hh
-                ) VALUES (?, ?, ?)
+                    hh,
+                    prioridad
+                ) VALUES (?, ?, ?, ?)
             ";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([
                 $processId,
                 $tareaId,
-                $hh
+                $hh,
+                $prioridad
             ]);
 
             return (int) $this->db->lastInsertId();

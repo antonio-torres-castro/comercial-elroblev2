@@ -1,0 +1,2 @@
+ALTER TABLE proveedor_proceso_tareas ADD COLUMN prioridad INT NULL DEFAULT 5 AFTER hh,
+CHANGE COLUMN hh hh DECIMAL(10,1) NULL DEFAULT 0.5 ;
