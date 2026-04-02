@@ -649,6 +649,14 @@ try {
                     }
                     break;
 
+                case 'createByProcess':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->storeByProcess();
+                    } else {
+                        $controller->createByProcess();
+                    }
+                    break;
+
                 case 'edit':
                     $controller->edit();
                     break;
@@ -734,6 +742,32 @@ try {
                     } else {
                         http_response_code(405);
                         echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'refreshProcessesSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshProcessesSelect();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'getProcessTasksJson':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->getProcessTasksJson();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'storeByProcess':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->storeByProcess();
+                    } else {
+                        Security::redirect(AppConstants::ROUTE_TASKS . '/createByProcess');
                     }
                     break;
 
@@ -988,7 +1022,7 @@ try {
                     break;
             }
             break;
-		
+
         case 'user':
             // Redireccionar las rutas /user/{id} a las rutas estándar
             if ($action) {

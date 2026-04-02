@@ -125,11 +125,17 @@ $processTasks = $data['processTasks'] ?? [];
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 position-relative">
                                             <label for="task_search" class="form-label">Buscar Tarea</label>
                                             <input type="text" class="form-control" id="task_search"
-                                                placeholder="Escriba para buscar tareas..." autocomplete="off">
-                                            <div id="taskSearchResults" class="task-search-results list-group position-absolute w-100 mt-1 d-none z-3"></div>
+                                                placeholder="Buscar o seleccionar tarea..."
+                                                autocomplete="on" role="combobox"
+                                                aria-expanded="false"
+                                                aria-controls="taskSearchResults">
+                                            <div id="taskSearchResults"
+                                                class="task-search-results list-group position-absolute w-100 mt-1 d-none"
+                                                style="z-index: 1050;">
+                                            </div>
                                         </div>
                                         <div class="col-md-2">
                                             <label for="tarea_hh" class="form-label">

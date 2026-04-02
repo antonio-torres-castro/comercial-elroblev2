@@ -255,11 +255,15 @@ function renderProcessTasksTable() {
     
     if (processTasks.length === 0) {
         tbody.innerHTML = '';
-        noTasksMsg.classList.remove('d-none');
+        if (noTasksMsg!=null) {
+            noTasksMsg.classList.remove('d-none');
+        }
         return;
     }
-    
-    noTasksMsg.classList.add('d-none');
+
+    if (noTasksMsg!=null) {
+            noTasksMsg.classList.add('d-none');
+    }
     
     tbody.innerHTML = processTasks.map(task => `
         <tr data-task-id="${task.tarea_id}" data-hh="${task.hh}">

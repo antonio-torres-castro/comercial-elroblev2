@@ -59,9 +59,15 @@ use App\Constants\AppConstants; ?>
                     <?php endif; ?>
 
                     <?php if ($_GET['show_btn_nuevo']): ?>
-                        <div class="<?= $_GET['show_btn_aprobar'] ? "col-md-2" : "col-md-6" ?> text-end">
+                        <div class="<?= $_GET['show_btn_aprobar'] ? "col-md-1" : "col-md-6" ?> text-end">
                             <a href="<?= AppConstants::ROUTE_TASKS ?>/create" class="btn btn-setap-primary">
                                 <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_TASK ?>
+                            </a>
+                        </div>
+
+                        <div class="<?= $_GET['show_btn_aprobar'] ? "col-md-1" : "col-md-6" ?> text-end">
+                            <a href="<?= AppConstants::ROUTE_TASKS_CREATE_BY_PROCESS ?>/create" class="btn btn-setap-primary">
+                                <i class="bi bi-plus-lg"></i> <?= AppConstants::UI_NEW_PROCESS ?>
                             </a>
                         </div>
                     <?php endif; ?>

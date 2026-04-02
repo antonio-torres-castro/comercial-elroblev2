@@ -1597,11 +1597,20 @@ class Task
     {
         try {
             $params = [];
+
+            $strWhere = " WHERE t.estado_tipo_id = 2";
+
             // Filtro por proveedor
             if (!empty($filters['proveedor_id'])) {
-                $strWhere = " AND t.proveedor_id = :proveedor_id";
+                $strWhere .= " AND t.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $filters['proveedor_id'];
             }
+            // Filtro por categoria
+            if (!empty($filters['categoria_id'])) {
+                $strWhere .= " AND t.tarea_categoria_id = :categoria_id";
+                $params[':categoria_id'] = $filters['categoria_id'];
+            }
+
 
             $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, 
             t.fecha_Creado, t.fecha_modificacion, 
@@ -1862,7 +1871,7 @@ class Task
 
             $strJoinUsuariosProyectos = " INNER JOIN proyecto_usuarios_grupo pug ON u.id = pug.usuario_id ";
 
-            $sql = "SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
+            $sql = "SELECT Distinct u.id, u.nombre_usuario, p.nombre as nombre_completo
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 $strJoinUsuariosProyectos
@@ -1886,21 +1895,37 @@ class Task
     {
         try {
             $params = [];
+            $strAndWhere = "";
 
-            $sql = "SELECT u.id, u.nombre_usuario, p.nombre as nombre_completo
+            if (!empty($filters['proveedor_id'])) {
+                $strAndWhere .= " AND u.proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
+            if (!empty($filters['proyecto_id'])) {
+                $strAndWhere .= " AND pug.proyecto_id = :proyecto_id";
+                $params[':proyecto_id'] = $filters['proyecto_id'];
+            }
+
+            $strJoinUsuariosProyectos = "";
+            if (!empty($filters['proyecto_id'])) {
+                $strJoinUsuariosProyectos = " INNER JOIN proyecto_usuarios_grupo pug ON u.id = pug.usuario_id ";
+            }
+
+            $sql = "SELECT Distinct u.id, u.nombre_usuario, p.nombre as nombre_completo
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
-                WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 3 and u.proveedor_id = :proveedor_id
+                $strJoinUsuariosProyectos
+                WHERE u.estado_tipo_id = 2 and u.usuario_tipo_id = 3
+                $strAndWhere
                 ORDER BY p.nombre
             ";
-
-            $params[':proveedor_id'] = $filters['proveedor_id'] ?? null;
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            Logger::error("Task::getUsers: " . $e->getMessage());
+            Logger::error("Task::getSupervisorUsers: " . $e->getMessage());
             return [];
         }
     }

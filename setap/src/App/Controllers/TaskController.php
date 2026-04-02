@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Task;
+use App\Models\Process;
 use App\Services\PermissionService;
 use App\Middlewares\AuthMiddleware;
 use App\Helpers\Security;
@@ -15,6 +16,7 @@ use RuntimeException;
 class TaskController extends BaseController
 {
     private $taskModel;
+    private $processModel;
     private $permissionService;
 
     public function __construct()
@@ -22,6 +24,7 @@ class TaskController extends BaseController
         // Verificar autenticación
         (new AuthMiddleware())->handle();
         $this->taskModel = new Task();
+        $this->processModel = new Process();
         $this->permissionService = new PermissionService();
     }
 
@@ -756,6 +759,211 @@ class TaskController extends BaseController
     }
 
     /**
+     * Mostrar formulario de creación por proceso
+     */
+    public function createByProcess()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+            $filters['contraparte_id'] = $contraparteId;
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
+            $proveedor_id = isset($_POST['proveedor_id']) && !empty($_POST['proveedor_id']) ? (int)$_POST['proveedor_id'] : 0;
+            $proveedor_id = isset($_GET['proveedor_id']) && !empty($_GET['proveedor_id']) ? (int)$_GET['proveedor_id'] : $proveedor_id;
+            if ($proveedor_id > 0) {
+                $filters['proveedor_id'] = $proveedor_id;
+            }
+
+            $suppliers = $this->taskModel->getSuppliers($filters);
+
+            if ($uti == 1 && ($suppliers[0]['id'] ?? 0) > 0) {
+                $provider_id = $suppliers[0]['id'];
+            } else {
+                $provider_id = $currentUser['proveedor_id'];
+            }
+            $filters['proveedor_id'] = $provider_id;
+
+            $processes = $this->processModel->getByProvider($provider_id);
+
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $project_id = isset($_POST['proyecto_id']) && !empty($_POST['proyecto_id']) ? (int)$_POST['proyecto_id'] : 0;
+            $project_id = isset($_GET['project_id']) && !empty($_GET['project_id']) ? (int)$_GET['project_id'] : $project_id;
+            if ($project_id > 0) {
+                $projects = $this->taskModel->getProjectById($project_id);
+            } else {
+                $projects = $this->taskModel->getProjects($filters);
+                if (count($projects) == 1) {
+                    $project_id = $projects[0]['id'];
+                }
+            }
+
+            $supervisors = $this->taskModel->getSupervisorUsers($filters);
+            $supervisorId = 0;
+            if (count($supervisors) == 1) {
+                $supervisorId = $supervisors[0]['id'];
+            }
+
+
+
+            $data = [
+                'user' => $currentUser,
+                'title' => 'Asignar Proceso a Proyecto',
+                'subtitle' => 'Asignar',
+                'suppliers' => $suppliers,
+                'projects' => $projects,
+                'processes' => $processes,
+                'supervisor_users' => $supervisors,
+                'taskStates' => $this->taskModel->getTaskStatesForCreate(),
+                'project_id' => $project_id,
+                'provider_id' => $provider_id,
+                'error' => $_GET['error'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/tasks/create-task-by-process.php';
+        } catch (Exception $e) {
+            Logger::error("TaskController::createByProcess: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    /**
+     * AJAX para obtener tareas de un proceso
+     */
+    public function getProcessTasksJson()
+    {
+        try {
+            $processId = (int)($_GET['process_id'] ?? 0);
+            if ($processId <= 0) {
+                $this->jsonError('Proceso inválido');
+                return;
+            }
+            $tasks = $this->processModel->getProcessTasks($processId);
+            $this->jsonSuccess('Tareas cargadas', ['tasks' => $tasks]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::getProcessTasksJson: " . $e->getMessage());
+            $this->jsonError('Error al obtener tareas del proceso');
+        }
+    }
+
+    /**
+     * Guardar tareas por proceso
+     */
+    public function storeByProcess()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $this->redirectToRoute(AppConstants::ROUTE_TASKS);
+                return;
+            }
+            // Verificar CSRF
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                Security::redirect("/tasks/createByProcess?error=" . urlencode('Token de seguridad inválido'));
+                return;
+            }
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+            // Verificar permisos
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_task')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $processId = (int)($_POST['proceso_id'] ?? 0);
+            $projectId = (int)($_POST['proyecto_id'] ?? 0);
+
+            if ($processId <= 0 || $projectId <= 0) {
+                Security::redirect("/tasks/createByProcess?error=" . urlencode('Proceso y Proyecto son obligatorios'));
+                return;
+            }
+
+            $processTasks = $this->processModel->getProcessTasks($processId);
+            if (empty($processTasks)) {
+                Security::redirect("/tasks/createByProcess?error=" . urlencode('El proceso no tiene tareas asociadas'));
+                return;
+            }
+
+            $tipoOcurr = $_POST['optionOcurrencia'];
+            $fechaInicio = "";
+            $fechaFin = "";
+            if ($tipoOcurr == '1') {
+                $fechaInicio = $_POST['fecha_inicio_masivo'];
+                $fechaFin = $_POST['fecha_fin_masivo'];
+            } elseif ($tipoOcurr == '2') {
+                $fechaInicio = $_POST['fecha_especifica_inicio'];
+                $fechaFin = $_POST['fecha_especifica_fin'] ?? $_POST['fecha_especifica_inicio'];
+            } elseif ($tipoOcurr == '3') {
+                $fechaInicio = $_POST['fecha_inicio_rango'];
+                $fechaFin = $_POST['fecha_fin_rango'];
+            } elseif ($tipoOcurr == '4') {
+                $fechaInicio = $_POST['fecha_inicio_intervalo'];
+                $fechaFin = $_POST['fecha_fin_intervalo'];
+            }
+
+            $countSuccess = 0;
+            $countTotal = count($processTasks);
+
+            foreach ($processTasks as $pTask) {
+                $taskData = [
+                    'proyecto_id' => $projectId,
+                    'tarea_id' => $pTask['tarea_id'],
+                    'planificador_id' => $currentUser['id'],
+                    'ejecutor_id' => null, // No se asigna ejecutor aquí
+                    'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
+                    'fecha_inicio' => $fechaInicio,
+                    'duracion_horas' => (float)$pTask['duracion_horas'],
+                    'fecha_fin' => $fechaFin,
+                    'prioridad' => 5, // Default "5 - Media"
+                    'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2), // Default "Activo"
+                    'tipo_ocurrencia' => $tipoOcurr,
+                    'dias_semana' => $_POST['dias'] ?? [],
+                    'intervalo_dias' => (int)($_POST['intervalo_dias'] ?? 0),
+                    'duracion_bloque_dias' => (int)($_POST['duracion_bloque_dias'] ?? 0),
+                    'dias_semana_intervalo' => $_POST['dias_intervalo'] ?? [],
+                    'ajustar_feriados' => !empty($_POST['ajustar_feriados']) ? 1 : 0
+                ];
+
+                if ($this->taskModel->create($taskData)) {
+                    $countSuccess++;
+                }
+            }
+
+            if ($countSuccess > 0) {
+                Security::redirect("/tasks?success=Se asignaron $countSuccess de $countTotal tareas del proceso correctamente");
+            } else {
+                Security::redirect("/tasks/createByProcess?error=Error al asignar las tareas del proceso");
+            }
+        } catch (Exception $e) {
+            Logger::error("TaskController::storeByProcess: " . $e->getMessage());
+            Security::redirect("/tasks/createByProcess?error=Error interno del servidor");
+        }
+    }
+
+    /**
      * Guardar nueva tarea
      */
     public function store()
@@ -1348,7 +1556,7 @@ class TaskController extends BaseController
     }
 
     /**
-     * Cargar supervisores por proveedor (JSON)
+     * Cargar supervisores por proveedor o proyecto (JSON)
      */
     public function refreshSupervisorSelect()
     {
@@ -1360,8 +1568,10 @@ class TaskController extends BaseController
             }
 
             $uti = $currentUser['usuario_tipo_id'];
-
             $idProveedor = isset($_GET['proveedor_id']) ? (int)$_GET['proveedor_id'] : 0;
+            $idProyecto = isset($_GET['proyecto_id']) ? (int)$_GET['proyecto_id'] : 0;
+
+            $filters = [];
 
             if ($uti > 1) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
@@ -1371,11 +1581,49 @@ class TaskController extends BaseController
                 }
             }
 
+            if ($idProyecto > 0) {
+                $filters['proyecto_id'] = $idProyecto;
+            }
+
             $supervisors = $this->taskModel->getSupervisorUsers($filters);
             $this->jsonSuccess('Supervisores cargados correctamente', ['supervisors' => $supervisors]);
         } catch (Exception $e) {
             Logger::error("TaskController::refreshSupervisorSelect: " . $e->getMessage());
             $this->jsonError('Error al cargar supervisores', [], 500);
+        }
+    }
+
+    /**
+     * Cargar procesos por proveedor (JSON)
+     */
+    public function refreshProcessesSelect()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $idProveedor = isset($_GET['proveedor_id']) ? (int)$_GET['proveedor_id'] : 0;
+
+            if ($uti > 1) {
+                $providerId = $currentUser['proveedor_id'];
+            } else {
+                $providerId = $idProveedor;
+            }
+
+            if ($providerId <= 0) {
+                $this->jsonSuccess('Proveedor no especificado', ['processes' => []]);
+                return;
+            }
+
+            $processes = $this->processModel->getByProvider($providerId);
+            $this->jsonSuccess('Procesos cargados correctamente', ['processes' => $processes]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::refreshProcessesSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar procesos', [], 500);
         }
     }
 

@@ -71,6 +71,9 @@ class AppConstants
     /** Ruta de edición de tarea */
     const ROUTE_TASKS_EDIT = '/setap/tasks/edit';
 
+    /** Ruta de creación de tareas por proceso */
+    const ROUTE_TASKS_CREATE_BY_PROCESS = '/setap/tasks/createByProcess';
+
     /** Ruta base de personas */
     const ROUTE_PERSONAS = '/setap/personas';
 
@@ -631,7 +634,10 @@ class AppConstants
     const UI_PROJECT_TASK = 'Proyecto Tarea';
 
     /** Nueva Tarea */
-    const UI_NEW_TASK = 'Nueva Tarea';
+    const UI_NEW_TASK = 'Tarea';
+
+    /** Nueva Tarea */
+    const UI_NEW_PROCESS = 'Proceso';
 
     /** Nueva Tarea Tipo */
     const UI_NEW_TASK_TYPE = 'Nueva Tarea Tipo';

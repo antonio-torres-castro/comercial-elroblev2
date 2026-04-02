@@ -276,7 +276,7 @@ class ProcessController extends BaseController
                 ]);
                 return;
             }
-
+            //No podemos determinar el success con el conteo de modificados por que el MySQL no se modifica si no hay diferencias
             $success = $this->processModel->update($id, $_POST);
 
             // Actualizar las tareas del proceso

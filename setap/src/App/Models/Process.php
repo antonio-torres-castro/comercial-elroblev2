@@ -159,7 +159,7 @@ class Process
                 $id
             ]);
 
-            return $result && $stmt->rowCount() > 0;
+            return $result;
         } catch (Exception $e) {
             Logger::error("Process::update: " . $e->getMessage());
             throw new Exception("Error al actualizar el proceso");
