@@ -937,7 +937,7 @@ class TaskController extends BaseController
                     'fecha_inicio' => $fechaInicio,
                     'duracion_horas' => (float)$pTask['duracion_horas'],
                     'fecha_fin' => $fechaFin,
-                    'prioridad' => 5, // Default "5 - Media"
+                    'prioridad' => $pTask['prioridad'] ?? 5, // Default "5 - Media"
                     'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2), // Default "Activo"
                     'tipo_ocurrencia' => $tipoOcurr,
                     'dias_semana' => $_POST['dias'] ?? [],
