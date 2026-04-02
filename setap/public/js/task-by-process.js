@@ -46,30 +46,121 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. Ver tareas del proceso en el modal
     if (btnVerTareas) {
         btnVerTareas.addEventListener('click', function () {
+
             const processId = procesoSelect.value;
-            taskList.innerHTML = '<li class="list-group-item text-center">Cargando tareas...</li>';
+
+            // Estado de carga
+            taskList.innerHTML = `
+                <div class="text-center p-2">Cargando tareas...</div>
+            `;
 
             fetch(`/setap/tasks/getProcessTasksJson?process_id=${processId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        taskList.innerHTML = '';
-                        if (data.tasks && data.tasks.length > 0) {
-                            data.tasks.forEach(task => {
-                                const li = document.createElement('li');
-                                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                                li.innerHTML = `<span>${task.tarea_nombre}</span> <span class="badge bg-primary rounded-pill">${task.hh}h</span>`;
-                                taskList.appendChild(li);
-                            });
-                        } else {
-                            taskList.innerHTML = '<li class="list-group-item text-center">No hay tareas asociadas</li>';
-                        }
-                    } else {
-                        taskList.innerHTML = `<li class="list-group-item text-danger text-center">${data.message}</li>`;
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error HTTP: ' + response.status);
                     }
+                    return response.json();
+                })
+                .then(data => {
+
+                    if (!data.success) {
+                        throw new Error(data.message || 'Error en la respuesta del servidor');
+                    }
+
+                    const tasks = data.tasks || [];
+
+                    if (tasks.length === 0) {
+                        taskList.innerHTML = `
+                            <div class="text-center p-2">No hay tareas asociadas</div>
+                        `;
+                        return;
+                    }
+
+                    // =========================
+                    // Helpers
+                    // =========================
+                    const getPrioridadTexto = (valor) => {
+                        switch (parseInt(valor)) {
+                            case 0: return 'Baja';
+                            case 3: return 'Normal';
+                            case 5: return 'Media';
+                            case 7: return 'Alta';
+                            case 10: return 'Crítica';
+                            default: return 'Desconocida';
+                        }
+                    };
+
+                    const getPrioridadBadge = (valor) => {
+                        switch (parseInt(valor)) {
+                            case 0: return 'bg-success';   // Baja
+                            case 3: return 'bg-primary';   // Normal
+                            case 5: return 'bg-info';      // Media
+                            case 7: return 'bg-warning';   // Alta
+                            case 10: return 'bg-danger';   // Crítica
+                            default: return 'bg-secondary';
+                        }
+                    };
+
+                    // =========================
+                    // Construcción tabla
+                    // =========================
+                    let totalHH = 0;
+
+                    let html = `
+                        <div class="table-responsive" style="max-height: 50vh; overflow-y: auto;">
+                            <table class="table table-sm table-bordered table-hover align-middle mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th class="text-center">HH</th>
+                                        <th class="text-center">Prioridad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    tasks.forEach(task => {
+                        const hh = parseFloat(task.hh) || 0;
+                        totalHH += hh;
+
+                        html += `
+                            <tr>
+                                <td>${task.tarea_nombre}</td>
+                                <td class="text-center">${hh}</td>
+                                <td class="text-center">
+                                    <span class="badge ${getPrioridadBadge(task.prioridad)}">
+                                        ${getPrioridadTexto(task.prioridad)}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    // Footer con total HH
+                    html += `
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-center">${totalHH}</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    `;
+
+                    taskList.innerHTML = html;
+
                 })
                 .catch(error => {
-                    taskList.innerHTML = '<li class="list-group-item text-danger text-center">Error al cargar tareas</li>';
+                    console.error('Error al cargar tareas:', error);
+
+                    taskList.innerHTML = `
+                        <div class="text-danger text-center p-2">
+                            ${error.message || 'Error al cargar tareas'}
+                        </div>
+                    `;
                 });
         });
     }
