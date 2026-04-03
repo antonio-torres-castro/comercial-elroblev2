@@ -2,7 +2,7 @@ let taskToDelete = null;
 let taskToChangeState = null;
 
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const estadoTipoSelect = document.getElementById('estado_tipo_id');
 
     const choices = new Choices(estadoTipoSelect, {
@@ -82,7 +82,7 @@ function confirmStateChange(taskId, newStateId, newStateName) {
 }
 
 // GAP 5: Ejecutar cambio de estado
-document.getElementById('confirmChangeState').addEventListener('click', function () {
+document.getElementById('confirmChangeState').addEventListener('click', function() {
     const formData = new FormData(document.getElementById('changeStateForm'));
 
     fetch('/setap/tasks/change-state', {
@@ -172,7 +172,7 @@ function deleteTask(id, name, stateId) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 
-document.getElementById('confirmDelete').addEventListener('click', function () {
+document.getElementById('confirmDelete').addEventListener('click', function() {
     if (taskToDelete) {
         const formData = new FormData();
         formData.append('id', taskToDelete);
@@ -245,7 +245,7 @@ function confirmStateChangeForSelectedRows(nStateId) {
 }
 
 // GAP 5: Ejecutar cambio de estado
-document.getElementById('confirmChangeStateFSR').addEventListener('click', function () {
+document.getElementById('confirmChangeStateFSR').addEventListener('click', function() {
     const form = document.getElementById('changeStateFormFSR');
     const formData = new FormData(form);
 
@@ -341,7 +341,7 @@ const proyectoSelect = document.getElementById('proyecto_id');
 let debounceTimer;
 
 if (taskInput) {
-    taskInput.addEventListener('input', function () {
+    taskInput.addEventListener('input', function() {
         clearTimeout(debounceTimer);
         const term = this.value.trim();
 
@@ -392,7 +392,7 @@ if (taskInput) {
     });
 
     // Cerrar resultados al hacer click fuera
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         if (!taskInput.contains(e.target) && !resultsContainer.contains(e.target)) {
             resultsContainer.classList.add('d-none');
         }
