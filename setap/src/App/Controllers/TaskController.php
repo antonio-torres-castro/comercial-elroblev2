@@ -112,7 +112,7 @@ class TaskController extends BaseController
 
             if ($uti > 1 && isset($currentUser['proveedor_id'])) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
-            } elseif ($uti == 1 && isset($_GET['proyecto_id'])) {
+            } elseif ($uti == 1 && isset($_GET['proveedor_id']) && !empty($_GET['proveedor_id'])) {
                 $filters['proveedor_id'] = $_GET['proveedor_id'];
             }
 
@@ -129,6 +129,10 @@ class TaskController extends BaseController
 
             if (!empty($_GET['excluye_no_asignados'])) {
                 $filters['excluye_no_asignados'] = $_GET['excluye_no_asignados'];
+            }
+
+            if (!empty($_GET['tarea_nombre'])) {
+                $filters['tarea_nombre'] = $_GET['tarea_nombre'];
             }
 
             $users = $this->taskModel->getExecutorUsers($filters);
@@ -1737,6 +1741,46 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             Logger::error("TaskController::refreshProcessesSelect: " . $e->getMessage());
             $this->jsonError('Error al cargar procesos', [], 500);
+        }
+    }
+
+    /**
+     * Buscar tareas para autocompletar (JSON)
+     */
+    public function searchTasksAutocomplete()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->jsonUnauthorized();
+                return;
+            }
+
+            $term = $_GET['term'] ?? '';
+            if (strlen($term) < 2) {
+                $this->jsonSuccess('Término muy corto', ['tasks' => []]);
+                return;
+            }
+
+            $filters = [
+                'current_usuario_tipo_id' => $currentUser['usuario_tipo_id'],
+                'current_usuario_id' => $currentUser['id'],
+                'term' => $term
+            ];
+
+            // Aplicar filtros adicionales de la URL si existen
+            if (!empty($_GET['proyecto_id'])) $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
+            if (!empty($_GET['proveedor_id'])) $filters['proveedor_id'] = (int)$_GET['proveedor_id'];
+            if (!empty($_GET['fecha_inicio'])) $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            if (!empty($_GET['fecha_fin'])) $filters['fecha_fin'] = $_GET['fecha_fin'];
+            if (!empty($_GET['usuario_id']) && $_GET['usuario_id'] != -1) $filters['usuario_id'] = (int)$_GET['usuario_id'];
+            if (isset($_GET['excluye_eliminados']) && $_GET['excluye_eliminados'] == 1) $filters['excluye_eliminados'] = 1;
+
+            $tasks = $this->taskModel->searchAutocomplete($filters);
+            $this->jsonSuccess('Tareas encontradas', ['tasks' => $tasks]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::searchTasksAutocomplete: " . $e->getMessage());
+            $this->jsonError('Error al buscar tareas', [], 500);
         }
     }
 

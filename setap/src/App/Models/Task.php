@@ -130,6 +130,11 @@ class Task
                 $params[] = $filters['fecha_fin'];
             }
 
+            if (isset($filters['tarea_nombre']) && !empty($filters['tarea_nombre'])) {
+                $strWhere .= " AND t.nombre LIKE ?";
+                $params[] = "%" . $filters['tarea_nombre'] . "%";
+            }
+
             $sql .= $strWhere;
             $sql .= " ORDER BY pt.fecha_inicio DESC";
 
@@ -247,6 +252,11 @@ class Task
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
                 $strWhere .= " AND pt.fecha_inicio <= ?";
                 $params[] = $filters['fecha_fin'];
+            }
+
+            if (isset($filters['tarea_nombre']) && !empty($filters['tarea_nombre'])) {
+                $strWhere .= " AND t.nombre LIKE ?";
+                $params[] = "%" . $filters['tarea_nombre'] . "%";
             }
 
             $sql .= $strWhere;
@@ -1083,6 +1093,68 @@ class Task
         }
     }
 
+
+    /**
+     * Buscar tareas para autocompletar con filtros
+     */
+    public function searchAutocomplete(array $filters): array
+    {
+        try {
+            $cu = $filters['current_usuario_id'];
+            $term = $filters['term'];
+            $params = [];
+
+            $sql = "SELECT DISTINCT t.nombre as label
+                    FROM proyecto_tareas pt
+                    INNER JOIN tareas t ON pt.tarea_id = t.id
+                    INNER JOIN proyectos p ON pt.proyecto_id = p.id
+                    WHERE t.nombre LIKE ? 
+                    AND EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug 
+                                WHERE pug.proyecto_id = p.id 
+                                AND pug.usuario_id = ? 
+                                AND pug.estado_tipo_id = 2 
+                                AND pug.grupo_id BETWEEN 1 AND 5)";
+
+            $params[] = "%$term%";
+            $params[] = $cu;
+
+            if (!empty($filters['proyecto_id'])) {
+                $sql .= " AND pt.proyecto_id = ?";
+                $params[] = $filters['proyecto_id'];
+            }
+
+            if (!empty($filters['proveedor_id'])) {
+                $sql .= " AND p.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
+            if (!empty($filters['usuario_id'])) {
+                $sql .= " AND (pt.ejecutor_id = ? OR pt.planificador_id = ? OR pt.supervisor_id = ?)";
+                $params[] = $filters['usuario_id'];
+                $params[] = $filters['usuario_id'];
+                $params[] = $filters['usuario_id'];
+            }
+
+            if (!empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
+                $sql .= " AND pt.fecha_inicio BETWEEN ? AND ?";
+                $params[] = $filters['fecha_inicio'];
+                $params[] = $filters['fecha_fin'];
+            }
+
+            if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
+                $sql .= " AND pt.estado_tipo_id != 4";
+            }
+
+            $sql .= " ORDER BY t.nombre LIMIT 15";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::searchAutocomplete: " . $e->getMessage());
+            return [];
+        }
+    }
 
     /**
      * Obtener tarea por ID

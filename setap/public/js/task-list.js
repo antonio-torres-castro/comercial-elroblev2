@@ -82,13 +82,13 @@ function confirmStateChange(taskId, newStateId, newStateName) {
 }
 
 // GAP 5: Ejecutar cambio de estado
-document.getElementById('confirmChangeState').addEventListener('click', function() {
+document.getElementById('confirmChangeState').addEventListener('click', function () {
     const formData = new FormData(document.getElementById('changeStateForm'));
 
     fetch('/setap/tasks/change-state', {
-            method: 'POST',
-            body: formData
-        })
+        method: 'POST',
+        body: formData
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -172,7 +172,7 @@ function deleteTask(id, name, stateId) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 
-document.getElementById('confirmDelete').addEventListener('click', function() {
+document.getElementById('confirmDelete').addEventListener('click', function () {
     if (taskToDelete) {
         const formData = new FormData();
         formData.append('id', taskToDelete);
@@ -180,12 +180,12 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
         formData.append('delete_all_occurrences', deleteAllOccurrences);
 
         fetch('/setap/tasks/delete', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -245,7 +245,7 @@ function confirmStateChangeForSelectedRows(nStateId) {
 }
 
 // GAP 5: Ejecutar cambio de estado
-document.getElementById('confirmChangeStateFSR').addEventListener('click', function() {
+document.getElementById('confirmChangeStateFSR').addEventListener('click', function () {
     const form = document.getElementById('changeStateFormFSR');
     const formData = new FormData(form);
 
@@ -253,30 +253,30 @@ document.getElementById('confirmChangeStateFSR').addEventListener('click', funct
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const newStateId = formData.get('new_state');
-            const updatedIds = Array.isArray(data.updated_ids) ? data.updated_ids : [];
-            updatedIds.forEach(id => {
-                updateStatusBadge(id, newStateId);
-                const row = document.getElementById(`task-row-${id}`);
-                if (row) row.classList.remove('table-active');
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const newStateId = formData.get('new_state');
+                const updatedIds = Array.isArray(data.updated_ids) ? data.updated_ids : [];
+                updatedIds.forEach(id => {
+                    updateStatusBadge(id, newStateId);
+                    const row = document.getElementById(`task-row-${id}`);
+                    if (row) row.classList.remove('table-active');
+                });
 
-            showAlert(data.message || 'Tareas aprobadas', 'success');
-            const modalEl = document.getElementById('changeStateFSRModal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
-            form.reset();
-        } else {
-            showAlert('Error: ' + (data.message || 'No fue posible aprobar las tareas'), 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('Error de conexión al servidor', 'danger');
-    });
+                showAlert(data.message || 'Tareas aprobadas', 'success');
+                const modalEl = document.getElementById('changeStateFSRModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                form.reset();
+            } else {
+                showAlert('Error: ' + (data.message || 'No fue posible aprobar las tareas'), 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error de conexión al servidor', 'danger');
+        });
 });
 
 function refreshTasksTableAjax() {
@@ -333,3 +333,68 @@ setInterval(() => {
         __inactiveList = true;
     }
 }, 5000);
+
+// Autocompletado de tareas
+const taskInput = document.getElementById('task_autocomplete');
+const resultsContainer = document.getElementById('autocomplete_results');
+const proyectoSelect = document.getElementById('proyecto_id');
+let debounceTimer;
+
+if (taskInput) {
+    taskInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        const term = this.value.trim();
+
+        if (term.length < 2) {
+            resultsContainer.classList.add('d-none');
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            const form = document.getElementById('getFormFilter');
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            params.set('term', term); // El controlador espera 'term' para la búsqueda AJAX
+
+            fetch(`/setap/tasks/searchTasksAutocomplete?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.tasks.length > 0) {
+                        resultsContainer.innerHTML = '';
+                        data.tasks.forEach(task => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.innerHTML = `
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">${task.label}</h6>
+                                        <small>${task.fecha_inicio}</small>
+                                    </div>
+                                `;
+                            item.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                // Al seleccionar una tarea de la lista:
+                                // 1. Ponemos el nombre en el input
+                                taskInput.value = task.label;
+                                // 2. Ocultamos los resultados
+                                resultsContainer.classList.add('d-none');
+                                // 3. Enviamos el formulario para que se apliquen TODOS los filtros
+                                form.submit();
+                            });
+                            resultsContainer.appendChild(item);
+                        });
+                        resultsContainer.classList.remove('d-none');
+                    } else {
+                        resultsContainer.classList.add('d-none');
+                    }
+                });
+        }, 300);
+    });
+
+    // Cerrar resultados al hacer click fuera
+    document.addEventListener('click', function (e) {
+        if (!taskInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+            resultsContainer.classList.add('d-none');
+        }
+    });
+};
