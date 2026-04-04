@@ -1922,6 +1922,42 @@ class Task
     }
 
     /**
+     * Obtener usuarios disponibles para HH y tomar tareas
+     */
+    public function getHhUsersProyecto(?array $filters = []): array
+    {
+        try {
+            $params = [];
+
+            $strAndWhere = "";
+
+            if (!empty($filters['proveedor_id'])) {
+                $strAndWhere = " AND u.proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
+            if (!empty($filters['proyecto_id'])) {
+                $strAndWhere .= " AND pug.proyecto_id = :proyecto_id";
+                $params[':proyecto_id'] = $filters['proyecto_id'];
+            }
+
+            $sql = "SELECT usuario_id, u.nombre_usuario, p.nombre, pug.hh
+                        FROM proyecto_usuarios_grupo pug
+                    INNER JOIN usuarios u ON u.id = pug.usuario_id
+                    INNER JOIN personas p ON p.id = u.persona_id
+                    WHERE pug.estado_tipo_id = 2
+                    AND pug.grupo_id = 4
+                    $strAndWhere ;";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getHhUsersProyecto: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtener usuarios disponibles para asignación
      */
     public function getExecutorUsers(?array $filters = []): array

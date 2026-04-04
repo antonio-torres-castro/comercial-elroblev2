@@ -42,7 +42,13 @@ use App\Constants\AppConstants; ?>
                     </div>
                     <div class="col-md-2">
                         <h4>
-                            <span class="badge bg-secondary ms-1"><?= $data['hh'] ?> HH Capacidad Diaria</span>
+                            <button type="button" class="badge bg-secondary ms-1 border-0"
+                                data-bs-toggle="modal"
+                                data-bs-target="#hHpersonasModal"
+                                style="cursor: pointer;">
+                                <?= $data['hh'] ?> HH Estandar Diaria
+                            </button>
+                            <!-- <span class="badge bg-secondary ms-1"><?= $data['hh'] ?> HH Estandard Diaria</span> -->
                         </h4>
                     </div>
                 </div>
@@ -281,6 +287,46 @@ use App\Constants\AppConstants; ?>
                         </div>
                     </div>
                 </div>
+
+                <div class="modal fade" id="hHpersonasModal" tabindex="-1">
+                    <div class="modal-dialog modal-small">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Colaboradores disponibles</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Usuario</th>
+                                                <th>Nombre</th>
+                                                <th>Horas</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="hHpersonasModalBody">
+                                            <?php if (!empty($data['userHh'])): ?>
+                                                <?php foreach ($data['userHh'] as $hh): ?>
+                                                    <tr>
+                                                        <td><?= htmlspecialchars($hh['nombre_usuario']) ?></td>
+                                                        <td><?= htmlspecialchars($hh['nombre']) ?></td>
+                                                        <td><?= number_format((float)($hh['hh'] ?? 0), 2, ',', '.') ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted">Seleccione un periodo</td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
