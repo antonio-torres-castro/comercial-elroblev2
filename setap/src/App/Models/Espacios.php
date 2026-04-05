@@ -142,18 +142,19 @@ class Espacios
         try {
             $sql = "SELECT COUNT(*) FROM espacios 
                     WHERE direccion_id = :direccion_id 
-                    AND (espacio_padre_id = :espacio_padre_id OR (espacio_padre_id IS NULL AND :espacio_padre_id IS NULL))
                     AND nombre = :nombre 
                     AND codigo = :codigo 
                     AND nivel = :nivel";
 
-            $params = [
-                ':direccion_id' => $data['direccion_id'],
-                ':espacio_padre_id' => $data['espacio_padre_id'],
-                ':nombre' => $data['nombre'],
-                ':codigo' => $data['codigo'],
-                ':nivel' => $data['nivel']
-            ];
+            $params[':direccion_id'] = $data['direccion_id'];
+            $params[':nombre'] = $data['nombre'];
+            $params[':codigo'] = $data['codigo'];
+            $params[':nivel'] = $data['nivel'];
+
+            if (isset($data['espacio_padre_id'])) {
+                $sql .= " AND espacio_padre_id = :espacio_padre_id";
+                $params[':espacio_padre_id'] = $data['espacio_padre_id'];
+            }
 
             if (isset($data['id'])) {
                 $sql .= " AND id != :id";
@@ -192,7 +193,8 @@ class Espacios
     public function updateEspacio(array $data): bool
     {
         try {
-            $sql = "UPDATE espacios SET 
+            $sql = "UPDATE espacios SET";
+            $sql .= " direccion_id = :direccion_id, 
                     espacio_padre_id = :espacio_padre_id, 
                     nombre = :nombre, 
                     tipos_espacio_id = :tipos_espacio_id, 
@@ -201,8 +203,22 @@ class Espacios
                     nivel = :nivel, 
                     orden = :orden 
                     WHERE id = :id";
+
+            $param = [];
+
+            $param[':direccion_id'] = $data['direccion_id'];
+            $param[':espacio_padre_id'] = $data['espacio_padre_id'];
+            $param[':nombre'] = $data['nombre'];
+            $param[':tipos_espacio_id'] = $data['tipos_espacio_id'];
+            $param[':codigo'] = $data['codigo'];
+            $param[':descripcion'] = $data['descripcion'];
+            $param[':nivel'] = $data['nivel'];
+            $param[':orden'] = $data['orden'];
+            $param[':id'] = $data['id'];
+
+
             $stmt = $this->db->prepare($sql);
-            return $stmt->execute($data);
+            return $stmt->execute($param);
         } catch (PDOException $e) {
             Logger::error("Espacios::updateEspacio: " . $e->getMessage());
             return false;
