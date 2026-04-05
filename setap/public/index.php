@@ -17,6 +17,7 @@ use App\Controllers\SuppliersController;
 use App\Controllers\TaskController;
 use App\Controllers\ProcessController;
 use App\Controllers\ReportController;
+use App\Controllers\EspaciosController;
 use App\Controllers\GrupoTipoController;
 use App\Controllers\ProyectoFeriadoController;
 use App\Controllers\ProyectoColaboradoresController;
@@ -97,6 +98,10 @@ try {
             // Redirigir a la nueva ruta /home para compatibilidad
             header('Location: ' . AppConstants::ROUTE_HOME, true, 301);
             exit;
+
+        case 'reports':
+            $controller->reports();
+            break;
 
         case 'users':
             $controller = new UserController();
@@ -190,6 +195,36 @@ try {
 
                 case 'delete':
                     $controller->delete();
+                    break;
+
+                case 'espacios':
+                    $controllerEspacios = new EspaciosController();
+                    switch ($id) {
+                        case 'getDirecciones':
+                            $controllerEspacios->getDirecciones();
+                            break;
+                        case 'getEspacios':
+                            $controllerEspacios->getEspacios();
+                            break;
+                        case 'storeDireccion':
+                            $controllerEspacios->storeDireccion();
+                            break;
+                        case 'storeEspacio':
+                            $controllerEspacios->storeEspacio();
+                            break;
+                        case 'deleteEspacio':
+                            $controllerEspacios->deleteEspacio();
+                            break;
+                        case 'getProvincias':
+                            $controllerEspacios->getProvincias();
+                            break;
+                        case 'getComunas':
+                            $controllerEspacios->getComunas();
+                            break;
+                        default:
+                            $controllerEspacios->index();
+                            break;
+                    }
                     break;
 
                 case 'change-status':
