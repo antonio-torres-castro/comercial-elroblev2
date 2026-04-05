@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title><?= $data['title'] ?> - SETAP</title>
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
 
@@ -19,17 +21,17 @@
                 <!-- Filtros Principales -->
                 <div class="row g-3 mb-4">
                     <?php if ($data['user']['usuario_tipo_id'] == 1): ?>
-                    <div class="col-md-3">
-                        <label class="form-label">Proveedor</label>
-                        <select class="form-select" id="proveedor_id">
-                            <option value="">Seleccionar proveedor...</option>
-                            <?php foreach ($data['suppliers'] as $s): ?>
-                                <option value="<?= $s['id'] ?>" <?= ($data['provider_id'] == $s['id']) ? 'selected' : '' ?>><?= htmlspecialchars($s['nombre']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Proveedor</label>
+                            <select class="form-select" id="proveedor_id">
+                                <option value="">Seleccionar proveedor...</option>
+                                <?php foreach ($data['suppliers'] as $s): ?>
+                                    <option value="<?= $s['id'] ?>" <?= ($data['provider_id'] == $s['id']) ? 'selected' : '' ?>><?= htmlspecialchars($s['nombre']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     <?php endif; ?>
-                    
+
                     <div class="col-md-4">
                         <label class="form-label">Proyecto</label>
                         <select class="form-select" id="proyecto_id">
@@ -162,7 +164,7 @@
                                 <select class="form-select" name="tipos_espacio_id" id="tipos_espacio_id" required>
                                     <option value="">Seleccionar...</option>
                                     <?php foreach ($data['tiposEspacio'] as $te): ?>
-                                        <option value="<?= $te['id'] ?>"><?= htmlspecialchars($te['nombre']) ?></option>
+                                        <option value="<?= $te['id'] ?>"><?= htmlspecialchars($te['nombre']) ?> - <?= htmlspecialchars($te['descripcion']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -206,4 +208,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/setap/public/js/espacios.js"></script>
 </body>
+
 </html>

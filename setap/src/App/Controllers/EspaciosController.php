@@ -107,6 +107,27 @@ class EspaciosController extends BaseController
         }
     }
 
+    public function getEspacioById()
+    {
+        try {
+            $id = (int)($_GET['id'] ?? 0);
+            if ($id <= 0) {
+                echo json_encode(['success' => false, 'message' => 'ID no válido']);
+                return;
+            }
+
+            $espacio = $this->espaciosModel->getEspacioById($id);
+            if ($espacio) {
+                echo json_encode(['success' => true, 'data' => $espacio]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Espacio no encontrado']);
+            }
+        } catch (Exception $e) {
+            Logger::error("EspaciosController::getEspacioById: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error al obtener espacio']);
+        }
+    }
+
     /**
      * AJAX: Guardar nueva dirección
      */
@@ -114,7 +135,7 @@ class EspaciosController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Método no permitido");
-            
+
             $data = [
                 'proyecto_id' => (int)$_POST['proyecto_id'],
                 'calle' => $_POST['calle'],

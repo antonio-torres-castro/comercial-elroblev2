@@ -189,15 +189,15 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/setap/projects/espacios/getEspacioById?id=${id}`)
             .then(res => res.json())
             .then(res => {
-                if (res) {
-                    document.getElementById('espacio_id').value = res.id;
-                    document.getElementById('espacio_nombre').value = res.nombre;
-                    document.getElementById('tipos_espacio_id').value = res.tipos_espacio_id;
-                    document.getElementById('espacio_padre_id').value = res.espacio_padre_id || '';
-                    document.getElementById('espacio_codigo').value = res.codigo || '';
-                    document.getElementById('espacio_descripcion').value = res.descripcion || '';
-                    document.getElementById('espacio_nivel').value = res.nivel;
-                    document.getElementById('espacio_orden').value = res.orden;
+                if (res.data) {
+                    document.getElementById('espacio_id').value = res.data.id;
+                    document.getElementById('espacio_nombre').value = res.data.nombre;
+                    document.getElementById('tipos_espacio_id').value = res.data.tipos_espacio_id;
+                    document.getElementById('espacio_padre_id').value = res.data.espacio_padre_id || '';
+                    document.getElementById('espacio_codigo').value = res.data.codigo || '';
+                    document.getElementById('espacio_descripcion').value = res.data.descripcion || '';
+                    document.getElementById('espacio_nivel').value = res.data.nivel;
+                    document.getElementById('espacio_orden').value = res.data.orden;
                     new bootstrap.Modal(document.getElementById('modalEspacio')).show();
                 }
             });

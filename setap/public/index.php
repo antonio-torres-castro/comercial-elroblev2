@@ -206,6 +206,9 @@ try {
                         case 'getEspacios':
                             $controllerEspacios->getEspacios();
                             break;
+                        case 'getEspacioById':
+                            $controllerEspacios->getEspacioById();
+                            break;
                         case 'storeDireccion':
                             $controllerEspacios->storeDireccion();
                             break;
