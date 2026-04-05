@@ -40,10 +40,16 @@ class EspaciosController extends BaseController
 
             // Si es admin, puede ver proveedores para filtrar proyectos
             $suppliers = [];
+            $providerId = $_GET['proveedor_id'] ?? $currentUser['proveedor_id'] ?? 0;
+
             if ($uti == 1) {
                 $suppliers = $this->taskModel->getSuppliers($filters);
+                if ($providerId > 0) {
+                    $filters['proveedor_id'] = $providerId;
+                }
             } else {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
+                $providerId = $currentUser['proveedor_id'];
             }
 
             $projects = $this->taskModel->getProjects($filters);
@@ -57,7 +63,7 @@ class EspaciosController extends BaseController
                 'projects' => $projects,
                 'regiones' => $regiones,
                 'tiposEspacio' => $tiposEspacio,
-                'provider_id' => $_GET['proveedor_id'] ?? $currentUser['proveedor_id'] ?? 0
+                'provider_id' => $providerId
             ];
 
             require_once __DIR__ . '/../Views/espacios/index.php';
