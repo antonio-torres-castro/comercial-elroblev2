@@ -57,15 +57,15 @@ use App\Constants\AppConstants;
                                 <div class="row text-center">
                                     <div class="col-4">
                                         <h6 class="text-muted">Total Feriados</h6>
-                                        <h4 class="text-primary"><?= $stats['total_feriados'] ?? 0 ?></h4>
+                                        <h4 class="text-primary" id="totalFeriados"><?= $stats['total_feriados'] ?? 0 ?></h4>
                                     </div>
                                     <div class="col-4">
                                         <h6 class="text-muted">Recurrentes</h6>
-                                        <h4 class="text-info"><?= $stats['feriados_recurrentes'] ?? 0 ?></h4>
+                                        <h4 class="text-info" id="feriadosRecurrentes"><?= $stats['feriados_recurrentes'] ?? 0 ?></h4>
                                     </div>
                                     <div class="col-4">
                                         <h6 class="text-muted">Irrenunciables</h6>
-                                        <h4 class="text-warning"><?= $stats['feriados_irrenunciables'] ?? 0 ?></h4>
+                                        <h4 class="text-warning" id="feriadosIrrenunciables"><?= $stats['feriados_irrenunciables'] ?? 0 ?></h4>
                                     </div>
                                 </div>
                             </div>

@@ -418,7 +418,9 @@ function updatePaginationNav(currentPage, totalPages) {
  */
 function updateStats(stats) {
     // Esta función podría actualizar las estadísticas mostradas en la parte superior
-    // Por ahora, simplemente refrescamos la página para mostrar stats actualizadas
+    document.getElementById('totalFeriados').textContent = stats.total_feriados || '0';
+    document.getElementById('feriadosRecurrentes').textContent = stats.feriados_recurrentes || '0';
+    document.getElementById('feriadosIrrenunciables').textContent = stats.feriados_irrenunciables || '0';
 }
 
 /**
