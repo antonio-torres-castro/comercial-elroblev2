@@ -218,9 +218,12 @@ use App\Constants\AppConstants; ?>
             const contraparteSelect = document.getElementById('contraparte_id');
 
             // Establecer fecha mínima como hoy
-            const today = new Date().toISOString().split('T')[0];
-            fechaInicio.min = today;
-            fechaFin.min = today;
+            const todayF = new Date().toISOString().split('T')[0];
+            const today = new Date();
+            const previousYear = today.getFullYear() - 1;
+            const minDate = new Date(previousYear, 0, 1).toISOString().split('T')[0];
+            fechaInicio.min = minDate;
+            fechaFin.min = todayF;
 
             // Validación de fechas
             function validateDates() {
