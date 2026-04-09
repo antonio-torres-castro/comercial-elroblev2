@@ -444,7 +444,7 @@ function populateInitialTasks() {
             hh: parseFloat(row.dataset.hh) || 0.5,
             prioridad: parseInt(row.dataset.prioridad) || 5,
             nombre: row.querySelector('td:first-child').textContent.trim(),
-            categoria: row.querySelector('td:nth-child(3)').textContent.trim()
+            categoria: row.querySelector('td:nth-child(4)').textContent.trim()
         });
     });
 }
