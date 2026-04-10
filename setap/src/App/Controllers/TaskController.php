@@ -141,7 +141,7 @@ class TaskController extends BaseController
             }
 
             $_GET['show_col_proyecto'] = empty($_GET['proyecto_id']);
-            $_GET['show_col_ejecuta'] = empty($_GET['usuario_id']);
+            $_GET['show_col_ejecuta'] = empty($_GET['usuario_id']) || $_GET['usuario_id'] == -1;
 
 
             // Configuración de paginación
@@ -2264,6 +2264,10 @@ class TaskController extends BaseController
 
         $fechaInicio = "";
         $fechaFin = "";
+        if ($tipoOcurrencia == null) {
+            $fechaInicio = $data['fecha_inicio'];
+            $fechaFin = $data['fecha_fin'];
+        }
         if ($tipoOcurrencia == '1') {
             $fechaInicio = $data['fecha_inicio_masivo'];
             $fechaFin = $data['fecha_fin_masivo'];

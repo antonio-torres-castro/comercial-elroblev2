@@ -125,7 +125,7 @@ use App\Constants\AppConstants; ?>
                                         <h5><i class="bi bi-calendar"></i> Planificación</h5>
 
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-3">
                                                 <div class="mb-3">
                                                     <label for="fecha_inicio" class="form-label">Fecha Inicio <span class="required">*</span></label>
                                                     <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
@@ -133,12 +133,31 @@ use App\Constants\AppConstants; ?>
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-6">
+                                            <div class="col-md-3">
                                                 <div class="mb-3">
                                                     <label for="fecha_fin" class="form-label">Fecha Fin <span class="required">*</span></label>
                                                     <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
                                                         value="<?= date('Y-m-d', strtotime($data['task']['fecha_fin'])) ?>" required>
                                                 </div>
+                                            </div>
+
+                                            <!-- Duración -->
+                                            <div class="col-md-2">
+                                                <label for="duracion_horas" class="form-label">Duración(horas)</label>
+                                                <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" step="0.5" min="0.5" max="9" required
+                                                    value="<?= htmlspecialchars($data['task']['duracion_horas'] ?? '0.5'); ?>">
+                                            </div>
+
+                                            <!-- Prioridad -->
+                                            <div class="col-md-2">
+                                                <label for="prioridad" class="form-label">Prioridad</label>
+                                                <select class="form-select" id="prioridad" name="prioridad" required>
+                                                    <option value="0" <?= ($data['task']['prioridad'] ?? '') == '0' ? 'selected' : ''; ?>>0 - Baja</option>
+                                                    <option value="3" <?= ($data['task']['prioridad'] ?? '') == '3' ? 'selected' : ''; ?>>3 - Normal</option>
+                                                    <option value="5" <?= (!isset($data['task']['prioridad']) || $data['task']['prioridad'] == '5') ? 'selected' : ''; ?>>5 - Media</option>
+                                                    <option value="7" <?= ($data['task']['prioridad'] ?? '') == '7' ? 'selected' : ''; ?>>7 - Alta</option>
+                                                    <option value="10" <?= ($data['task']['prioridad'] ?? '') == '10' ? 'selected' : ''; ?>>10 - Crítica</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -189,7 +208,7 @@ use App\Constants\AppConstants; ?>
 
                                     <!-- Botones de Acción -->
                                     <div class="mt-4 text-end">
-                                        <a href="<?= AppConstants::ROUTE_TASKS ?>" class="btn btn-secondary me-2">
+                                        <a href="javascript:history.back()" class="btn btn-secondary me-2">
                                             <i class="bi bi-arrow-left"></i> <?= AppConstants::UI_BACK ?>
                                         </a>
                                         <button type="submit" class="btn btn-warning" id="updateBtn">
