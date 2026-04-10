@@ -68,6 +68,19 @@ use App\Constants\AppConstants; ?>
                             <?= Security::renderCsrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$data['task']['id'] ?>">
 
+                            <!-- Propagar filtros del listado -->
+                            <?php if (!empty($data['filters'])): ?>
+                                <?php foreach ($data['filters'] as $key => $value): ?>
+                                    <?php if (is_array($value)): ?>
+                                        <?php foreach ($value as $v): ?>
+                                            <input type="hidden" name="filters[<?= htmlspecialchars($key) ?>][]" value="<?= htmlspecialchars($v) ?>">
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <input type="hidden" name="filters[<?= htmlspecialchars($key) ?>]" value="<?= htmlspecialchars($value) ?>">
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+
                             <div class="row">
                                 <div class="col-12">
                                     <!-- Información Básica -->

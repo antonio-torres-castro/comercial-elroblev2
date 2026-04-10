@@ -1262,6 +1262,10 @@ class TaskController extends BaseController
                 return;
             }
 
+            // Capturar filtros para propagar
+            $filterParams = $_GET;
+            unset($filterParams['id'], $filterParams['error'], $filterParams['success']);
+
             $data = [
                 'user' => $currentUser,
                 'title' => AppConstants::UI_EDIT_TASK_TITLE,
@@ -1274,6 +1278,7 @@ class TaskController extends BaseController
                 'task' => $task,
                 'task_id' => $id,  // Mantener para compatibilidad
                 'action' => 'edit',  // Estandarizar
+                'filters' => $filterParams, // Pasar filtros a la vista
                 'error' => $_GET['error'] ?? '',
                 'success' => $_GET['success'] ?? ''
             ];
@@ -1348,14 +1353,26 @@ class TaskController extends BaseController
 
             // Actualizar tarea
             if ($this->taskModel->update($id, $taskData)) {
-                Security::redirect("/tasks?success=Tarea actualizada correctamente");
+                $queryString = "";
+                if (!empty($_POST['filters'])) {
+                    $queryString = "&" . http_build_query($_POST['filters']);
+                }
+                Security::redirect("/tasks?success=Tarea actualizada correctamente" . $queryString);
             } else {
-                Security::redirect("/tasks/edit?id={$id}&error=Error al actualizar la tarea");
+                $queryString = "";
+                if (!empty($_POST['filters'])) {
+                    $queryString = "&" . http_build_query($_POST['filters']);
+                }
+                Security::redirect("/tasks/edit?id={$id}&error=Error al actualizar la tarea" . $queryString);
             }
         } catch (Exception $e) {
             Logger::error("TaskController::update: " . $e->getMessage());
             $id = (int)($_POST['id'] ?? 0);
-            Security::redirect("/tasks/edit?id={$id}&error=Error interno del servidor");
+            $queryString = "";
+            if (!empty($_POST['filters'])) {
+                $queryString = "&" . http_build_query($_POST['filters']);
+            }
+            Security::redirect("/tasks/edit?id={$id}&error=Error interno del servidor" . $queryString);
         }
     }
 

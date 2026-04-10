@@ -321,7 +321,13 @@ use App\Constants\AppConstants; ?>
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
                                                                 <?php if ($_GET['show_col_acciones']): ?>
-                                                                    <a href="<?= AppConstants::ROUTE_TASKS_EDIT ?>?id=<?= $task['id'] ?>" class="btn btn-outline-setap-primary" title="Editar">
+                                                                    <?php
+                                                                    $filterParams = $_GET;
+                                                                    unset($filterParams['id']); // No queremos el ID actual en los filtros propagados
+                                                                    $queryString = http_build_query($filterParams);
+                                                                    $editUrl = AppConstants::ROUTE_TASKS_EDIT . "?id=" . $task['id'] . ($queryString ? "&" . $queryString : "");
+                                                                    ?>
+                                                                    <a href="<?= $editUrl ?>" class="btn btn-outline-setap-primary" title="Editar">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
                                                                     <!-- GAP 5: Validar si puede eliminar según estado -->
