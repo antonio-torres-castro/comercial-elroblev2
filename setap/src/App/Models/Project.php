@@ -270,7 +270,7 @@ class Project
         try {
             $sql = "SELECT pt.id, pt.proyecto_id, pt.tarea_id, 
                 pt.planificador_id, pt.ejecutor_id, pt.supervisor_id, 
-                pt.fecha_inicio, pt.duracion_horas, pt.fecha_fin, pt.prioridad, 
+                pt.fecha_inicio, pt.duracion_horas, pt.fecha_fin, pt.prioridad, pt.espacio_id,
                 pt.estado_tipo_id, pt.fecha_Creado, pt.fecha_modificacion,
                 t.nombre as tarea_nombre, t.descripcion as tarea_descripcion,
                 p.nombre_usuario as planificador_nombre,

@@ -10,15 +10,15 @@ class HomeControllerTest extends TestCase
 {
     private $homeController;
     private $db;
-    
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->db = Database::getInstance();
-        
+
         // Crear tablas necesarias para testing en memoria
         $this->createTestTables();
-        
+
         // Mock de sesión para testing
         if (!isset($_SESSION)) {
             $_SESSION = [
@@ -28,7 +28,7 @@ class HomeControllerTest extends TestCase
                 'logged_in' => true
             ];
         }
-        
+
         $this->homeController = new HomeController();
     }
 
@@ -124,16 +124,14 @@ class HomeControllerTest extends TestCase
                 (2, 1, '2024-01-02', 1, 5, 1),
                 (3, 1, '2024-01-03', 1, 1, 1);
             ",
-            'tareas' => "
-                CREATE TABLE IF NOT EXISTS tareas (
+            'tareas' => " CREATE TABLE IF NOT EXISTS tareas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nombre VARCHAR(150) NOT NULL,
                     estado_tipo_id INT DEFAULT 2
                 );
                 INSERT OR IGNORE INTO tareas (id, nombre) VALUES (1, 'Tarea Test');
             ",
-            'proyecto_tareas' => "
-                CREATE TABLE IF NOT EXISTS proyecto_tareas (
+            'proyecto_tareas' => " CREATE TABLE IF NOT EXISTS proyecto_tareas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     proyecto_id INT NOT NULL,
                     tarea_id INT NOT NULL,
@@ -165,7 +163,7 @@ class HomeControllerTest extends TestCase
     public function testRequiredTablesExist()
     {
         $tables = ['usuarios', 'proyectos', 'proyecto_tareas'];
-        
+
         foreach ($tables as $table) {
             $stmt = $this->db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='$table'");
             $result = $stmt->fetch();
@@ -181,7 +179,7 @@ class HomeControllerTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM usuarios WHERE estado_tipo_id != 4");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertIsInt((int)$count, "El conteo de usuarios debe devolver un número entero");
         $this->assertGreaterThanOrEqual(0, $count, "El conteo de usuarios no puede ser negativo");
     }
@@ -194,7 +192,7 @@ class HomeControllerTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id != 4");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertIsInt((int)$count, "El conteo de proyectos debe devolver un número entero");
         $this->assertGreaterThanOrEqual(0, $count, "El conteo de proyectos no puede ser negativo");
     }
@@ -207,7 +205,7 @@ class HomeControllerTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyectos WHERE estado_tipo_id IN (2, 5)");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertIsInt((int)$count, "El conteo de proyectos activos debe devolver un número entero");
         $this->assertGreaterThanOrEqual(0, $count, "El conteo de proyectos activos no puede ser negativo");
     }
@@ -220,7 +218,7 @@ class HomeControllerTest extends TestCase
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyecto_tareas WHERE estado_tipo_id IN (1, 2, 5)");
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        
+
         $this->assertIsInt((int)$count, "El conteo de tareas pendientes debe devolver un número entero");
         $this->assertGreaterThanOrEqual(0, $count, "El conteo de tareas pendientes no puede ser negativo");
     }
@@ -234,11 +232,11 @@ class HomeControllerTest extends TestCase
         $reflection = new \ReflectionClass($this->homeController);
         $method = $reflection->getMethod('calculateStats');
         $method->setAccessible(true);
-        
+
         $stats = $method->invoke($this->homeController);
-        
+
         $this->assertIsArray($stats, "Las estadísticas deben devolver un array");
-        
+
         $requiredKeys = ['total_usuarios', 'total_proyectos', 'proyectos_activos', 'tareas_pendientes'];
         foreach ($requiredKeys as $key) {
             $this->assertArrayHasKey($key, $stats, "Las estadísticas deben incluir la clave '$key'");
@@ -256,9 +254,9 @@ class HomeControllerTest extends TestCase
         $reflection = new \ReflectionClass($this->homeController);
         $method = $reflection->getMethod('calculateStats');
         $method->setAccessible(true);
-        
+
         $stats = $method->invoke($this->homeController);
-        
+
         // Verificar que al menos uno de los valores no sea 0 (asumiendo que hay datos en la BD)
         $hasNonZeroValues = false;
         foreach (['total_usuarios', 'total_proyectos', 'proyectos_activos', 'tareas_pendientes'] as $key) {
@@ -267,14 +265,16 @@ class HomeControllerTest extends TestCase
                 break;
             }
         }
-        
+
         // Si hay datos en la base de datos, las estadísticas no deberían ser todas cero
         $stmt = $this->db->query("SELECT COUNT(*) FROM usuarios");
         $hasUsers = $stmt->fetchColumn() > 0;
-        
+
         if ($hasUsers) {
-            $this->assertTrue($hasNonZeroValues || $stats['total_usuarios'] > 0, 
-                "Las estadísticas deben reflejar datos reales, no valores hardcoded en 0");
+            $this->assertTrue(
+                $hasNonZeroValues || $stats['total_usuarios'] > 0,
+                "Las estadísticas deben reflejar datos reales, no valores hardcoded en 0"
+            );
         }
     }
 
@@ -287,10 +287,10 @@ class HomeControllerTest extends TestCase
         $reflection = new \ReflectionClass($this->homeController);
         $method = $reflection->getMethod('calculateStats');
         $method->setAccessible(true);
-        
+
         // El método debe devolver un array válido incluso si hay errores
         $stats = $method->invoke($this->homeController);
-        
+
         $this->assertIsArray($stats, "Las estadísticas deben devolver un array incluso en caso de error");
         $this->assertCount(4, $stats, "Las estadísticas deben incluir exactamente 4 métricas");
     }
@@ -304,10 +304,13 @@ class HomeControllerTest extends TestCase
         $reflection = new \ReflectionClass($this->homeController);
         $method = $reflection->getMethod('calculateStats');
         $method->setAccessible(true);
-        
+
         $stats = $method->invoke($this->homeController);
-        
-        $this->assertLessThanOrEqual($stats['total_proyectos'], $stats['proyectos_activos'], 
-            "Los proyectos activos no pueden ser más que el total de proyectos");
+
+        $this->assertLessThanOrEqual(
+            $stats['total_proyectos'],
+            $stats['proyectos_activos'],
+            "Los proyectos activos no pueden ser más que el total de proyectos"
+        );
     }
 }

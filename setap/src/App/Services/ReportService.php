@@ -176,8 +176,7 @@ class ReportService
 
         try {
             // --- 1) Resumen de totales (posicionales) ---
-            $sqlTotal = "
-            SELECT
+            $sqlTotal = "SELECT
                 COUNT(pt.id) AS total,
                 SUM(pt.estado_tipo_id IN (2,5,6,7)
                     AND pt.fecha_inicio < ?

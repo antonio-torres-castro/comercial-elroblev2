@@ -166,6 +166,7 @@ class Task
                     pt.fecha_inicio,
                     pt.duracion_horas,
                     pt.prioridad,
+                    pt.espacio_id,
                     pt.fecha_Creado,
                     p.id as proyecto_id,
                     CONCAT(c.razon_social, '.', p.fecha_inicio, '.', p.fecha_fin) as proyecto_nombre,
@@ -628,8 +629,7 @@ class Task
             // =========================
             // 3. SUBQUERY ACCESO USUARIO
             // =========================
-            $sqlAcceso = "
-            SELECT DISTINCT proyecto_id
+            $sqlAcceso = " SELECT DISTINCT proyecto_id
             FROM proyecto_usuarios_grupo
             WHERE usuario_id = ?
               AND estado_tipo_id = 2
@@ -640,8 +640,7 @@ class Task
             // =========================
             // 4. QUERY BASE
             // =========================
-            $sql = "
-            SELECT 
+            $sql = "SELECT 
                 'mes' as lapso,
                 DATE_FORMAT(pt.fecha_inicio, '%Y-%m') as mes,
 
@@ -1162,12 +1161,11 @@ class Task
     public function getById(int $id): ?array
     {
         try {
-            $sql = "
-                SELECT
+            $sql = "SELECT
                     pt.id, pt.proyecto_id, pt.tarea_id, 
                     pt.planificador_id, pt.ejecutor_id, pt.supervisor_id, 
                     pt.fecha_inicio, pt.duracion_horas, pt.fecha_fin,
-                    pt.prioridad, pt.estado_tipo_id, 
+                    pt.prioridad, pt.espacio_id, pt.estado_tipo_id, 
                     pt.fecha_Creado, pt.fecha_modificacion,
                     t.nombre             as tarea_nombre,
                     t.descripcion        as tarea_descripcion,
@@ -1243,8 +1241,7 @@ class Task
             $proyectoTareasId = 0;
             $this->db->beginTransaction();
             // Verificar si existe
-            $stmt = $this->db->prepare("
-                SELECT id FROM proyecto_tareas
+            $stmt = $this->db->prepare("SELECT id FROM proyecto_tareas
                 WHERE proyecto_id = ? and tarea_id = ? and ejecutor_id = ?  and fecha_inicio = ?
             ");
             $stmt->execute([$data['proyecto_id'], $data['tarea_id'], $data['ejecutor_id'] ?? null, $data['fecha_inicio']]);
@@ -1252,8 +1249,7 @@ class Task
             if ($existing) {
                 $proyectoTareasId = $existing['id'];
                 // Actualizar registro existente
-                $stmt = $this->db->prepare("
-                    UPDATE proyecto_tareas SET
+                $stmt = $this->db->prepare("UPDATE proyecto_tareas SET
                         planificador_id = ?,
                         supervisor_id = ?,
                         duracion_horas = ?,
@@ -1273,8 +1269,7 @@ class Task
                 ]);
             } else {
                 // Luego crear la asignación proyecto-tarea
-                $stmt = $this->db->prepare("
-                INSERT INTO proyecto_tareas (
+                $stmt = $this->db->prepare("INSERT INTO proyecto_tareas (
                     proyecto_id,
                     tarea_id,
                     planificador_id,
@@ -1509,8 +1504,7 @@ class Task
     public function update(int $id, array $data): bool
     {
         try {
-            $sql = "
-                UPDATE proyecto_tareas
+            $sql = "UPDATE proyecto_tareas
                 SET
                     proyecto_id = ?,
                     planificador_id = ?,
@@ -2452,8 +2446,7 @@ class Task
     public function isTaskOnHoliday(int $taskId): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT pt.fecha_inicio, pt.fecha_fin, pt.proyecto_id
+            $stmt = $this->db->prepare("SELECT pt.fecha_inicio, pt.fecha_fin, pt.proyecto_id
                 FROM proyecto_tareas pt
                 WHERE pt.id = ?
             ");
@@ -2465,8 +2458,7 @@ class Task
             }
 
             // Verificar si la fecha de inicio o fin está en feriados
-            $stmt = $this->db->prepare("
-                SELECT COUNT(*) as holiday_count
+            $stmt = $this->db->prepare("SELECT COUNT(*) as holiday_count
                 FROM proyecto_feriados pf
                 WHERE pf.proyecto_id = ?
                 AND pf.estado_tipo_id = 2
@@ -2494,8 +2486,7 @@ class Task
     public function getTasksOnHolidays(int $projectId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT DISTINCT pt.id, pt.fecha_inicio, pt.fecha_fin,
+            $stmt = $this->db->prepare("SELECT DISTINCT pt.id, pt.fecha_inicio, pt.fecha_fin,
                        t.nombre as tarea_nombre,
                        et.nombre as estado_nombre,
                        pf.fecha as fecha_feriado,
@@ -2656,8 +2647,7 @@ class Task
     public function getTaskHistory(int $proyectoTareaId): array
     {
         try {
-            $sql = "
-                SELECT
+            $sql = "SELECT
                     ht.id,
                     ht.proyecto_tarea_id,
                     ht.usuario_id,

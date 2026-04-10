@@ -122,8 +122,7 @@ class DashboardStatsTest extends TestCase
             INSERT OR IGNORE INTO tareas (id, nombre) VALUES (1, 'Tarea Test');
         ");
 
-        $this->db->exec("
-            CREATE TABLE IF NOT EXISTS proyecto_tareas (
+        $this->db->exec("CREATE TABLE IF NOT EXISTS proyecto_tareas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 proyecto_id INT NOT NULL,
                 tarea_id INT NOT NULL,
@@ -267,11 +266,16 @@ class DashboardStatsTest extends TestCase
             return $value > 0;
         });
 
-        $this->assertNotEmpty($hasNonZeroValues,
-            "Las estadísticas deben mostrar datos reales, no valores hardcoded en 0");
+        $this->assertNotEmpty(
+            $hasNonZeroValues,
+            "Las estadísticas deben mostrar datos reales, no valores hardcoded en 0"
+        );
 
         // Verificar que los proyectos activos no exceden el total
-        $this->assertLessThanOrEqual($stats['total_proyectos'], $stats['proyectos_activos'],
-            "Proyectos activos no puede exceder el total de proyectos");
+        $this->assertLessThanOrEqual(
+            $stats['total_proyectos'],
+            $stats['proyectos_activos'],
+            "Proyectos activos no puede exceder el total de proyectos"
+        );
     }
 }
