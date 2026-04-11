@@ -1252,6 +1252,7 @@ class Task
                 $stmt = $this->db->prepare("UPDATE proyecto_tareas SET
                         planificador_id = ?,
                         supervisor_id = ?,
+                        espacio_id = ?,
                         duracion_horas = ?,
                         prioridad = ?,
                         estado_tipo_id = ?,
@@ -1262,6 +1263,7 @@ class Task
                 $result = $stmt->execute([
                     $data['planificador_id'],
                     $data['supervisor_id'] ?? null,
+                    $data['espacio_id'] ?? null,
                     $data['duracion_horas'] ?? 1.0,
                     $data['prioridad'] ?? 0,
                     $data['estado_tipo_id'] ?? 1,
@@ -1275,12 +1277,13 @@ class Task
                     planificador_id,
                     ejecutor_id,
                     supervisor_id,
+                    espacio_id,
                     fecha_inicio,
                     duracion_horas,
                     fecha_fin,
                     prioridad,
                     estado_tipo_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
                 $result = $stmt->execute([
@@ -1289,6 +1292,7 @@ class Task
                     $data['planificador_id'],
                     $data['ejecutor_id'] ?? null,
                     $data['supervisor_id'] ?? null,
+                    $data['espacio_id'] ?? null,
                     $data['fecha_inicio'],
                     $data['duracion_horas'] ?? 1.0,
                     $data['fecha_fin'],
@@ -1510,6 +1514,7 @@ class Task
                     planificador_id = ?,
                     ejecutor_id = ?,
                     supervisor_id = ?,
+                    espacio_id = ?,
                     fecha_inicio = ?,
                     duracion_horas = ?,
                     prioridad = ?,
@@ -1524,6 +1529,7 @@ class Task
                 $data['planificador_id'],
                 $data['ejecutor_id'] ?? null,
                 $data['supervisor_id'] ?? null,
+                $data['espacio_id'] ?? null,
                 $data['fecha_inicio'],
                 $data['duracion_horas'] ?? 1.0,
                 $data['prioridad'] ?? 0,
@@ -1894,8 +1900,81 @@ class Task
         }
     }
 
+
     /**
-     * Obtener usuarios disponibles para asignación
+     * Verificar si un usuario tiene acceso a un proyecto
+     */
+    public function userHasProjectAccess(int $userId, int $projectId): bool
+    {
+        try {
+            $sql = "SELECT 1
+                FROM proyecto_usuarios_grupo
+                WHERE proyecto_id = ?
+                  AND usuario_id = ?
+                  AND estado_tipo_id = 2
+                  AND grupo_id BETWEEN 1 AND 5
+                LIMIT 1";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$projectId, $userId]);
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            Logger::error("Task::userHasProjectAccess: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtener espacios por proyecto (via direcciones)
+     */
+    public function getEspaciosByProyecto(int $proyectoId): array
+    {
+        try {
+            $sql = "SELECT 
+                    e.id,
+                    e.nombre,
+                    e.codigo,
+                    e.nivel,
+                    e.orden,
+                    te.nombre as tipo_nombre,
+                    d.id as direccion_id,
+                    d.calle,
+                    d.numero,
+                    d.letra,
+                    d.referencia
+                FROM direcciones d
+                INNER JOIN espacios e ON e.direccion_id = d.id
+                LEFT JOIN tipos_espacio te ON e.tipos_espacio_id = te.id
+                WHERE d.proyecto_id = ?
+                ORDER BY d.id, e.nivel, e.orden, e.nombre";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$proyectoId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getEspaciosByProyecto: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Validar si un espacio pertenece al proyecto
+     */
+    public function isEspacioInProyecto(int $espacioId, int $proyectoId): bool
+    {
+        try {
+            $sql = "SELECT COUNT(*)
+                FROM espacios e
+                INNER JOIN direcciones d ON e.direccion_id = d.id
+                WHERE e.id = ? AND d.proyecto_id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$espacioId, $proyectoId]);
+            return (int)$stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            Logger::error("Task::isEspacioInProyecto: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /* Obtener usuarios disponibles para asignación
      */
     public function getUsers(): array
     {
@@ -2359,6 +2438,7 @@ class Task
                         proyecto_tarea_id,
                         usuario_id,
                         supervisor_id,
+                        espacio_id,
                         contraparte_id,
                         fecha_evento,
                         comentario,

@@ -293,6 +293,8 @@ function updateProjectSelectOptions(projects) {
     if (stillExists) {
         proyectoSelect.value = previousValue;
     }
+
+    proyectoSelect.dispatchEvent(new Event('change'));
 }
 
 async function refreshSupervisorSelect() {
@@ -346,3 +348,4 @@ function updateSupervisorSelectOptions(supervisors) {
         supervisorSelect.value = previousValue;
     }
 }
+

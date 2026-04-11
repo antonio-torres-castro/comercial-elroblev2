@@ -145,6 +145,15 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
 
+                                        <!-- Espacio (opcional) -->
+                                        <div class="col-md-12">
+                                            <label for="espacio_id" class="form-label">Espacio (opcional)</label>
+                                            <select class="form-select" id="espacio_id" name="espacio_id" data-selected="<?= htmlspecialchars($_POST['espacio_id'] ?? '') ?>">
+                                                <option value="">Sin espacio (opcional)</option>
+                                            </select>
+                                            <div class="form-text" id="espacio_help">Selecciona un espacio si aplica.</div>
+                                        </div>
+
                                         <!-- Asignaciones usuario:inicio -->
                                         <div class="col-12">
                                             <hr>
@@ -516,6 +525,8 @@ use App\Constants\AppConstants; ?>
 
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . '/../layouts/scripts-base.php'; ?>
+    <!-- Espacios por proyecto -->
+    <script src="/setap/public/js/task-space-select.js"></script>
     <!-- UX -->
     <script src="/setap/public/js/create-project-task.js"></script>
     <!-- GAP 5: Task State Validation Utilities -->

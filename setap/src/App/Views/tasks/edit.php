@@ -120,6 +120,18 @@ use App\Constants\AppConstants; ?>
                                         </div>
 
                                         <div class="mb-3">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="mb-3">
+                                                        <label for="espacio_id" class="form-label">Espacio (opcional)</label>
+                                                        <select class="form-select" id="espacio_id" name="espacio_id" data-selected="<?= (int)($data['task']['espacio_id'] ?? 0) ?>">
+                                                            <option value="">Sin espacio (opcional)</option>
+                                                        </select>
+                                                        <div class="form-text" id="espacio_help">Selecciona un espacio si aplica.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <label for="nombre" class="form-label">Nombre de la Tarea <span class="required">*</span></label>
                                             <input type="text" class="form-control" id="nombre" name="nombre"
                                                 value="<?= htmlspecialchars($data['task']['tarea_nombre']) ?>"
@@ -241,6 +253,7 @@ use App\Constants\AppConstants; ?>
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
     <!-- GAP 5: Task State Validation Utilities -->
+    <script src="/setap/public/js/task-space-select.js"></script>
     <script src="/setap/public/js/task-state-utils.js"></script>
 
     <script>

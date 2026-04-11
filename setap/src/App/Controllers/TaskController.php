@@ -939,6 +939,7 @@ class TaskController extends BaseController
                     'planificador_id' => $currentUser['id'],
                     'ejecutor_id' => null, // No se asigna ejecutor aquí
                     'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
+                    'espacio_id' => !empty($_POST['espacio_id']) ? (int)$_POST['espacio_id'] : null,
                     'fecha_inicio' => $fechaInicio,
                     'duracion_horas' => (float)$pTask['hh'],
                     'fecha_fin' => $fechaFin,
@@ -1040,6 +1041,7 @@ class TaskController extends BaseController
                 'planificador_id' => $currentUser['id'], // El usuario actual es quien planifica
                 'ejecutor_id' => !empty($_POST['ejecutor_id']) ? (int)$_POST['ejecutor_id'] : null,
                 'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
+                'espacio_id' => !empty($_POST['espacio_id']) ? (int)$_POST['espacio_id'] : null,
                 'fecha_inicio' => $fechaInicio,
                 'duracion_horas' => (float)($_POST['duracion_horas'] ?? 1.0),
                 'fecha_fin' => $fechaFin,
@@ -1345,6 +1347,7 @@ class TaskController extends BaseController
                 'planificador_id' => $currentUser['id'], // Mantener planificador actual
                 'ejecutor_id' => !empty($_POST['ejecutor_id']) ? (int)$_POST['ejecutor_id'] : null,
                 'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
+                'espacio_id' => !empty($_POST['espacio_id']) ? (int)$_POST['espacio_id'] : null,
                 'fecha_inicio' => $_POST['fecha_inicio'],
                 'duracion_horas' => (float)($_POST['duracion_horas'] ?? 1.0),
                 'prioridad' => (int)($_POST['prioridad'] ?? 0),
@@ -1687,6 +1690,38 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             Logger::error("TaskController::refreshProjectsSelect: " . $e->getMessage());
             $this->jsonError('Error al cargar proyectos', [], 500);
+        }
+    }
+
+
+    /**
+     * Cargar espacios por proyecto (JSON)
+     */
+    public function refreshSpacesSelect()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $projectId = isset($_GET['proyecto_id']) ? (int)$_GET['proyecto_id'] : 0;
+            if ($projectId <= 0) {
+                $this->jsonSuccess('Proyecto no seleccionado', ['espacios' => []]);
+                return;
+            }
+
+            if (!$this->taskModel->userHasProjectAccess((int)$currentUser['id'], $projectId)) {
+                $this->jsonError('Proyecto invalido', [], 403);
+                return;
+            }
+
+            $espacios = $this->taskModel->getEspaciosByProyecto($projectId);
+            $this->jsonSuccess('Espacios cargados correctamente', ['espacios' => $espacios]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::refreshSpacesSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar espacios', [], 500);
         }
     }
 
@@ -2253,6 +2288,18 @@ class TaskController extends BaseController
         if (empty($data['proyecto_id']) || !is_numeric($data['proyecto_id'])) {
             $errors[] = 'Debe seleccionar un proyecto válido';
         }
+
+        // Validar espacio (opcional)
+        if (!empty($data['espacio_id'])) {
+            if (!is_numeric($data['espacio_id'])) {
+                $errors[] = "El espacio seleccionado no es valido";
+            } elseif (!empty($data['proyecto_id']) && is_numeric($data['proyecto_id'])) {
+                if (!$this->taskModel->isEspacioInProyecto((int)$data['espacio_id'], (int)$data['proyecto_id'])) {
+                    $errors[] = "El espacio seleccionado no pertenece al proyecto";
+                }
+            }
+        }
+
         // Para creación de tareas - validar tarea existente o nueva
         if (!$isUpdate) {
             // Validar tarea - debe seleccionar existente o crear nueva
