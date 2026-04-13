@@ -1716,7 +1716,7 @@ class TaskController extends BaseController
                 return;
             }
 
-            $direcciones = $this->taskModel->getDirecciónByProyecto($projectId);
+            $direcciones = $this->taskModel->getDireccionByProyecto($projectId);
             $this->jsonSuccess('Direcciones cargadas correctamente', ['direcciones' => $direcciones]);
         } catch (Exception $e) {
             Logger::error("TaskController::refreshDireccionSelect: " . $e->getMessage());

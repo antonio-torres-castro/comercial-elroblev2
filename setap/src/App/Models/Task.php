@@ -1926,7 +1926,7 @@ class Task
     /**
      * Obtener direcciones por proyecto
      */
-    public function getDirecciónByProyecto(int $proyectoId): array
+    public function getDireccionByProyecto(int $proyectoId): array
     {
         try {
             $sql = "SELECT 
@@ -1947,7 +1947,7 @@ class Task
             $stmt->execute([$proyectoId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            Logger::error("Task::getDirecciónByProyecto: " . $e->getMessage());
+            Logger::error("Task::getDireccionByProyecto: " . $e->getMessage());
             return [];
         }
     }
