@@ -52,7 +52,7 @@ use App\Constants\AppConstants; ?>
                     <div class="card-body">
                         <?php if (!empty($data['error'])): ?>
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                                <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error ?? $data['error'] ?? '') ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
@@ -96,7 +96,7 @@ use App\Constants\AppConstants; ?>
                                                         <?php foreach ($data['projects'] as $project): ?>
                                                             <option value="<?= (int)$project['id'] ?>"
                                                                 <?= $project['id'] == $data['task']['proyecto_id'] ? 'selected' : '' ?>>
-                                                                <?= htmlspecialchars($project['cliente_nombre']) ?>
+                                                                <?= htmlspecialchars($project['nombre']) ?>
                                                             </option>
                                                         <?php endforeach; ?>
                                                     </select>
@@ -121,11 +121,31 @@ use App\Constants\AppConstants; ?>
 
                                         <div class="mb-3">
                                             <div class="row">
-                                                <div class="col-md-12">
+                                                <div class="col-md-6">
+                                                    <label for="direccion_id" class="form-label">Dirección (opcional)</label>
+                                                    <select class="form-select" id="direccion_id" name="direccion_id" data-selected="<?= htmlspecialchars($_POST['direccion_id'] ?? '') ?>">
+                                                        <option value="">Sin dirección (opcional)</option>
+                                                        <?php foreach ($data['projectAdresses'] as $pa): ?>
+                                                            <option value="<?= (int)$pa['id'] ?>"
+                                                                <?= $pa['id'] == $data['task']['direccion_id'] ? 'selected' : '' ?>>
+                                                                <?= htmlspecialchars($pa['nombre']) ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                    <div class="form-text" id="direccion_help">Selecciona una dirección si aplica.</div>
+                                                </div>
+
+                                                <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="espacio_id" class="form-label">Espacio (opcional)</label>
                                                         <select class="form-select" id="espacio_id" name="espacio_id" data-selected="<?= (int)($data['task']['espacio_id'] ?? 0) ?>">
                                                             <option value="">Sin espacio (opcional)</option>
+                                                            <?php foreach ($data['projectSpaces'] as $pe): ?>
+                                                                <option value="<?= (int)$pe['id'] ?>"
+                                                                    <?= $pe['id'] == $data['task']['espacio_id'] ? 'selected' : '' ?>>
+                                                                    <?= htmlspecialchars($pe['nombre']) ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
                                                         </select>
                                                         <div class="form-text" id="espacio_help">Selecciona un espacio si aplica.</div>
                                                     </div>
@@ -389,7 +409,7 @@ use App\Constants\AppConstants; ?>
         }
 
         // Agregar validación de estado al envío del formulario
-        document.getElementById('editTaskForm').addEventListener('submit', function(e) {
+        document.getElementById('taskEditForm').addEventListener('submit', function(e) {
             if (!validateStateChange()) {
                 e.preventDefault();
                 return false;

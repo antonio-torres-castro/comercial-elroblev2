@@ -1165,7 +1165,7 @@ class Task
                     pt.id, pt.proyecto_id, pt.tarea_id, 
                     pt.planificador_id, pt.ejecutor_id, pt.supervisor_id, 
                     pt.fecha_inicio, pt.duracion_horas, pt.fecha_fin,
-                    pt.prioridad, pt.espacio_id, pt.estado_tipo_id, 
+                    pt.prioridad, pt.espacio_id, e.direccion_id, pt.estado_tipo_id, 
                     pt.fecha_Creado, pt.fecha_modificacion,
                     t.nombre             as tarea_nombre,
                     t.descripcion        as tarea_descripcion,
@@ -1179,15 +1179,16 @@ class Task
                     super.nombre_usuario as supervisor_nombre,
                     p.tarea_tipo_id,
                     p.contraparte_id
-                FROM proyecto_tareas pt
-                INNER JOIN tareas        t   ON pt.tarea_id = t.id
-                INNER JOIN proyectos     p   ON pt.proyecto_id = p.id
-                INNER JOIN clientes      c   ON p.cliente_id = c.id
-                INNER JOIN tarea_tipos  tt   ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et   ON pt.estado_tipo_id = et.id
-                INNER JOIN usuarios     plan ON pt.planificador_id = plan.id
-                LEFT JOIN usuarios      exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios      super ON pt.supervisor_id = super.id
+                      FROM proyecto_tareas pt
+                INNER JOIN tareas          t     ON pt.tarea_id = t.id
+                INNER JOIN proyectos       p     ON pt.proyecto_id = p.id
+                INNER JOIN clientes        c     ON p.cliente_id = c.id
+                INNER JOIN tarea_tipos     tt    ON p.tarea_tipo_id = tt.id
+                INNER JOIN estado_tipos    et    ON pt.estado_tipo_id = et.id
+                INNER JOIN usuarios        plan  ON pt.planificador_id = plan.id
+                 LEFT JOIN espacios        e     ON pt.espacio_id = e.id
+                 LEFT JOIN usuarios        exec  ON pt.ejecutor_id = exec.id
+                 LEFT JOIN usuarios        super ON pt.supervisor_id = super.id
                 WHERE pt.id = ?
             ";
 

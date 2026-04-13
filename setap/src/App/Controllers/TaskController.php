@@ -1268,11 +1268,16 @@ class TaskController extends BaseController
             $filterParams = $_GET;
             unset($filterParams['id'], $filterParams['error'], $filterParams['success']);
 
+            $adresses = $this->taskModel->getDireccionByProyecto($task['proyecto_id']);
+            $spaces = $this->taskModel->getEspaciosByProyecto($task['direccion_id']);
+
             $data = [
                 'user' => $currentUser,
                 'title' => AppConstants::UI_EDIT_TASK_TITLE,
                 'subtitle' => "Editando: {$task['tarea_nombre']}",
                 'projects' => $this->taskModel->getProjects($filters),
+                'projectAdresses' => $adresses,
+                'projectSpaces' => $spaces,
                 'taskTypes' => $this->taskModel->getTaskTypes(),
                 'executor_users' => $this->taskModel->getExecutorUsers($filters),
                 'supervisor_users' => $this->taskModel->getSupervisorUsers(),
@@ -1705,7 +1710,7 @@ class TaskController extends BaseController
                 return;
             }
 
-            $projectId = isset($_GET['proyecto_id']) ? (int)$_GET['proyecto_id'] : 0;
+            $projectId = (isset($_GET['proyecto_id']) ? (int)$_GET['proyecto_id'] : 0);
             if ($projectId <= 0) {
                 $this->jsonSuccess('Proyecto no seleccionado', ['direcciones' => []]);
                 return;
@@ -2463,7 +2468,7 @@ class TaskController extends BaseController
             } else {
                 $estadoId = (int)$data['estado_tipo_id'];
                 // Estados válidos para proyecto_tareas: 1, 2, 3, 4, 5, 6, 7, 8
-                if (!in_array($estadoId, [1, 2])) {
+                if (!in_array($estadoId, [1, 2, 3, 4, 5, 6, 7, 8])) {
                     $errors[] = 'El estado seleccionado no es válido para tareas';
                 }
             }
