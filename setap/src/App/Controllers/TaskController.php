@@ -1693,6 +1693,36 @@ class TaskController extends BaseController
         }
     }
 
+    /**
+     * Cargar espacios por proyecto (JSON)
+     */
+    public function refreshDireccionSelect()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $projectId = isset($_GET['proyecto_id']) ? (int)$_GET['proyecto_id'] : 0;
+            if ($projectId <= 0) {
+                $this->jsonSuccess('Proyecto no seleccionado', ['direcciones' => []]);
+                return;
+            }
+
+            if (!$this->taskModel->userHasProjectAccess((int)$currentUser['id'], $projectId)) {
+                $this->jsonError('Proyecto invalido', [], 403);
+                return;
+            }
+
+            $direcciones = $this->taskModel->getDirecciónByProyecto($projectId);
+            $this->jsonSuccess('Direcciones cargadas correctamente', ['direcciones' => $direcciones]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::refreshDireccionSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar direcciones', [], 500);
+        }
+    }
 
     /**
      * Cargar espacios por proyecto (JSON)
@@ -1706,14 +1736,14 @@ class TaskController extends BaseController
                 return;
             }
 
-            $projectId = isset($_GET['proyecto_id']) ? (int)$_GET['proyecto_id'] : 0;
+            $projectId = isset($_GET['direccion_id']) ? (int)$_GET['direccion_id'] : 0;
             if ($projectId <= 0) {
-                $this->jsonSuccess('Proyecto no seleccionado', ['espacios' => []]);
+                $this->jsonSuccess('Dirección no seleccionada', ['espacios' => []]);
                 return;
             }
 
             if (!$this->taskModel->userHasProjectAccess((int)$currentUser['id'], $projectId)) {
-                $this->jsonError('Proyecto invalido', [], 403);
+                $this->jsonError('Dirección invalida', [], 403);
                 return;
             }
 

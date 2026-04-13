@@ -130,7 +130,7 @@ use App\Constants\AppConstants; ?>
 
                                     <div class="row g-3">
                                         <!-- Proyecto -->
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <label for="proyecto_id" class="form-label">
                                                 Proyecto <span class="text-danger">*</span>
                                             </label>
@@ -143,6 +143,15 @@ use App\Constants\AppConstants; ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
+                                        </div>
+
+                                        <!-- Dirección (opcional) -->
+                                        <div class="col-md-6">
+                                            <label for="direccion_id" class="form-label">Dirección (opcional)</label>
+                                            <select class="form-select" id="direccion_id" name="direccion_id" data-selected="<?= htmlspecialchars($_POST['direccion_id'] ?? '') ?>">
+                                                <option value="">Sin dirección (opcional)</option>
+                                            </select>
+                                            <div class="form-text" id="direccion_help">Selecciona una dirección si aplica.</div>
                                         </div>
 
                                         <!-- Espacio (opcional) -->

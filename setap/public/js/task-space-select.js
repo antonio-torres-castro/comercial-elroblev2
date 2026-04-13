@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const proyectoSelect = document.getElementById('proyecto_id');
+    const direccionSelect = document.getElementById('direccion_id');
+    const direccionHelp = document.getElementById('direccion_help');
     const espacioSelect = document.getElementById('espacio_id');
     const espacioHelp = document.getElementById('espacio_help');
 
@@ -7,28 +9,49 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    function buildDireccionLabel(espacio) {
-        const calle = espacio.calle ? String(espacio.calle) : '';
-        const numero = espacio.numero ? ` ${espacio.numero}` : '';
-        const letra = espacio.letra ? ` ${espacio.letra}` : '';
-        const referencia = espacio.referencia ? ` (${espacio.referencia})` : '';
-        return `${calle}${numero}${letra}${referencia}`.trim();
+    function buildDireccionLabel(direccion) {
+        const calle = direccion.calle ? String(direccion.calle) : '';
+        const numero = direccion.numero ? ` ${direccion.numero}` : '';
+        const letra = direccion.letra ? ` ${direccion.letra}` : '';
+        const comuna = direccion.comuna ? ` (${direccion.comuna})` : '';
+        const provincia = direccion.provincia ? ` (${direccion.provincia})` : '';
+        const region = direccion.region ? ` (${direccion.region})` : '';
+        return `${calle}${numero}${letra}${comuna}${provincia}${region}`.trim();
     }
 
     function buildEspacioLabel(espacio) {
         const nombre = espacio.nombre ? String(espacio.nombre) : 'Sin nombre';
         const codigo = espacio.codigo ? ` [${espacio.codigo}]` : '';
+        const nivel = espacio.nivel ? ` (Nivel ${espacio.nivel})` : '';
+        const orden = espacio.orden ? ` - Orden ${espacio.orden}` : '';
         const tipo = espacio.tipo_nombre ? ` - ${espacio.tipo_nombre}` : '';
-        const direccion = buildDireccionLabel(espacio);
-        if (direccion) {
-            return `${direccion} - ${nombre}${codigo}${tipo}`;
-        }
-        return `${nombre}${codigo}${tipo}`;
+        const espacioPadre1 = espacio.espacio_padre1 ? ` - ${espacio.espacio_padre1}` : '';
+        const espacioPadre2 = espacio.espacio_padre2 ? ` - ${espacio.espacio_padre2}` : '';
+        return `${nombre}${codigo}${nivel}${orden}${tipo}${espacioPadre1}${espacioPadre2}`;
     }
 
     function updateHelp(text) {
         if (espacioHelp) {
             espacioHelp.textContent = text;
+        }
+
+        if (direccionHelp) {
+            direccionHelp.textContent = text;
+        }
+    }
+
+    function renderDirecciones(direcciones, selectedValue) {
+        let optionsHtml = '<option value="">Sin direccion (opcional)</option>';
+        direcciones.forEach(direccion => {
+            optionsHtml += `<option value="${direccion.id}">${buildDireccionLabel(direccion)}</option>`;
+        });
+        direccionSelect.innerHTML = optionsHtml;
+
+        if (selectedValue) {
+            const exists = direcciones.some(direccion => String(direccion.id) === String(selectedValue));
+            direccionSelect.value = exists ? String(selectedValue) : '';
+        } else {
+            direccionSelect.value = '';
         }
     }
 
@@ -47,18 +70,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function loadEspacios() {
+    async function loadDirecciones() {
         const projectId = proyectoSelect.value;
-        const selectedValue = espacioSelect.dataset.selected || espacioSelect.value || '';
+        const selectedValue = direccionSelect.dataset.selected || direccionSelect.value || '';
 
         if (!projectId) {
-            renderEspacios([], '');
-            updateHelp('Selecciona un proyecto para cargar espacios.');
+            renderDirecciones([], '');
+            updateHelp('Selecciona un proyecto para cargar direcciones.');
             return;
         }
 
         try {
-            const response = await fetch(`/setap/tasks/refreshSpacesSelect?proyecto_id=${encodeURIComponent(projectId)}`);
+            const response = await fetch(`/setap/tasks/refreshDireccionSelect?proyecto_id=${encodeURIComponent(projectId)}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                console.error('Error al cargar direcciones:', data.message || 'Respuesta no válida');
+                renderDirecciones([], '');
+                updateHelp('No fue posible cargar las direcciones.');
+                return;
+            }
+
+            const direcciones = data.direcciones || [];
+            renderDirecciones(direcciones, selectedValue);
+
+            if (direcciones.length === 0) {
+                updateHelp('No hay direcciones disponibles para este proyecto.');
+            } else {
+                updateHelp('Selecciona una dirección si aplica.');
+            }
+        } catch (error) {
+            console.error('Error al cargar direcciones:', error);
+            renderDirecciones([], '');
+            updateHelp('No fue posible cargar las direcciones.');
+        }
+
+        direccionSelect.dataset.selected = '';
+    }
+
+    async function loadEspacios() {
+        const direccionId = direccionSelect.value;
+        const selectedValue = espacioSelect.dataset.selected || espacioSelect.value || '';
+
+        if (!direccionId) {
+            renderEspacios([], '');
+            updateHelp('Selecciona una dirección para cargar espacios.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/setap/tasks/refreshSpacesSelect?direccion_id=${encodeURIComponent(direccionId)}`);
             const data = await response.json();
 
             if (!data.success) {
@@ -85,7 +146,10 @@ document.addEventListener('DOMContentLoaded', function() {
         espacioSelect.dataset.selected = '';
     }
 
-    proyectoSelect.addEventListener('change', loadEspacios);
+    proyectoSelect.addEventListener('change', loadDirecciones);
+    loadDirecciones();
+
+    direccionSelect.addEventListener('change', loadEspacios);
     loadEspacios();
 });
 

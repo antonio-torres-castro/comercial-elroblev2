@@ -1924,9 +1924,38 @@ class Task
     }
 
     /**
+     * Obtener direcciones por proyecto
+     */
+    public function getDirecciónByProyecto(int $proyectoId): array
+    {
+        try {
+            $sql = "SELECT 
+                        d.id,
+                        d.calle,
+                        d.numero,
+                        d.letra,
+                        c.nombre as comuna,
+                        p.nombre as provincia,
+                        r.nombre as region
+                    From direcciones d
+                Inner Join comunas   c on c.id = d.comuna_id
+                Inner Join provincia p on p.id = c.provincia_id
+                Inner Join regiones  r on r.id = p.region_id
+                WHERE d.proyecto_id = ?
+                ORDER BY d.id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$proyectoId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getDirecciónByProyecto: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtener espacios por proyecto (via direcciones)
      */
-    public function getEspaciosByProyecto(int $proyectoId): array
+    public function getEspaciosByProyecto(int $direccionId): array
     {
         try {
             $sql = "SELECT 
@@ -1936,18 +1965,18 @@ class Task
                     e.nivel,
                     e.orden,
                     te.nombre as tipo_nombre,
-                    d.id as direccion_id,
-                    d.calle,
-                    d.numero,
-                    d.letra,
-                    d.referencia
-                FROM direcciones d
-                INNER JOIN espacios e ON e.direccion_id = d.id
-                LEFT JOIN tipos_espacio te ON e.tipos_espacio_id = te.id
-                WHERE d.proyecto_id = ?
-                ORDER BY d.id, e.nivel, e.orden, e.nombre";
+                    ep1.nombre as espacio_padre1,
+                    ep2.nombre as espacio_padre2
+                    FROM direcciones d
+            INNER JOIN espacios    e ON e.direccion_id = d.id
+             LEFT JOIN tipos_espacio te ON e.tipos_espacio_id = te.id
+             LEFT JOIN espacios    ep1 ON ep1.id = e.espacio_padre_id
+             LEFT JOIN espacios    ep2 ON ep2.id = ep1.espacio_padre_id
+
+            WHERE d.id = ?
+            ORDER BY d.id, e.nivel, e.orden, e.nombre";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([$proyectoId]);
+            $stmt->execute([$direccionId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Task::getEspaciosByProyecto: " . $e->getMessage());
