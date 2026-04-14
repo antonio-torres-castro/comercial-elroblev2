@@ -879,6 +879,27 @@ class TaskController extends BaseController
     }
 
     /**
+     * AJAX para obtener espacios de una dirección
+     */
+    public function getEspaciosByDireccionJson()
+    {
+        try {
+            $direccionId = (int)($_GET['direccion_id'] ?? 0);
+            if ($direccionId <= 0) {
+                $this->jsonError('Dirección inválida');
+                return;
+            }
+            // Usamos el método existente en TaskModel o EspaciosModel
+            // Veo que TaskController ya usa $this->taskModel
+            $spaces = $this->taskModel->getEspaciosByProyecto($direccionId);
+            $this->jsonSuccess('Espacios cargados', ['spaces' => $spaces]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::getEspaciosByDireccionJson: " . $e->getMessage());
+            $this->jsonError('Error al obtener espacios de la dirección');
+        }
+    }
+
+    /**
      * Guardar tareas por proceso
      */
     public function storeByProcess()
@@ -937,31 +958,63 @@ class TaskController extends BaseController
             }
 
             $countSuccess = 0;
-            $countTotal = count($processTasks);
+            $countTotal = 0;
 
-            foreach ($processTasks as $pTask) {
-                $taskData = [
-                    'proyecto_id' => $projectId,
-                    'tarea_id' => $pTask['tarea_id'],
-                    'planificador_id' => $currentUser['id'],
-                    'ejecutor_id' => null, // No se asigna ejecutor aquí
-                    'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
-                    'espacio_id' => !empty($_POST['espacio_id']) ? (int)$_POST['espacio_id'] : null,
-                    'fecha_inicio' => $fechaInicio,
-                    'duracion_horas' => (float)$pTask['hh'],
-                    'fecha_fin' => $fechaFin,
-                    'prioridad' => $pTask['prioridad'] ?? 5, // Default "5 - Media"
-                    'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2), // Default "Activo"
-                    'tipo_ocurrencia' => $tipoOcurr,
-                    'dias_semana' => $_POST['dias'] ?? [],
-                    'intervalo_dias' => (int)($_POST['intervalo_dias'] ?? 0),
-                    'duracion_bloque_dias' => (int)($_POST['duracion_bloque_dias'] ?? 0),
-                    'dias_semana_intervalo' => $_POST['dias_intervalo'] ?? [],
-                    'ajustar_feriados' => !empty($_POST['ajustar_feriados']) ? 1 : 0
-                ];
+            // Si recibimos tareas específicas desde el modal
+            if (!empty($_POST['tasks_process'])) {
+                $countTotal = count($_POST['tasks_process']);
+                foreach ($_POST['tasks_process'] as $taskItem) {
+                    $taskData = [
+                        'proyecto_id' => $projectId,
+                        'tarea_id' => (int)$taskItem['tarea_id'],
+                        'planificador_id' => $currentUser['id'],
+                        'ejecutor_id' => null,
+                        'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
+                        'espacio_id' => !empty($taskItem['espacio_id']) ? (int)$taskItem['espacio_id'] : null,
+                        'fecha_inicio' => $fechaInicio,
+                        'duracion_horas' => (float)$taskItem['hh'],
+                        'fecha_fin' => $fechaFin,
+                        'prioridad' => (int)($taskItem['prioridad'] ?? 5),
+                        'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2),
+                        'tipo_ocurrencia' => $tipoOcurr,
+                        'dias_semana' => $_POST['dias'] ?? [],
+                        'intervalo_dias' => (int)($_POST['intervalo_dias'] ?? 0),
+                        'duracion_bloque_dias' => (int)($_POST['duracion_bloque_dias'] ?? 0),
+                        'dias_semana_intervalo' => $_POST['dias_intervalo'] ?? [],
+                        'ajustar_feriados' => !empty($_POST['ajustar_feriados']) ? 1 : 0
+                    ];
 
-                if ($this->taskModel->create($taskData)) {
-                    $countSuccess++;
+                    if ($this->taskModel->create($taskData)) {
+                        $countSuccess++;
+                    }
+                }
+            } else {
+                // Fallback: usar todas las tareas del proceso si no se enviaron detalles (no debería ocurrir con el nuevo JS)
+                $countTotal = count($processTasks);
+                foreach ($processTasks as $pTask) {
+                    $taskData = [
+                        'proyecto_id' => $projectId,
+                        'tarea_id' => $pTask['tarea_id'],
+                        'planificador_id' => $currentUser['id'],
+                        'ejecutor_id' => null,
+                        'supervisor_id' => !empty($_POST['supervisor_id']) ? (int)$_POST['supervisor_id'] : null,
+                        'espacio_id' => null, // No hay espacio_id individual en el fallback
+                        'fecha_inicio' => $fechaInicio,
+                        'duracion_horas' => (float)$pTask['hh'],
+                        'fecha_fin' => $fechaFin,
+                        'prioridad' => $pTask['prioridad'] ?? 5,
+                        'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2),
+                        'tipo_ocurrencia' => $tipoOcurr,
+                        'dias_semana' => $_POST['dias'] ?? [],
+                        'intervalo_dias' => (int)($_POST['intervalo_dias'] ?? 0),
+                        'duracion_bloque_dias' => (int)($_POST['duracion_bloque_dias'] ?? 0),
+                        'dias_semana_intervalo' => $_POST['dias_intervalo'] ?? [],
+                        'ajustar_feriados' => !empty($_POST['ajustar_feriados']) ? 1 : 0
+                    ];
+
+                    if ($this->taskModel->create($taskData)) {
+                        $countSuccess++;
+                    }
                 }
             }
 
@@ -1276,7 +1329,7 @@ class TaskController extends BaseController
             unset($filterParams['id'], $filterParams['error'], $filterParams['success']);
 
             $adresses = $this->taskModel->getDireccionByProyecto($task['proyecto_id']);
-            $spaces = $this->taskModel->getEspaciosByProyecto($task['direccion_id']);
+            $spaces = $this->taskModel->getEspaciosByProyecto($task['direccion_id'] ?? 0);
 
             $data = [
                 'user' => $currentUser,

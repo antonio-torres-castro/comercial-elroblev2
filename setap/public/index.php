@@ -809,6 +809,24 @@ try {
                     }
                     break;
 
+                case 'refreshSupervisorSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshSupervisorSelect();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'getEspaciosByDireccionJson':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->getEspaciosByDireccionJson();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'searchTasksAutocomplete':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $controller->searchTasksAutocomplete();

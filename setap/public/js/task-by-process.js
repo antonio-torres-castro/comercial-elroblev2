@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('createTaskByProcessForm');
     const proveedorSelect = document.getElementById('proveedor_id');
     const proyectoSelect = document.getElementById('proyecto_id');
-    
+
     const direccionSelect = document.getElementById('direccion_id');
     const direccionHelp = document.getElementById('direccion_help');
 
@@ -119,134 +119,125 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 4. Ver tareas del proceso en el modal
     if (btnVerTareas) {
-        btnVerTareas.addEventListener('click', function () {
+        btnVerTareas.addEventListener('click', async function () {
 
             const processId = procesoSelect.value;
+            const direccionId = direccionSelect.value;
 
             // Estado de carga
             taskList.innerHTML = `
                 <div class="text-center p-2">Cargando tareas...</div>
             `;
 
-            fetch(`/setap/tasks/getProcessTasksJson?process_id=${processId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error HTTP: ' + response.status);
+            try {
+                // Cargar tareas y espacios en paralelo
+                const [tasksRes, spacesRes] = await Promise.all([
+                    fetch(`/setap/tasks/getProcessTasksJson?process_id=${processId}`).then(r => r.json()),
+                    direccionId ? fetch(`/setap/tasks/getEspaciosByDireccionJson?direccion_id=${direccionId}`).then(r => r.json()) : Promise.resolve({ success: true, data: { spaces: [] } })
+                ]);
+
+                if (!tasksRes.success) throw new Error(tasksRes.message || 'Error al cargar tareas');
+
+                const tasks = tasksRes.tasks || [];
+                const spaces = spacesRes?.spaces || [];
+
+                if (tasks.length === 0) {
+                    taskList.innerHTML = `<div class="text-center p-2">No hay tareas asociadas</div>`;
+                    return;
+                }
+
+                // =========================
+                // Helpers
+                // =========================
+                const getPrioridadTexto = (valor) => {
+                    switch (parseInt(valor)) {
+                        case 0: return 'Baja';
+                        case 3: return 'Normal';
+                        case 5: return 'Media';
+                        case 7: return 'Alta';
+                        case 10: return 'Crítica';
+                        default: return 'Desconocida';
                     }
-                    return response.json();
-                })
-                .then(data => {
+                };
 
-                    if (!data.success) {
-                        throw new Error(data.message || 'Error en la respuesta del servidor');
+                const getPrioridadBadge = (valor) => {
+                    switch (parseInt(valor)) {
+                        case 0: return 'bg-success';
+                        case 3: return 'bg-primary';
+                        case 5: return 'bg-info';
+                        case 7: return 'bg-warning';
+                        case 10: return 'bg-danger';
+                        default: return 'bg-secondary';
                     }
+                };
 
-                    const tasks = data.tasks || [];
+                // =========================
+                // Construcción tabla
+                // =========================
+                let totalHH = 0;
+                let html = `
+                    <div class="table-responsive" style="max-height: 50vh; overflow-y: auto;">
+                        <table class="table table-sm table-bordered table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th class="text-center">HH</th>
+                                    <th class="text-center">Prioridad</th>
+                                    <th class="text-center">Espacio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
 
-                    if (tasks.length === 0) {
-                        taskList.innerHTML = `
-                            <div class="text-center p-2">No hay tareas asociadas</div>
-                        `;
-                        return;
-                    }
+                tasks.forEach((task, index) => {
+                    const hh = parseFloat(task.hh) || 0;
+                    totalHH += hh;
 
-                    // =========================
-                    // Helpers
-                    // =========================
-                    const getPrioridadTexto = (valor) => {
-                        switch (parseInt(valor)) {
-                            case 0: return 'Baja';
-                            case 3: return 'Normal';
-                            case 5: return 'Media';
-                            case 7: return 'Alta';
-                            case 10: return 'Crítica';
-                            default: return 'Desconocida';
-                        }
-                    };
-
-                    const getPrioridadBadge = (valor) => {
-                        switch (parseInt(valor)) {
-                            case 0: return 'bg-success';   // Baja
-                            case 3: return 'bg-primary';   // Normal
-                            case 5: return 'bg-info';      // Media
-                            case 7: return 'bg-warning';   // Alta
-                            case 10: return 'bg-danger';   // Crítica
-                            default: return 'bg-secondary';
-                        }
-                    };
-
-                    // =========================
-                    // Construcción tabla
-                    // =========================
-                    let totalHH = 0;
-
-                    let html = `
-                        <div class="table-responsive" style="max-height: 50vh; overflow-y: auto;">
-                            <table class="table table-sm table-bordered table-hover align-middle mb-0">
-                                <thead class="table-light sticky-top">
-                                    <tr>
-                                        <th hidden>Id</th>
-                                        <th>Nombre</th>
-                                        <th class="text-center">HH</th>
-                                        <th class="text-center">Prioridad</th>
-                                        <th class="text-center">Espacio</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-
-                    tasks.forEach(task => {
-                        const hh = parseFloat(task.hh) || 0;
-                        totalHH += hh;
-
-                        html += `
-                            <tr>
-                                <td hidden>${task.id}</td>
-                                <td>${task.tarea_nombre}</td>
-                                <td class="text-center">${hh}</td>
-                                <td class="text-center">
-                                    <span class="badge ${getPrioridadBadge(task.prioridad)}">
-                                        ${getPrioridadTexto(task.prioridad)}
-                                    </span>
-                                </td>
-                                <td>
-                                    <select class="form-select" name="espacio_id">
-                                        <option value="">Seleccionar espacio...</option>
-                                        ${spaces.map(space => `
-                                            <option value="${space.id}">${space.nombre}</option>
-                                        `).join('')}
-                                    </select>
-                                </td>
-                            </tr>
-                        `;
-                    });
-
-                    // Footer con total HH
                     html += `
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th class="text-end">Total</th>
-                                        <th class="text-center">${totalHH}</th>
-                                        <th></th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    `;
-
-                    taskList.innerHTML = html;
-
-                })
-                .catch(error => {
-                    console.error('Error al cargar tareas:', error);
-
-                    taskList.innerHTML = `
-                        <div class="text-danger text-center p-2">
-                            ${error.message || 'Error al cargar tareas'}
-                        </div>
+                        <tr>
+                            <td>
+                                ${task.tarea_nombre}
+                                <input type="hidden" name="tasks_process[${index}][tarea_id]" value="${task.tarea_id}">
+                                <input type="hidden" name="tasks_process[${index}][hh]" value="${hh}">
+                                <input type="hidden" name="tasks_process[${index}][prioridad]" value="${task.prioridad}">
+                            </td>
+                            <td class="text-center">${hh}</td>
+                            <td class="text-center">
+                                <span class="badge ${getPrioridadBadge(task.prioridad)}">
+                                    ${getPrioridadTexto(task.prioridad)}
+                                </span>
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm" name="tasks_process[${index}][espacio_id]">
+                                    <option value="">Seleccionar espacio...</option>
+                                    ${spaces.map(space => `
+                                        <option value="${space.id}">${space.nombre}</option>
+                                    `).join('')}
+                                </select>
+                            </td>
+                        </tr>
                     `;
                 });
+
+                html += `
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-center">${totalHH}</th>
+                                    <th colspan="2"></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+
+                taskList.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error al cargar datos del modal:', error);
+                taskList.innerHTML = `<div class="text-danger text-center p-2">${error.message}</div>`;
+            }
         });
     }
 
