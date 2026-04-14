@@ -54,7 +54,7 @@ use App\Constants\AppConstants; ?>
                                     <div class="row g-3">
                                         <!-- Proveedor (Solo Admin) -->
                                         <?php if ($data['user']['usuario_tipo_id'] == 1): ?>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label for="proveedor_id" class="form-label">Proveedor</label>
                                                 <select class="form-select" id="proveedor_id" name="proveedor_id">
                                                     <option value="">Seleccionar proveedor...</option>
@@ -70,13 +70,26 @@ use App\Constants\AppConstants; ?>
                                         <?php endif; ?>
 
                                         <!-- Proyecto -->
-                                        <div class="<?= ($data['user']['usuario_tipo_id'] == 1) ? 'col-md-6' : 'col-md-12'; ?>">
+                                        <div class="<?= ($data['user']['usuario_tipo_id'] == 1) ? 'col-md-4' : 'col-md-6'; ?>">
                                             <label for="proyecto_id" class="form-label">Proyecto <span class="text-danger">*</span></label>
                                             <select class="form-select" id="proyecto_id" name="proyecto_id" required>
                                                 <option value="">Seleccionar proyecto...</option>
                                                 <?php foreach ($data['projects'] as $project): ?>
                                                     <option value="<?= $project['id']; ?>" <?= ($data['project_id'] == $project['id']) ? 'selected' : ''; ?>>
                                                         <?= htmlspecialchars($project['nombre']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="<?= ($data['user']['usuario_tipo_id'] == 1) ? 'col-md-4' : 'col-md-6'; ?>">
+                                            <label for="direccion_id" class="form-label">Dirección <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="direccion_id" name="direccion_id" required>
+                                                <option value="">Seleccionar dirección...</option>
+                                                <?php foreach ($data['projectAdresses'] as $pa): ?>
+                                                    <option value="<?= (int)$pa['id'] ?>"
+                                                        <?= $pa['id'] == $data['task']['direccion_id'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($pa['nombre']) ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>

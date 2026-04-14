@@ -827,8 +827,12 @@ class TaskController extends BaseController
             if (count($supervisors) == 1) {
                 $supervisorId = $supervisors[0]['id'];
             }
-
-
+            $adresses = $this->taskModel->getDireccionByProyecto($project_id);
+            $direccion_id = 0;
+            if (count($adresses) == 1) {
+                $direccion_id = $adresses[0]['id'];
+            }
+            $spaces = $this->taskModel->getEspaciosByProyecto($direccion_id);
 
             $data = [
                 'user' => $currentUser,
@@ -837,10 +841,13 @@ class TaskController extends BaseController
                 'suppliers' => $suppliers,
                 'projects' => $projects,
                 'processes' => $processes,
+                'projectAdresses' => $adresses,
+                'projectSpaces' => $spaces,
                 'supervisor_users' => $supervisors,
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
                 'project_id' => $project_id,
                 'provider_id' => $provider_id,
+                'supervisor_id' => $supervisorId,
                 'error' => $_GET['error'] ?? ''
             ];
 

@@ -2,10 +2,83 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('createTaskByProcessForm');
     const proveedorSelect = document.getElementById('proveedor_id');
     const proyectoSelect = document.getElementById('proyecto_id');
+    
+    const direccionSelect = document.getElementById('direccion_id');
+    const direccionHelp = document.getElementById('direccion_help');
+
     const procesoSelect = document.getElementById('proceso_id');
     const supervisorSelect = document.getElementById('supervisor_id');
     const btnVerTareas = document.getElementById('btnVerTareas');
     const taskList = document.getElementById('taskList');
+
+    function buildDireccionLabel(direccion) {
+        const calle = direccion.calle ? String(direccion.calle) : '';
+        const numero = direccion.numero ? ` ${direccion.numero}` : '';
+        const letra = direccion.letra ? ` ${direccion.letra}` : '';
+        const comuna = direccion.comuna ? ` (${direccion.comuna})` : '';
+        const provincia = direccion.provincia ? ` (${direccion.provincia})` : '';
+        const region = direccion.region ? ` (${direccion.region})` : '';
+        return `${calle}${numero}${letra}${comuna}${provincia}${region}`.trim();
+    }
+
+    function updateHelp(text) {
+        if (direccionHelp) {
+            direccionHelp.textContent = text;
+        }
+    }
+
+    function renderDirecciones(direcciones, selectedValue) {
+        let optionsHtml = '<option value="">Sin direccion (opcional)</option>';
+        direcciones.forEach(direccion => {
+            optionsHtml += `<option value="${direccion.id}">${buildDireccionLabel(direccion)}</option>`;
+        });
+        direccionSelect.innerHTML = optionsHtml;
+
+        if (selectedValue) {
+            const exists = direcciones.some(direccion => String(direccion.id) === String(selectedValue));
+            direccionSelect.value = exists ? String(selectedValue) : '';
+        } else {
+            direccionSelect.value = '';
+        }
+    }
+
+    async function loadDirecciones() {
+        const projectId = proyectoSelect.value;
+        const selectedValue = direccionSelect.dataset.selected || direccionSelect.value || '';
+
+        if (!projectId) {
+            renderDirecciones([], '');
+            updateHelp('Selecciona un proyecto para cargar direcciones.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/setap/tasks/refreshDireccionSelect?proyecto_id=${encodeURIComponent(projectId)}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                console.error('Error al cargar direcciones:', data.message || 'Respuesta no válida');
+                renderDirecciones([], '');
+                updateHelp('No fue posible cargar las direcciones.');
+                return;
+            }
+
+            const direcciones = data.direcciones || [];
+            renderDirecciones(direcciones, selectedValue);
+
+            if (direcciones.length === 0) {
+                updateHelp('No hay direcciones disponibles para este proyecto.');
+            } else {
+                updateHelp('Selecciona una dirección si aplica.');
+            }
+        } catch (error) {
+            console.error('Error al cargar direcciones:', error);
+            renderDirecciones([], '');
+            updateHelp('No fue posible cargar las direcciones.');
+        }
+
+        direccionSelect.dataset.selected = '';
+    }
 
     // 1. Al seleccionar un proveedor: filtrar proyectos y procesos
     if (proveedorSelect) {
@@ -33,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const proyectoId = this.value;
             const proveedorId = proveedorSelect ? proveedorSelect.value : '';
             refreshSupervisors(proveedorId, proyectoId);
+            loadDirecciones();
         });
     }
 
@@ -111,9 +185,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             <table class="table table-sm table-bordered table-hover align-middle mb-0">
                                 <thead class="table-light sticky-top">
                                     <tr>
+                                        <th hidden>Id</th>
                                         <th>Nombre</th>
                                         <th class="text-center">HH</th>
                                         <th class="text-center">Prioridad</th>
+                                        <th class="text-center">Espacio</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -125,12 +201,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         html += `
                             <tr>
+                                <td hidden>${task.id}</td>
                                 <td>${task.tarea_nombre}</td>
                                 <td class="text-center">${hh}</td>
                                 <td class="text-center">
                                     <span class="badge ${getPrioridadBadge(task.prioridad)}">
                                         ${getPrioridadTexto(task.prioridad)}
                                     </span>
+                                </td>
+                                <td>
+                                    <select class="form-select" name="espacio_id">
+                                        <option value="">Seleccionar espacio...</option>
+                                        ${spaces.map(space => `
+                                            <option value="${space.id}">${space.nombre}</option>
+                                        `).join('')}
+                                    </select>
                                 </td>
                             </tr>
                         `;
