@@ -307,8 +307,6 @@ use App\Constants\AppConstants; ?>
                                         <!-- Creación Masiva Tab -->
                                         <div class="tab-pane fade show active" id="masivo" role="tabpanel" name="tabpane">
 
-                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
-
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label for="fecha_inicio_masivo" class="form-label">Inicio *</label>
@@ -376,7 +374,6 @@ use App\Constants\AppConstants; ?>
 
                                         <!-- Fecha Específica Tab -->
                                         <div class="tab-pane fade" id="especifico" role="tabpanel" name="tabpane">
-                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
@@ -395,7 +392,7 @@ use App\Constants\AppConstants; ?>
 
                                         <!-- Rango de Fechas Tab -->
                                         <div class="tab-pane fade" id="rango" role="tabpanel" name="tabpane">
-                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
+
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
@@ -414,7 +411,6 @@ use App\Constants\AppConstants; ?>
 
                                         <!-- Intervalo de Fechas Tab -->
                                         <div class="tab-pane fade" id="intervalo" role="tabpanel" name="tabpane">
-                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
