@@ -27,7 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const tipo = espacio.tipo_nombre ? ` - ${espacio.tipo_nombre}` : '';
         const espacioPadre1 = espacio.espacio_padre1 ? ` - ${espacio.espacio_padre1}` : '';
         const espacioPadre2 = espacio.espacio_padre2 ? ` - ${espacio.espacio_padre2}` : '';
-        return `${nombre}${codigo}${nivel}${orden}${tipo}${espacioPadre1}${espacioPadre2}`;
+        const espacioPadre3 = espacio.espacio_padre3 ? ` - ${espacio.espacio_padre3}` : '';
+        const espacioPadre4 = espacio.espacio_padre4 ? ` - ${espacio.espacio_padre4}` : '';
+        const espacioPadre5 = espacio.espacio_padre5 ? ` - ${espacio.espacio_padre5}` : '';
+        const espacioPadre6 = espacio.espacio_padre6 ? ` - ${espacio.espacio_padre6}` : '';
+        const espacioPadre7 = espacio.espacio_padre7 ? ` - ${espacio.espacio_padre7}` : '';
+        return `${nombre}${codigo}${nivel}${orden}${tipo}${espacioPadre1}${espacioPadre2}${espacioPadre3}${espacioPadre4}${espacioPadre5}${espacioPadre6}${espacioPadre7}`;
     }
 
     function updateHelp(text) {

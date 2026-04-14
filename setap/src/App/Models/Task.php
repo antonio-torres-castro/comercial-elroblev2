@@ -1967,13 +1967,22 @@ class Task
                     e.orden,
                     te.nombre as tipo_nombre,
                     ep1.nombre as espacio_padre1,
-                    ep2.nombre as espacio_padre2
+                    ep2.nombre as espacio_padre2,
+                    ep3.nombre as espacio_padre3,
+                    ep4.nombre as espacio_padre4,
+                    ep5.nombre as espacio_padre5,
+                    ep6.nombre as espacio_padre6,
+                    ep7.nombre as espacio_padre7
                     FROM direcciones d
             INNER JOIN espacios    e ON e.direccion_id = d.id
              LEFT JOIN tipos_espacio te ON e.tipos_espacio_id = te.id
              LEFT JOIN espacios    ep1 ON ep1.id = e.espacio_padre_id
              LEFT JOIN espacios    ep2 ON ep2.id = ep1.espacio_padre_id
-
+             LEFT JOIN espacios    ep3 ON ep3.id = ep2.espacio_padre_id
+             LEFT JOIN espacios    ep4 ON ep4.id = ep3.espacio_padre_id
+             LEFT JOIN espacios    ep5 ON ep5.id = ep4.espacio_padre_id
+             LEFT JOIN espacios    ep6 ON ep6.id = ep5.espacio_padre_id
+             LEFT JOIN espacios    ep7 ON ep7.id = ep6.espacio_padre_id
             WHERE d.id = ?
             ORDER BY d.id, e.nivel, e.orden, e.nombre";
             $stmt = $this->db->prepare($sql);

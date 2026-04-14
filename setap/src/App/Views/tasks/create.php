@@ -307,7 +307,7 @@ use App\Constants\AppConstants; ?>
                                         <!-- Creación Masiva Tab -->
                                         <div class="tab-pane fade show active" id="masivo" role="tabpanel" name="tabpane">
 
-                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
@@ -376,15 +376,15 @@ use App\Constants\AppConstants; ?>
 
                                         <!-- Fecha Específica Tab -->
                                         <div class="tab-pane fade" id="especifico" role="tabpanel" name="tabpane">
-                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label for="fecha_especifica_inicio" class="form-label">Inicio *</label>
+                                                    <label for="fecha_especifica_inicio" class="form-label">Dia *</label>
                                                     <input type="date" class="form-control" id="fecha_especifica_inicio" name="fecha_especifica_inicio"
                                                         value="<?= htmlspecialchars($_POST['fecha_inicio'] ?? date('Y-m-d')); ?>" required>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-6" hidden>
                                                     <label for="fecha_especifica_fin" class="form-label">Fin *</label>
                                                     <input type="date" class="form-control" id="fecha_especifica_fin" name="fecha_especifica_fin"
                                                         value="<?= htmlspecialchars($_POST['fecha_fin'] ?? date('Y-m-d')); ?>" required disabled>
@@ -395,7 +395,7 @@ use App\Constants\AppConstants; ?>
 
                                         <!-- Rango de Fechas Tab -->
                                         <div class="tab-pane fade" id="rango" role="tabpanel" name="tabpane">
-                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
@@ -414,7 +414,7 @@ use App\Constants\AppConstants; ?>
 
                                         <!-- Intervalo de Fechas Tab -->
                                         <div class="tab-pane fade" id="intervalo" role="tabpanel" name="tabpane">
-                                            <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>">
+                                            <!-- <input type="hidden" name="proyecto_id" value="<?= $project['id'] ?>"> -->
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
