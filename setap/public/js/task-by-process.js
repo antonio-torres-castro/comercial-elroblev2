@@ -110,10 +110,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 3. Habilitar/deshabilitar botón de ver tareas
+    // 3. Habilitar/deshabilitar botón de ver tareas y limpiar tareas previas
     if (procesoSelect) {
         procesoSelect.addEventListener('change', function () {
             btnVerTareas.disabled = !this.value;
+            // Limpiar tareas cargadas anteriormente para evitar enviar datos de un proceso anterior
+            if (taskList) {
+                taskList.innerHTML = '<div class="text-center p-3">Cargando tareas...</div>';
+            }
         });
     }
 
