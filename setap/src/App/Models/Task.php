@@ -2013,6 +2013,42 @@ class Task
         }
     }
 
+    /**
+     * Espacios padre de una direccion
+     */
+    public function getEspaciosPadreByDireccion(int $direccionId): array
+    {
+        try {
+            $sql = "SELECT es.id, es.nombre
+                    FROM espacios es
+                INNER JOIN (
+                    Select 
+                        e.espacio_padre_id
+                    From direcciones d
+                Inner Join espacios      e   ON e.direccion_id = d.id
+                 Left Join tipos_espacio te  ON e.tipos_espacio_id = te.id
+                 Left Join espacios      ep1 ON ep1.id = e.espacio_padre_id
+                 Left Join espacios      ep2 ON ep2.id = ep1.espacio_padre_id
+                 Left Join espacios      ep3 ON ep3.id = ep2.espacio_padre_id
+                 Left Join espacios      ep4 ON ep4.id = ep3.espacio_padre_id
+                 Left Join espacios      ep5 ON ep5.id = ep4.espacio_padre_id
+                 Left Join espacios      ep6 ON ep6.id = ep5.espacio_padre_id
+                 Left Join espacios      ep7 ON ep7.id = ep6.espacio_padre_id
+                 Where d.id = 3 and 
+                 (
+                  ep1.id is not null or ep2.id is not null or ep3.id is not null or
+                  ep4.id is not null or ep5.id is not null or ep6.id is not null or 
+                  ep7.id is not null) 
+                 ) padres ON padres.espacio_padre_id = es.id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$direccionId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getEspaciosPadreByDireccion: " . $e->getMessage());
+            return [];
+        }
+    }
+
     /* Obtener usuarios disponibles para asignación
      */
     public function getUsers(): array
