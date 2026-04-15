@@ -66,7 +66,7 @@ use App\Constants\AppConstants; ?>
                                                 <?php endif; ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-1">
                                             <label class="form-label">Estado</label>
                                             <select class="form-select" name="estado_tipo_id" onchange="this.form.submit()">
                                                 <option value="">Todos</option>
@@ -106,9 +106,23 @@ use App\Constants\AppConstants; ?>
                                                 value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>" onchange="this.form.submit()">
                                         </div>
 
+                                        <div class="col-md-3">
+                                            <label class="form-label">Buscar Tarea (Autocompletar)</label>
+                                            <div class="position-relative">
+                                                <input type="text" class="form-control" id="task_autocomplete" name="tarea_nombre"
+                                                    placeholder="Escriba para buscar tarea..."
+                                                    value="<?= htmlspecialchars($_GET['tarea_nombre'] ?? '') ?>"
+                                                    autocomplete="off">
+                                                <div id="autocomplete_results" class="list-group position-absolute w-100 mt-1 d-none"
+                                                    style="z-index: 1050; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                                </div>
+                                            </div>
+                                        </div>
+
+
                                         <div class="col-md-2 d-flex align-items-end">
                                             <button type="submit" class="btn btn-outline-setap-primary me-2">
-                                                <i class="bi bi-search"></i> Filtrar
+                                                <i class="bi bi-search"></i>
                                             </button>
                                             <a href="<?= AppConstants::ROUTE_MY_TASKS ?>" class="btn btn-outline-secondary">
                                                 <i class="bi bi-x-lg"></i>

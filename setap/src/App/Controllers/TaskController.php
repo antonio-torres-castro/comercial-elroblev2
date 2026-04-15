@@ -505,6 +505,10 @@ class TaskController extends BaseController
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
 
+            if (!empty($_GET['tarea_nombre'])) {
+                $filters['tarea_nombre'] = $_GET['tarea_nombre'];
+            }
+
             // Configuración de paginación
             $perPage = 7;
             $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
