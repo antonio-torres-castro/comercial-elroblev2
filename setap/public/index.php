@@ -827,9 +827,27 @@ try {
                     }
                     break;
 
-                case 'searchTasksAutocomplete':
+                case 'getEspaciosByDireccionJson':
                     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                        $controller->searchTasksAutocomplete();
+                        $controller->getEspaciosByDireccionJson();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'refreshDireccionSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshDireccionSelect();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'refreshEspaciosPadreSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshEspaciosPadreSelect();
                     } else {
                         http_response_code(405);
                         echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);

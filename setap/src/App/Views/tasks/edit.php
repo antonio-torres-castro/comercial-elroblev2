@@ -128,7 +128,7 @@ use App\Constants\AppConstants; ?>
                                                         <?php foreach ($data['projectAdresses'] as $pa): ?>
                                                             <option value="<?= (int)$pa['id'] ?>"
                                                                 <?= $pa['id'] == $data['task']['direccion_id'] ? 'selected' : '' ?>>
-                                                                <?= htmlspecialchars($pa['nombre']) ?>
+                                                                <?= htmlspecialchars($pa['calle'] . ' ' . $pa['numero'] . ', ' . $pa['comuna'] . '-' . $pa['provincia'] . '-' . $pa['region']) ?>
                                                             </option>
                                                         <?php endforeach; ?>
                                                     </select>

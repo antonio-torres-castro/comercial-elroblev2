@@ -135,6 +135,25 @@ class Task
                 $params[] = "%" . $filters['tarea_nombre'] . "%";
             }
 
+            if (isset($filters['direccion_id']) && !empty($filters['direccion_id'])) {
+                $strWhere .= " AND Exists (Select 1 From direcciones d Where d.proyecto_id = ? and d.id = ?)";
+                $params[] = $filters['proyecto_id'];
+                $params[] = $filters['direccion_id'];
+            }
+
+            if (isset($filters['espacio_padre_id']) && !empty($filters['espacio_padre_id'])) {
+                $strWhere .= " AND (pt.espacio_id = ? OR EXISTS (
+                    SELECT 1 FROM espacios e 
+                    WHERE e.id = pt.espacio_id 
+                    AND (e.espacio_padre_id = ? OR e.espacio_padre_id IN (
+                        SELECT id FROM espacios WHERE espacio_padre_id = ?
+                    ))
+                ))";
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+            }
+
             $sql .= $strWhere;
             $sql .= " ORDER BY pt.fecha_inicio DESC";
 
@@ -258,6 +277,25 @@ class Task
             if (isset($filters['tarea_nombre']) && !empty($filters['tarea_nombre'])) {
                 $strWhere .= " AND t.nombre LIKE ?";
                 $params[] = "%" . $filters['tarea_nombre'] . "%";
+            }
+
+            if (isset($filters['direccion_id']) && !empty($filters['direccion_id'])) {
+                $strWhere .= " AND Exists (Select 1 From direcciones d Where d.proyecto_id = ? and d.id = ?)";
+                $params[] = $filters['proyecto_id'];
+                $params[] = $filters['direccion_id'];
+            }
+
+            if (isset($filters['espacio_padre_id']) && !empty($filters['espacio_padre_id'])) {
+                $strWhere .= " AND (pt.espacio_id = ? OR EXISTS (
+                    SELECT 1 FROM espacios e 
+                    WHERE e.id = pt.espacio_id 
+                    AND (e.espacio_padre_id = ? OR e.espacio_padre_id IN (
+                        SELECT id FROM espacios WHERE espacio_padre_id = ?
+                    ))
+                ))";
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
             }
 
             $sql .= $strWhere;
@@ -1179,6 +1217,7 @@ class Task
                     super.nombre_usuario as supervisor_nombre,
                     p.tarea_tipo_id,
                     p.contraparte_id
+                    
                       FROM proyecto_tareas pt
                 INNER JOIN tareas          t     ON pt.tarea_id = t.id
                 INNER JOIN proyectos       p     ON pt.proyecto_id = p.id
@@ -1995,6 +2034,54 @@ class Task
     }
 
     /**
+     * Datos de un espacio
+     */
+    public function getEspacioById(int $id): array
+    {
+        try {
+            $sql = "SELECT 
+                        d.id,
+                        ifnull(ep1.nombre, '') + '-' + 
+                        ifnull(ep2.nombre, '') + '-' + 
+                        ifnull(ep3.nombre, '') + '-' + 
+                        ifnull(ep4.nombre, '') + '-' + 
+                        ifnull(ep5.nombre, '') + '-' + 
+                        ifnull(ep6.nombre, '') + '-' + 
+                        ifnull(ep7.nombre, '') as espacio_padre,
+                        e.nombre      as espacio_nombre,
+                        e.codigo      as espacio_codigo,
+                        e.nivel       as espacio_nivel,
+                        e.orden       as espacio_orden,
+                        e.descripcion as espacio_descripcion,
+                        d.calle,
+                        d.numero,
+                        d.letra,
+                        c.nombre as comuna,
+                        p.nombre as provincia,
+                        r.nombre as region
+                    From espacios    e
+                Inner Join direcciones d  on d.id = e.direccion_id
+                Inner Join comunas     c  on c.id = d.comuna_id
+                Inner Join provincia   p  on p.id = c.provincia_id
+                Inner Join regiones    r  on r.id = p.region_id
+                Left Join espacios    ep1 on ep1.id = e.espacio_padre_id
+                Left Join espacios    ep2 on ep2.id = e.espacio_padre_id
+                Left Join espacios    ep3 on ep3.id = e.espacio_padre_id
+                Left Join espacios    ep4 on ep4.id = e.espacio_padre_id
+                Left Join espacios    ep5 on ep5.id = e.espacio_padre_id
+                Left Join espacios    ep6 on ep6.id = e.espacio_padre_id
+                Left Join espacios    ep7 on ep7.id = e.espacio_padre_id
+                WHERE e.id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getEspacioById: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Validar si un espacio pertenece al proyecto
      */
     public function isEspacioInProyecto(int $espacioId, int $proyectoId): bool
@@ -2019,27 +2106,11 @@ class Task
     public function getEspaciosPadreByDireccion(int $direccionId): array
     {
         try {
-            $sql = "SELECT es.id, es.nombre
+            $sql = "SELECT DISTINCT es.id, es.nombre
                     FROM espacios es
-                INNER JOIN (
-                    Select 
-                        e.espacio_padre_id
-                    From direcciones d
-                Inner Join espacios      e   ON e.direccion_id = d.id
-                 Left Join tipos_espacio te  ON e.tipos_espacio_id = te.id
-                 Left Join espacios      ep1 ON ep1.id = e.espacio_padre_id
-                 Left Join espacios      ep2 ON ep2.id = ep1.espacio_padre_id
-                 Left Join espacios      ep3 ON ep3.id = ep2.espacio_padre_id
-                 Left Join espacios      ep4 ON ep4.id = ep3.espacio_padre_id
-                 Left Join espacios      ep5 ON ep5.id = ep4.espacio_padre_id
-                 Left Join espacios      ep6 ON ep6.id = ep5.espacio_padre_id
-                 Left Join espacios      ep7 ON ep7.id = ep6.espacio_padre_id
-                 Where d.id = 3 and 
-                 (
-                  ep1.id is not null or ep2.id is not null or ep3.id is not null or
-                  ep4.id is not null or ep5.id is not null or ep6.id is not null or 
-                  ep7.id is not null) 
-                 ) padres ON padres.espacio_padre_id = es.id";
+                    INNER JOIN espacios e ON e.espacio_padre_id = es.id
+                    WHERE e.direccion_id = ?
+                    ORDER BY es.nombre";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$direccionId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

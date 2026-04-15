@@ -110,7 +110,37 @@ use App\Constants\AppConstants; ?>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Dirección</label>
+                                            <select class="form-select" name="direccion_id" id="direccion_id" onchange="this.form.submit()">
+                                                <option value="">Seleccionar...</option>
+                                                <?php if (!empty($data['projectAdresses'])): ?>
+                                                    <?php foreach ($data['projectAdresses'] as $direccion): ?>
+                                                        <option value="<?= $direccion['id'] ?>"
+                                                            <?= (isset($_GET['direccion_id']) && $_GET['direccion_id'] == $direccion['id']) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($direccion['calle'] . ' ' . $direccion['numero'] . ' ' . $direccion['comuna'] . '-' . $direccion['provincia'] . '-' . $direccion['region']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label class="form-label">Espacio Padre</label>
+                                            <select class="form-select" name="espacio_padre_id" id="espacio_padre_id" onchange="this.form.submit()">
+                                                <option value="">Seleccionar...</option>
+                                                <?php if (!empty($data['espaciosPadre'])): ?>
+                                                    <?php foreach ($data['espaciosPadre'] as $espacio): ?>
+                                                        <option value="<?= $espacio['id'] ?>"
+                                                            <?= (isset($_GET['espacio_padre_id']) && $_GET['espacio_padre_id'] == $espacio['id']) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($espacio['nombre']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3">
                                             <label class="form-label">Buscar Tarea (Autocompletar)</label>
                                             <div class="position-relative">
                                                 <input type="text" class="form-control" id="task_autocomplete" name="tarea_nombre"

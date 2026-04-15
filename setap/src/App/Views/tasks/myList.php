@@ -54,7 +54,7 @@ use App\Constants\AppConstants; ?>
                                     <form method="GET" id="getFormFilter" class="row g-3">
                                         <div class="col-md-2">
                                             <label class="form-label">Proyecto</label>
-                                            <select class="form-select" name="proyecto_id" onchange="this.form.submit()">
+                                            <select class="form-select" name="proyecto_id" id="proyecto_id" onchange="this.form.submit()">
                                                 <option value="">Todos</option>
                                                 <?php if (!empty($data['projects'])): ?>
                                                     <?php foreach ($data['projects'] as $project): ?>
@@ -66,6 +66,37 @@ use App\Constants\AppConstants; ?>
                                                 <?php endif; ?>
                                             </select>
                                         </div>
+
+                                        <div class="col-md-2">
+                                            <label class="form-label">Dirección</label>
+                                            <select class="form-select" name="direccion_id" id="direccion_id" onchange="this.form.submit()">
+                                                <option value="">Todas</option>
+                                                <?php if (!empty($data['projectAdresses'])): ?>
+                                                    <?php foreach ($data['projectAdresses'] as $direccion): ?>
+                                                        <option value="<?= $direccion['id'] ?>"
+                                                            <?= (isset($_GET['direccion_id']) && $_GET['direccion_id'] == $direccion['id']) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($direccion['nombre']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label class="form-label">Espacio Padre</label>
+                                            <select class="form-select" name="espacio_padre_id" id="espacio_padre_id" onchange="this.form.submit()">
+                                                <option value="">Todos</option>
+                                                <?php if (!empty($data['espaciosPadre'])): ?>
+                                                    <?php foreach ($data['espaciosPadre'] as $espacio): ?>
+                                                        <option value="<?= $espacio['id'] ?>"
+                                                            <?= (isset($_GET['espacio_padre_id']) && $_GET['espacio_padre_id'] == $espacio['id']) ? 'selected' : '' ?>>
+                                                            <?= htmlspecialchars($espacio['nombre']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
+
                                         <div class="col-md-1">
                                             <label class="form-label">Estado</label>
                                             <select class="form-select" name="estado_tipo_id" onchange="this.form.submit()">

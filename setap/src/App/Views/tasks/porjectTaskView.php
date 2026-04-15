@@ -98,12 +98,115 @@ use App\Constants\AppConstants; ?>
                                                     <label for="supervisor_nombre" class="form-label">Supervisor</label>
                                                 </div>
                                             </div>
+
                                         </div>
 
                                     </div>
                                 </div>
 
 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Espacio: <?= isset($data['espacio']['espacio_nombre']) ? htmlspecialchars($data['espacio']['espacio_nombre']) : '' ?></h5>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="row">
+
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="espacio_descripcion" placeholder="" value="<?= isset($data['espacio']['espacio_descripcion']) ? htmlspecialchars($data['espacio']['espacio_descripcion']) : '' ?>" readonly>
+                                                    <label for="espacio_descripcion" class="form-label">Descripción</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="espacio_codigo" placeholder="" value="<?= isset($data['espacio']['espacio_codigo']) ? htmlspecialchars($data['espacio']['espacio_codigo']) : '' ?>" readonly>
+                                                    <label for="espacio_codigo" class="form-label">Código</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="espacio_nivel" placeholder="" value="<?= isset($data['espacio']['espacio_nivel']) ? htmlspecialchars($data['espacio']['espacio_nivel']) : '' ?>" readonly>
+                                                    <label for="espacio_nivel" class="form-label">Nivel</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="espacio_orden" placeholder="" value="<?= isset($data['espacio']['espacio_orden']) ? htmlspecialchars($data['espacio']['espacio_orden']) : '' ?>" readonly>
+                                                    <label for="espacio_orden" class="form-label">Orden</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="calle" placeholder="" value="<?= isset($data['espacio']['calle']) ? htmlspecialchars($data['espacio']['calle']) : '' ?>" readonly>
+                                                    <label for="calle" class="form-label">Calle</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-1">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="numero" placeholder="" value="<?= isset($data['espacio']['numero']) ? htmlspecialchars($data['espacio']['numero']) : '' ?>" readonly>
+                                                    <label for="numero" class="form-label">Número</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-1">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="letra" placeholder="" value="<?= isset($data['espacio']['letra']) ? htmlspecialchars($data['espacio']['letra']) : '' ?>" readonly>
+                                                    <label for="letra" class="form-label">Letra</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="comuna" placeholder="" value="<?= isset($data['espacio']['comuna']) ? htmlspecialchars($data['espacio']['comuna']) : '' ?>" readonly>
+                                                    <label for="comuna" class="form-label">Comuna</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="provincia" placeholder="" value="<?= isset($data['espacio']['provincia']) ? htmlspecialchars($data['espacio']['provincia']) : '' ?>" readonly>
+                                                    <label for="provincia" class="form-label">Provincia</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="region" placeholder="" value="<?= isset($data['espacio']['region']) ? htmlspecialchars($data['espacio']['region']) : '' ?>" readonly>
+                                                    <label for="region" class="form-label">Región</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="espacio_padre" placeholder="" value="<?= isset($data['espacio']['espacio_padre']) ? htmlspecialchars($data['espacio']['espacio_padre']) : '' ?>" readonly>
+                                                    <label for="espacio_padre" class="form-label">Padre</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

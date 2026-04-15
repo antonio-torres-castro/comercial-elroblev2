@@ -135,9 +135,27 @@ class TaskController extends BaseController
                 $filters['tarea_nombre'] = $_GET['tarea_nombre'];
             }
 
+            if (!empty($_GET['direccion_id'])) {
+                $filters['direccion_id'] = (int)$_GET['direccion_id'];
+            }
+
+            if (!empty($_GET['espacio_padre_id'])) {
+                $filters['espacio_padre_id'] = (int)$_GET['espacio_padre_id'];
+            }
+
             $users = $this->taskModel->getExecutorUsers($filters);
             if (count($users) == 1 && $uti > 1) {
                 $_GET['usuario_id'] = $users[0]['id'];
+            }
+
+            // Direcciones y Espacios Padre para filtros
+            $projectAdresses = [];
+            $espaciosPadre = [];
+            if (!empty($filters['proyecto_id'])) {
+                $projectAdresses = $this->taskModel->getDireccionByProyecto($filters['proyecto_id']);
+            }
+            if (!empty($filters['direccion_id'])) {
+                $espaciosPadre = $this->taskModel->getEspaciosPadreByDireccion($filters['direccion_id']);
             }
 
             $_GET['show_col_proyecto'] = empty($_GET['proyecto_id']);
@@ -166,6 +184,8 @@ class TaskController extends BaseController
                 'currentPage' => $currentPage,
                 'totalPages' => $totalPages,
                 'projects' => $projects,
+                'projectAdresses' => $projectAdresses,
+                'espaciosPadre' => $espaciosPadre,
                 'taskStates' => $taskStates,
                 'users' => $users,
                 'filters' => $filters,
@@ -567,6 +587,10 @@ class TaskController extends BaseController
                 return;
             }
             $task = $id ? $this->taskModel->getById($id) : null;
+            $espacio = [];
+            if (isset($task['espacio_id']) && !empty($task['espacio_id'])) {
+                $espacio = $this->taskModel->getEspacioById($task['espacio_id']);
+            }
 
             // Obtener historial de la tarea
             $taskHistory = $id ? $this->taskModel->getTaskHistory($id) : [];
@@ -590,6 +614,7 @@ class TaskController extends BaseController
                 'task_id' => $id,
                 'task' => $task,
                 'task_history' => $taskHistory,
+                'espacio' => $espacio,
                 'action' => 'view'
             ];
 
@@ -879,6 +904,32 @@ class TaskController extends BaseController
         } catch (Exception $e) {
             Logger::error("TaskController::getProcessTasksJson: " . $e->getMessage());
             $this->jsonError('Error al obtener tareas del proceso');
+        }
+    }
+
+    /**
+     * AJAX para obtener espacios padre de una dirección
+     */
+    public function refreshEspaciosPadreSelect()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->jsonUnauthorized();
+                return;
+            }
+
+            $direccionId = (int)($_GET['direccion_id'] ?? 0);
+            if ($direccionId <= 0) {
+                $this->jsonSuccess('Dirección no especificada', ['espacios' => []]);
+                return;
+            }
+
+            $espacios = $this->taskModel->getEspaciosPadreByDireccion($direccionId);
+            $this->jsonSuccess('Espacios padre cargados correctamente', ['espacios' => $espacios]);
+        } catch (Exception $e) {
+            Logger::error("TaskController::refreshEspaciosPadreSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar espacios padre', [], 500);
         }
     }
 
