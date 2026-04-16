@@ -139,10 +139,6 @@ class TaskController extends BaseController
                 $filters['direccion_id'] = (int)$_GET['direccion_id'];
             }
 
-            if (!empty($_GET['espacio_padre_id'])) {
-                $filters['espacio_padre_id'] = (int)$_GET['espacio_padre_id'];
-            }
-
             $users = $this->taskModel->getExecutorUsers($filters);
             if (count($users) == 1 && $uti > 1) {
                 $_GET['usuario_id'] = $users[0]['id'];
@@ -156,6 +152,10 @@ class TaskController extends BaseController
             }
             if (!empty($filters['direccion_id'])) {
                 $espaciosPadre = $this->taskModel->getEspaciosPadreByDireccion($filters['direccion_id']);
+            }
+
+            if (!empty($_GET['espacio_padre_id']) && in_array($_GET['espacio_padre_id'], array_column($espaciosPadre, 'id'))) {
+                $filters['espacio_padre_id'] = (int)$_GET['espacio_padre_id'];
             }
 
             $_GET['show_col_proyecto'] = empty($_GET['proyecto_id']);
@@ -529,6 +529,25 @@ class TaskController extends BaseController
                 $filters['tarea_nombre'] = $_GET['tarea_nombre'];
             }
 
+            if (!empty($_GET['direccion_id'])) {
+                $filters['direccion_id'] = (int)$_GET['direccion_id'];
+            }
+
+
+
+            // Direcciones y Espacios Padre para filtros
+            $projectAdresses = [];
+            $espaciosPadre = [];
+            if (!empty($filters['proyecto_id'])) {
+                $projectAdresses = $this->taskModel->getDireccionByProyecto($filters['proyecto_id']);
+            }
+            if (!empty($filters['direccion_id'])) {
+                $espaciosPadre = $this->taskModel->getEspaciosPadreByDireccion($filters['direccion_id']);
+            }
+            if (!empty($_GET['espacio_padre_id']) && in_array($_GET['espacio_padre_id'], array_column($espaciosPadre, 'id'))) {
+                $filters['espacio_padre_id'] = (int)$_GET['espacio_padre_id'];
+            }
+
             // Configuración de paginación
             $perPage = 7;
             $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
@@ -551,6 +570,8 @@ class TaskController extends BaseController
                 'currentPage' => $currentPage,
                 'totalPages' => $totalPages,
                 'projects' => $projects,
+                'projectAdresses' => $projectAdresses,
+                'espaciosPadre' => $espaciosPadre,
                 'taskStates' => $taskStates,
                 'users' => $users,
                 'filters' => $filters,

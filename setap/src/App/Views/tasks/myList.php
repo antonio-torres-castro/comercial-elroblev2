@@ -55,7 +55,7 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-2">
                                             <label class="form-label">Proyecto</label>
                                             <select class="form-select" name="proyecto_id" id="proyecto_id" onchange="this.form.submit()">
-                                                <option value="">Todos</option>
+                                                <option value="">Seleccionar...</option>
                                                 <?php if (!empty($data['projects'])): ?>
                                                     <?php foreach ($data['projects'] as $project): ?>
                                                         <option value="<?= $project['id'] ?>"
@@ -70,12 +70,12 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-2">
                                             <label class="form-label">Dirección</label>
                                             <select class="form-select" name="direccion_id" id="direccion_id" onchange="this.form.submit()">
-                                                <option value="">Todas</option>
+                                                <option value="">Seleccionar...</option>
                                                 <?php if (!empty($data['projectAdresses'])): ?>
                                                     <?php foreach ($data['projectAdresses'] as $direccion): ?>
                                                         <option value="<?= $direccion['id'] ?>"
                                                             <?= (isset($_GET['direccion_id']) && $_GET['direccion_id'] == $direccion['id']) ? 'selected' : '' ?>>
-                                                            <?= htmlspecialchars($direccion['nombre']) ?>
+                                                            <?= htmlspecialchars($direccion['calle'] . ' ' . $direccion['numero'] . ' ' . $direccion['comuna'] . '-' . $direccion['provincia'] . '-' . $direccion['region']) ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
@@ -85,7 +85,7 @@ use App\Constants\AppConstants; ?>
                                         <div class="col-md-2">
                                             <label class="form-label">Espacio Padre</label>
                                             <select class="form-select" name="espacio_padre_id" id="espacio_padre_id" onchange="this.form.submit()">
-                                                <option value="">Todos</option>
+                                                <option value="">Seleccionar...</option>
                                                 <?php if (!empty($data['espaciosPadre'])): ?>
                                                     <?php foreach ($data['espaciosPadre'] as $espacio): ?>
                                                         <option value="<?= $espacio['id'] ?>"

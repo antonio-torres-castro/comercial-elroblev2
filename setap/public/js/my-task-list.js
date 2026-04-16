@@ -220,8 +220,8 @@ if (proyectoSelect && direccionSelect) {
     proyectoSelect.addEventListener('change', function() {
         const projectId = this.value;
         if (!projectId) {
-            updateSelect(direccionSelect, [], 'Todas');
-            updateSelect(espacioPadreSelect, [], 'Todos');
+            updateSelect(direccionSelect, [], 'Seleccionar...');
+            updateSelect(espacioPadreSelect, [], 'Seleccionar...');
             return;
         }
         refreshDirecciones(projectId);
@@ -232,7 +232,7 @@ if (direccionSelect && espacioPadreSelect) {
     direccionSelect.addEventListener('change', function() {
         const direccionId = this.value;
         if (!direccionId) {
-            updateSelect(espacioPadreSelect, [], 'Todos');
+            updateSelect(espacioPadreSelect, [], 'Seleccionar...');
             return;
         }
         refreshEspaciosPadre(direccionId);
@@ -244,8 +244,8 @@ async function refreshDirecciones(projectId) {
         const response = await fetch(`/setap/tasks/refreshDireccionSelect?proyecto_id=${projectId}`);
         const data = await response.json();
         if (data.success) {
-            updateSelect(direccionSelect, data.direcciones, 'Todas');
-            updateSelect(espacioPadreSelect, [], 'Todos');
+            updateSelect(direccionSelect, data.direcciones, 'Seleccionar...');
+            updateSelect(espacioPadreSelect, [], 'Seleccionar...');
         }
     } catch (error) {
         console.error('Error refreshing direcciones:', error);
@@ -257,7 +257,7 @@ async function refreshEspaciosPadre(direccionId) {
         const response = await fetch(`/setap/tasks/refreshEspaciosPadreSelect?direccion_id=${direccionId}`);
         const data = await response.json();
         if (data.success) {
-            updateSelect(espacioPadreSelect, data.espacios, 'Todos');
+            updateSelect(espacioPadreSelect, data.espacios, 'Seleccionar...');
         }
     } catch (error) {
         console.error('Error refreshing espacios padre:', error);
@@ -265,7 +265,9 @@ async function refreshEspaciosPadre(direccionId) {
 }
 
 function updateSelect(selectElement, items, placeholder) {
-    if (!selectElement) return;
+    if (!selectElement) {
+        return;
+    }
     let html = `<option value="">${placeholder}</option>`;
     items.forEach(item => {
         html += `<option value="${item.id}">${item.nombre}</option>`;
