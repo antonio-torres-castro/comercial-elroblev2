@@ -186,6 +186,11 @@ class Task
                     pt.duracion_horas,
                     pt.prioridad,
                     pt.espacio_id,
+                    e.nombre  as espacio_nombre,
+                    e.codigo  as espacio_codigo,
+                    e.nivel   as espacio_nivel,
+                    e.orden   as espacio_orden, 
+                    ep.nombre as espacio_padre_nombre,
                     pt.fecha_Creado,
                     p.id as proyecto_id,
                     CONCAT(c.razon_social, '.', p.fecha_inicio, '.', p.fecha_fin) as proyecto_nombre,
@@ -204,7 +209,9 @@ class Task
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios plan ON pt.planificador_id = plan.id
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
-                LEFT JOIN usuarios super ON pt.supervisor_id = super.id ";
+                LEFT JOIN usuarios super ON pt.supervisor_id = super.id
+                LEFT JOIN espacios e ON e.id = pt.espacio_id
+                LEFT JOIN espacios ep ON ep.id = e.espacio_padre_id ";
             $strWhere = " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id

@@ -143,11 +143,22 @@ function viewDetail(taskId) {
     const taskDetail = document.querySelector(`#task-row-${taskId} .text-hide`).textContent;
     const taskDateHH = document.getElementById(`date-hh-${taskId}`).textContent;
     const taskState = document.getElementById(`status-badge-${taskId}`).textContent;
+    const taskSpace = document.getElementById(`space-${taskId}`).textContent;
+    const taskCode = document.getElementById(`code-${taskId}`).textContent;
+    const taskLevel = document.getElementById(`level-${taskId}`).textContent;
+    const taskOrder = document.getElementById(`order-${taskId}`).textContent;
+    const taskParentSpace = document.getElementById(`parent-space-${taskId}`).textContent;
 
-    document.getElementById('detailTaskName').textContent = taskName;
-    document.getElementById('detailTaskDescripcion').textContent = taskDetail;
-    document.getElementById('detailTaskFechaDuracion').textContent = taskDateHH;
-    document.getElementById('detailTaskStateName').textContent = taskState;
+
+    document.getElementById('detailTaskName').textContent = taskName.trim();
+    document.getElementById('detailTaskDescripcion').textContent = taskDetail.trim();
+    document.getElementById('detailTaskFechaDuracion').textContent = taskDateHH.trim();
+    document.getElementById('detailTaskStateName').textContent = taskState.trim();
+    document.getElementById('detailTaskSpaceName').textContent = taskSpace.trim();
+    document.getElementById('detailTaskSpaceCode').textContent = taskCode.trim();
+    document.getElementById('detailTaskSpaceLevel').textContent = taskLevel.trim();
+    document.getElementById('detailTaskSpaceOrder').textContent = taskOrder.trim();
+    document.getElementById('detailTaskParentSpaceName').textContent = taskParentSpace.trim();
 
     new bootstrap.Modal(document.getElementById('detailTaskModal')).show();
 }

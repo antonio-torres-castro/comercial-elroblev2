@@ -282,6 +282,54 @@ use App\Constants\AppConstants; ?>
                                                                 <small class="text-muted">Error</small>
                                                             <?php endif; ?>
                                                         </td><!-- fin Fechass -->
+
+                                                        <td><!-- Espacio -->
+                                                            <small id="space-<?= $task['id'] ?>" hidden>
+                                                                <?php if (!empty($task['espacio_nombre'])): ?>
+                                                                    <?= htmlspecialchars($task['espacio_nombre']) ?>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">Sin espacio</span>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </td>
+
+                                                        <td><!-- Codigo -->
+                                                            <small id="code-<?= $task['id'] ?>" hidden>
+                                                                <?php if (!empty($task['espacio_codigo'])): ?>
+                                                                    <?= htmlspecialchars($task['espacio_codigo']) ?>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">Sin código</span>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </td>
+                                                        <td><!-- Nivel -->
+                                                            <small id="level-<?= $task['id'] ?>" hidden>
+                                                                <?php if (!empty($task['espacio_nivel'])): ?>
+                                                                    <?= htmlspecialchars($task['espacio_nivel']) ?>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">Sin nivel</span>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </td>
+                                                        <td><!-- Orden -->
+                                                            <small id="order-<?= $task['id'] ?>" hidden>
+                                                                <?php if (!empty($task['espacio_orden'])): ?>
+                                                                    <?= htmlspecialchars($task['espacio_orden']) ?>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">Sin orden</span>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </td>
+                                                        <td><!-- Espacio Padre -->
+                                                            <small id="parent-space-<?= $task['id'] ?>" hidden>
+                                                                <?php if (!empty($task['espacio_padre_nombre'])): ?>
+                                                                    <?= htmlspecialchars($task['espacio_padre_nombre']) ?>
+                                                                <?php else: ?>
+                                                                    <span class="text-muted">Sin espacio padre</span>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </td>
+
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
@@ -431,6 +479,31 @@ use App\Constants\AppConstants; ?>
                                     </div>
                                 </div>
 
+                                <div class="col-4">
+                                    <label class="form-label fw-bold">Espacio</label>
+                                    <div id="detailTaskSpaceName" class="text"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label class="form-label fw-bold">Codigo</label>
+                                        <div id="detailTaskSpaceCode" class="text"></div>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <label class="form-label fw-bold">Nivel</label>
+                                        <div id="detailTaskSpaceLevel" class="text"></div>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <label class="form-label fw-bold">Orden</label>
+                                        <div id="detailTaskSpaceOrder" class="text"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-4">
+                                    <label class="form-label fw-bold">Espacio padre</label>
+                                    <div id="detailTaskParentSpaceName" class="text"></div>
+                                </div>
 
                             </div>
                             <div class="modal-footer">
