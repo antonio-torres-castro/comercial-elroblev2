@@ -419,16 +419,18 @@ use App\Constants\AppConstants; ?>
                                     <label class="form-label fw-bold">Descripción</label>
                                     <div id="detailTaskDescripcion" class="text"></div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-5">
+                                        <label class="form-label fw-bold">Fecha</label>
+                                        <div id="detailTaskFechaDuracion" class="text"></div>
+                                    </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Fecha</label>
-                                    <div id="detailTaskFechaDuracion" class="text"></div>
+                                    <div class="col-4">
+                                        <label class="form-label fw-bold">Estado</label>
+                                        <div id="detailTaskStateName" class="text-success"></div>
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Estado</label>
-                                    <div id="detailTaskStateName" class="text-success"></div>
-                                </div>
 
                             </div>
                             <div class="modal-footer">
