@@ -204,6 +204,161 @@ class TaskController extends BaseController
     }
 
     /**
+     * Lista de tareas agrupadas por direccion, espacio padre mas alto, nivel y orden
+     */
+    public function listDireccionEspacio()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
+
+            $aManageTask = $this->permissionService->hasMenuAccess($cu, 'manage_tasks');
+            $rActivity = $this->permissionService->hasPermission($cu, 'Register activity');
+            $rModify = $this->permissionService->hasPermission($cu, 'Modify');
+            $rCreate = $this->permissionService->hasPermission($cu, 'Create');
+            $rEliminate = $this->permissionService->hasPermission($cu, 'Eliminate');
+            $rApruve = $this->permissionService->hasPermission($cu, 'Apruve');
+
+            if (!$aManageTask) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+            $filters['sort_direccion_espacio'] = true;
+            $filters['proyecto_id'] = empty($_GET['proyecto_id']) ? 0 : (int)$_GET['proyecto_id'];
+
+            if (isset($_GET['estado_tipo_id']) && !empty($_GET['estado_tipo_id'])) {
+                $filters['estado_tipo_id'] = $_GET['estado_tipo_id'];
+            }
+            if (!empty($_GET['usuario_id']) && $_GET['usuario_id'] != -1) {
+                $filters['usuario_id'] = (int)$_GET['usuario_id'];
+            }
+            if (!empty($_GET['fecha_inicio'])) {
+                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            }
+            if (!empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = $_GET['fecha_fin'];
+            }
+            if (empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = date('Y-m-d');
+                $_GET['fecha_fin'] = $filters['fecha_fin'];
+            }
+
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+            if ($uti == 6) {
+                $filters['contraparte_id'] = $contraparteId;
+            }
+            if ($uti == 3) {
+                $filters['supervisor_id'] = $cu;
+            }
+            if ($uti == 2) {
+                $filters['planificador_id'] = $cu;
+            }
+            if (empty($_GET['usuario_id']) && $uti == 4) {
+                $filters['ejecutor_id'] = $cu;
+                $_GET['usuario_id'] = $filters['ejecutor_id'];
+            }
+
+            $_GET['show_col_acciones'] = $rModify && $rEliminate;
+            $_GET['show_btn_aprobar'] = $rApruve;
+            $_GET['show_btn_terminar'] = $rActivity && $rApruve;
+            $_GET['show_btn_nuevo'] = $rCreate;
+            $_GET['show_btn_activity'] = $rActivity;
+
+            if ($uti > 1 && isset($currentUser['proveedor_id'])) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            } elseif ($uti == 1 && isset($_GET['proveedor_id']) && !empty($_GET['proveedor_id'])) {
+                $filters['proveedor_id'] = $_GET['proveedor_id'];
+            }
+
+            $suppliers = $this->taskModel->getSuppliers($filters);
+            $projects = $this->taskModel->getProjects($filters);
+            if (count($projects) == 1) {
+                $_GET['proyecto_id'] = $projects[0]['id'];
+            }
+
+            if (!empty($_GET['excluye_eliminados'])) {
+                $filters['excluye_eliminados'] = $_GET['excluye_eliminados'];
+            }
+            if (!empty($_GET['excluye_no_asignados'])) {
+                $filters['excluye_no_asignados'] = $_GET['excluye_no_asignados'];
+            }
+            if (!empty($_GET['tarea_nombre'])) {
+                $filters['tarea_nombre'] = $_GET['tarea_nombre'];
+            }
+            if (!empty($_GET['direccion_id'])) {
+                $filters['direccion_id'] = (int)$_GET['direccion_id'];
+            }
+
+            $users = $this->taskModel->getExecutorUsers($filters);
+            if (count($users) == 1 && $uti > 1) {
+                $_GET['usuario_id'] = $users[0]['id'];
+            }
+
+            $projectAdresses = [];
+            $espaciosPadre = [];
+            if (!empty($filters['proyecto_id'])) {
+                $projectAdresses = $this->taskModel->getDireccionByProyecto($filters['proyecto_id']);
+            }
+            if (!empty($filters['direccion_id'])) {
+                $espaciosPadre = $this->taskModel->getEspaciosPadreByDireccion($filters['direccion_id']);
+            }
+            if (!empty($_GET['espacio_padre_id']) && in_array($_GET['espacio_padre_id'], array_column($espaciosPadre, 'id'))) {
+                $filters['espacio_padre_id'] = (int)$_GET['espacio_padre_id'];
+            }
+
+            $_GET['show_col_ejecuta'] = empty($_GET['usuario_id']) || $_GET['usuario_id'] == -1;
+
+            $perPage = 50;
+            $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+            $offset = ($currentPage - 1) * $perPage;
+            $totalRows = $this->taskModel->countAll($filters);
+            $totalPages = max(1, ceil($totalRows / $perPage));
+
+            $tasks = $this->taskModel->getAll($filters, $perPage, $offset);
+            $taskStates = $this->taskModel->getTaskStates($filters);
+
+            $data = [
+                'user' => $currentUser,
+                'suppliers' => $suppliers,
+                'tasks' => $tasks,
+                'totalRecords' => $totalRows,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
+                'projects' => $projects,
+                'projectAdresses' => $projectAdresses,
+                'espaciosPadre' => $espaciosPadre,
+                'taskStates' => $taskStates,
+                'users' => $users,
+                'filters' => $filters,
+                'title' => 'Gestión de Tareas por Dirección y Espacio',
+                'subtitle' => 'Lista agrupada de tareas',
+                'error' => $_GET['error'] ?? '',
+                'success' => $_GET['success'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/tasks/listDireccionEspacio.php';
+        } catch (Exception $e) {
+            Logger::error("TaskController::listDireccionEspacio: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    /**
      * Vista de horas planificadas (dia/semana/mes)
      */
     public function horas()
@@ -584,6 +739,142 @@ class TaskController extends BaseController
             require_once __DIR__ . '/../Views/tasks/myList.php';
         } catch (Exception $e) {
             Logger::error("TaskController::index: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    /**
+     * Lista de mis tareas agrupadas por direccion, espacio padre mas alto, nivel y orden
+     */
+    public function myListDireccionEspacio()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $uti = $currentUser['usuario_tipo_id'];
+            $cu = $currentUser['id'];
+            $contraparteId = $currentUser['contraparte_id'];
+
+            $aMyTasks = $this->permissionService->hasMenuAccess($currentUser['id'], 'my_tasks');
+            $rRead = $this->permissionService->hasPermission($currentUser['id'], 'Read');
+
+            if (!$aMyTasks) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_ACCESS_DENIED);
+                return;
+            }
+            if (!$rRead) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $cu;
+            $filters['sort_direccion_espacio'] = true;
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
+            if (!empty($_GET['proyecto_id'])) {
+                $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
+            }
+
+            $projects = $this->taskModel->getProjectsActivos($filters);
+            if (count($projects) == 1) {
+                $_GET['proyecto_id'] = $projects[0]['id'];
+            }
+
+            if (!empty($_GET['estado_tipo_id'])) {
+                $filters['estado_tipo_id'] = (int)$_GET['estado_tipo_id'];
+            }
+            if (!empty($_GET['usuario_id'])) {
+                $filters['usuario_id'] = (int)$_GET['usuario_id'];
+            }
+
+            if ($uti == 6) {
+                $filters['contraparte_id'] = $contraparteId;
+            }
+            if ($uti == 3) {
+                $filters['supervisor_id'] = $currentUser['id'];
+            }
+            if ($uti == 2) {
+                $filters['planificador_id'] = $currentUser['id'];
+            }
+            if (empty($_GET['usuario_id']) && $uti == 4) {
+                $filters['ejecutor_id'] = $currentUser['id'];
+                $_GET['usuario_id'] = $filters['ejecutor_id'];
+            }
+
+            $filters['excluye_eliminados'] = "1";
+
+            if (!empty($_GET['fecha_inicio'])) {
+                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            }
+            if (!empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = $_GET['fecha_fin'];
+            }
+            if (empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = date('Y-m-d');
+                $_GET['fecha_fin'] = $filters['fecha_fin'];
+            }
+
+            if (!empty($_GET['tarea_nombre'])) {
+                $filters['tarea_nombre'] = $_GET['tarea_nombre'];
+            }
+            if (!empty($_GET['direccion_id'])) {
+                $filters['direccion_id'] = (int)$_GET['direccion_id'];
+            }
+
+            $projectAdresses = [];
+            $espaciosPadre = [];
+            if (!empty($filters['proyecto_id'])) {
+                $projectAdresses = $this->taskModel->getDireccionByProyecto($filters['proyecto_id']);
+            }
+            if (!empty($filters['direccion_id'])) {
+                $espaciosPadre = $this->taskModel->getEspaciosPadreByDireccion($filters['direccion_id']);
+            }
+            if (!empty($_GET['espacio_padre_id']) && in_array($_GET['espacio_padre_id'], array_column($espaciosPadre, 'id'))) {
+                $filters['espacio_padre_id'] = (int)$_GET['espacio_padre_id'];
+            }
+
+            $perPage = 50;
+            $currentPage = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0 ? (int)$_GET['page'] : 1;
+            $offset = ($currentPage - 1) * $perPage;
+            $totalRows = $this->taskModel->countAll($filters);
+            $totalPages = max(1, ceil($totalRows / $perPage));
+
+            $tasks = $this->taskModel->getAll($filters, $perPage, $offset);
+            $taskStates = $this->taskModel->getTaskStatesMyListFilter();
+            $users = $this->taskModel->getUsers();
+
+            $data = [
+                'user' => $currentUser,
+                'tasks' => $tasks,
+                'totalRecords' => $totalRows,
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
+                'projects' => $projects,
+                'projectAdresses' => $projectAdresses,
+                'espaciosPadre' => $espaciosPadre,
+                'taskStates' => $taskStates,
+                'users' => $users,
+                'filters' => $filters,
+                'title' => 'Mis Tareas por Dirección y Espacio',
+                'subtitle' => 'Lista agrupada de mis tareas',
+                'error' => $_GET['error'] ?? '',
+                'success' => $_GET['success'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/tasks/mylistDireccionEspacio.php';
+        } catch (Exception $e) {
+            Logger::error("TaskController::myListDireccionEspacio: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
         }

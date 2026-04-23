@@ -60,7 +60,16 @@ class Task
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
                 INNER JOIN clientes c ON p.cliente_id = c.id
                 INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
+                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
+                LEFT JOIN espacios e ON e.id = pt.espacio_id
+                LEFT JOIN direcciones d ON d.id = e.direccion_id
+                LEFT JOIN espacios ep1 ON ep1.id = e.espacio_padre_id
+                LEFT JOIN espacios ep2 ON ep2.id = ep1.espacio_padre_id
+                LEFT JOIN espacios ep3 ON ep3.id = ep2.espacio_padre_id
+                LEFT JOIN espacios ep4 ON ep4.id = ep3.espacio_padre_id
+                LEFT JOIN espacios ep5 ON ep5.id = ep4.espacio_padre_id
+                LEFT JOIN espacios ep6 ON ep6.id = ep5.espacio_padre_id
+                LEFT JOIN espacios ep7 ON ep7.id = ep6.espacio_padre_id ";
             $strWhere = " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
@@ -136,19 +145,26 @@ class Task
             }
 
             if (isset($filters['direccion_id']) && !empty($filters['direccion_id'])) {
-                $strWhere .= " AND Exists (Select 1 From direcciones d Where d.proyecto_id = ? and d.id = ?)";
-                $params[] = $filters['proyecto_id'];
+                $strWhere .= " AND d.id = ?";
                 $params[] = $filters['direccion_id'];
             }
 
             if (isset($filters['espacio_padre_id']) && !empty($filters['espacio_padre_id'])) {
-                $strWhere .= " AND (pt.espacio_id = ? OR EXISTS (
-                    SELECT 1 FROM espacios e 
-                    WHERE e.id = pt.espacio_id 
-                    AND (e.espacio_padre_id = ? OR e.espacio_padre_id IN (
-                        SELECT id FROM espacios WHERE espacio_padre_id = ?
-                    ))
-                ))";
+                $strWhere .= " AND (
+                    pt.espacio_id = ?
+                    OR ep1.id = ?
+                    OR ep2.id = ?
+                    OR ep3.id = ?
+                    OR ep4.id = ?
+                    OR ep5.id = ?
+                    OR ep6.id = ?
+                    OR ep7.id = ?
+                )";
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
                 $params[] = $filters['espacio_padre_id'];
                 $params[] = $filters['espacio_padre_id'];
                 $params[] = $filters['espacio_padre_id'];
@@ -189,8 +205,17 @@ class Task
                     e.nombre  as espacio_nombre,
                     e.codigo  as espacio_codigo,
                     e.nivel   as espacio_nivel,
-                    e.orden   as espacio_orden, 
+                    e.orden   as espacio_orden,
                     ep.nombre as espacio_padre_nombre,
+                    d.id as direccion_id,
+                    d.calle as direccion_calle,
+                    d.numero as direccion_numero,
+                    d.letra as direccion_letra,
+                    co.nombre as direccion_comuna,
+                    prv.nombre as direccion_provincia,
+                    rg.nombre as direccion_region,
+                    COALESCE(ep7.id, ep6.id, ep5.id, ep4.id, ep3.id, ep2.id, ep1.id, e.id) as espacio_padre_mas_alto_id,
+                    COALESCE(ep7.nombre, ep6.nombre, ep5.nombre, ep4.nombre, ep3.nombre, ep2.nombre, ep1.nombre, e.nombre) as espacio_padre_mas_alto_nombre,
                     pt.fecha_Creado,
                     p.id as proyecto_id,
                     CONCAT(c.razon_social, '.', p.fecha_inicio, '.', p.fecha_fin) as proyecto_nombre,
@@ -211,7 +236,18 @@ class Task
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 LEFT JOIN usuarios super ON pt.supervisor_id = super.id
                 LEFT JOIN espacios e ON e.id = pt.espacio_id
-                LEFT JOIN espacios ep ON ep.id = e.espacio_padre_id ";
+                LEFT JOIN espacios ep ON ep.id = e.espacio_padre_id
+                LEFT JOIN direcciones d ON d.id = e.direccion_id
+                LEFT JOIN comunas co ON co.id = d.comuna_id
+                LEFT JOIN provincia prv ON prv.id = co.provincia_id
+                LEFT JOIN regiones rg ON rg.id = prv.region_id
+                LEFT JOIN espacios ep1 ON ep1.id = e.espacio_padre_id
+                LEFT JOIN espacios ep2 ON ep2.id = ep1.espacio_padre_id
+                LEFT JOIN espacios ep3 ON ep3.id = ep2.espacio_padre_id
+                LEFT JOIN espacios ep4 ON ep4.id = ep3.espacio_padre_id
+                LEFT JOIN espacios ep5 ON ep5.id = ep4.espacio_padre_id
+                LEFT JOIN espacios ep6 ON ep6.id = ep5.espacio_padre_id
+                LEFT JOIN espacios ep7 ON ep7.id = ep6.espacio_padre_id ";
             $strWhere = " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
@@ -287,26 +323,45 @@ class Task
             }
 
             if (isset($filters['direccion_id']) && !empty($filters['direccion_id'])) {
-                $strWhere .= " AND Exists (Select 1 From direcciones d Where d.proyecto_id = ? and d.id = ?)";
-                $params[] = $filters['proyecto_id'];
+                $strWhere .= " AND d.id = ?";
                 $params[] = $filters['direccion_id'];
             }
 
             if (isset($filters['espacio_padre_id']) && !empty($filters['espacio_padre_id'])) {
-                $strWhere .= " AND (pt.espacio_id = ? OR EXISTS (
-                    SELECT 1 FROM espacios e 
-                    WHERE e.id = pt.espacio_id 
-                    AND (e.espacio_padre_id = ? OR e.espacio_padre_id IN (
-                        SELECT id FROM espacios WHERE espacio_padre_id = ?
-                    ))
-                ))";
+                $strWhere .= " AND (
+                    pt.espacio_id = ?
+                    OR ep1.id = ?
+                    OR ep2.id = ?
+                    OR ep3.id = ?
+                    OR ep4.id = ?
+                    OR ep5.id = ?
+                    OR ep6.id = ?
+                    OR ep7.id = ?
+                )";
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
+                $params[] = $filters['espacio_padre_id'];
                 $params[] = $filters['espacio_padre_id'];
                 $params[] = $filters['espacio_padre_id'];
                 $params[] = $filters['espacio_padre_id'];
             }
 
             $sql .= $strWhere;
-            $sql .= " ORDER BY pt.fecha_inicio ASC, pt.id asc LIMIT ? OFFSET ?";
+            if (!empty($filters['sort_direccion_espacio'])) {
+                $sql .= " ORDER BY
+                    pt.proyecto_id ASC,
+                    COALESCE(d.id, 0) ASC,
+                    COALESCE(ep7.nombre, ep6.nombre, ep5.nombre, ep4.nombre, ep3.nombre, ep2.nombre, ep1.nombre, e.nombre, 'Sin espacio') ASC,
+                    COALESCE(e.nivel, 999999) ASC,
+                    COALESCE(e.orden, 999999) ASC,
+                    pt.fecha_inicio ASC,
+                    pt.id ASC";
+            } else {
+                $sql .= " ORDER BY pt.fecha_inicio ASC, pt.id asc";
+            }
+            $sql .= " LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 

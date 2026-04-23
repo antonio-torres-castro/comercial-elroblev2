@@ -695,6 +695,14 @@ try {
                     }
                     break;
 
+                case 'listDireccionEspacio':
+                    $controller->listDireccionEspacio();
+                    break;
+
+                case 'myListDireccionEspacio':
+                    $controller->myListDireccionEspacio();
+                    break;
+
                 case 'edit':
                     $controller->edit();
                     break;
@@ -951,7 +959,11 @@ try {
                     break;
 
                 case 'my':
-                    $controller->myIndex();
+                    if ($id === 'listDireccionEspacio') {
+                        $controller->myListDireccionEspacio();
+                    } else {
+                        $controller->myIndex();
+                    }
 
                     break;
 
