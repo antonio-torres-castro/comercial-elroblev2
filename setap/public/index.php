@@ -99,10 +99,6 @@ try {
             header('Location: ' . AppConstants::ROUTE_HOME, true, 301);
             exit;
 
-        case 'reports':
-            $controller->reports();
-            break;
-
         case 'users':
             $controller = new UserController();
 
