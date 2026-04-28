@@ -9,6 +9,9 @@ use App\Helpers\Security;
 use App\Helpers\Logger;
 use App\Constants\AppConstants;
 use App\Config\Database;
+
+use App\Models\Report;
+
 use PDO;
 use Exception;
 
@@ -17,6 +20,7 @@ class ReportController extends BaseController
     private $db;
     private $reportService;
     private $permissionService;
+    private $reportModel;
 
     public function __construct()
     {
@@ -25,6 +29,7 @@ class ReportController extends BaseController
         $this->db = Database::getInstance();
         $this->reportService = new ReportService($this->db);
         $this->permissionService = new PermissionService();
+        $this->reportModel = new Report();
     }
 
     /**
@@ -205,6 +210,24 @@ class ReportController extends BaseController
                 return;
             }
 
+            $filters = [
+                'cliente_id' => $currentUser['cliente_id'],
+                'proveedor_id' => $currentUser['contraparte_id']
+            ];
+
+            if (!empty($_GET['fecha_inicio'])) {
+                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            }
+            if (!empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = $_GET['fecha_fin'];
+            }
+            if (empty($_GET['fecha_fin'])) {
+                $filters['fecha_fin'] = date('Y-m-d');
+                $_GET['fecha_fin'] = $filters['fecha_fin'];
+            }
+
+            $stats = $this->reportModel->getStats($filters);
+
             // Obtener reportes generados
             $reports = $this->getGeneratedReports();
 
@@ -214,6 +237,7 @@ class ReportController extends BaseController
                 'title' => AppConstants::UI_SYSTEM_REPORTS,
                 'subtitle' => 'Gestión y descarga de reportes generados',
                 'reports' => $reports,
+                'stats' => $stats,
                 'action' => 'index'
             ];
 

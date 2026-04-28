@@ -48,13 +48,23 @@ use App\Constants\AppConstants; ?>
         <main class="main-content">
             <!-- Header -->
             <div class="row mb-4">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <h2>
                         <i class="bi bi-bar-chart"></i> <?= AppConstants::UI_SYSTEM_REPORTS ?>
                     </h2>
                     <p class="text-muted">Genere y consulte reportes de actividad del sistema</p>
                 </div>
-                <div class="col-md-6 text-end">
+                <div class="col-md-2">
+                    <label for="fecha_inicio" class="form-label">Inicio</label>
+                    <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
+                        value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+                </div>
+                <div class="col-md-2">
+                    <label for="fecha_fin" class="form-label">Fin</label>
+                    <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
+                        value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+                </div>
+                <div class="col-md-3 text-end">
                     <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
                         <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_REPORT ?>
                     </a>
@@ -71,14 +81,14 @@ use App\Constants\AppConstants; ?>
 
             <!-- Estadísticas Rápidas -->
             <?php if (isset($stats)): ?>
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-md-3 mb-3">
                         <div class="card stats-card h-100 border-0 shadow-sm">
                             <div class="card-body text-center">
                                 <div class="text-setap-primary mb-2">
                                     <i class="bi bi-folder" style="font-size: 2rem;"></i>
                                 </div>
-                                <h3 class="mb-0"><?= $stats['total_projects'] ?? 0 ?></h3>
+                                <h3 class="mb-0"><?= $stats[0]['total_projects'] ?? 0 ?></h3>
                                 <p class="text-muted mb-0">Total Proyectos</p>
                             </div>
                         </div>
@@ -90,7 +100,7 @@ use App\Constants\AppConstants; ?>
                                 <div class="text-success mb-2">
                                     <i class="bi bi-list-task" style="font-size: 2rem;"></i>
                                 </div>
-                                <h3 class="mb-0"><?= $stats['total_tasks'] ?? 0 ?></h3>
+                                <h3 class="mb-0"><?= $stats[0]['total_tasks'] ?? 0 ?></h3>
                                 <p class="text-muted mb-0">Total Tareas</p>
                             </div>
                         </div>
@@ -102,7 +112,7 @@ use App\Constants\AppConstants; ?>
                                 <div class="text-info mb-2">
                                     <i class="bi bi-people" style="font-size: 2rem;"></i>
                                 </div>
-                                <h3 class="mb-0"><?= $stats['total_users'] ?? 0 ?></h3>
+                                <h3 class="mb-0"><?= $stats[0]['total_users'] ?? 0 ?></h3>
                                 <p class="text-muted mb-0">Total Usuarios</p>
                             </div>
                         </div>
@@ -114,7 +124,7 @@ use App\Constants\AppConstants; ?>
                                 <div class="text-warning mb-2">
                                     <i class="bi bi-building" style="font-size: 2rem;"></i>
                                 </div>
-                                <h3 class="mb-0"><?= $stats['total_clients'] ?? 0 ?></h3>
+                                <h3 class="mb-0"><?= $stats[0]['total_clients'] ?? 0 ?></h3>
                                 <p class="text-muted mb-0">Total Clientes</p>
                             </div>
                         </div>
