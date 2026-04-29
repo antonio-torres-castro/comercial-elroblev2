@@ -54,6 +54,19 @@ use App\Constants\AppConstants; ?>
                     </h2>
                     <p class="text-muted">Genere y consulte reportes de actividad del sistema</p>
                 </div>
+                <div class="col-md-3">
+                    <!-- Proveedor -->
+                    <label class="form-label">Proveedor</label>
+                    <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="this.form.submit()">
+                        <option value="">Selecionar...</option>
+                        <?php foreach ($data['suppliers'] as $supplier): ?>
+                            <option value="<?= $supplier['id']; ?>"
+                                <?= (isset($_GET['proveedor_id']) && $_GET['proveedor_id'] == $supplier['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($supplier['nombre']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
                 <div class="col-md-2">
                     <label for="fecha_inicio" class="form-label">Inicio</label>
                     <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
@@ -64,9 +77,9 @@ use App\Constants\AppConstants; ?>
                     <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
                         value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
                 </div>
-                <div class="col-md-3 text-end">
+                <div class="col-md-1 text-end">
                     <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
-                        <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_REPORT ?>
+                        <i class="bi bi-plus-circle"></i>
                     </a>
                 </div>
             </div>
