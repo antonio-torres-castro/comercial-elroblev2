@@ -202,6 +202,10 @@ class ReportController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+            $uti = $currentUser['usuario_tipo_id'];
+            $filters = [];
+            $filters['current_usuario_tipo_id'] = $uti;
+            $filters['current_usuario_id'] = $currentUser['id'];
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_reports')) {
@@ -210,10 +214,8 @@ class ReportController extends BaseController
                 return;
             }
 
-            $filters = [
-                'cliente_id' => $currentUser['cliente_id'],
-                'proveedor_id' => $currentUser['contraparte_id']
-            ];
+            $filters['cliente_id'] = $currentUser['cliente_id'];
+            $filters['contraparte_id'] = $currentUser['contraparte_id'];
 
             if (!empty($_GET['fecha_inicio'])) {
                 $filters['fecha_inicio'] = $_GET['fecha_inicio'];
@@ -226,6 +228,13 @@ class ReportController extends BaseController
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
 
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
+            $suppliers = $this->reportModel->getSuppliers($filters);
+            $projects = $this->reportModel->getProjects($filters);
+
             $stats = $this->reportModel->getStats($filters);
 
             // Obtener reportes generados
@@ -237,6 +246,8 @@ class ReportController extends BaseController
                 'title' => AppConstants::UI_SYSTEM_REPORTS,
                 'subtitle' => 'Gestión y descarga de reportes generados',
                 'reports' => $reports,
+                'suppliers' => $suppliers,
+                'projects' => $projects,
                 'stats' => $stats,
                 'action' => 'index'
             ];

@@ -613,7 +613,7 @@ class AppConstants
     const UI_EDITING_COUNTERPARTY = 'Editando contraparte';
 
     /** Reportes del Sistema */
-    const UI_SYSTEM_REPORTS = 'Reportes del Sistema';
+    const UI_SYSTEM_REPORTS = 'Reportes';
 
     // ===== ACCIONES DE NAVEGACIÓN ESPECÍFICAS =====
 

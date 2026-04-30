@@ -48,11 +48,10 @@ use App\Constants\AppConstants; ?>
         <main class="main-content">
             <!-- Header -->
             <div class="row mb-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <h2>
                         <i class="bi bi-bar-chart"></i> <?= AppConstants::UI_SYSTEM_REPORTS ?>
                     </h2>
-                    <p class="text-muted">Genere y consulte reportes de actividad del sistema</p>
                 </div>
                 <div class="col-md-3">
                     <!-- Proveedor -->
@@ -67,6 +66,7 @@ use App\Constants\AppConstants; ?>
                         <?php endforeach; ?>
                     </select>
                 </div>
+
                 <div class="col-md-2">
                     <label for="fecha_inicio" class="form-label">Inicio</label>
                     <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
@@ -77,9 +77,9 @@ use App\Constants\AppConstants; ?>
                     <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
                         value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
                 </div>
-                <div class="col-md-1 text-end">
+                <div class="col-md-2 text-end">
                     <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
-                        <i class="bi bi-plus-circle"></i>
+                        <i class="bi bi-plus-circle"></i> Reporte
                     </a>
                 </div>
             </div>
@@ -147,10 +147,24 @@ use App\Constants\AppConstants; ?>
 
             <!-- Tipos de Reportes Disponibles -->
             <div class="row">
-                <div class="col-12">
+                <div class="col-3">
                     <h4 class="mb-3">
-                        <i class="bi bi-collection"></i> Reportes Disponibles
+                        <i class="bi bi-collection"></i> Disponibles
                     </h4>
+                </div>
+
+                <div class="col-md-3">
+                    <select class="form-select" name="proyecto_id" id="proyecto_id" onchange="this.form.submit()">
+                        <option value="">Selecionar proyecto...</option>
+                        <?php if (!empty($data['projects'])): ?>
+                            <?php foreach ($data['projects'] as $project): ?>
+                                <option value="<?= $project['id'] ?>"
+                                    <?= (isset($_GET['proyecto_id']) && $_GET['proyecto_id'] == $project['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($project['nombre']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
                 </div>
             </div>
 
