@@ -81,22 +81,22 @@ use App\Constants\AppConstants; ?>
                             <div class="card">
                                 <div class="card-body">
                                     <form method="GET" id="getFormFilter" class="row g-3">
-
-                                        <div class="col-md-3">
+                                        <div class="col-md-3" <?= count($data['suppliers']) == 1 ? 'hidden' : '' ?>>
                                             <!-- Proveedor -->
-                                            <label class="form-label">Proveedor</label>
+                                            <label class="form-label" for="proveedor_id">Proveedor</label>
                                             <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="this.form.submit()">
                                                 <option value="">Selecionar...</option>
                                                 <?php foreach ($data['suppliers'] as $supplier): ?>
                                                     <option value="<?= $supplier['id']; ?>"
-                                                        <?= (isset($_GET['proveedor_id']) && $_GET['proveedor_id'] == $supplier['id']) ? 'selected' : '' ?>>
+                                                        <?= (isset($currentUser['proveedor_id']) && $currentUser['proveedor_id'] == $supplier['id']) ? 'selected' : '' ?>>
                                                         <?= htmlspecialchars($supplier['nombre']); ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
+
                                         <div class="col-md-3">
-                                            <label class="form-label">Proyecto</label>
+                                            <label class="form-label" for="proyecto_id">Proyecto</label>
                                             <select class="form-select" name="proyecto_id" id="proyecto_id" onchange="this.form.submit()">
                                                 <option value="">Selecionar...</option>
                                                 <?php if (!empty($data['projects'])): ?>
