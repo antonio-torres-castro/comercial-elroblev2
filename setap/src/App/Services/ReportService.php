@@ -119,6 +119,11 @@ class ReportService
             $params[] = $parameters['client_id'];
         }
 
+        if (!empty($parameters['proveedor_id'])) {
+            $sql .= " AND p.proveedor_id = ?";
+            $params[] = $parameters['proveedor_id'];
+        }
+
         $sql .= " ORDER BY p.fecha_inicio DESC";
 
         $stmt = $this->db->prepare($sql);
@@ -173,6 +178,7 @@ class ReportService
     {
         $fecha = $parameters['date_to'] ?? date('Y-m-d');
         $projectId = !empty($parameters['project_id']) ? (int)$parameters['project_id'] : 0;
+        $proveedorId = !empty($parameters['proveedor_id']) ? (int)$parameters['proveedor_id'] : 0;
 
         try {
             // --- 1) Resumen de totales (posicionales) ---
@@ -181,18 +187,23 @@ class ReportService
                 SUM(pt.estado_tipo_id IN (2,5,6,7)
                     AND pt.fecha_inicio < ?
                     AND (? = 0 OR pt.proyecto_id = ?)
+                    AND (? = 0 OR p.proveedor_id = ?)
                 ) AS pending,
                 SUM(pt.estado_tipo_id = 8
                     AND pt.fecha_inicio <= ?
                     AND (? = 0 OR pt.proyecto_id = ?)
+                    AND (? = 0 OR p.proveedor_id = ?)
                 ) AS complete,
                 SUM(pt.estado_tipo_id IN (5,6,7)
                     AND pt.fecha_inicio <= ?
                     AND (? = 0 OR pt.proyecto_id = ?)
+                    AND (? = 0 OR p.proveedor_id = ?)
                 ) AS progress
-            FROM proyecto_tareas pt
+                  FROM proyecto_tareas pt
+            INNER JOIN proyectos       p  ON pt.proyecto_id = p.id
             WHERE pt.fecha_inicio <= ?
               AND (? = 0 OR pt.proyecto_id = ?)
+              AND (? = 0 OR p.proveedor_id = ?)
               AND pt.estado_tipo_id IN (2,3,5,6,7,8);
         ";
 
@@ -202,18 +213,26 @@ class ReportService
                 $fecha,
                 $projectId,
                 $projectId,
+                $proveedorId,
+                $proveedorId,
                 // complete: fecha, projectId, projectId
                 $fecha,
                 $projectId,
                 $projectId,
+                $proveedorId,
+                $proveedorId,
                 // progress: fecha, projectId, projectId
                 $fecha,
                 $projectId,
                 $projectId,
+                $proveedorId,
+                $proveedorId,
                 // WHERE: fecha, projectId, projectId
                 $fecha,
                 $projectId,
-                $projectId
+                $projectId,
+                $proveedorId,
+                $proveedorId,
             ];
 
             $stmt = $this->db->prepare($sqlTotal);
@@ -246,6 +265,7 @@ class ReportService
             WHERE pt.estado_tipo_id IN (2,5,6,7,8)
               AND (pt.fecha_inicio <= ?)
               AND (? = 0 OR pt.proyecto_id = ?)
+              AND (? = 0 OR p.proveedor_id = ?)
 			) x
             Group by x.nombre, x.prioridad, x.estado, x.razon_social, x.categoria, x.atraso;
         ";
@@ -255,6 +275,8 @@ class ReportService
                 $fecha,
                 $projectId,
                 $projectId,
+                $proveedorId,
+                $proveedorId
             ];
 
             $stmt = $this->db->prepare($sqlTasks);
@@ -378,6 +400,11 @@ class ReportService
         if (!empty($parameters['date_to'])) {
             $sql .= " AND c.fecha_termino_contrato <= ?";
             $params[] = $parameters['date_to'];
+        }
+
+        if (!empty($parameters['proveedor_id'])) {
+            $sql .= " WHERE c.proveedor_id = ?";
+            $params[] = $parameters['proveedor_id'];
         }
 
         $sql .= " GROUP BY c.id ORDER BY c.razon_social";

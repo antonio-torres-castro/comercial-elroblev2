@@ -100,10 +100,11 @@ class ReportController extends BaseController
 
             // Obtener parámetros del formulario
             $reportType = $_POST['report_type'] ?? '';
-            $dateFrom = $_POST['date_from'] ?? '';
-            $dateTo = $_POST['date_to'] ?? '';
+            $dateFrom = $_POST['date_from'] ?? $_POST['fecha_desde'] ?? '';
+            $dateTo = $_POST['date_to'] ?? $_POST['fecha_hasta'] ?? '';
             $clientId = $_POST['client_id'] ?? null;
-            $projectId = $_POST['project_id'] ?? null;
+            $projectId = $_POST['project_id'] ?? $_POST['proyecto_id'] ?? null;
+            $supplierId = $_POST['proveedor_id'] ?? null;
 
             // Validar parámetros obligatorios
             if (empty($reportType)) {
@@ -117,6 +118,7 @@ class ReportController extends BaseController
                 'date_to' => $dateTo,
                 'client_id' => $clientId,
                 'project_id' => $projectId,
+                'proveedor_id' => $supplierId,
                 'usuario_id' => $currentUser['id'],
                 'cliente_id' => $currentUser['cliente_id'],
                 'contraparte_id' => $currentUser['contraparte_id']
@@ -217,19 +219,35 @@ class ReportController extends BaseController
             $filters['cliente_id'] = $currentUser['cliente_id'];
             $filters['contraparte_id'] = $currentUser['contraparte_id'];
 
-            if (!empty($_GET['fecha_inicio'])) {
-                $filters['fecha_inicio'] = $_GET['fecha_inicio'];
+            $fechaDesde = $_GET['fecha_desde'] ?? $_GET['fecha_inicio'] ?? '';
+            $fechaHasta = $_GET['fecha_hasta'] ?? $_GET['fecha_fin'] ?? '';
+
+            if (!empty($fechaDesde)) {
+                $filters['fecha_desde'] = $fechaDesde;
+                $filters['fecha_inicio'] = $fechaDesde;
+                $_GET['fecha_desde'] = $fechaDesde;
             }
-            if (!empty($_GET['fecha_fin'])) {
-                $filters['fecha_fin'] = $_GET['fecha_fin'];
+
+            if (!empty($fechaHasta)) {
+                $filters['fecha_hasta'] = $fechaHasta;
+                $filters['fecha_fin'] = $fechaHasta;
+                $_GET['fecha_hasta'] = $fechaHasta;
             }
-            if (empty($_GET['fecha_fin'])) {
-                $filters['fecha_fin'] = date('Y-m-d');
-                $_GET['fecha_fin'] = $filters['fecha_fin'];
+
+            if (empty($fechaHasta)) {
+                $filters['fecha_hasta'] = date('Y-m-d');
+                $filters['fecha_fin'] = $filters['fecha_hasta'];
+                $_GET['fecha_hasta'] = $filters['fecha_hasta'];
             }
 
             if ($uti > 1) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            } elseif (isset($_GET['proveedor_id']) && is_numeric($_GET['proveedor_id']) && (int)$_GET['proveedor_id'] > 0) {
+                $filters['proveedor_id'] = (int)$_GET['proveedor_id'];
+            }
+
+            if (isset($_GET['proyecto_id']) && is_numeric($_GET['proyecto_id']) && (int)$_GET['proyecto_id'] > 0) {
+                $filters['proyecto_id'] = (int)$_GET['proyecto_id'];
             }
 
             $suppliers = $this->reportModel->getSuppliers($filters);
@@ -257,6 +275,67 @@ class ReportController extends BaseController
             Logger::error("ReportController::index: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    public function currentUserJson(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->jsonUnauthorized();
+                return;
+            }
+
+            $this->jsonSuccess('Usuario cargado correctamente', [
+                'user' => [
+                    'id' => (int)$currentUser['id'],
+                    'proveedor_id' => (int)($currentUser['proveedor_id'] ?? 0),
+                    'usuario_tipo_id' => (int)($currentUser['usuario_tipo_id'] ?? 0)
+                ]
+            ]);
+        } catch (Exception $e) {
+            Logger::error("ReportController::currentUserJson: " . $e->getMessage());
+            $this->jsonError('Error al cargar usuario', [], 500);
+        }
+    }
+
+    public function refreshProjectsSelect(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->jsonUnauthorized();
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_reports')) {
+                $this->jsonForbidden(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $providerId = isset($_GET['proveedor_id'])
+                ? (int)$_GET['proveedor_id']
+                : (int)($_GET['proveedor'] ?? 0);
+
+            $filters = [
+                'current_usuario_tipo_id' => (int)$currentUser['usuario_tipo_id'],
+                'current_usuario_id' => (int)$currentUser['id'],
+                'cliente_id' => $currentUser['cliente_id'],
+                'contraparte_id' => $currentUser['contraparte_id']
+            ];
+
+            if ((int)($currentUser['proveedor_id'] ?? 0) > 0) {
+                $filters['proveedor_id'] = (int)$currentUser['proveedor_id'];
+            } elseif ($providerId > 0) {
+                $filters['proveedor_id'] = $providerId;
+            }
+
+            $projects = $this->reportModel->getProjects($filters);
+            $this->jsonSuccess('Proyectos cargados correctamente', ['projects' => $projects]);
+        } catch (Exception $e) {
+            Logger::error("ReportController::refreshProjectsSelect: " . $e->getMessage());
+            $this->jsonError('Error al cargar proyectos', [], 500);
         }
     }
 

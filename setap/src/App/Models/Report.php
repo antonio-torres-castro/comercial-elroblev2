@@ -32,8 +32,11 @@ class Report
             // Aplicar filtros
             $params[] = !isset($filters['cliente_id']) || empty($filters['cliente_id']) ? 0 : $filters['cliente_id'];
             $params[] = !isset($filters['proveedor_id']) || empty($filters['proveedor_id']) ? 0 : $filters['proveedor_id'];
-            $params[] = !isset($filters['fecha_desde']) || empty($filters['fecha_desde']) ? null : $filters['fecha_desde'];
-            $params[] = !isset($filters['fecha_hasta']) || empty($filters['fecha_hasta']) ? null : $filters['fecha_hasta'];
+            $fechaDesde = $filters['fecha_desde'] ?? $filters['fecha_inicio'] ?? null;
+            $fechaHasta = $filters['fecha_hasta'] ?? $filters['fecha_fin'] ?? null;
+
+            $params[] = empty($fechaDesde) ? null : $fechaDesde;
+            $params[] = empty($fechaHasta) ? null : $fechaHasta;
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);

@@ -53,7 +53,7 @@ use App\Constants\AppConstants; ?>
                         <i class="bi bi-bar-chart"></i> <?= AppConstants::UI_SYSTEM_REPORTS ?>
                     </h2>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 <?= ((int)($data['user']['proveedor_id'] ?? 0) === 0) ? '' : 'd-none' ?>" id="report-supplier-filter">
                     <!-- Proveedor -->
                     <label class="form-label">Proveedor</label>
                     <select class="form-select" id="proveedor_id" name="proveedor_id">
@@ -68,14 +68,14 @@ use App\Constants\AppConstants; ?>
                 </div>
 
                 <div class="col-md-2">
-                    <label for="fecha_inicio" class="form-label">Inicio</label>
-                    <input type="date" class="form-control" name="fecha_inicio" id="fecha_hasta"
-                        value="<?= htmlspecialchars($_GET['fecha_inicio'] ?? '') ?>">
+                    <label for="fecha_desde" class="form-label">Inicio</label>
+                    <input type="date" class="form-control" name="fecha_desde" id="fecha_desde"
+                        value="<?= htmlspecialchars($_GET['fecha_desde'] ?? $_GET['fecha_inicio'] ?? '') ?>">
                 </div>
                 <div class="col-md-2">
-                    <label for="fecha_fin" class="form-label">Fin</label>
-                    <input type="date" class="form-control" name="fecha_fin" id="fecha_hasta"
-                        value="<?= htmlspecialchars($_GET['fecha_fin'] ?? '') ?>">
+                    <label for="fecha_hasta" class="form-label">Fin</label>
+                    <input type="date" class="form-control" name="fecha_hasta" id="fecha_hasta"
+                        value="<?= htmlspecialchars($_GET['fecha_hasta'] ?? $_GET['fecha_fin'] ?? '') ?>">
                 </div>
                 <div class="col-md-2 text-end">
                     <a href="<?= AppConstants::ROUTE_REPORTS ?>/create" class="btn btn-setap-primary">
@@ -305,6 +305,22 @@ use App\Constants\AppConstants; ?>
     <!-- Scripts Optimizados de SETAP -->
     <?php include __DIR__ . "/../layouts/scripts-base.php"; ?>
     <script>
+        window.SETAP = window.SETAP || {};
+        window.SETAP.reportList = {
+            routes: {
+                base: '<?= AppConstants::ROUTE_REPORTS; ?>',
+                generate: '<?= AppConstants::ROUTE_REPORTS; ?>/generate',
+                currentUser: '<?= AppConstants::ROUTE_REPORTS; ?>/current-user',
+                projects: '<?= AppConstants::ROUTE_REPORTS; ?>/refreshProjectsSelect'
+            },
+            csrfToken: '<?= \App\Helpers\Security::getCsrfToken() ?>',
+            currentUser: {
+                proveedor_id: <?= (int)($data['user']['proveedor_id'] ?? 0) ?>
+            }
+        };
+    </script>
+    <script src="/setap/public/js/report-list.js"></script>
+    <script>
         // Auto-hide alerts after 5 seconds (excepto los que están dentro de modales)
         setTimeout(() => {
             const alerts = document.querySelectorAll('.alert:not(.modal .alert)');
@@ -313,47 +329,6 @@ use App\Constants\AppConstants; ?>
                 bsAlert.close();
             });
         }, 5000);
-
-        // Función para generar reportes rápidos
-        function generateReport(reportType) {
-            // Crear formulario temporal para enviar datos
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '<?= AppConstants::ROUTE_REPORTS; ?>/generate';
-
-            // Agregar token CSRF
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = 'csrf_token';
-            csrfToken.value = '<?= \App\Helpers\Security::getCsrfToken() ?>';
-            form.appendChild(csrfToken);
-
-            // Agregar tipo de reporte
-            const reportTypeInput = document.createElement('input');
-            reportTypeInput.type = 'hidden';
-            reportTypeInput.name = 'report_type';
-            reportTypeInput.value = reportType;
-            form.appendChild(reportTypeInput);
-
-            // Agregar fechas por defecto (último mes)
-            const dateFrom = document.createElement('input');
-            dateFrom.type = 'hidden';
-            dateFrom.name = 'date_from';
-            const lastMonth = new Date();
-            lastMonth.setMonth(lastMonth.getMonth() - 1);
-            dateFrom.value = lastMonth.toISOString().split('T')[0];
-            form.appendChild(dateFrom);
-
-            const dateTo = document.createElement('input');
-            dateTo.type = 'hidden';
-            dateTo.name = 'date_to';
-            dateTo.value = new Date().toISOString().split('T')[0];
-            form.appendChild(dateTo);
-
-            // Enviar formulario
-            document.body.appendChild(form);
-            form.submit();
-        }
     </script>
 </body>
 

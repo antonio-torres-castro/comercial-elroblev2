@@ -1255,6 +1255,24 @@ try {
                     }
                     break;
 
+                case 'current-user':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->currentUserJson();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
+                case 'refreshProjectsSelect':
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $controller->refreshProjectsSelect();
+                    } else {
+                        http_response_code(405);
+                        echo json_encode(['success' => false, 'message' => AppConstants::ERROR_METHOD_NOT_ALLOWED]);
+                    }
+                    break;
+
                 case 'users-report':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->usersReport();
