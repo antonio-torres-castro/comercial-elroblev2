@@ -56,7 +56,7 @@ use App\Constants\AppConstants; ?>
                 <div class="col-md-3">
                     <!-- Proveedor -->
                     <label class="form-label">Proveedor</label>
-                    <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="this.form.submit()">
+                    <select class="form-select" id="proveedor_id" name="proveedor_id">
                         <option value="">Selecionar...</option>
                         <?php foreach ($data['suppliers'] as $supplier): ?>
                             <option value="<?= $supplier['id']; ?>"
@@ -154,7 +154,7 @@ use App\Constants\AppConstants; ?>
                 </div>
 
                 <div class="col-md-3">
-                    <select class="form-select" name="proyecto_id" id="proyecto_id" onchange="this.form.submit()">
+                    <select class="form-select" name="proyecto_id" id="proyecto_id">
                         <option value="">Selecionar proyecto...</option>
                         <?php if (!empty($data['projects'])): ?>
                             <?php foreach ($data['projects'] as $project): ?>
