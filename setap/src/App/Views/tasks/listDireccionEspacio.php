@@ -109,7 +109,7 @@ $buildDireccionLabel = static function (array $task): string {
                             <div class="card">
                                 <div class="card-body">
                                     <form method="GET" id="getFormFilter" class="row g-3">
-                                        <div class="col-md-3">
+                                        <div class="col-md-3" <?= count($data['suppliers']) == 1 ? 'hidden' : '' ?>>
                                             <label class="form-label">Proveedor</label>
                                             <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="this.form.submit()">
                                                 <option value="">Selecionar...</option>

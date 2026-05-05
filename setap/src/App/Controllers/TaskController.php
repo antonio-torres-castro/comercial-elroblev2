@@ -280,6 +280,7 @@ class TaskController extends BaseController
 
             if ($uti > 1 && isset($currentUser['proveedor_id'])) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
+                $_GET['proveedor_id'] = $filters['proveedor_id'];
             } elseif ($uti == 1 && isset($_GET['proveedor_id']) && !empty($_GET['proveedor_id'])) {
                 $filters['proveedor_id'] = $_GET['proveedor_id'];
             }
