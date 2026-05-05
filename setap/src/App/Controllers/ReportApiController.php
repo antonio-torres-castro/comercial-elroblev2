@@ -12,9 +12,7 @@ class ReportApiController extends BaseController
 {
     private ?ReportService $reportService = null;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function projectTasks(): void
     {

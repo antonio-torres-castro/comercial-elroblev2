@@ -109,12 +109,12 @@ class ReportService
                     p.nombre AS nombre_completo
                 FROM usuarios u
                 INNER JOIN personas p ON p.id = u.persona_id
-                WHERE (u.nombre_usuario = :identifier OR u.email = :identifier)
+                WHERE (u.nombre_usuario = :identifier OR u.email = :identifier2)
                   AND u.estado_tipo_id = 2
                   AND p.estado_tipo_id = 2
                 LIMIT 1
             ");
-            $stmt->execute([':identifier' => $identifier]);
+            $stmt->execute([':identifier' => $identifier, ':identifier2' => $identifier]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$user || !password_verify($password, (string)$user['clave_hash'])) {
