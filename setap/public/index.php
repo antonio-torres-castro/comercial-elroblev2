@@ -17,6 +17,7 @@ use App\Controllers\SuppliersController;
 use App\Controllers\TaskController;
 use App\Controllers\ProcessController;
 use App\Controllers\ReportController;
+use App\Controllers\ReportApiController;
 use App\Controllers\EspaciosController;
 use App\Controllers\GrupoTipoController;
 use App\Controllers\ProyectoFeriadoController;
@@ -1190,6 +1191,23 @@ try {
                 } else {
                     http_response_code(404);
                     echo json_encode(['error' => 'API endpoint not found']);
+                }
+            } elseif ($action === 'reports') {
+                $controller = new ReportApiController();
+                if (isset($parts[2])) {
+                    switch ($parts[2]) {
+                        case 'project-tasks':
+                            $controller->projectTasks();
+                            break;
+                        default:
+                            http_response_code(404);
+                            header('Content-Type: application/json; charset=UTF-8');
+                            echo json_encode(['success' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'API endpoint not found']]);
+                    }
+                } else {
+                    http_response_code(404);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode(['success' => false, 'error' => ['code' => 'NOT_FOUND', 'message' => 'API endpoint not found']]);
                 }
             } else {
                 http_response_code(404);

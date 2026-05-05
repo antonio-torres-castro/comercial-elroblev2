@@ -8,10 +8,13 @@ use DateTime;
 use DateInterval;
 
 use PDO;
+use PDOException;
 use Exception;
 
 class ReportService
 {
+    private const API_MAX_LIMIT = 500;
+
     private $db;
 
     public function __construct(PDO $db)
@@ -83,6 +86,237 @@ class ReportService
         } catch (Exception $e) {
             Logger::error("ReportService::generateReport: " . $e->getMessage());
             throw $e;
+        }
+    }
+
+    /**
+     * Autentica un consumidor API contra usuarios activos del sistema.
+     */
+    public function authenticateApiConsumer(string $identifier, string $password): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT DISTINCT
+                    u.id,
+                    u.nombre_usuario,
+                    u.email,
+                    u.clave_hash,
+                    u.estado_tipo_id,
+                    u.usuario_tipo_id,
+                    COALESCE(u.proveedor_id, 0) AS proveedor_id,
+                    COALESCE(u.cliente_id, 0) AS cliente_id,
+                    p.estado_tipo_id AS persona_estado,
+                    p.nombre AS nombre_completo
+                FROM usuarios u
+                INNER JOIN personas p ON p.id = u.persona_id
+                WHERE (u.nombre_usuario = :identifier OR u.email = :identifier)
+                  AND u.estado_tipo_id = 2
+                  AND p.estado_tipo_id = 2
+                LIMIT 1
+            ");
+            $stmt->execute([':identifier' => $identifier]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$user || !password_verify($password, (string)$user['clave_hash'])) {
+                return [
+                    'success' => false,
+                    'status' => 401,
+                    'code' => 'INVALID_CREDENTIALS',
+                    'message' => 'Usuario o clave invalidos.'
+                ];
+            }
+
+            if ((int)$user['proveedor_id'] <= 0) {
+                return [
+                    'success' => false,
+                    'status' => 403,
+                    'code' => 'PROVIDER_REQUIRED',
+                    'message' => 'El usuario autenticado no tiene proveedor asociado.'
+                ];
+            }
+
+            unset($user['clave_hash']);
+
+            return [
+                'success' => true,
+                'user' => $user
+            ];
+        } catch (PDOException $e) {
+            Logger::error("ReportService::authenticateApiConsumer: " . $e->getMessage());
+            return [
+                'success' => false,
+                'status' => 503,
+                'code' => 'DATABASE_UNAVAILABLE',
+                'message' => 'No fue posible validar las credenciales contra la base de datos.'
+            ];
+        } catch (Exception $e) {
+            Logger::error("ReportService::authenticateApiConsumer: " . $e->getMessage());
+            return [
+                'success' => false,
+                'status' => 500,
+                'code' => 'AUTHENTICATION_ERROR',
+                'message' => 'Ocurrio un error inesperado al validar las credenciales.'
+            ];
+        }
+    }
+
+    /**
+     * Entrega tareas de un proyecto acotadas al proveedor del consumidor API.
+     */
+    public function getProjectTasksForApi(array $user, array $filters): array
+    {
+        $limit = min(max((int)($filters['limit'] ?? 100), 1), self::API_MAX_LIMIT);
+        $offset = max((int)($filters['offset'] ?? 0), 0);
+
+        $sql = "
+            WITH RECURSIVE espacio_ancestros AS (
+                SELECT
+                    e.id AS espacio_id,
+                    e.id AS ancestro_id,
+                    e.nombre AS ancestro_nombre,
+                    e.espacio_padre_id,
+                    0 AS profundidad
+                FROM espacios e
+
+                UNION ALL
+
+                SELECT
+                    ea.espacio_id,
+                    ep.id AS ancestro_id,
+                    ep.nombre AS ancestro_nombre,
+                    ep.espacio_padre_id,
+                    ea.profundidad + 1 AS profundidad
+                FROM espacio_ancestros ea
+                INNER JOIN espacios ep ON ep.id = ea.espacio_padre_id
+                WHERE ea.profundidad < 20
+            ),
+            espacio_raiz AS (
+                SELECT espacio_id, ancestro_id, ancestro_nombre
+                FROM (
+                    SELECT
+                        ea.*,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY ea.espacio_id
+                            ORDER BY ea.profundidad DESC
+                        ) AS rn
+                    FROM espacio_ancestros ea
+                ) ranked
+                WHERE rn = 1
+            )
+            SELECT
+                pt.id,
+                pt.tarea_id,
+                t.nombre AS tarea_nombre,
+                t.descripcion,
+                pt.fecha_inicio,
+                pt.duracion_horas,
+                pt.prioridad,
+                pt.espacio_id,
+                e.nombre AS espacio_nombre,
+                e.codigo AS espacio_codigo,
+                e.nivel AS espacio_nivel,
+                e.orden AS espacio_orden,
+                ep.nombre AS espacio_padre_nombre,
+                d.id AS direccion_id,
+                d.calle AS direccion_calle,
+                d.numero AS direccion_numero,
+                d.letra AS direccion_letra,
+                co.nombre AS direccion_comuna,
+                prv.nombre AS direccion_provincia,
+                rg.nombre AS direccion_region,
+                er.ancestro_id AS espacio_padre_mas_alto_id,
+                er.ancestro_nombre AS espacio_padre_mas_alto_nombre,
+                pt.fecha_Creado,
+                p.id AS proyecto_id,
+                CONCAT(c.razon_social, '.', DATE_FORMAT(p.fecha_inicio, '%Y-%m-%d'), '.', DATE_FORMAT(p.fecha_fin, '%Y-%m-%d')) AS proyecto_nombre,
+                c.razon_social AS cliente_nombre,
+                tt.nombre AS tipo_tarea,
+                et.nombre AS estado,
+                et.id AS estado_tipo_id,
+                plan.nombre_usuario AS planificador_nombre,
+                exec.nombre_usuario AS ejecutor_nombre,
+                super.nombre_usuario AS supervisor_nombre
+            FROM proyecto_tareas pt
+            INNER JOIN tareas t ON t.id = pt.tarea_id
+            INNER JOIN proyectos p ON p.id = pt.proyecto_id
+            INNER JOIN clientes c ON c.id = p.cliente_id
+            INNER JOIN tarea_tipos tt ON tt.id = p.tarea_tipo_id
+            INNER JOIN estado_tipos et ON et.id = pt.estado_tipo_id
+            INNER JOIN usuarios plan ON plan.id = pt.planificador_id
+            LEFT JOIN usuarios exec ON exec.id = pt.ejecutor_id
+            LEFT JOIN usuarios super ON super.id = pt.supervisor_id
+            LEFT JOIN espacios e ON e.id = pt.espacio_id
+            LEFT JOIN espacios ep ON ep.id = e.espacio_padre_id
+            LEFT JOIN espacio_raiz er ON er.espacio_id = e.id
+            LEFT JOIN direcciones d ON d.id = e.direccion_id
+            LEFT JOIN comunas co ON co.id = d.comuna_id
+            LEFT JOIN provincia prv ON prv.id = co.provincia_id
+            LEFT JOIN regiones rg ON rg.id = prv.region_id
+            WHERE pt.proyecto_id = :proyecto_id
+              AND p.proveedor_id = :proveedor_id
+              AND pt.fecha_inicio >= :fecha_desde
+              AND pt.fecha_inicio < DATE_ADD(:fecha_hasta, INTERVAL 1 DAY)
+              AND EXISTS (
+                  SELECT 1
+                  FROM proyecto_usuarios_grupo pug
+                  WHERE pug.proyecto_id = p.id
+                    AND pug.usuario_id = :usuario_id
+                    AND pug.estado_tipo_id = 2
+                    AND pug.grupo_id BETWEEN 1 AND 5
+              )
+            ORDER BY
+                pt.proyecto_id ASC,
+                COALESCE(d.id, 0) ASC,
+                COALESCE(er.ancestro_nombre, e.nombre, 'Sin espacio') ASC,
+                COALESCE(e.nivel, 999999) ASC,
+                COALESCE(e.orden, 999999) ASC,
+                pt.fecha_inicio ASC,
+                pt.id ASC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':proyecto_id', (int)$filters['proyecto_id'], PDO::PARAM_INT);
+            $stmt->bindValue(':proveedor_id', (int)$user['proveedor_id'], PDO::PARAM_INT);
+            $stmt->bindValue(':usuario_id', (int)$user['id'], PDO::PARAM_INT);
+            $stmt->bindValue(':fecha_desde', $filters['fecha_desde']);
+            $stmt->bindValue(':fecha_hasta', $filters['fecha_hasta']);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                'success' => true,
+                'data' => $rows,
+                'meta' => [
+                    'total_records' => count($rows),
+                    'limit' => $limit,
+                    'offset' => $offset,
+                    'proyecto_id' => (int)$filters['proyecto_id'],
+                    'fecha_desde' => $filters['fecha_desde'],
+                    'fecha_hasta' => $filters['fecha_hasta'],
+                    'proveedor_id' => (int)$user['proveedor_id']
+                ]
+            ];
+        } catch (PDOException $e) {
+            Logger::error("ReportService::getProjectTasksForApi: " . $e->getMessage());
+            return [
+                'success' => false,
+                'status' => 503,
+                'code' => 'DATABASE_UNAVAILABLE',
+                'message' => 'No fue posible recuperar las tareas del proyecto desde la base de datos.'
+            ];
+        } catch (Exception $e) {
+            Logger::error("ReportService::getProjectTasksForApi: " . $e->getMessage());
+            return [
+                'success' => false,
+                'status' => 500,
+                'code' => 'REPORT_ERROR',
+                'message' => 'Ocurrio un error inesperado al recuperar el reporte.'
+            ];
         }
     }
 
