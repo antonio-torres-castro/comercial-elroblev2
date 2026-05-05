@@ -548,61 +548,56 @@ class ReportService
      */
     private function generateUsersActivity($parameters)
     {
-        $sql = "SELECT 
-                    u.id,
-                    u.nombre_usuario as username,
-                    p.nombre as nombre_completo,
-                    u.email,
-                    ut.nombre as rol,
-                    u.fecha_Creado
-                FROM usuarios u
-                LEFT JOIN usuario_tipos ut ON u.usuario_tipo_id = ut.id
-                LEFT JOIN personas p ON u.persona_id = p.id
-                WHERE 1=1";
+        $sql = "CALL login_logout_report(?, ?, ?)";
 
         $params = [];
 
         // Filtros de fecha
-        if (!empty($parameters['date_from'])) {
-            $sql .= " AND u.fecha_Creado >= ?";
-            $params[] = $parameters['date_from'];
-        }
-
-        if (!empty($parameters['date_to'])) {
-            $sql .= " AND u.fecha_Creado <= ?";
-            $params[] = $parameters['date_to'];
-        }
-
-        $sql .= " ORDER BY u.fecha_Creado DESC";
+        $params[] = $parameters['proveedor_id'] == null || $parameters['proveedor_id'] == '' ? 0 : $parameters['proveedor_id'];
+        $params[] = $parameters['date_from'] == null || $parameters['date_from'] == '' ? '1900-01-01' : $parameters['date_from'];
+        $params[] = $parameters['date_to'] == null || $parameters['date_to'] == '' ? '2036-01-01 23:59:59' : $parameters['date_to'] . " 23:59:59";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->nextRowset();
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Calcular resumen
         $summary = [
-            'total_users' => count($data),
+            'total_users' => 0,
             'active_users' => 0,
             'recent_logins' => 0,
             'new_users' => 0
         ];
 
-        $weekAgo = date('Y-m-d', strtotime('-1 week'));
+        if (count($users) > 0) {
+            $summary['total_users'] = count(array_unique(array_column($users, 'nombre')));
+        }
+
         $monthAgo = date('Y-m-d', strtotime('-1 month'));
-
-        foreach ($data as $user) {
-            if ($user['activo']) {
+        foreach ($users as $user) {
+            if ($user['estado'] == 'activo') {
                 $summary['active_users']++;
-            }
-
-            if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $weekAgo) {
-                $summary['recent_logins']++;
             }
 
             if ($user['fecha_Creado'] && $user['fecha_Creado'] >= $monthAgo) {
                 $summary['new_users']++;
             }
         }
+
+        $weekAgo = date('Y-m-d', strtotime('-1 week'));
+        foreach ($data as $record) {
+            if ($record['fecha'] && $record['fecha'] >= $weekAgo) {
+                $summary['recent_logins']++;
+            }
+        }
+
+        $data = array_map(function ($fila) {
+            unset($fila['fecha_Creado']);
+            return $fila;
+        }, $data);
+
 
         return [
             'summary' => $summary,
