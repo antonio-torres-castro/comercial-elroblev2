@@ -444,7 +444,8 @@ class Client
                     p.nombre as persona_nombre,
                     p.telefono as persona_telefono,
                     et.nombre as estado_nombre,
-                    c.razon_social as cliente_nombre
+                    c.razon_social as cliente_nombre,
+                    c.proveedor_id
                 FROM cliente_contrapartes cc
                 JOIN personas p ON cc.persona_id = p.id
                 JOIN clientes c ON cc.cliente_id = c.id
@@ -458,6 +459,11 @@ class Client
             if (!empty($filters['cliente_id'])) {
                 $query .= " AND cc.cliente_id = ?";
                 $params[] = $filters['cliente_id'];
+            }
+
+            if (!empty($filters['proveedor_id'])) {
+                $query .= " AND c.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
             }
 
             if (!empty($filters['persona_nombre'])) {

@@ -29,11 +29,14 @@ use App\Constants\AppConstants;
             <main class="col-12 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><?= htmlspecialchars($data['title']); ?></h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="<?= AppConstants::ROUTE_CLIENTS_CREATE ?>" class="btn btn-sm btn-setap-primary">
-                            <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_CLIENT ?>
-                        </a>
-                    </div>
+                    <?php if ($_GET['show_btn_nuevo']): ?>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <a href="<?= AppConstants::ROUTE_CLIENTS_CREATE ?>" class="btn btn-sm btn-setap-primary">
+                                <i class="bi bi-plus-circle"></i> <?= AppConstants::UI_NEW_CLIENT ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+
                 </div>
 
                 <!-- Alertas de mensajes -->
@@ -126,7 +129,10 @@ use App\Constants\AppConstants;
                                             <th>Contrapartes</th>
                                             <th>Estado</th>
                                             <th>Creado</th>
-                                            <th width="150">Acciones</th>
+                                            <?php if ($_GET['show_col_acciones']): ?>
+                                                <th width="150">Acciones</th>
+                                            <?php endif; ?>
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -183,19 +189,21 @@ use App\Constants\AppConstants;
                                                         <?= date('d/m/Y', strtotime($client['fecha_Creado'])); ?>
                                                     </small>
                                                 </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm" role="group">
-                                                        <a href="<?= AppConstants::ROUTE_CLIENTS_EDIT . '/' ?><?= $client['id'] ?>"
-                                                            class="btn btn-outline-setap-primary" title="Editar" id="edit<?= $client['id']; ?>">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </a>
-                                                        <button type="button" class="btn btn-outline-danger"
-                                                            onclick="confirmDelete(<?= $client['id']; ?>, '<?= addslashes($client['razon_social']); ?>')"
-                                                            title="Eliminar">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
+                                                <?php if ($_GET['show_col_acciones']): ?>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <a href="<?= AppConstants::ROUTE_CLIENTS_EDIT . '/' ?><?= $client['id'] ?>"
+                                                                class="btn btn-outline-setap-primary" title="Editar" id="edit<?= $client['id']; ?>">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+                                                            <button type="button" class="btn btn-outline-danger"
+                                                                onclick="confirmDelete(<?= $client['id']; ?>, '<?= addslashes($client['razon_social']); ?>')"
+                                                                title="Eliminar">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                <?php endif; ?>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>

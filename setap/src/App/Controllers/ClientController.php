@@ -56,6 +56,14 @@ class ClientController extends BaseController
                 return;
             }
 
+            $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
+            $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
+            $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
+
+            //Botón nueva persona, solo el administrador puede crear peronas
+            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
+
             // Obtener filtros de búsqueda
             $filters = [
                 'rut' => $_GET['rut'] ?? '',
@@ -370,12 +378,22 @@ class ClientController extends BaseController
                 return;
             }
 
+            $uti = $currentUser['usuario_tipo_id'];
+
             // Verificar permisos para gestión de contrapartes
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client_counterparties')) {
                 http_response_code(403);
                 echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
                 return;
             }
+
+            $rModify = $this->permissionService->hasPermission($currentUser['id'], 'Modify');
+            $rCreate = $this->permissionService->hasPermission($currentUser['id'], 'Create');
+            $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
+
+            //Botón nueva persona, solo el administrador puede crear peronas
+            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
 
             $uti = $currentUser['usuario_tipo_id'];
 
@@ -387,18 +405,14 @@ class ClientController extends BaseController
                 'estado_tipo_id' => $_GET['estado_tipo_id'] ?? ''
             ];
 
-            if ($uti == 1 || $uti == 2) {
-                $_GET['show_btn_nuevo'] = true;
-                $_GET['show_col_acciones'] = true;
-            } else {
-                $_GET['show_btn_nuevo'] = false;
-                $_GET['show_col_acciones'] = false;
+            if ($uti > 1) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
             }
 
             // Obtener contrapartes usando el servicio y datos necesarios para filtros
             $counterparties = $this->counterpartieService->getAllCounterparties($filters);
             $statusTypes = $this->clientModel->getStatusTypes();
-            $clients = $this->clientModel->getAll(); // Para el filtro de clientes
+            $clients = $this->clientModel->getAll($filters); // Para el filtro de clientes
 
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('client-counterparties/list', [
