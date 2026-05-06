@@ -77,10 +77,14 @@ class HomeController extends BaseController
             $params = [];
 
             $cliente_id = $cUser['cliente_id'] ?? 0;
+            $proveedor_id = $cUser['proveedor_id'] ?? 0;
 
-            $sqlAnd = $cliente_id > 0 ? " and cliente_id = ?" : "";
+            $sqlAnd = ($cliente_id > 0 ? " and cliente_id = ?" : "") . ($proveedor_id > 0 ? " and proveedor_id = ?" : "");
             if ($cliente_id > 0) {
                 $params[] =  $cliente_id;
+            }
+            if ($proveedor_id > 0) {
+                $params[] =  $proveedor_id;
             }
 
             // 1. Total usuarios activos
@@ -99,7 +103,7 @@ class HomeController extends BaseController
             $proyectosActivos = $stmt->fetchColumn();
 
             // 4. Tareas pendientes (estado activo=2, o iniciado=5, rechazado=7).
-            $sqlAnd = $cliente_id > 0 ? " and p.cliente_id = ?" : "";
+            $sqlAnd = ($cliente_id > 0 ? " and p.cliente_id = ?" : "") . ($proveedor_id > 0 ? " and p.proveedor_id = ?" : "");
             $stmt = $db->prepare("SELECT count(1) 
                                   FROM proyecto_tareas pt 
                                   Inner Join proyectos p on p.id = pt.proyecto_id 
