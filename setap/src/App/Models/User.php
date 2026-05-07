@@ -414,7 +414,7 @@ class User
         $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
 
         // Usuarios de la empresa propietaria NO deben tener cliente_id
-        if (in_array($tipoUsuario, ['client', 'counterparty', 'admin'])) {
+        if (in_array($tipoUsuario, ['client', 'counterparty'])) {
             return null;
         }
 
@@ -423,6 +423,11 @@ class User
             if (empty($data['proveedor_id'])) {
                 throw new Exception("Usuario tipo '$tipoUsuario' debe tener proveedor_id asignado");
             }
+            return (int)$data['proveedor_id'];
+        }
+
+        // Usuarios de cliente deben tener cliente_id
+        if (in_array($tipoUsuario, ['admin'])) {
             return (int)$data['proveedor_id'];
         }
 

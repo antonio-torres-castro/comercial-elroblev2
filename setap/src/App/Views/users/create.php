@@ -462,10 +462,9 @@
                 clientSelect.removeAttribute('required');
                 clientSelect.value = '';
 
-                proveedorField.style.display = 'none';
-                proveedorField.classList.remove('proveedor-conditional');
+                proveedorField.style.display = 'block';
+                proveedorField.classList.add('proveedor-conditional');
                 proveedorSelect.removeAttribute('required');
-                proveedorSelect.value = '';
             }
         }
 

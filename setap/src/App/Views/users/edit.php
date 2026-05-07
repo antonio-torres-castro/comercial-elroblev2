@@ -433,7 +433,7 @@ use App\Constants\AppConstants; ?>
                             <div class="row mb-4" id="supplier-selection" style="display: none;">
                                 <div class="col-12">
                                     <h5 class="border-bottom pb-2 mb-3">
-                                        <i class="bi bi-building"></i> Asignación de Cliente
+                                        <i class="bi bi-building"></i> Asignación de Proveedor
                                     </h5>
                                 </div>
 
@@ -609,9 +609,8 @@ use App\Constants\AppConstants; ?>
                     validationClientInfo.style.display = 'none';
 
                     // Ocultar selección de proveedor
-                    supplierSection.style.display = 'none';
+                    supplierSection.style.display = 'block';
                     supplierSelect.required = false;
-                    supplierSelect.value = '';
                 }
             }
 
