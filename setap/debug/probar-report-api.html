@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Probar API Reporte de Tareas</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --border: #d7dde5;
+            --bg: #f5f7fa;
+            --panel: #ffffff;
+            --text: #17202a;
+            --muted: #5d6d7e;
+            --accent: #1769aa;
+            --accent-hover: #0f568f;
+            --error: #b42318;
+            --ok: #0f7b45;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.45;
+        }
+
+        main {
+            width: min(1180px, calc(100% - 32px));
+            margin: 28px auto;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin: 0 0 22px;
+            color: var(--muted);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(280px, 420px) 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        section {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        label {
+            display: block;
+            margin: 0 0 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font: inherit;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        button {
+            width: 100%;
+            min-height: 40px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--accent);
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: .7;
+        }
+
+        .status {
+            margin-top: 14px;
+            min-height: 22px;
+            font-weight: 700;
+        }
+
+        .status.ok {
+            color: var(--ok);
+        }
+
+        .status.error {
+            color: var(--error);
+        }
+
+        pre {
+            min-height: 520px;
+            max-height: 72vh;
+            margin: 0;
+            overflow: auto;
+            border-radius: 6px;
+            background: #111827;
+            color: #e5e7eb;
+            padding: 14px;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        @media (max-width: 860px) {
+            .layout,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Probar API Reporte de Tareas</h1>
+    <p class="subtitle">Endpoint: <strong>/setap/api/reports/project-tasks</strong></p>
+
+    <div class="layout">
+        <section>
+            <form id="api-form">
+                <div class="field">
+                    <label for="endpoint">URL endpoint</label>
+                    <input id="endpoint" name="endpoint" value="/setap/api/reports/project-tasks" required>
+                </div>
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="usuario">Usuario o email</label>
+                        <input id="usuario" name="usuario" autocomplete="username" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="clave">Clave</label>
+                        <input id="clave" name="clave" type="password" autocomplete="current-password" required>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="proyecto_id">Proyecto ID</label>
+                        <input id="proyecto_id" name="proyecto_id" type="number" min="1" step="1" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="limit">Limit</label>
+                        <input id="limit" name="limit" type="number" min="1" max="500" step="1" value="100" required>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="field">
+                        <label for="fecha_desde">Fecha desde</label>
+                        <input id="fecha_desde" name="fecha_desde" type="date" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="fecha_hasta">Fecha hasta</label>
+                        <input id="fecha_hasta" name="fecha_hasta" type="date" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="offset">Offset</label>
+                    <input id="offset" name="offset" type="number" min="0" step="1" value="0" required>
+                </div>
+
+                <button id="submit-button" type="submit">Probar servicio</button>
+                <div id="status" class="status"></div>
+            </form>
+        </section>
+
+        <section>
+            <pre id="response">{}</pre>
+        </section>
+    </div>
+</main>
+
+<script>
+    const form = document.getElementById('api-form');
+    const responseBox = document.getElementById('response');
+    const statusBox = document.getElementById('status');
+    const submitButton = document.getElementById('submit-button');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const endpoint = formData.get('endpoint');
+        const payload = {
+            usuario: formData.get('usuario'),
+            clave: formData.get('clave'),
+            proyecto_id: Number(formData.get('proyecto_id')),
+            fecha_desde: formData.get('fecha_desde'),
+            fecha_hasta: formData.get('fecha_hasta'),
+            limit: Number(formData.get('limit')),
+            offset: Number(formData.get('offset'))
+        };
+
+        submitButton.disabled = true;
+        statusBox.className = 'status';
+        statusBox.textContent = 'Consultando...';
+        responseBox.textContent = JSON.stringify(payload, null, 2);
+
+        try {
+            const startedAt = performance.now();
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const elapsedMs = Math.round(performance.now() - startedAt);
+            const text = await response.text();
+
+            let body;
+            try {
+                body = JSON.parse(text);
+            } catch (error) {
+                body = { raw_response: text };
+            }
+
+            statusBox.className = response.ok ? 'status ok' : 'status error';
+            statusBox.textContent = `HTTP ${response.status} en ${elapsedMs} ms`;
+            responseBox.textContent = JSON.stringify(body, null, 2);
+        } catch (error) {
+            statusBox.className = 'status error';
+            statusBox.textContent = 'No fue posible llamar al endpoint.';
+            responseBox.textContent = JSON.stringify({
+                error: error.message
+            }, null, 2);
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

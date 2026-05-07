@@ -49,6 +49,10 @@ class SuppliersController extends BaseController
                 'estado_tipo_id' => $_GET['estado_tipo_id'] ?? ''
             ];
 
+            if ($currentUser['proveedor_id'] > 0) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
+
             $suppliers = $this->supplierModel->getAll($filters);
             $statusTypes = $this->supplierModel->getStatusTypes();
 
@@ -370,4 +374,3 @@ class SuppliersController extends BaseController
         return $errors;
     }
 }
-

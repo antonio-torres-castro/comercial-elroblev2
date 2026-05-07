@@ -1230,12 +1230,24 @@ class UserController extends BaseController
                 return;
             }
 
+            if ($_GET['fecha_inicio'] == null) {
+                $_GET['fecha_inicio'] = date('Y-m-d');
+            }
+
+            if ($_GET['fecha_fin'] == null) {
+                $_GET['fecha_fin'] = date('Y-m-d');
+            }
+
             $filters = [
                 'search' => trim($_GET['search'] ?? ''),
                 'role' => trim($_GET['role'] ?? ''),
                 'fecha_inicio' => trim($_GET['fecha_inicio'] ?? ''),
                 'fecha_fin' => trim($_GET['fecha_fin'] ?? '')
             ];
+
+            if ($currentUser['proveedor_id'] > 0) {
+                $filters['proveedor_id'] = $currentUser['proveedor_id'];
+            }
 
             $page = max(1, (int)($_GET['page'] ?? 1));
             $limit = max(10, min(100, (int)($_GET['limit'] ?? 25)));
@@ -1245,7 +1257,7 @@ class UserController extends BaseController
             $totalRows = $this->userModel->countUserLogs($filters);
             $totalPages = max(1, (int)ceil($totalRows / $limit));
 
-            $userTypes = $this->getUserTypes();
+            $userTypes = $this->getUserTypes($filters);
 
             $data = [
                 'user' => $currentUser,

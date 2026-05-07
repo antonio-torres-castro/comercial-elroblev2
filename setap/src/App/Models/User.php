@@ -414,20 +414,15 @@ class User
         $tipoUsuario = $this->getUserTypeName($data['usuario_tipo_id']);
 
         // Usuarios de la empresa propietaria NO deben tener cliente_id
-        if (in_array($tipoUsuario, ['client', 'counterparty'])) {
+        if (in_array($tipoUsuario, ['client', 'counterparty', 'admin'])) {
             return null;
         }
 
         // Usuarios de cliente deben tener cliente_id
-        if (in_array($tipoUsuario, ['executor', 'supervisor', 'planner'])) {
+        if (in_array($tipoUsuario, ['executor', 'supervisor', 'planner', 'gobernor'])) {
             if (empty($data['proveedor_id'])) {
                 throw new Exception("Usuario tipo '$tipoUsuario' debe tener proveedor_id asignado");
             }
-            return (int)$data['proveedor_id'];
-        }
-
-        // Usuarios de cliente deben tener cliente_id
-        if (in_array($tipoUsuario, ['admin'])) {
             return (int)$data['proveedor_id'];
         }
 
@@ -905,6 +900,11 @@ class User
         if (!empty($filters['fecha_fin'])) {
             $where .= " AND ul.fecha <= :fecha_fin";
             $params[':fecha_fin'] = $filters['fecha_fin'] . ' 23:59:59';
+        }
+
+        if (!empty($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+            $where .= " AND u.proveedor_id = :proveedor_id";
+            $params[':proveedor_id'] = $filters['proveedor_id'];
         }
 
         return $where;

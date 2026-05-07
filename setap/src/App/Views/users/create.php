@@ -447,7 +447,7 @@
                 proveedorField.classList.remove('proveedor-conditional');
                 proveedorSelect.removeAttribute('required');
                 proveedorSelect.value = '';
-            } else if (userTypeName === 'executor' || userTypeName === 'supervisor' || userTypeName === 'planner') {
+            } else if (userTypeName === 'executor' || userTypeName === 'supervisor' || userTypeName === 'planner' || userTypeName === 'gobernor') {
                 proveedorField.style.display = 'block';
                 proveedorField.classList.add('proveedor-conditional');
                 proveedorSelect.setAttribute('required', 'required');
@@ -462,9 +462,10 @@
                 clientSelect.removeAttribute('required');
                 clientSelect.value = '';
 
-                proveedorField.style.display = 'block';
-                proveedorField.classList.add('proveedor-conditional');
+                proveedorField.style.display = 'none';
+                proveedorField.classList.remove('proveedor-conditional');
                 proveedorSelect.removeAttribute('required');
+                proveedorSelect.value = '';
             }
         }
 

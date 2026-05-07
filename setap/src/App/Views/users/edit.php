@@ -579,7 +579,7 @@ use App\Constants\AppConstants; ?>
 
                 // Tipos de usuario que requieren cliente
                 const clientUserTypes = ['client', 'counterparty'];
-                const supplierUserTypes = ['executor', 'supervisor', 'planner'];
+                const supplierUserTypes = ['executor', 'supervisor', 'planner', 'gobernor'];
 
                 if (clientUserTypes.includes(userType.toLowerCase())) {
                     // Mostrar selección de cliente
@@ -609,8 +609,9 @@ use App\Constants\AppConstants; ?>
                     validationClientInfo.style.display = 'none';
 
                     // Ocultar selección de proveedor
-                    supplierSection.style.display = 'block';
+                    supplierSection.style.display = 'none';
                     supplierSelect.required = false;
+                    supplierSelect.value = '';
                 }
             }
 

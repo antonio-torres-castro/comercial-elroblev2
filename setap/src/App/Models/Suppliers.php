@@ -49,6 +49,11 @@ class Suppliers
                 $params[] = $filters['estado_tipo_id'];
             }
 
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $query .= " AND p.id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
             $query .= " ORDER BY p.razon_social ASC";
 
             $stmt = $this->db->prepare($query);
