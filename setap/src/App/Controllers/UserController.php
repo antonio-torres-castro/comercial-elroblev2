@@ -72,14 +72,14 @@ class UserController extends BaseController
 
             $filters = [];
 
-            if ($uti > 1) {
+            if ($currentUser['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
             }
 
             $users = $this->userModel->getAll($filters);
 
             // Obtener tipos de usuario para filtro
-            $userTypes = $this->getUserTypes();
+            $userTypes = $this->getUserTypes($filters);
 
             // Estandarizar estructura de datos
             $data = [
@@ -114,8 +114,11 @@ class UserController extends BaseController
                 return;
             }
 
+            $filters = [];
+            $filters['proveedor_id'] = $currentUser['proveedor_id'];
+
             // Obtener datos necesarios para el formulario
-            $userTypes = $this->getUserTypes();
+            $userTypes = $this->getUserTypes($filters);
             $estadosTipo = $this->getEstadosTipo();
             $clients = $this->userModel->getAvailableClients();
             $suppliers = $this->userModel->getAvailableSuppliers();
@@ -367,10 +370,14 @@ class UserController extends BaseController
         }
     }
 
-    private function getUserTypes(): array
+    private function getUserTypes(array $filters = []): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM usuario_tipos ORDER BY id");
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM usuario_tipos WHERE id in (2, 3, 4, 5, 6) ORDER BY id");
+            } else {
+                $stmt = $this->db->prepare("SELECT id, nombre, descripcion FROM usuario_tipos ORDER BY id");
+            }
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {
