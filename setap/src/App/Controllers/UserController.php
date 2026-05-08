@@ -67,8 +67,8 @@ class UserController extends BaseController
             $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
 
             //Botón nueva persona, solo el administrador puede crear peronas
-            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
-            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
+            $_GET['show_btn_nuevo'] = $rCreate && ($uti === 1 || $uti === 7);
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && ($uti === 1 || $uti === 7);
 
             $filters = [];
 
@@ -120,8 +120,8 @@ class UserController extends BaseController
             // Obtener datos necesarios para el formulario
             $userTypes = $this->getUserTypes($filters);
             $estadosTipo = $this->getEstadosTipo();
-            $clients = $this->userModel->getAvailableClients();
-            $suppliers = $this->userModel->getAvailableSuppliers();
+            $clients = $this->userModel->getAvailableClients($filters);
+            $suppliers = $this->userModel->getAvailableSuppliers($filters);
 
             // Obtener todas las personas disponibles
             $availablePersonas = $this->userModel->getAllPersonas();

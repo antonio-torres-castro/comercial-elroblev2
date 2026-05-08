@@ -61,8 +61,8 @@ class ClientController extends BaseController
             $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
 
             //Botón nueva persona, solo el administrador puede crear peronas
-            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
-            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
+            $_GET['show_btn_nuevo'] = $rCreate && ($uti === 1 || $uti === 7);
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && ($uti === 1 || $uti === 7);
 
             // Obtener filtros de búsqueda
             $filters = [
@@ -106,6 +106,9 @@ class ClientController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+            $filters = []; // Puedes agregar filtros si es necesario
+
+            $filters['proveedor_id'] = $currentUser['proveedor_id'] ?? null;
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client')) {
@@ -115,7 +118,7 @@ class ClientController extends BaseController
             }
 
             $statusTypes = $this->clientModel->getStatusTypes();
-            $suppliers = $this->clientModel->getSuppliers(); // Para el campo de proveedor
+            $suppliers = $this->clientModel->getSuppliers($filters); // Para el campo de proveedor
 
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('clients/create', [
@@ -201,6 +204,9 @@ class ClientController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+            $filters = []; // Puedes agregar filtros si es necesario
+
+            $filters['proveedor_id'] = $currentUser['proveedor_id'] ?? null;
 
             // Verificar permisos
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client')) {
@@ -219,7 +225,7 @@ class ClientController extends BaseController
 
             $statusTypes = $this->clientModel->getStatusTypes();
             $counterparties = $this->clientModel->getCounterparties((int)$id);
-            $suppliers = $this->clientModel->getSuppliers(); // Para el campo de proveedor
+            $suppliers = $this->clientModel->getSuppliers($filters); // Para el campo de proveedor
 
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('clients/edit', [
@@ -392,8 +398,8 @@ class ClientController extends BaseController
             $rEliminate = $this->permissionService->hasPermission($currentUser['id'], 'Eliminate');
 
             //Botón nueva persona, solo el administrador puede crear peronas
-            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
-            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
+            $_GET['show_btn_nuevo'] = $rCreate && ($uti === 1 || $uti === 7);
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && ($uti === 1 || $uti === 7);
 
             $uti = $currentUser['usuario_tipo_id'];
 
@@ -442,6 +448,8 @@ class ClientController extends BaseController
                 $this->redirectToLogin();
                 return;
             }
+            $filters = []; // Puedes agregar filtros si es necesario
+            $filters['proveedor_id'] = $currentUser['proveedor_id'] ?? null; // Filtrar por proveedor del usuario
 
             // Verificar permisos para gestión de contraparte individual
             if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_client_counterpartie')) {
@@ -465,7 +473,7 @@ class ClientController extends BaseController
             }
 
             // Obtener datos necesarios para el formulario usando el servicio
-            $formData = $this->counterpartieService->getFormData();
+            $formData = $this->counterpartieService->getFormData($filters);
 
             // Usar ViewRenderer para renderizar la vista
             echo $this->viewRenderer->render('client-counterparties/form', [

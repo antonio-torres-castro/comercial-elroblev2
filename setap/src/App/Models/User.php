@@ -493,16 +493,22 @@ class User
     /**
      * Obtener todos los clientes disponibles para asignacion
      */
-    public function getAvailableClients(): array
+    public function getAvailableClients(array $filters = []): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT id, razon_social, rut
-                FROM clientes
-                WHERE estado_tipo_id = 2
-                ORDER BY razon_social
-            ");
-            $stmt->execute();
+            $params = [];
+            $sql = "SELECT id, razon_social, rut
+                    FROM clientes
+                    WHERE estado_tipo_id = 2";
+
+            if ($filters['proveedor_id'] ?? null) {
+                $sql .= PHP_EOL . " AND proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+            $sql .= PHP_EOL . " ORDER BY razon_social";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("obteniendo clientes: " . $e->getMessage());
@@ -513,19 +519,26 @@ class User
     /**
      * Obtener todos los proveedores disponibles para asignacion
      */
-    public function getAvailableSuppliers(): array
+    public function getAvailableSuppliers(array $filters = []): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT id, razon_social, rut
-                FROM proveedores
-                WHERE estado_tipo_id = 2
-                ORDER BY razon_social
-            ");
-            $stmt->execute();
+            $params = [];
+            $sql = "SELECT id, razon_social, rut
+                    FROM proveedores
+                    WHERE estado_tipo_id = 2";
+
+            if ($filters['proveedor_id'] ?? null) {
+                $sql .= PHP_EOL . " AND id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
+            $sql .= PHP_EOL . " ORDER BY razon_social";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            Logger::error("obteniendo clientes: " . $e->getMessage());
+            Logger::error("obteniendo proveedores: " . $e->getMessage());
             return [];
         }
     }

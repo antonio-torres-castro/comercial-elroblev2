@@ -30,40 +30,38 @@ class Persona
                        et.nombre AS estado, p.estado_tipo_id,
                        p.fecha_creado, p.fecha_modificacion
                 FROM personas p
-                LEFT JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                ";
+                LEFT JOIN estado_tipos et ON p.estado_tipo_id = et.id";
 
             // Filtro por proveedor
             if (!empty($filters['proveedor_id'])) {
-                $sql .= " INNER JOIN usuarios u ON p.id = u.persona_id
-                          ";
+                $sql .= PHP_EOL . " INNER JOIN usuarios u ON p.id = u.persona_id";
             }
 
-            $sql .= " WHERE p.estado_tipo_id != 4";
+            $sql .= PHP_EOL . " WHERE p.estado_tipo_id != 4";
 
             $params = [];
 
             // Filtro por estado
             if (!empty($filters['estado_tipo_id'])) {
-                $sql .= " AND p.estado_tipo_id = :estado_tipo_id";
+                $sql .= PHP_EOL . " AND p.estado_tipo_id = :estado_tipo_id";
                 $params[':estado_tipo_id'] = $filters['estado_tipo_id'];
             }
 
             // Filtro por proveedor
             if (!empty($filters['proveedor_id'])) {
-                $sql .= " AND u.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND u.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $filters['proveedor_id'];
             }
 
             // Filtro por búsqueda general
             if (!empty($filters['search'])) {
-                $sql .= " AND (p.nombre LIKE :search1 OR p.rut LIKE :search2 OR p.telefono LIKE :search3)";
+                $sql .= PHP_EOL . " AND (p.nombre LIKE :search1 OR p.rut LIKE :search2 OR p.telefono LIKE :search3)";
                 $params[':search1'] = '%' . $filters['search'] . '%';
                 $params[':search2'] = '%' . $filters['search'] . '%';
                 $params[':search3'] = '%' . $filters['search'] . '%';
             }
 
-            $sql .= " ORDER BY p.fecha_creado DESC";
+            $sql .= PHP_EOL . " ORDER BY p.fecha_creado DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);

@@ -116,11 +116,11 @@ class CounterpartieService
      *
      * @return array Datos para formularios (clientes, personas, estados)
      */
-    public function getFormData(): array
+    public function getFormData(array $filters = []): array
     {
         return [
-            'clients' => $this->clientModel->getAll(),
-            'personas' => $this->personaModel->getAll(),
+            'clients' => $this->clientModel->getAll($filters),
+            'personas' => $this->personaModel->getAll($filters),
             'statusTypes' => $this->clientModel->getStatusTypes()
         ];
     }
