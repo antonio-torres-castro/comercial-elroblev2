@@ -121,6 +121,7 @@ class TaskController extends BaseController
             $projects = $this->taskModel->getProjects($filters);
             if (count($projects) == 1) {
                 $_GET['proyecto_id'] = $projects[0]['id'];
+                $filters['proyecto_id'] = $projects[0]['id'];
             }
 
             if (!empty($_GET['excluye_eliminados'])) {
@@ -289,6 +290,7 @@ class TaskController extends BaseController
             $projects = $this->taskModel->getProjects($filters);
             if (count($projects) == 1) {
                 $_GET['proyecto_id'] = $projects[0]['id'];
+                $filters['proyecto_id'] = $projects[0]['id'];
             }
 
             if (!empty($_GET['excluye_eliminados'])) {

@@ -75,7 +75,7 @@ class Task
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
 						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
+						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
             // Filtros
@@ -253,7 +253,7 @@ class Task
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
 						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
+						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
             // Filtros
@@ -441,7 +441,7 @@ class Task
             FROM proyecto_usuarios_grupo
             WHERE usuario_id = ?
               AND estado_tipo_id = 2
-              AND grupo_id BETWEEN 1 AND 5 ";
+              AND grupo_id in (1, 2, 3, 4, 5, 7) ";
             $paramsSubquery[] = $cu;
 
             // =========================
@@ -625,7 +625,7 @@ class Task
                     FROM proyecto_usuarios_grupo
                     WHERE usuario_id = ?
                       AND estado_tipo_id = 2
-                      AND grupo_id BETWEEN 1 AND 5
+                      AND grupo_id in (1, 2, 3, 4, 5, 7)
                 ) pugf ON pugf.proyecto_id = pt.proyecto_id
         ";
 
@@ -733,7 +733,7 @@ class Task
             FROM proyecto_usuarios_grupo
             WHERE usuario_id = ?
               AND estado_tipo_id = 2
-              AND grupo_id BETWEEN 1 AND 5
+              AND grupo_id in (1, 2, 3, 4, 5, 7)
         ";
             $paramsSubquery[] = $cu;
 
@@ -876,7 +876,7 @@ class Task
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
 						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
+						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
@@ -957,7 +957,7 @@ class Task
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
 						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
+						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
@@ -1038,7 +1038,7 @@ class Task
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
 						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) ";
+						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
@@ -1123,7 +1123,7 @@ class Task
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
 						  AND pug.estado_tipo_id = 2
-						  AND pug.grupo_id BETWEEN 1 AND 5) AND pt.ejecutor_id IS NOT NULL ";
+						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) AND pt.ejecutor_id IS NOT NULL ";
             $params[] = $cu;
 
             // Filtros
@@ -1212,7 +1212,7 @@ class Task
                                 WHERE pug.proyecto_id = p.id 
                                 AND pug.usuario_id = ? 
                                 AND pug.estado_tipo_id = 2 
-                                AND pug.grupo_id BETWEEN 1 AND 5)";
+                                AND pug.grupo_id in (1, 2, 3, 4, 5, 7))";
 
             $params[] = "%$term%";
             $params[] = $cu;
@@ -1924,7 +1924,12 @@ class Task
                 $sql .= " WHERE p.estado_tipo_id = 2";
             }
 
-            $sql .= " AND EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id BETWEEN 1 AND 5) ";
+            $sql .= " AND EXISTS (SELECT 1 
+                                  FROM proyecto_usuarios_grupo pug 
+                                  WHERE pug.proyecto_id = p.id AND 
+                                  pug.usuario_id = ? AND 
+                                  pug.estado_tipo_id = 2 AND 
+                                  pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $myFilters[] = $filters['current_usuario_id'];
 
             if (!empty($filters['proveedor_id'])) {
@@ -1958,7 +1963,7 @@ class Task
 
             $params = [];
             if (!empty($filters['current_usuario_id'])) {
-                $sql .= " and EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id BETWEEN 1 AND 5)";
+                $sql .= " and EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id in (1, 2, 3, 4, 5, 7))";
                 $params[] = $filters['current_usuario_id'];
             }
 
@@ -2014,7 +2019,7 @@ class Task
                 WHERE proyecto_id = ?
                   AND usuario_id = ?
                   AND estado_tipo_id = 2
-                  AND grupo_id BETWEEN 1 AND 5
+                  AND grupo_id in (1, 2, 3, 4, 5, 7)
                 LIMIT 1";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$projectId, $userId]);

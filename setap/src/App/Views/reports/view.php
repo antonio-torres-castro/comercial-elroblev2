@@ -157,7 +157,7 @@ use App\Constants\AppConstants; ?>
                                                 <?php foreach ($reportData['data'] as $row): ?>
                                                     <tr>
                                                         <?php foreach ($row as $cell): ?>
-                                                            <td><?= htmlspecialchars($cell) ?></td>
+                                                            <td><?= htmlspecialchars($cell ?? '') ?></td>
                                                         <?php endforeach; ?>
                                                     </tr>
                                                 <?php endforeach; ?>

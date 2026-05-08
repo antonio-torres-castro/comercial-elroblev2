@@ -168,8 +168,7 @@ class ReportService
         $limit = min(max((int)($filters['limit'] ?? 100), 1), self::API_MAX_LIMIT);
         $offset = max((int)($filters['offset'] ?? 0), 0);
 
-        $sql = "
-            WITH RECURSIVE espacio_ancestros AS (
+        $sql = "WITH RECURSIVE espacio_ancestros AS (
                 SELECT
                     e.id AS espacio_id,
                     e.id AS ancestro_id,
@@ -262,7 +261,7 @@ class ReportService
                   WHERE pug.proyecto_id = p.id
                     AND pug.usuario_id = :usuario_id
                     AND pug.estado_tipo_id = 2
-                    AND pug.grupo_id BETWEEN 1 AND 5
+                    AND pug.grupo_id in (1, 2, 3, 4, 5, 7)
               )
             ORDER BY
                 pt.proyecto_id ASC,

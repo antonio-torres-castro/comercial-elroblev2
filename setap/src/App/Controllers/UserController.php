@@ -1230,11 +1230,11 @@ class UserController extends BaseController
                 return;
             }
 
-            if ($_GET['fecha_inicio'] == null) {
+            if (!isset($_GET['fecha_inicio']) || $_GET['fecha_inicio'] == null) {
                 $_GET['fecha_inicio'] = date('Y-m-d');
             }
 
-            if ($_GET['fecha_fin'] == null) {
+            if (!isset($_GET['fecha_fin']) || $_GET['fecha_fin'] == null) {
                 $_GET['fecha_fin'] = date('Y-m-d');
             }
 

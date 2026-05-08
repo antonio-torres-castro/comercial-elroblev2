@@ -90,7 +90,7 @@ class Report
                 $sql .= " WHERE p.estado_tipo_id = 2";
             }
 
-            $sql .= " AND EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id BETWEEN 1 AND 5) ";
+            $sql .= " AND EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $myFilters[] = $filters['current_usuario_id'];
 
             if (!empty($filters['proveedor_id'])) {
