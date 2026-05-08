@@ -185,6 +185,23 @@ use App\Constants\AppConstants; ?>
                             <div class="form-text">Campo opcional. Máximo 255 caracteres.</div>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="proveedor_id" class="form-label">Proveedor <span class="text-danger">*</span></label>
+                            <select class="form-select" id="proveedor_id" name="proveedor_id">
+                                <option value="">Seleccionar proveedor...</option>
+                                <?php if (isset($suppliers) && is_array($suppliers)): ?>
+                                    <?php foreach ($suppliers as $supplier): ?>
+                                        <option value="<?= $supplier['id'] ?>"
+                                            data-rut="<?= htmlspecialchars($supplier['rut'] ?? '') ?>"
+                                            <?= (isset($persona['proveedor_id']) && $supplier['id'] == $persona['proveedor_id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($supplier['razon_social']) ?>
+                                            <?= !empty($supplier['rut']) ? ' - RUT: ' . htmlspecialchars($supplier['rut']) : '' ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+
                         <!-- Botones de Acción -->
                         <div class="mt-4 text-end">
                             <a href="<?= AppConstants::ROUTE_PERSONAS; ?>" class="btn btn-secondary me-2">

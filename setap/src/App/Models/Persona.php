@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Config\Database;
 use App\Helpers\Security;
+use PDOException;
 use App\Helpers\Logger;
 use PDO;
 use Exception;
@@ -18,15 +19,66 @@ class Persona
     }
 
     /**
-     * Obtener todas las personas con filtros opcionales
+     * Obtener todos los clientes disponibles para asignacion
      */
+    public function getAvailableClients(array $filters = []): array
+    {
+        try {
+            $params = [];
+            $sql = "SELECT id, razon_social, rut
+                    FROM clientes
+                    WHERE estado_tipo_id = 2";
+
+            if ($filters['proveedor_id'] ?? null) {
+                $sql .= PHP_EOL . " AND proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+            $sql .= PHP_EOL . " ORDER BY razon_social";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("obteniendo clientes: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener todos los proveedores disponibles para asignacion
+     */
+    public function getAvailableSuppliers(array $filters = []): array
+    {
+        try {
+            $params = [];
+            $sql = "SELECT id, razon_social, rut
+                    FROM proveedores
+                    WHERE estado_tipo_id = 2";
+
+            if ($filters['proveedor_id'] ?? null) {
+                $sql .= PHP_EOL . " AND id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
+            $sql .= PHP_EOL . " ORDER BY razon_social";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("obteniendo proveedores: " . $e->getMessage());
+            return [];
+        }
+    }
+
+
     /**
      * Obtener todas las personas con filtros opcionales
      */
     public function getAll(array $filters = []): array
     {
         try {
-            $sql = "SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion,
+            $sql = "SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion, p.proveedor_id,
                        et.nombre AS estado, p.estado_tipo_id,
                        p.fecha_creado, p.fecha_modificacion
                 FROM personas p
@@ -80,7 +132,7 @@ class Persona
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion,
+                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion, p.proveedor_id,
                        et.nombre as estado, p.estado_tipo_id,
                        p.fecha_Creado, p.fecha_modificacion
                 FROM personas p
@@ -132,8 +184,8 @@ class Persona
             $this->db->beginTransaction();
 
             $stmt = $this->db->prepare("
-                INSERT INTO personas (rut, nombre, telefono, direccion, estado_tipo_id)
-                VALUES (:rut, :nombre, :telefono, :direccion, :estado_tipo_id)
+                INSERT INTO personas (rut, nombre, telefono, direccion, proveedor_id, estado_tipo_id)
+                VALUES (:rut, :nombre, :telefono, :direccion, :proveedor_id, :estado_tipo_id)
             ");
 
             $success = $stmt->execute([
@@ -141,6 +193,7 @@ class Persona
                 ':nombre' => $data['nombre'],
                 ':telefono' => $data['telefono'] ?? null,
                 ':direccion' => $data['direccion'] ?? null,
+                ':proveedor_id' => $data['proveedor_id'] ?? null,
                 ':estado_tipo_id' => $data['estado_tipo_id'] ?? 2 // Activo por defecto
             ]);
 
@@ -170,7 +223,7 @@ class Persona
             $stmt = $this->db->prepare("
                 UPDATE personas
                 SET rut = :rut, nombre = :nombre, telefono = :telefono,
-                    direccion = :direccion, estado_tipo_id = :estado_tipo_id
+                    direccion = :direccion, proveedor_id = :proveedor_id, estado_tipo_id = :estado_tipo_id
                 WHERE id = :id AND estado_tipo_id != 4
             ");
 
@@ -180,6 +233,7 @@ class Persona
                 ':nombre' => $data['nombre'],
                 ':telefono' => $data['telefono'] ?? null,
                 ':direccion' => $data['direccion'] ?? null,
+                ':proveedor_id' => $data['proveedor_id'] ?? null,
                 ':estado_tipo_id' => $data['estado_tipo_id']
             ]);
 

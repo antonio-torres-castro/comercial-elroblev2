@@ -46,8 +46,8 @@ class PersonaController extends AbstractBaseController
             $filters = $this->extractFilters(['estado_tipo_id', 'search']);
 
             //Botón nueva persona, solo el administrador puede crear peronas
-            $_GET['show_btn_nuevo'] = $rCreate && $uti === 1;
-            $_GET['show_col_acciones'] = $rModify && $rEliminate && $uti === 1;
+            $_GET['show_btn_nuevo'] = $rCreate && ($uti === 1 || $uti === 7);
+            $_GET['show_col_acciones'] = $rModify && $rEliminate && ($uti === 1 || $uti === 7);
 
             if ($uti > 1) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
@@ -79,10 +79,21 @@ class PersonaController extends AbstractBaseController
                 return;
             }
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $filters = [];
+            $filters['proveedor_id'] = $currentUser['proveedor_id'] ?? null;
+
             $estadosTipo = $this->getEstadosTipo();
+            $suppliers = $this->personaModel->getAvailableSuppliers($filters);
 
             $this->render('personas/create', [
                 'estadosTipo' => $estadosTipo,
+                'suppliers' => $suppliers,
                 'error' => $_GET['error'] ?? ''
             ]);
         }, 'create');
@@ -151,6 +162,15 @@ class PersonaController extends AbstractBaseController
                 return;
             }
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            $filters = [];
+            $filters['proveedor_id'] = $currentUser['proveedor_id'] ?? null;
+
             $id = $this->validateId($_GET['id'] ?? null, AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
 
             $persona = $this->personaModel->find($id);
@@ -160,10 +180,12 @@ class PersonaController extends AbstractBaseController
             }
 
             $estadosTipo = $this->getEstadosTipo();
+            $suppliers = $this->personaModel->getAvailableSuppliers($filters);
 
             $this->render('personas/edit', [
                 'persona' => $persona,
                 'estadosTipo' => $estadosTipo,
+                'suppliers' => $suppliers,
                 'error' => $_GET['error'] ?? ''
             ]);
         }, 'edit');
@@ -201,6 +223,7 @@ class PersonaController extends AbstractBaseController
                 'nombre' => Security::sanitizeInput($_POST['nombre']),
                 'telefono' => Security::sanitizeInput($_POST['telefono'] ?? ''),
                 'direccion' => Security::sanitizeInput($_POST['direccion'] ?? ''),
+                'proveedor_id' => (int)$_POST['proveedor_id'],
                 'estado_tipo_id' => (int)$_POST['estado_tipo_id']
             ];
 
