@@ -55,7 +55,7 @@ class PersonaController extends AbstractBaseController
 
             $personas = $this->personaModel->getAll($filters);
             $estadosTipo = $this->getEstadosTipo();
-            $stats = $this->personaModel->getStats();
+            $stats = $this->personaModel->getStats($filters);
 
             $this->render('personas/list', [
                 'personas' => $personas,
@@ -130,6 +130,7 @@ class PersonaController extends AbstractBaseController
                 'nombre' => Security::sanitizeInput($_POST['nombre']),
                 'telefono' => Security::sanitizeInput($_POST['telefono'] ?? ''),
                 'direccion' => Security::sanitizeInput($_POST['direccion'] ?? ''),
+                'proveedor_id' => (int)$_POST['proveedor_id'],
                 'estado_tipo_id' => (int)($_POST['estado_tipo_id'] ?? 2)
             ];
 

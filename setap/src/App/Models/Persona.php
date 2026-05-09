@@ -84,11 +84,6 @@ class Persona
                 FROM personas p
                 LEFT JOIN estado_tipos et ON p.estado_tipo_id = et.id";
 
-            // Filtro por proveedor
-            if (!empty($filters['proveedor_id'])) {
-                $sql .= PHP_EOL . " INNER JOIN usuarios u ON p.id = u.persona_id";
-            }
-
             $sql .= PHP_EOL . " WHERE p.estado_tipo_id != 4";
 
             $params = [];
@@ -101,7 +96,7 @@ class Persona
 
             // Filtro por proveedor
             if (!empty($filters['proveedor_id'])) {
-                $sql .= PHP_EOL . " AND u.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND p.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $filters['proveedor_id'];
             }
 
@@ -340,20 +335,26 @@ class Persona
     /**
      * Obtener estadísticas de personas
      */
-    public function getStats(): array
+    public function getStats(array $filters = []): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT
-                    COUNT(*) as total,
-                    SUM(CASE WHEN estado_tipo_id = 2 THEN 1 ELSE 0 END) as activos,
-                    SUM(CASE WHEN estado_tipo_id = 3 THEN 1 ELSE 0 END) as inactivos,
-                    SUM(CASE WHEN DATE(fecha_Creado) = CURDATE() THEN 1 ELSE 0 END) as creados_hoy
-                FROM personas
-                WHERE estado_tipo_id != 4
-            ");
+            $params = [];
+            $sql = "SELECT
+                        COUNT(*) as total,
+                        SUM(CASE WHEN estado_tipo_id = 2 THEN 1 ELSE 0 END) as activos,
+                        SUM(CASE WHEN estado_tipo_id = 3 THEN 1 ELSE 0 END) as inactivos,
+                        SUM(CASE WHEN DATE(fecha_Creado) = CURDATE() THEN 1 ELSE 0 END) as creados_hoy
+                    FROM personas
+                    WHERE estado_tipo_id != 4";
 
-            $stmt->execute();
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $sql .= PHP_EOL . " AND proveedor_id = :proveedor_id";
+                $params[':proveedor_id'] = $filters['proveedor_id'];
+            }
+
+            $stmt = $this->db->prepare($sql);
+
+            $stmt->execute($params);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
         } catch (Exception $e) {
             Logger::error('Persona::getStats error: ' . $e->getMessage());

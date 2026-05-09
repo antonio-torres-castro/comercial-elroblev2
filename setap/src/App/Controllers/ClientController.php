@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Models\Client;
-use App\Models\Persona;
 use App\Services\PermissionService;
 use App\Services\ClientValidationService;
 use App\Services\CounterpartieService;
@@ -17,7 +16,6 @@ use Exception;
 class ClientController extends BaseController
 {
     private $clientModel;
-    private $personaModel;
     private $permissionService;
     private $clientValidationService;
     private $counterpartieService;
@@ -28,7 +26,6 @@ class ClientController extends BaseController
         // Verificar autenticación
         (new AuthMiddleware())->handle();
         $this->clientModel = new Client();
-        $this->personaModel = new Persona();
         $this->permissionService = new PermissionService();
         $this->clientValidationService = new ClientValidationService();
         $this->counterpartieService = new CounterpartieService();
