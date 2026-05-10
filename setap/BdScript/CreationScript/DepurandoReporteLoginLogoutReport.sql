@@ -1,4 +1,4 @@
-SET @proveedor = 3;
+SET @proveedor = 0;
 
 DROP TABLE IF EXISTS tUsuarios;
 Create Temporary Table tUsuarios
@@ -26,4 +26,4 @@ t.proveedor,
 t.estado, t.fecha_creado
 	  From usuario_logs ul
 Inner Join tUsuarios    t  on t.id = ul.usuario_id
-Where ul.fecha between '2026-01-01' and '2026-05-05 23:59:59';
+Where ul.fecha between '2026-05-10' and '2026-05-10 23:59:59';

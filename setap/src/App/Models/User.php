@@ -895,30 +895,30 @@ class User
      */
     private function buildUserLogFilters(array $filters, array &$params): string
     {
-        $where = " WHERE 1=1 ";
+        $where = " WHERE ul.tipo_registro IN (1, 2) "; // Solo login/logout
 
         if (!empty($filters['search'])) {
-            $where .= " AND (u.nombre_usuario LIKE :search OR p.nombre LIKE :search OR ul.IP LIKE :search)";
+            $where .= PHP_EOL . " AND (u.nombre_usuario LIKE :search OR p.nombre LIKE :search OR ul.IP LIKE :search)";
             $params[':search'] = '%' . $filters['search'] . '%';
         }
 
         if (!empty($filters['role'])) {
-            $where .= " AND ut.nombre = :role";
+            $where .= PHP_EOL . " AND ut.nombre = :role";
             $params[':role'] = $filters['role'];
         }
 
         if (!empty($filters['fecha_inicio'])) {
-            $where .= " AND ul.fecha >= :fecha_inicio";
+            $where .= PHP_EOL . " AND ul.fecha >= :fecha_inicio";
             $params[':fecha_inicio'] = $filters['fecha_inicio'] . ' 00:00:00';
         }
 
         if (!empty($filters['fecha_fin'])) {
-            $where .= " AND ul.fecha <= :fecha_fin";
+            $where .= PHP_EOL . " AND ul.fecha <= :fecha_fin";
             $params[':fecha_fin'] = $filters['fecha_fin'] . ' 23:59:59';
         }
 
         if (!empty($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
-            $where .= " AND u.proveedor_id = :proveedor_id";
+            $where .= PHP_EOL . " AND u.proveedor_id = :proveedor_id";
             $params[':proveedor_id'] = $filters['proveedor_id'];
         }
 

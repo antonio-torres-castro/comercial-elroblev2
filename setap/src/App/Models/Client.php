@@ -24,8 +24,7 @@ class Client
     public function getAll(array $filters = []): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     c.*,
                     et.nombre as estado_nombre,
                     (SELECT COUNT(*) 
@@ -34,33 +33,32 @@ class Client
                         cc.cliente_id = c.id 
                     AND cc.estado_tipo_id = 2) as total_contrapartes
                 FROM {$this->table} c
-                INNER JOIN estado_tipos et ON c.estado_tipo_id = et.id
-            ";
+                INNER JOIN estado_tipos et ON c.estado_tipo_id = et.id ";
 
             $params = [];
 
             // Filtros opcionales
             if (!empty($filters['rut'])) {
-                $query .= " AND c.rut LIKE ?";
+                $query .= PHP_EOL . " AND c.rut LIKE ?";
                 $params[] = '%' . $filters['rut'] . '%';
             }
 
             if (!empty($filters['razon_social'])) {
-                $query .= " AND c.razon_social LIKE ?";
+                $query .= PHP_EOL . " AND c.razon_social LIKE ?";
                 $params[] = '%' . $filters['razon_social'] . '%';
             }
 
             if (!empty($filters['estado_tipo_id'])) {
-                $query .= " AND c.estado_tipo_id = ?";
+                $query .= PHP_EOL . " AND c.estado_tipo_id = ?";
                 $params[] = $filters['estado_tipo_id'];
             }
 
-            if (isset($filters['proveedor_id'])) {
-                $query .= " AND c.proveedor_id = ?";
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $query .= PHP_EOL . " AND c.proveedor_id = ?";
                 $params[] = $filters['proveedor_id'];
             }
 
-            $query .= " ORDER BY c.razon_social ASC";
+            $query .= PHP_EOL . " ORDER BY c.razon_social ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($params);
@@ -298,16 +296,14 @@ class Client
     {
         try {
             $filtroProveedor = "";
-            if (isset($filters['proveedor_id']) && is_numeric($filters['proveedor_id'])) {
-                $filtroProveedor = "AND id = " . (int)$filters['proveedor_id'];
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $filtroProveedor = PHP_EOL . " AND id = " . (int)$filters['proveedor_id'];
             }
-            $stmt = $this->db->prepare("
-                SELECT id, razon_social as nombre, rut
+            $stmt = $this->db->prepare("SELECT id, razon_social as nombre, rut
                 FROM proveedores
                 WHERE estado_tipo_id != 4
                 $filtroProveedor
-                ORDER BY razon_social
-            ");
+                ORDER BY razon_social ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {

@@ -6,7 +6,7 @@ USE comerci3_bdsetap $$
 CREATE PROCEDURE login_logout_report (
     IN p_proveedor_id INT,
     IN p_desde DATE,
-    IN p_hasta DATE
+    IN p_hasta DATETIME
 )
 BEGIN   
 	DROP TABLE IF EXISTS tUsuarios;
