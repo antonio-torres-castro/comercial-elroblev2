@@ -70,7 +70,7 @@ class Task
                 LEFT JOIN espacios ep5 ON ep5.id = ep4.espacio_padre_id
                 LEFT JOIN espacios ep6 ON ep6.id = ep5.espacio_padre_id
                 LEFT JOIN espacios ep7 ON ep7.id = ep6.espacio_padre_id ";
-            $strWhere = " WHERE EXISTS (SELECT 1
+            $strWhere = PHP_EOL . " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
@@ -248,7 +248,7 @@ class Task
                 LEFT JOIN espacios ep5 ON ep5.id = ep4.espacio_padre_id
                 LEFT JOIN espacios ep6 ON ep6.id = ep5.espacio_padre_id
                 LEFT JOIN espacios ep7 ON ep7.id = ep6.espacio_padre_id ";
-            $strWhere = " WHERE EXISTS (SELECT 1
+            $strWhere = PHP_EOL . " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
@@ -350,7 +350,7 @@ class Task
 
             $sql .= $strWhere;
             if (!empty($filters['sort_direccion_espacio'])) {
-                $sql .= " ORDER BY
+                $sql .= PHP_EOL . " ORDER BY
                     pt.proyecto_id ASC,
                     COALESCE(d.id, 0) ASC,
                     COALESCE(ep7.nombre, ep6.nombre, ep5.nombre, ep4.nombre, ep3.nombre, ep2.nombre, ep1.nombre, e.nombre, 'Sin espacio') ASC,
@@ -359,7 +359,7 @@ class Task
                     pt.fecha_inicio ASC,
                     pt.id ASC";
             } else {
-                $sql .= " ORDER BY pt.fecha_inicio ASC, pt.id asc";
+                $sql .= PHP_EOL . " ORDER BY pt.fecha_inicio ASC, pt.id asc";
             }
             $sql .= " LIMIT ? OFFSET ?";
             $params[] = $limit;
@@ -432,7 +432,7 @@ class Task
                 $paramsSubquery[] = $filters['proyecto_id'];
             }
 
-            $sqlCapacidad .= " GROUP BY d.proyecto_id, d.fecha ";
+            $sqlCapacidad .= PHP_EOL . " GROUP BY d.proyecto_id, d.fecha ";
 
             // =========================
             // 3. SUBQUERY ACCESO USUARIO
@@ -530,13 +530,13 @@ class Task
             // =========================
             // 6. GROUP + HAVING
             // =========================
-            $sql .= " GROUP BY pt.fecha_inicio ";
+            $sql .= PHP_EOL . " GROUP BY pt.fecha_inicio ";
 
             if (!empty($filters['solo_excedidos'])) {
-                $sql .= " HAVING SUM(pt.duracion_horas) > COALESCE(MAX(ca.hh_disponibles), 0)";
+                $sql .= PHP_EOL . " HAVING SUM(pt.duracion_horas) > COALESCE(MAX(ca.hh_disponibles), 0)";
             }
 
-            $sql .= " ORDER BY pt.fecha_inicio ASC LIMIT ? OFFSET ?";
+            $sql .= PHP_EOL . " ORDER BY pt.fecha_inicio ASC LIMIT ? OFFSET ?";
 
             // =========================
             // 7. PARAMS FINALES (ORDEN SEGURO)
@@ -670,14 +670,14 @@ class Task
             $sql .= $strWhere;
 
             // 🔥 agrupación semanal
-            $sql .= " GROUP BY semana_inicio ";
+            $sql .= PHP_EOL . " GROUP BY semana_inicio ";
 
             // 🔥 HAVING correcto (capacidad real semanal)
             if (!empty($filters['solo_excedidos'])) {
-                $sql .= " HAVING SUM(pt.duracion_horas) > COALESCE(SUM(ca.hh_disponibles), 0)";
+                $sql .= PHP_EOL . " HAVING SUM(pt.duracion_horas) > COALESCE(SUM(ca.hh_disponibles), 0)";
             }
 
-            $sql .= " ORDER BY semana_inicio ASC LIMIT ? OFFSET ?";
+            $sql .= PHP_EOL . " ORDER BY semana_inicio ASC LIMIT ? OFFSET ?";
 
             $params[] = $limit;
             $params[] = $offset;
@@ -710,21 +710,19 @@ class Task
             // =========================
             // 2. SUBQUERY CAPACIDAD (DIARIA)
             // =========================
-            $sqlCapacidad = "
-            SELECT 
+            $sqlCapacidad = "SELECT 
                 d.fecha,
                 SUM(d.hh) as hh_disponibles,
                 d.proyecto_id
             FROM proyecto_usuarios_grupo_disponibilidad d
-            WHERE d.grupo_id = 4
-        ";
+            WHERE d.grupo_id = 4";
 
             if (!empty($filters['proyecto_id'])) {
                 $sqlCapacidad .= " AND d.proyecto_id = ? ";
                 $paramsSubquery[] = $filters['proyecto_id'];
             }
 
-            $sqlCapacidad .= " GROUP BY d.proyecto_id, d.fecha ";
+            $sqlCapacidad .= PHP_EOL . " GROUP BY d.proyecto_id, d.fecha ";
 
             // =========================
             // 3. SUBQUERY ACCESO USUARIO
@@ -946,12 +944,12 @@ class Task
             $params = [];
 
             $sql = "SELECT COUNT(DISTINCT DATE_SUB(pt.fecha_inicio, INTERVAL WEEKDAY(pt.fecha_inicio) DAY)) as total
-                FROM proyecto_tareas pt
-                INNER JOIN tareas t ON pt.tarea_id = t.id
-                INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
+                    FROM proyecto_tareas pt
+              INNER JOIN tareas t ON pt.tarea_id = t.id
+              INNER JOIN proyectos p ON pt.proyecto_id = p.id
+              INNER JOIN clientes c ON p.cliente_id = c.id
+              INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+              INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
             $strWhere = " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
@@ -1027,12 +1025,12 @@ class Task
             $params = [];
 
             $sql = "SELECT COUNT(DISTINCT DATE_FORMAT(pt.fecha_inicio, '%Y-%m')) as total
-                FROM proyecto_tareas pt
-                INNER JOIN tareas t ON pt.tarea_id = t.id
-                INNER JOIN proyectos p ON pt.proyecto_id = p.id
-                INNER JOIN clientes c ON p.cliente_id = c.id
-                INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
-                INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
+                    FROM proyecto_tareas pt
+              INNER JOIN tareas t ON pt.tarea_id = t.id
+              INNER JOIN proyectos p ON pt.proyecto_id = p.id
+              INNER JOIN clientes c ON p.cliente_id = c.id
+              INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
+              INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
             $strWhere = " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
@@ -1110,7 +1108,7 @@ class Task
             $sql = "SELECT DISTINCT
                             pe.nombre as nombre,
                             exec.nombre_usuario as usuario
-                FROM proyecto_tareas pt
+                      FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
                 INNER JOIN proyectos p ON pt.proyecto_id = p.id
                 INNER JOIN clientes c ON p.cliente_id = c.id
@@ -1326,6 +1324,7 @@ class Task
                 Logger::error("Task::create: no se puede crear tarea sin nombre");
             }
             $this->db->commit();
+
             return $tareaId;
         } catch (PDOException $e) {
             $this->db->rollBack();
@@ -1533,10 +1532,11 @@ class Task
     private function isHolidayDate(int $projectId, string $date): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT id FROM proyecto_feriados
-                WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
-            ");
+            $stmt = $this->db->prepare("SELECT id 
+                                        FROM proyecto_feriados
+                                        WHERE proyecto_id = ? 
+                                          AND fecha = ? 
+                                          AND estado_tipo_id = 2");
             $stmt->execute([$projectId, $date]);
             return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
@@ -1650,8 +1650,7 @@ class Task
     public function updateT(int $id, array $data): bool
     {
         try {
-            $sql = "
-                UPDATE tareas
+            $sql = "UPDATE tareas
                 SET
                     nombre = ?,
                     descripcion = ?,
@@ -2007,7 +2006,6 @@ class Task
         }
     }
 
-
     /**
      * Verificar si un usuario tiene acceso a un proyecto
      */
@@ -2357,12 +2355,10 @@ class Task
     public function getTaskStatesMyListFilter(): array
     {
         try {
-            $sql = "
-                SELECT id, nombre, descripcion
-                FROM estado_tipos
-                WHERE id in (2, 5, 7) 
-                ORDER BY id
-            ";
+            $sql = "SELECT id, nombre, descripcion
+                    FROM estado_tipos
+                    WHERE id in (2, 5, 7) 
+                    ORDER BY id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -2379,12 +2375,10 @@ class Task
     {
         // Solo el estado de activo y creado 
         try {
-            $sql = "
-                SELECT id, nombre, descripcion
-                FROM estado_tipos
-                WHERE id in (1, 2)
-                ORDER BY id
-            ";
+            $sql = "SELECT id, nombre, descripcion
+                    FROM estado_tipos
+                    WHERE id in (1, 2)
+                    ORDER BY id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -2401,12 +2395,10 @@ class Task
     {
         // Solo el estado de activo y creado 
         try {
-            $sql = "
-                SELECT id, nombre, descripcion
-                FROM estado_tipos
-                WHERE id in (1, 2, 4)
-                ORDER BY id
-            ";
+            $sql = "SELECT id, nombre, descripcion
+                    FROM estado_tipos
+                    WHERE id in (1, 2, 4)
+                    ORDER BY id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -2646,8 +2638,7 @@ class Task
             $checkTable->execute();
 
             if ($checkTable->rowCount() > 0) {
-                $sql = "
-                    INSERT INTO historial_tareas (
+                $sql = "INSERT INTO historial_tareas (
                         proyecto_tarea_id,
                         usuario_id,
                         supervisor_id,
@@ -2815,11 +2806,11 @@ class Task
 
         try {
             // Verificar si fecha de inicio es feriado
-            $stmt = $this->db->prepare("
-                SELECT fecha, ind_irrenunciable, observaciones
-                FROM proyecto_feriados
-                WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
-            ");
+            $stmt = $this->db->prepare("SELECT fecha, ind_irrenunciable, observaciones
+                                        FROM proyecto_feriados
+                                        WHERE proyecto_id = ? 
+                                          AND fecha = ? 
+                                          AND estado_tipo_id = 2");
 
             $stmt->execute([$projectId, $fechaInicio]);
             $holidayStart = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -2872,15 +2863,15 @@ class Task
                 $dateStr = $currentDate->format('Y-m-d');
 
                 // Verificar si es feriado
-                $stmt = $this->db->prepare("
-                    SELECT id FROM proyecto_feriados
-                    WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
-                ");
+                $stmt = $this->db->prepare("SELECT id 
+                                            FROM proyecto_feriados
+                                            WHERE proyecto_id = ? 
+                                              AND fecha = ? 
+                                              AND estado_tipo_id = 2");
                 $stmt->execute([$projectId, $dateStr]);
 
                 if ($stmt->rowCount() === 0) {
-                    // No es feriado, retornar esta fecha
-                    return $dateStr;
+                    return $dateStr; // No es feriado, retornar esta fecha
                 }
 
                 // Avanzar un día
@@ -2983,8 +2974,7 @@ class Task
             }
 
             $placeholders = implode(',', array_fill(0, count($historialIds), '?'));
-            $sql = "
-                SELECT
+            $sql = "SELECT
                     tf.id,
                     tf.historial_tarea_id,
                     tf.url_foto,
@@ -2994,8 +2984,7 @@ class Task
                 FROM tarea_fotos tf
                 LEFT JOIN estado_tipos et ON et.id = tf.estado_tipo_id
                 WHERE tf.historial_tarea_id IN ($placeholders)
-                ORDER BY tf.fecha_Creado DESC, tf.id DESC
-            ";
+                ORDER BY tf.fecha_Creado DESC, tf.id DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute(array_values($historialIds));
@@ -3030,12 +3019,10 @@ class Task
                 return 0;
             }
 
-            $sql = "
-                SELECT tf.url_foto
+            $sql = "SELECT tf.url_foto
                 FROM tarea_fotos tf
                 INNER JOIN historial_tareas ht ON ht.id = tf.historial_tarea_id
-                WHERE ht.proyecto_tarea_id = ?
-            ";
+                WHERE ht.proyecto_tarea_id = ?";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$proyectoTareaId]);
@@ -3143,5 +3130,33 @@ class Task
         }
 
         return preg_replace('/[^A-Za-z0-9._-]/', '_', $fileName) ?: $fileName;
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
+        }
     }
 }

@@ -23,38 +23,36 @@ class Suppliers
     public function getAll(array $filters = []): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     p.*,
                     et.nombre as estado_nombre
                 FROM {$this->table} p
                 LEFT JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                WHERE 1=1
-            ";
+                WHERE 1=1 ";
 
             $params = [];
 
             if (!empty($filters['rut'])) {
-                $query .= " AND p.rut LIKE ?";
+                $query .= PHP_EOL . " AND p.rut LIKE ?";
                 $params[] = '%' . $filters['rut'] . '%';
             }
 
             if (!empty($filters['razon_social'])) {
-                $query .= " AND p.razon_social LIKE ?";
+                $query .= PHP_EOL . " AND p.razon_social LIKE ?";
                 $params[] = '%' . $filters['razon_social'] . '%';
             }
 
             if (!empty($filters['estado_tipo_id'])) {
-                $query .= " AND p.estado_tipo_id = ?";
+                $query .= PHP_EOL . " AND p.estado_tipo_id = ?";
                 $params[] = $filters['estado_tipo_id'];
             }
 
             if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
-                $query .= " AND p.id = ?";
+                $query .= PHP_EOL . " AND p.id = ?";
                 $params[] = $filters['proveedor_id'];
             }
 
-            $query .= " ORDER BY p.razon_social ASC";
+            $query .= PHP_EOL . " ORDER BY p.razon_social ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($params);
@@ -72,14 +70,12 @@ class Suppliers
     public function find(int $id): ?array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     p.*,
                     et.nombre as estado_nombre
                 FROM {$this->table} p
                 LEFT JOIN estado_tipos et ON p.estado_tipo_id = et.id
-                WHERE p.id = ?
-            ";
+                WHERE p.id = ? ";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$id]);
@@ -98,13 +94,11 @@ class Suppliers
     public function create(array $data): int
     {
         try {
-            $query = "
-                INSERT INTO {$this->table} (
+            $query = "INSERT INTO {$this->table} (
                     rut, razon_social, direccion, email, telefono,
                     fecha_inicio_contrato, fecha_facturacion, fecha_termino_contrato,
                     estado_tipo_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ";
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([
@@ -132,8 +126,7 @@ class Suppliers
     public function update(int $id, array $data): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table} SET
+            $query = "UPDATE {$this->table} SET
                     rut = ?,
                     razon_social = ?,
                     direccion = ?,
@@ -144,8 +137,7 @@ class Suppliers
                     fecha_termino_contrato = ?,
                     estado_tipo_id = ?,
                     fecha_modificacion = CURRENT_TIMESTAMP
-                WHERE id = ? AND estado_tipo_id != 4
-            ";
+                WHERE id = ? AND estado_tipo_id != 4 ";
 
             $stmt = $this->db->prepare($query);
             $result = $stmt->execute([
@@ -174,12 +166,10 @@ class Suppliers
     public function delete(int $id): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table} SET
+            $query = "UPDATE {$this->table} SET
                     estado_tipo_id = 4,
                     fecha_modificacion = CURRENT_TIMESTAMP
-                WHERE id = ? AND estado_tipo_id != 4
-            ";
+                WHERE id = ? AND estado_tipo_id != 4 ";
 
             $stmt = $this->db->prepare($query);
             $result = $stmt->execute([$id]);
@@ -201,7 +191,7 @@ class Suppliers
             $params = [$rut];
 
             if ($excludeId) {
-                $query .= " AND id != ?";
+                $query .= PHP_EOL . " AND id != ?";
                 $params[] = $excludeId;
             }
 
@@ -280,5 +270,33 @@ class Suppliers
         $formattedBody = number_format(intval($body), 0, '', '.');
 
         return $formattedBody . '-' . $dv;
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
+        }
     }
 }

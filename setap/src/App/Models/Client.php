@@ -624,4 +624,32 @@ class Client
 
         return $formattedBody . '-' . $dv;
     }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
+        }
+    }
 }

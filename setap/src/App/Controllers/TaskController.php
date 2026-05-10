@@ -1462,6 +1462,8 @@ class TaskController extends BaseController
                 if ($tareaId == null) {
                     Security::redirect("/tasks/create?error=" . urlencode('Error al crear la nueva tarea'));
                     return;
+                } else {
+                    $this->taskModel->logUserEvent($currentUser['id'], 6); // Creación de nueva tarea tipo
                 }
             }
             // Preparar datos para creación
@@ -1489,6 +1491,19 @@ class TaskController extends BaseController
             $result = $this->taskModel->create($taskData);
             if ($result) {
                 Security::redirect("/tasks?success=Tarea asignada al proyecto correctamente");
+
+                if ($tipoOcurr == 1) {
+                    $this->taskModel->logUserEvent($currentUser['id'], 7); // Crea proyecto-tarea masivo
+                }
+                if ($tipoOcurr == 2) { // Fecha especifica
+                    $this->taskModel->logUserEvent($currentUser['id'], 8); // Crea proyecto-tarea especifica
+                }
+                if ($tipoOcurr == 3) { //Rango de fechas todos los dias
+                    $this->taskModel->logUserEvent($currentUser['id'], 9); // Crea proyecto-tarea rango
+                }
+                if ($tipoOcurr == 4) {
+                    $this->taskModel->logUserEvent($currentUser['id'], 10); // Crea proyecto-tarea intervalo
+                }
             } else {
                 Security::redirect("/tasks/create?error=Error al asignar la tarea al proyecto");
             }
@@ -1531,6 +1546,7 @@ class TaskController extends BaseController
             $proveedorId = (int)($_POST['proveedor_id'] ?? 0);
             // Crear tarea
             $taskId = $this->taskModel->taskCreate($nueva_tarea_nombre, $nueva_tarea_descripcion, $nueva_tarea_categoria_id, $proveedorId);
+            $this->taskModel->logUserEvent($currentUser['id'], 11); // Creación de nueva tarea tipo
             if ($taskId) {
                 Security::redirect("/task/newTask?success=Tarea tipo creada");
             } elseif ($taskId === null) {
@@ -1626,6 +1642,8 @@ class TaskController extends BaseController
             );
 
             if ($taskId) {
+                $this->taskModel->logUserEvent($currentUser['id'], 11); // Creación de nueva tarea tipo
+
                 echo json_encode([
                     'success' => true,
                     'task_id' => $taskId,
@@ -1796,6 +1814,9 @@ class TaskController extends BaseController
                 if (!empty($_POST['filters'])) {
                     $queryString = "&" . http_build_query($_POST['filters']);
                 }
+
+                $this->taskModel->logUserEvent($currentUser['id'], 12); // Actualización de proyecto-tarea
+
                 Security::redirect("/tasks?success=Tarea actualizada correctamente" . $queryString);
             } else {
                 $queryString = "";
@@ -1862,6 +1883,8 @@ class TaskController extends BaseController
 
             // Actualizar tarea
             if ($this->taskModel->updateT($id, $taskData)) {
+                $this->taskModel->logUserEvent($currentUser['id'], 13); // Actualización tarea tipo
+
                 $this->jsonSuccess('Tarea actualizada');
             } else {
                 $this->jsonError('Error al actualizar tarea', [], 500);
@@ -1924,6 +1947,12 @@ class TaskController extends BaseController
                     !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
                 ) {
+                    if ($deleteAllOccurrences) {
+                        $this->taskModel->logUserEvent($currentUser['id'], 13); // Eliminación masiva proyecto-tarea
+                    } else {
+                        $this->taskModel->logUserEvent($currentUser['id'], 14); // Eliminación de proyecto-tarea 
+                    }
+
                     $this->jsonSuccess(
                         $deleteAllOccurrences
                             ? 'Tareas eliminadas correctamente para el proyecto'
@@ -1999,6 +2028,7 @@ class TaskController extends BaseController
 
             // Eliminar tarea
             if ($this->taskModel->deleteT($id)) {
+                $this->taskModel->logUserEvent($currentUser['id'], 15); // Eliminación tarea tipo
                 $this->jsonSuccess('Tarea eliminada');
             } else {
                 $this->jsonError('Error al eliminar la tarea', [], 500);
@@ -2371,6 +2401,7 @@ class TaskController extends BaseController
             );
 
             if ($result['success']) {
+                $this->taskModel->logUserEvent($currentUser['id'], 16); // Cambio estado de tarea
                 $this->jsonSuccess($result['message'] ?? 'Estado de tarea actualizado correctamente');
             } else {
                 $this->removeEvidenceFiles($photoProcessing['photos'] ?? []);
@@ -2422,6 +2453,8 @@ class TaskController extends BaseController
                 $relativePath = $this->optimizeAndSaveImage($tmpPath, $mimeType, $photoDir);
                 $photoPaths[] = $relativePath;
             }
+
+            $this->taskModel->logUserEvent($this->getCurrentUser()['id'], 17); // Carga foto de evidencia
 
             return ['success' => true, 'photos' => $photoPaths];
         } catch (Exception $e) {
@@ -2488,7 +2521,7 @@ class TaskController extends BaseController
 
         $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
         if (!$resizedImage) {
-            imagedestroy($sourceImage);
+            unset($sourceImage);
             throw new RuntimeException('No fue posible optimizar una imagen.');
         }
 
@@ -2506,8 +2539,8 @@ class TaskController extends BaseController
         $fullPath = $photoDir . '/' . $fileName;
         $saved = imagejpeg($resizedImage, $fullPath, 75);
 
-        imagedestroy($sourceImage);
-        imagedestroy($resizedImage);
+        unset($sourceImage);
+        unset($resizedImage);
 
         if (!$saved) {
             throw new RuntimeException('No fue posible almacenar una foto de evidencia.');
@@ -2631,6 +2664,7 @@ class TaskController extends BaseController
                 );
 
                 if (!empty($result['success'])) {
+                    $this->taskModel->logUserEvent($currentUser['id'], 18); // Cambio estado grupo tareas
                     $approved++;
                     $updatedIds[] = $tid;
                 } else {

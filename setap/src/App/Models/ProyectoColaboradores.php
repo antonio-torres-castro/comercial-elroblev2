@@ -8,6 +8,7 @@ use DateInterval;
 use DateTime;
 use PDO;
 use PDOException;
+use Exception;
 
 class ProyectoColaboradores
 {
@@ -61,11 +62,11 @@ class ProyectoColaboradores
                 WHERE u.estado_tipo_id = 2 AND u.usuario_tipo_id = 4";
 
             if (!$isAdmin) {
-                $sql .= " AND u.proveedor_id = ?";
+                $sql .= PHP_EOL . " AND u.proveedor_id = ?";
                 $params[] = $proveedorId;
             }
 
-            $sql .= " AND NOT EXISTS (
+            $sql .= PHP_EOL . " AND NOT EXISTS (
                     SELECT 1 FROM proyecto_usuarios_grupo pug
                     WHERE pug.proyecto_id = ?
                       AND pug.usuario_id = u.id
@@ -74,7 +75,7 @@ class ProyectoColaboradores
                 )";
             $params[] = $projectId;
 
-            $sql .= " ORDER BY p.nombre";
+            $sql .= PHP_EOL . " ORDER BY p.nombre";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -316,7 +317,7 @@ class ProyectoColaboradores
                   AND pt.proyecto_id != ?
                   AND pt.estado_tipo_id IN (2, 5, 6, 7, 8)
                   AND pt.fecha_inicio BETWEEN ? AND ?
-                GROUP BY DATE(pt.fecha_inicio)");
+                GROUP BY DATE(pt.fecha_inicio) ");
             $stmt->execute([$usuarioId, $projectId, $fechaInicio, $fechaFin]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -353,6 +354,34 @@ class ProyectoColaboradores
         } catch (PDOException $e) {
             Logger::error('ProyectoColaboradores::getHorasOtrosProyectosByUsers error: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 }

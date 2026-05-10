@@ -178,8 +178,7 @@ class Persona
         try {
             $this->db->beginTransaction();
 
-            $stmt = $this->db->prepare("
-                INSERT INTO personas (rut, nombre, telefono, direccion, proveedor_id, estado_tipo_id)
+            $stmt = $this->db->prepare("INSERT INTO personas (rut, nombre, telefono, direccion, proveedor_id, estado_tipo_id)
                 VALUES (:rut, :nombre, :telefono, :direccion, :proveedor_id, :estado_tipo_id)
             ");
 
@@ -215,12 +214,11 @@ class Persona
         try {
             $this->db->beginTransaction();
 
-            $stmt = $this->db->prepare("
-                UPDATE personas
-                SET rut = :rut, nombre = :nombre, telefono = :telefono,
-                    direccion = :direccion, proveedor_id = :proveedor_id, estado_tipo_id = :estado_tipo_id
-                WHERE id = :id AND estado_tipo_id != 4
-            ");
+            $stmt = $this->db->prepare("UPDATE personas
+                                        SET rut = :rut, nombre = :nombre, telefono = :telefono,
+                                            direccion = :direccion, proveedor_id = :proveedor_id, 
+                                            estado_tipo_id = :estado_tipo_id
+                                        WHERE id = :id AND estado_tipo_id != 4");
 
             $success = $stmt->execute([
                 ':id' => $id,
@@ -259,10 +257,7 @@ class Persona
 
             $this->db->beginTransaction();
 
-            $stmt = $this->db->prepare("
-                UPDATE personas
-                SET estado_tipo_id = 4
-                WHERE id = :id AND estado_tipo_id != 4
+            $stmt = $this->db->prepare("UPDATE personas SET estado_tipo_id = 4 WHERE id = :id AND estado_tipo_id != 4
             ");
 
             $success = $stmt->execute([':id' => $id]);
@@ -368,14 +363,12 @@ class Persona
     public function search(string $term, int $limit = 10): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT id, nombre, rut
+            $stmt = $this->db->prepare("SELECT id, nombre, rut
                 FROM personas
                 WHERE (nombre LIKE :term OR rut LIKE :term)
                 AND estado_tipo_id = 2
                 ORDER BY nombre
-                LIMIT :limit
-            ");
+                LIMIT :limit");
 
             $stmt->bindValue(':term', '%' . $term . '%', PDO::PARAM_STR);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -385,6 +378,34 @@ class Persona
         } catch (Exception $e) {
             Logger::error('Persona::search error: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 }

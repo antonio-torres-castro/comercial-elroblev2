@@ -25,8 +25,7 @@ class MenuGrupo
     public function getAll(array $filters = []): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     mg.id,
                     mg.nombre,
                     mg.descripcion,
@@ -39,28 +38,27 @@ class MenuGrupo
                     et.nombre as estado_nombre
                 FROM {$this->table} mg
                 LEFT JOIN estado_tipos et ON mg.estado_tipo_id = et.id
-                WHERE mg.estado_tipo_id != 4
-            ";
+                WHERE mg.estado_tipo_id != 4";
 
             $params = [];
 
             // Filtros opcionales
             if (!empty($filters['nombre'])) {
-                $query .= " AND mg.nombre LIKE ?";
+                $query .= PHP_EOL . " AND mg.nombre LIKE ?";
                 $params[] = '%' . $filters['nombre'] . '%';
             }
 
             if (!empty($filters['estado_tipo_id'])) {
-                $query .= " AND mg.estado_tipo_id = ?";
+                $query .= PHP_EOL . " AND mg.estado_tipo_id = ?";
                 $params[] = $filters['estado_tipo_id'];
             }
 
             if (!empty($filters['display'])) {
-                $query .= " AND mg.display LIKE ?";
+                $query .= PHP_EOL . " AND mg.display LIKE ?";
                 $params[] = '%' . $filters['display'] . '%';
             }
 
-            $query .= " ORDER BY mg.orden ASC, mg.nombre ASC";
+            $query .= PHP_EOL . " ORDER BY mg.orden ASC, mg.nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($params);
@@ -78,8 +76,7 @@ class MenuGrupo
     public function find(int $id): ?array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     id,
                     nombre,
                     descripcion,
@@ -90,8 +87,7 @@ class MenuGrupo
                     fecha_modificacion,
                     estado_tipo_id
                 FROM {$this->table}
-                WHERE id = ?
-            ";
+                WHERE id = ?";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$id]);
@@ -110,8 +106,7 @@ class MenuGrupo
     public function create(array $data): int
     {
         try {
-            $query = "
-                INSERT INTO {$this->table} (
+            $query = "INSERT INTO {$this->table} (
                     nombre,
                     descripcion,
                     icono,
@@ -145,8 +140,7 @@ class MenuGrupo
     public function update(int $id, array $data): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table}
+            $query = "UPDATE {$this->table}
                 SET
                     nombre = ?,
                     descripcion = ?,
@@ -180,8 +174,7 @@ class MenuGrupo
     public function delete(int $id): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table}
+            $query = "UPDATE {$this->table}
                 SET estado_tipo_id = 4, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -200,8 +193,7 @@ class MenuGrupo
     public function getActiveGroups(): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     id,
                     nombre,
                     descripcion,
@@ -210,8 +202,7 @@ class MenuGrupo
                     display
                 FROM {$this->table}
                 WHERE estado_tipo_id = 2
-                ORDER BY orden ASC, nombre ASC
-            ";
+                ORDER BY orden ASC, nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute();
@@ -270,12 +261,10 @@ class MenuGrupo
     public function getStatusTypes(): array
     {
         try {
-            $query = "
-                SELECT id, nombre
+            $query = "SELECT id, nombre
                 FROM estado_tipos
                 WHERE id IN (1, 2, 3)
-                ORDER BY id ASC
-            ";
+                ORDER BY id ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute();
@@ -317,17 +306,43 @@ class MenuGrupo
             // Cambiar estado (2=Activo, 3=Inactivo)
             $newStatus = ($currentGroup['estado_tipo_id'] == 2) ? 3 : 2;
 
-            $query = "
-                UPDATE {$this->table}
+            $query = "UPDATE {$this->table}
                 SET estado_tipo_id = ?, fecha_modificacion = NOW()
-                WHERE id = ?
-            ";
+                WHERE id = ?";
 
             $stmt = $this->db->prepare($query);
             return $stmt->execute([$newStatus, $id]);
         } catch (Exception $e) {
             Logger::error("cambiar estado del grupo: " . $e->getMessage());
             throw new Exception("Error al cambiar el estado del grupo: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 }

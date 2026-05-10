@@ -25,8 +25,7 @@ class Menu
     public function getAll(array $filters = []): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     m.id,
                     m.nombre,
                     m.descripcion,
@@ -67,7 +66,7 @@ class Menu
                 $params[] = $filters['menu_grupo_id'];
             }
 
-            $query .= " ORDER BY m.orden ASC, m.nombre ASC";
+            $query .= PHP_EOL . " ORDER BY m.orden ASC, m.nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($params);
@@ -85,8 +84,7 @@ class Menu
     public function find(int $id): ?array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     id,
                     nombre,
                     descripcion,
@@ -119,8 +117,7 @@ class Menu
     public function create(array $data): int
     {
         try {
-            $query = "
-                INSERT INTO {$this->table} (
+            $query = "INSERT INTO {$this->table} (
                     nombre,
                     descripcion,
                     url,
@@ -158,8 +155,7 @@ class Menu
     public function update(int $id, array $data): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table}
+            $query = "UPDATE {$this->table}
                 SET
                     nombre = ?,
                     descripcion = ?,
@@ -197,8 +193,7 @@ class Menu
     public function delete(int $id): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table}
+            $query = "UPDATE {$this->table}
                 SET estado_tipo_id = 4, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -226,8 +221,7 @@ class Menu
             // Cambiar estado (2=Activo, 3=Inactivo)
             $newStatus = ($currentMenu['estado_tipo_id'] == 2) ? 3 : 2;
 
-            $query = "
-                UPDATE {$this->table}
+            $query = "UPDATE {$this->table}
                 SET estado_tipo_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -246,8 +240,7 @@ class Menu
     public function getStatusTypes(): array
     {
         try {
-            $query = "
-                SELECT id, nombre
+            $query = "SELECT id, nombre
                 FROM estado_tipos
                 WHERE id IN (1, 2, 3)
                 ORDER BY id ASC
@@ -349,8 +342,7 @@ class Menu
     public function getNavigationMenus(): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     id,
                     nombre,
                     display,
@@ -408,8 +400,7 @@ class Menu
     public function getMenuGroups(): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     id,
                     nombre,
                     descripcion,
@@ -446,8 +437,7 @@ class Menu
 
             foreach ($groups as $group) {
                 // Obtener menús del grupo que el usuario tiene permisos para ver
-                $query = "
-                    SELECT
+                $query = "SELECT
                         m.id,
                         m.nombre,
                         m.display,
@@ -487,6 +477,34 @@ class Menu
         } catch (Exception $e) {
             Logger::error("obtener menús agrupados de usuario: " . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 }

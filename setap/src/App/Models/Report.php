@@ -54,13 +54,10 @@ class Report
             if (isset($filters['proveedor_id']) && is_numeric($filters['proveedor_id'])) {
                 $filtroProveedor = "AND id = " . (int)$filters['proveedor_id'];
             }
-            $stmt = $this->db->prepare("
-                SELECT id, razon_social as nombre, rut
-                FROM proveedores
-                WHERE estado_tipo_id != 4
-                $filtroProveedor
-                ORDER BY razon_social
-            ");
+            $stmt = $this->db->prepare("SELECT id, razon_social as nombre, rut FROM proveedores
+                                        WHERE estado_tipo_id != 4
+                                        $filtroProveedor
+                                        ORDER BY razon_social ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
@@ -85,20 +82,20 @@ class Report
                     INNER JOIN clientes c ON p.cliente_id = c.id ";
 
             if ($uti == 1 || $uti == 2) {
-                $sql .= " WHERE p.estado_tipo_id IN (1, 2, 5)";
+                $sql .= PHP_EOL . " WHERE p.estado_tipo_id IN (1, 2, 5)";
             } else {
-                $sql .= " WHERE p.estado_tipo_id = 2";
+                $sql .= PHP_EOL . " WHERE p.estado_tipo_id = 2";
             }
 
-            $sql .= " AND EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
+            $sql .= PHP_EOL . " AND EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $myFilters[] = $filters['current_usuario_id'];
 
             if (!empty($filters['proveedor_id'])) {
-                $sql .= " AND p.proveedor_id = ? ";
+                $sql .= PHP_EOL . " AND p.proveedor_id = ? ";
                 $myFilters[] = $filters['proveedor_id'];
             }
 
-            $sql .= " ORDER BY c.razon_social";
+            $sql .= PHP_EOL . " ORDER BY c.razon_social";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($myFilters);
@@ -106,6 +103,34 @@ class Report
         } catch (PDOException $e) {
             Logger::error("Task::getProjects: " . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 }

@@ -228,6 +228,8 @@ class UserController extends BaseController
             // Crear usuario
             $userId = $this->userModel->create($data);
 
+            $this->userModel->logUserEvent($currentUser['id'], 3); // Seguimiento de creación de usuario
+
             if ($userId) {
                 $this->redirectWithSuccess(AppConstants::ROUTE_USERS, AppConstants::SUCCESS_USER_CREATED);
             } else {
@@ -530,6 +532,9 @@ class UserController extends BaseController
                     'user_id' => $id,
                     'updated_by' => $_SESSION['username']
                 ]);
+
+                $this->userModel->logUserEvent($currentUser['id'], 4); // Seguimiento de modificación de usuario
+
                 // Redirigir con mensaje de éxito
                 $_SESSION['success_message'] = 'Datos ' . $userData['nombre_usuario'] .  ' actualizados';
                 header('Location: ' . AppConstants::ROUTE_USERS);
@@ -586,6 +591,7 @@ class UserController extends BaseController
             }
 
             if ($this->userModel->delete($id)) {
+                $this->userModel->logUserEvent($currentUser['id'], 5); // Seguimiento de eliminación de usuario
                 $this->jsonSuccess('Usuario eliminado correctamente');
             } else {
                 $this->jsonError('Error al eliminar el usuario', [], 500);

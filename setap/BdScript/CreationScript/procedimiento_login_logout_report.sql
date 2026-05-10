@@ -28,7 +28,17 @@ BEGIN
 	Select * From tUsuarios;
 
 	Select 
-	case ul.tipo_registro when 1 then 'login' when 2 then 'logout' end accion, 
+	case ul.tipo_registro when 1 then 'login' when 2 then 'logout'
+                          when 3 then 'Creo usuario' when 4 then 'Modifico Usuario' when 5 then 'Elimino Usuario' 
+                          when 6 then 'Crea tarea tipo en proyecto'
+                          when 7 then 'Crea proyecto-tarea masivo' when 8 then 'Crea proyecto-tarea especifica' 
+                          when 9 then 'Crea proyecto-tarea rango' when 10 then 'Crea proyecto-tarea intervalo'
+                          when 11 then 'Crea tarea tipo'
+                          when 12 then 'Actualiza proyecto-tarea'
+                          when 13 then 'Eliminación masiva proyecto-tarea'  when 14 then 'Eliminación de proyecto-tarea'
+                          when 15 then 'Eliminación tarea tipo'
+                          when 16 then 'Cambio estado de tarea' when 17 then 'Carga foto de evidencia' when 18 then 'Cambio estado grupo tareas'
+                          end accion, 
 	ul.fecha, ul.IP,
 	t.nombre,
 	t.tipo,

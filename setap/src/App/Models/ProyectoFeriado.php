@@ -23,13 +23,11 @@ class ProyectoFeriado
     public function countByProject(int $projectId): int
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT Count(1) as total
+            $stmt = $this->db->prepare("SELECT Count(1) as total
                 FROM proyecto_feriados pf
                 INNER JOIN estado_tipos et ON pf.estado_tipo_id = et.id
                 WHERE pf.proyecto_id = ? AND pf.estado_tipo_id != 4
-                ORDER BY pf.fecha ASC
-            ");
+                ORDER BY pf.fecha ASC ");
 
             $stmt->execute([$projectId]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -46,8 +44,7 @@ class ProyectoFeriado
     public function getByProject(int $projectId, int $limit = 7, int $offset = 0): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT pf.*,
+            $stmt = $this->db->prepare("SELECT pf.*,
                        et.nombre as estado_nombre,
                        CASE DAYOFWEEK(pf.fecha)
                            WHEN 1 THEN 'Domingo'
@@ -61,8 +58,7 @@ class ProyectoFeriado
                 FROM proyecto_feriados pf
                 INNER JOIN estado_tipos et ON pf.estado_tipo_id = et.id
                 WHERE pf.proyecto_id = ? AND pf.estado_tipo_id != 4
-                ORDER BY pf.fecha ASC LIMIT ? OFFSET ?
-            ");
+                ORDER BY pf.fecha ASC LIMIT ? OFFSET ? ");
             $params = [];
             $params[] = $projectId;
             $params[] = $limit;
@@ -82,8 +78,7 @@ class ProyectoFeriado
     public function getByProjectForProjectIndex(int $projectId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT pf.*,
+            $stmt = $this->db->prepare("SELECT pf.*,
                        et.nombre as estado_nombre,
                        CASE DAYOFWEEK(pf.fecha)
                            WHEN 1 THEN 'Domingo'
@@ -98,8 +93,7 @@ class ProyectoFeriado
                 INNER JOIN estado_tipos et ON pf.estado_tipo_id = et.id
                 WHERE pf.proyecto_id = ? AND pf.estado_tipo_id != 4
                 AND DAYOFWEEK(pf.fecha) in (2, 3, 4, 5, 6)
-                ORDER BY pf.fecha ASC
-            ");
+                ORDER BY pf.fecha ASC ");
 
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -243,10 +237,7 @@ class ProyectoFeriado
     {
         try {
             // Verificar si existe
-            $stmt = $this->db->prepare("
-                SELECT id FROM proyecto_feriados
-                WHERE proyecto_id = ? AND fecha = ?
-            ");
+            $stmt = $this->db->prepare("SELECT id FROM proyecto_feriados WHERE proyecto_id = ? AND fecha = ? ");
             $stmt->execute([$projectId, $fecha]);
             $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -255,8 +246,7 @@ class ProyectoFeriado
 
             if ($existing) {
                 // Actualizar registro existente
-                $stmt = $this->db->prepare("
-                    UPDATE proyecto_feriados SET
+                $stmt = $this->db->prepare("UPDATE proyecto_feriados SET
                         tipo_feriado = ?,
                         ind_irrenunciable = ?,
                         observaciones = ?,
@@ -279,8 +269,7 @@ class ProyectoFeriado
                 ];
             } else {
                 // Crear nuevo registro
-                $stmt = $this->db->prepare("
-                    INSERT INTO proyecto_feriados (
+                $stmt = $this->db->prepare("INSERT INTO proyecto_feriados (
                         proyecto_id, fecha, tipo_feriado,
                         ind_irrenunciable, observaciones,
                         estado_tipo_id, created_at
@@ -320,8 +309,7 @@ class ProyectoFeriado
             $placeholders = str_repeat('?,', count($fechas) - 1) . '?';
             $params = array_merge([$projectId], $fechas);
 
-            $stmt = $this->db->prepare("
-                SELECT pt.id, pt.fecha_inicio, pt.fecha_fin, t.nombre as tarea_nombre,
+            $stmt = $this->db->prepare("SELECT pt.id, pt.fecha_inicio, pt.fecha_fin, t.nombre as tarea_nombre,
                        et.nombre as estado_nombre
                 FROM proyecto_tareas pt
                 INNER JOIN tareas t ON pt.tarea_id = t.id
@@ -330,8 +318,7 @@ class ProyectoFeriado
                 AND pt.estado_tipo_id NOT IN (4, 6, 7, 8)
                 AND (pt.fecha_inicio IN ($placeholders)
                      OR pt.fecha_fin IN ($placeholders)
-                     OR (pt.fecha_inicio <= ? AND pt.fecha_fin >= ?))
-            ");
+                     OR (pt.fecha_inicio <= ? AND pt.fecha_fin >= ?)) ");
 
             // Preparar parámetros para las consultas de rango
             $minFecha = min($fechas);
@@ -373,11 +360,9 @@ class ProyectoFeriado
 
             foreach ($taskIds as $taskId) {
                 // Obtener fechas actuales de la tarea
-                $stmt = $this->db->prepare("
-                    SELECT fecha_inicio, fecha_fin
+                $stmt = $this->db->prepare("SELECT fecha_inicio, fecha_fin
                     FROM proyecto_tareas
-                    WHERE id = ? AND proyecto_id = ?
-                ");
+                    WHERE id = ? AND proyecto_id = ? ");
                 $stmt->execute([$taskId, $projectId]);
                 $task = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -387,13 +372,11 @@ class ProyectoFeriado
                         $this->addWorkingDays($projectId, $task['fecha_fin'], $diasAMover) : null;
 
                     // Actualizar fechas de la tarea
-                    $stmt = $this->db->prepare("
-                        UPDATE proyecto_tareas SET
+                    $stmt = $this->db->prepare("UPDATE proyecto_tareas SET
                             fecha_inicio = ?,
                             fecha_fin = ?,
                             fecha_modificacion = CURRENT_TIMESTAMP
-                        WHERE id = ?
-                    ");
+                        WHERE id = ? ");
                     $stmt->execute([$newStartDate, $newEndDate, $taskId]);
                 }
             }

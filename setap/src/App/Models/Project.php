@@ -292,19 +292,19 @@ class Project
             $params[] = $projectId;
 
             if (!empty($fechaInicio)) {
-                $sql .= " and pt.fecha_inicio >= ? ";
+                $sql .= PHP_EOL . " AND pt.fecha_inicio >= ? ";
                 $params[] = $fechaInicio;
             }
             if (!empty($fechaFin)) {
-                $sql .= " and pt.fecha_inicio <= ? ";
+                $sql .= PHP_EOL . " AND pt.fecha_inicio <= ? ";
                 $params[] = $fechaFin;
             }
             if (!empty($estadoTipoId)) {
-                $sql .= " and pt.estado_tipo_id = ? ";
+                $sql .= PHP_EOL . " AND pt.estado_tipo_id = ? ";
                 $params[] = $estadoTipoId;
             }
 
-            $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC, pt.id LIMIT ? OFFSET ? ";
+            $sql .= PHP_EOL . "ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC, pt.id LIMIT ? OFFSET ? ";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -323,8 +323,7 @@ class Project
     public function getProjectStats(int $projectId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT
+            $stmt = $this->db->prepare("SELECT
                     COUNT(*) as total_tareas,
                     COUNT(CASE WHEN pt.estado_tipo_id = 5 THEN 1 END) as tareas_iniciadas,
                     COUNT(CASE WHEN pt.estado_tipo_id = 6 THEN 1 END) as tareas_terminadas,
@@ -335,8 +334,7 @@ class Project
                     MIN(pt.fecha_inicio) as fecha_inicio_primera_tarea,
                     MAX(pt.fecha_inicio) as fecha_inicio_ultima_tarea
                 FROM proyecto_tareas pt
-                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id in (2, 5, 6, 7, 8)
-            ");
+                WHERE pt.proyecto_id = ? AND pt.estado_tipo_id in (2, 5, 6, 7, 8) ");
 
             $stmt->execute([$projectId]);
             $stats = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -359,12 +357,10 @@ class Project
     public function getProjectHolidays(int $projectId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT fecha
+            $stmt = $this->db->prepare("SELECT fecha
                 FROM proyecto_feriados
                 WHERE proyecto_id = ? AND estado_tipo_id != 4
-                ORDER BY fecha
-            ");
+                ORDER BY fecha ");
 
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -380,8 +376,7 @@ class Project
     public function getProjectHolidaysForViewManager(int $projectId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT fecha, CASE DAYOFWEEK(fecha)
+            $stmt = $this->db->prepare("SELECT fecha, CASE DAYOFWEEK(fecha)
                            WHEN 1 THEN 'Domingo'
                            WHEN 2 THEN 'Lunes'
                            WHEN 3 THEN 'Martes'
@@ -393,8 +388,7 @@ class Project
                 FROM proyecto_feriados
                 WHERE proyecto_id = ? AND estado_tipo_id != 4
                 AND DAYOFWEEK(fecha) in (2, 3, 4, 5, 6)
-                ORDER BY fecha
-            ");
+                ORDER BY fecha ");
 
             $stmt->execute([$projectId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -410,12 +404,8 @@ class Project
     public function changeStatus(int $projectId, int $newStatusId): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                UPDATE proyectos SET
-                    estado_tipo_id = ?,
-                    fecha_modificacion = CURRENT_TIMESTAMP
-                WHERE id = ? AND estado_tipo_id != 4
-            ");
+            $stmt = $this->db->prepare("UPDATE proyectos SET estado_tipo_id = ?, fecha_modificacion = CURRENT_TIMESTAMP
+                WHERE id = ? AND estado_tipo_id != 4 ");
 
             return $stmt->execute([$newStatusId, $projectId]);
         } catch (PDOException $e) {
@@ -504,7 +494,12 @@ class Project
     {
         try {
             // validar duplicidad
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM proyecto_usuarios_grupo WHERE proyecto_id = ? AND usuario_id = ? AND grupo_id = ? AND estado_tipo_id != 4");
+            $stmt = $this->db->prepare("SELECT COUNT(*) 
+                                        FROM proyecto_usuarios_grupo
+                                        WHERE proyecto_id = ? 
+                                        AND usuario_id = ? 
+                                        AND grupo_id = ? 
+                                        AND estado_tipo_id != 4");
             $stmt->execute([$projectId, $usuarioId, $grupoId]);
             if ((int)$stmt->fetchColumn() > 0) {
                 return ['success' => false, 'message' => 'Ya existe la asociación'];
@@ -523,7 +518,8 @@ class Project
     public function updateUsuarioGrupo(int $id, int $grupoId, float $hh): array
     {
         try {
-            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET grupo_id = ?, hh = ? WHERE id = ? AND estado_tipo_id != 4");
+            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET grupo_id = ?, hh = ? 
+                                        WHERE id = ? AND estado_tipo_id != 4");
             $ok = $stmt->execute([$grupoId, $hh, $id]);
             return $ok ? ['success' => true] : ['success' => false, 'message' => 'Error al actualizar'];
         } catch (Exception $e) {
@@ -536,7 +532,8 @@ class Project
     public function deleteUsuarioGrupo(int $id): array
     {
         try {
-            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET estado_tipo_id = 4 WHERE id = ? AND estado_tipo_id != 4");
+            $stmt = $this->db->prepare("UPDATE proyecto_usuarios_grupo SET estado_tipo_id = 4 
+                                        WHERE id = ? AND estado_tipo_id != 4");
             $ok = $stmt->execute([$id]);
             return $ok ? ['success' => true] : ['success' => false, 'message' => 'Error al eliminar'];
         } catch (Exception $e) {
@@ -562,7 +559,10 @@ class Project
     public function getAllUsers(): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre_usuario FROM usuarios WHERE estado_tipo_id != 4 ORDER BY nombre_usuario");
+            $stmt = $this->db->prepare("SELECT id, nombre_usuario
+                                        FROM usuarios
+                                        WHERE estado_tipo_id != 4
+                                        ORDER BY nombre_usuario");
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (Exception $e) {
@@ -575,7 +575,11 @@ class Project
     public function getUsersBySupplier(int $supplierId): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre_usuario FROM usuarios WHERE estado_tipo_id != 4 AND (? = 0 OR proveedor_id = ?) ORDER BY nombre_usuario");
+            $stmt = $this->db->prepare("SELECT id, nombre_usuario
+                                        FROM usuarios
+                                        WHERE estado_tipo_id != 4 
+                                          AND (? = 0 OR proveedor_id = ?)
+                                        ORDER BY nombre_usuario ");
             $stmt->execute([$supplierId, $supplierId]);
             return $stmt->fetchAll();
         } catch (Exception $e) {
@@ -588,7 +592,10 @@ class Project
     public function getUsersBySupplierToAdmin(int $supplierId): array
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nombre_usuario FROM usuarios WHERE estado_tipo_id != 4 AND (usuario_tipo_id = 1 OR proveedor_id = ?) ORDER BY nombre_usuario");
+            $stmt = $this->db->prepare("SELECT id, nombre_usuario 
+                                        FROM usuarios 
+                                        WHERE estado_tipo_id != 4 AND (usuario_tipo_id = 1 OR proveedor_id = ?)
+                                        ORDER BY nombre_usuario ");
             $stmt->execute([$supplierId]);
             return $stmt->fetchAll();
         } catch (Exception $e) {
@@ -616,8 +623,7 @@ class Project
         try {
             $searchTerm = "%{$term}%";
 
-            $stmt = $this->db->prepare("
-                SELECT DISTINCT p.*,
+            $stmt = $this->db->prepare("SELECT DISTINCT p.*,
                        c.razon_social as cliente_nombre,
                        et.nombre as estado_nombre
                 FROM proyectos p
@@ -632,8 +638,7 @@ class Project
                     per.nombre LIKE ? OR
                     cc.email LIKE ?
                 )
-                ORDER BY p.fecha_inicio DESC
-            ");
+                ORDER BY p.fecha_inicio DESC ");
 
             $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -651,10 +656,8 @@ class Project
     private function addHolidays(int $projectId, array $holidays): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                INSERT INTO proyecto_feriados (proyecto_id, fecha, estado_tipo_id)
-                VALUES (?, ?, 1)
-            ");
+            $stmt = $this->db->prepare("INSERT INTO proyecto_feriados (proyecto_id, fecha, estado_tipo_id)
+                VALUES (?, ?, 1) ");
 
             foreach ($holidays as $holiday) {
                 $stmt->execute([$projectId, $holiday]);
@@ -673,15 +676,41 @@ class Project
     private function removeAllHolidays(int $projectId): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                UPDATE proyecto_feriados SET estado_tipo_id = 4
-                WHERE proyecto_id = ?
-            ");
+            $stmt = $this->db->prepare("UPDATE proyecto_feriados SET estado_tipo_id = 4
+                WHERE proyecto_id = ? ");
 
             return $stmt->execute([$projectId]);
         } catch (PDOException $e) {
             Logger::error('Project::removeAllHolidays error: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 }

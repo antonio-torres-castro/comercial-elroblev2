@@ -24,28 +24,26 @@ class Process
     public function getAll(array $filters = []): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     pp.*,
                     p.razon_social as proveedor_nombre
                 FROM {$this->table} pp
                 LEFT JOIN proveedores p ON pp.proveedor_id = p.id
-                WHERE 1=1
-            ";
+                WHERE 1=1 ";
 
             $params = [];
 
             if (!empty($filters['proveedor_id'])) {
-                $query .= " AND pp.proveedor_id = ?";
+                $query .= PHP_EOL . " AND pp.proveedor_id = ?";
                 $params[] = $filters['proveedor_id'];
             }
 
             if (!empty($filters['nombre'])) {
-                $query .= " AND pp.nombre LIKE ?";
+                $query .= PHP_EOL . " AND pp.nombre LIKE ?";
                 $params[] = '%' . $filters['nombre'] . '%';
             }
 
-            $query .= " ORDER BY pp.nombre ASC";
+            $query .= PHP_EOL . " ORDER BY pp.nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($params);
@@ -63,14 +61,12 @@ class Process
     public function find(int $id): ?array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     pp.*,
                     p.razon_social as proveedor_nombre
                 FROM {$this->table} pp
                 LEFT JOIN proveedores p ON pp.proveedor_id = p.id
-                WHERE pp.id = ?
-            ";
+                WHERE pp.id = ? ";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$id]);
@@ -89,15 +85,13 @@ class Process
     public function getByProvider(int $proveedorId): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     pp.id,
                     pp.nombre,
                     pp.descripcion
                 FROM {$this->table} pp
                 WHERE pp.proveedor_id = ?
-                ORDER BY pp.nombre ASC
-            ";
+                ORDER BY pp.nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$proveedorId]);
@@ -115,13 +109,11 @@ class Process
     public function create(array $data): int
     {
         try {
-            $query = "
-                INSERT INTO {$this->table} (
+            $query = "INSERT INTO {$this->table} (
                     proveedor_id,
                     nombre,
                     descripcion
-                ) VALUES (?, ?, ?)
-            ";
+                ) VALUES (?, ?, ?) ";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([
@@ -143,13 +135,11 @@ class Process
     public function update(int $id, array $data): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table} SET
+            $query = "UPDATE {$this->table} SET
                     proveedor_id = ?,
                     nombre = ?,
                     descripcion = ?
-                WHERE id = ?
-            ";
+                WHERE id = ? ";
 
             $stmt = $this->db->prepare($query);
             $result = $stmt->execute([
@@ -192,8 +182,7 @@ class Process
     public function getProcessTasks(int $processId): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     ppt.id,
                     ppt.tarea_id,
                     ppt.hh,
@@ -205,8 +194,7 @@ class Process
                 JOIN tareas t ON ppt.tarea_id = t.id
                 LEFT JOIN tarea_categorias tc ON t.tarea_categoria_id = tc.id
                 WHERE ppt.proveedor_proceso_id = ?
-                ORDER BY t.nombre ASC
-            ";
+                ORDER BY t.nombre ASC ";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$processId]);
@@ -224,14 +212,12 @@ class Process
     public function addTaskToProcess(int $processId, int $tareaId, float $hh, int $prioridad): int
     {
         try {
-            $query = "
-                INSERT INTO {$this->tasksTable} (
+            $query = "INSERT INTO {$this->tasksTable} (
                     proveedor_proceso_id,
                     tarea_id,
                     hh,
                     prioridad
-                ) VALUES (?, ?, ?, ?)
-            ";
+                ) VALUES (?, ?, ?, ?)";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([
@@ -288,8 +274,7 @@ class Process
     public function getTasksByProvider(int $proveedorId): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     t.id,
                     t.nombre,
                     t.descripcion,
@@ -300,8 +285,7 @@ class Process
                 LEFT JOIN tarea_categorias tc ON t.tarea_categoria_id = tc.id
                 LEFT JOIN estado_tipos et ON t.estado_tipo_id = et.id
                 WHERE t.proveedor_id = ? AND t.estado_tipo_id != 4
-                ORDER BY t.nombre ASC
-            ";
+                ORDER BY t.nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$proveedorId]);
@@ -319,8 +303,7 @@ class Process
     public function getTasksFiltered(int $proveedorId, ?int $categoriaId = null, $search = null): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     t.id,
                     t.nombre,
                     t.descripcion,
@@ -330,22 +313,21 @@ class Process
                 FROM tareas t
                 LEFT JOIN tarea_categorias tc ON t.tarea_categoria_id = tc.id
                 LEFT JOIN estado_tipos et ON t.estado_tipo_id = et.id
-                WHERE t.proveedor_id = :proveedor_id AND t.estado_tipo_id != 4
-            ";
+                WHERE t.proveedor_id = :proveedor_id AND t.estado_tipo_id != 4 ";
 
             $params = [':proveedor_id' => $proveedorId];
 
             if ($categoriaId) {
-                $query .= " AND t.tarea_categoria_id = :categoria_id";
+                $query .= PHP_EOL . " AND t.tarea_categoria_id = :categoria_id";
                 $params[':categoria_id'] = $categoriaId;
             }
 
             if (!empty($search)) {
-                $query .= " AND LOWER(t.nombre) LIKE :search";
+                $query .= PHP_EOL . " AND LOWER(t.nombre) LIKE :search";
                 $params[':search'] = '%' . strtolower($search) . '%';
             }
 
-            $query .= " ORDER BY t.nombre ASC";
+            $query .= PHP_EOL . " ORDER BY t.nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($params);
@@ -363,13 +345,11 @@ class Process
     public function getTaskCategories(): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     id,
                     nombre
                 FROM tarea_categorias
-                ORDER BY nombre ASC
-            ";
+                ORDER BY nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute();
@@ -387,16 +367,14 @@ class Process
     public function getTaskDetail(int $tareaId): ?array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     t.*,
                     tc.nombre as categoria_nombre,
                     et.nombre as estado_nombre
                 FROM tareas t
                 LEFT JOIN tarea_categorias tc ON t.tarea_categoria_id = tc.id
                 LEFT JOIN estado_tipos et ON t.estado_tipo_id = et.id
-                WHERE t.id = ?
-            ";
+                WHERE t.id = ? ";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute([$tareaId]);
@@ -419,7 +397,7 @@ class Process
             $params = [$nombre, $proveedorId];
 
             if ($excludeId) {
-                $query .= " AND id != ?";
+                $query .= PHP_EOL . " AND id != ?";
                 $params[] = $excludeId;
             }
 
@@ -430,6 +408,34 @@ class Process
         } catch (Exception $e) {
             Logger::error("Process::processExistsByName: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Registrar login/logout en base de datos
+     * @param int|null $userId
+     * @param int $tipoRegistro 1=login, 2=logout
+     */
+    public function logUserEvent(?int $userId, int $tipoRegistro): void
+    {
+        try {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            if ($ip === null || $ip === '') {
+                $ip = '0.0.0.0';
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
+            ");
+
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':tipo' => $tipoRegistro,
+                ':ip' => $ip
+            ]);
+        } catch (Exception $e) {
+            Logger::error("AuthService::logUserEvent: " . $e->getMessage());
         }
     }
 }
