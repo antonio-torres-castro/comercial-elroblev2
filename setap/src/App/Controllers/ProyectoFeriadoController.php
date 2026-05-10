@@ -125,6 +125,13 @@ class ProyectoFeriadoController extends BaseController
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
                 return;
             }
+
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             // Validar CSRF
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_INVALID_CSRF_TOKEN);
@@ -182,7 +189,7 @@ class ProyectoFeriadoController extends BaseController
             if (!empty($result['conflicts'])) {
                 $message .= '. Se detectaron conflictos con tareas existentes.';
             }
-
+            $this->projectModel->logUserEvent($currentUser['id'], 56); // Crea feriados masivamente
             // Respuesta en formato JSON
             echo json_encode([
                 'success' => $success,
@@ -206,6 +213,12 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
+                return;
+            }
+
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
                 return;
             }
 
@@ -255,6 +268,8 @@ class ProyectoFeriadoController extends BaseController
                 $message .= '. Se detectaron conflictos con tareas existentes.';
             }
 
+            $this->projectModel->logUserEvent($currentUser['id'], 57); // Crea feriado fecha específica
+
             // Respuesta en formato JSON
             echo json_encode([
                 'success' => $success,
@@ -278,6 +293,12 @@ class ProyectoFeriadoController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 $this->redirectWithError(AppConstants::ROUTE_HOME, AppConstants::ERROR_METHOD_NOT_ALLOWED);
+                return;
+            }
+
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
                 return;
             }
 
@@ -333,6 +354,8 @@ class ProyectoFeriadoController extends BaseController
             if (!empty($result['conflicts'])) {
                 $message .= '. Se detectaron conflictos con tareas existentes.';
             }
+
+            $this->projectModel->logUserEvent($currentUser['id'], 58); // Crea feriados rango
 
             // Respuesta en formato JSON
             echo json_encode([
@@ -429,6 +452,8 @@ class ProyectoFeriadoController extends BaseController
             $message = $success ? AppConstants::SUCCESS_HOLIDAY_UPDATED : 'Error al actualizar feriado';
 
             if ($isAjax) {
+                $this->projectModel->logUserEvent($this->getCurrentUser()['id'], 59); // Edita feriado
+
                 echo json_encode([
                     'success' => $success,
                     'message' => $message
@@ -437,6 +462,8 @@ class ProyectoFeriadoController extends BaseController
             }
 
             if ($success) {
+                $this->projectModel->logUserEvent($this->getCurrentUser()['id'], 59); // Edita feriado
+
                 $this->redirectWithSuccess($returnUrl, $message);
             } else {
                 $this->redirectWithError($returnUrl, $message);
@@ -493,6 +520,7 @@ class ProyectoFeriadoController extends BaseController
                 'error' => []
             ];
             if ($success) {
+                $this->projectModel->logUserEvent($this->getCurrentUser()['id'], 60); // Elimina feriado
                 $message = AppConstants::SUCCESS_HOLIDAY_DELETED;
             } else {
                 $message = 'Error al eliminar feriado';
@@ -572,6 +600,7 @@ class ProyectoFeriadoController extends BaseController
             $success = $this->proyectoFeriadoModel->moveTasksForward($projectId, $taskIds, $diasAMover);
             if ($success) {
                 $message = 'Tareas movidas exitosamente (' . count($taskIds) . ' tareas)';
+                $this->projectModel->logUserEvent($this->getCurrentUser()['id'], 61); // Mueve tareas por feriado
                 $this->redirectWithSuccess($returnUrl, $message);
             } else {
                 $this->redirectWithError($returnUrl, 'Error al mover tareas');

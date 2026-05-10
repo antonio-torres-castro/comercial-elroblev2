@@ -236,6 +236,7 @@ class MenuController extends BaseController
             ];
 
             if ($this->menuModel->create($menuData)) {
+                $this->menuModel->logUserEvent($currentUser['id'], 32); // Crea menú
                 $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, 'Menú creado correctamente');
             } else {
                 throw new Exception('Error al crear el menú');
@@ -378,6 +379,7 @@ class MenuController extends BaseController
             ];
 
             if ($this->menuModel->update($id, $menuData)) {
+                $this->menuModel->logUserEvent($currentUser['id'], 33); // Actualiza menú
                 $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, 'Menú actualizado correctamente');
             } else {
                 throw new Exception('Error al actualizar el menú');
@@ -428,6 +430,7 @@ class MenuController extends BaseController
             }
 
             if ($this->menuModel->delete($id)) {
+                $this->menuModel->logUserEvent($currentUser['id'], 34); // Elimina menú
                 $this->redirectWithSuccess(AppConstants::ROUTE_MENUS, 'Menú eliminado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_MENUS, 'Error al eliminar el menú');

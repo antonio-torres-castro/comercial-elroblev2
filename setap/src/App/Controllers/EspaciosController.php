@@ -142,6 +142,12 @@ class EspaciosController extends BaseController
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Método no permitido");
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             $data = [
                 'proyecto_id' => (int)$_POST['proyecto_id'],
                 'calle' => $_POST['calle'],
@@ -158,6 +164,7 @@ class EspaciosController extends BaseController
 
             $id = $this->espaciosModel->createDireccion($data);
             if ($id > 0) {
+                $this->espaciosModel->logUserEvent($currentUser['id'], 25); // Crear dirección
                 echo json_encode(['success' => true, 'message' => 'Dirección creada', 'id' => $id]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al crear dirección']);
@@ -174,6 +181,12 @@ class EspaciosController extends BaseController
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Método no permitido");
+
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
 
             $id = !empty($_POST['id']) ? (int)$_POST['id'] : null;
             $data = [
@@ -197,10 +210,12 @@ class EspaciosController extends BaseController
 
             if ($id) {
                 $success = $this->espaciosModel->updateEspacio($data);
+                $this->espaciosModel->logUserEvent($currentUser['id'], 26); // Modifica espacio
                 $message = $success ? 'Espacio actualizado' : 'Error al actualizar';
             } else {
                 $newId = $this->espaciosModel->createEspacio($data);
                 $success = $newId > 0;
+                $this->espaciosModel->logUserEvent($currentUser['id'], 27); // Crea espacio
                 $message = $success ? 'Espacio creado' : 'Error al crear';
             }
 
@@ -216,10 +231,19 @@ class EspaciosController extends BaseController
     public function deleteEspacio()
     {
         try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Método no permitido");
+
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             $id = (int)($_POST['id'] ?? 0);
             if ($id <= 0) throw new Exception("ID no válido");
 
             $this->espaciosModel->deleteEspacio($id);
+            $this->espaciosModel->logUserEvent($currentUser['id'], 28); // Elimina espacio
             echo json_encode(['success' => true, 'message' => 'Espacio eliminado']);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -231,6 +255,8 @@ class EspaciosController extends BaseController
      */
     public function getProvincias()
     {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Método no permitido");
+
         $id = (int)$_GET['region_id'];
         echo json_encode($this->espaciosModel->getProvincias($id));
     }
@@ -240,6 +266,7 @@ class EspaciosController extends BaseController
      */
     public function getComunas()
     {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Método no permitido");
         $id = (int)$_GET['provincia_id'];
         echo json_encode($this->espaciosModel->getComunas($id));
     }

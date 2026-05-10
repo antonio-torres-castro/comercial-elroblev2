@@ -147,7 +147,7 @@ class SuppliersController extends BaseController
             }
 
             $supplierId = $this->supplierModel->create($_POST);
-
+            $this->supplierModel->logUserEvent($currentUser['id'], 62); // Crea proveedor
             $this->redirectWithSuccess(AppConstants::ROUTE_SUPPLIERS, AppConstants::SUCCESS_CREATED);
         } catch (Exception $e) {
             Logger::error("SuppliersController::store: " . $e->getMessage());
@@ -249,6 +249,7 @@ class SuppliersController extends BaseController
 
             $success = $this->supplierModel->update($id, $_POST);
             if ($success) {
+                $this->supplierModel->logUserEvent($currentUser['id'], 63); // Edita proveedor
                 $this->redirectWithSuccess(AppConstants::ROUTE_SUPPLIERS, AppConstants::SUCCESS_UPDATED);
             } else {
                 throw new Exception('No se pudo actualizar el proveedor');
@@ -293,6 +294,7 @@ class SuppliersController extends BaseController
 
             $success = $this->supplierModel->delete($id);
             if ($success) {
+                $this->supplierModel->logUserEvent($currentUser['id'], 64); // Elimina proveedor
                 $this->redirectWithSuccess(AppConstants::ROUTE_SUPPLIERS, AppConstants::SUCCESS_DELETED);
             } else {
                 throw new Exception('No se pudo eliminar el proveedor');

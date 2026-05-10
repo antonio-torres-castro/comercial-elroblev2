@@ -372,6 +372,7 @@ class ProyectoColaboradoresController extends BaseController
             );
 
             if (!$result['success']) {
+                $this->proyectoColaboradoresModel->logUserEvent($currentUser['id'], 51); // Agrega ejecutor
                 echo json_encode(['success' => false, 'message' => $result['message'] ?? 'No se pudo agregar']);
                 return;
             }
@@ -450,6 +451,7 @@ class ProyectoColaboradoresController extends BaseController
                 return;
             }
 
+            $this->proyectoColaboradoresModel->logUserEvent($currentUser['id'], 52); // Guarda calendario
             echo json_encode(['success' => true, 'message' => 'Calendario guardado correctamente']);
         } catch (Exception $e) {
             Logger::error('ProyectoColaboradoresController::saveCalendar error: ' . $e->getMessage());
@@ -492,6 +494,7 @@ class ProyectoColaboradoresController extends BaseController
 
             $deleted = $this->proyectoColaboradoresModel->deleteDisponibilidad($projectId, $usuarioId, 4);
             if ($deleted) {
+                $this->proyectoColaboradoresModel->logUserEvent($currentUser['id'], 53); // Elimina calendario
                 echo json_encode(['success' => true, 'message' => 'Calendario eliminado']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'No se pudo eliminar el calendario']);
@@ -566,6 +569,7 @@ class ProyectoColaboradoresController extends BaseController
             );
 
             if ($success) {
+                $this->proyectoColaboradoresModel->logUserEvent($currentUser['id'], 54); // Agrega fecha calendario colaborador
                 echo json_encode(['success' => true, 'message' => 'Fecha agregada correctamente']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'No se pudo agregar la fecha']);
@@ -629,6 +633,7 @@ class ProyectoColaboradoresController extends BaseController
             );
 
             if ($success) {
+                $this->proyectoColaboradoresModel->logUserEvent($currentUser['id'], 55); // Modifica fecha calendario colaborador
                 echo json_encode(['success' => true, 'message' => 'Disponibilidad actualizada']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'No se pudo actualizar']);

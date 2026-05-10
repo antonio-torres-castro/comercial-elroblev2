@@ -295,6 +295,12 @@ class ProjectController extends BaseController
             return;
         }
 
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
+        }
+
         try {
             $errors = $this->validateProjectData($_POST);
             if (!empty($errors)) {
@@ -316,6 +322,7 @@ class ProjectController extends BaseController
 
             $projectId = $this->projectModel->create($projectData);
             if ($projectId) {
+                $this->projectModel->logUserEvent($currentUser['id'], 44); // Crea de proyecto
                 Security::logSecurityEvent('project_created', [
                     'project_id' => $projectId,
                     'created_by' => $_SESSION['username']
@@ -397,6 +404,12 @@ class ProjectController extends BaseController
             return;
         }
 
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
+        }
+
         try {
             $errors = $this->validateProjectData($_POST);
             if (!empty($errors)) {
@@ -417,10 +430,7 @@ class ProjectController extends BaseController
             ];
 
             if ($this->projectModel->update($id, $projectData)) {
-                Security::logSecurityEvent('project_updated', [
-                    'project_id' => $id,
-                    'updated_by' => $_SESSION['username']
-                ]);
+                $this->projectModel->logUserEvent($currentUser['id'], 45); // Actualiza proyecto
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto actualizado correctamente');
             } else {
                 Security::redirect("/projects/edit?id={$id}&error=Error al actualizar proyecto");
@@ -450,6 +460,12 @@ class ProjectController extends BaseController
             return;
         }
 
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
+        }
+
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_INVALID_PROJECT_ID);
@@ -464,10 +480,7 @@ class ProjectController extends BaseController
             }
 
             if ($this->projectModel->delete($id)) {
-                Security::logSecurityEvent('project_deleted', [
-                    'project_id' => $id,
-                    'deleted_by' => $_SESSION['username']
-                ]);
+                $this->projectModel->logUserEvent($currentUser['id'], 46); // Elimina proyecto
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROJECTS, 'Proyecto eliminado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_PROJECTS, AppConstants::ERROR_DELETE_PROJECT);
@@ -491,6 +504,12 @@ class ProjectController extends BaseController
             return;
         }
 
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) {
+            $this->redirectToLogin();
+            return;
+        }
+
         // Validar CSRF token
         if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
             $this->redirectWithError(AppConstants::ROUTE_PROJECTS, 'Token CSRF inválido');
@@ -507,11 +526,7 @@ class ProjectController extends BaseController
 
         try {
             if ($this->projectModel->changeStatus($projectId, $newStatusId)) {
-                Security::logSecurityEvent('project_status_changed', [
-                    'project_id' => $projectId,
-                    'new_status_id' => $newStatusId,
-                    'changed_by' => $_SESSION['username']
-                ]);
+                $this->projectModel->logUserEvent($currentUser['id'], 47); // Cambia estado proyecto
                 Security::redirect("/projects/show?id={$projectId}&success=Estado actualizado correctamente");
             } else {
                 Security::redirect("/projects/show?id={$projectId}&error=Error al cambiar estado");
@@ -800,6 +815,7 @@ class ProjectController extends BaseController
             }
 
             $res = $this->projectModel->addUsuarioGrupo($projectId, $usuarioId, $grupoId, $hh);
+            $this->projectModel->logUserEvent($currentUser['id'], 48); // Agrega usuario a grupo
             echo json_encode($res);
         } catch (Exception $e) {
             Logger::error('ProjectController::usuariosGrupoAdd: ' . $e->getMessage());
@@ -854,6 +870,7 @@ class ProjectController extends BaseController
             }
 
             $res = $this->projectModel->updateUsuarioGrupo($id, $grupoId, $hh);
+            $this->projectModel->logUserEvent($currentUser['id'], 49); // Actualiza usuario grupo
             echo json_encode($res);
         } catch (Exception $e) {
             Logger::error('ProjectController::usuariosGrupoUpdate: ' . $e->getMessage());
@@ -899,6 +916,7 @@ class ProjectController extends BaseController
 
             // Se permite eliminar incluso si el proyecto está inactivo
             $res = $this->projectModel->deleteUsuarioGrupo($id);
+            $this->projectModel->logUserEvent($currentUser['id'], 50); // Elimina usuario grupo
             echo json_encode($res);
         } catch (Exception $e) {
             Logger::error('ProjectController::usuariosGrupoDelete: ' . $e->getMessage());

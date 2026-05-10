@@ -117,6 +117,12 @@ class PersonaController extends AbstractBaseController
                 return;
             }
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             // Validar datos de la persona
             $validationErrors = $this->validatePersonaData($_POST);
             if (!empty($validationErrors)) {
@@ -136,6 +142,7 @@ class PersonaController extends AbstractBaseController
 
             try {
                 $personaId = $this->personaModel->create($personaData);
+                $this->personaModel->logUserEvent($currentUser['id'], 38); // Evento: Crea de persona
             } catch (Exception $e) {
                 $this->redirectWithError(AppConstants::ROUTE_PERSONAS_CREATE, 'Error al crear persona: ' . $e->getMessage());
             }
@@ -210,6 +217,12 @@ class PersonaController extends AbstractBaseController
                 return;
             }
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             $id = $this->validateId($_POST['id'] ?? null, AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
 
             $validationErrors = $this->validatePersonaData($_POST, $id);
@@ -229,6 +242,7 @@ class PersonaController extends AbstractBaseController
             ];
 
             if ($this->personaModel->update($id, $personaData)) {
+                $this->personaModel->logUserEvent($currentUser['id'], 39); // Modifica de persona
                 Security::logSecurityEvent('persona_updated', [
                     'persona_id' => $id,
                     'updated_by' => $_SESSION['username']
@@ -256,9 +270,16 @@ class PersonaController extends AbstractBaseController
                 return;
             }
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             $id = $this->validateId($_POST['id'] ?? null, AppConstants::ROUTE_PERSONAS, AppConstants::ERROR_INVALID_PERSONA_ID);
 
             if ($this->personaModel->delete($id)) {
+                $this->personaModel->logUserEvent($currentUser['id'], 40); // Elimina persona
                 Security::logSecurityEvent('persona_deleted', [
                     'persona_id' => $id,
                     'deleted_by' => $_SESSION['username']

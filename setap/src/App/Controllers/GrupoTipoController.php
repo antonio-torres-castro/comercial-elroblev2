@@ -108,6 +108,7 @@ class GrupoTipoController extends BaseController
             }
             $ok = $this->model->create(['nombre' => $nombre, 'descripcion' => $descripcion]);
             if ($ok) {
+                $this->model->logUserEvent($currentUser['id'], 30); // Crea grupo tipo
                 $this->redirectWithSuccess(AppConstants::ROUTE_GRUPO_TIPOS, 'Creado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_GRUPO_TIPOS, 'El nombre ya existe o error al crear');
@@ -182,6 +183,7 @@ class GrupoTipoController extends BaseController
             }
             $ok = $this->model->update($id, ['nombre' => $nombre, 'descripcion' => $descripcion]);
             if ($ok) {
+                $this->model->logUserEvent($currentUser['id'], 31); // Edita grupo tipo
                 $this->redirectWithSuccess(AppConstants::ROUTE_GRUPO_TIPOS, 'Actualizado correctamente');
             } else {
                 $this->redirectWithError(AppConstants::ROUTE_GRUPO_TIPOS, 'El nombre ya existe o error al actualizar');

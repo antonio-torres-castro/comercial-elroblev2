@@ -158,6 +158,7 @@ class ProcessController extends BaseController
             }
 
             $processId = $this->processModel->create($_POST);
+            $this->processModel->logUserEvent($currentUser['id'], 41);
 
             // Guardar las tareas del proceso
             $tasksData = json_decode($_POST['process_tasks_json'] ?? '[]', true);
@@ -278,7 +279,6 @@ class ProcessController extends BaseController
             }
             //No podemos determinar el success con el conteo de modificados por que el MySQL no se modifica si no hay diferencias
             $success = $this->processModel->update($id, $_POST);
-
             // Actualizar las tareas del proceso
             if ($success) {
                 // Eliminar tareas existentes y agregar las nuevas
@@ -292,6 +292,7 @@ class ProcessController extends BaseController
             }
 
             if ($success) {
+                $this->processModel->logUserEvent($currentUser['id'], 42);
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROCESSES, AppConstants::SUCCESS_UPDATED);
             } else {
                 throw new Exception('No se pudo actualizar el proceso');
@@ -336,6 +337,7 @@ class ProcessController extends BaseController
 
             $success = $this->processModel->delete($id);
             if ($success) {
+                $this->processModel->logUserEvent($currentUser['id'], 43);
                 $this->redirectWithSuccess(AppConstants::ROUTE_PROCESSES, AppConstants::SUCCESS_DELETED);
             } else {
                 throw new Exception('No se pudo eliminar el proceso');

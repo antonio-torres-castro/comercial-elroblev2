@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Constants\AppConstants;
 use App\Traits\CommonValidationsTrait;
+use App\Models\User;
 use App\Helpers\Logger;
 use Exception;
 
@@ -17,6 +18,15 @@ use Exception;
 class PermissionsController extends AbstractBaseController
 {
     use CommonValidationsTrait;
+    private $userModel;
+
+    /**
+     * Hook para inicialización específica del controlador
+     */
+    protected function initializeController(): void
+    {
+        $this->userModel = new User();
+    }
 
     /**
      * Lista principal del mantenedor de permisos
@@ -63,6 +73,12 @@ class PermissionsController extends AbstractBaseController
                 return;
             }
 
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             $userTypeId = (int)($_POST['user_type_id'] ?? 0);
             $permissionIds = $_POST['permission_ids'] ?? [];
 
@@ -73,6 +89,7 @@ class PermissionsController extends AbstractBaseController
 
             // Lógica de negocio limpia
             $result = $this->updateUserTypePermissions($userTypeId, $permissionIds);
+            $this->userModel->logUserEvent($currentUser['id'], 35); // Actualiza permisos
             $message = $result ? 'Permisos actualizados correctamente' : 'Error al actualizar permisos';
 
             // Respuesta tradicional con redirect
@@ -91,11 +108,9 @@ class PermissionsController extends AbstractBaseController
     private function getAllPermissions(): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT id, nombre, descripcion
+            $stmt = $this->db->prepare("SELECT id, nombre, descripcion
                 FROM permiso_tipos
-                ORDER BY nombre
-            ");
+                ORDER BY nombre ");
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (Exception $e) {
@@ -107,11 +122,9 @@ class PermissionsController extends AbstractBaseController
     private function getPermissionsByUserType(): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT usuario_tipo_id, permiso_id, fecha_creacion
+            $stmt = $this->db->prepare("SELECT usuario_tipo_id, permiso_id, fecha_creacion
                 FROM usuario_tipo_permisos
-                WHERE estado_tipo_id = 2
-            ");
+                WHERE estado_tipo_id = 2 ");
             $stmt->execute();
             $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -134,20 +147,16 @@ class PermissionsController extends AbstractBaseController
             $this->db->beginTransaction();
 
             // 1. Obtener las tuplas actuales activas (usuario_tipo_id, permiso_id)
-            $stmt = $this->db->prepare("
-                SELECT permiso_id
+            $stmt = $this->db->prepare("SELECT permiso_id
                 FROM usuario_tipo_permisos
-                WHERE usuario_tipo_id = ? AND estado_tipo_id = 2
-            ");
+                WHERE usuario_tipo_id = ? AND estado_tipo_id = 2 ");
             $stmt->execute([$userTypeId]);
             $currentPermissionIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'permiso_id');
 
             // 2. Obtener las tuplas eliminadas (usuario_tipo_id, permiso_id)
-            $stmt = $this->db->prepare("
-                SELECT permiso_id
+            $stmt = $this->db->prepare("SELECT permiso_id
                 FROM usuario_tipo_permisos
-                WHERE usuario_tipo_id = ? AND estado_tipo_id = 4
-            ");
+                WHERE usuario_tipo_id = ? AND estado_tipo_id = 4 ");
             $stmt->execute([$userTypeId]);
             $deletedPermissionIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'permiso_id');
 
@@ -160,11 +169,9 @@ class PermissionsController extends AbstractBaseController
             // 4. Desactivar los permisos que ya no están seleccionados
             if (!empty($permissionIdsToDeactivate)) {
                 $placeholders = str_repeat('?,', count($permissionIdsToDeactivate) - 1) . '?';
-                $stmt = $this->db->prepare("
-                    UPDATE usuario_tipo_permisos
+                $stmt = $this->db->prepare("UPDATE usuario_tipo_permisos
                     SET estado_tipo_id = 4, fecha_modificacion = NOW()
-                    WHERE usuario_tipo_id = ? AND permiso_id IN ($placeholders)
-                ");
+                    WHERE usuario_tipo_id = ? AND permiso_id IN ($placeholders) ");
                 $stmt->execute(array_merge([$userTypeId], $permissionIdsToDeactivate));
             }
 
@@ -174,11 +181,9 @@ class PermissionsController extends AbstractBaseController
             // 6. Activar los permisos que se han vuelto a seleccionar
             if (!empty($permissionIdsToActivate)) {
                 $placeholders = str_repeat('?,', count($permissionIdsToActivate) - 1) . '?';
-                $stmt = $this->db->prepare("
-                    UPDATE usuario_tipo_permisos
+                $stmt = $this->db->prepare("UPDATE usuario_tipo_permisos
                     SET estado_tipo_id = 2, fecha_modificacion = NOW()
-                    WHERE usuario_tipo_id = ? AND permiso_id IN ($placeholders)
-                ");
+                    WHERE usuario_tipo_id = ? AND permiso_id IN ($placeholders) ");
                 $stmt->execute(array_merge([$userTypeId], $permissionIdsToActivate));
             }
 

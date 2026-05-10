@@ -118,6 +118,12 @@ class PerfilController extends BaseController
     private function updateProfile($fullUserData)
     {
         try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
             // Validar CSRF token
             if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
                 http_response_code(403);
@@ -143,6 +149,7 @@ class PerfilController extends BaseController
 
             // Actualizar perfil usando el modelo
             if ($this->userModel->updateProfile($fullUserData['id'], $data)) {
+                $this->userModel->logUserEvent($currentUser['id'], 35); // Actualiza perfil
                 // Redirigir con mensaje de éxito
                 $_SESSION['success_message'] = 'Perfil actualizado correctamente';
                 header('Location: ' . AppConstants::ROUTE_PERFIL);
@@ -276,6 +283,7 @@ class PerfilController extends BaseController
 
             // Actualizar contraseña
             if ($this->userModel->updatePassword($currentUser['id'], $newPassword)) {
+                $this->userModel->logUserEvent($currentUser['id'], 36); // Cambia contraseña
                 $_SESSION['success_message'] = 'Contraseña actualizada correctamente';
                 header('Location: ' . AppConstants::ROUTE_PERFIL);
                 exit;

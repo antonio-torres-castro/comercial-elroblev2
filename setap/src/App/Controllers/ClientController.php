@@ -180,6 +180,7 @@ class ClientController extends BaseController
 
             // Crear cliente
             $clientId = $this->clientModel->create($_POST);
+            $this->clientModel->logUserEvent($currentUser['id'], 19); // Crea cliente
 
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_CREATED);
@@ -300,6 +301,8 @@ class ClientController extends BaseController
             // Actualizar cliente
             $success = $this->clientModel->update($id, $_POST);
             if ($success) {
+                $this->clientModel->logUserEvent($currentUser['id'], 20); // Modifica cliente
+
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_UPDATED);
             } else {
                 throw new Exception('No se pudo actualizar el cliente');
@@ -347,6 +350,7 @@ class ClientController extends BaseController
             // Eliminar cliente
             $success = $this->clientModel->delete($id);
             if ($success) {
+                $this->clientModel->logUserEvent($currentUser['id'], 21); // Elimina cliente
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENTS, AppConstants::SUCCESS_DELETED);
             } else {
                 throw new Exception('No se pudo eliminar el cliente');
@@ -541,7 +545,7 @@ class ClientController extends BaseController
 
             // Crear contraparte usando el servicio
             $counterpartieId = $this->counterpartieService->createCounterpartie($_POST);
-
+            $this->clientModel->logUserEvent($currentUser['id'], 22); // Crea contraparte
             // Redireccionar con mensaje de éxito
             $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_CREATED);
         } catch (Exception $e) {
@@ -610,6 +614,7 @@ class ClientController extends BaseController
             // Actualizar contraparte usando el servicio
             $success = $this->counterpartieService->updateCounterpartie($id, $_POST);
             if ($success) {
+                $this->clientModel->logUserEvent($currentUser['id'], 23); // Modifica contraparte
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_UPDATED);
             }
         } catch (Exception $e) {
@@ -655,6 +660,7 @@ class ClientController extends BaseController
             // Eliminar contraparte usando el servicio
             $success = $this->counterpartieService->deleteCounterpartie($id);
             if ($success) {
+                $this->clientModel->logUserEvent($currentUser['id'], 24); // Elimina contraparte
                 $this->redirectWithSuccess(AppConstants::ROUTE_CLIENT_COUNTERPARTIES, AppConstants::SUCCESS_DELETED);
             }
         } catch (Exception $e) {
