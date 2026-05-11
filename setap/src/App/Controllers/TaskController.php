@@ -84,9 +84,6 @@ class TaskController extends BaseController
                 $_GET['fecha_fin'] = $filters['fecha_fin'];
             }
 
-            if ($uti > 1) {
-                $filters['proveedor_id'] = $currentUser['proveedor_id'];
-            }
             if ($uti == 6) {
                 $filters['contraparte_id'] = $contraparteId;
             }
@@ -110,9 +107,10 @@ class TaskController extends BaseController
             $_GET['show_btn_nuevo'] = $rCreate;
             $_GET['show_btn_activity'] = $rActivity;
 
-            if ($uti > 1 && isset($currentUser['proveedor_id'])) {
+            if ($currentUser['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
-            } elseif ($uti == 1 && isset($_GET['proveedor_id']) && !empty($_GET['proveedor_id'])) {
+                $_GET['proveedor_id'] = $filters['proveedor_id'];
+            } elseif ($uti == 1 && isset($_GET['proveedor_id']) && $_GET['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $_GET['proveedor_id'];
             }
 
@@ -279,10 +277,10 @@ class TaskController extends BaseController
             $_GET['show_btn_nuevo'] = $rCreate;
             $_GET['show_btn_activity'] = $rActivity;
 
-            if ($uti > 1 && isset($currentUser['proveedor_id'])) {
+            if ($currentUser['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
                 $_GET['proveedor_id'] = $filters['proveedor_id'];
-            } elseif ($uti == 1 && isset($_GET['proveedor_id']) && !empty($_GET['proveedor_id'])) {
+            } elseif ($uti == 1 && isset($_GET['proveedor_id']) && $_GET['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $_GET['proveedor_id'];
             }
 
@@ -433,8 +431,9 @@ class TaskController extends BaseController
                 $filters['proyecto_id'] = (int)$projects[0]['id'];
             }
 
-            if ($uti > 1) {
+            if ($currentUser['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
+                $_GET['proveedor_id'] = $filters['proveedor_id'];
             } elseif (isset($_GET['proyecto_id']) && !empty($_GET['proyecto_id'])) {
                 $filters['proveedor_id'] = (int)$projects[array_search($_GET['proyecto_id'], array_column($projects, 'id'))]['proveedor_id'];
             }
@@ -636,7 +635,7 @@ class TaskController extends BaseController
 
             $filters['current_usuario_tipo_id'] = $uti;
             $filters['current_usuario_id'] = $cu;
-            if ($uti > 1) {
+            if ($currentUser['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
             }
 
@@ -781,7 +780,7 @@ class TaskController extends BaseController
             $filters['current_usuario_tipo_id'] = $uti;
             $filters['current_usuario_id'] = $cu;
             $filters['sort_direccion_espacio'] = true;
-            if ($uti > 1) {
+            if ($currentUser['proveedor_id'] > 0) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
             }
 

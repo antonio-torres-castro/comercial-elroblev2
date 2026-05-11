@@ -26,7 +26,7 @@ class Task
     {
         try {
             $filtroProveedor = "";
-            if (isset($filters['proveedor_id']) && is_numeric($filters['proveedor_id'])) {
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0 && $filters['current_usuario_tipo_id'] > 1) {
                 $filtroProveedor = "AND id = " . (int)$filters['proveedor_id'];
             }
             $stmt = $this->db->prepare("
@@ -79,25 +79,30 @@ class Task
             $params[] = $cu;
 
             // Filtros
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $strWhere .= PHP_EOL . " and p.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
             if (isset($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+                $strWhere .= PHP_EOL . " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
             } elseif (isset($filters['usuario_id'])) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $filters['usuario_id'];
             }
 
             if (isset($filters['excluye_no_asignados']) && $filters['excluye_no_asignados'] == 1) {
-                $strWhere .= " AND pt.ejecutor_id is not null ";
+                $strWhere .= PHP_EOL . " AND pt.ejecutor_id is not null ";
             }
 
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
@@ -113,44 +118,44 @@ class Task
                     // Creamos placeholders (?, ?, ?, ...)
                     $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
                     // Agregamos la condición con el IN dinámico
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $strWhere .= PHP_EOL . " AND pt.estado_tipo_id IN ($placeholders)";
                     // Agregamos todos los IDs al array de parámetros
                     $params = array_merge($params, $estadoTipoIds);
                 }
             }
 
             if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
-                $strWhere .= " AND pt.estado_tipo_id != 4 ";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id != 4 ";
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio >= ?";
                 $params[] = $filters['fecha_inicio'];
             }
 
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio <= ?";
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['tarea_nombre']) && !empty($filters['tarea_nombre'])) {
-                $strWhere .= " AND t.nombre LIKE ?";
+                $strWhere .= PHP_EOL . " AND t.nombre LIKE ?";
                 $params[] = "%" . $filters['tarea_nombre'] . "%";
             }
 
             if (isset($filters['direccion_id']) && !empty($filters['direccion_id'])) {
-                $strWhere .= " AND d.id = ?";
+                $strWhere .= PHP_EOL . " AND d.id = ?";
                 $params[] = $filters['direccion_id'];
             }
 
             if (isset($filters['espacio_padre_id']) && !empty($filters['espacio_padre_id'])) {
-                $strWhere .= " AND (
+                $strWhere .= PHP_EOL . " AND (
                     pt.espacio_id = ?
                     OR ep1.id = ?
                     OR ep2.id = ?
@@ -171,7 +176,7 @@ class Task
             }
 
             $sql .= $strWhere;
-            $sql .= " ORDER BY pt.fecha_inicio DESC";
+            $sql .= PHP_EOL . " ORDER BY pt.fecha_inicio DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -182,7 +187,6 @@ class Task
             return 0;
         }
     }
-
 
     /**
      * Obtener todas las tareas con información relacionada
@@ -257,25 +261,30 @@ class Task
             $params[] = $cu;
 
             // Filtros
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $strWhere .= PHP_EOL . " and p.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
             if (isset($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+                $strWhere .= PHP_EOL . " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
             } elseif (isset($filters['usuario_id'])) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $filters['usuario_id'];
             }
 
             if (isset($filters['excluye_no_asignados']) && $filters['excluye_no_asignados'] == 1) {
-                $strWhere .= " AND pt.ejecutor_id is not null ";
+                $strWhere .= PHP_EOL . " AND pt.ejecutor_id is not null ";
             }
 
             if (isset($filters['estado_tipo_id']) && !empty($filters['estado_tipo_id'])) {
@@ -291,44 +300,44 @@ class Task
                     // Creamos placeholders (?, ?, ?, ...)
                     $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
                     // Agregamos la condición con el IN dinámico
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $strWhere .= PHP_EOL . " AND pt.estado_tipo_id IN ($placeholders)";
                     // Agregamos todos los IDs al array de parámetros
                     $params = array_merge($params, $estadoTipoIds);
                 }
             }
 
             if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
-                $strWhere .= " AND pt.estado_tipo_id != 4 ";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id != 4 ";
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio >= ?";
                 $params[] = $filters['fecha_inicio'];
             }
 
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio <= ?";
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['tarea_nombre']) && !empty($filters['tarea_nombre'])) {
-                $strWhere .= " AND t.nombre LIKE ?";
+                $strWhere .= PHP_EOL . " AND t.nombre LIKE ?";
                 $params[] = "%" . $filters['tarea_nombre'] . "%";
             }
 
             if (isset($filters['direccion_id']) && !empty($filters['direccion_id'])) {
-                $strWhere .= " AND d.id = ?";
+                $strWhere .= PHP_EOL . " AND d.id = ?";
                 $params[] = $filters['direccion_id'];
             }
 
             if (isset($filters['espacio_padre_id']) && !empty($filters['espacio_padre_id'])) {
-                $strWhere .= " AND (
+                $strWhere .= PHP_EOL . " AND (
                     pt.espacio_id = ?
                     OR ep1.id = ?
                     OR ep2.id = ?
@@ -524,7 +533,7 @@ class Task
             }
 
             if (!empty($where)) {
-                $sql .= " WHERE " . implode(" AND ", $where);
+                $sql .= PHP_EOL . " WHERE " . implode(" AND ", $where);
             }
 
             // =========================
@@ -877,19 +886,24 @@ class Task
 						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $strWhere .= PHP_EOL . " and p.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+                $strWhere .= PHP_EOL . " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
             } else {
-                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
             }
 
@@ -900,24 +914,24 @@ class Task
                 $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
                 if (!empty($estadoTipoIds)) {
                     $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $strWhere .= PHP_EOL . " AND pt.estado_tipo_id IN ($placeholders)";
                     $params = array_merge($params, $estadoTipoIds);
                 }
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio >= ?";
                 $params[] = $filters['fecha_inicio'];
             }
 
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio <= ?";
                 $params[] = $filters['fecha_fin'];
             }
 
@@ -950,7 +964,7 @@ class Task
               INNER JOIN clientes c ON p.cliente_id = c.id
               INNER JOIN tarea_tipos tt ON p.tarea_tipo_id = tt.id
               INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id ";
-            $strWhere = " WHERE EXISTS (SELECT 1
+            $strWhere = PHP_EOL . " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
@@ -958,19 +972,24 @@ class Task
 						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $strWhere .= PHP_EOL . " and p.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+                $strWhere .= PHP_EOL . " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
             } else {
-                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
             }
 
@@ -981,24 +1000,24 @@ class Task
                 $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
                 if (!empty($estadoTipoIds)) {
                     $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $strWhere .= PHP_EOL . " AND pt.estado_tipo_id IN ($placeholders)";
                     $params = array_merge($params, $estadoTipoIds);
                 }
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio >= ?";
                 $params[] = $filters['fecha_inicio'];
             }
 
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio <= ?";
                 $params[] = $filters['fecha_fin'];
             }
 
@@ -1039,19 +1058,24 @@ class Task
 						  AND pug.grupo_id in (1, 2, 3, 4, 5, 7)) ";
             $params[] = $cu;
 
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $strWhere .= PHP_EOL . " and p.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+                $strWhere .= PHP_EOL . " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
             } else {
-                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
             }
 
@@ -1062,24 +1086,24 @@ class Task
                 $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
                 if (!empty($estadoTipoIds)) {
                     $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $strWhere .= PHP_EOL . " AND pt.estado_tipo_id IN ($placeholders)";
                     $params = array_merge($params, $estadoTipoIds);
                 }
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio >= ?";
                 $params[] = $filters['fecha_inicio'];
             }
 
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio <= ?";
                 $params[] = $filters['fecha_fin'];
             }
 
@@ -1116,7 +1140,7 @@ class Task
                 INNER JOIN estado_tipos et ON pt.estado_tipo_id = et.id
                 INNER JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 INNER JOIN personas pe ON pe.id = exec.persona_id ";
-            $strWhere = " WHERE EXISTS (SELECT 1
+            $strWhere = PHP_EOL . " WHERE EXISTS (SELECT 1
 						FROM proyecto_usuarios_grupo pug
 						WHERE pug.proyecto_id = p.id
 						  AND pug.usuario_id = ?
@@ -1125,19 +1149,24 @@ class Task
             $params[] = $cu;
 
             // Filtros
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $strWhere .= PHP_EOL . " and p.proveedor_id = ?";
+                $params[] = $filters['proveedor_id'];
+            }
+
             if (isset($filters['proyecto_id']) && !empty($filters['proyecto_id'])) {
-                $strWhere .= " and pt.proyecto_id = ?";
+                $strWhere .= PHP_EOL . " and pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (isset($uti) && $uti > 2) {
-                $strWhere .= " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (2, 5, 6, 7, 8)";
             } else {
-                $strWhere .= " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
+                $strWhere .= PHP_EOL . " AND pt.estado_tipo_id in (1, 2, 3, 5, 6, 7, 8)";
             }
 
             if (isset($uti) && $uti == 4) {
-                $strWhere .= " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
+                $strWhere .= PHP_EOL . " AND (pt.ejecutor_id is null or pt.ejecutor_id = ?)";
                 $params[] = $cu;
             }
 
@@ -1154,30 +1183,30 @@ class Task
                     // Creamos placeholders (?, ?, ?, ...)
                     $placeholders = implode(', ', array_fill(0, count($estadoTipoIds), '?'));
                     // Agregamos la condición con el IN dinámico
-                    $strWhere .= " AND pt.estado_tipo_id IN ($placeholders)";
+                    $strWhere .= PHP_EOL . " AND pt.estado_tipo_id IN ($placeholders)";
                     // Agregamos todos los IDs al array de parámetros
                     $params = array_merge($params, $estadoTipoIds);
                 }
             }
 
             if (isset($filters['fecha_inicio']) && isset($filters['fecha_fin']) && !empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio between ? and ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio between ? and ?";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['fecha_inicio']) && !empty($filters['fecha_inicio']) && (!isset($filters['fecha_fin']) || empty($filters['fecha_fin']))) {
-                $strWhere .= " AND pt.fecha_inicio >= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio >= ?";
                 $params[] = $filters['fecha_inicio'];
             }
 
             if ((!isset($filters['fecha_inicio']) || empty($filters['fecha_inicio'])) && isset($filters['fecha_fin']) && !empty($filters['fecha_fin'])) {
-                $strWhere .= " AND pt.fecha_inicio <= ?";
+                $strWhere .= PHP_EOL . " AND pt.fecha_inicio <= ?";
                 $params[] = $filters['fecha_fin'];
             }
 
             $sql .= $strWhere;
-            $sql .= " ORDER BY pe.nombre ASC, pe.nombre asc LIMIT ? OFFSET ?";
+            $sql .= PHP_EOL . " ORDER BY pe.nombre ASC, pe.nombre asc LIMIT ? OFFSET ?";
             $params[] = $limit;
             $params[] = $offset;
 
@@ -1216,33 +1245,33 @@ class Task
             $params[] = $cu;
 
             if (!empty($filters['proyecto_id'])) {
-                $sql .= " AND pt.proyecto_id = ?";
+                $sql .= PHP_EOL . " AND pt.proyecto_id = ?";
                 $params[] = $filters['proyecto_id'];
             }
 
             if (!empty($filters['proveedor_id'])) {
-                $sql .= " AND p.proveedor_id = ?";
+                $sql .= PHP_EOL . " AND p.proveedor_id = ?";
                 $params[] = $filters['proveedor_id'];
             }
 
             if (!empty($filters['usuario_id'])) {
-                $sql .= " AND (pt.ejecutor_id = ? OR pt.planificador_id = ? OR pt.supervisor_id = ?)";
+                $sql .= PHP_EOL . " AND (pt.ejecutor_id = ? OR pt.planificador_id = ? OR pt.supervisor_id = ?)";
                 $params[] = $filters['usuario_id'];
                 $params[] = $filters['usuario_id'];
                 $params[] = $filters['usuario_id'];
             }
 
             if (!empty($filters['fecha_inicio']) && !empty($filters['fecha_fin'])) {
-                $sql .= " AND pt.fecha_inicio BETWEEN ? AND ?";
+                $sql .= PHP_EOL . " AND pt.fecha_inicio BETWEEN ? AND ?";
                 $params[] = $filters['fecha_inicio'];
                 $params[] = $filters['fecha_fin'];
             }
 
             if (isset($filters['excluye_eliminados']) && $filters['excluye_eliminados'] == 1) {
-                $sql .= " AND pt.estado_tipo_id != 4";
+                $sql .= PHP_EOL . " AND pt.estado_tipo_id != 4";
             }
 
-            $sql .= " ORDER BY t.nombre LIMIT 15";
+            $sql .= PHP_EOL . " ORDER BY t.nombre LIMIT 15";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -1961,17 +1990,17 @@ class Task
                     WHERE p.estado_tipo_id = 2";
 
             $params = [];
-            if (!empty($filters['current_usuario_id'])) {
-                $sql .= " and EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id in (1, 2, 3, 4, 5, 7))";
+            if (isset($filters['current_usuario_id']) && $filters['current_usuario_id'] > 0) {
+                $sql .= PHP_EOL . " and EXISTS (SELECT 1 FROM proyecto_usuarios_grupo pug WHERE pug.proyecto_id = p.id AND pug.usuario_id = ? AND pug.estado_tipo_id = 2 AND pug.grupo_id in (1, 2, 3, 4, 5, 7))";
                 $params[] = $filters['current_usuario_id'];
             }
 
-            if (!empty($filters['proveedor_id'])) {
-                $sql .= " AND p.proveedor_id = ? ";
+            if (isset($filters['proveedor_id']) && $filters['proveedor_id'] > 0) {
+                $sql .= PHP_EOL . " AND p.proveedor_id = ? ";
                 $params[] = $filters['proveedor_id'];
             }
 
-            $sql .= " ORDER BY c.razon_social";
+            $sql .= PHP_EOL . " ORDER BY c.razon_social";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
