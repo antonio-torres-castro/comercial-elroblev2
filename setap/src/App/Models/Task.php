@@ -45,7 +45,7 @@ class Task
     }
 
     /**
-     * Contar total de tareas según los filtros
+     * Contar total de tareas segÃºn los filtros
      */
     public function countAll(array $filters = []): int
     {
@@ -111,7 +111,7 @@ class Task
                     ? $filters['estado_tipo_id']
                     : [$filters['estado_tipo_id']];
 
-                // Eliminamos vacíos o nulos
+                // Eliminamos vacÃ­os o nulos
                 $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
 
                 if (!empty($estadoTipoIds)) {
@@ -206,11 +206,40 @@ class Task
                     pt.duracion_horas,
                     pt.prioridad,
                     pt.espacio_id,
+                    e.espacio_padre_id as espacio_padre_id,
                     e.nombre  as espacio_nombre,
                     e.codigo  as espacio_codigo,
                     e.nivel   as espacio_nivel,
                     e.orden   as espacio_orden,
                     ep.nombre as espacio_padre_nombre,
+                    ep1.id as espacio_ancestro_1_id,
+                    ep1.nombre as espacio_ancestro_1_nombre,
+                    ep1.nivel as espacio_ancestro_1_nivel,
+                    ep1.orden as espacio_ancestro_1_orden,
+                    ep2.id as espacio_ancestro_2_id,
+                    ep2.nombre as espacio_ancestro_2_nombre,
+                    ep2.nivel as espacio_ancestro_2_nivel,
+                    ep2.orden as espacio_ancestro_2_orden,
+                    ep3.id as espacio_ancestro_3_id,
+                    ep3.nombre as espacio_ancestro_3_nombre,
+                    ep3.nivel as espacio_ancestro_3_nivel,
+                    ep3.orden as espacio_ancestro_3_orden,
+                    ep4.id as espacio_ancestro_4_id,
+                    ep4.nombre as espacio_ancestro_4_nombre,
+                    ep4.nivel as espacio_ancestro_4_nivel,
+                    ep4.orden as espacio_ancestro_4_orden,
+                    ep5.id as espacio_ancestro_5_id,
+                    ep5.nombre as espacio_ancestro_5_nombre,
+                    ep5.nivel as espacio_ancestro_5_nivel,
+                    ep5.orden as espacio_ancestro_5_orden,
+                    ep6.id as espacio_ancestro_6_id,
+                    ep6.nombre as espacio_ancestro_6_nombre,
+                    ep6.nivel as espacio_ancestro_6_nivel,
+                    ep6.orden as espacio_ancestro_6_orden,
+                    ep7.id as espacio_ancestro_7_id,
+                    ep7.nombre as espacio_ancestro_7_nombre,
+                    ep7.nivel as espacio_ancestro_7_nivel,
+                    ep7.orden as espacio_ancestro_7_orden,
                     d.id as direccion_id,
                     d.calle as direccion_calle,
                     d.numero as direccion_numero,
@@ -293,7 +322,7 @@ class Task
                     ? $filters['estado_tipo_id']
                     : [$filters['estado_tipo_id']];
 
-                // Eliminamos vacíos o nulos
+                // Eliminamos vacÃ­os o nulos
                 $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
 
                 if (!empty($estadoTipoIds)) {
@@ -489,7 +518,7 @@ class Task
         ";
 
             // =========================
-            // 5. WHERE DINÁMICO LIMPIO
+            // 5. WHERE DINÃMICO LIMPIO
             // =========================
             $where = [];
 
@@ -557,7 +586,7 @@ class Task
             );
 
             // =========================
-            // 8. EJECUCIÓN
+            // 8. EJECUCIÃ“N
             // =========================
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -615,7 +644,7 @@ class Task
                 LEFT JOIN usuarios exec ON pt.ejecutor_id = exec.id
                 LEFT JOIN usuarios super ON pt.supervisor_id = super.id 
 
-                -- 🔥 capacidad diaria
+                -- ðŸ”¥ capacidad diaria
                 LEFT JOIN (
                     SELECT 
                         d.fecha,
@@ -628,7 +657,7 @@ class Task
                 ) ca ON ca.proyecto_id = pt.proyecto_id 
                     AND ca.fecha = pt.fecha_inicio
 
-                -- 🔥 acceso usuario optimizado
+                -- ðŸ”¥ acceso usuario optimizado
                 INNER JOIN (
                     SELECT DISTINCT proyecto_id
                     FROM proyecto_usuarios_grupo
@@ -678,10 +707,10 @@ class Task
 
             $sql .= $strWhere;
 
-            // 🔥 agrupación semanal
+            // ðŸ”¥ agrupación semanal
             $sql .= PHP_EOL . " GROUP BY semana_inicio ";
 
-            // 🔥 HAVING correcto (capacidad real semanal)
+            // ðŸ”¥ HAVING correcto (capacidad real semanal)
             if (!empty($filters['solo_excedidos'])) {
                 $sql .= PHP_EOL . " HAVING SUM(pt.duracion_horas) > COALESCE(SUM(ca.hh_disponibles), 0)";
             }
@@ -781,7 +810,7 @@ class Task
         ";
 
             // =========================
-            // 5. WHERE DINÁMICO
+            // 5. WHERE DINÃMICO
             // =========================
             $where = [];
 
@@ -849,7 +878,7 @@ class Task
             );
 
             // =========================
-            // 8. EJECUCIÓN
+            // 8. EJECUCIÃ“N
             // =========================
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -1176,7 +1205,7 @@ class Task
                     ? $filters['estado_tipo_id']
                     : [$filters['estado_tipo_id']];
 
-                // Eliminamos vacíos o nulos
+                // Eliminamos vacÃ­os o nulos
                 $estadoTipoIds = array_filter($estadoTipoIds, fn($v) => $v !== '' && $v !== null);
 
                 if (!empty($estadoTipoIds)) {
@@ -1457,7 +1486,7 @@ class Task
             $result = false;
 
             $diasSemana = $data['dias_semana'] ?? [];
-            // Convertir días a array de enteros
+            // Convertir dÃ­as a array de enteros
             $diasSemana = array_map('intval', $diasSemana);
             // Generar todas las fechas
             $start = new \DateTime($data['fecha_inicio']);
@@ -2459,7 +2488,7 @@ class Task
      */
     public function isValidStateTransition(int $currentState, int $newState): array
     {
-        // Definir transiciones válidas según reglas de negocio
+        // Definir transiciones válidas segÃºn reglas de negocio
         $validTransitions = [
             1 => [2, 4], // creado -> activo, eliminado
             2 => [3, 5], // activo -> inactivo, iniciado
@@ -2500,7 +2529,7 @@ class Task
     }
 
     /**
-     * Validar si el usuario puede cambiar el estado según su rol
+     * Validar si el usuario puede cambiar el estado segÃºn su rol
      */
     public function canUserChangeState(int $currentState, int $newState, string $userRole): array
     {
@@ -2514,7 +2543,7 @@ class Task
             }
         }
 
-        // Validaciones específicas por rol
+        // Validaciones especÃ­ficas por rol
         $restrictions = [
             'executor' => [
                 'allowed_from' => [2, 5], // Solo desde activo e iniciado
@@ -2546,7 +2575,7 @@ class Task
     }
 
     /**
-     * Validar si la tarea puede ser ejecutada según su estado
+     * Validar si la tarea puede ser ejecutada segÃºn su estado
      */
     public function canExecuteTask(int $taskId): array
     {
@@ -2741,7 +2770,7 @@ class Task
                 }
             }
 
-            // Validar si se pueden hacer cambios según el estado actual
+            // Validar si se pueden hacer cambios segÃºn el estado actual
             if ($currentState == 8 && !in_array($userRole, ['admin', 'planner'])) {
                 $errors[] = 'Solo usuarios Admin y Planner pueden modificar tareas aprobadas';
             }
@@ -2754,7 +2783,7 @@ class Task
     }
 
     /**
-     * Verificar si una tarea está programada en un día feriado
+     * Verificar si una tarea está programada en un dÃ­a feriado
      */
     public function isTaskOnHoliday(int $taskId): bool
     {
@@ -2903,12 +2932,12 @@ class Task
                     return $dateStr; // No es feriado, retornar esta fecha
                 }
 
-                // Avanzar un día
+                // Avanzar un dÃ­a
                 $currentDate->add(new \DateInterval('P1D'));
                 $iterations++;
             }
 
-            // Si no encontramos día hábil en 30 días, retornar fecha original
+            // Si no encontramos dÃ­a hábil en 30 dÃ­as, retornar fecha original
             return $date;
         } catch (\Exception $e) {
             Logger::error('Task::getNextWorkingDay error: ' . $e->getMessage());
@@ -2917,7 +2946,7 @@ class Task
     }
 
     /**
-     * Calcular días laborables entre dos fechas excluyendo feriados
+     * Calcular dÃ­as laborables entre dos fechas excluyendo feriados
      */
     public function getWorkingDaysBetween(int $projectId, string $startDate, string $endDate): int
     {
@@ -2955,7 +2984,7 @@ class Task
     }
 
     /**
-     * Obtener historial de cambios de una tarea específica
+     * Obtener historial de cambios de una tarea especÃ­fica
      */
     public function getTaskHistory(int $proyectoTareaId): array
     {
@@ -3089,7 +3118,7 @@ class Task
     }
 
     /**
-     * Copiar una foto histórica desde storage a public/uploads y devolver su URL pública.
+     * Copiar una foto histórica desde storage a public/uploads y devolver su URL pÃºblica.
      */
     private function copyHistoryPhotoToPublicUploads(string $originalUrl): string
     {

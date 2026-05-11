@@ -54,6 +54,50 @@ $buildDireccionLabel = static function (array $task): string {
             background: #f8f9fa;
             font-weight: 600;
         }
+
+        .task-tree-heading,
+        .task-tree-direction>summary,
+        .task-tree-space>details>summary {
+            align-items: center;
+            display: flex;
+            gap: .5rem;
+        }
+
+        .task-tree-direction,
+        .task-tree-space details {
+            margin-top: .75rem;
+        }
+
+        .task-tree-direction>summary,
+        .task-tree-space>details>summary {
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .task-tree-direction>summary::-webkit-details-marker,
+        .task-tree-space>details>summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .task-tree-spaces,
+        .task-tree-tasks {
+            list-style: none;
+            margin: .5rem 0 0;
+            padding-left: 1.25rem;
+        }
+
+        .task-tree-space {
+            border-left: 1px solid #dee2e6;
+            padding-left: .75rem;
+        }
+
+        .task-tree-task {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: .375rem;
+            margin: .35rem 0;
+            padding: .5rem .75rem;
+        }
     </style>
 </head>
 
@@ -225,227 +269,250 @@ $buildDireccionLabel = static function (array $task): string {
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <?php if (!empty($data['tasks'])): ?>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="table-responsive-xl">
-                                        <table class="table table-hover align-middle" id="tasksTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Tarea</th>
-                                                    <th>Estado</th>
-                                                    <?php if ($_GET['show_col_ejecuta']): ?>
-                                                        <th>Ejecuta</th>
-                                                    <?php endif; ?>
-                                                    <th>Fecha</th>
-                                                    <th><?= $_GET['show_col_acciones'] ? 'Acciones' : 'Acción' ?></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $columnCount = $_GET['show_col_ejecuta'] ? 5 : 4;
-                                                $currentProjectKey = null;
-                                                $currentDirectionKey = null;
-                                                $currentSpaceKey = null;
-                                                foreach ($data['tasks'] as $task):
-                                                    $direccionLabel = $buildDireccionLabel($task);
-                                                    $spaceRootLabel = $task['espacio_padre_mas_alto_nombre'] ?? '';
-                                                    if ($spaceRootLabel === '') {
-                                                        $spaceRootLabel = $task['espacio_nombre'] ?? 'Sin espacio';
-                                                    }
+                <ul class="nav nav-tabs mb-3" id="direccionEspacioTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="direccion-espacio-tabla-tab" data-bs-toggle="tab" data-bs-target="#direccion-espacio-tabla" type="button" role="tab" aria-controls="direccion-espacio-tabla" aria-selected="true">
+                            <i class="bi bi-table me-1"></i> Tabla
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="direccion-espacio-arbol-tab" data-bs-toggle="tab" data-bs-target="#direccion-espacio-arbol" type="button" role="tab" aria-controls="direccion-espacio-arbol" aria-selected="false">
+                            <i class="bi bi-diagram-3 me-1"></i> Arbol de espacios
+                        </button>
+                    </li>
+                </ul>
 
-                                                    $projectKey = (string)($task['proyecto_id'] ?? 'sin-proyecto');
-                                                    $directionKey = (string)($task['direccion_id'] ?? 'sin-direccion');
-                                                    $spaceKey = $projectKey . '|' . $directionKey . '|' . ($task['espacio_padre_mas_alto_id'] ?? $task['espacio_id'] ?? 'sin-espacio');
-
-                                                    if ($projectKey !== $currentProjectKey):
-                                                        $currentProjectKey = $projectKey;
+                <div class="tab-content" id="direccionEspacioTabsContent">
+                    <div class="tab-pane fade show active" id="direccion-espacio-tabla" role="tabpanel" aria-labelledby="direccion-espacio-tabla-tab" tabindex="0">
+                        <div class="row">
+                            <div class="col-12">
+                                <?php if (!empty($data['tasks'])): ?>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="table-responsive-xl">
+                                                <table class="table table-hover align-middle" id="tasksTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Tarea</th>
+                                                            <th>Estado</th>
+                                                            <?php if ($_GET['show_col_ejecuta']): ?>
+                                                                <th>Ejecuta</th>
+                                                            <?php endif; ?>
+                                                            <th>Fecha</th>
+                                                            <th><?= $_GET['show_col_acciones'] ? 'Acciones' : 'Acción' ?></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $columnCount = $_GET['show_col_ejecuta'] ? 5 : 4;
+                                                        $currentProjectKey = null;
                                                         $currentDirectionKey = null;
                                                         $currentSpaceKey = null;
-                                                ?>
-                                                        <tr class="group-row-project">
-                                                            <td colspan="<?= $columnCount ?>">
-                                                                <i class="bi bi-folder2-open me-2"></i><?= htmlspecialchars($task['proyecto_nombre']) ?>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endif; ?>
+                                                        foreach ($data['tasks'] as $task):
+                                                            $direccionLabel = $buildDireccionLabel($task);
+                                                            $spaceRootLabel = $task['espacio_padre_mas_alto_nombre'] ?? '';
+                                                            if ($spaceRootLabel === '') {
+                                                                $spaceRootLabel = $task['espacio_nombre'] ?? 'Sin espacio';
+                                                            }
 
-                                                    <?php if ($directionKey !== $currentDirectionKey):
-                                                        $currentDirectionKey = $directionKey;
-                                                        $currentSpaceKey = null;
-                                                    ?>
-                                                        <tr class="group-row-direction">
-                                                            <td colspan="<?= $columnCount ?>">
-                                                                <i class="bi bi-geo-alt me-2"></i><?= htmlspecialchars($direccionLabel) ?>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endif; ?>
+                                                            $projectKey = (string)($task['proyecto_id'] ?? 'sin-proyecto');
+                                                            $directionKey = (string)($task['direccion_id'] ?? 'sin-direccion');
+                                                            $spaceKey = $projectKey . '|' . $directionKey . '|' . ($task['espacio_padre_mas_alto_id'] ?? $task['espacio_id'] ?? 'sin-espacio');
 
-                                                    <?php if ($spaceKey !== $currentSpaceKey):
-                                                        $currentSpaceKey = $spaceKey;
-                                                    ?>
-                                                        <tr class="group-row-space">
-                                                            <td colspan="<?= $columnCount ?>">
-                                                                <i class="bi bi-diagram-2 me-2"></i><?= htmlspecialchars($spaceRootLabel) ?>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endif; ?>
-
-                                                    <tr class="clickable-row" id="task-row-<?= $task['id'] ?>" data-state-id="<?= (int)$task['estado_tipo_id'] ?>">
-                                                        <td class="task-column">
-                                                            <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
-                                                            <?php if (!empty($task['descripcion'])): ?>
-                                                                <small class="text-muted d-block"><?= htmlspecialchars(substr($task['descripcion'], 0, 100)) ?>...</small>
+                                                            if ($projectKey !== $currentProjectKey):
+                                                                $currentProjectKey = $projectKey;
+                                                                $currentDirectionKey = null;
+                                                                $currentSpaceKey = null;
+                                                        ?>
+                                                                <tr class="group-row-project">
+                                                                    <td colspan="<?= $columnCount ?>">
+                                                                        <i class="bi bi-folder2-open me-2"></i><?= htmlspecialchars($task['proyecto_nombre']) ?>
+                                                                    </td>
+                                                                </tr>
                                                             <?php endif; ?>
-                                                            <small class="text-muted">
-                                                                Espacio: <?= htmlspecialchars($task['espacio_nombre'] ?? 'Sin espacio') ?>
-                                                                | Nivel: <?= htmlspecialchars((string)($task['espacio_nivel'] ?? 'Sin nivel')) ?>
-                                                                | Orden: <?= htmlspecialchars((string)($task['espacio_orden'] ?? 'Sin orden')) ?>
-                                                            </small>
-                                                        </td>
-                                                        <td>
-                                                            <small>
-                                                                <?php
-                                                                $badgeClass = 'bg-secondary';
-                                                                $statusText = '';
-                                                                switch ($task['estado_tipo_id']) {
-                                                                    case 1:
-                                                                        $badgeClass = 'bg-warning text-dark';
-                                                                        $statusText = 'Creado';
-                                                                        break;
-                                                                    case 2:
-                                                                        $badgeClass = 'bg-primary';
-                                                                        $statusText = 'Activo';
-                                                                        break;
-                                                                    case 3:
+
+                                                            <?php if ($directionKey !== $currentDirectionKey):
+                                                                $currentDirectionKey = $directionKey;
+                                                                $currentSpaceKey = null;
+                                                            ?>
+                                                                <tr class="group-row-direction">
+                                                                    <td colspan="<?= $columnCount ?>">
+                                                                        <i class="bi bi-geo-alt me-2"></i><?= htmlspecialchars($direccionLabel) ?>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endif; ?>
+
+                                                            <?php if ($spaceKey !== $currentSpaceKey):
+                                                                $currentSpaceKey = $spaceKey;
+                                                            ?>
+                                                                <tr class="group-row-space">
+                                                                    <td colspan="<?= $columnCount ?>">
+                                                                        <i class="bi bi-diagram-2 me-2"></i><?= htmlspecialchars($spaceRootLabel) ?>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endif; ?>
+
+                                                            <tr class="clickable-row" id="task-row-<?= $task['id'] ?>" data-state-id="<?= (int)$task['estado_tipo_id'] ?>">
+                                                                <td class="task-column">
+                                                                    <div class="fw-bold"><?= htmlspecialchars($task['tarea_nombre']) ?></div>
+                                                                    <?php if (!empty($task['descripcion'])): ?>
+                                                                        <small class="text-muted d-block"><?= htmlspecialchars(substr($task['descripcion'], 0, 100)) ?>...</small>
+                                                                    <?php endif; ?>
+                                                                    <small class="text-muted">
+                                                                        Espacio: <?= htmlspecialchars($task['espacio_nombre'] ?? 'Sin espacio') ?>
+                                                                        | Nivel: <?= htmlspecialchars((string)($task['espacio_nivel'] ?? 'Sin nivel')) ?>
+                                                                        | Orden: <?= htmlspecialchars((string)($task['espacio_orden'] ?? 'Sin orden')) ?>
+                                                                    </small>
+                                                                </td>
+                                                                <td>
+                                                                    <small>
+                                                                        <?php
                                                                         $badgeClass = 'bg-secondary';
-                                                                        $statusText = 'Inactivo';
-                                                                        break;
-                                                                    case 5:
-                                                                        $badgeClass = 'bg-info';
-                                                                        $statusText = 'Iniciado';
-                                                                        break;
-                                                                    case 6:
-                                                                        $badgeClass = 'bg-warning';
-                                                                        $statusText = 'Terminado';
-                                                                        break;
-                                                                    case 7:
-                                                                        $badgeClass = 'bg-danger';
-                                                                        $statusText = 'Rechazado';
-                                                                        break;
-                                                                    case 8:
-                                                                        $badgeClass = 'bg-success';
-                                                                        $statusText = 'Aprobado';
-                                                                        break;
-                                                                    default:
-                                                                        $statusText = htmlspecialchars($task['estado']);
-                                                                }
-                                                                ?>
-                                                                <div class="d-flex align-items-center">
-                                                                    <span class="badge <?= $badgeClass ?>" id="status-badge-<?= $task['id'] ?>">
-                                                                        <?= $statusText ?>
-                                                                    </span>
-                                                                    <?php if ($_GET['show_btn_activity']): ?>
-                                                                        <div class="dropdown ms-2">
-                                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false" onclick="loadValidTransitions(<?= $task['id'] ?>)">
-                                                                                <i class="bi bi-arrow-repeat"></i>
-                                                                            </button>
-                                                                            <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
-                                                                                <li><span class="dropdown-item-text text-muted"><?= AppConstants::UI_LOADING; ?></span></li>
-                                                                            </ul>
+                                                                        $statusText = '';
+                                                                        switch ($task['estado_tipo_id']) {
+                                                                            case 1:
+                                                                                $badgeClass = 'bg-warning text-dark';
+                                                                                $statusText = 'Creado';
+                                                                                break;
+                                                                            case 2:
+                                                                                $badgeClass = 'bg-primary';
+                                                                                $statusText = 'Activo';
+                                                                                break;
+                                                                            case 3:
+                                                                                $badgeClass = 'bg-secondary';
+                                                                                $statusText = 'Inactivo';
+                                                                                break;
+                                                                            case 5:
+                                                                                $badgeClass = 'bg-info';
+                                                                                $statusText = 'Iniciado';
+                                                                                break;
+                                                                            case 6:
+                                                                                $badgeClass = 'bg-warning';
+                                                                                $statusText = 'Terminado';
+                                                                                break;
+                                                                            case 7:
+                                                                                $badgeClass = 'bg-danger';
+                                                                                $statusText = 'Rechazado';
+                                                                                break;
+                                                                            case 8:
+                                                                                $badgeClass = 'bg-success';
+                                                                                $statusText = 'Aprobado';
+                                                                                break;
+                                                                            default:
+                                                                                $statusText = htmlspecialchars($task['estado']);
+                                                                        }
+                                                                        ?>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="badge <?= $badgeClass ?>" id="status-badge-<?= $task['id'] ?>">
+                                                                                <?= $statusText ?>
+                                                                            </span>
+                                                                            <?php if ($_GET['show_btn_activity']): ?>
+                                                                                <div class="dropdown ms-2">
+                                                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="stateDropdown<?= $task['id'] ?>" data-bs-toggle="dropdown" aria-expanded="false" onclick="loadValidTransitions(<?= $task['id'] ?>)">
+                                                                                        <i class="bi bi-arrow-repeat"></i>
+                                                                                    </button>
+                                                                                    <ul class="dropdown-menu" id="stateMenu<?= $task['id'] ?>">
+                                                                                        <li><span class="dropdown-item-text text-muted"><?= AppConstants::UI_LOADING; ?></span></li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                            <?php endif; ?>
                                                                         </div>
-                                                                    <?php endif; ?>
-                                                                </div>
-                                                            </small>
-                                                        </td>
-                                                        <?php if ($_GET['show_col_ejecuta']): ?>
-                                                            <td>
-                                                                <small>
-                                                                    <?php if (!empty($task['ejecutor_nombre'])): ?>
-                                                                        <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
-                                                                    <?php else: ?>
-                                                                        Sin asignar
-                                                                    <?php endif; ?>
-                                                                </small>
-                                                            </td>
-                                                        <?php endif; ?>
-                                                        <td>
-                                                            <?php if (!empty($task['fecha_inicio'])): ?>
-                                                                <small>
-                                                                    <?= date('d/m/Y', strtotime($task['fecha_inicio'])) ?><br>
-                                                                    <?php if (!empty($task['duracion_horas'])): ?>
-                                                                        <strong>HH:</strong> <?= $task['duracion_horas'] ?>
-                                                                    <?php endif; ?>
-                                                                </small>
-                                                            <?php else: ?>
-                                                                <small class="text-muted">Error</small>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                        <td>
-                                                            <div class="btn-group btn-group-sm">
-                                                                <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
-                                                                    <i class="bi bi-eye"></i>
-                                                                </a>
-                                                                <?php if ($_GET['show_col_acciones']): ?>
-                                                                    <?php
-                                                                    $filterParams = $_GET;
-                                                                    unset($filterParams['id']);
-                                                                    $queryString = http_build_query($filterParams);
-                                                                    $editUrl = AppConstants::ROUTE_TASKS_EDIT . "?id=" . $task['id'] . ($queryString ? "&" . $queryString : "");
-                                                                    ?>
-                                                                    <a href="<?= $editUrl ?>" class="btn btn-outline-setap-primary" title="Editar">
-                                                                        <i class="bi bi-pencil"></i>
-                                                                    </a>
-                                                                    <button type="button" class="btn btn-outline-danger" onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>', <?= $task['estado_tipo_id'] ?>)" title="Eliminar" id="delete-btn-<?= $task['id'] ?>">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
+                                                                    </small>
+                                                                </td>
+                                                                <?php if ($_GET['show_col_ejecuta']): ?>
+                                                                    <td>
+                                                                        <small>
+                                                                            <?php if (!empty($task['ejecutor_nombre'])): ?>
+                                                                                <i class="bi bi-person"></i> <?= htmlspecialchars($task['ejecutor_nombre']) ?>
+                                                                            <?php else: ?>
+                                                                                Sin asignar
+                                                                            <?php endif; ?>
+                                                                        </small>
+                                                                    </td>
                                                                 <?php endif; ?>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                                <td>
+                                                                    <?php if (!empty($task['fecha_inicio'])): ?>
+                                                                        <small>
+                                                                            <?= date('d/m/Y', strtotime($task['fecha_inicio'])) ?><br>
+                                                                            <?php if (!empty($task['duracion_horas'])): ?>
+                                                                                <strong>HH:</strong> <?= $task['duracion_horas'] ?>
+                                                                            <?php endif; ?>
+                                                                        </small>
+                                                                    <?php else: ?>
+                                                                        <small class="text-muted">Error</small>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <a href="<?= AppConstants::ROUTE_TASKS_SHOW ?>/<?= $task['id'] ?>" class="btn btn-outline-info" title="Ver detalles">
+                                                                            <i class="bi bi-eye"></i>
+                                                                        </a>
+                                                                        <?php if ($_GET['show_col_acciones']): ?>
+                                                                            <?php
+                                                                            $filterParams = $_GET;
+                                                                            unset($filterParams['id']);
+                                                                            $queryString = http_build_query($filterParams);
+                                                                            $editUrl = AppConstants::ROUTE_TASKS_EDIT . "?id=" . $task['id'] . ($queryString ? "&" . $queryString : "");
+                                                                            ?>
+                                                                            <a href="<?= $editUrl ?>" class="btn btn-outline-setap-primary" title="Editar">
+                                                                                <i class="bi bi-pencil"></i>
+                                                                            </a>
+                                                                            <button type="button" class="btn btn-outline-danger" onclick="deleteTask(<?= $task['id'] ?>, '<?= htmlspecialchars($task['tarea_nombre']) ?>', <?= $task['estado_tipo_id'] ?>)" title="Eliminar" id="delete-btn-<?= $task['id'] ?>">
+                                                                                <i class="bi bi-trash"></i>
+                                                                            </button>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
 
-                                    <?php if ($totalPages > 1): ?>
-                                        <nav aria-label="Navegación de páginas" class="mt-3">
-                                            <ul class="pagination justify-content-center">
-                                                <?php
-                                                $queryString = $_GET;
-                                                unset($queryString['page']);
-                                                $baseUrl = '?' . http_build_query($queryString);
-                                                ?>
-                                                <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                                                    <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage - 1) ?>">&laquo;</a>
-                                                </li>
-                                                <?php
-                                                $start = max(1, $currentPage - 1);
-                                                $end = min($totalPages, $currentPage + 1);
-                                                for ($i = $start; $i <= $end; $i++):
-                                                ?>
-                                                    <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                                                        <a class="page-link" href="<?= $baseUrl . '&page=' . $i ?>"><?= $i ?></a>
-                                                    </li>
-                                                <?php endfor; ?>
-                                                <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                                                    <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage + 1) ?>">&raquo;</a>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    <?php endif; ?>
-                                </div>
+                                            <?php if ($totalPages > 1): ?>
+                                                <nav aria-label="Navegación de páginas" class="mt-3">
+                                                    <ul class="pagination justify-content-center">
+                                                        <?php
+                                                        $queryString = $_GET;
+                                                        unset($queryString['page']);
+                                                        $baseUrl = '?' . http_build_query($queryString);
+                                                        ?>
+                                                        <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                                                            <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage - 1) ?>">&laquo;</a>
+                                                        </li>
+                                                        <?php
+                                                        $start = max(1, $currentPage - 1);
+                                                        $end = min($totalPages, $currentPage + 1);
+                                                        for ($i = $start; $i <= $end; $i++):
+                                                        ?>
+                                                            <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
+                                                                <a class="page-link" href="<?= $baseUrl . '&page=' . $i ?>"><?= $i ?></a>
+                                                            </li>
+                                                        <?php endfor; ?>
+                                                        <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                                                            <a class="page-link" href="<?= $baseUrl . '&page=' . ($currentPage + 1) ?>">&raquo;</a>
+                                                        </li>
+                                                    </ul>
+                                                </nav>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-inbox display-1 text-muted"></i>
+                                            <h4 class="mt-3">No hay tareas registradas</h4>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             </div>
-                        <?php else: ?>
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-inbox display-1 text-muted"></i>
-                                    <h4 class="mt-3">No hay tareas registradas</h4>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="direccion-espacio-arbol" role="tabpanel" aria-labelledby="direccion-espacio-arbol-tab" tabindex="0">
+                        <?php
+                        $treeShowActions = true;
+                        include __DIR__ . '/partials/direccionEspacioTree.php';
+                        ?>
                     </div>
                 </div>
 
@@ -481,7 +548,6 @@ $buildDireccionLabel = static function (array $task): string {
                         </div>
                     </div>
                 </div>
-
                 <div class="modal fade" id="changeStateModal" tabindex="-1">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -515,7 +581,6 @@ $buildDireccionLabel = static function (array $task): string {
                         </div>
                     </div>
                 </div>
-
                 <div class="modal fade" id="changeStateFSRModal" tabindex="-1">
                     <div class="modal-dialog">
                         <div class="modal-content">

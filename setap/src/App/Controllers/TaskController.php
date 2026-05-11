@@ -330,12 +330,14 @@ class TaskController extends BaseController
             $totalPages = max(1, ceil($totalRows / $perPage));
 
             $tasks = $this->taskModel->getAll($filters, $perPage, $offset);
+            $treeTasks = $totalRows > 0 ? $this->taskModel->getAll($filters, $totalRows, 0) : [];
             $taskStates = $this->taskModel->getTaskStates($filters);
 
             $data = [
                 'user' => $currentUser,
                 'suppliers' => $suppliers,
                 'tasks' => $tasks,
+                'treeTasks' => $treeTasks,
                 'totalRecords' => $totalRows,
                 'currentPage' => $currentPage,
                 'totalPages' => $totalPages,
@@ -853,12 +855,14 @@ class TaskController extends BaseController
             $totalPages = max(1, ceil($totalRows / $perPage));
 
             $tasks = $this->taskModel->getAll($filters, $perPage, $offset);
+            $treeTasks = $totalRows > 0 ? $this->taskModel->getAll($filters, $totalRows, 0) : [];
             $taskStates = $this->taskModel->getTaskStatesMyListFilter();
             $users = $this->taskModel->getUsers();
 
             $data = [
                 'user' => $currentUser,
                 'tasks' => $tasks,
+                'treeTasks' => $treeTasks,
                 'totalRecords' => $totalRows,
                 'currentPage' => $currentPage,
                 'totalPages' => $totalPages,
@@ -2948,3 +2952,6 @@ class TaskController extends BaseController
         return $errors;
     }
 }
+
+
+
