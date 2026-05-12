@@ -76,8 +76,7 @@ class Client
     public function find(int $id): ?array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     c.*,
                     et.nombre as estado_nombre
                 FROM {$this->table} c
@@ -102,8 +101,7 @@ class Client
     public function create(array $data): int
     {
         try {
-            $query = "
-                INSERT INTO {$this->table} (
+            $query = "INSERT INTO {$this->table} (
                     proveedor_id, rut, razon_social, direccion, email, telefono,
                     fecha_inicio_contrato, fecha_facturacion, fecha_termino_contrato,
                     estado_tipo_id
@@ -137,8 +135,7 @@ class Client
     public function update(int $id, array $data): bool
     {
         try {
-            $query = "
-                UPDATE {$this->table} SET
+            $query = "UPDATE {$this->table} SET
                     proveedor_id = ?,
                     rut = ?,
                     razon_social = ?,
@@ -187,8 +184,7 @@ class Client
             }
 
             // Realizar soft delete
-            $query = "
-                UPDATE {$this->table} SET
+            $query = "UPDATE {$this->table} SET
                     estado_tipo_id = 4,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE id = ? AND estado_tipo_id != 4
@@ -239,8 +235,7 @@ class Client
     public function getCounterparties(int $clientId): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     cc.*,
                     p.rut as persona_rut,
                     p.nombre as persona_nombre,
@@ -269,8 +264,7 @@ class Client
     public function addCounterpartie(array $data): int
     {
         try {
-            $query = "
-                INSERT INTO cliente_contrapartes (
+            $query = "INSERT INTO cliente_contrapartes (
                     cliente_id, persona_id, telefono, email, cargo, estado_tipo_id
                 ) VALUES (?, ?, ?, ?, ?, ?)
             ";
@@ -335,8 +329,7 @@ class Client
     public function updateCounterpartie(int $id, array $data): bool
     {
         try {
-            $query = "
-                UPDATE cliente_contrapartes SET
+            $query = "UPDATE cliente_contrapartes SET
                     cliente_id = ?,
                     persona_id = ?,
                     telefono = ?,
@@ -377,8 +370,7 @@ class Client
             }
 
             // Realizar soft delete
-            $query = "
-                UPDATE cliente_contrapartes SET
+            $query = "UPDATE cliente_contrapartes SET
                     estado_tipo_id = 4,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE id = ? AND estado_tipo_id != 4
@@ -400,8 +392,7 @@ class Client
     public function findCounterpartie(int $id): ?array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     cc.*,
                     p.rut as persona_rut,
                     p.nombre as persona_nombre,
@@ -433,8 +424,7 @@ class Client
     public function getAllCounterparties(array $filters = []): array
     {
         try {
-            $query = "
-                SELECT
+            $query = "SELECT
                     cc.*,
                     p.rut as persona_rut,
                     p.nombre as persona_nombre,
@@ -453,31 +443,31 @@ class Client
 
             // Filtros opcionales
             if (!empty($filters['cliente_id'])) {
-                $query .= " AND cc.cliente_id = ?";
+                $query .= PHP_EOL . " AND cc.cliente_id = ?";
                 $params[] = $filters['cliente_id'];
             }
 
             if (!empty($filters['proveedor_id'])) {
-                $query .= " AND c.proveedor_id = ?";
+                $query .= PHP_EOL . " AND c.proveedor_id = ?";
                 $params[] = $filters['proveedor_id'];
             }
 
             if (!empty($filters['persona_nombre'])) {
-                $query .= " AND p.nombre LIKE ?";
+                $query .= PHP_EOL . " AND p.nombre LIKE ?";
                 $params[] = '%' . $filters['persona_nombre'] . '%';
             }
 
             if (!empty($filters['cargo'])) {
-                $query .= " AND cc.cargo LIKE ?";
+                $query .= PHP_EOL . " AND cc.cargo LIKE ?";
                 $params[] = '%' . $filters['cargo'] . '%';
             }
 
             if (!empty($filters['estado_tipo_id'])) {
-                $query .= " AND cc.estado_tipo_id = ?";
+                $query .= PHP_EOL . " AND cc.estado_tipo_id = ?";
                 $params[] = $filters['estado_tipo_id'];
             }
 
-            $query .= " ORDER BY c.razon_social ASC, p.nombre ASC";
+            $query .= PHP_EOL . " ORDER BY c.razon_social ASC, p.nombre ASC";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($params);
@@ -499,7 +489,7 @@ class Client
             $params = [$clientId, $personaId];
 
             if ($excludeId) {
-                $query .= " AND id != ?";
+                $query .= PHP_EOL . " AND id != ?";
                 $params[] = $excludeId;
             }
 
@@ -537,8 +527,7 @@ class Client
     private function deactivateCounterparties(int $clientId): void
     {
         try {
-            $query = "
-                UPDATE cliente_contrapartes SET
+            $query = "UPDATE cliente_contrapartes SET
                     estado_tipo_id = 3,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE cliente_id = ? AND estado_tipo_id != 4
@@ -634,8 +623,7 @@ class Client
                 $ip = '0.0.0.0';
             }
 
-            $stmt = $this->db->prepare("
-                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+            $stmt = $this->db->prepare("INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
                 VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
             ");
 

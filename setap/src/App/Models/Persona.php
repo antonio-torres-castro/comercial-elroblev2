@@ -126,8 +126,7 @@ class Persona
     public function find(int $id): ?array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion, p.proveedor_id,
+            $stmt = $this->db->prepare("SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion, p.proveedor_id,
                        et.nombre as estado, p.estado_tipo_id,
                        p.fecha_Creado, p.fecha_modificacion
                 FROM personas p
@@ -286,7 +285,7 @@ class Persona
             $params = [':rut' => $rut];
 
             if ($excludeId) {
-                $sql .= " AND id != :id";
+                $sql .= PHP_EOL . " AND id != :id";
                 $params[':id'] = $excludeId;
             }
 
@@ -394,8 +393,7 @@ class Persona
                 $ip = '0.0.0.0';
             }
 
-            $stmt = $this->db->prepare("
-                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+            $stmt = $this->db->prepare("INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
                 VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
             ");
 

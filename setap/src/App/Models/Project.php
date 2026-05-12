@@ -90,8 +90,7 @@ class Project
         try {
             $this->db->beginTransaction();
 
-            $stmt = $this->db->prepare("
-                INSERT INTO proyectos (
+            $stmt = $this->db->prepare("INSERT INTO proyectos (
                     cliente_id, proveedor_id, direccion, fecha_inicio, fecha_fin,
                     tarea_tipo_id, estado_tipo_id, contraparte_id
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -137,8 +136,7 @@ class Project
         try {
             $this->db->beginTransaction();
 
-            $stmt = $this->db->prepare("
-                UPDATE proyectos SET
+            $stmt = $this->db->prepare("UPDATE proyectos SET
                     cliente_id = ?, proveedor_id = ?, direccion = ?, fecha_inicio = ?, fecha_fin = ?,
                     tarea_tipo_id = ?, estado_tipo_id = ?, contraparte_id = ?,
                     fecha_modificacion = CURRENT_TIMESTAMP
@@ -183,8 +181,7 @@ class Project
             $this->db->beginTransaction();
 
             // Eliminar proyecto (lógicamente)
-            $stmt = $this->db->prepare("
-                UPDATE proyectos SET
+            $stmt = $this->db->prepare("UPDATE proyectos SET
                     estado_tipo_id = 4,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE id = ?
@@ -192,8 +189,7 @@ class Project
             $stmt->execute([$id]);
 
             // Eliminar tareas asociadas (lógicamente)
-            $stmt = $this->db->prepare("
-                UPDATE proyecto_tareas SET
+            $stmt = $this->db->prepare("UPDATE proyecto_tareas SET
                     estado_tipo_id = 4,
                     fecha_modificacion = CURRENT_TIMESTAMP
                 WHERE proyecto_id = ?
@@ -201,8 +197,7 @@ class Project
             $stmt->execute([$id]);
 
             // Eliminar feriados asociados (lógicamente)
-            $stmt = $this->db->prepare("
-                UPDATE proyecto_feriados SET
+            $stmt = $this->db->prepare("UPDATE proyecto_feriados SET
                     estado_tipo_id = 4
                 WHERE proyecto_id = ?
             ");
@@ -238,19 +233,19 @@ class Project
             $params[] = $projectId;
 
             if (!empty($fechaInicio)) {
-                $sql .= " and pt.fecha_inicio >= ? ";
+                $sql .= PHP_EOL . " and pt.fecha_inicio >= ? ";
                 $params[] = $fechaInicio;
             }
             if (!empty($fechaFin)) {
-                $sql .= " and pt.fecha_inicio <= ? ";
+                $sql .= PHP_EOL . " and pt.fecha_inicio <= ? ";
                 $params[] = $fechaFin;
             }
             if (!empty($estadoTipoId)) {
-                $sql .= " and pt.estado_tipo_id = ? ";
+                $sql .= PHP_EOL . " and pt.estado_tipo_id = ? ";
                 $params[] = $estadoTipoId;
             }
 
-            $sql .= " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC ";
+            $sql .= PHP_EOL . " ORDER BY pt.prioridad DESC, pt.fecha_inicio ASC ";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -699,8 +694,7 @@ class Project
                 $ip = '0.0.0.0';
             }
 
-            $stmt = $this->db->prepare("
-                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+            $stmt = $this->db->prepare("INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
                 VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
             ");
 

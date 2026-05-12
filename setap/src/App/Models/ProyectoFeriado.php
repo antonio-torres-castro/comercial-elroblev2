@@ -421,8 +421,7 @@ class ProyectoFeriado
     public function isHoliday(int $projectId, string $fecha): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT id FROM proyecto_feriados
+            $stmt = $this->db->prepare("SELECT id FROM proyecto_feriados
                 WHERE proyecto_id = ? AND fecha = ? AND estado_tipo_id = 2
             ");
             $stmt->execute([$projectId, $fecha]);
@@ -464,8 +463,7 @@ class ProyectoFeriado
     public function update(int $id, array $data): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                UPDATE proyecto_feriados SET
+            $stmt = $this->db->prepare("UPDATE proyecto_feriados SET
                     tipo_feriado = ?,
                     ind_irrenunciable = ?,
                     observaciones = ?,
@@ -493,8 +491,7 @@ class ProyectoFeriado
     public function delete(int $id): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                UPDATE proyecto_feriados SET
+            $stmt = $this->db->prepare("UPDATE proyecto_feriados SET
                     estado_tipo_id = 4,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
@@ -513,8 +510,7 @@ class ProyectoFeriado
     public function find(int $id): array|false
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT pf.*, et.nombre as estado_nombre
+            $stmt = $this->db->prepare("SELECT pf.*, et.nombre as estado_nombre
                 FROM proyecto_feriados pf
                 INNER JOIN estado_tipos et ON pf.estado_tipo_id = et.id
                 WHERE pf.id = ?
@@ -534,8 +530,7 @@ class ProyectoFeriado
     public function getProjectHolidayStats(int $projectId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT
+            $stmt = $this->db->prepare("SELECT
                     COUNT(*) as total_feriados,
                     COUNT(CASE WHEN tipo_feriado = 'recurrente' THEN 1 END) as feriados_recurrentes,
                     COUNT(CASE WHEN tipo_feriado = 'especifico' THEN 1 END) as feriados_especificos,

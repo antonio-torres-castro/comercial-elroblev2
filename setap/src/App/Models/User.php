@@ -24,8 +24,7 @@ class User
     public function getAll(array $filters = []): array
     {
         try {
-            $sql = "
-                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id, u.proveedor_id, u.estado_tipo_id,
+            $sql = "SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id, u.proveedor_id, u.estado_tipo_id,
                        p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
@@ -44,11 +43,11 @@ class User
 
             // Filtro por proveedor
             if (!empty($filters['proveedor_id'])) {
-                $sql .= " AND u.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND u.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $filters['proveedor_id'];
             }
 
-            $sql .= " ORDER BY u.fecha_Creado DESC";
+            $sql .= PHP_EOL . " ORDER BY u.fecha_Creado DESC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -100,8 +99,7 @@ class User
             $clienteId = $this->determineClienteId($data);
             $proveedorId = $this->determineProveedorId($data);
 
-            $sql = "
-                INSERT INTO usuarios (
+            $sql = "INSERT INTO usuarios (
                     persona_id,
                     nombre_usuario,
                     email,
@@ -146,8 +144,7 @@ class User
     public function getById(int $id): ?array
     {
         try {
-            $sql = "
-                SELECT u.*, p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
+            $sql = "SELECT u.*, p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
                 ut.nombre as rol,
                 et.nombre as estado, /*atributo de estado desplegado al usuario*/
                 c.razon_social as cliente_nombre
@@ -181,8 +178,7 @@ class User
             $proveedorId = $this->determineProveedorId($data);
 
             // Solo actualizar campos específicos del usuario - NO datos de persona
-            $usuarioSql = "
-                UPDATE usuarios
+            $usuarioSql = "UPDATE usuarios
                 SET email = ?, usuario_tipo_id = ?, cliente_id = ?, proveedor_id = ?, estado_tipo_id = ?,
                     fecha_inicio = ?, fecha_termino = ?, persona_id = ?, fecha_modificacion = NOW()
                 WHERE id = ?
@@ -277,8 +273,7 @@ class User
     public function verifyPassword(int $id, string $password): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT u.clave_hash FROM usuarios u
+            $stmt = $this->db->prepare("SELECT u.clave_hash FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 WHERE (u.id = ?) AND p.estado_tipo_id = 2 AND u.estado_tipo_id = 2
             ");
@@ -318,8 +313,7 @@ class User
             $this->db->beginTransaction();
 
             // Actualizar datos de persona (nombre, teléfono, dirección)
-            $personaSql = "
-                UPDATE personas
+            $personaSql = "UPDATE personas
                 SET nombre = ?, telefono = ?, direccion = ?, fecha_modificacion = NOW()
                 WHERE id = (SELECT persona_id FROM usuarios WHERE id = ?)
             ";
@@ -333,8 +327,7 @@ class User
             ]);
 
             // Actualizar email del usuario (sin cambiar el rol)
-            $usuarioSql = "
-                UPDATE usuarios
+            $usuarioSql = "UPDATE usuarios
                 SET email = ?, fecha_modificacion = NOW()
                 WHERE id = ?
             ";
@@ -360,8 +353,7 @@ class User
     public function findComplete(int $id): ?array
     {
         try {
-            $sql = "
-                SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id,
+            $sql = "SELECT u.id, u.nombre_usuario, u.email, u.fecha_Creado, u.cliente_id,
                        p.nombre as nombre_completo, p.rut, p.telefono, p.direccion,
                        ut.nombre as rol, ut.id as usuario_tipo_id,
                        et.nombre as estado,
@@ -479,8 +471,7 @@ class User
     public function validateCounterpartyExists(int $personaId, int $clientId): bool
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT COUNT(*)
+            $stmt = $this->db->prepare("SELECT COUNT(*)
                 FROM cliente_contrapartes
                 WHERE persona_id = ? AND cliente_id = ? AND estado_tipo_id != 4
             ");
@@ -551,8 +542,7 @@ class User
     public function getClientCounterparties(int $clientId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT cc.id, p.nombre, p.rut, cc.cargo, cc.email
+            $stmt = $this->db->prepare("SELECT cc.id, p.nombre, p.rut, cc.cargo, cc.email
                 FROM cliente_contrapartes cc
                 INNER JOIN personas p ON cc.persona_id = p.id
                 WHERE cc.cliente_id = ? AND cc.estado_tipo_id != 4
@@ -572,8 +562,7 @@ class User
     public function getAvailablePersonas(?string $search = null): array
     {
         try {
-            $sql = "
-                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion
+            $sql = "SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion
                 FROM personas p
                 LEFT JOIN usuarios u ON p.id = u.persona_id
                 WHERE u.persona_id IS NULL
@@ -583,12 +572,12 @@ class User
             $params = [];
 
             if (!empty($search)) {
-                $sql .= " AND (p.nombre LIKE ? OR p.rut LIKE ?)";
+                $sql .= PHP_EOL . " AND (p.nombre LIKE ? OR p.rut LIKE ?)";
                 $searchParam = "%{$search}%";
                 $params = [$searchParam, $searchParam];
             }
 
-            $sql .= " ORDER BY p.nombre";
+            $sql .= PHP_EOL . " ORDER BY p.nombre";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -611,8 +600,7 @@ class User
     public function searchPersonasAdvanced(?string $search = null, string $searchType = 'all', bool $includeAssigned = true, ?int $excludeUserId = null): array
     {
         try {
-            $sql = "
-                SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion,
+            $sql = "SELECT p.id, p.rut, p.nombre, p.telefono, p.direccion,
                        CASE WHEN u.id IS NOT NULL THEN 1 ELSE 0 END as has_user,
                        CASE WHEN u.id IS NOT NULL THEN u.nombre_usuario ELSE NULL END as usuario_asociado,
                        CASE WHEN u.id IS NOT NULL THEN u.id ELSE NULL END as usuario_id
@@ -625,15 +613,15 @@ class User
 
             // Si no se quieren incluir personas asignadas
             if (!$includeAssigned) {
-                $sql .= " AND u.persona_id IS NULL";
+                $sql .= PHP_EOL . " AND u.persona_id IS NULL";
             }
 
             // Si se está editando un usuario, excluir de la verificación de asignación
             if ($excludeUserId !== null) {
-                $sql .= " AND (u.id IS NULL OR u.id = ?)";
+                $sql .= PHP_EOL . " AND (u.id IS NULL OR u.id = ?)";
                 $params[] = $excludeUserId;
             } else {
-                $sql .= " AND (u.id IS NULL)";
+                $sql .= PHP_EOL . " AND (u.id IS NULL)";
             }
 
             // Aplicar filtro de búsqueda según tipo
@@ -642,20 +630,20 @@ class User
                     case 'rut':
                         // Buscar por RUT exacto (limpiando formato)
                         $cleanRut = preg_replace('/[^0-9kK]/', '', $search);
-                        $sql .= " AND REPLACE(REPLACE(p.rut, '-', ''), '.', '') LIKE ?";
+                        $sql .= PHP_EOL . " AND REPLACE(REPLACE(p.rut, '-', ''), '.', '') LIKE ?";
                         $params[] = "%{$cleanRut}%";
                         break;
 
                     case 'name':
                         // Buscar por coincidencia parcial en nombre
-                        $sql .= " AND p.nombre LIKE ?";
+                        $sql .= PHP_EOL . " AND p.nombre LIKE ?";
                         $params[] = "%{$search}%";
                         break;
 
                     case 'all':
                     default:
                         // Buscar en ambos campos
-                        $sql .= " AND (p.nombre LIKE ? OR p.rut LIKE ?)";
+                        $sql .= PHP_EOL . " AND (p.nombre LIKE ? OR p.rut LIKE ?)";
                         $searchParam = "%{$search}%";
                         $params[] = $searchParam;
                         $params[] = $searchParam;
@@ -663,7 +651,7 @@ class User
                 }
             }
 
-            $sql .= " ORDER BY
+            $sql .= PHP_EOL . " ORDER BY
                 CASE WHEN u.id IS NULL THEN 0 ELSE 1 END, -- Personas sin usuario primero
                 p.nombre ASC";
 
@@ -717,8 +705,7 @@ class User
     public function isPersonaAvailableForUser(int $personaId, ?int $excludeUserId = null): bool
     {
         try {
-            $sql = "
-                SELECT COUNT(*)
+            $sql = "SELECT COUNT(*)
                 FROM usuarios u
                 INNER JOIN personas p ON u.persona_id = p.id
                 WHERE u.persona_id = ? AND p.estado_tipo_id = 2
@@ -728,7 +715,7 @@ class User
 
             // Si se está editando un usuario, excluirlo de la verificación
             if ($excludeUserId !== null) {
-                $sql .= " AND u.id != ?";
+                $sql .= PHP_EOL . " AND u.id != ?";
                 $params[] = $excludeUserId;
             }
 
@@ -803,8 +790,7 @@ class User
     public function getAvailableCounterparties(int $clientId): array
     {
         try {
-            $stmt = $this->db->prepare("
-                SELECT p.id, p.rut, p.nombre, p.telefono, cc.cargo, cc.email
+            $stmt = $this->db->prepare("SELECT p.id, p.rut, p.nombre, p.telefono, cc.cargo, cc.email
                 FROM cliente_contrapartes cc
                 INNER JOIN personas p ON cc.persona_id = p.id
                 LEFT JOIN usuarios u ON p.id = u.persona_id
@@ -868,8 +854,7 @@ class User
             $params = [];
             $where = $this->buildUserLogFilters($filters, $params);
 
-            $sql = "
-                SELECT COUNT(*)
+            $sql = "SELECT COUNT(*)
                 FROM usuario_logs ul
                 INNER JOIN usuarios u ON u.id = ul.usuario_id
                 INNER JOIN personas p ON p.id = u.persona_id
@@ -895,7 +880,7 @@ class User
      */
     private function buildUserLogFilters(array $filters, array &$params): string
     {
-        $where = " WHERE ul.tipo_registro IN (1, 2) "; // Solo login/logout
+        $where = PHP_EOL . " WHERE ul.tipo_registro IN (1, 2) "; // Solo login/logout
 
         if (!empty($filters['search'])) {
             $where .= PHP_EOL . " AND (u.nombre_usuario LIKE :search OR p.nombre LIKE :search OR ul.IP LIKE :search)";
@@ -938,8 +923,7 @@ class User
                 $ip = '0.0.0.0';
             }
 
-            $stmt = $this->db->prepare("
-                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+            $stmt = $this->db->prepare("INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
                 VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
             ");
 

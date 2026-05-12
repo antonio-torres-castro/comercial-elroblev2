@@ -47,22 +47,22 @@ class Menu
 
             // Filtros opcionales
             if (!empty($filters['nombre'])) {
-                $query .= " AND m.nombre LIKE ?";
+                $query .= PHP_EOL . " AND m.nombre LIKE ?";
                 $params[] = '%' . $filters['nombre'] . '%';
             }
 
             if (!empty($filters['estado_tipo_id'])) {
-                $query .= " AND m.estado_tipo_id = ?";
+                $query .= PHP_EOL . " AND m.estado_tipo_id = ?";
                 $params[] = $filters['estado_tipo_id'];
             }
 
             if (!empty($filters['display'])) {
-                $query .= " AND m.display LIKE ?";
+                $query .= PHP_EOL . " AND m.display LIKE ?";
                 $params[] = '%' . $filters['display'] . '%';
             }
 
             if (!empty($filters['menu_grupo_id'])) {
-                $query .= " AND m.menu_grupo_id = ?";
+                $query .= PHP_EOL . " AND m.menu_grupo_id = ?";
                 $params[] = $filters['menu_grupo_id'];
             }
 
@@ -281,7 +281,7 @@ class Menu
             $params = [$nombre];
 
             if ($excludeId) {
-                $query .= " AND id != ?";
+                $query .= PHP_EOL . " AND id != ?";
                 $params[] = $excludeId;
             }
 
@@ -305,7 +305,7 @@ class Menu
             $params = [$url];
 
             if ($excludeId) {
-                $query .= " AND id != ?";
+                $query .= PHP_EOL . " AND id != ?";
                 $params[] = $excludeId;
             }
 
@@ -493,8 +493,7 @@ class Menu
                 $ip = '0.0.0.0';
             }
 
-            $stmt = $this->db->prepare("
-                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+            $stmt = $this->db->prepare("INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
                 VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
             ");
 
