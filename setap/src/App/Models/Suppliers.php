@@ -286,7 +286,7 @@ class Suppliers
             }
 
             $stmt = $this->db->prepare("
-                INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+                INSERT INTO usuario_logs (usuario_id, accion_id, fecha, IP)
                 VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
             ");
 

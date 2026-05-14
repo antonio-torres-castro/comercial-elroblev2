@@ -1,0 +1,1 @@
+ALTER TABLE usuario_logs CHANGE COLUMN tipo_registro accion_id INT NOT NULL DEFAULT '1' ;

@@ -818,7 +818,7 @@ class User
 
             $sql = "SELECT ul.fecha, ul.IP, u.nombre_usuario, p.nombre, ut.nombre as rol, 
                     pr.razon_social as proveedor_nombre, c.razon_social as cliente_nombre,
-                    case ul.tipo_registro when 1 then 'login' when 2 then 'logout' end tipo
+                    case ul.accion_id when 1 then 'login' when 2 then 'logout' end tipo
                 FROM usuario_logs ul
                 INNER JOIN usuarios u ON u.id = ul.usuario_id
                 INNER JOIN personas p ON p.id = u.persona_id
@@ -880,7 +880,7 @@ class User
      */
     private function buildUserLogFilters(array $filters, array &$params): string
     {
-        $where = PHP_EOL . " WHERE ul.tipo_registro IN (1, 2) "; // Solo login/logout
+        $where = PHP_EOL . " WHERE ul.accion_id IN (1, 2) "; // Solo login/logout
 
         if (!empty($filters['search'])) {
             $where .= PHP_EOL . " AND (u.nombre_usuario LIKE :search OR p.nombre LIKE :search OR ul.IP LIKE :search)";
@@ -923,7 +923,7 @@ class User
                 $ip = '0.0.0.0';
             }
 
-            $stmt = $this->db->prepare("INSERT INTO usuario_logs (usuario_id, tipo_registro, fecha, IP)
+            $stmt = $this->db->prepare("INSERT INTO usuario_logs (usuario_id, accion_id, fecha, IP)
                 VALUES (:user_id, :tipo, CURRENT_TIMESTAMP, :ip)
             ");
 
