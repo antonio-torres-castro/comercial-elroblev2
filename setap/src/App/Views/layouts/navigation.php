@@ -35,13 +35,6 @@ try {
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Home siempre visible -->
-                <li class="nav-item">
-                    <a class="nav-link text-light" href="<?= AppConstants::ROUTE_HOME ?>">
-                        <i class="bi bi-house"></i> Home
-                    </a>
-                </li>
-
                 <!-- Menús agrupados con desplegables -->
                 <?php if (!empty($groupedMenus)): ?>
                     <?php foreach ($groupedMenus as $groupData): ?>
