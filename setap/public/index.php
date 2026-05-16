@@ -24,6 +24,7 @@ use App\Controllers\ProyectoFeriadoController;
 use App\Controllers\ProyectoColaboradoresController;
 use App\Controllers\AccessController;
 use App\Controllers\PermissionsController;
+use App\Controllers\ComplianceController;
 use App\Helpers\Security;
 use App\Helpers\Logger;
 use App\Constants\AppConstants;
@@ -1305,6 +1306,88 @@ try {
                     } else {
                         Security::redirect(AppConstants::ROUTE_REPORTS);
                     }
+                    break;
+
+                case '':
+                case null:
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+
+        case 'compliance':
+            $controller = new ComplianceController();
+
+            switch ($action) {
+                case 'my':
+                    $controller->compliances();
+                    break;
+
+                case 'assessments':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->storeQuestion();
+                    } else {
+                        $controller->assessments();
+                    }
+                    break;
+
+                case 'history':
+                    $controller->history();
+                    break;
+
+                case 'document':
+                    if ($id && is_numeric($id)) {
+                        $controller->viewDocument((int)$id);
+                    } else {
+                        Security::redirect('/setap/compliance/my');
+                    }
+                    break;
+
+                case 'start':
+                    if ($id && is_numeric($id)) {
+                        $controller->startCompliance((int)$id);
+                    } else {
+                        Security::redirect('/setap/compliance/my');
+                    }
+                    break;
+
+                case 'accept':
+                    $controller->acceptCompliance();
+                    break;
+
+                case 'evaluation':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->submitEvaluation();
+                    } elseif ($id && is_numeric($id)) {
+                        $controller->evaluation((int)$id);
+                    } else {
+                        Security::redirect('/setap/compliance/my');
+                    }
+                    break;
+
+                case 'store':
+                    $controller->store();
+                    break;
+
+                case 'update':
+                    $controller->update();
+                    break;
+
+                case 'status':
+                    $controller->changeStatus();
+                    break;
+
+                case 'version':
+                    $controller->storeVersion();
+                    break;
+
+                case 'publish-version':
+                    $controller->publishVersion();
+                    break;
+
+                case 'cleanup-flow':
+                    $controller->cleanupFlow();
                     break;
 
                 case '':
