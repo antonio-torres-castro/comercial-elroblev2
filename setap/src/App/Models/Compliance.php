@@ -63,8 +63,10 @@ class Compliance
             }
 
             if (!empty($filters['search'])) {
-                $sql .= PHP_EOL . " AND (d.nombre LIKE :search OR d.codigo LIKE :search OR d.descripcion LIKE :search)";
-                $params[':search'] = '%' . $filters['search'] . '%';
+                $sql .= PHP_EOL . " AND (d.nombre LIKE :search1 OR d.codigo LIKE :search2 OR d.descripcion LIKE :search3)";
+                $params[':search1'] = '%' . $filters['search'] . '%';
+                $params[':search2'] = '%' . $filters['search'] . '%';
+                $params[':search3'] = '%' . $filters['search'] . '%';
             }
 
             $sql .= PHP_EOL . " ORDER BY d.fecha_modificacion DESC, d.id DESC";
@@ -88,7 +90,7 @@ class Compliance
                 WHERE d.id = :id";
 
             if ($proveedorId !== null && $proveedorId > 0) {
-                $sql .= " AND d.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND d.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $proveedorId;
             }
 
@@ -115,7 +117,7 @@ class Compliance
                 WHERE v.id = :id";
 
             if ($proveedorId !== null && $proveedorId > 0) {
-                $sql .= " AND d.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND d.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $proveedorId;
             }
 
@@ -140,11 +142,11 @@ class Compliance
                 AND v.publicado = 1";
 
             if ($proveedorId !== null && $proveedorId > 0) {
-                $sql .= " AND d.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND d.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $proveedorId;
             }
 
-            $sql .= " ORDER BY v.fecha_publicacion DESC, v.id DESC LIMIT 1";
+            $sql .= PHP_EOL . " ORDER BY v.fecha_publicacion DESC, v.id DESC LIMIT 1";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -167,11 +169,11 @@ class Compliance
                 WHERE v.cumplimiento_documento_id = :document_id";
 
             if ($proveedorId !== null && $proveedorId > 0) {
-                $sql .= " AND d.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND d.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = $proveedorId;
             }
 
-            $sql .= " ORDER BY v.fecha_creacion DESC, v.id DESC";
+            $sql .= PHP_EOL . " ORDER BY v.fecha_creacion DESC, v.id DESC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -488,9 +490,9 @@ class Compliance
                 INNER JOIN estado_tipos et ON et.id = p.estado_tipo_id
                 WHERE p.cumplimiento_documento_version_id = :version_id";
             if ($activeOnly) {
-                $sql .= " AND p.estado_tipo_id = 2";
+                $sql .= PHP_EOL . " AND p.estado_tipo_id = 2";
             }
-            $sql .= " ORDER BY p.orden_visualizacion ASC, p.id ASC";
+            $sql .= PHP_EOL . " ORDER BY p.orden_visualizacion ASC, p.id ASC";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':version_id' => $versionId]);
@@ -550,12 +552,15 @@ class Compliance
                         ORDER BY l2.fecha_creacion DESC, l2.id DESC
                         LIMIT 1
                     )
-                WHERE u.proveedor_id = :proveedor_id
-                AND d.proveedor_id = :proveedor_id
+                WHERE u.proveedor_id = :proveedor_id1
+                AND d.proveedor_id = :proveedor_id2
                 AND u.estado_tipo_id = 2
                 AND d.estado_tipo_id = 2
                 ORDER BY p.nombre ASC, d.nombre ASC, l.fecha_creacion DESC");
-            $stmt->execute([':proveedor_id' => $proveedorId]);
+            $stmt->execute([
+                ':proveedor_id1' => $proveedorId,
+                ':proveedor_id2' => $proveedorId
+            ]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getAdminAssignments: " . $e->getMessage());
@@ -898,19 +903,19 @@ class Compliance
                 WHERE 1 = 1";
 
             if (!empty($filters['proveedor_id'])) {
-                $sql .= " AND d.proveedor_id = :proveedor_id";
+                $sql .= PHP_EOL . " AND d.proveedor_id = :proveedor_id";
                 $params[':proveedor_id'] = (int)$filters['proveedor_id'];
             }
             if (!empty($filters['fecha_inicio'])) {
-                $sql .= " AND l.fecha_creacion >= :fecha_inicio";
+                $sql .= PHP_EOL . " AND l.fecha_creacion >= :fecha_inicio";
                 $params[':fecha_inicio'] = $filters['fecha_inicio'] . ' 00:00:00';
             }
             if (!empty($filters['fecha_fin'])) {
-                $sql .= " AND l.fecha_creacion <= :fecha_fin";
+                $sql .= PHP_EOL . " AND l.fecha_creacion <= :fecha_fin";
                 $params[':fecha_fin'] = $filters['fecha_fin'] . ' 23:59:59';
             }
 
-            $sql .= " ORDER BY l.fecha_creacion DESC, l.id DESC LIMIT 300";
+            $sql .= PHP_EOL . " ORDER BY l.fecha_creacion DESC, l.id DESC LIMIT 300";
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -933,11 +938,11 @@ class Compliance
                 WHERE ul.accion_id IN (65,66,67,68,69,70,71,72)";
 
             if (!empty($filters['proveedor_id'])) {
-                $sql .= " AND (u.proveedor_id = :proveedor_id OR u.proveedor_id IS NULL)";
+                $sql .= PHP_EOL . " AND (u.proveedor_id = :proveedor_id OR u.proveedor_id IS NULL)";
                 $params[':proveedor_id'] = (int)$filters['proveedor_id'];
             }
 
-            $sql .= " ORDER BY ul.fecha DESC LIMIT 200";
+            $sql .= PHP_EOL . " ORDER BY ul.fecha DESC LIMIT 200";
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
