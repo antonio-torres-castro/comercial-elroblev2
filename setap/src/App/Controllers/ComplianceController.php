@@ -53,15 +53,15 @@ class ComplianceController extends BaseController
                 'assignments' => $assignments,
                 'filters' => $filters,
                 'title' => 'Administrar Cumplimientos',
-                'success' => $_GET['success'] ?? '',
-                'error' => $_GET['error'] ?? '',
+                'success' => $this->consumeFlashMessage('compliance_success'),
+                'error' => $this->consumeFlashMessage('compliance_error'),
             ];
 
             require_once __DIR__ . '/../Views/compliance/list.php';
         } catch (Exception $e) {
             Logger::error("ComplianceController::index: " . $e->getMessage());
             http_response_code(500);
-            echo AppConstants::ERROR_INTERNAL_SERVER;
+            echo $this->renderError($this->formatExceptionMessage($e));
         }
     }
 
@@ -82,15 +82,15 @@ class ComplianceController extends BaseController
                 'user' => $currentUser,
                 'items' => $items,
                 'title' => 'Mis Cumplimientos',
-                'success' => $_GET['success'] ?? '',
-                'error' => $_GET['error'] ?? '',
+                'success' => $this->consumeFlashMessage('compliance_success'),
+                'error' => $this->consumeFlashMessage('compliance_error'),
             ];
 
             require_once __DIR__ . '/../Views/compliance/my.php';
         } catch (Exception $e) {
             Logger::error("ComplianceController::compliances: " . $e->getMessage());
             http_response_code(500);
-            echo AppConstants::ERROR_INTERNAL_SERVER;
+            echo $this->renderError($this->formatExceptionMessage($e));
         }
     }
 
@@ -127,15 +127,15 @@ class ComplianceController extends BaseController
                 'selectedVersion' => $selectedVersion,
                 'questions' => $questions,
                 'title' => 'Administrar Evaluaciones',
-                'success' => $_GET['success'] ?? '',
-                'error' => $_GET['error'] ?? '',
+                'success' => $this->consumeFlashMessage('compliance_success'),
+                'error' => $this->consumeFlashMessage('compliance_error'),
             ];
 
             require_once __DIR__ . '/../Views/compliance/assessments.php';
         } catch (Exception $e) {
             Logger::error("ComplianceController::assessments: " . $e->getMessage());
             http_response_code(500);
-            echo AppConstants::ERROR_INTERNAL_SERVER;
+            echo $this->renderError($this->formatExceptionMessage($e));
         }
     }
 
@@ -167,7 +167,7 @@ class ComplianceController extends BaseController
         } catch (Exception $e) {
             Logger::error("ComplianceController::history: " . $e->getMessage());
             http_response_code(500);
-            echo AppConstants::ERROR_INTERNAL_SERVER;
+            echo $this->renderError($this->formatExceptionMessage($e));
         }
     }
 
@@ -179,7 +179,7 @@ class ComplianceController extends BaseController
             $version = $this->complianceModel->getVersion($versionId, (int)$currentUser['proveedor_id']);
             $isAdminPreview = $this->permissionService->hasMenuAccess((int)$currentUser['id'], 'manage_compliance');
             if (!$version || ((int)$version['documento_estado_tipo_id'] !== 2 && !$isAdminPreview)) {
-                $this->redirectWithError('/setap/compliance/my', 'Documento no disponible');
+                $this->redirectComplianceError('/setap/compliance/my', 'Documento no disponible');
                 return;
             }
 
@@ -198,13 +198,13 @@ class ComplianceController extends BaseController
                 'version' => $version,
                 'reading' => $reading,
                 'title' => 'Lectura de Cumplimiento',
-                'error' => $_GET['error'] ?? '',
+                'error' => $this->consumeFlashMessage('compliance_error'),
             ];
 
             require_once __DIR__ . '/../Views/compliance/document.php';
         } catch (Exception $e) {
             Logger::error("ComplianceController::viewDocument: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance/my', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance/my', $e);
         }
     }
 
@@ -219,12 +219,12 @@ class ComplianceController extends BaseController
             $currentUser = $this->requireUser();
             $reading = $this->complianceModel->getReading((int)$readingId, (int)$currentUser['id'], (int)$currentUser['proveedor_id']);
             if (!$reading || empty($reading['password_confirmado'])) {
-                $this->redirectWithError('/setap/compliance/my', 'Debe aceptar la lectura antes de evaluar');
+                $this->redirectComplianceError('/setap/compliance/my', 'Debe aceptar la lectura antes de evaluar');
                 return;
             }
 
             if (!$this->complianceModel->canAttemptEvaluation((int)$currentUser['id'], (int)$readingId, (int)$currentUser['proveedor_id'])) {
-                $this->redirectWithError('/setap/compliance/my', 'La evaluacion esta disponible entre 01:00 y 22:59. Un nuevo intento se habilita despues de las 01:00');
+                $this->redirectComplianceError('/setap/compliance/my', 'La evaluacion esta disponible entre 01:00 y 22:59. Un nuevo intento se habilita despues de las 01:00');
                 return;
             }
 
@@ -242,7 +242,7 @@ class ComplianceController extends BaseController
             require_once __DIR__ . '/../Views/compliance/evaluation.php';
         } catch (Exception $e) {
             Logger::error("ComplianceController::evaluation: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance/my', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance/my', $e);
         }
     }
 
@@ -269,10 +269,10 @@ class ComplianceController extends BaseController
                 ? 'Evaluacion aprobada con ' . $result['puntaje'] . '%'
                 : 'Evaluacion reprobada con ' . $result['puntaje'] . '%. Puede intentar nuevamente despues de las 01:00';
 
-            $this->redirectWithSuccess('/setap/compliance/my', $message);
+            $this->redirectComplianceSuccess('/setap/compliance/my', $message);
         } catch (Exception $e) {
             Logger::error("ComplianceController::submitEvaluation: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance/my', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance/my', $e);
         }
     }
 
@@ -300,11 +300,11 @@ class ComplianceController extends BaseController
                 return;
             }
 
-            $this->redirectWithSuccess('/setap/compliance/my', 'Lectura aceptada correctamente');
+            $this->redirectComplianceSuccess('/setap/compliance/my', 'Lectura aceptada correctamente');
         } catch (Exception $e) {
             Logger::error("ComplianceController::acceptCompliance: " . $e->getMessage());
             $readingId = (int)($_POST['reading_id'] ?? 0);
-            $this->redirectWithError($readingId > 0 ? '/setap/compliance/document/' . ($_POST['version_id'] ?? '') : '/setap/compliance/my', $e->getMessage());
+            $this->redirectComplianceError($readingId > 0 ? '/setap/compliance/document/' . ($_POST['version_id'] ?? '') : '/setap/compliance/my', $e);
         }
     }
 
@@ -319,10 +319,10 @@ class ComplianceController extends BaseController
 
             $data = $this->documentPayload();
             $this->complianceModel->createDocument($data, (int)$currentUser['id'], (int)$currentUser['proveedor_id']);
-            $this->redirectWithSuccess('/setap/compliance', 'Cumplimiento creado en estado creado');
+            $this->redirectComplianceSuccess('/setap/compliance', 'Cumplimiento creado en estado creado');
         } catch (Exception $e) {
             Logger::error("ComplianceController::store: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance', $e);
         }
     }
 
@@ -337,10 +337,10 @@ class ComplianceController extends BaseController
 
             $documentId = (int)($_POST['document_id'] ?? 0);
             $this->complianceModel->updateDocument($documentId, $this->documentPayload(), (int)$currentUser['id'], (int)$currentUser['proveedor_id']);
-            $this->redirectWithSuccess('/setap/compliance', 'Cumplimiento actualizado');
+            $this->redirectComplianceSuccess('/setap/compliance', 'Cumplimiento actualizado');
         } catch (Exception $e) {
             Logger::error("ComplianceController::update: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance', $e);
         }
     }
 
@@ -356,10 +356,10 @@ class ComplianceController extends BaseController
             $documentId = (int)($_POST['document_id'] ?? 0);
             $stateId = (int)($_POST['estado_tipo_id'] ?? 0);
             $this->complianceModel->changeDocumentStatus($documentId, $stateId, (int)$currentUser['id'], (int)$currentUser['proveedor_id']);
-            $this->redirectWithSuccess('/setap/compliance', 'Estado actualizado');
+            $this->redirectComplianceSuccess('/setap/compliance', 'Estado actualizado');
         } catch (Exception $e) {
             Logger::error("ComplianceController::changeStatus: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance', $e);
         }
     }
 
@@ -382,10 +382,10 @@ class ComplianceController extends BaseController
                 'fecha_inicio_vigencia' => $_POST['fecha_inicio_vigencia'] ?? null,
                 'fecha_fin_vigencia' => $_POST['fecha_fin_vigencia'] ?? null,
             ], (int)$currentUser['id'], (int)$currentUser['proveedor_id']);
-            $this->redirectWithSuccess('/setap/compliance', 'Version creada');
+            $this->redirectComplianceSuccess('/setap/compliance', 'Version creada');
         } catch (Exception $e) {
             Logger::error("ComplianceController::storeVersion: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance', $e);
         }
     }
 
@@ -400,10 +400,10 @@ class ComplianceController extends BaseController
 
             $versionId = (int)($_POST['version_id'] ?? 0);
             $this->complianceModel->publishVersion($versionId, (int)$currentUser['id'], (int)$currentUser['proveedor_id']);
-            $this->redirectWithSuccess('/setap/compliance', 'Version publicada');
+            $this->redirectComplianceSuccess('/setap/compliance', 'Version publicada');
         } catch (Exception $e) {
             Logger::error("ComplianceController::publishVersion: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance', $e);
         }
     }
 
@@ -432,11 +432,11 @@ class ComplianceController extends BaseController
                 'alternativas' => $alternatives,
             ], (int)$currentUser['proveedor_id']);
 
-            $this->redirectWithSuccess('/setap/compliance/assessments?version_id=' . $versionId, 'Pregunta creada');
+            $this->redirectComplianceSuccess('/setap/compliance/assessments?version_id=' . $versionId, 'Pregunta creada');
         } catch (Exception $e) {
             Logger::error("ComplianceController::storeQuestion: " . $e->getMessage());
             $versionId = (int)($_POST['version_id'] ?? 0);
-            $this->redirectWithError('/setap/compliance/assessments?version_id=' . $versionId, $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance/assessments?version_id=' . $versionId, $e);
         }
     }
 
@@ -450,10 +450,10 @@ class ComplianceController extends BaseController
             $this->validatePost();
             $documentId = (int)($_POST['document_id'] ?? 0);
             $count = $this->complianceModel->cleanupUserFlowData($documentId, (int)$currentUser['id'], (int)$currentUser['proveedor_id']);
-            $this->redirectWithSuccess('/setap/compliance', 'Registros de usuarios eliminados: ' . $count);
+            $this->redirectComplianceSuccess('/setap/compliance', 'Registros de usuarios eliminados: ' . $count);
         } catch (Exception $e) {
             Logger::error("ComplianceController::cleanupFlow: " . $e->getMessage());
-            $this->redirectWithError('/setap/compliance', $e->getMessage());
+            $this->redirectComplianceError('/setap/compliance', $e);
         }
     }
 
@@ -518,5 +518,40 @@ class ComplianceController extends BaseController
             return false;
         }
         return true;
+    }
+
+    private function redirectComplianceSuccess(string $route, string $message): void
+    {
+        $_SESSION['compliance_success'] = $message;
+        Security::redirect($route);
+    }
+
+    private function redirectComplianceError(string $route, Exception|string $error): void
+    {
+        $_SESSION['compliance_error'] = $error instanceof Exception
+            ? $this->formatExceptionMessage($error)
+            : $error;
+        Security::redirect($route);
+    }
+
+    private function consumeFlashMessage(string $key): string
+    {
+        $message = (string)($_SESSION[$key] ?? '');
+        unset($_SESSION[$key]);
+        return $message;
+    }
+
+    private function formatExceptionMessage(Exception $e): string
+    {
+        $message = $e->getMessage();
+        if ($message === '') {
+            $message = get_class($e);
+        }
+
+        if ($e->getPrevious() && $e->getPrevious()->getMessage() !== '') {
+            $message .= ' | Causa original: ' . $e->getPrevious()->getMessage();
+        }
+
+        return $message;
     }
 }

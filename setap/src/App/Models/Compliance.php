@@ -76,7 +76,7 @@ class Compliance
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getDocuments: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -100,7 +100,7 @@ class Compliance
             return $result ?: null;
         } catch (PDOException $e) {
             Logger::error("Compliance::getDocument: " . $e->getMessage());
-            return null;
+            throw $e;
         }
     }
 
@@ -127,7 +127,7 @@ class Compliance
             return $result ?: null;
         } catch (PDOException $e) {
             Logger::error("Compliance::getVersion: " . $e->getMessage());
-            return null;
+            throw $e;
         }
     }
 
@@ -154,7 +154,7 @@ class Compliance
             return $result ?: null;
         } catch (PDOException $e) {
             Logger::error("Compliance::getPublishedVersionByDocument: " . $e->getMessage());
-            return null;
+            throw $e;
         }
     }
 
@@ -179,7 +179,7 @@ class Compliance
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getVersions: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -505,7 +505,7 @@ class Compliance
             return $questions;
         } catch (PDOException $e) {
             Logger::error("Compliance::getQuestions: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -520,7 +520,7 @@ class Compliance
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getAlternatives: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -564,7 +564,7 @@ class Compliance
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getAdminAssignments: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -607,7 +607,7 @@ class Compliance
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getUserCompliances: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -658,7 +658,7 @@ class Compliance
             return $result ?: null;
         } catch (PDOException $e) {
             Logger::error("Compliance::getOpenReading: " . $e->getMessage());
-            return null;
+            throw $e;
         }
     }
 
@@ -682,7 +682,7 @@ class Compliance
             return $result ?: null;
         } catch (PDOException $e) {
             Logger::error("Compliance::getReading: " . $e->getMessage());
-            return null;
+            throw $e;
         }
     }
 
@@ -921,7 +921,7 @@ class Compliance
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getHistory: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -948,7 +948,7 @@ class Compliance
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             Logger::error("Compliance::getComplianceLogs: " . $e->getMessage());
-            return [];
+            throw $e;
         }
     }
 
@@ -961,7 +961,7 @@ class Compliance
             return $hash && password_verify($password, $hash);
         } catch (PDOException $e) {
             Logger::error("Compliance::verifyPassword: " . $e->getMessage());
-            return false;
+            throw $e;
         }
     }
 
