@@ -1,3 +1,22 @@
+CREATE TABLE cumplimiento_documentos (
+  id int NOT NULL AUTO_INCREMENT,
+  proveedor_id int NOT NULL,
+  nombre varchar(250) NOT NULL,
+  codigo varchar(100) DEFAULT NULL,
+  descripcion varchar(500) DEFAULT NULL,
+  requiere_evaluacion tinyint NOT NULL DEFAULT '1',
+  puntaje_minimo decimal(5,2) NOT NULL DEFAULT '80.00',
+  cantidad_preguntas int NOT NULL DEFAULT '5',
+  vigencia_dias int NOT NULL DEFAULT '365',
+  estado_tipo_id int NOT NULL DEFAULT '1',
+  fecha_creacion timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_modificacion timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_documento_proveedor (proveedor_id),
+  KEY idx_documento_estado (estado_tipo_id),
+  CONSTRAINT fk_documento_estado FOREIGN KEY (estado_tipo_id) REFERENCES estado_tipos (id),
+  CONSTRAINT fk_documento_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 CREATE TABLE cumplimiento_documento_versiones (
   id int NOT NULL AUTO_INCREMENT,
   cumplimiento_documento_id int NOT NULL,
@@ -22,25 +41,6 @@ CREATE TABLE cumplimiento_documento_versiones (
   CONSTRAINT fk_doc_version_documento FOREIGN KEY (cumplimiento_documento_id) REFERENCES cumplimiento_documentos (id),
   CONSTRAINT fk_doc_version_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id),
   CONSTRAINT fk_doc_version_usuario FOREIGN KEY (creado_por_usuario_id) REFERENCES usuarios (id)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-CREATE TABLE cumplimiento_documentos (
-  id int NOT NULL AUTO_INCREMENT,
-  proveedor_id int NOT NULL,
-  nombre varchar(250) NOT NULL,
-  codigo varchar(100) DEFAULT NULL,
-  descripcion varchar(500) DEFAULT NULL,
-  requiere_evaluacion tinyint NOT NULL DEFAULT '1',
-  puntaje_minimo decimal(5,2) NOT NULL DEFAULT '80.00',
-  cantidad_preguntas int NOT NULL DEFAULT '5',
-  vigencia_dias int NOT NULL DEFAULT '365',
-  estado_tipo_id int NOT NULL DEFAULT '1',
-  fecha_creacion timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  fecha_modificacion timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_documento_proveedor (proveedor_id),
-  KEY idx_documento_estado (estado_tipo_id),
-  CONSTRAINT fk_documento_estado FOREIGN KEY (estado_tipo_id) REFERENCES estado_tipos (id),
-  CONSTRAINT fk_documento_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 CREATE TABLE cumplimiento_lecturas (
   id int NOT NULL AUTO_INCREMENT,
@@ -69,7 +69,23 @@ CREATE TABLE cumplimiento_lecturas (
   CONSTRAINT fk_lectura_proveedor_id FOREIGN KEY (proveedor_id) REFERENCES proveedores (id),
   CONSTRAINT fk_lectura_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id),
   CONSTRAINT fk_lectura_version FOREIGN KEY (cumplimiento_documento_version_id) REFERENCES cumplimiento_documento_versiones (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE cumplimiento_preguntas (
+  id int NOT NULL AUTO_INCREMENT,
+  cumplimiento_documento_version_id int NOT NULL,
+  pregunta varchar(1000) NOT NULL,
+  orden_visualizacion int NOT NULL DEFAULT '1',
+  estado_tipo_id int NOT NULL DEFAULT '1',
+  fecha_creacion timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  proveedor_id int DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY idx_preguntas_version (cumplimiento_documento_version_id),
+  KEY fk_preguntas_proveedor_id_idx (proveedor_id),
+  KEY fk_preguntas_estado (estado_tipo_id),
+  CONSTRAINT fk_preguntas_estado FOREIGN KEY (estado_tipo_id) REFERENCES estado_tipos (id),
+  CONSTRAINT fk_preguntas_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id),
+  CONSTRAINT fk_preguntas_version FOREIGN KEY (cumplimiento_documento_version_id) REFERENCES cumplimiento_documento_versiones (id)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 CREATE TABLE cumplimiento_pregunta_alternativas (
   id int NOT NULL AUTO_INCREMENT,
   cumplimiento_pregunta_id int NOT NULL,
@@ -82,23 +98,7 @@ CREATE TABLE cumplimiento_pregunta_alternativas (
   KEY fk_alternativa_pregunta_proveedor_id_idx (proveedor_id),
   CONSTRAINT fk_alternativa_pregunta_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id),
   CONSTRAINT fk_alternativas_pregunta FOREIGN KEY (cumplimiento_pregunta_id) REFERENCES cumplimiento_preguntas (id)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-CREATE TABLE cumplimiento_preguntas (
-  id int NOT NULL AUTO_INCREMENT,
-  cumplimiento_documento_version_id int NOT NULL,
-  pregunta varchar(1000) NOT NULL,
-  orden_visualizacion int NOT NULL DEFAULT '1',
-  estado_tipo_id int NOT NULL DEFAULT '1',
-  fecha_creacion timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  proveedor_id int DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY idx_preguntas_version (cumplimiento_documento_version_id),
-  KEY fk_preguntas_estado (estado_tipo_id),
-  KEY fk_preguntas_proveedor_id_idx (proveedor_id),
-  CONSTRAINT fk_preguntas_estado FOREIGN KEY (estado_tipo_id) REFERENCES estado_tipos (id),
-  CONSTRAINT fk_preguntas_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id),
-  CONSTRAINT fk_preguntas_version FOREIGN KEY (cumplimiento_documento_version_id) REFERENCES cumplimiento_documento_versiones (id)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 CREATE TABLE cumplimiento_respuestas_usuario (
   id int NOT NULL AUTO_INCREMENT,
   cumplimiento_lectura_id int NOT NULL,
@@ -116,4 +116,4 @@ CREATE TABLE cumplimiento_respuestas_usuario (
   CONSTRAINT fk_respuesta_lectura FOREIGN KEY (cumplimiento_lectura_id) REFERENCES cumplimiento_lecturas (id),
   CONSTRAINT fk_respuesta_pregunta FOREIGN KEY (cumplimiento_pregunta_id) REFERENCES cumplimiento_preguntas (id),
   CONSTRAINT fk_respuestas_usuario_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
