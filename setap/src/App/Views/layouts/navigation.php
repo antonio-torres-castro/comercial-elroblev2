@@ -94,6 +94,14 @@ try {
                         </li>
                     <?php endif; ?>
 
+                    <?php if (\App\Helpers\Security::hasMenuAccess('manage_projects') || \App\Helpers\Security::hasMenuAccess('manage_tasks')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="<?= AppConstants::ROUTE_SERVICES ?>">
+                                <i class="bi bi-activity"></i> Servicios
+                            </a>
+                        </li>
+                    <?php endif; ?>
+
                     <?php if (\App\Helpers\Security::hasMenuAccess('manage_menus')): ?>
                         <li class="nav-item">
                             <a class="nav-link text-light" href="<?= AppConstants::ROUTE_MENUS ?>">

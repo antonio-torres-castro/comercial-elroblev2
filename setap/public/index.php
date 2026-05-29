@@ -16,6 +16,7 @@ use App\Controllers\ClientController;
 use App\Controllers\SuppliersController;
 use App\Controllers\TaskController;
 use App\Controllers\ProcessController;
+use App\Controllers\ServiceController;
 use App\Controllers\ReportController;
 use App\Controllers\ReportApiController;
 use App\Controllers\EspaciosController;
@@ -624,6 +625,78 @@ try {
                     $controller->getTaskDetail();
                     break;
 
+                default:
+                    $controller->index();
+                    break;
+            }
+            break;
+
+        case 'services':
+            $controller = new ServiceController();
+
+            switch ($action) {
+                case 'catalog':
+                    $controller->catalog();
+                    break;
+
+                case 'create':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $controller->store();
+                    } else {
+                        $controller->create();
+                    }
+                    break;
+
+                case 'store':
+                    $controller->store();
+                    break;
+
+                case 'version':
+                    $controller->version();
+                    break;
+
+                case 'plan':
+                    $controller->plan();
+                    break;
+
+                case 'generate':
+                    $controller->generate();
+                    break;
+
+                case 'show':
+                    $controller->show($id ? (int)$id : null);
+                    break;
+
+                case 'suspend':
+                    $controller->suspend();
+                    break;
+
+                case 'finish-early':
+                    $controller->finishEarly();
+                    break;
+
+                case 'replan':
+                    $controller->replan();
+                    break;
+
+                case 'category':
+                    $controller->createCategory();
+                    break;
+
+                case 'type':
+                    $controller->createType();
+                    break;
+
+                case 'client':
+                    $controller->createClient();
+                    break;
+
+                case 'provider-data':
+                    $controller->providerData();
+                    break;
+
+                case '':
+                case null:
                 default:
                     $controller->index();
                     break;

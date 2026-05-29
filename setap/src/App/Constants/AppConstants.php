@@ -157,6 +157,11 @@ class AppConstants
     /** Ruta de vista de procesos */
     const ROUTE_PROCESSES_SHOW = '/setap/process/show';
 
+    const ROUTE_SERVICES = '/setap/services';
+    const ROUTE_SERVICES_CATALOG = '/setap/services/catalog';
+    const ROUTE_SERVICES_CREATE = '/setap/services/create';
+    const ROUTE_SERVICES_PLAN = '/setap/services/plan';
+
     /** Ruta de gestión de colaboradores de proyecto */
     const ROUTE_PROJECT_COLABORADORES = "/setap/proyecto-colaboradores";
 
