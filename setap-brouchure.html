@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="SETAP centraliza tareas, evidencias, documentación, checklists, hallazgos y reportes para operaciones en terreno con equipos distribuidos y contratistas.">
+    <title>SETAP | Visibilidad total sobre operaciones en terreno</title>
+
+    <link rel="canonical" href="https://www.comercial-elroble.cl/setap-brouchure.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SETAP | Visibilidad total sobre tus operaciones en terreno">
+    <meta property="og:description"
+        content="Controla tareas, evidencias, cumplimiento, documentación y ejecución operacional desde una sola plataforma.">
+    <meta property="og:image" content="https://www.comercial-elroble.cl/assets/images/CollageFinalVideoSETAP.png">
+    <meta property="og:locale" content="es_CL">
+
+    <link rel="shortcut icon" href="assets/images/mbr-130x115_rojo.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="assets/web/assets/mobirise-icons/mobirise-icons.css">
+    <link rel="stylesheet" href="assets/tether/tether.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap-reboot.min.css">
+    <link rel="stylesheet" href="assets/dropdown/css/style.css">
+    <link rel="stylesheet" href="assets/theme/css/style.css">
+    <link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css" type="text/css">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "SETAP",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "description": "Plataforma SaaS para gestión operacional, supervisión de terreno, trazabilidad de actividades, evidencias, documentación, checklists, hallazgos y reportes.",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "CLP",
+                "availability": "https://schema.org/InStock",
+                "description": "Precio disponible bajo cotización comercial."
+            },
+            "provider": {
+                "@type": "Organization",
+                "name": "Comercial El Roble"
+            }
+        }
+    </script>
+
+    <style>
+        .cid-setapHero {
+            background-image: url("assets/images/tareasRecurrentes2.png");
+        }
+
+        .cid-setapHero .mbr-overlay {
+            opacity: 0.62 !important;
+            background: linear-gradient(135deg, #4f0f22 0%, #7f1933 100%) !important;
+        }
+
+        #problemas-setap,
+        #modulos-setap,
+        #industrias-setap,
+        #compliance-setap {
+            background-color: #f7eff2 !important;
+        }
+
+        #valor-setap,
+        #flujo-setap,
+        #gerencia-setap,
+        #diferenciadores-setap {
+            background-color: #ffffff !important;
+        }
+
+        #problemas-setap .mbr-section-title,
+        #valor-setap .mbr-section-title,
+        #modulos-setap .mbr-section-title,
+        #flujo-setap .mbr-section-title,
+        #industrias-setap .mbr-section-title,
+        #gerencia-setap .mbr-section-title,
+        #diferenciadores-setap .mbr-section-title,
+        #compliance-setap .mbr-section-title {
+            color: #7f1933;
+        }
+
+        .setap-dashboard {
+            border-radius: 10px;
+            box-shadow: 0 12px 35px rgba(79, 15, 34, 0.22);
+            width: 100%;
+            max-width: 1100px;
+            height: auto;
+            display: block;
+            margin: 40px auto 0;
+        }
+
+        .setap-box {
+            background: #ffffff;
+            border-radius: 10px;
+            border-top: 4px solid #7f1933;
+            box-shadow: 0 10px 30px rgba(79, 15, 34, 0.12);
+            padding: 30px 22px;
+            height: 100%;
+        }
+
+        .setap-problem {
+            border-top-color: #b3263d;
+        }
+
+        .setap-muted {
+            border-top-color: #6c757d;
+            background-color: #fbfbfb;
+        }
+
+        .setap-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .setap-list li {
+            margin: 10px 0;
+            font-size: 1.03rem;
+        }
+
+        .setap-list li span {
+            color: #7f1933;
+            margin-right: 8px;
+        }
+
+        .setap-flow-step {
+            background: #ffffff;
+            border: 1px solid rgba(127, 25, 51, 0.18);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(79, 15, 34, 0.08);
+            height: 100%;
+            padding: 22px 18px;
+        }
+
+        .setap-flow-step .step-number {
+            background: #7f1933;
+            border-radius: 50%;
+            color: #ffffff;
+            display: inline-block;
+            font-weight: 700;
+            height: 36px;
+            line-height: 36px;
+            margin-bottom: 12px;
+            width: 36px;
+        }
+
+        .setap-comparison {
+            border: 1px solid rgba(127, 25, 51, 0.16);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(79, 15, 34, 0.10);
+        }
+
+        .setap-comparison .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .setap-comparison .comparison-head {
+            background: #7f1933;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .setap-comparison .comparison-cell {
+            background: #ffffff;
+            border-bottom: 1px solid #ead7dd;
+            padding: 16px;
+        }
+
+        .setap-comparison .comparison-cell:first-child {
+            color: #7f1933;
+            font-weight: 700;
+        }
+
+        .setap-cta {
+            background: linear-gradient(135deg, #6d152d 0%, #8a1f3c 100%);
+        }
+
+        .setap-form {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(79, 15, 34, 0.18);
+            padding: 40px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .setap-form label {
+            color: #4f0f22;
+            font-weight: 700;
+        }
+
+        #contacto-setap {
+            padding-top: 90px;
+            padding-bottom: 90px;
+        }
+
+        #contacto-setap h2 {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        #contacto-setap p {
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        /* #header1-setap {
+            min-height: 80vh;
+        }
+
+        #header1-setap .container {
+            max-width: 1280px;
+        }
+
+        #header1-setap h1 {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        #header1-setap p {
+            max-width: 760px;
+            margin: 0 auto 30px;
+        } */
+
+        @media (max-width: 768px) {
+            .setap-comparison .comparison-head {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="menu cid-SiteMenuSeccion" once="menu" id="menu1-setap">
+        <nav
+            class="navbar navbar-expand beta-menu navbar-dropdown align-items-center navbar-fixed-top navbar-toggleable-sm">
+
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+
+            <div class="menu-logo">
+                <div class="navbar-brand">
+                    <span class="navbar-logo">
+                        <a href="index.html">
+                            <img src="assets/images/mbr-130x115_rojo.jpg" alt="Comercial El Roble" title=""
+                                style="height: 3.8rem;">
+                        </a>
+                    </span>
+
+                    <span class="navbar-caption-wrap">
+                        <a class="navbar-caption text-white display-4" href="index.html">
+                            Comercial El Roble
+                        </a>
+                    </span>
+                </div>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav nav-dropdown" data-app-modern-menu="true">
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="servicios.html">
+                            <span class="mbri-setting mbr-iconfont mbr-iconfont-btn"></span>
+                            Servicios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="pisos.html">
+                            Pisos<br>Alfombras
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="aseo.html">
+                            Aseo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="cortinas.html">
+                            Cortinas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="proyectos.html">
+                            Proyectos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link text-white display-4" href="empresa.html">
+                            <span class="mbri-home mbr-iconfont mbr-iconfont-btn"></span>
+                            Nosotros
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="navbar-buttons mbr-section-btn">
+                    <a class="btn btn-sm btn-secondary display-3" href="/setap">
+                        <span class="mbri-user mbr-iconfont mbr-iconfont-btn ">
+                        </span>
+                        Setap
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <section class="engine"></section>
+
+    <section class="header1 cid-setapHero mbr-fullscreen mbr-parallax-background" id="header1-setap">
+        <div class="mbr-overlay" style="opacity: 0.35; background-color: rgb(15, 118, 153);"></div>
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="mbr-white col-lg-8 col-xl-7 mx-auto align-center">
+                    <h1 class="mbr-section-title mbr-bold pt-4 pb-3 mbr-fonts-style display-1">
+                        Control real de la operativa en terreno</h1>
+                        <p class="mbr-text pb-3 mbr-fonts-style display-5">
+                        Planifica procesos, coordina equipos, 
+                        supervisa la ejecución y demuestra cumplimiento verificable desde una sola plataforma</p>
+                    <div class="mbr-section-btn">
+                        <a class="btn btn-md btn-secondary display-3" href="#contacto-setap">
+                            Solicitar demostración
+                        </a>
+                        <a class="btn btn-md btn-white-outline display-3" href="#modulos-setap">
+                            Ver funcionalidades
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mbr-arrow hidden-sm-down" aria-hidden="true">
+            <a href="#problemas-setap">
+                <i class="mbri-down mbr-iconfont"></i>
+            </a>
+        </div>
+    </section>
+
+    <section class="features1 cid-segundaSeccionVista" id="problemas-setap">
+        <div class="container-fluid">
+            <h3 class="mbr-section-title pb-0 mbr-fonts-style align-center">
+                ¿Por qué las operaciones pierden control?
+            </h3>
+            <h3 class="mbr-section-subtitle pb-1 mbr-fonts-style align-center display-5">
+                Cuando la planificación, ejecución y supervisión dependen de múltiples 
+                herramientas, aumenta el riesgo de retrasos, baja visibilidad y 
+                decisiones basadas en información incompleta.
+            </h3>
+
+            <div class="media-container-row">
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-search mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Procesos difíciles de coordinar</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Actividades recurrentes que deben programarse manualmente una y otra vez, 
+                            consumiendo tiempo y aumentando el riesgo de errores.</p>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-letter mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Supervisión limitada</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Los responsables no siempre tienen visibilidad inmediata 
+                            del avance real de las tareas ni de las evidencias asociadas.
+                        </p>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-image-gallery mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Sobrecarga operativa</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Es difícil identificar qué equipos tienen capacidad disponible y cuáles están sobreasignados.
+                        </p>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-timer mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Información dispersa</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Proyectos, tareas, evidencias y cumplimiento terminan 
+                            distribuidos entre planillas, correos y conversaciones.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mbr-section content4 pt-4" id="valor-setap">
+        <div class="container">
+            <div class="media-container-row">
+                <div class="title col-12 col-md-10 mx-auto align-center">
+                    <h2 class="mbr-section-title pb-3 mbr-fonts-style display-2">
+                        Una sola plataforma para planificar, ejecutar y supervisar operaciones</h2>
+                    <p class="mbr-text align-center mbr-fonts-style display-7">
+                        SETAP permite transformar procesos operacionales recurrentes en tareas ejecutables, 
+                        supervisables y medibles. Centraliza proyectos, procesos, tareas, evidencias, 
+                        capacidad operativa y cumplimiento normativo para entregar trazabilidad completa 
+                        de la ejecución.</p>
+                    <img src="assets/images/CollageFinalVideoSETAP.png" class="setap-dashboard mt-4"
+                        alt="Mockup de dashboard SETAP con proyectos, tareas y resumen ejecutivo">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features1 cid-segundaSeccionVista" id="flujo-setap">
+        <div class="container">
+            <h3 class="mbr-section-title pb-3 mbr-fonts-style align-center">Del modelo de proceso a la ejecución</h3>
+            <div class="row">
+                <div class="col-12 col-md-6 col-lg-3 p-2">
+                    <div class="setap-flow-step align-center"><span class="step-number">1</span>
+                        <h4 class="display-7">Definir proyecto</h4>
+                        <p class="display-7">Configura clientes, responsables y equipos de trabajo.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 p-2">
+                    <div class="setap-flow-step align-center"><span class="step-number">2</span>
+                        <h4 class="display-7">Diseñar procesos</h4><p class="display-7">
+                            Define actividades recurrentes mediante modelos reutilizables.</p></div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 p-2">
+                    <div class="setap-flow-step align-center"><span class="step-number">3</span>
+                        <h4 class="display-7">Generar tareas</h4><p class="display-7">
+                            Programa tareas individuales o masivas para períodos completos.</p></div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 p-2">
+                    <div class="setap-flow-step align-center"><span class="step-number">4</span>
+                        <h4 class="display-7">Ejecutar actividades</h4><p class="display-7">
+                            Los ejecutores inician, desarrollan y completan tareas.</p></div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 p-2">
+                    <div class="setap-flow-step align-center"><span class="step-number">5</span>
+                        <h4 class="display-7">Registrar evidencias</h4><p class="display-7">
+                            Incorpora observaciones y fotografías asociadas a la ejecución.</p></div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 p-2">
+                    <div class="setap-flow-step align-center"><span class="step-number">6</span>
+                        <h4 class="display-7">Supervisar resultados</h4><p class="display-7">
+                            Los supervisores aprueban o rechazan las tareas ejecutadas.</p></div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 p-2">
+                    <div class="setap-flow-step align-center"><span class="step-number">7</span>
+                        <h4 class="display-7">Analizar desempeño</h4><p class="display-7">
+                            Visualiza indicadores, avance y capacidad operativa.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features1 cid-segundaSeccionVista" id="modulos-setap">
+        <div class="container-fluid">
+            <h3 class="mbr-section-title pb-0 mbr-fonts-style align-center">Módulos del sistema</h3>
+            <h3 class="mbr-section-subtitle pb-1 mbr-fonts-style align-center display-5">
+                Capacidades conectadas para planificar, ejecutar, validar y reportar.
+            </h3>
+
+            <div class="media-container-row">
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Personas y Accesos</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Administración de personas</li>
+                            <li><span>✓</span>Administración de usuarios</li>
+                            <li><span>✓</span>Perfil y configuración de usuario</li>
+                            <li><span>✓</span>Roles y permisos</li>
+                            <li><span>✓</span>Auditoría de accesos (Login / Logout)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Clientes y Contrapartes</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Gestión de clientes</li>
+                            <li><span>✓</span>Gestión de contrapartes</li>
+                            <li><span>✓</span>Relación cliente-proyecto</li>
+                            <li><span>✓</span>Acceso diferenciado para clientes y proveedores</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Gestión de Proyectos</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Administración de proyectos</li>
+                            <li><span>✓</span>Equipos de trabajo</li>
+                            <li><span>✓</span>Calendario operativo</li>
+                            <li><span>✓</span>Feriados y disponibilidad</li>
+                            <li><span>✓</span>Seguimiento de avance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media-container-row">
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Procesos Recurrentes</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Tipos de tarea reutilizables</li>
+                            <li><span>✓</span>Modelos de proceso</li>
+                            <li><span>✓</span>Programación periódica</li>
+                             <li><span>✓</span>Generación masiva de tareas</li>
+                            <li><span>✓</span>Automatización de planificación</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Ejecución y Supervisión</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Asignación de tareas</li>
+                            <li><span>✓</span>Autoasignación por ejecutores</li>
+                            <li><span>✓</span>Registro de observaciones</li>
+                            <li><span>✓</span>Evidencia fotográfica</li>
+                            <li><span>✓</span>Aprobación o rechazo de tareas</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Espacios y Ubicaciones</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Direcciones físicas</li>
+                            <li><span>✓</span>Estructura jerárquica de espacios</li>
+                            <li><span>✓</span>Instalaciones, sectores y áreas</li>
+                            <li><span>✓</span>Ubicación de tareas</li>
+                            <li><span>✓</span>Trazabilidad espacial</li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="media-container-row">
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Capacidad Operativa</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Horas por proyecto</li>
+                            <li><span>✓</span>Disponibilidad de usuarios</li>
+                            <li><span>✓</span>Vacaciones y permisos</li>
+                            <li><span>✓</span>Detección de sobrecarga</li>
+                            <li><span>✓</span>Balance de capacidad</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-muted">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Reportes y Dashboards</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Avance de proyectos</li>
+                            <li><span>✓</span>Estado de tareas</li>
+                            <li><span>✓</span>Actividad de usuarios</li>
+                            <li><span>✓</span>Resumen de clientes</li>
+                            <li><span>✓</span>Indicadores operacionales</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-muted">
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Cumplimiento Normativo</h4>
+                        <ul class="setap-list">
+                            <li><span>✓</span>Lectura de documentos</li>
+                            <li><span>✓</span>Control de versiones</li>
+                            <li><span>✓</span>Firma mediante contraseña</li>
+                            <li><span>✓</span>Evaluaciones</li>
+                            <li><span>✓</span>Historial de cumplimiento</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mbr-section content4 pt-4" id="gerencia-setap">
+        <div class="container">
+            <div class="media-container-row">
+                <div class="title col-12 col-md-10 mx-auto align-center">
+                    <h2 class="mbr-section-title pb-3 mbr-fonts-style display-2">Información para tomar decisiones</h2>
+                    <p class="mbr-text align-center mbr-fonts-style display-7">
+                        Visualiza el avance de proyectos, el estado de las tareas, 
+                        la carga operativa de los equipos, la actividad de los usuarios 
+                        y el cumplimiento normativo mediante dashboards y reportes consolidados.
+                        <br><br>
+                        Los tableros permiten analizar tareas activas, iniciadas, terminadas, 
+                        aprobadas o rechazadas, facilitando la supervisión diaria de la operación.</p>
+                    <img src="assets/images/TableroControlProyecto1.png" class="setap-dashboard mt-4"
+                        alt="Reporte de tareas con resumen ejecutivo y datos detallados">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features1 cid-segundaSeccionVista" id="visibilidad-setap">
+        <div class="container-fluid">
+            <h3 class="mbr-section-title pb-0 mbr-fonts-style align-center">
+                Información relevante para cada nivel de la organización
+            </h3>
+            <h3 class="mbr-section-subtitle pb-1 mbr-fonts-style align-center display-5">
+                Cada rol accede a la información que necesita para tomar decisiones, 
+                supervisar la ejecución y mantener el control operacional.
+            </h3>
+
+            <div class="media-container-row">
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-growing-chart mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Dirección y Gerencia</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                              Estado global de contratos
+                            , Avance de proyectos
+                            , Cumplimiento normativo
+                            , Capacidad operativa
+                            , Indicadores ejecutivos</p>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-preview mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Supervisores</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                              Tareas pendientes
+                            , Tareas terminadas
+                            , Aprobaciones
+                            , Rechazos
+                            , Evidencias registradas
+                        </p>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-users mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Ejecutores</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                          Tareas asignadas
+                        , Tareas disponibles
+                        , Registro de observaciones
+                        , Evidencias fotográficas
+                        , Historial de ejecución
+                        </p>
+                    </div>
+                </div>
+                <div class="card p-3 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box setap-problem align-center">
+                        <span class="mbri-briefcase mbr-iconfont"></span>
+                        <h4 class="card-title pb-2 mbr-fonts-style display-7">Clientes y Contrapartes</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                              Avance de proyectos
+                            , Reportes de ejecución
+                            , Evidencias aprobadas
+                            , Cumplimiento contractual
+                            , Acceso de solo lectura
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features1 cid-segundaSeccionVista" id="diferenciadores-setap">
+        <div class="container">
+            <h3 class="mbr-section-title pb-3 mbr-fonts-style align-center">Manual vs SETAP</h3>
+            <div class="setap-comparison">
+                <div class="row comparison-head">
+                    <div class="col-md-4 comparison-cell">Capacidad</div>
+                    <div class="col-md-4 comparison-cell">Manual</div>
+                    <div class="col-md-4 comparison-cell">SETAP</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 comparison-cell">Trazabilidad</div>
+                    <div class="col-md-4 comparison-cell">Fragmentada y difícil de auditar.</div>
+                    <div class="col-md-4 comparison-cell">Historial por proyecto, tarea y responsable.</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 comparison-cell">Supervisión</div>
+                    <div class="col-md-4 comparison-cell">Difícil verificar el trabajo ejecutado.</div>
+                    <div class="col-md-4 comparison-cell">Evidencias de cada ejecución/validación formal.</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 comparison-cell">Planificación</div>
+                    <div class="col-md-4 comparison-cell">Programación repetitiva, planillas fragiles.</div>
+                    <div class="col-md-4 comparison-cell">Procesos reutilizables, generación masiva de tareas.</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 comparison-cell">Capacidad Operativa</div>
+                    <div class="col-md-4 comparison-cell">Difícil identificar sobrecarga de equipos.</div>
+                    <div class="col-md-4 comparison-cell">Control de disponibilidad, permisos y carga horaria.</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 comparison-cell">Reportabilidad</div>
+                    <div class="col-md-4 comparison-cell">Consolidación manual de información.</div>
+                    <div class="col-md-4 comparison-cell">Dashboards y reportes operacionales disponibles en línea.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features1 cid-segundaSeccionVista" id="industrias-setap">
+        <div class="container">
+            <h3 class="mbr-section-title pb-3 mbr-fonts-style align-center">
+                Diseñado para operaciones con actividades recurrentes</h3>
+            <h3 class="mbr-section-subtitle pb-1 mbr-fonts-style align-center display-5">
+                SETAP se adapta a organizaciones que necesitan coordinar personas, tareas, 
+                evidencias y cumplimiento sobre múltiples contratos, instalaciones o clientes.
+            </h3>
+            <div class="media-container-row">
+                <div class="card p-2 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box align-center">
+                        <h4 class="display-7">Servicios industriales</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Control de tareas periódicas, evidencias de ejecución y seguimiento operacional.</p>
+                    </div>
+                </div>
+                <div class="card p-2 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box align-center">
+                        <h4 class="display-7">Facility Management</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Administración de actividades por instalación, sector o área física.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="media-container-row">
+                <div class="card p-2 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box align-center">
+                        <h4 class="display-7">Mantenimiento</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Planificación de actividades recurrentes y control de cumplimiento.
+                        </p>
+                    </div>
+                </div>
+                <div class="card p-2 col-12 col-md-6 col-lg-3">
+                    <div class="setap-box align-center">
+                        <h4 class="display-7">Empresas con múltiples clientes</h4>
+                        <p class="mbr-text mbr-fonts-style display-7">
+                            Gestión centralizada de proyectos, equipos y reportabilidad diferenciada por cliente.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mbr-section content4 pt-4" id="compliance-setap">
+        <div class="container">
+            <div class="media-container-row">
+                <div class="title col-12 col-md-10 mx-auto align-center">
+                    <h2 class="mbr-section-title pb-3 mbr-fonts-style display-2">Cumplimiento normativo integrado</h2>
+                    <p class="mbr-text align-center mbr-fonts-style display-7">
+                        SETAP permite gestionar programas de cumplimiento mediante documentos versionados, 
+                        lectura obligatoria, firma electrónica mediante contraseña, evaluaciones 
+                        y trazabilidad histórica de resultados.
+                        <br><br>
+                        Cada nueva versión de un documento puede requerir una nueva lectura y aprobación, 
+                        manteniendo evidencia verificable del cumplimiento de cada usuario.
+                    </p>
+                    <img src="assets/images/AdministrarCumplimientos.png" class="setap-dashboard mt-4"
+                        alt="Módulo de cumplimiento e integridad empresarial como capacidad complementaria de SETAP">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="header1 setap-cta" id="cta-setap">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="mbr-white col-md-10 align-center">
+                    <h2 class="mbr-section-title mbr-fonts-style pb-3 display-2">¿Quiere conocer cómo funciona SETAP?</h2>
+                    <div class="mbr-section-btn">
+                        <a class="btn btn-md btn-white-outline display-4" href="index.html#form4-h">
+                            Solicitar Presentación Ejecutiva
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="assets/web/assets/jquery/jquery.min.js"></script>
+    <script src="assets/popper/popper.min.js"></script>
+    <script src="assets/tether/tether.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/smoothscroll/smooth-scroll.js"></script>
+    <script src="assets/parallax/jarallax.min.js"></script>
+    <script src="assets/dropdown/js/script.min.js"></script>
+    <script src="assets/touchswipe/jquery.touch-swipe.min.js"></script>
+    <script src="assets/theme/js/script.js"></script>
+</body>
+
+</html>
