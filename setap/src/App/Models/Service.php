@@ -23,6 +23,15 @@ class Service
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getParentCategories(): array
+    {
+        $stmt = $this->db->query("SELECT DISTINCT p.id, p.parent_id, p.nombre 
+                                  FROM servicio_categorias p
+                                  INNER JOIN servicio_categorias h ON h.parent_id = p.id
+                                  ORDER BY p.nombre ASC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function createCategory(array $data): int
     {
         $stmt = $this->db->prepare("INSERT INTO servicio_categorias (parent_id, nombre) VALUES (?, ?)");

@@ -367,6 +367,7 @@ class ServiceController extends BaseController
             'service' => $old,
             'suppliers' => $this->getSuppliersForUser($user),
             'categories' => $this->serviceModel->getCategories(),
+            'parent_categories' => $this->serviceModel->getParentCategories(),
             'types' => $this->serviceModel->getTypes(['proveedor_id' => $providerId]),
             'processes' => $providerId ? $this->processModel->getByProvider($providerId) : []
         ];

@@ -181,8 +181,8 @@ $isAdmin = $data['user']['id'] == 1;
                             <form method="POST" action="<?= AppConstants::ROUTE_SERVICES ?>/category">
                                 <?= Security::renderCsrfField() ?>
 
-                                <label class="form-label" for="padre_id">Padre</label>
-                                <select class="form-select mb-3" id="padre_id" name="padre_id">
+                                <label class="form-label" for="parent_id">Padre</label>
+                                <select class="form-select mb-3" id="parent_id" name="parent_id">
                                     <option value="">Sin padre</option>
                                     <?php foreach ($data['categories'] as $category): ?>
                                         <option value="<?= $category['id']; ?>"><?= htmlspecialchars($category['nombre']); ?></option>
@@ -214,11 +214,11 @@ $isAdmin = $data['user']['id'] == 1;
                                     <input type="hidden" name="proveedor_id" value="<?= htmlspecialchars((string)($data['suppliers'][0]['id'] ?? '')); ?>">
                                 <?php endif; ?>
 
-                                <label class="form-label" for="padre_id">Padre</label>
-                                <select class="form-select mb-3" id="padre_id" name="padre_id">
+                                <label class="form-label" for="filtro_parent_id">Padre</label>
+                                <select class="form-select mb-3" id="filtro_parent_id" name="parent_id">
                                     <option value="">Sin padre</option>
-                                    <?php foreach ($data['categories'] as $category): ?>
-                                        <option value="<?= $category['id']; ?>"><?= htmlspecialchars($category['nombre']); ?></option>
+                                    <?php foreach ($data['parent_categories'] as $parent_category): ?>
+                                        <option value="<?= $parent_category['id']; ?>"><?= htmlspecialchars($parent_category['nombre']); ?></option>
                                     <?php endforeach; ?>
                                 </select>
 
