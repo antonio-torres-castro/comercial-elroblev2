@@ -17,6 +17,17 @@ class Service
         $this->db = Database::getInstance();
     }
 
+    public function getCategoriesByParent(?int $parentId): array
+    {
+        if ($parentId === null || $parentId === 0) {
+            $stmt = $this->db->query("SELECT id, parent_id, nombre FROM servicio_categorias WHERE parent_id IS NULL ORDER BY nombre ASC");
+        } else {
+            $stmt = $this->db->prepare("SELECT id, parent_id, nombre FROM servicio_categorias WHERE parent_id = ? ORDER BY nombre ASC");
+            $stmt->execute([$parentId]);
+        }
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getCategories(): array
     {
         $stmt = $this->db->query("SELECT id, parent_id, nombre FROM servicio_categorias ORDER BY nombre ASC");

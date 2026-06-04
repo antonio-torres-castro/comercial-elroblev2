@@ -679,6 +679,10 @@ try {
                     $controller->replan();
                     break;
 
+                case 'category-by-parent':
+                    $controller->categoryByParent();
+                    break;
+
                 case 'category':
                     $controller->createCategory();
                     break;

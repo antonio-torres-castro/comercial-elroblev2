@@ -255,6 +255,25 @@ class ServiceController extends BaseController
         }
     }
 
+    public function categoryByParent(): void
+    {
+        try {
+            $user = $this->requireUser();
+            if (!$this->canAdmin($user)) {
+                $this->jsonForbidden();
+                return;
+            }
+            $parentId = $_GET['parent_id'] ?? '';
+            $parentId = is_numeric($parentId) ? (int)$parentId : null;
+            $this->jsonSuccess('Categorias cargadas', [
+                'data' => $this->serviceModel->getCategoriesByParent($parentId)
+            ]);
+        } catch (Exception $e) {
+            Logger::error("ServiceController::categoryByParent: " . $e->getMessage());
+            $this->jsonInternalError($e->getMessage());
+        }
+    }
+
     public function createCategory(): void
     {
         try {

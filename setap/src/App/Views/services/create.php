@@ -299,6 +299,36 @@ $isAdmin = $data['user']['id'] == 1;
                 (payload.processes || []).forEach(process => processSelect.add(new Option(process.nombre, process.id)));
             });
         }
+        const filtroParentSelect = document.getElementById('filtro_parent_id');
+        const categoriaSelect = document.getElementById('servicio_categoria_id');
+        const allCategoriaOptions = Array.from(categoriaSelect.options).map(opt => ({
+            value: opt.value,
+            text: opt.textContent,
+            parentId: opt.dataset.parentId || ''
+        }));
+
+        if (filtroParentSelect && categoriaSelect) {
+            filtroParentSelect.addEventListener('change', async () => {
+                const parentId = filtroParentSelect.value;
+                categoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
+                if (!parentId) {
+                    allCategoriaOptions.forEach(opt => {
+                        if (opt.value !== '') {
+                            categoriaSelect.add(new Option(opt.text, opt.value));
+                        }
+                    });
+                    return;
+                }
+                try {
+                    const response = await fetch(`${serviceBaseRoute}/category-by-parent?parent_id=${parentId}`);
+                    const json = await response.json();
+                    const categories = json.data || [];
+                    categories.forEach(cat => categoriaSelect.add(new Option(cat.nombre, cat.id)));
+                } catch (e) {
+                    console.error('Error al cargar categorias:', e);
+                }
+            });
+        }
     </script>
 </body>
 
