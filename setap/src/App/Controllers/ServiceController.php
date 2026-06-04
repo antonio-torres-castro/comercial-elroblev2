@@ -88,6 +88,112 @@ class ServiceController extends BaseController
         }
     }
 
+    public function categories(): void
+    {
+        try {
+            $user = $this->requireUser();
+            if (!$this->canAdmin($user)) {
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $filters = [
+                'nombre' => $_GET['nombre'] ?? '',
+                'parent_id' => $_GET['parent_id'] ?? ''
+            ];
+
+            echo $this->viewRenderer->render('services/categories', [
+                'user' => $user,
+                'title' => 'Categorias de Servicio',
+                'categories' => $this->serviceModel->getCategoriesWithFilters($filters),
+                'all_categories' => $this->serviceModel->getCategories(),
+                'parent_categories' => $this->serviceModel->getParentCategories(),
+                'filters' => $filters
+            ]);
+        } catch (Exception $e) {
+            Logger::error("ServiceController::categories: " . $e->getMessage());
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    public function types(): void
+    {
+        try {
+            $user = $this->requireUser();
+            if (!$this->canAdmin($user)) {
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $providerId = $user['id'] == 1 ? null : (int)($user['proveedor_id'] ?? 0);
+            $filters = [
+                'nombre' => $_GET['nombre'] ?? '',
+                'servicio_categoria_id' => $_GET['servicio_categoria_id'] ?? '',
+                'proveedor_id' => $providerId ?? ''
+            ];
+
+            echo $this->viewRenderer->render('services/types', [
+                'user' => $user,
+                'title' => 'Tipos de Servicio',
+                'types' => $this->serviceModel->getTypesWithFilters($filters),
+                'categories' => $this->serviceModel->getCategories(),
+                'parent_categories' => $this->serviceModel->getParentCategories(),
+                'suppliers' => $this->getSuppliersForUser($user),
+                'filters' => $filters,
+                'isAdmin' => $user['id'] == 1
+            ]);
+        } catch (Exception $e) {
+            Logger::error("ServiceController::types: " . $e->getMessage());
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    public function deleteCategory(): void
+    {
+        try {
+            $user = $this->requireUser();
+            if (!$this->canAdmin($user)) {
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+            $this->ensurePost();
+            $this->ensureCsrf();
+
+            $id = (int)($_POST['id'] ?? 0);
+            if (!$id) {
+                throw new Exception('ID de categoria requerido');
+            }
+            $this->serviceModel->deleteCategory($id);
+            $this->redirectWithSuccess(AppConstants::ROUTE_SERVICES . '/categories', AppConstants::SUCCESS_DELETED);
+        } catch (Exception $e) {
+            Logger::error("ServiceController::deleteCategory: " . $e->getMessage());
+            $this->redirectWithError(AppConstants::ROUTE_SERVICES . '/categories', $e->getMessage());
+        }
+    }
+
+    public function deleteType(): void
+    {
+        try {
+            $user = $this->requireUser();
+            if (!$this->canAdmin($user)) {
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+            $this->ensurePost();
+            $this->ensureCsrf();
+
+            $id = (int)($_POST['id'] ?? 0);
+            if (!$id) {
+                throw new Exception('ID de tipo requerido');
+            }
+            $this->serviceModel->deleteType($id);
+            $this->redirectWithSuccess(AppConstants::ROUTE_SERVICES . '/types', AppConstants::SUCCESS_DELETED);
+        } catch (Exception $e) {
+            Logger::error("ServiceController::deleteType: " . $e->getMessage());
+            $this->redirectWithError(AppConstants::ROUTE_SERVICES . '/types', $e->getMessage());
+        }
+    }
+
     public function create(): void
     {
         try {

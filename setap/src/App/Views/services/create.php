@@ -171,72 +171,6 @@ $isAdmin = $data['user']['id'] == 1;
                         </div>
                     </form>
                 </div>
-
-                <div class="col-lg-4">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-tags"></i> Crear categoria</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="<?= AppConstants::ROUTE_SERVICES ?>/category">
-                                <?= Security::renderCsrfField() ?>
-
-                                <label class="form-label" for="parent_id">Padre</label>
-                                <select class="form-select mb-3" id="parent_id" name="parent_id">
-                                    <option value="">Sin padre</option>
-                                    <?php foreach ($data['categories'] as $category): ?>
-                                        <option value="<?= $category['id']; ?>"><?= htmlspecialchars($category['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-
-                                <label class="form-label" for="categoria_nombre">Nombre</label>
-                                <input class="form-control mb-3" id="categoria_nombre" name="nombre" required>
-                                <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-plus-circle"></i> Guardar categoria</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-ui-checks-grid"></i> Crear tipo</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="<?= AppConstants::ROUTE_SERVICES ?>/type">
-                                <?= Security::renderCsrfField() ?>
-                                <input type="hidden" name="estado_tipo_id" value="2">
-                                <?php if ($isAdmin): ?>
-                                    <label class="form-label" for="type_proveedor_id">Proveedor</label>
-                                    <select class="form-select mb-3" id="type_proveedor_id" name="proveedor_id" required>
-                                        <?php foreach ($data['suppliers'] as $supplier): ?>
-                                            <option value="<?= $supplier['id']; ?>"><?= htmlspecialchars($supplier['razon_social']); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else: ?>
-                                    <input type="hidden" name="proveedor_id" value="<?= htmlspecialchars((string)($data['suppliers'][0]['id'] ?? '')); ?>">
-                                <?php endif; ?>
-
-                                <label class="form-label" for="filtro_parent_id">Padre</label>
-                                <select class="form-select mb-3" id="filtro_parent_id" name="parent_id">
-                                    <option value="">Sin padre</option>
-                                    <?php foreach ($data['parent_categories'] as $parent_category): ?>
-                                        <option value="<?= $parent_category['id']; ?>"><?= htmlspecialchars($parent_category['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-
-                                <label class="form-label" for="servicio_categoria_id">Categoria</label>
-                                <select class="form-select mb-3" id="servicio_categoria_id" name="servicio_categoria_id">
-                                    <option value="">Sin categoria</option>
-                                    <?php foreach ($data['categories'] as $category): ?>
-                                        <option value="<?= $category['id']; ?>"><?= htmlspecialchars($category['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-
-                                <label class="form-label" for="tipo_nombre">Nombre</label>
-                                <input class="form-control mb-3" id="tipo_nombre" name="nombre" required>
-                                <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-plus-circle"></i> Guardar tipo</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
@@ -297,36 +231,6 @@ $isAdmin = $data['user']['id'] == 1;
                 (payload.types || []).forEach(type => typeSelect.add(new Option(type.nombre, type.id)));
                 processSelect.innerHTML = '<option value="">Seleccione</option>';
                 (payload.processes || []).forEach(process => processSelect.add(new Option(process.nombre, process.id)));
-            });
-        }
-        const filtroParentSelect = document.getElementById('filtro_parent_id');
-        const categoriaSelect = document.getElementById('servicio_categoria_id');
-        const allCategoriaOptions = Array.from(categoriaSelect.options).map(opt => ({
-            value: opt.value,
-            text: opt.textContent,
-            parentId: opt.dataset.parentId || ''
-        }));
-
-        if (filtroParentSelect && categoriaSelect) {
-            filtroParentSelect.addEventListener('change', async () => {
-                const parentId = filtroParentSelect.value;
-                categoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
-                if (!parentId) {
-                    allCategoriaOptions.forEach(opt => {
-                        if (opt.value !== '') {
-                            categoriaSelect.add(new Option(opt.text, opt.value));
-                        }
-                    });
-                    return;
-                }
-                try {
-                    const response = await fetch(`${serviceBaseRoute}/category-by-parent?parent_id=${parentId}`);
-                    const json = await response.json();
-                    const categories = json.data || [];
-                    categories.forEach(cat => categoriaSelect.add(new Option(cat.nombre, cat.id)));
-                } catch (e) {
-                    console.error('Error al cargar categorias:', e);
-                }
             });
         }
     </script>

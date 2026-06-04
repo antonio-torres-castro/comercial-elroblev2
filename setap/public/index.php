@@ -679,6 +679,22 @@ try {
                     $controller->replan();
                     break;
 
+                case 'categories':
+                    $controller->categories();
+                    break;
+
+                case 'types':
+                    $controller->types();
+                    break;
+
+                case 'delete-category':
+                    $controller->deleteCategory();
+                    break;
+
+                case 'delete-type':
+                    $controller->deleteType();
+                    break;
+
                 case 'category-by-parent':
                     $controller->categoryByParent();
                     break;

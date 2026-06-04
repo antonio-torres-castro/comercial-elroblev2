@@ -43,6 +43,87 @@ class Service
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getCategoriesWithFilters(array $filters = []): array
+    {
+        $sql = "SELECT sc.id, sc.parent_id, sc.nombre, p.nombre AS parent_nombre
+                FROM servicio_categorias sc
+                LEFT JOIN servicio_categorias p ON p.id = sc.parent_id
+                WHERE 1=1";
+        $params = [];
+
+        if (!empty($filters['nombre'])) {
+            $sql .= " AND sc.nombre LIKE ?";
+            $params[] = '%' . $filters['nombre'] . '%';
+        }
+
+        if (!empty($filters['parent_id'])) {
+            $sql .= " AND sc.parent_id = ?";
+            $params[] = (int)$filters['parent_id'];
+        }
+
+        $sql .= " ORDER BY sc.nombre ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function deleteCategory(int $id): bool
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM servicio_categorias WHERE parent_id = ?");
+        $stmt->execute([$id]);
+        $count = (int)$stmt->fetchColumn();
+        if ($count > 0) {
+            throw new Exception('No se puede eliminar la categoria porque tiene subcategorias asociadas');
+        }
+        $stmt = $this->db->prepare("DELETE FROM servicio_categorias WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function getTypesWithFilters(array $filters = []): array
+    {
+        $sql = "SELECT st.*, sc.nombre AS categoria_nombre, p.razon_social AS proveedor_nombre, et.nombre AS estado_nombre
+                FROM servicio_tipos st
+                LEFT JOIN servicio_categorias sc ON sc.id = st.servicio_categoria_id
+                LEFT JOIN proveedores p ON p.id = st.proveedor_id
+                LEFT JOIN estado_tipos et ON et.id = st.estado_tipo_id
+                WHERE 1=1";
+        $params = [];
+
+        if (!empty($filters['nombre'])) {
+            $sql .= " AND st.nombre LIKE ?";
+            $params[] = '%' . $filters['nombre'] . '%';
+        }
+
+        if (!empty($filters['servicio_categoria_id'])) {
+            $sql .= " AND st.servicio_categoria_id = ?";
+            $params[] = (int)$filters['servicio_categoria_id'];
+        }
+
+        if (!empty($filters['proveedor_id'])) {
+            $sql .= " AND st.proveedor_id = ?";
+            $params[] = (int)$filters['proveedor_id'];
+        }
+
+        $sql .= " ORDER BY st.nombre ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function deleteType(int $id): bool
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM servicios WHERE servicio_tipo_id = ?");
+        $stmt->execute([$id]);
+        $count = (int)$stmt->fetchColumn();
+        if ($count > 0) {
+            throw new Exception('No se puede eliminar el tipo porque esta siendo utilizado en servicios');
+        }
+        $stmt = $this->db->prepare("DELETE FROM servicio_tipos WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->rowCount() > 0;
+    }
+
     public function createCategory(array $data): int
     {
         $stmt = $this->db->prepare("INSERT INTO servicio_categorias (parent_id, nombre) VALUES (?, ?)");
