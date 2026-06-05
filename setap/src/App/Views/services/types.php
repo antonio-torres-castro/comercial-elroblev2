@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <?php
+
 use App\Helpers\Security;
 use App\Constants\AppConstants;
+
 $isAdmin = $data['user']['id'] == 1;
 ?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +18,7 @@ $isAdmin = $data['user']['id'] == 1;
     <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
     <div class="container-fluid mt-4">
@@ -234,12 +238,21 @@ $isAdmin = $data['user']['id'] == 1;
     <script>
         $(document).ready(function() {
             $('#typesTable').DataTable({
-                language: { url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/es-ES.json' },
+                language: {
+                    url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/es-ES.json'
+                },
                 pageLength: 25,
-                order: [[1, 'asc']],
-                columnDefs: [{ targets: [-1], orderable: false, searchable: false }]
+                order: [
+                    [1, 'asc']
+                ],
+                columnDefs: [{
+                    targets: [-1],
+                    orderable: false,
+                    searchable: false
+                }]
             });
         });
+
         function confirmDeleteType(id, name) {
             document.getElementById('deleteTypeName').textContent = name;
             document.getElementById('deleteTypeId').value = id;
@@ -279,4 +292,5 @@ $isAdmin = $data['user']['id'] == 1;
         }
     </script>
 </body>
+
 </html>

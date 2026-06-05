@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <?php
+
 use App\Helpers\Security;
 use App\Constants\AppConstants;
 ?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +16,7 @@ use App\Constants\AppConstants;
     <link href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/setap/public/css/setap-theme.css">
 </head>
+
 <body>
     <?php include __DIR__ . '/../layouts/navigation.php'; ?>
     <div class="container-fluid mt-4">
@@ -110,10 +113,22 @@ use App\Constants\AppConstants;
                                         <?php foreach ($data['categories'] as $cat): ?>
                                             <tr>
                                                 <td><span class="badge bg-light text-dark"><?= htmlspecialchars($cat['id']); ?></span></td>
-                                                <td><strong><?= htmlspecialchars($cat['nombre']); ?></strong></td>
+                                                <td>
+                                                    <?php if ($cat['ind_padre'] > 0): ?>
+                                                        <strong><?= htmlspecialchars($cat['nombre']); ?></strong>
+                                                    <?php else: ?>
+                                                        <?= htmlspecialchars($cat['nombre']); ?>
+                                                    <?php endif; ?>
+                                                </td>
                                                 <td>
                                                     <?php if ($cat['parent_nombre']): ?>
-                                                        <span class="badge bg-setap-primary-light"><?= htmlspecialchars($cat['parent_nombre']); ?></span>
+
+                                                        <?php if ($cat['ind_padre'] > 0): ?>
+                                                            <span class="badge bg-setap-primary"><?= htmlspecialchars($cat['parent_nombre']); ?></span>
+                                                        <?php else: ?>
+                                                            <span class="badge bg-setap-secondary"><?= htmlspecialchars($cat['parent_nombre']); ?></span>
+                                                        <?php endif; ?>
+
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
                                                     <?php endif; ?>
@@ -154,7 +169,9 @@ use App\Constants\AppConstants;
                         <select class="form-select mb-3" id="modal_parent_id" name="parent_id">
                             <option value="">Sin padre</option>
                             <?php foreach ($data['all_categories'] as $category): ?>
-                                <option value="<?= $category['id']; ?>"><?= htmlspecialchars($category['nombre']); ?></option>
+                                <option value="<?= $category['id']; ?>" <?= $category['ind_padre'] > 0 ? 'style="font-weight: bold;"' : 'style="font-weight: normal;"'; ?>>
+                                    <?= htmlspecialchars($category['nombre']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                         <label class="form-label" for="modal_categoria_nombre">Nombre</label>
@@ -202,12 +219,21 @@ use App\Constants\AppConstants;
     <script>
         $(document).ready(function() {
             $('#categoriesTable').DataTable({
-                language: { url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/es-ES.json' },
+                language: {
+                    url: 'https://cdn.jsdelivr.net/npm/datatables.net-plugins@1.13.6/i18n/es-ES.json'
+                },
                 pageLength: 25,
-                order: [[1, 'asc']],
-                columnDefs: [{ targets: [-1], orderable: false, searchable: false }]
+                order: [
+                    [1, 'asc']
+                ],
+                columnDefs: [{
+                    targets: [-1],
+                    orderable: false,
+                    searchable: false
+                }]
             });
         });
+
         function confirmDeleteCategory(id, name) {
             document.getElementById('deleteCategoryName').textContent = name;
             document.getElementById('deleteCategoryId').value = id;
@@ -215,4 +241,5 @@ use App\Constants\AppConstants;
         }
     </script>
 </body>
+
 </html>

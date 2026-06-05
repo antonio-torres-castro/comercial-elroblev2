@@ -30,7 +30,15 @@ class Service
 
     public function getCategories(): array
     {
-        $stmt = $this->db->query("SELECT id, parent_id, nombre FROM servicio_categorias ORDER BY nombre ASC");
+        $stmt = $this->db->query("SELECT DISTINCT 
+                                   c.id, c.parent_id, c.nombre, 
+                                   ifnull(padre.id, 0) AS ind_padre
+                                  FROM servicio_categorias c
+                                  LEFT JOIN (SELECT DISTINCT p.id
+                                  FROM servicio_categorias p
+                                  INNER JOIN servicio_categorias h 
+                                  ON h.parent_id = p.id) padre ON padre.id = c.id
+                                  ORDER BY c.nombre ASC;");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -45,9 +53,15 @@ class Service
 
     public function getCategoriesWithFilters(array $filters = []): array
     {
-        $sql = "SELECT sc.id, sc.parent_id, sc.nombre, p.nombre AS parent_nombre
+        $sql = "SELECT sc.id, sc.parent_id, sc.nombre, 
+                       p.nombre AS parent_nombre, 
+                       ifnull(padre.id, 0) AS ind_padre
                 FROM servicio_categorias sc
                 LEFT JOIN servicio_categorias p ON p.id = sc.parent_id
+                LEFT JOIN (SELECT DISTINCT p.id
+                           FROM servicio_categorias p
+                           INNER JOIN servicio_categorias h 
+                           ON h.parent_id = p.id) padre ON padre.id = sc.id
                 WHERE 1=1";
         $params = [];
 

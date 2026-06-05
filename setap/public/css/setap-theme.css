@@ -228,6 +228,12 @@ Actualizada: Colores 5% más oscuros para mayor alineación con comercial-elrobl
     color: var(--setap-text-light) !important;
 }
 
+/* Background utilities */
+.bg-setap-secondary {
+    background-color: var(--setap-secondary) !important;
+    color: var(--setap-text-light) !important;
+}
+
 /* Custom hover effects */
 .hover-setap-primary:hover {
     color: var(--setap-primary) !important;

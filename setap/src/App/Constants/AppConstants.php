@@ -157,6 +157,8 @@ class AppConstants
     /** Ruta de vista de procesos */
     const ROUTE_PROCESSES_SHOW = '/setap/process/show';
 
+    const ROUTE_SERVICES_CATEGORIES = '/setap/services/categories';
+    const ROUTE_SERVICES_TYPES = '/setap/services/types';
     const ROUTE_SERVICES = '/setap/services';
     const ROUTE_SERVICES_CATALOG = '/setap/services/catalog';
     const ROUTE_SERVICES_CREATE = '/setap/services/create';
@@ -208,6 +210,9 @@ class AppConstants
     const SUCCESS_STATUS_CHANGED = 'status_changed';
 
     // ===== MENSAJES DE ERROR COMUNES =====
+
+    /** Error de categoria nombre existente */
+    const ERROR_INVALID_CATEGORY_NAME_EXISTS = 'Nombre de categoría ya existe';
 
     /** Error de ID inválido */
     const ERROR_INVALID_ID = 'ID inválido';

@@ -393,8 +393,14 @@ class ServiceController extends BaseController
             if (empty($_POST['nombre'])) {
                 throw new Exception('Nombre de categoria requerido');
             }
+            $filters = [];
+            $filters['nombre'] = $_POST['nombre'];
+            $categoryExists = $this->serviceModel->getCategoriesWithFilters($filters);
+            if ($categoryExists) {
+                $this->redirectWithError(AppConstants::ROUTE_SERVICES_CATEGORIES, AppConstants::ERROR_INVALID_CATEGORY_NAME_EXISTS);
+            }
             $this->serviceModel->createCategory($_POST);
-            $this->redirectWithSuccess(AppConstants::ROUTE_SERVICES_CREATE, AppConstants::SUCCESS_CREATED);
+            $this->redirectWithSuccess(AppConstants::ROUTE_SERVICES_CATEGORIES, AppConstants::SUCCESS_CREATED);
         } catch (Exception $e) {
             Logger::error("ServiceController::createCategory: " . $e->getMessage());
             echo $this->renderError($e->getMessage());
