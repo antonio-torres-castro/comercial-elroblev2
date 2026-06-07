@@ -17,6 +17,26 @@ class Service
         $this->db = Database::getInstance();
     }
 
+    /**
+     * Obtener estados disponibles para menús
+     */
+    public function getStatusTypes(): array
+    {
+        try {
+            $estados = [];
+            $query = "SELECT id, nombre FROM estado_tipos WHERE id IN (1, 2, 3, 4) ORDER BY id ASC";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $estados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $estados;
+        } catch (Exception $e) {
+            Logger::error("obtener estados: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function getCategoriesByParent(?int $parentId): array
     {
         if ($parentId === null || $parentId === 0) {

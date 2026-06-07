@@ -67,11 +67,14 @@ $isAdmin = $data['user']['id'] == 1;
                                 <label for="servicio_categoria_id" class="form-label">Categoria</label>
                                 <select class="form-select" id="servicio_categoria_id" name="servicio_categoria_id">
                                     <option value="">Todas</option>
+
                                     <?php foreach ($data['categories'] as $category): ?>
-                                        <option value="<?= $category['id']; ?>" <?= ($data['filters']['servicio_categoria_id'] ?? '') == $category['id'] ? 'selected' : ''; ?>>
+                                        <option value="<?= $category['id']; ?>" <?= ($data['filters']['servicio_categoria_id'] ?? '') == $category['id'] ? 'selected' : ''; ?>
+                                            <?= $category['ind_padre'] > 0 ? 'style="font-weight: bold;"' : 'style="font-weight: normal;"'; ?>>
                                             <?= htmlspecialchars($category['nombre']); ?>
                                         </option>
                                     <?php endforeach; ?>
+
                                 </select>
                             </div>
                             <div class="col-md-4">
@@ -193,8 +196,77 @@ $isAdmin = $data['user']['id'] == 1;
                             <?php endforeach; ?>
                         </select>
 
+                        <label class="form-label" for="modal_tipo_codigo">Codigo</label>
+                        <input class="form-control mb-3" id="modal_tipo_codigo" name="codigo" required>
+
                         <label class="form-label" for="modal_tipo_nombre">Nombre</label>
                         <input class="form-control mb-3" id="modal_tipo_nombre" name="nombre" required>
+
+                        <label class="form-label" for="modal_tipo_descripcion">Descripcion</label>
+                        <textarea class="form-control mb-3" rows="4" id="modal_tipo_descripcion" name="descripcion" required></textarea>
+
+                        <div class="mb-3 col-md-10" id="DuracionEstimadaDias">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 flex-shrink-0" for="modal_tipo_duracion_estimada_dias">
+                                    Duración estimada (días):
+                                </label>
+
+                                <input type="number"
+                                    class="form-control"
+                                    id="modal_tipo_duracion_estimada_dias"
+                                    name="duracion_estimada_dias"
+                                    min="0"
+                                    style="max-width: 100px;"
+                                    required>
+                            </div>
+                        </div>
+
+                        <label class="form-label" for="modal_tipo_color">Color</label>
+                        <select class="form-select mb-3" id="modal_tipo_color" name="color" required>
+                            <option value="#0d6efd" selected>Azul (Servicio Estándar)</option>
+                            <option value="#198754">Verde (Prioridad Baja / Activo)</option>
+                            <option value="#ffc107">Amarillo (Prioridad Media / En Pausa)</option>
+                            <option value="#dc3545">Rojo (Prioridad Alta / Crítico)</option>
+                            <option value="#6c757d">Gris (Inactivo / Archivado)</option>
+                        </select>
+
+                        <div class="row">
+                            <div class="form-check mb-2 mx-3 col-md-5" id="RequiereAprobacionCliente">
+                                <input class="form-check-input" type="checkbox" id="modal_tipo_requiere_aprobacion_cliente"
+                                    name="requiere_aprobacion_cliente" value="1">
+                                <label class="form-check-label" for="modal_tipo_requiere_aprobacion_cliente">
+                                    Aprobación cliente
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2 col-md-5" id="RequiereFirmaCliente">
+                                <input class="form-check-input" type="checkbox" id="modal_tipo_requiere_firma_cliente"
+                                    name="requiere_firma_cliente" value="1">
+                                <label class="form-check-label" for="modal_tipo_requiere_firma_cliente">
+                                    Firma cliente
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-check mb-2 mx-3 col-md-6" id="GeneraProyectoServicio">
+                                <input class="form-check-input" type="checkbox" id="modal_tipo_genera_proyecto_servicio"
+                                    name="genera_proyecto_servicio" value="1">
+                                <label class="form-check-label" for="modal_tipo_genera_proyecto_servicio">
+                                    Genera proyecto de servicio
+                                </label>
+                            </div>
+                        </div>
+
+
+                        <label class="form-label" for="modal_tipo_estado_tipo_id">Estado</label>
+                        <select class="form-select mb-2" id="modal_tipo_estado_tipo_id" name="estado_tipo_id">
+                            <option value="">Seleccionar estado</option>
+                            <?php foreach ($data['status'] as $status): ?>
+                                <option value="<?= $status['id']; ?>"><?= htmlspecialchars($status['nombre']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
                     </form>
                 </div>
                 <div class="modal-footer">

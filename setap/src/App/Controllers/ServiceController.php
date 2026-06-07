@@ -135,6 +135,7 @@ class ServiceController extends BaseController
             echo $this->viewRenderer->render('services/types', [
                 'user' => $user,
                 'title' => 'Tipos de Servicio',
+                'status' => $this->serviceModel->getStatusTypes(),
                 'types' => $this->serviceModel->getTypesWithFilters($filters),
                 'categories' => $this->serviceModel->getCategories(),
                 'parent_categories' => $this->serviceModel->getParentCategories(),
