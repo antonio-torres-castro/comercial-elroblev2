@@ -421,8 +421,16 @@ class ServiceController extends BaseController
             if (empty($_POST['proveedor_id']) || empty($_POST['nombre'])) {
                 throw new Exception('Proveedor y nombre del tipo son requeridos');
             }
+            $filters = [];
+            $filters['nombre'] = $_POST['nombre'];
+            $categoryExists = $this->serviceModel->getTypesWithFilters($filters);
+            if ($categoryExists) {
+                $this->redirectWithError(AppConstants::ROUTE_SERVICES_TYPES, AppConstants::ERROR_INVALID_TYPE_NAME_EXISTS);
+            }
+
+
             $this->serviceModel->createType($_POST);
-            $this->redirectWithSuccess(AppConstants::ROUTE_SERVICES_CREATE, AppConstants::SUCCESS_CREATED);
+            $this->redirectWithSuccess(AppConstants::ROUTE_SERVICES_TYPES, AppConstants::SUCCESS_CREATED);
         } catch (Exception $e) {
             Logger::error("ServiceController::createType: " . $e->getMessage());
             echo $this->renderError($e->getMessage());

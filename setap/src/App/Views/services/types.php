@@ -123,7 +123,7 @@ $isAdmin = $data['user']['id'] == 1;
                                                 <td><strong><?= htmlspecialchars($type['nombre']); ?></strong></td>
                                                 <td>
                                                     <?php if ($type['categoria_nombre']): ?>
-                                                        <span class="badge bg-setap-primary-light"><?= htmlspecialchars($type['categoria_nombre']); ?></span>
+                                                        <span class="badge bg-setap-secondary"><?= htmlspecialchars($type['categoria_nombre']); ?></span>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
                                                     <?php endif; ?>

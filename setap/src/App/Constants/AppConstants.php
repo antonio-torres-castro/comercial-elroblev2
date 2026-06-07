@@ -214,6 +214,9 @@ class AppConstants
     /** Error de categoria nombre existente */
     const ERROR_INVALID_CATEGORY_NAME_EXISTS = 'Nombre de categoría ya existe';
 
+    /** Error de tipo nombre existente */
+    const ERROR_INVALID_TYPE_NAME_EXISTS = 'Nombre de tipo ya existe';
+
     /** Error de ID inválido */
     const ERROR_INVALID_ID = 'ID inválido';
 
