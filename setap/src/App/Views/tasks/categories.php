@@ -55,13 +55,24 @@ use App\Constants\AppConstants;
                     </div>
                     <div class="card-body">
                         <form method="GET" action="<?= AppConstants::ROUTE_TASKS ?>/categories" class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="nombre" class="form-label">Nombre</label>
                                 <input type="text" class="form-control" id="nombre" name="nombre"
                                     value="<?= htmlspecialchars($data['filters']['nombre'] ?? ''); ?>"
                                     placeholder="Buscar por nombre">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label for="industria_id" class="form-label">Industria</label>
+                                <select class="form-select" id="industria_id" name="industria_id">
+                                    <option value="">Todas</option>
+                                    <?php foreach ($data['industrias'] as $industria): ?>
+                                        <option value="<?= $industria['id']; ?>" <?= ($data['filters']['industria_id'] ?? '') == $industria['id'] ? 'selected' : ''; ?>>
+                                            <?= htmlspecialchars($industria['nombre']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
                                 <label for="parent_id" class="form-label">Padre</label>
                                 <select class="form-select" id="parent_id" name="parent_id">
                                     <option value="">Todos</option>
@@ -72,7 +83,7 @@ use App\Constants\AppConstants;
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">&nbsp;</label>
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-setap-primary">
@@ -105,6 +116,7 @@ use App\Constants\AppConstants;
                                         <tr>
                                             <th>ID</th>
                                             <th>Nombre</th>
+                                            <th>Industria</th>
                                             <th>Padre</th>
                                             <th width="120">Acciones</th>
                                         </tr>
@@ -118,6 +130,13 @@ use App\Constants\AppConstants;
                                                         <?= htmlspecialchars($cat['nombre']); ?>
                                                     <?php else: ?>
                                                         <strong><?= htmlspecialchars($cat['nombre']); ?></strong>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php if ($cat['industria_nombre']): ?>
+                                                        <span class="badge bg-info"><?= htmlspecialchars($cat['industria_nombre']); ?></span>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">-</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
@@ -159,6 +178,13 @@ use App\Constants\AppConstants;
                 <div class="modal-body">
                     <form method="POST" action="<?= AppConstants::ROUTE_TASKS ?>/create-task-category" id="createCategoryForm">
                         <?= Security::renderCsrfField() ?>
+                        <label class="form-label" for="modal_industria_id">Industria</label>
+                        <select class="form-select mb-3" id="modal_industria_id" name="industria_id">
+                            <option value="">Sin industria</option>
+                            <?php foreach ($data['industrias'] as $industria): ?>
+                                <option value="<?= $industria['id']; ?>"><?= htmlspecialchars($industria['nombre']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                         <label class="form-label" for="modal_parent_id">Padre</label>
                         <select class="form-select mb-3" id="modal_parent_id" name="parent_id">
                             <option value="">Sin padre</option>

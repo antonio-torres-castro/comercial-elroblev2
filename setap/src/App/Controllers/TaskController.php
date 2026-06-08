@@ -2800,7 +2800,8 @@ class TaskController extends BaseController
 
             $filters = [
                 'nombre' => $_GET['nombre'] ?? '',
-                'parent_id' => $_GET['parent_id'] ?? ''
+                'parent_id' => $_GET['parent_id'] ?? '',
+                'industria_id' => $_GET['industria_id'] ?? ''
             ];
 
             $data = [
@@ -2809,6 +2810,7 @@ class TaskController extends BaseController
                 'categories' => $this->taskModel->getTaskCategoriesWithFilters($filters),
                 'all_categories' => $this->taskModel->getTaskCategorys(),
                 'parent_categories' => $this->taskModel->getTaskParentCategories(),
+                'industrias' => $this->taskModel->getIndustrias(),
                 'filters' => $filters,
                 'success' => $_GET['success'] ?? '',
                 'error' => $_GET['error'] ?? ''

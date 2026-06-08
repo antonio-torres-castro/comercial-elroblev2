@@ -1789,12 +1789,26 @@ class Task
         }
     }
 
+    public function getIndustrias(): array
+    {
+        try {
+            $sql = "SELECT id, nombre FROM industrias ORDER BY nombre ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getIndustrias: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function getTaskCategoriesWithFilters(array $filters = []): array
     {
         try {
-            $sql = "SELECT tc.id, tc.parent_id, tc.nombre, p.nombre AS parent_nombre
+            $sql = "SELECT tc.id, tc.industria_id, tc.parent_id, tc.nombre, p.nombre AS parent_nombre, i.nombre AS industria_nombre
                     FROM tarea_categorias tc
                     LEFT JOIN tarea_categorias p ON p.id = tc.parent_id
+                    LEFT JOIN industrias i ON i.id = tc.industria_id
                     WHERE 1=1";
             $params = [];
 
@@ -1806,6 +1820,11 @@ class Task
             if (!empty($filters['parent_id'])) {
                 $sql .= " AND tc.parent_id = ?";
                 $params[] = (int)$filters['parent_id'];
+            }
+
+            if (!empty($filters['industria_id'])) {
+                $sql .= " AND tc.industria_id = ?";
+                $params[] = (int)$filters['industria_id'];
             }
 
             $sql .= " ORDER BY tc.nombre ASC";
@@ -1821,9 +1840,10 @@ class Task
     public function getTaskParentCategories(): array
     {
         try {
-            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre
+            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre, p.industria_id, i.nombre AS industria_nombre
                     FROM tarea_categorias p
                     INNER JOIN tarea_categorias h ON h.parent_id = p.id
+                    LEFT JOIN industrias i ON i.id = p.industria_id
                     ORDER BY p.nombre ASC";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
@@ -1837,10 +1857,22 @@ class Task
     public function createTaskCategory(array $data): int
     {
         try {
-            $stmt = $this->db->prepare("INSERT INTO tarea_categorias (parent_id, nombre) VALUES (?, ?)");
+            $industriaId = !empty($data['industria_id']) ? (int)$data['industria_id'] : null;
+            $nombre = trim($data['nombre']);
+
+            if ($industriaId !== null) {
+                $stmt = $this->db->prepare("SELECT COUNT(*) FROM tarea_categorias WHERE nombre = ? AND industria_id = ?");
+                $stmt->execute([$nombre, $industriaId]);
+                if ((int)$stmt->fetchColumn() > 0) {
+                    throw new Exception('Ya existe una categoria con ese nombre en la misma industria');
+                }
+            }
+
+            $stmt = $this->db->prepare("INSERT INTO tarea_categorias (industria_id, parent_id, nombre) VALUES (?, ?, ?)");
             $stmt->execute([
+                $industriaId,
                 !empty($data['parent_id']) ? (int)$data['parent_id'] : null,
-                trim($data['nombre'])
+                $nombre
             ]);
             return (int)$this->db->lastInsertId();
         } catch (PDOException $e) {
@@ -1873,7 +1905,7 @@ class Task
     public function getTaskCategorys(): array
     {
         try {
-            $sql = "SELECT id, nombre FROM tarea_categorias ORDER BY nombre";
+            $sql = "SELECT id, industria_id, nombre FROM tarea_categorias ORDER BY nombre";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
