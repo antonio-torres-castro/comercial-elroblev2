@@ -1854,6 +1854,24 @@ class Task
         }
     }
 
+    public function getTaskParentCategoriesByIndustry(array $filters = []): array
+    {
+        try {
+            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre, p.industria_id, i.nombre AS industria_nombre
+                    FROM tarea_categorias p
+                    INNER JOIN tarea_categorias h ON h.parent_id = p.id
+                    LEFT JOIN industrias i ON i.id = p.industria_id
+                    WHERE p.industria_id = ?
+                    ORDER BY p.nombre ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([(int)($filters['industria_id'] ?? 0)]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskParentCategories: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function createTaskCategory(array $data): int
     {
         try {
@@ -1902,10 +1920,23 @@ class Task
     /**
      * Obtener tipos de tareas disponibles (catálogo general)
      */
-    public function getTaskCategorys(): array
+    public function getTaskCategorys(array $filters = []): array
     {
         try {
-            $sql = "SELECT id, industria_id, nombre FROM tarea_categorias ORDER BY nombre";
+            $Where = "";
+            if (!empty($filters['industria_id'])) {
+                $Where .= " WHERE c.industria_id = " . (int)$filters['industria_id'];
+            }
+
+            $sql = "SELECT c.id, c.parent_id, c.industria_id, c.nombre, 
+            ifnull(p1.nombre, '') as parent1_name, ifnull(p2.nombre, '') as parent2_name,
+            i.nombre AS industria_nombre
+            FROM tarea_categorias c 
+            INNER JOIN industrias i on i.id = c.industria_id
+            LEFT JOIN tarea_categorias p1 on p1.id = c.parent_id
+            LEFT JOIN tarea_categorias p2 on p2.id = p1.parent_id
+            $Where
+            ORDER BY c.nombre";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

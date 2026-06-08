@@ -189,7 +189,12 @@ use App\Constants\AppConstants;
                         <select class="form-select mb-3" id="modal_parent_id" name="parent_id">
                             <option value="">Sin padre</option>
                             <?php foreach ($data['all_categories'] as $category): ?>
-                                <option value="<?= $category['id']; ?>"><?= htmlspecialchars($category['nombre']); ?></option>
+                                <option value="<?= $category['id']; ?>">
+                                    <?= htmlspecialchars($category['industria_nombre']); ?>
+                                    <?= htmlspecialchars($category['parent1_name'] === null ? '' : "-" . $category['parent1_name']); ?>
+                                    <?= htmlspecialchars($category['parent2_name'] === null ? '' : "-" . $category['parent2_name']); ?>
+                                    <?= htmlspecialchars("-" . $category['nombre']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                         <label class="form-label" for="modal_categoria_nombre">Nombre</label>
@@ -256,6 +261,70 @@ use App\Constants\AppConstants;
             document.getElementById('deleteCategoryName').textContent = name;
             document.getElementById('deleteCategoryId').value = id;
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        const filtroIndustriaSelect = document.getElementById('industria_id');
+        const categoriaParentSelect = document.getElementById('parent_id');
+        const allCategoriaParentOptions = Array.from(categoriaParentSelect.options).map(opt => ({
+            value: opt.value,
+            text: opt.textContent,
+            parentId: opt.dataset.parentId || ''
+        }));
+
+        if (filtroIndustriaSelect && categoriaParentSelect) {
+            filtroIndustriaSelect.addEventListener('change', async () => {
+                const industriaId = filtroIndustriaSelect.value;
+                categoriaParentSelect.innerHTML = '<option value="">Sin categoria padre</option>';
+                if (!industriaId) {
+                    allCategoriaParentOptions.forEach(opt => {
+                        if (opt.value !== '') {
+                            categoriaParentSelect.add(new Option(opt.text, opt.value));
+                        }
+                    });
+                    return;
+                }
+                try {
+                    const serviceBaseRoute = '<?= AppConstants::ROUTE_TASKS ?>';
+                    const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
+                    const json = await response.json();
+                    const categoriesParents = json.data || [];
+                    categoriesParents.forEach(cat => categoriaParentSelect.add(new Option(cat.nombre, cat.id)));
+                } catch (e) {
+                    console.error('Error al cargar categorias padre:', e);
+                }
+            });
+        }
+
+        const modalIndustriaSelect = document.getElementById('modal_industria_id');
+        const modalCategoriaSelect = document.getElementById('modal_parent_id');
+        const modalAllCategoriaOptions = Array.from(modalCategoriaSelect.options).map(opt => ({
+            value: opt.value,
+            text: opt.textContent,
+            parentId: opt.dataset.parentId || ''
+        }));
+
+        if (modalIndustriaSelect && modalCategoriaSelect) {
+            modalIndustriaSelect.addEventListener('change', async () => {
+                const industriaId = modalIndustriaSelect.value;
+                modalCategoriaSelect.innerHTML = '<option value="">Sin categoria padre</option>';
+                if (!industriaId) {
+                    modalAllCategoriaOptions.forEach(opt => {
+                        if (opt.value !== '') {
+                            modalCategoriaSelect.add(new Option(opt.text, opt.value));
+                        }
+                    });
+                    return;
+                }
+                try {
+                    const serviceBaseRoute = '<?= AppConstants::ROUTE_TASKS ?>';
+                    const response = await fetch(`${serviceBaseRoute}/category-by-industry?industria_id=${industriaId}`);
+                    const json = await response.json();
+                    const categoriesParents = json.data || [];
+                    categoriesParents.forEach(cat => modalCategoriaSelect.add(new Option((cat.parent1_name ? cat.parent1_name + '-' : '') + (cat.parent2_name ? cat.parent2_name + '-' : '') + cat.nombre, cat.id)));
+                } catch (e) {
+                    console.error('Error al cargar categorias padre:', e);
+                }
+            });
         }
     </script>
 </body>

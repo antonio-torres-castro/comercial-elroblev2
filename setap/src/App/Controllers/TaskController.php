@@ -2808,7 +2808,7 @@ class TaskController extends BaseController
                 'user' => $currentUser,
                 'title' => 'Categorias de Tarea',
                 'categories' => $this->taskModel->getTaskCategoriesWithFilters($filters),
-                'all_categories' => $this->taskModel->getTaskCategorys(),
+                'all_categories' => $this->taskModel->getTaskCategorys($filters),
                 'parent_categories' => $this->taskModel->getTaskParentCategories(),
                 'industrias' => $this->taskModel->getIndustrias(),
                 'filters' => $filters,
@@ -2821,6 +2821,68 @@ class TaskController extends BaseController
             Logger::error("TaskController::categories: " . $e->getMessage());
             http_response_code(500);
             echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    public function categoryByIndustry(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+            $industriaId = $_GET['industria_id'] ?? '';
+            $industriaId = is_numeric($industriaId) ? (int)$industriaId : null;
+
+            $data = [];
+            if ($industriaId) {
+                $data = $this->taskModel->getTaskCategorys(['industria_id' => $industriaId]);
+            } else {
+                $data = $this->taskModel->getTaskCategorys();
+            }
+
+            $this->jsonSuccess('Categorias padre cargadas', ['data' => $data]);
+        } catch (Exception $e) {
+            Logger::error("ServiceController::categoryParentByIndustry: " . $e->getMessage());
+            $this->jsonInternalError($e->getMessage());
+        }
+    }
+
+    public function categoryParentByIndustry(): void
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+            $industriaId = $_GET['industria_id'] ?? '';
+            $industriaId = is_numeric($industriaId) ? (int)$industriaId : null;
+
+            $data = [];
+            if ($industriaId) {
+                $data = $this->taskModel->getTaskParentCategoriesByIndustry(['industria_id' => $industriaId]);
+            } else {
+                $data = $this->taskModel->getTaskParentCategories();
+            }
+
+            $this->jsonSuccess('Categorias padre cargadas', ['data' => $data]);
+        } catch (Exception $e) {
+            Logger::error("ServiceController::categoryParentByIndustry: " . $e->getMessage());
+            $this->jsonInternalError($e->getMessage());
         }
     }
 
@@ -3073,6 +3135,3 @@ class TaskController extends BaseController
         return $errors;
     }
 }
-
-
-

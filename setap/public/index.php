@@ -782,6 +782,14 @@ try {
                     $controller->deleteTaskCategory();
                     break;
 
+                case 'category-by-industry':
+                    $controller->categoryByIndustry();
+                    break;
+
+                case 'category-parent-by-industry':
+                    $controller->categoryParentByIndustry();
+                    break;
+
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();
