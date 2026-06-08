@@ -141,7 +141,7 @@ use App\Constants\AppConstants;
                                                 </td>
                                                 <td>
                                                     <?php if ($cat['parent_nombre']): ?>
-                                                        <span class="badge bg-setap-primary-light"><?= htmlspecialchars($cat['parent_nombre']); ?></span>
+                                                        <span class="badge bg-setap-secondary"><?= htmlspecialchars($cat['parent_nombre']); ?></span>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
                                                     <?php endif; ?>
