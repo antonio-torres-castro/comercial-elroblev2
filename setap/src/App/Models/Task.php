@@ -1805,9 +1805,10 @@ class Task
     public function getTaskCategoriesWithFilters(array $filters = []): array
     {
         try {
-            $sql = "SELECT tc.id, tc.industria_id, tc.parent_id, tc.nombre, p.nombre AS parent_nombre, i.nombre AS industria_nombre
+            $sql = "SELECT tc.id, tc.industria_id, tc.parent_id, tc.nombre, p1.nombre AS parent1_name, p2.nombre AS parent2_name, i.nombre AS industria_nombre
                     FROM tarea_categorias tc
-                    LEFT JOIN tarea_categorias p ON p.id = tc.parent_id
+                    LEFT JOIN tarea_categorias p1 ON p1.id = tc.parent_id
+                    LEFT JOIN tarea_categorias p2 ON p2.id = p1.parent_id
                     LEFT JOIN industrias i ON i.id = tc.industria_id
                     WHERE 1=1";
             $params = [];
@@ -1840,9 +1841,10 @@ class Task
     public function getTaskParentCategories(): array
     {
         try {
-            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre, p.industria_id, i.nombre AS industria_nombre
-                    FROM tarea_categorias p
-                    INNER JOIN tarea_categorias h ON h.parent_id = p.id
+            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre, p.industria_id, p1.nombre AS parent1_name, p2.nombre AS parent2_name, i.nombre AS industria_nombre
+                    FROM tarea_categorias p INNER JOIN tarea_categorias h ON h.parent_id = p.id
+                    LEFT JOIN tarea_categorias p1 ON p1.id = p.parent_id
+                    LEFT JOIN tarea_categorias p2 ON p2.id = p1.parent_id
                     LEFT JOIN industrias i ON i.id = p.industria_id
                     ORDER BY p.nombre ASC";
             $stmt = $this->db->prepare($sql);
@@ -1857,9 +1859,10 @@ class Task
     public function getTaskParentCategoriesByIndustry(array $filters = []): array
     {
         try {
-            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre, p.industria_id, i.nombre AS industria_nombre
-                    FROM tarea_categorias p
-                    INNER JOIN tarea_categorias h ON h.parent_id = p.id
+            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre, p.industria_id, p1.nombre AS parent1_name, p2.nombre AS parent2_name, i.nombre AS industria_nombre
+                    FROM tarea_categorias p INNER JOIN tarea_categorias h ON h.parent_id = p.id
+                    LEFT JOIN tarea_categorias p1 ON p1.id = p.parent_id
+                    LEFT JOIN tarea_categorias p2 ON p2.id = p1.parent_id
                     LEFT JOIN industrias i ON i.id = p.industria_id
                     WHERE p.industria_id = ?
                     ORDER BY p.nombre ASC";
@@ -1929,7 +1932,7 @@ class Task
             }
 
             $sql = "SELECT c.id, c.parent_id, c.industria_id, c.nombre, 
-            ifnull(p1.nombre, '') as parent1_name, ifnull(p2.nombre, '') as parent2_name,
+            p1.nombre as parent1_name, p2.nombre as parent2_name,
             i.nombre AS industria_nombre
             FROM tarea_categorias c 
             INNER JOIN industrias i on i.id = c.industria_id
@@ -1979,7 +1982,7 @@ class Task
             }
             // Filtro por categoria
             if (!empty($filters['categoria_id'])) {
-                $strWhere .= " AND t.tarea_categoria_id = :categoria_id";
+                $strWhere .= " AND (t.tarea_categoria_id = :categoria_id OR t.tarea_categoria_id is null)";
                 $params[':categoria_id'] = $filters['categoria_id'];
             }
 
@@ -1988,8 +1991,8 @@ class Task
             t.fecha_Creado, t.fecha_modificacion, 
             tc.nombre as categoria, et.nombre as estado 
             FROM tareas t
-            INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id 
             INNER JOIN estado_tipos et on et.id = t.estado_tipo_id 
+            LEFT JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id 
             $strWhere
             ORDER BY t.nombre";
             $stmt = $this->db->prepare($sql);
@@ -2009,7 +2012,7 @@ class Task
         try {
             $params = [];
 
-            $strWhere = " WHERE t.tarea_categoria_id = :categoria_id ";
+            $strWhere = " WHERE (t.tarea_categoria_id = :categoria_id OR t.tarea_categoria_id is null)";
             $params[':categoria_id'] = $filters['categoria_id'];
 
             // Filtro por proveedor
@@ -2022,8 +2025,8 @@ class Task
             t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, 
             et.nombre as estado 
             FROM tareas t 
-            INNER JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id 
-            INNER JOIN estado_tipos et on et.id = t.estado_tipo_id 
+            INNER JOIN estado_tipos et on et.id = t.estado_tipo_id
+            LEFT JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id 
             $strWhere
             ORDER BY t.nombre";
 

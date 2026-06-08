@@ -78,7 +78,10 @@ use App\Constants\AppConstants;
                                     <option value="">Todos</option>
                                     <?php foreach ($data['parent_categories'] as $parent): ?>
                                         <option value="<?= $parent['id']; ?>" <?= ($data['filters']['parent_id'] ?? '') == $parent['id'] ? 'selected' : ''; ?>>
-                                            <?= htmlspecialchars($parent['nombre']); ?>
+                                            <?= htmlspecialchars($parent['industria_nombre']); ?>
+                                            <?= htmlspecialchars($parent['parent1_name'] === null ? '' : " | " . $parent['parent1_name']); ?>
+                                            <?= htmlspecialchars($parent['parent2_name'] === null ? '' : " | " . $parent['parent2_name']); ?>
+                                            <?= htmlspecialchars(" | " . $parent['nombre']); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -140,8 +143,8 @@ use App\Constants\AppConstants;
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <?php if ($cat['parent_nombre']): ?>
-                                                        <span class="badge bg-setap-secondary"><?= htmlspecialchars($cat['parent_nombre']); ?></span>
+                                                    <?php if ($cat['parent1_name']): ?>
+                                                        <span class="badge bg-setap-secondary"><?= htmlspecialchars($cat['parent1_name']); ?></span>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
                                                     <?php endif; ?>
@@ -191,9 +194,9 @@ use App\Constants\AppConstants;
                             <?php foreach ($data['all_categories'] as $category): ?>
                                 <option value="<?= $category['id']; ?>">
                                     <?= htmlspecialchars($category['industria_nombre']); ?>
-                                    <?= htmlspecialchars($category['parent1_name'] === null ? '' : "-" . $category['parent1_name']); ?>
-                                    <?= htmlspecialchars($category['parent2_name'] === null ? '' : "-" . $category['parent2_name']); ?>
-                                    <?= htmlspecialchars("-" . $category['nombre']); ?>
+                                    <?= htmlspecialchars($category['parent1_name'] === null ? '' : " | " . $category['parent1_name']); ?>
+                                    <?= htmlspecialchars($category['parent2_name'] === null ? '' : " | " . $category['parent2_name']); ?>
+                                    <?= htmlspecialchars(" | " . $category['nombre']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -288,7 +291,7 @@ use App\Constants\AppConstants;
                     const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
                     const json = await response.json();
                     const categoriesParents = json.data || [];
-                    categoriesParents.forEach(cat => categoriaParentSelect.add(new Option(cat.nombre, cat.id)));
+                    categoriesParents.forEach(cat => categoriaParentSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
                 } catch (e) {
                     console.error('Error al cargar categorias padre:', e);
                 }
@@ -320,7 +323,7 @@ use App\Constants\AppConstants;
                     const response = await fetch(`${serviceBaseRoute}/category-by-industry?industria_id=${industriaId}`);
                     const json = await response.json();
                     const categoriesParents = json.data || [];
-                    categoriesParents.forEach(cat => modalCategoriaSelect.add(new Option((cat.parent1_name ? cat.parent1_name + '-' : '') + (cat.parent2_name ? cat.parent2_name + '-' : '') + cat.nombre, cat.id)));
+                    categoriesParents.forEach(cat => modalCategoriaSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
                 } catch (e) {
                     console.error('Error al cargar categorias padre:', e);
                 }
