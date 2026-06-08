@@ -770,6 +770,18 @@ try {
             $controller = new TaskController();
 
             switch ($action) {
+                case 'categories':
+                    $controller->categories();
+                    break;
+
+                case 'create-task-category':
+                    $controller->createTaskCategory();
+                    break;
+
+                case 'delete-task-category':
+                    $controller->deleteTaskCategory();
+                    break;
+
                 case 'create':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $controller->store();

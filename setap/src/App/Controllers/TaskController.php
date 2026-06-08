@@ -2783,6 +2783,125 @@ class TaskController extends BaseController
     /**
      * Validar datos de tarea
      */
+    public function categories()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $filters = [
+                'nombre' => $_GET['nombre'] ?? '',
+                'parent_id' => $_GET['parent_id'] ?? ''
+            ];
+
+            $data = [
+                'user' => $currentUser,
+                'title' => 'Categorias de Tarea',
+                'categories' => $this->taskModel->getTaskCategoriesWithFilters($filters),
+                'all_categories' => $this->taskModel->getTaskCategorys(),
+                'parent_categories' => $this->taskModel->getTaskParentCategories(),
+                'filters' => $filters,
+                'success' => $_GET['success'] ?? '',
+                'error' => $_GET['error'] ?? ''
+            ];
+
+            require_once __DIR__ . '/../Views/tasks/categories.php';
+        } catch (Exception $e) {
+            Logger::error("TaskController::categories: " . $e->getMessage());
+            http_response_code(500);
+            echo $this->renderError(AppConstants::ERROR_INTERNAL_SERVER);
+        }
+    }
+
+    public function createTaskCategory()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
+                return;
+            }
+
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            if (empty($_POST['nombre'])) {
+                $this->redirectWithError(AppConstants::ROUTE_TASKS . '/categories', 'Nombre de categoria requerido');
+                return;
+            }
+
+            $this->taskModel->createTaskCategory($_POST);
+            $this->redirectWithSuccess(AppConstants::ROUTE_TASKS . '/categories', AppConstants::SUCCESS_CREATED);
+        } catch (Exception $e) {
+            Logger::error("TaskController::createTaskCategory: " . $e->getMessage());
+            $this->redirectWithError(AppConstants::ROUTE_TASKS . '/categories', $e->getMessage());
+        }
+    }
+
+    public function deleteTaskCategory()
+    {
+        try {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                $this->redirectToLogin();
+                return;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo $this->renderError(AppConstants::ERROR_METHOD_NOT_ALLOWED);
+                return;
+            }
+
+            if (!Security::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_INVALID_SECURITY_TOKEN);
+                return;
+            }
+
+            if (!$this->permissionService->hasMenuAccess($currentUser['id'], 'manage_tasks')) {
+                http_response_code(403);
+                echo $this->renderError(AppConstants::ERROR_NO_PERMISSIONS);
+                return;
+            }
+
+            $id = (int)($_POST['id'] ?? 0);
+            if (!$id) {
+                throw new Exception('ID de categoria requerido');
+            }
+
+            $this->taskModel->deleteTaskCategory($id);
+            $this->redirectWithSuccess(AppConstants::ROUTE_TASKS . '/categories', AppConstants::SUCCESS_DELETED);
+        } catch (Exception $e) {
+            Logger::error("TaskController::deleteTaskCategory: " . $e->getMessage());
+            $this->redirectWithError(AppConstants::ROUTE_TASKS . '/categories', $e->getMessage());
+        }
+    }
+
     private function validateTaskData(array $data, bool $isUpdate = false): array
     {
         $errors = [];

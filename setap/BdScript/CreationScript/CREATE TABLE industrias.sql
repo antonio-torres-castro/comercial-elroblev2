@@ -1,0 +1,4 @@
+CREATE TABLE industrias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(250) NOT NULL UNIQUE
+);

@@ -1789,6 +1789,84 @@ class Task
         }
     }
 
+    public function getTaskCategoriesWithFilters(array $filters = []): array
+    {
+        try {
+            $sql = "SELECT tc.id, tc.parent_id, tc.nombre, p.nombre AS parent_nombre
+                    FROM tarea_categorias tc
+                    LEFT JOIN tarea_categorias p ON p.id = tc.parent_id
+                    WHERE 1=1";
+            $params = [];
+
+            if (!empty($filters['nombre'])) {
+                $sql .= " AND tc.nombre LIKE ?";
+                $params[] = '%' . $filters['nombre'] . '%';
+            }
+
+            if (!empty($filters['parent_id'])) {
+                $sql .= " AND tc.parent_id = ?";
+                $params[] = (int)$filters['parent_id'];
+            }
+
+            $sql .= " ORDER BY tc.nombre ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskCategoriesWithFilters: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getTaskParentCategories(): array
+    {
+        try {
+            $sql = "SELECT DISTINCT p.id, p.parent_id, p.nombre
+                    FROM tarea_categorias p
+                    INNER JOIN tarea_categorias h ON h.parent_id = p.id
+                    ORDER BY p.nombre ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            Logger::error("Task::getTaskParentCategories: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function createTaskCategory(array $data): int
+    {
+        try {
+            $stmt = $this->db->prepare("INSERT INTO tarea_categorias (parent_id, nombre) VALUES (?, ?)");
+            $stmt->execute([
+                !empty($data['parent_id']) ? (int)$data['parent_id'] : null,
+                trim($data['nombre'])
+            ]);
+            return (int)$this->db->lastInsertId();
+        } catch (PDOException $e) {
+            Logger::error("Task::createTaskCategory: " . $e->getMessage());
+            throw new Exception("Error al crear la categoria de tarea");
+        }
+    }
+
+    public function deleteTaskCategory(int $id): bool
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM tarea_categorias WHERE parent_id = ?");
+            $stmt->execute([$id]);
+            $count = (int)$stmt->fetchColumn();
+            if ($count > 0) {
+                throw new Exception('No se puede eliminar la categoria porque tiene subcategorias asociadas');
+            }
+            $stmt = $this->db->prepare("DELETE FROM tarea_categorias WHERE id = ?");
+            $stmt->execute([$id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            Logger::error("Task::deleteTaskCategory: " . $e->getMessage());
+            throw new Exception("Error al eliminar la categoria de tarea");
+        }
+    }
+
     /**
      * Obtener tipos de tareas disponibles (catálogo general)
      */

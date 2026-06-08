@@ -1,0 +1,1 @@
+ALTER TABLE tarea_categorias ADD COLUMN industria_id INT NULL AFTER id;
