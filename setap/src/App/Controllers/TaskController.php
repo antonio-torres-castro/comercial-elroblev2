@@ -1011,6 +1011,8 @@ class TaskController extends BaseController
             if ($uti > 1) {
                 $filters['proveedor_id'] = $currentUser['proveedor_id'];
             }
+            $filters['industria_id'] = $_GET['industria_id'] ?? $_POST['industria_id'] ?? -1;
+            $categorias = $this->taskModel->getTaskCategorys($filters);
 
             $suppliers = $this->taskModel->getSuppliers($filters);
 
@@ -1021,7 +1023,8 @@ class TaskController extends BaseController
                 'suppliers' => $suppliers,
                 'tasks' => $this->taskModel->getAllTasks($filters), // Catálogo de tareas existentes
                 'taskStates' => $this->taskModel->getTaskStatesForNewTask(),
-                'taskCategorys' => $this->taskModel->getTaskCategorys(),
+                'taskCategorys' => $categorias,
+                'industrias' => $this->taskModel->getIndustrias(),
                 'success' => $_GET['success'] ?? '',
                 'error' => $_GET['error'] ?? ''
             ];

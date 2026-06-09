@@ -16,6 +16,9 @@
 
             initializeFormHandlers();
 
+            handlerCategory();
+            handlerFilterCategory();
+
             refreshTasksTable();
         });
 
@@ -176,6 +179,73 @@
         /**
          * Utilidades
          */
+        function handlerCategory(){
+            const filtroIndustriaSelect = document.getElementById('industria_id');
+            const categoriaParentSelect = document.getElementById('tarea_categoria_id');
+            const allCategoriaParentOptions = Array.from(categoriaParentSelect.options).map(opt => ({
+                value: opt.value,
+                text: opt.textContent,
+                parentId: opt.dataset.parentId || ''
+            }));
+
+            if (filtroIndustriaSelect && categoriaParentSelect) {
+                filtroIndustriaSelect.addEventListener('change', async () => {
+                    const industriaId = filtroIndustriaSelect.value;
+                    categoriaParentSelect.innerHTML = '<option value="">Sin categoria padre</option>';
+                    if (!industriaId) {
+                        allCategoriaParentOptions.forEach(opt => {
+                            if (opt.value !== '') {
+                                categoriaParentSelect.add(new Option(opt.text, opt.value));
+                            }
+                        });
+                        return;
+                    }
+                    try {
+                        const serviceBaseRoute = '/setap/tasks';
+                        const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
+                        const json = await response.json();
+                        const categoriesParents = json.data || [];
+                        categoriesParents.forEach(cat => categoriaParentSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
+                    } catch (e) {
+                        console.error('Error al cargar categorias padre:', e);
+                    }
+                });
+            }
+        }
+
+        function handlerFilterCategory(){
+            const filtroIndustriaSelect = document.getElementById('filtro_categoria_industria_id');
+            const categoriaParentSelect = document.getElementById('filtro_tarea_categoria_id');
+            const allCategoriaParentOptions = Array.from(categoriaParentSelect.options).map(opt => ({
+                value: opt.value,
+                text: opt.textContent,
+                parentId: opt.dataset.parentId || ''
+            }));
+
+            if (filtroIndustriaSelect && categoriaParentSelect) {
+                filtroIndustriaSelect.addEventListener('change', async () => {
+                    const industriaId = filtroIndustriaSelect.value;
+                    categoriaParentSelect.innerHTML = '<option value="">Sin categoria padre</option>';
+                    if (!industriaId) {
+                        allCategoriaParentOptions.forEach(opt => {
+                            if (opt.value !== '') {
+                                categoriaParentSelect.add(new Option(opt.text, opt.value));
+                            }
+                        });
+                        return;
+                    }
+                    try {
+                        const serviceBaseRoute = '/setap/tasks';
+                        const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
+                        const json = await response.json();
+                        const categoriesParents = json.data || [];
+                        categoriesParents.forEach(cat => categoriaParentSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
+                    } catch (e) {
+                        console.error('Error al cargar categorias padre:', e);
+                    }
+                });
+            }
+        }
 
         /**
          * Obtener token CSRF

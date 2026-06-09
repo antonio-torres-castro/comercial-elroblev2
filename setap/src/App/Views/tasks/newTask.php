@@ -86,12 +86,13 @@ use App\Constants\AppConstants; ?>
                                                 </select>
                                             </div>
                                             <div class="col-md-3">
-                                                <!-- Categoria -->
-                                                <label for="tarea_categoria_id" class="form-label">Categoria<span class="text-danger">*</span></label>
-                                                <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
-                                                    <?php foreach ($data['taskCategorys'] as $category): ?>
-                                                        <option value="<?= $category['id']; ?>">
-                                                            <?= htmlspecialchars($category['nombre']); ?>
+                                                <!-- Industria -->
+                                                <label for="industria_id" class="form-label">Industria</label>
+                                                <select class="form-select" id="industria_id" name="industria_id">
+                                                    <option value="">Seleccionar...</option>
+                                                    <?php foreach ($data['industrias'] as $industria): ?>
+                                                        <option value="<?= $industria['id']; ?>" <?= ($data['filters']['industria_id'] ?? '') == $industria['id'] ? 'selected' : ''; ?>>
+                                                            <?= htmlspecialchars($industria['nombre']); ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
@@ -101,13 +102,24 @@ use App\Constants\AppConstants; ?>
                                                 <textarea class="form-control" id="nueva_tarea_descripcion" name="nueva_tarea_descripcion"
                                                     placeholder="Descripción detallada de la tarea" rows="2"><?= htmlspecialchars($_POST['nueva_tarea_descripcion'] ?? ''); ?></textarea>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-3">
                                                 <!-- Proveedor -->
                                                 <label for="proveedor_id" class="form-label">Proveedor<span class="text-danger">*</span></label>
                                                 <select class="form-select" id="proveedor_id" name="proveedor_id" required>
                                                     <?php foreach ($data['suppliers'] as $supplier): ?>
                                                         <option value="<?= $supplier['id']; ?>">
                                                             <?= htmlspecialchars($supplier['nombre']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <!-- Categoria -->
+                                                <label for="tarea_categoria_id" class="form-label">Categoria<span class="text-danger">*</span></label>
+                                                <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required>
+                                                    <?php foreach ($data['taskCategorys'] as $category): ?>
+                                                        <option value="<?= $category['id']; ?>">
+                                                            <?= htmlspecialchars($category['nombre']); ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
@@ -147,7 +159,19 @@ use App\Constants\AppConstants; ?>
                                 <h5 class="mb-0"><i class="bi bi-list-task"></i>Tareas</h5>
 
                                 <div class="col-md-3">
+                                    <select class="form-select" id="filtro_categoria_industria_id" name="filtro_categoria_industria_id">
+                                        <option value="">Selecciona industria</option>
+                                        <?php foreach ($data['industrias'] as $industria): ?>
+                                            <option value="<?= $industria['id']; ?>" <?= ($data['filters']['industria_id'] ?? '') == $industria['id'] ? 'selected' : ''; ?>>
+                                                <?= htmlspecialchars($industria['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
                                     <select class="form-select" id="filtro_tarea_categoria_id" name="filtro_tarea_categoria_id" onchange="refreshTasksTable()">
+                                        <option value="">Selecciona categoria</option>
                                         <?php foreach ($data['taskCategorys'] as $category): ?>
                                             <option value="<?= $category['id']; ?>">
                                                 <?= htmlspecialchars($category['nombre']); ?>
@@ -156,12 +180,13 @@ use App\Constants\AppConstants; ?>
                                     </select>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <!-- Proveedor -->
                                     <select class="form-select" id="filtro_proveedor_id" name="filtro_proveedor_id" onchange="refreshTasksTable()">
+                                        <option value="">Selecciona proveedor</option>
                                         <?php foreach ($data['suppliers'] as $supplier): ?>
                                             <option value="<?= $supplier['id']; ?>">
-                                                Proveedor: <?= htmlspecialchars($supplier['nombre']); ?>
+                                                <?= htmlspecialchars($supplier['nombre']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
