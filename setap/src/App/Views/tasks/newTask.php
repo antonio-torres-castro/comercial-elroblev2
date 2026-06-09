@@ -213,6 +213,7 @@ use App\Constants\AppConstants; ?>
                                                     <td id="tdNombre<?= $tarea['id'] ?>"><?= $tarea['nombre'] ?></td>
                                                     <td id="tdDescripcion<?= $tarea['id'] ?>"><?= $tarea['descripcion'] ?></td>
                                                     <td id="tdCategoriaId<?= $tarea['id'] ?>" hidden><?= $tarea['tarea_categoria_id'] ?></td>
+                                                    <td id="tdIndustriaId<?= $tarea['id'] ?>" hidden><?= $tarea['industria_id'] ?></td>
                                                     <td id="tdEstadoTipoId<?= $tarea['id'] ?>" hidden><?= $tarea['estado_tipo_id'] ?></td>
                                                     <td id="tdEstado<?= $tarea['id'] ?>">
                                                         <span class="badge bg-<?= $tarea['estado_tipo_id'] == 2 ? 'success' : 'secondary' ?>">
@@ -271,6 +272,17 @@ use App\Constants\AppConstants; ?>
                                 <?php foreach ($data['taskStates'] as $state): ?>
                                     <option value="<?= $state['id']; ?>">
                                         <?= htmlspecialchars($state['nombre']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <!-- Industria -->
+                            <label for="editIndustriaId" class="form-label">Industria<span class="text-danger">*</span></label>
+                            <select class="form-select" id="editIndustriaId" name="editIndustriaId" required>
+                                <?php foreach ($data['industrias'] as $industria): ?>
+                                    <option value="<?= $industria['id']; ?>">
+                                        <?= htmlspecialchars($industria['nombre']); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

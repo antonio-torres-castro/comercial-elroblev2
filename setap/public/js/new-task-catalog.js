@@ -18,6 +18,7 @@
 
             handlerCategory();
             handlerFilterCategory();
+            handlerEditFormCategory();
 
             refreshTasksTable();
         });
@@ -72,6 +73,7 @@
             <td id="tdNombre${tarea.id}">${tarea.nombre}</td>
             <td id="tdDescripcion${tarea.id}">${tarea.descripcion}</td>
             <td id="tdCategoriaId${tarea.id}" hidden>${tarea.tarea_categoria_id}</td>
+            <td id="tdIndustriaId${tarea.id}" hidden>${tarea.industria_id}</td>
             <td id="tdEstadoTipoId${tarea.id}" hidden>${tarea.estado_tipo_id}</td>
             <td id="tdEstado${tarea.id}">
                 <span class="badge bg-${tarea.estado_tipo_id == 2 ? 'success' : 'secondary'}">
@@ -105,6 +107,7 @@
                 document.getElementById('editTareaNombre').value = document.getElementById('tdNombre' + id).textContent;
                 document.getElementById('editTareaDescripcion').value = document.getElementById('tdDescripcion' + id).textContent;
                 document.getElementById('editEstadoTipoId').value = document.getElementById('tdEstadoTipoId' + id).textContent;
+                document.getElementById('editIndustriaId').value = document.getElementById('tdIndustriaId' + id).textContent;
                 document.getElementById('editCategoriaId').value = document.getElementById('tdCategoriaId' + id).textContent;
 
                 modal.show();
@@ -181,21 +184,21 @@
          */
         function handlerCategory(){
             const filtroIndustriaSelect = document.getElementById('industria_id');
-            const categoriaParentSelect = document.getElementById('tarea_categoria_id');
-            const allCategoriaParentOptions = Array.from(categoriaParentSelect.options).map(opt => ({
+            const categoriaSelect = document.getElementById('tarea_categoria_id');
+            const allCategoriaOptions = Array.from(categoriaSelect.options).map(opt => ({
                 value: opt.value,
                 text: opt.textContent,
                 parentId: opt.dataset.parentId || ''
             }));
 
-            if (filtroIndustriaSelect && categoriaParentSelect) {
+            if (filtroIndustriaSelect && categoriaSelect) {
                 filtroIndustriaSelect.addEventListener('change', async () => {
                     const industriaId = filtroIndustriaSelect.value;
-                    categoriaParentSelect.innerHTML = '<option value="">Sin categoria padre</option>';
+                    categoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
                     if (!industriaId) {
-                        allCategoriaParentOptions.forEach(opt => {
+                        allCategoriaOptions.forEach(opt => {
                             if (opt.value !== '') {
-                                categoriaParentSelect.add(new Option(opt.text, opt.value));
+                                categoriaSelect.add(new Option(opt.text, opt.value));
                             }
                         });
                         return;
@@ -204,32 +207,31 @@
                         const serviceBaseRoute = '/setap/tasks';
                         const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
                         const json = await response.json();
-                        const categoriesParents = json.data || [];
-                        categoriesParents.forEach(cat => categoriaParentSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
+                        const categories = json.data || [];
+                        categories.forEach(cat => categoriaSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
                     } catch (e) {
-                        console.error('Error al cargar categorias padre:', e);
+                        console.error('Error al cargar categorias:', e);
                     }
                 });
             }
         }
-
         function handlerFilterCategory(){
             const filtroIndustriaSelect = document.getElementById('filtro_categoria_industria_id');
-            const categoriaParentSelect = document.getElementById('filtro_tarea_categoria_id');
-            const allCategoriaParentOptions = Array.from(categoriaParentSelect.options).map(opt => ({
+            const categoriaSelect = document.getElementById('filtro_tarea_categoria_id');
+            const allCategoriaOptions = Array.from(categoriaSelect.options).map(opt => ({
                 value: opt.value,
                 text: opt.textContent,
                 parentId: opt.dataset.parentId || ''
             }));
 
-            if (filtroIndustriaSelect && categoriaParentSelect) {
+            if (filtroIndustriaSelect && categoriaSelect) {
                 filtroIndustriaSelect.addEventListener('change', async () => {
                     const industriaId = filtroIndustriaSelect.value;
-                    categoriaParentSelect.innerHTML = '<option value="">Sin categoria padre</option>';
+                    categoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
                     if (!industriaId) {
-                        allCategoriaParentOptions.forEach(opt => {
+                        allCategoriaOptions.forEach(opt => {
                             if (opt.value !== '') {
-                                categoriaParentSelect.add(new Option(opt.text, opt.value));
+                                categoriaSelect.add(new Option(opt.text, opt.value));
                             }
                         });
                         return;
@@ -238,10 +240,43 @@
                         const serviceBaseRoute = '/setap/tasks';
                         const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
                         const json = await response.json();
-                        const categoriesParents = json.data || [];
-                        categoriesParents.forEach(cat => categoriaParentSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
+                        const categories = json.data || [];
+                        categories.forEach(cat => categoriaSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
                     } catch (e) {
-                        console.error('Error al cargar categorias padre:', e);
+                        console.error('Error al cargar categorias:', e);
+                    }
+                });
+            }
+        }
+        function handlerEditFormCategory(){
+            const filtroIndustriaSelect = document.getElementById('editIndustriaId');
+            const categoriaSelect = document.getElementById('editCategoriaId');
+            const allCategoriaOptions = Array.from(categoriaSelect.options).map(opt => ({
+                value: opt.value,
+                text: opt.textContent,
+                parentId: opt.dataset.parentId || ''
+            }));
+
+            if (filtroIndustriaSelect && categoriaSelect) {
+                filtroIndustriaSelect.addEventListener('change', async () => {
+                    const industriaId = filtroIndustriaSelect.value;
+                    categoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
+                    if (!industriaId) {
+                        allCategoriaOptions.forEach(opt => {
+                            if (opt.value !== '') {
+                                categoriaSelect.add(new Option(opt.text, opt.value));
+                            }
+                        });
+                        return;
+                    }
+                    try {
+                        const serviceBaseRoute = '/setap/tasks';
+                        const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
+                        const json = await response.json();
+                        const categories = json.data || [];
+                        categories.forEach(cat => categoriaSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
+                    } catch (e) {
+                        console.error('Error al cargar categorias:', e);
                     }
                 });
             }

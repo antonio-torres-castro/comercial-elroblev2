@@ -1987,7 +1987,7 @@ class Task
             }
 
 
-            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, 
+            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, tc.industria_id, t.estado_tipo_id, 
             t.fecha_Creado, t.fecha_modificacion, 
             tc.nombre as categoria, et.nombre as estado 
             FROM tareas t
@@ -2022,7 +2022,7 @@ class Task
             }
 
             $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, 
-            t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, 
+            tc.industria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, 
             et.nombre as estado 
             FROM tareas t 
             INNER JOIN estado_tipos et on et.id = t.estado_tipo_id
