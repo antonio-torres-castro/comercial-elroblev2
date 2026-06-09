@@ -69,7 +69,8 @@ use App\Constants\AppConstants; ?>
                                 <div class="col-md-3">
                                     <!-- Industria -->
                                     <label for="industria_id" class="form-label">Industria</label>
-                                    <select class="form-select" id="industria_id" name="industria_id" required">
+                                    <select class="form-select" id="industria_id" name="industria_id" required>
+                                        <option value="">Seleccionar...</option>
                                         <?php foreach ($data['industrias'] as $industria): ?>
                                             <option value="<?= $industria['id']; ?>">
                                                 <?= htmlspecialchars($industria['nombre']); ?>
