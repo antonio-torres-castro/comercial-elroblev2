@@ -55,22 +55,35 @@ use App\Constants\AppConstants; ?>
                             <!-- Definicion tarea catalogo:inicio-->
                             <!-- Tarea Catálogo -->
                             <div class="row mb-2">
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <!-- Proveedor -->
+                                    <label for="proveedor_id" class="form-label">Proveedor</label>
                                     <select class="form-select" id="proveedor_id" name="proveedor_id" onchange="refreshTasksAndProjects()">
                                         <?php foreach ($data['suppliers'] as $supplier): ?>
                                             <option value="<?= $supplier['id']; ?>">
-                                                Proveedor: <?= htmlspecialchars($supplier['nombre']); ?>
+                                                <?= htmlspecialchars($supplier['nombre']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
+                                <div class="col-md-3">
+                                    <!-- Industria -->
+                                    <label for="industria_id" class="form-label">Industria</label>
+                                    <select class="form-select" id="industria_id" name="industria_id" required">
+                                        <?php foreach ($data['industrias'] as $industria): ?>
+                                            <option value="<?= $industria['id']; ?>">
+                                                <?= htmlspecialchars($industria['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                                 <div class="col-md-6">
+                                    <!-- Categoria -->
+                                    <label for="tarea_categoria_id" class="form-label">Categoria</label>
                                     <select class="form-select" id="tarea_categoria_id" name="tarea_categoria_id" required onchange="refreshTasksSelect()">
                                         <?php foreach ($data['taskCategorys'] as $category): ?>
                                             <option value="<?= $category['id']; ?>">
-                                                Categoria: <?= htmlspecialchars($category['nombre']); ?>
+                                                <?= htmlspecialchars($category['nombre']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>

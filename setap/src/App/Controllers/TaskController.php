@@ -1087,6 +1087,9 @@ class TaskController extends BaseController
             if (count($supervisors) == 1) {
                 $supervisorId = $supervisors[0]['id'];
             }
+            $filters['industria_id'] = $_GET['industria_id'] ?? $_POST['industria_id'] ?? -1;
+            $industry = $this->taskModel->getIndustrias();
+            $category = $this->taskModel->getTaskCategorys($filters);
 
             $data = [
                 'user' => $currentUser,
@@ -1098,7 +1101,8 @@ class TaskController extends BaseController
                 'executor_users' => $this->taskModel->getExecutorUsers($filters),
                 'supervisor_users' => $supervisors,
                 'taskStates' => $this->taskModel->getTaskStatesForCreate(),
-                'taskCategorys' => $this->taskModel->getTaskCategorys(),
+                'industrias' => $industry,
+                'taskCategorys' => $category,
                 'task' => null,
                 'task_id' => null,
                 'project_id' => $project_id,

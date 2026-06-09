@@ -143,6 +143,8 @@ document.addEventListener('DOMContentLoaded', function() {
         createBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Enviando...';
         createBtn.disabled = true;
     });
+
+    handlerCategory();
 });
 
 function selOpt(evt, nameIor) {
@@ -349,3 +351,36 @@ function updateSupervisorSelectOptions(supervisors) {
     }
 }
 
+function handlerCategory(){
+    const filtroIndustriaSelect = document.getElementById('industria_id');
+    const refreshCategoriaSelect = document.getElementById('tarea_categoria_id');
+    const allCategoriaOptions = Array.from(refreshCategoriaSelect.options).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        parentId: opt.dataset.parentId || ''
+    }));
+
+    if (filtroIndustriaSelect && refreshCategoriaSelect) {
+        filtroIndustriaSelect.addEventListener('change', async () => {
+            const industriaId = filtroIndustriaSelect.value;
+            refreshCategoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
+            if (!industriaId) {
+                allCategoriaOptions.forEach(opt => {
+                    if (opt.value !== '') {
+                        refreshCategoriaSelect.add(new Option(opt.text, opt.value));
+                    }
+                });
+                return;
+            }
+            try {
+                const serviceBaseRoute = '/setap/tasks';
+                const response = await fetch(`${serviceBaseRoute}/category-parent-by-industry?industria_id=${industriaId}`);
+                const json = await response.json();
+                const categories = json.data || [];
+                categories.forEach(cat => refreshCategoriaSelect.add(new Option((cat.parent1_name ? cat.parent1_name + ' | ' : '') + (cat.parent2_name ? cat.parent2_name + ' | ' : '') + cat.nombre, cat.id)));
+            } catch (e) {
+                console.error('Error al cargar categorias:', e);
+            }
+        });
+    }
+}
