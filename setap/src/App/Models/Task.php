@@ -2045,7 +2045,17 @@ class Task
     public function getTaskById(?int $id): array
     {
         try {
-            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, tc.nombre as categoria, et.nombre as estado FROM tareas t LEFT JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id INNER JOIN estado_tipos et on et.id = t.estado_tipo_id WHERE t.id = ?";
+            $sql = "SELECT t.id, t.proveedor_id, t.nombre, t.descripcion, t.tarea_categoria_id, tc.industria_id,
+                           t.estado_tipo_id, t.fecha_Creado, t.fecha_modificacion, 
+                           tc.nombre as categoria, p1.nombre as parent1_categoria, p2.nombre as parent2_categoria,
+                           i.nombre as industria, et.nombre as estado 
+                    FROM tareas t 
+                    INNER JOIN estado_tipos et on et.id = t.estado_tipo_id
+                    LEFT JOIN tarea_categorias tc on tc.id = t.tarea_categoria_id
+                    LEFT JOIN tarea_categorias p1 on p1.id = tc.parent_id
+                    LEFT JOIN tarea_categorias p2 on p2.id = p1.parent_id
+                    LEFT JOIN industrias i on i.id = tc.industria_id
+                    WHERE t.id = ?";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([$id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initTaskModal();
     updateTaskCount();
     populateInitialTasks();
+
+    handlerCategory();
+    handlerNewTaskCategory()
 });
 
 /**
@@ -338,7 +341,12 @@ function viewTaskDetail(taskId) {
             const task = data.task[0];
             document.getElementById('viewTaskNombre').textContent = task.nombre || '-';
             document.getElementById('viewTaskDescripcion').textContent = task.descripcion || '-';
-            document.getElementById('viewTaskCategoria').textContent = task.categoria || 'N/A';
+            document.getElementById('viewTaskIndustria').textContent = task.industria || 'N/A';
+            document.getElementById('viewTaskCategoria').textContent = (
+                (task.parent2_categoria ? task.parent2_categoria + ' | ' : '') +
+                (task.parent1_categoria ? task.parent1_categoria + ' | ' : '') +
+                task.categoria
+            ) || 'N/A';
             document.getElementById('viewTaskEstado').textContent = task.estado || '-';
             
             new bootstrap.Modal(document.getElementById('viewTaskModal')).show();
@@ -372,7 +380,7 @@ function openNewTaskModal() {
  */
 function createNewTask() {
     const nombre = document.getElementById('nueva_tarea_nombre').value.trim();
-    const categoriaId = document.getElementById('nueva_tarea_categoria').value;
+    const categoriaId = document.getElementById('nueva_tarea_categoria_id').value;
     const estadoId = document.getElementById('nueva_tarea_estado').value;
     const descripcion = document.getElementById('nueva_tarea_descripcion').value.trim();
     const proveedorId = document.getElementById('proveedor_id').value;
@@ -465,4 +473,78 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function handlerCategory(){
+    const filtroIndustriaSelect = document.getElementById('industria_id');
+    const categoriaSelect = document.getElementById('categoria_id');
+    const allCategoriaOptions = Array.from(categoriaSelect.options).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        parentId: opt.dataset.parentId || ''
+    }));
+
+    if (filtroIndustriaSelect && categoriaSelect) {
+        filtroIndustriaSelect.addEventListener('change', async () => {
+            const industriaId = filtroIndustriaSelect.value;
+            categoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
+            if (!industriaId) {
+                allCategoriaOptions.forEach(opt => {
+                    if (opt.value !== '') {
+                        categoriaSelect.add(new Option(opt.text, opt.value));
+                    }
+                });
+                return;
+            }
+            try {
+                const serviceBaseRoute = '/setap/tasks';
+                const response = await fetch(`${serviceBaseRoute}/category-by-industry?industria_id=${industriaId}`);
+                const json = await response.json();
+                const categories = json.data || [];
+                categories.forEach(cat => categoriaSelect.add(new Option(
+                    (cat.parent2_name ? cat.parent2_name + ' | ' : '') 
+                    + (cat.parent1_name ? cat.parent1_name + ' | ' : '') 
+                    + cat.nombre, cat.id)));
+            } catch (e) {
+                console.error('Error al cargar categorias:', e);
+            }
+        });
+    }
+}
+
+function handlerNewTaskCategory(){
+    const filtroIndustriaSelect = document.getElementById('nueva_industria_id');
+    const categoriaSelect = document.getElementById('nueva_tarea_categoria_id');
+    const allCategoriaOptions = Array.from(categoriaSelect.options).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        parentId: opt.dataset.parentId || ''
+    }));
+
+    if (filtroIndustriaSelect && categoriaSelect) {
+        filtroIndustriaSelect.addEventListener('change', async () => {
+            const industriaId = filtroIndustriaSelect.value;
+            categoriaSelect.innerHTML = '<option value="">Sin categoria</option>';
+            if (!industriaId) {
+                allCategoriaOptions.forEach(opt => {
+                    if (opt.value !== '') {
+                        categoriaSelect.add(new Option(opt.text, opt.value));
+                    }
+                });
+                return;
+            }
+            try {
+                const serviceBaseRoute = '/setap/tasks';
+                const response = await fetch(`${serviceBaseRoute}/category-by-industry?industria_id=${industriaId}`);
+                const json = await response.json();
+                const categories = json.data || [];
+                categories.forEach(cat => categoriaSelect.add(new Option(
+                    (cat.parent2_name ? cat.parent2_name + ' | ' : '') 
+                    + (cat.parent1_name ? cat.parent1_name + ' | ' : '') 
+                    + cat.nombre, cat.id)));
+            } catch (e) {
+                console.error('Error al cargar categorias:', e);
+            }
+        });
+    }
 }

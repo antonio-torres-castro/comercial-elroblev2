@@ -90,8 +90,12 @@ class ProcessController extends BaseController
                 return;
             }
 
+            $filters = [];
+            $filters['industria_id'] = $_GET['industria_id'] ?? $_POST['industria_id'] ?? -1;
+
             $suppliers = $this->getSuppliersForUser($currentUser);
-            $categories = $this->processModel->getTaskCategories();
+            $indistries = $this->taskModel->getIndustrias();
+            $categories = $this->taskModel->getTaskCategorys($filters);
             $tasks = [];
 
             echo $this->viewRenderer->render('process/create', [
@@ -101,6 +105,7 @@ class ProcessController extends BaseController
                 'process' => null,
                 'processTasks' => [],
                 'suppliers' => $suppliers,
+                'industrias' => $indistries,
                 'categories' => $categories,
                 'tasks' => $tasks,
                 'action' => 'create'
