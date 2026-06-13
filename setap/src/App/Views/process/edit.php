@@ -71,12 +71,10 @@ $processTasks = $data['processTasks'] ?? [];
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <?php if ($isAdmin): ?>
-                                            <div class="col-md-4">
-                                                <label for="proveedor_id" class="form-label">
-                                                    Proveedor<span class="text-danger">*</span>
-                                                </label>
+                                            <div class="col-md-3">
+                                                <label for="proveedor_id" class="form-label">Proveedor<span class="text-danger">*</span></label>
                                                 <select class="form-select" id="proveedor_id" name="proveedor_id" required>
-                                                    <option value="">Seleccione un proveedor</option>
+                                                    <option value="">Seleccione...</option>
                                                     <?php foreach ($data['suppliers'] as $supplier): ?>
                                                         <option value="<?= $supplier['id']; ?>"
                                                             <?= ($data['process']['proveedor_id'] ?? '') == $supplier['id'] ? 'selected' : ''; ?>>
@@ -89,18 +87,27 @@ $processTasks = $data['processTasks'] ?? [];
                                             <input type="hidden" name="proveedor_id" id="proveedor_id"
                                                 value="<?= $data['process']['proveedor_id'] ?? ''; ?>">
                                         <?php endif; ?>
-                                        <div class="col-md-4">
-                                            <label for="nombre" class="form-label">
-                                                Nombre del Proceso<span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre"
-                                                maxlength="100" required
+                                        <div class="col-md-3">
+                                            <label for="nombre" class="form-label">Nombre del Proceso<span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="nombre" name="nombre" maxlength="100" required
                                                 value="<?= htmlspecialchars($data['process']['nombre'] ?? ''); ?>">
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label for="descripcion" class="form-label">Descripcion</label>
                                             <textarea class="form-control" id="descripcion" name="descripcion"
                                                 rows="2"><?= htmlspecialchars($data['process']['descripcion'] ?? ''); ?></textarea>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <!-- Industria -->
+                                            <label for="industria_id" class="form-label">Industria</label>
+                                            <select class="form-select" id="industria_id" name="industria_id">
+                                                <option value="">Seleccionar...</option>
+                                                <?php foreach ($data['industrias'] as $industria): ?>
+                                                    <option value="<?= $industria['id']; ?>" <?= ($data['filters']['industria_id'] ?? '') == $industria['id'] ? 'selected' : ''; ?>>
+                                                        <?= htmlspecialchars($industria['nombre']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -114,12 +121,12 @@ $processTasks = $data['processTasks'] ?? [];
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-md-2">
+                                        <div class="col-md-5">
                                             <label for="categoria_id" class="form-label">Categoria</label>
-                                            <select class="form-select" id="categoria_id">
+                                            <select class="form-select" id="categoria_id" name="categoria_id">
                                                 <option value="">Todas las categorias</option>
                                                 <?php foreach ($data['categories'] as $category): ?>
-                                                    <option value="<?= $category['id']; ?>">
+                                                    <option value="<?= $category['id']; ?>" <?= ($data['filters']['categoria_id'] ?? '') == $category['id'] ? 'selected' : ''; ?>>
                                                         <?= htmlspecialchars($category['nombre']); ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -139,7 +146,7 @@ $processTasks = $data['processTasks'] ?? [];
                                         </div>
                                         <div class="col-md-1">
                                             <label for="tarea_hh" class="form-label">
-                                                Duracion (hrs)<span class="text-danger">*</span>
+                                                Hrs<span class="text-danger">*</span>
                                             </label>
                                             <input type="number" class="form-control" id="tarea_hh"
                                                 min="0.5" step="0.5" value="0.5" required>
@@ -154,7 +161,7 @@ $processTasks = $data['processTasks'] ?? [];
                                                 <option value="10" <?= ($_POST['prioridad'] ?? '') === '10' ? 'selected' : ''; ?>>10 - Crítica</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3 d-flex align-items-end gap-2">
+                                        <div class="col-md-12 d-flex justify-content-end align-items-center gap-2">
                                             <button type="button" class="btn btn-setap-primary" id="btnAddTask">
                                                 <i class="bi bi-plus-circle"></i> Agregar
                                             </button>
@@ -166,6 +173,8 @@ $processTasks = $data['processTasks'] ?? [];
                                             </button>
                                         </div>
                                     </div>
+
+
                                 </div>
                             </div>
                         </div>
@@ -248,6 +257,10 @@ $processTasks = $data['processTasks'] ?? [];
                         <dd class="col-sm-8" id="viewTaskNombre">-</dd>
                         <dt class="col-sm-4">Descripcion:</dt>
                         <dd class="col-sm-8" id="viewTaskDescripcion">-</dd>
+
+                        <dt class="col-sm-4">Industria:</dt>
+                        <dd class="col-sm-8" id="viewTaskIndustria">-</dd>
+
                         <dt class="col-sm-4">Categoria:</dt>
                         <dd class="col-sm-8" id="viewTaskCategoria">-</dd>
                         <dt class="col-sm-4">Estado:</dt>
@@ -273,15 +286,25 @@ $processTasks = $data['processTasks'] ?? [];
                         <?= Security::renderCsrfField() ?>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="nueva_tarea_nombre" class="form-label">
-                                    Nombre<span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre"
-                                    maxlength="150" required>
+                                <label for="nueva_tarea_nombre" class="form-label">Nombre<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre" maxlength="150" required>
                             </div>
-                            <div class="col-md-3">
+
+                            <div class="col-md-6">
+                                <label for="nueva_industria_id" class="form-label">Industria<span class="text-danger">*</span></label>
+                                <select class="form-select" id="nueva_industria_id" name="nueva_industria_id" required>
+                                    <option value="">Seleccionar...</option>
+                                    <?php foreach ($data['industrias'] as $industry): ?>
+                                        <option value="<?= $industry['id']; ?>">
+                                            <?= htmlspecialchars($industry['nombre']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-9">
                                 <label for="nueva_tarea_categoria" class="form-label">Categoria<span class="text-danger">*</span></label>
-                                <select class="form-select" id="nueva_tarea_categoria" name="tarea_categoria_id" required>
+                                <select class="form-select" id="nueva_tarea_categoria_id" name="nueva_tarea_categoria_id" required>
                                     <?php foreach ($data['categories'] as $category): ?>
                                         <option value="<?= $category['id']; ?>">
                                             <?= htmlspecialchars($category['nombre']); ?>

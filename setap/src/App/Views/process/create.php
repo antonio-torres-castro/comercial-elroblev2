@@ -88,11 +88,8 @@ $processTasks = $data['processTasks'] ?? [];
                                                 value="<?= $data['suppliers'][0]['id'] ?? ''; ?>">
                                         <?php endif; ?>
                                         <div class="col-md-3">
-                                            <label for="nombre" class="form-label">
-                                                Nombre del Proceso<span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre"
-                                                maxlength="100" required
+                                            <label for="nombre" class="form-label">Nombre del Proceso<span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="nombre" name="nombre" maxlength="100" required
                                                 value="<?= htmlspecialchars($data['process']['nombre'] ?? ''); ?>">
                                         </div>
                                         <div class="col-md-3">
@@ -124,7 +121,7 @@ $processTasks = $data['processTasks'] ?? [];
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-md-4">
+                                        <div class="col-md-5">
                                             <label for="categoria_id" class="form-label">Categoria</label>
                                             <select class="form-select" id="categoria_id" name="categoria_id">
                                                 <option value="">Todas las categorias</option>
@@ -147,9 +144,9 @@ $processTasks = $data['processTasks'] ?? [];
                                                 style="z-index: 1050;">
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-1">
                                             <label for="tarea_hh" class="form-label">
-                                                Duracion (hrs)<span class="text-danger">*</span>
+                                                Hrs<span class="text-danger">*</span>
                                             </label>
                                             <input type="number" class="form-control" id="tarea_hh" min="0.5" step="0.5" value="0.5" required>
                                         </div>
@@ -287,11 +284,8 @@ $processTasks = $data['processTasks'] ?? [];
                         <?= Security::renderCsrfField() ?>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="nueva_tarea_nombre" class="form-label">
-                                    Nombre<span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre"
-                                    maxlength="150" required>
+                                <label for="nueva_tarea_nombre" class="form-label">Nombre<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nueva_tarea_nombre" name="nueva_tarea_nombre" maxlength="150" required>
                             </div>
 
                             <div class="col-md-6">

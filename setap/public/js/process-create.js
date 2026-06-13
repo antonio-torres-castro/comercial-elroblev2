@@ -397,7 +397,7 @@ function createNewTask() {
     
     const formData = new FormData();
     formData.append('nueva_tarea_nombre', nombre);
-    formData.append('tarea_categoria_id', categoriaId);
+    formData.append('nueva_tarea_categoria_id', categoriaId);
     formData.append('estado_tipo_id', estadoId);
     formData.append('nueva_tarea_descripcion', descripcion);
     formData.append('proveedor_id', proveedorId);

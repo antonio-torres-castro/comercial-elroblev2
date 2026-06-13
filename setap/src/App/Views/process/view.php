@@ -153,6 +153,10 @@ $process = $data['process'] ?? null;
                         <dd class="col-sm-8" id="viewTaskNombre">-</dd>
                         <dt class="col-sm-4">Descripcion:</dt>
                         <dd class="col-sm-8" id="viewTaskDescripcion">-</dd>
+
+                        <dt class="col-sm-4">Industria:</dt>
+                        <dd class="col-sm-8" id="viewTaskIndustria">-</dd>
+
                         <dt class="col-sm-4">Categoria:</dt>
                         <dd class="col-sm-8" id="viewTaskCategoria">-</dd>
                         <dt class="col-sm-4">Estado:</dt>
